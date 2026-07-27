@@ -144,12 +144,13 @@ const categories: { label: string; icon: LucideIcon }[] = [
   { label: "Warehouses", icon: Warehouse },
 ];
 
-const navItems: { label: string; icon: LucideIcon }[] = [
-  { label: "Home", icon: Home },
-  { label: "Buy a home", icon: Search },
-  { label: "Rent a home", icon: KeyRound },
-  { label: "Sell property", icon: LandPlot },
-  { label: "AI finder", icon: Sparkles },
+const navItems: { label: string; icon: LucideIcon; href: string }[] = [
+  { label: "Home", icon: Home, href: "/" },
+  { label: "Buy a home", icon: Search, href: "/buy" },
+  { label: "Rent a home", icon: KeyRound, href: "/rent" },
+  { label: "Saved homes", icon: Heart, href: "/saved" },
+  { label: "Sell property", icon: LandPlot, href: "/sell" },
+  { label: "AI finder", icon: Sparkles, href: "/ai-finder" },
 ];
 
 const neighborhoods = [
@@ -320,10 +321,10 @@ export default function HomePage() {
 
         <nav className="side-nav" aria-label="Primary navigation">
           <p>Explore</p>
-          {navItems.map(({ label, icon: Icon }, index) => (
+          {navItems.map(({ label, icon: Icon, href }, index) => (
             <a
               className={index === 0 ? "active" : ""}
-              href={index === 0 ? "#top" : "#recommendations"}
+              href={href}
               key={label}
               onClick={() => setMenuOpen(false)}
             >
@@ -367,11 +368,11 @@ export default function HomePage() {
             <ChevronDown size={15} />
           </div>
           <nav className="top-links" aria-label="Account actions">
-            <a href="#recommendations">For buyers</a>
-            <a href="#market">Market insights</a>
-            <button type="button" className="list-button">
+            <a href="/buy">For buyers</a>
+            <a href="/market">Market insights</a>
+            <a href="/sell" className="list-button">
               List property
-            </button>
+            </a>
             <div className="notification-wrap">
               <button
                 type="button"
@@ -681,22 +682,22 @@ export default function HomePage() {
             <Home size={19} />
             <span>Home</span>
           </a>
-          <a href="#recommendations">
+          <a href="/buy">
             <Search size={19} />
             <span>Search</span>
           </a>
-          <a href="#market">
+          <a href="/market">
             <TrendingUp size={19} />
             <span>Market</span>
           </a>
-          <button type="button" onClick={() => setNotificationsOpen((open) => !open)}>
+          <a href="/saved">
             <Heart size={19} />
             <span>Saved</span>
-          </button>
-          <button type="button">
+          </a>
+          <a href="/about">
             <UserRound size={19} />
             <span>Profile</span>
-          </button>
+          </a>
         </nav>
       </div>
     </div>
