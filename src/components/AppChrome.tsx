@@ -36,12 +36,13 @@ import { colors, fonts, shadow, webPointer } from "@/theme";
 import { Brand } from "./Brand";
 import { AppLink } from "./ui";
 
-export type ActivePage = "home" | "buy" | "rent" | "saved" | "sell" | "ai" | "market" | "property";
+export type ActivePage = "home" | "buy" | "rent" | "saved" | "sell" | "ai" | "market" | "property" | "profile" | "users";
 
 const shellNav: { label: string; href: string; icon: LucideIcon; key: ActivePage }[] = [
   { label: "Home", href: "/", icon: Home, key: "home" },
   { label: "Buy a home", href: "/buy", icon: Search, key: "buy" },
   { label: "Rent a home", href: "/rent", icon: KeyRound, key: "rent" },
+  { label: "Community", href: "/users", icon: UserRound, key: "users" },
   { label: "Saved homes", href: "/saved", icon: Heart, key: "saved" },
   { label: "Sell property", href: "/sell", icon: LandPlot, key: "sell" },
   { label: "AI finder", href: "/ai-finder", icon: Sparkles, key: "ai" },
@@ -153,7 +154,7 @@ function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
               </View>
             ) : null}
           </View>
-          <AppLink href="/saved" accessibilityLabel="Open profile" style={styles.avatar}>
+          <AppLink href="/profile" accessibilityLabel="Open profile" style={styles.avatar}>
             <UserRound color={colors.ink} size={18} />
           </AppLink>
         </View>
