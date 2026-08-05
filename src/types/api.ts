@@ -50,7 +50,20 @@ export interface AuthMeResponse {
 export interface Area {
   id: string;
   name: string;
-  city: string;
+  type: 'DIVISION' | 'CITY' | 'DISTRICT' | 'NEIGHBORHOOD' | 'UPZILA';
   parent_area_id: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  city?: string;
+  _count?: {
+    children: number;
+  };
+}
+
+export interface AreaListResponse {
+  items: Area[];
+  total: number;
+  page: number;
+  limit: number;
 }
 

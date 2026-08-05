@@ -19,6 +19,9 @@ import { allProperties, savedPropertyIds } from "@/data/properties";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
+import { AreaPicker } from "@/components/AreaPicker";
+import type { Area } from "@/types/api";
+
 function FilterPanel({
   beds,
   setBeds,
@@ -30,53 +33,68 @@ function FilterPanel({
   modal = false,
 }: {
   beds: number;
-  setBeds: (value: number) => void;
+  setBeds: (val: number) => void;
   mode: "buy" | "rent";
   checks: string[];
-  toggleCheck: (value: string) => void;
+  toggleCheck: (val: string) => void;
   resetFilters: () => void;
   onClose?: () => void;
   modal?: boolean;
 }) {
   return (
-    <SafeAreaView edges={modal ? ["top", "bottom"] : []} style={[styles.filterPanel, modal && styles.filterPanelModal]}>
+    <View style={[styles.filterPanel, modal && styles.filterPanelModal]}>
       <View style={styles.filterHeading}>
-        <Text style={styles.filterHeadingText}>Filter homes</Text>
-        {modal ? <Pressable accessibilityLabel="Close filters" onPress={onClose} style={webPointer}><X color={colors.muted} size={17} /></Pressable> : null}
+        <Text style={styles.filterHeadingText}>Filters</Text>
+        {onClose ? (
+          <Pressable accessibilityLabel="Close filters modal" onPress={onClose} style={webPointer}>
+            <X color={colors.muted} size={16} />
+          </Pressable>
+        ) : null}
       </View>
       <View style={styles.filterGroup}>
         <Text style={styles.filterLabel}>Bedrooms</Text>
         <View style={styles.optionRow}>
-          {[0, 1, 2, 3, 4].map((count) => (
-            <Pressable key={count} onPress={() => setBeds(count)} style={[styles.optionButton, beds === count && styles.optionButtonActive, webPointer]}>
-              <Text style={[styles.optionText, beds === count && styles.optionTextActive]}>{count === 0 ? "Any" : `${count}+`}</Text>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-      <View style={styles.filterGroup}>
-        <Text style={styles.filterLabel}>{mode === "buy" ? "Price range" : "Monthly rent"}</Text>
-        <View style={styles.priceInputs}>
-          <View style={styles.priceField}><Text style={styles.priceCaption}>Minimum</Text><TextInput placeholder={mode === "buy" ? "BDT 80 Lac" : "BDT 35,000"} placeholderTextColor="#899790" style={styles.priceInput} /></View>
-          <View style={styles.priceField}><Text style={styles.priceCaption}>Maximum</Text><TextInput placeholder={mode === "buy" ? "BDT 6 Cr" : "BDT 250,000"} placeholderTextColor="#899790" style={styles.priceInput} /></View>
-        </View>
-      </View>
-      <View style={styles.filterGroup}>
-        <Text style={styles.filterLabel}>Property confidence</Text>
-        <View style={styles.checkList}>
-          {["AI verified price", "Verified ownership", "Ready to move"].map((label) => {
-            const checked = checks.includes(label);
+          {[0, 1, 2, 3, 4].map((count) => {
+            const active = beds === count;
+            const text = count === 0 ? "Any" : `${count}+`;
             return (
-              <Pressable key={label} onPress={() => toggleCheck(label)} style={[styles.checkRow, webPointer]}>
-                <View style={[styles.checkbox, checked && styles.checkboxActive]}>{checked ? <Check color={colors.white} size={11} /> : null}</View>
-                <Text style={styles.checkLabel}>{label}</Text>
+              <Pressable
+                key={count}
+                accessibilityLabel={`${count} bedrooms`}
+                onPress={() => setBeds(count)}
+                style={[styles.optionButton, active && styles.optionButtonActive, webPointer]}
+              >
+                <Text style={[styles.optionText, active && styles.optionTextActive]}>{text}</Text>
               </Pressable>
             );
           })}
         </View>
       </View>
-      <Pressable onPress={resetFilters} style={[styles.resetButton, webPointer]}><Text style={styles.resetText}>Reset all filters</Text></Pressable>
-    </SafeAreaView>
+      <View style={styles.filterGroup}>
+        <Text style={styles.filterLabel}>Trust verification</Text>
+        <View style={styles.checkList}>
+          {["AI verified price", "Verified title deed", "Home inspection report"].map((check) => {
+            const active = checks.includes(check);
+            return (
+              <Pressable
+                key={check}
+                accessibilityLabel={check}
+                onPress={() => toggleCheck(check)}
+                style={[styles.checkRow, webPointer]}
+              >
+                <View style={[styles.checkbox, active && styles.checkboxActive]}>
+                  {active ? <Check color={colors.white} size={11} /> : null}
+                </View>
+                <Text style={styles.checkLabel}>{check}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+      <Pressable accessibilityLabel="Reset all filters" onPress={resetFilters} style={[styles.resetButton, webPointer]}>
+        <Text style={styles.resetText}>RESET FILTERS</Text>
+      </Pressable>
+    </View>
   );
 }
 
@@ -90,13 +108,27 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [checks, setChecks] = useState(["AI verified price"]);
 
+  // Location Picker State
+  const [selectedArea, setSelectedArea] = useState<Area | null>(null);
+  const [selectedAreaPath, setSelectedAreaPath] = useState<Area[]>([]);
+  const [areaPickerOpen, setAreaPickerOpen] = useState(false);
+
   const results = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return allProperties.filter((property) => {
+      // Area match filter
+      let matchesArea = true;
+      if (selectedArea) {
+        const propLocLower = property.location.toLowerCase();
+        // Check if property location includes selected area name or any ancestor area in the path
+        matchesArea = selectedAreaPath.some(node => propLocLower.includes(node.name.toLowerCase())) ||
+                      propLocLower.includes(selectedArea.name.toLowerCase());
+      }
+
       const matchesQuery = !normalized || `${property.title} ${property.location}`.toLowerCase().includes(normalized);
-      return matchesQuery && (type === "All types" || property.type === type) && (beds === 0 || property.beds >= beds);
+      return matchesArea && matchesQuery && (type === "All types" || property.type === type) && (beds === 0 || property.beds >= beds);
     });
-  }, [beds, query, type]);
+  }, [beds, query, type, selectedArea, selectedAreaPath]);
 
   function toggleSaved(id: number) {
     setSavedIds((current) => current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]);
@@ -107,6 +139,8 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
     setType("All types");
     setBeds(0);
     setChecks(["AI verified price"]);
+    setSelectedArea(null);
+    setSelectedAreaPath([]);
   }
 
   function toggleCheck(value: string) {
@@ -131,8 +165,41 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
 
       <View style={[styles.searchPanel, isPhone && styles.searchPanelPhone]}>
         <View style={styles.searchLocation}>
-          <MapPin color={colors.green} size={18} />
-          <TextInput onChangeText={setQuery} placeholder="Search area, neighborhood, or property" placeholderTextColor="#899790" style={styles.searchInput} value={query} />
+          <Pressable 
+            onPress={() => setAreaPickerOpen(true)}
+            style={({ pressed }) => [styles.locationTrigger, pressed && styles.pressed, webPointer]}
+          >
+            <MapPin color={colors.green} size={18} />
+            <Text 
+              style={[
+                styles.locationText, 
+                selectedArea ? styles.locationTextSelected : styles.locationTextPlaceholder
+              ]} 
+              numberOfLines={1}
+            >
+              {selectedArea ? selectedAreaPath.map(n => n.name).join(" > ") : "Select Area"}
+            </Text>
+            {selectedArea ? (
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setSelectedArea(null);
+                  setSelectedAreaPath([]);
+                }}
+                style={styles.locationClearBtn}
+              >
+                <X color={colors.muted} size={14} />
+              </Pressable>
+            ) : null}
+          </Pressable>
+          <View style={styles.searchDivider} />
+          <TextInput 
+            onChangeText={setQuery} 
+            placeholder="Search keywords..." 
+            placeholderTextColor="#899790" 
+            style={styles.searchInput} 
+            value={query} 
+          />
         </View>
         <View style={styles.typeSelect}><Building2 color={colors.green} size={17} /><SelectField onChange={setType} options={["All types", "Apartment", "House", "Condo"]} style={styles.typePicker} value={type} /></View>
         <AppButton icon={Search} label="Search" style={[styles.searchAction, isPhone && styles.searchActionPhone]} />
@@ -173,6 +240,16 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
       <Modal animationType="slide" onRequestClose={() => setFiltersOpen(false)} transparent visible={isTablet && filtersOpen}>
         <View style={styles.modalLayer}><Pressable accessibilityLabel="Close filters" onPress={() => setFiltersOpen(false)} style={styles.modalOverlay} /><View style={styles.modalPanel}><FilterPanel beds={beds} checks={checks} modal mode={mode} onClose={() => setFiltersOpen(false)} resetFilters={resetFilters} setBeds={setBeds} toggleCheck={toggleCheck} /></View></View>
       </Modal>
+
+      <AreaPicker 
+        visible={areaPickerOpen} 
+        onClose={() => setAreaPickerOpen(false)} 
+        onSelect={(area, path) => {
+          setSelectedArea(area);
+          setSelectedAreaPath(path);
+        }} 
+        selectedArea={selectedArea} 
+      />
     </AppChrome>
   );
 }
@@ -191,6 +268,13 @@ const styles = StyleSheet.create({
   searchPanel: { flexDirection: "row", gap: 8, padding: 10, borderRadius: 16, backgroundColor: "#F3F7F5", borderWidth: 1, borderColor: colors.line },
   searchPanelPhone: { flexDirection: "column" },
   searchLocation: { minHeight: 47, minWidth: 0, flex: 1, flexDirection: "row", alignItems: "center", gap: 9, paddingHorizontal: 14, borderRadius: 10, backgroundColor: colors.white, borderWidth: 1, borderColor: "#E0E8E4" },
+  locationTrigger: { flexDirection: "row", alignItems: "center", gap: 6, flex: 1, minWidth: 120 },
+  locationText: { fontSize: 10, fontFamily: fonts.semiBold, flex: 1 },
+  locationTextPlaceholder: { color: "#899790" },
+  locationTextSelected: { color: "#1D3B2F" },
+  locationClearBtn: { padding: 4 },
+  searchDivider: { width: 1, height: 20, backgroundColor: colors.line, marginHorizontal: 4 },
+  pressed: { opacity: 0.78 },
   searchInput: { minWidth: 0, flex: 1, color: colors.ink, fontFamily: fonts.regular, fontSize: 10 },
   typeSelect: { width: 210, minHeight: 47, flexDirection: "row", alignItems: "center", gap: 5, paddingLeft: 14, borderRadius: 10, backgroundColor: colors.white, borderWidth: 1, borderColor: "#E0E8E4" },
   typePicker: { flex: 1 },

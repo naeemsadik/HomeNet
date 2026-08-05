@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Modal,
   Pressable,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -29,7 +30,7 @@ import type { Area } from "@/types/api";
 export interface AreaPickerProps {
   visible: boolean;
   onClose: () => void;
-  onSelect: (area: Area | null) => void;
+  onSelect: (area: Area | null, path: Area[]) => void;
   selectedArea: Area | null;
   initialCity?: string;
 }
@@ -103,9 +104,49 @@ export function AreaPicker({
     selectCity,
   } = useAreaPicker({ initialCity });
 
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const flatListRef = React.useRef<FlatList>(null);
+  const touchStartY = React.useRef(0);
+
+  // Helper to construct the full path list for a selected area
+  const getPathForArea = (area: Area): Area[] => {
+    // If we have an active navigation drill down
+    if (navPath.length > 0) {
+      const lastInPath = navPath[navPath.length - 1];
+      if (area.id === lastInPath.id) {
+        return navPath;
+      }
+      if (area.parent_area_id === lastInPath.id) {
+        return [...navPath, area];
+      }
+    }
+    
+    // Fallback for search or arbitrary direct selection
+    const path: Area[] = [];
+    if (area.city && area.name !== area.city) {
+      path.push({
+        id: area.parent_area_id || `city-${area.city}`,
+        name: area.city,
+        type: 'CITY',
+        parent_area_id: null,
+        latitude: null,
+        longitude: null,
+      } as Area);
+    }
+    path.push(area);
+    return path;
+  };
+
   // Handle final selection of an area
   const handleSelectArea = (area: Area) => {
-    onSelect(area);
+    const fullPath = getPathForArea(area);
+    onSelect(area, fullPath);
+    onClose();
+  };
+
+  // Clear current selection completely
+  const handleClearSelection = () => {
+    onSelect(null, []);
     onClose();
   };
 
@@ -114,17 +155,88 @@ export function AreaPicker({
     if (navPath.length > 0) {
       handleSelectArea(navPath[navPath.length - 1]);
     } else if (selectedCity) {
-      // Find area matching city if possible, or build temporary representation
       const cityArea: Area = {
         id: `city-${selectedCity}`,
         name: selectedCity,
-        city: selectedCity,
+        type: 'CITY',
         parent_area_id: null,
+        latitude: null,
+        longitude: null,
+        city: selectedCity,
       };
       handleSelectArea(cityArea);
     } else {
-      onSelect(null);
-      onClose();
+      handleClearSelection();
+    }
+  };
+
+  // Reset focus index when items list changes
+  useEffect(() => {
+    setFocusedIndex(areas.length > 0 ? 0 : -1);
+  }, [areas]);
+
+  // Scroll to focused item on keyboard navigation
+  useEffect(() => {
+    if (focusedIndex >= 0 && flatListRef.current) {
+      try {
+        flatListRef.current.scrollToIndex({
+          index: focusedIndex,
+          animated: true,
+          viewPosition: 0.5,
+        });
+      } catch (err) {
+        // Safe catch for cases where the FlatList is not fully rendered
+      }
+    }
+  }, [focusedIndex]);
+
+  // Web keyboard event listener
+  useEffect(() => {
+    if (Platform.OS !== "web" || !visible) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setFocusedIndex((prev) => (areas.length > 0 ? (prev + 1) % areas.length : -1));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setFocusedIndex((prev) => (areas.length > 0 ? (prev - 1 + areas.length) % areas.length : -1));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (focusedIndex >= 0 && focusedIndex < areas.length) {
+          const selectedItem = areas[focusedIndex];
+          const isLeaf = selectedItem.type === 'NEIGHBORHOOD' || selectedItem._count?.children === 0;
+          if (isLeaf) {
+            handleSelectArea(selectedItem);
+          } else {
+            drillDown(selectedItem);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [visible, areas, focusedIndex, onClose, drillDown]);
+
+  // Touch Swipe-down to close on mobile
+  const handleTouchStart = (e: any) => {
+    if (isPhone) {
+      touchStartY.current = e.nativeEvent.pageY;
+    }
+  };
+
+  const handleTouchEnd = (e: any) => {
+    if (isPhone) {
+      const deltaY = e.nativeEvent.pageY - touchStartY.current;
+      if (deltaY > 60) {
+        onClose();
+      }
     }
   };
 
@@ -135,10 +247,20 @@ export function AreaPicker({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
+      <View style={[styles.modalOverlay, !isPhone && styles.modalOverlayDesktop]}>
         <Pressable style={styles.backdropPressable} onPress={onClose} />
         
-        <View style={[styles.sheetContent, isPhone ? styles.sheetPhone : styles.sheetTablet]}>
+        <View 
+          style={[styles.sheetContent, isPhone ? styles.sheetPhone : styles.sheetTablet]}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Swipe drag handle on mobile */}
+          {isPhone ? (
+            <View style={styles.dragHandleContainer}>
+              <View style={styles.dragHandle} />
+            </View>
+          ) : null}
           
           {/* Header */}
           <View style={styles.header}>
@@ -146,13 +268,23 @@ export function AreaPicker({
               <MapPin size={20} color={colors.green} />
               <Text style={styles.headerTitle}>Select Location</Text>
             </View>
-            <Pressable
-              onPress={onClose}
-              style={[styles.closeButton, webPointer]}
-              accessibilityLabel="Close location picker"
-            >
-              <X size={18} color={colors.muted} />
-            </Pressable>
+            <View style={styles.headerActions}>
+              {selectedArea ? (
+                <Pressable
+                  onPress={handleClearSelection}
+                  style={[styles.clearSelectBtn, webPointer]}
+                >
+                  <Text style={styles.clearSelectText}>Clear Selected</Text>
+                </Pressable>
+              ) : null}
+              <Pressable
+                onPress={onClose}
+                style={[styles.closeButton, webPointer]}
+                accessibilityLabel="Close location picker"
+              >
+                <X size={18} color={colors.muted} />
+              </Pressable>
+            </View>
           </View>
 
           {/* City Selection Chips */}
@@ -339,22 +471,38 @@ export function AreaPicker({
               </View>
             ) : (
               <FlatList
+                ref={flatListRef}
                 data={areas}
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => {
+                onScrollToIndexFailed={(info) => {
+                  flatListRef.current?.scrollToOffset({
+                    offset: info.highestMeasuredFrameIndex * info.averageItemLength,
+                    animated: false,
+                  });
+                }}
+                renderItem={({ item, index }) => {
                   const isSelected = selectedArea?.id === item.id;
+                  const isKeyboardFocused = index === focusedIndex;
+                  const isLeaf = item.type === 'NEIGHBORHOOD' || item._count?.children === 0;
+
                   return (
-                    <View style={[styles.areaRow, isSelected && styles.areaRowSelected]}>
-                      {/* Left: Tapping name/row selects it, or drills down */}
+                    <View 
+                      style={[
+                        styles.areaRow, 
+                        isSelected && styles.areaRowSelected,
+                        isKeyboardFocused && styles.areaRowFocused,
+                      ]}
+                    >
+                      {/* Left: Tapping name/row selects it if leaf, or drills down if parent */}
                       <Pressable
                         style={[styles.areaInfoPressable, webPointer]}
                         onPress={() => {
-                          if (searchQuery) {
-                            // If searching, tap directly selects the item
+                          if (searchQuery || isLeaf) {
+                            // Leaf node or search result: direct select
                             handleSelectArea(item);
                           } else {
-                            // In navigation mode, tap drills down
+                            // Non-leaf node: drill down
                             drillDown(item);
                           }
                         }}
@@ -373,35 +521,39 @@ export function AreaPicker({
                           >
                             {item.name}
                           </Text>
-                          <Text style={styles.areaCity}>{item.city}</Text>
+                          <Text style={styles.areaCity}>
+                            {item.type} {item.city ? `• ${item.city}` : ""}
+                          </Text>
                         </View>
                       </Pressable>
 
-                      {/* Right: Direct selection/confirm or drill arrow */}
+                      {/* Right: Actions */}
                       <View style={styles.actionCol}>
-                        {/* Select direct button */}
-                        <Pressable
-                          onPress={() => handleSelectArea(item)}
-                          style={[
-                            styles.directSelectBtn,
-                            isSelected && styles.directSelectBtnActive,
-                            webPointer,
-                          ]}
-                          accessibilityLabel={`Select ${item.name}`}
-                        >
-                          {isSelected ? (
-                            <Check size={14} color="#FFFFFF" />
-                          ) : (
-                            <Text style={styles.directSelectText}>Select</Text>
-                          )}
-                        </Pressable>
+                        {/* If it is a parent node, offer a direct select button */}
+                        {!isLeaf ? (
+                          <Pressable
+                            onPress={() => handleSelectArea(item)}
+                            style={[
+                              styles.directSelectBtn,
+                              isSelected && styles.directSelectBtnActive,
+                              webPointer,
+                            ]}
+                            accessibilityLabel={`Select ${item.name}`}
+                          >
+                            {isSelected ? (
+                              <Check size={14} color="#FFFFFF" />
+                            ) : (
+                              <Text style={styles.directSelectText}>Select</Text>
+                            )}
+                          </Pressable>
+                        ) : null}
 
-                        {/* Drill Down arrow (if not searching) */}
-                        {!searchQuery ? (
+                        {/* Drill Down arrow (if parent and not searching) */}
+                        {!isLeaf && !searchQuery ? (
                           <Pressable
                             onPress={() => drillDown(item)}
                             style={[styles.drillBtn, webPointer]}
-                            accessibilityLabel={`View neighborhoods in ${item.name}`}
+                            accessibilityLabel={`View child locations in ${item.name}`}
                           >
                             <ChevronRight size={16} color={colors.muted} />
                           </Pressable>
@@ -425,9 +577,13 @@ export function AreaPicker({
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(19, 40, 32, 0.45)", // Overlay color matching tokens
+    backgroundColor: "rgba(19, 40, 32, 0.45)",
     justifyContent: "flex-end",
     alignItems: "center",
+  },
+  modalOverlayDesktop: {
+    justifyContent: "flex-start",
+    paddingTop: 80,
   },
   backdropPressable: {
     position: "absolute",
@@ -448,12 +604,22 @@ const styles = StyleSheet.create({
     height: "85%",
   },
   sheetTablet: {
-    height: 650,
-    maxWidth: 600,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    marginBottom: "auto",
-    marginTop: "auto",
+    height: 520,
+    width: 480,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  dragHandleContainer: {
+    width: "100%",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  dragHandle: {
+    width: 38,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: colors.line,
   },
   
   // Header
@@ -462,7 +628,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 16,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: colors.line,
@@ -473,9 +639,23 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: fonts.bold,
     color: colors.ink,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  clearSelectBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  clearSelectText: {
+    fontSize: 12,
+    fontFamily: fonts.bold,
+    color: colors.coral,
   },
   closeButton: {
     padding: 6,
@@ -528,7 +708,7 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     borderRadius: 12,
     paddingHorizontal: 12,
-    height: 48,
+    height: 46,
   },
   searchIcon: {
     marginRight: 8,
@@ -641,18 +821,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.line,
+    borderLeftWidth: 3,
+    borderLeftColor: "transparent",
+    paddingLeft: 8,
   },
   areaRowSelected: {
     borderBottomColor: colors.green,
+    backgroundColor: colors.greenLight + "30",
+  },
+  areaRowFocused: {
+    backgroundColor: colors.soft,
+    borderLeftColor: colors.green,
   },
   areaInfoPressable: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
     paddingRight: 10,
+    paddingVertical: 4,
   },
   areaRowIcon: {
     marginRight: 12,
@@ -674,6 +863,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     color: colors.muted,
     marginTop: 2,
+    textTransform: "lowercase",
   },
   actionCol: {
     flexDirection: "row",
@@ -795,3 +985,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 });
+
