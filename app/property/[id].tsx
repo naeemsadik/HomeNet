@@ -1,12 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
-import { PropertyDetailsScreen } from "@/screens/PropertyDetailsScreen";
-import { allProperties } from "@/data/properties";
-
-export function generateStaticParams() {
-  return allProperties.map((property) => ({ id: String(property.id) }));
-}
+import { PropertyDetailScreen } from "@/features/property/screens/PropertyDetailScreen";
 
 export default function PropertyRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  return <PropertyDetailsScreen propertyId={Number(id)} />;
+  return <PropertyDetailScreen key={id} />;
 }

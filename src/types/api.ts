@@ -67,3 +67,76 @@ export interface AreaListResponse {
   limit: number;
 }
 
+// ─── Notification Module ────────────────────────────────────────────────────
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface NotificationListResponse {
+  items: Notification[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface UnreadCountResponse {
+  count: number;
+}
+
+// ─── Role Module ────────────────────────────────────────────────────────────
+export interface Role {
+  id: string;
+  name: string;
+  level: number;
+  description: string | null;
+}
+
+// ─── Admin Module ───────────────────────────────────────────────────────────
+export interface AdminStats {
+  totalUsers: number;
+  totalProperties: number;
+  pendingVerifications: number;
+  activeListings: number;
+}
+
+export interface AdminUser {
+  id: string;
+  full_name: string;
+  email: string;
+  avatar_url: string | null;
+  role: string;
+  created_at: string;
+}
+
+// ─── Property Create/Update DTO ────────────────────────────────────────────
+export interface CreatePropertyDto {
+  title: string;
+  description?: string;
+  type: "residential" | "commercial" | "land" | "parking";
+  listing_type: "sale" | "rent";
+  price: number;
+  area_id: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  area_size?: number;
+  address?: string;
+  location_lat?: number;
+  location_lng?: number;
+  amenities?: Record<string, unknown>;
+  virtual_tour_url?: string;
+}
+
+export type UpdatePropertyDto = Partial<CreatePropertyDto>;
+
+// ─── User Update DTO ───────────────────────────────────────────────────────
+export interface UpdateUserDto {
+  full_name?: string;
+}
+

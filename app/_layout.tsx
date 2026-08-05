@@ -6,9 +6,21 @@ import {
   Manrope_800ExtraBold,
   useFonts,
 } from "@expo-google-fonts/manrope";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -22,9 +34,11 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ contentStyle: { backgroundColor: "#FFFFFF" }, headerShown: false }} />
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <Stack screenOptions={{ contentStyle: { backgroundColor: "#FFFFFF" }, headerShown: false }} />
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }

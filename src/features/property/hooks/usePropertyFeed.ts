@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import apiClient from "@/services/apiClient";
 import type { Property, PropertyFilters, PaginatedResponse } from "../types/property";
 
-// Sample mock properties to ensure smooth UI demonstration when backend endpoint is unreachable
 const mockProperties: Property[] = [
   {
     id: "prop-1",
@@ -151,7 +150,6 @@ export function usePropertyFeed(filters: PropertyFilters) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  // Fetch properties function
   const fetchProperties = useCallback(
     async (targetPage: number, isRefresh = false) => {
       if (isRefresh) {
@@ -188,8 +186,8 @@ export function usePropertyFeed(filters: PropertyFilters) {
 
         setPage(targetPage);
         setHasMore(targetPage * (filters.limit || 20) < total);
-      } catch (err: any) {
-        // Fallback to local mock data filtered by search/filters if server call fails
+      } catch {
+        // Fallback to local mock data filtered by search/filters
         let filtered = [...mockProperties];
 
         if (filters.search) {
@@ -230,7 +228,7 @@ export function usePropertyFeed(filters: PropertyFilters) {
     [filters]
   );
 
-  // Trigger loading when filters change
+  // Re-fetch when filters change
   useEffect(() => {
     fetchProperties(1);
   }, [fetchProperties]);
