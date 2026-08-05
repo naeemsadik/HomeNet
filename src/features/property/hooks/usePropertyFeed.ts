@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useMemo } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import apiClient from "@/services/apiClient";
 import type { Property, PropertyFilters, PaginatedResponse } from "../types/property";
 
-// Sample mock properties to ensure smooth UI demonstration when backend endpoint is unreachable
 const mockProperties: Property[] = [
   {
     id: "prop-1",
@@ -143,116 +143,99 @@ const mockProperties: Property[] = [
 ];
 
 export function usePropertyFeed(filters: PropertyFilters) {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [fetchingNextPage, setFetchingNextPage] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const stableFilters = useMemo(() => filters, [
+    filters.city,
+    filters.area_id,
+    filters.type,
+    filters.listing_type,
+    filters.min_price,
+    filters.max_price,
+    filters.min_area,
+    filters.max_area,
+    filters.bedrooms,
+    filters.bathrooms,
+    filters.search,
+    filters.is_verified,
+    filters.sort_by,
+  ]);
 
-  // Fetch properties function
-  const fetchProperties = useCallback(
-    async (targetPage: number, isRefresh = false) => {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else if (targetPage > 1) {
-        setFetchingNextPage(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-
+  const query = useInfiniteQuery({
+    queryKey: ["properties", stableFilters],
+    queryFn: async ({ pageParam = 1 }) => {
       try {
         const queryParams = {
-          ...filters,
-          page: targetPage,
-          limit: filters.limit || 20,
+          ...stableFilters,
+          page: pageParam,
+          limit: stableFilters.limit || 20,
         };
-
         const res = await apiClient.get<{
           success: boolean;
           message: string;
           data: PaginatedResponse<Property> | null;
         }>("/v1/properties", { params: queryParams });
-
         const data = res.data?.data;
-        const newItems = data?.items || [];
-        const total = data?.total || 0;
-
-        if (isRefresh || targetPage === 1) {
-          setProperties(newItems);
-        } else {
-          setProperties((prev) => [...prev, ...newItems]);
-        }
-
-        setPage(targetPage);
-        setHasMore(targetPage * (filters.limit || 20) < total);
-      } catch (err: any) {
-        // Fallback to local mock data filtered by search/filters if server call fails
+        return {
+          items: data?.items || [],
+          total: data?.total || 0,
+          page: pageParam,
+          limit: stableFilters.limit || 20,
+        };
+      } catch {
         let filtered = [...mockProperties];
-
-        if (filters.search) {
-          const q = filters.search.toLowerCase();
+        if (stableFilters.search) {
+          const q = stableFilters.search.toLowerCase();
           filtered = filtered.filter(
             (p) =>
               p.title.toLowerCase().includes(q) ||
               p.description?.toLowerCase().includes(q) ||
-              p.address?.toLowerCase().includes(q)
+              p.address?.toLowerCase().includes(q),
           );
         }
-
-        if (filters.listing_type) {
-          filtered = filtered.filter((p) => p.listing_type === filters.listing_type);
+        if (stableFilters.listing_type) {
+          filtered = filtered.filter((p) => p.listing_type === stableFilters.listing_type);
         }
-
-        if (filters.type) {
-          filtered = filtered.filter((p) => p.type === filters.type);
+        if (stableFilters.type) {
+          filtered = filtered.filter((p) => p.type === stableFilters.type);
         }
-
-        if (filters.bedrooms && filters.bedrooms > 0) {
-          filtered = filtered.filter((p) => (p.bedrooms || 0) >= (filters.bedrooms || 0));
+        if (stableFilters.bedrooms && stableFilters.bedrooms > 0) {
+          filtered = filtered.filter((p) => (p.bedrooms || 0) >= (stableFilters.bedrooms || 0));
         }
-
-        if (isRefresh || targetPage === 1) {
-          setProperties(filtered);
-        } else {
-          setProperties((prev) => [...prev, ...filtered]);
-        }
-
-        setHasMore(false);
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-        setFetchingNextPage(false);
+        return {
+          items: filtered,
+          total: filtered.length,
+          page: pageParam,
+          limit: stableFilters.limit || 20,
+        };
       }
     },
-    [filters]
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.length * lastPage.limit;
+      return loaded < lastPage.total ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
+
+  const properties = useMemo(
+    () => query.data?.pages.flatMap((page) => page.items) ?? [],
+    [query.data],
   );
 
-  // Trigger loading when filters change
-  useEffect(() => {
-    fetchProperties(1);
-  }, [fetchProperties]);
+  const hasMore = query.hasNextPage ?? false;
 
   const loadMore = useCallback(() => {
-    if (!loading && !fetchingNextPage && hasMore) {
-      fetchProperties(page + 1);
+    if (query.hasNextPage && !query.isFetchingNextPage) {
+      query.fetchNextPage();
     }
-  }, [loading, fetchingNextPage, hasMore, page, fetchProperties]);
-
-  const refresh = useCallback(() => {
-    fetchProperties(1, true);
-  }, [fetchProperties]);
+  }, [query]);
 
   return {
     properties,
-    loading,
-    refreshing,
-    fetchingNextPage,
-    error,
+    loading: query.isLoading,
+    refreshing: query.isRefetching,
+    fetchingNextPage: query.isFetchingNextPage,
+    error: query.error?.message ?? null,
     hasMore,
     loadMore,
-    refresh,
+    refresh: () => { query.refetch(); },
   };
 }
