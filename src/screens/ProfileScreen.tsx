@@ -1,141 +1,79 @@
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
-import { Camera, LoaderCircle, LogOut, Save, ShieldCheck, Trash2, UserRound, XCircle } from "lucide-react-native";
+import { Camera, LoaderCircle, LogOut, Save, ShieldCheck, Trash2, UserRound, KeyRound } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
-import { deleteAvatar, deleteUser, getUser, updateUser, uploadAvatar, UserApiError, type UserProfile } from "@/services/userApi";
-import { clearAuthSession, getAuthSession, saveAuthSession, type StoredAuthSession } from "@/services/authStorage";
-import { getCurrentUser, loginUser, registerUser, logoutUser } from "@/services/authApi";
+import { useAuthStore } from "@/stores/authStore";
+import { FloatingInput, ErrorBanner, AuthButton, Divider } from "@/components/AuthFormFields";
+import { getAccessToken } from "@/services/tokenStorage";
+import { updateUser, uploadAvatar, deleteAvatar, deleteUser } from "@/services/userApi";
 
 export function ProfileScreen() {
   const { isPhone } = useResponsive();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [editingName, setEditingName] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [authSession, setAuthSession] = useState<StoredAuthSession | null>(null);
+  const { user, login, register, logout, loading: authLoading, error: authError, clearError, hydrate } = useAuthStore();
+
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("john@example.com");
   const [password, setPassword] = useState("Password123");
   const [fullName, setFullName] = useState("John Doe");
 
-  function formatError(err: unknown): string {
-    if (err instanceof UserApiError) {
-      return err.errorCode ? `[Error ${err.errorCode}] ${err.message}` : err.message;
-    }
-    return err instanceof Error ? err.message : String(err);
-  }
+  const [editingName, setEditingName] = useState("");
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
-    void loadSession();
+    void hydrate();
   }, []);
 
-  async function loadSession() {
-    try {
-      setLoading(true);
-      const session = await getAuthSession();
-      if (session) {
-        setAuthSession(session);
-        setProfile({
-          id: session.userId,
-          full_name: session.userName,
-          avatar_url: session.avatarUrl,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          auth_identities: [{ provider: "LOCAL", email: session.email, phone: null, verified_at: null }],
-        });
-        setEditingName(session.userName);
-        const me = await getCurrentUser(session.accessToken);
-        if (me.data) {
-          setProfile({
-            id: me.data.id,
-            full_name: me.data.full_name,
-            avatar_url: me.data.avatar_url,
-            created_at: me.data.created_at,
-            updated_at: me.data.created_at,
-            auth_identities: [{ provider: "LOCAL", email: me.data.email, phone: null, verified_at: null }],
-          });
-          setEditingName(me.data.full_name);
-        } else {
-          const result = await getUser(session.accessToken, session.userId);
-          if (result.data) {
-            setProfile(result.data);
-            setEditingName(result.data.full_name);
-          }
-        }
+  useEffect(() => {
+    if (user) {
+      setEditingName(user.full_name);
+    }
+  }, [user]);
+
+  const handleAuthSubmit = async () => {
+    setLocalError(null);
+    if (mode === "login") {
+      await login({ email: email.trim(), password });
+    } else {
+      if (!fullName.trim()) {
+        setLocalError("Full name is required");
+        return;
       }
-    } catch (err) {
-      setError(formatError(err));
-    } finally {
-      setLoading(false);
+      if (password.length < 8) {
+        setLocalError("Password must be at least 8 characters");
+        return;
+      }
+      await register({ full_name: fullName.trim(), email: email.trim(), password });
     }
-  }
+  };
 
-  async function handleAuthSubmit() {
+  const handleSaveName = async () => {
+    if (!user || !editingName.trim()) return;
     try {
-      setLoading(true);
-      setError(null);
-      const response = mode === "login"
-        ? await loginUser(email.trim(), password)
-        : await registerUser(fullName.trim(), email.trim(), password);
-
-      const payload = response.data;
-      if (!payload) throw new Error("Authentication response did not include user data");
-
-      const session: StoredAuthSession = {
-        accessToken: payload.access_token,
-        refreshToken: payload.refresh_token,
-        userId: payload.user.id,
-        userName: payload.user.full_name,
-        email: payload.user.email,
-        avatarUrl: payload.user.avatar_url,
-      };
-
-      await saveAuthSession(session);
-      setAuthSession(session);
-      setProfile({
-        id: payload.user.id,
-        full_name: payload.user.full_name,
-        avatar_url: payload.user.avatar_url,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        auth_identities: [{ provider: "LOCAL", email: payload.user.email, phone: null, verified_at: null }],
-      });
-      setEditingName(payload.user.full_name);
-    } catch (err) {
-      setError(formatError(err));
+      setUpdatingProfile(true);
+      setLocalError(null);
+      const token = await getAccessToken();
+      await updateUser(token || "", user.id, editingName.trim());
+      // Refresh user details in store
+      const { fetchMe } = useAuthStore.getState();
+      await fetchMe();
+      Alert.alert("Success", "Profile name updated successfully.");
+    } catch (err: any) {
+      setLocalError(err?.message || "Failed to update profile name");
     } finally {
-      setLoading(false);
+      setUpdatingProfile(false);
     }
-  }
+  };
 
-  const primaryIdentity = useMemo(() => profile?.auth_identities?.[0], [profile]);
-
-  async function handleSave() {
-    if (!profile || !authSession) return;
-    try {
-      setSaving(true);
-      setError(null);
-      const result = await updateUser(authSession.accessToken, profile.id, editingName.trim());
-      setProfile(result.data);
-      setEditingName(result.data?.full_name ?? "");
-      Alert.alert("Profile updated", "Your profile name has been updated.");
-    } catch (err) {
-      setError(formatError(err));
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleAvatarUpload() {
-    if (!profile || !authSession) return;
-
+  const handleAvatarUpload = async () => {
+    if (!user) return;
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       Alert.alert("Permission needed", "Allow access to your photo library to upload an avatar.");
@@ -152,195 +90,275 @@ export function ProfileScreen() {
     if (result.canceled || !result.assets?.[0]) return;
 
     try {
-      setUploading(true);
-      setError(null);
+      setUploadingAvatar(true);
+      setLocalError(null);
       const asset = result.assets[0] as any;
 
-      // Prefer the native File object (web) when provided by the picker.
       let fileToUpload: Blob | File | null = null;
       if (asset.file && (globalThis as any).File && asset.file instanceof (globalThis as any).File) {
         fileToUpload = asset.file as File;
       } else if (asset.uri && asset.uri.startsWith("data:")) {
-        // data: URL -> convert to blob
         const base64 = asset.uri.split(",")[1];
         const res = await fetch(asset.uri);
         fileToUpload = await res.blob();
       } else if (asset.uri) {
-        // Try fetching blob from URI (blob:, http:, etc.)
         try {
           const response = await fetch(asset.uri);
           fileToUpload = await response.blob();
         } catch (fetchErr) {
-          console.error("Failed to fetch picked image URI:", asset.uri, fetchErr);
-          throw new Error("Unable to read selected file from the browser. Try a different image or use the desktop build.");
+          throw new Error("Unable to read selected file from browser.");
         }
       }
 
       if (!fileToUpload) {
-        throw new Error("Could not obtain file from image picker result");
+        throw new Error("Could not obtain file from image picker");
       }
 
-      // On web convert Blob -> File to preserve filename/type where possible
       try {
         if ((globalThis as any).File && !(fileToUpload instanceof (globalThis as any).File)) {
-          fileToUpload = new (globalThis as any).File([fileToUpload], asset.fileName || "avatar.jpg", { type: (fileToUpload as Blob).type || "image/jpeg" });
+          fileToUpload = new (globalThis as any).File([fileToUpload], asset.fileName || "avatar.jpg", {
+            type: (fileToUpload as Blob).type || "image/jpeg",
+          });
         }
       } catch {
         // ignore
       }
 
-      const uploadResult = await uploadAvatar(authSession.accessToken, fileToUpload as Blob | File, asset.fileName || "avatar.jpg");
-      setProfile(uploadResult.data);
-      Alert.alert("Avatar uploaded", "Your avatar has been updated.");
-    } catch (err) {
-      setError(formatError(err));
+      const token = await getAccessToken();
+      await uploadAvatar(token || "", fileToUpload as Blob | File, asset.fileName || "avatar.jpg");
+      
+      const { fetchMe } = useAuthStore.getState();
+      await fetchMe();
+      Alert.alert("Success", "Avatar uploaded successfully.");
+    } catch (err: any) {
+      setLocalError(err?.message || "Failed to upload avatar");
     } finally {
-      setUploading(false);
+      setUploadingAvatar(false);
     }
-  }
+  };
 
-  async function handleAvatarDelete() {
-    if (!profile || !authSession) return;
+  const handleAvatarDelete = async () => {
+    if (!user) return;
     try {
-      setUploading(true);
-      setError(null);
-      const result = await deleteAvatar(authSession.accessToken);
-      setProfile(result.data);
-      Alert.alert("Avatar removed", "Your avatar has been removed.");
-    } catch (err) {
-      setError(formatError(err));
+      setUploadingAvatar(true);
+      setLocalError(null);
+      const token = await getAccessToken();
+      await deleteAvatar(token || "");
+      
+      const { fetchMe } = useAuthStore.getState();
+      await fetchMe();
+      Alert.alert("Success", "Avatar removed.");
+    } catch (err: any) {
+      setLocalError(err?.message || "Failed to remove avatar");
     } finally {
-      setUploading(false);
+      setUploadingAvatar(false);
     }
-  }
+  };
 
-  async function handleDeleteAccount() {
-    if (!profile || !authSession) return;
-    Alert.alert("Delete account", "This will permanently remove your user record.", [
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    Alert.alert("Delete Account", "Are you sure? This action is permanent.", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
           try {
-            setSaving(true);
-            await deleteUser(authSession.accessToken, profile.id);
-            await clearAuthSession();
-            setAuthSession(null);
-            setProfile(null);
-            setEditingName("");
-            Alert.alert("Account deleted", "Your account has been removed.");
-          } catch (err) {
-            setError(formatError(err));
+            setUpdatingProfile(true);
+            const token = await getAccessToken();
+            await deleteUser(token || "", user.id);
+            await logout();
+            Alert.alert("Deleted", "Your account has been deleted.");
+          } catch (err: any) {
+            setLocalError(err?.message || "Failed to delete account");
           } finally {
-            setSaving(false);
+            setUpdatingProfile(false);
           }
         },
       },
     ]);
-  }
-
-  async function handleLogout() {
-    if (!authSession) return;
-    try {
-      setLoading(true);
-      await logoutUser(authSession.accessToken, authSession.refreshToken);
-    } catch (err) {
-      setError(formatError(err));
-    } finally {
-      await clearAuthSession();
-      setAuthSession(null);
-      setProfile(null);
-      setEditingName("");
-      setLoading(false);
-    }
-  }
+  };
 
   return (
     <AppChrome active="profile">
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={[styles.heroCard, isPhone && styles.heroCardPhone]}>
-          <LinearGradient colors={[colors.green, colors.blue]} end={{ x: 1, y: 0 }} style={styles.heroGradient} />
-          <View style={styles.avatarWrap}>
-            {profile?.avatar_url ? (
-              <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <UserRound color={colors.white} size={34} />
-              </View>
-            )}
-            <Pressable accessibilityLabel="Upload avatar" onPress={handleAvatarUpload} style={[styles.avatarAction, webPointer]}>
-              {uploading ? <LoaderCircle color={colors.white} size={15} /> : <Camera color={colors.white} size={15} />}
-            </Pressable>
-          </View>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        
+        {/* Profile Card if Logged In */}
+        {user ? (
+          <View style={[styles.heroCard, isPhone && styles.heroCardPhone]}>
+            <LinearGradient colors={[colors.green, colors.blue]} end={{ x: 1, y: 0 }} style={styles.heroGradient} />
+            <View style={styles.avatarWrap}>
+              {user.avatar_url ? (
+                <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <UserRound color={colors.white} size={34} />
+                </View>
+              )}
+              <Pressable accessibilityLabel="Upload avatar" onPress={handleAvatarUpload} style={[styles.avatarAction, webPointer]}>
+                {uploadingAvatar ? <LoaderCircle color={colors.white} size={15} /> : <Camera color={colors.white} size={15} />}
+              </Pressable>
+            </View>
 
-          <View style={styles.heroContent}>
-            <Eyebrow light>Profile</Eyebrow>
-            <Text style={styles.title}>{profile?.full_name ?? "Loading profile"}</Text>
-            <Text style={styles.subtitle}>{primaryIdentity?.email ?? "No email available"}</Text>
-            <View style={styles.badgeRow}>
-              <View style={styles.badge}>
-                <ShieldCheck color={colors.white} size={14} />
-                <Text style={styles.badgeText}>Verified account</Text>
+            <View style={styles.heroContent}>
+              <Eyebrow light>Profile</Eyebrow>
+              <Text style={styles.title}>{user.full_name}</Text>
+              <Text style={styles.subtitle}>{user.email}</Text>
+              <View style={styles.badgeRow}>
+                <View style={styles.badge}>
+                  <ShieldCheck color={colors.white} size={14} />
+                  <Text style={styles.badgeText}>Verified Account</Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
+        ) : null}
 
-        {error ? <View style={styles.notice}><XCircle color={colors.coral} size={16} /><Text style={styles.noticeText}>{error}</Text></View> : null}
+        {/* Global Errors */}
+        <ErrorBanner message={localError || authError} />
 
-        {!authSession ? (
+        {/* Unauthenticated State */}
+        {!user ? (
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>{mode === "login" ? "Sign in to HomeNet" : "Create your HomeNet account"}</Text>
-            <Text style={styles.supportText}>This connects the profile screen to your backend auth endpoints.</Text>
-            {mode === "register" ? (
-              <View style={styles.formStack}>
-                <Text style={styles.fieldLabel}>Full name</Text>
-                <TextInput onChangeText={setFullName} placeholder="Enter your full name" style={styles.input} value={fullName} />
-              </View>
-            ) : null}
-            <View style={styles.formStack}>
-              <Text style={styles.fieldLabel}>Email</Text>
-              <TextInput autoCapitalize="none" autoCorrect={false} keyboardType="email-address" onChangeText={setEmail} placeholder="you@example.com" style={styles.input} value={email} />
-            </View>
-            <View style={styles.formStack}>
-              <Text style={styles.fieldLabel}>Password</Text>
-              <TextInput onChangeText={setPassword} placeholder="Your password" secureTextEntry style={styles.input} value={password} />
-            </View>
-            <View style={styles.actionsRow}>
-              <AppButton label={mode === "login" ? "Sign in" : "Create account"} onPress={handleAuthSubmit} icon={Save} />
-              <AppButton label={mode === "login" ? "Create account" : "Sign in"} onPress={() => setMode((current) => current === "login" ? "register" : "login")} variant="secondary" />
+            <Text style={styles.sectionTitle}>
+              {mode === "login" ? "Sign in to HomeNet" : "Create your HomeNet account"}
+            </Text>
+            <Text style={styles.supportText}>
+              Access saved properties, list new homes, and verify pricing.
+            </Text>
+
+            <View style={styles.formContainer}>
+              {mode === "register" ? (
+                <FloatingInput
+                  label="Full Name"
+                  value={fullName}
+                  onChangeText={(val) => {
+                    setFullName(val);
+                    setLocalError(null);
+                    clearError();
+                  }}
+                  autoCapitalize="words"
+                />
+              ) : null}
+
+              <FloatingInput
+                label="Email"
+                value={email}
+                onChangeText={(val) => {
+                  setEmail(val);
+                  setLocalError(null);
+                  clearError();
+                }}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              <FloatingInput
+                label="Password"
+                value={password}
+                onChangeText={(val) => {
+                  setPassword(val);
+                  setLocalError(null);
+                  clearError();
+                }}
+                secureTextEntry
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+
+              <AuthButton
+                label={mode === "login" ? "Sign In" : "Register"}
+                onPress={handleAuthSubmit}
+                loading={authLoading}
+                disabled={!email || !password || (mode === "register" && !fullName)}
+                style={styles.submitBtn}
+              />
+
+              <Divider text="or" />
+
+              <AuthButton
+                label={mode === "login" ? "Create an account" : "Back to Sign In"}
+                onPress={() => {
+                  setMode((current) => (current === "login" ? "register" : "login"));
+                  setLocalError(null);
+                  clearError();
+                }}
+                variant="secondary"
+              />
             </View>
           </View>
         ) : (
+          /* Authenticated Settings State */
           <>
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>Profile details</Text>
-              <Text style={styles.fieldLabel}>Full name</Text>
-              <TextInput
-                onChangeText={setEditingName}
-                placeholder="Enter your full name"
-                style={styles.input}
+              
+              <FloatingInput
+                label="Full Name"
                 value={editingName}
+                onChangeText={(val) => {
+                  setEditingName(val);
+                  setLocalError(null);
+                }}
+                autoCapitalize="words"
               />
+
               <View style={styles.actionsRow}>
-                <AppButton disabled={saving || !editingName.trim()} label={saving ? "Saving..." : "Save changes"} onPress={handleSave} icon={Save} />
-                <AppButton label="Remove avatar" onPress={handleAvatarDelete} variant="secondary" icon={Trash2} />
+                <AuthButton
+                  label="Save changes"
+                  onPress={handleSaveName}
+                  loading={updatingProfile}
+                  disabled={!editingName.trim() || editingName === user.full_name}
+                  style={styles.flexBtn}
+                />
+                
+                {user.avatar_url ? (
+                  <AuthButton
+                    label="Remove avatar"
+                    onPress={handleAvatarDelete}
+                    variant="secondary"
+                    icon={Trash2}
+                    style={styles.flexBtn}
+                  />
+                ) : null}
               </View>
             </View>
 
             <View style={styles.card}>
-              <Text style={styles.sectionTitle}>Account security</Text>
-              <Text style={styles.supportText}>Use the endpoints documented for the user module to keep profile data synchronized with your backend.</Text>
+              <Text style={styles.sectionTitle}>Account Security</Text>
+              <Text style={styles.supportText}>
+                Manage your credentials and security preferences.
+              </Text>
+              
               <View style={styles.actionsRow}>
-                <AppButton label="Log out" onPress={handleLogout} variant="ghost" icon={LogOut} />
-                <AppButton label="Delete account" onPress={handleDeleteAccount} variant="ghost" icon={Trash2} />
+                <AuthButton
+                  label="Change Password"
+                  onPress={() => router.push("/profile/change-password")}
+                  variant="secondary"
+                  icon={KeyRound}
+                  style={styles.flexBtn}
+                />
+                
+                <AuthButton
+                  label="Log out"
+                  onPress={logout}
+                  variant="ghost"
+                  icon={LogOut}
+                  style={styles.flexBtn}
+                />
               </View>
+
+              <Pressable
+                onPress={handleDeleteAccount}
+                style={[styles.deleteAccountBtn, webPointer]}
+              >
+                <Trash2 size={14} color={colors.coral} />
+                <Text style={styles.deleteAccountText}>Permanently Delete Account</Text>
+              </Pressable>
             </View>
           </>
         )}
-
-        {loading ? <Text style={styles.loadingText}>Loading user details…</Text> : null}
       </ScrollView>
     </AppChrome>
   );
@@ -361,14 +379,39 @@ const styles = StyleSheet.create({
   badgeRow: { flexDirection: "row", marginTop: 4 },
   badge: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.18)" },
   badgeText: { color: colors.white, fontFamily: fonts.extraBold, fontSize: 10 },
-  card: { padding: 20, borderRadius: 18, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
-  sectionTitle: { marginBottom: 10, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 17 },
-  fieldLabel: { marginBottom: 7, color: colors.muted, fontFamily: fonts.extraBold, fontSize: 10, textTransform: "uppercase", letterSpacing: 1 },
-  input: { minHeight: 46, paddingHorizontal: 13, borderRadius: 12, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.soft, color: colors.ink, fontFamily: fonts.regular },
-  actionsRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 14 },
-  formStack: { marginTop: 12 },
-  notice: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 12, backgroundColor: "#FFF4F4", borderWidth: 1, borderColor: "#F9D8D8" },
-  noticeText: { color: colors.coral, fontFamily: fonts.regular, fontSize: 12, flexShrink: 1 },
-  supportText: { color: colors.muted, fontFamily: fonts.regular, fontSize: 12, lineHeight: 18 },
-  loadingText: { textAlign: "center", color: colors.muted, fontFamily: fonts.regular, fontSize: 12 },
+  
+  card: { padding: 24, borderRadius: 18, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
+  sectionTitle: { marginBottom: 4, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 18 },
+  supportText: { color: colors.muted, fontFamily: fonts.regular, fontSize: 13, lineHeight: 18, marginBottom: 18 },
+  
+  formContainer: {
+    marginTop: 16,
+  },
+  submitBtn: {
+    marginTop: 10,
+  },
+  
+  actionsRow: { flexDirection: "row", gap: 12, marginTop: 14, flexWrap: "wrap" },
+  flexBtn: {
+    flex: 1,
+    minWidth: 150,
+  },
+  
+  deleteAccountBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 24,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "#F9D8D8",
+    backgroundColor: "#FFF4F4",
+    borderRadius: 12,
+  },
+  deleteAccountText: {
+    color: colors.coral,
+    fontFamily: fonts.bold,
+    fontSize: 13,
+  },
 });
