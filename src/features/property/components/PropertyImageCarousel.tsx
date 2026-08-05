@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Image,
@@ -10,10 +10,13 @@ import {
 } from "react-native";
 import type { PropertyMedia } from "../types/property";
 import { feedColors } from "./PropertyBadge";
+import { MediaDeleteButton } from "./MediaDeleteButton";
 
 interface PropertyImageCarouselProps {
   media?: PropertyMedia[];
   fallbackImageUrl?: string;
+  editable?: boolean;
+  onMediaDeleted?: (mediaId: string) => void;
 }
 
 const fallbackImage =
@@ -22,23 +25,40 @@ const fallbackImage =
 export function PropertyImageCarousel({
   media = [],
   fallbackImageUrl,
+  editable = false,
+  onMediaDeleted,
 }: PropertyImageCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [cardWidth, setCardWidth] = useState(0);
+  const [localMedia, setLocalMedia] = useState(media);
 
   const images =
-    media.length > 0
-      ? media.map((m) => m.url)
+    localMedia.length > 0
+      ? localMedia.map((m) => m.url)
       : [fallbackImageUrl || fallbackImage];
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (cardWidth <= 0) return;
-    const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.round(contentOffsetX / cardWidth);
-    if (index !== activeIndex && index >= 0 && index < images.length) {
-      setActiveIndex(index);
-    }
-  };
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (cardWidth <= 0) return;
+      const contentOffsetX = event.nativeEvent.contentOffset.x;
+      const index = Math.round(contentOffsetX / cardWidth);
+      if (index !== activeIndex && index >= 0 && index < images.length) {
+        setActiveIndex(index);
+      }
+    },
+    [cardWidth, activeIndex, images.length],
+  );
+
+  function handleMediaDelete(mediaId: string) {
+    setLocalMedia((prev) => {
+      const next = prev.filter((m) => m.id !== mediaId);
+      if (activeIndex >= next.length && next.length > 0) {
+        setActiveIndex(next.length - 1);
+      }
+      return next;
+    });
+    onMediaDeleted?.(mediaId);
+  }
 
   return (
     <View
@@ -47,21 +67,33 @@ export function PropertyImageCarousel({
     >
       <FlatList
         data={images}
-        keyExtractor={(_, index) => `img-${index}`}
+        keyExtractor={(_, index) => {
+          if (index < localMedia.length) return localMedia[index].id;
+          return `fallback-${index}`;
+        }}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
-        renderItem={({ item }) => (
-          <View style={[styles.imageWrapper, { width: cardWidth || 340 }]}>
-            <Image
-              source={{ uri: item }}
-              style={styles.image}
-              resizeMode="cover"
-            />
-          </View>
-        )}
+        renderItem={({ item, index }) => {
+          const mediaItem = index < localMedia.length ? localMedia[index] : null;
+          return (
+            <View style={[styles.imageWrapper, { width: cardWidth || 340 }]}>
+              <Image
+                source={{ uri: item }}
+                style={styles.image}
+                resizeMode="cover"
+              />
+              {editable && mediaItem ? (
+                <MediaDeleteButton
+                  mediaId={mediaItem.id}
+                  onSuccess={handleMediaDelete}
+                />
+              ) : null}
+            </View>
+          );
+        }}
       />
 
       {images.length > 1 ? (
