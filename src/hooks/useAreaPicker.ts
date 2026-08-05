@@ -38,11 +38,11 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
           city: selectedCity || undefined,
           limit,
         });
-        setAreas(res.data || []);
+        setAreas(res.data?.items || []);
       } else if (currentParentId) {
         // If we have a drill down parent, get child areas
         const res = await fetchAreaChildren(currentParentId);
-        setAreas(res.data || []);
+        setAreas(res.data?.items || []);
       } else {
         // If we are at root, fetch root level areas (e.g. cities or main areas in the city)
         const res = await fetchAreas({
@@ -50,7 +50,7 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
           parent_area_id: null,
           limit,
         });
-        setAreas(res.data || []);
+        setAreas(res.data?.items || []);
       }
     } catch (err: any) {
       setError(err?.message || "Failed to load locations");
