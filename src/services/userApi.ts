@@ -40,7 +40,7 @@ export type UserProfile = {
   auth_identities: AuthIdentity[];
 };
 
-export const userModuleBaseUrl = "http://localhost:8082/api/v1/users";
+export const userModuleBaseUrl = process.env.EXPO_PUBLIC_USER_API_BASE_URL || process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:3000/v1/users";
 
 import { getAuthSession, saveAuthSession, clearAuthSession } from "@/services/authStorage";
 
