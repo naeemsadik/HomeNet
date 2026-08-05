@@ -28,20 +28,24 @@ export type AuthMeResponse = {
 };
 
 export const authModuleBaseUrl = (() => {
-  // Prefer a runtime-derived URL when running in the browser (works with the dev proxy).
+  // Prefer the documented backend URL and allow overriding it for local setups.
+  const configuredBaseUrl = process.env.EXPO_PUBLIC_AUTH_API_BASE_URL || process.env.EXPO_PUBLIC_API_BASE_URL;
+
+  if (configuredBaseUrl) {
+    return configuredBaseUrl.replace(/\/$/, "");
+  }
+
+  // Keep browser and non-browser behavior aligned with the integration guide.
   try {
     if (typeof window !== "undefined" && window.location) {
-      const protocol = window.location.protocol || "http:";
-      const hostname = window.location.hostname || "localhost";
-      const port = 8082;
-      return `${protocol}//${hostname}:${port}/api/v1/auth`;
+      return "http://localhost:3000/v1/auth";
     }
   } catch {
     // ignore
   }
 
   // Fallback to localhost for non-browser environments or tests.
-  return "http://localhost:8082/api/v1/auth";
+  return "http://localhost:3000/v1/auth";
 })();
 
 async function requestAuth<T>(path: string, init: RequestInit = {}) {
