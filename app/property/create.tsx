@@ -1,3 +1,3 @@
-import { PropertyCreateScreen } from "@/features/property/screens/PropertyCreateScreen";
+import { PropertyCreateWizard } from "@/features/property/screens/PropertyCreateWizard";
 
-export default PropertyCreateScreen;
+export default PropertyCreateWizard;

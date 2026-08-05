@@ -130,6 +130,7 @@ export interface CreatePropertyDto {
   location_lat?: number;
   location_lng?: number;
   amenities?: Record<string, unknown>;
+  virtual_tour_url?: string;
 }
 
 export type UpdatePropertyDto = Partial<CreatePropertyDto>;
