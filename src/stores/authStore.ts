@@ -10,6 +10,7 @@ import type {
   LoginDto,
   ChangePasswordDto,
 } from "@/types/api";
+import type { UserRole } from "@/features/admin/types/admin";
 
 // ─── Store Shape ───────────────────────────────────────────────────────────
 
@@ -22,12 +23,15 @@ interface AuthState {
   error: string | null;
   /** Raw `error_code` from the backend envelope (useful for inline field errors). */
   errorCode: number | null;
+  /** User's assigned roles with permissions (fetched after login). */
+  userRoles: UserRole[];
 
   // ── Actions ──────────────────────────────────────────────────────────────
   register: (dto: RegisterDto) => Promise<boolean>;
   login: (dto: LoginDto) => Promise<boolean>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
+  fetchUserRoles: (userId: string) => Promise<void>;
   changePassword: (dto: ChangePasswordDto) => Promise<boolean>;
   clearError: () => void;
   /** Hydrate the store on app startup – reads tokens & calls GET /me. */
@@ -58,6 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loading: false,
   error: null,
   errorCode: null,
+  userRoles: [],
 
   // ── Register ─────────────────────────────────────────────────────────────
   register: async (dto) => {
@@ -70,6 +75,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const payload = data.data!;
       await saveTokens(payload.access_token, payload.refresh_token);
       set({ user: payload.user, loading: false });
+      await get().fetchUserRoles(payload.user.id);
       return true;
     } catch (err) {
       const { message, code } = extractError(err);
@@ -89,6 +95,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const payload = data.data!;
       await saveTokens(payload.access_token, payload.refresh_token);
       set({ user: payload.user, loading: false });
+      await get().fetchUserRoles(payload.user.id);
       return true;
     } catch (err) {
       const { message, code } = extractError(err);
@@ -101,7 +108,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     set({ loading: true, error: null, errorCode: null });
     try {
-      // Fire-and-forget: even if the server call fails we still clear local state.
       const { getRefreshToken } = await import("@/services/tokenStorage");
       const refreshToken = await getRefreshToken();
       if (refreshToken) {
@@ -111,7 +117,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     } finally {
       await clearTokens();
-      set({ user: null, loading: false, error: null, errorCode: null });
+      set({ user: null, loading: false, error: null, errorCode: null, userRoles: [] });
     }
   },
 
@@ -132,9 +138,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         },
         loading: false,
       });
+      await get().fetchUserRoles(me.id);
     } catch (err) {
       const { message, code } = extractError(err);
       set({ loading: false, error: message, errorCode: code });
+    }
+  },
+
+  // ── Fetch User Roles ─────────────────────────────────────────────────────
+  fetchUserRoles: async (userId: string) => {
+    try {
+      const { data } = await apiClient.get<ApiResponse<UserRole[]>>(
+        `/v1/roles/user/${userId}`,
+      );
+      set({ userRoles: data.data ?? [] });
+    } catch {
+      set({ userRoles: [] });
     }
   },
 
@@ -164,7 +183,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const token = await getAccessToken();
     if (!token) return;
 
-    // We have a token – try fetching the current user.
     await get().fetchMe();
   },
 }));

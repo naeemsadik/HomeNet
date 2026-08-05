@@ -1,3 +1,3 @@
-import { AdminPropertiesScreen } from "@/screens/AdminPropertiesScreen";
+import { AdminPropertiesScreen } from "@/features/admin/screens/AdminPropertiesScreen";
 
 export default AdminPropertiesScreen;

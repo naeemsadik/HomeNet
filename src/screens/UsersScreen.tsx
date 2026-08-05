@@ -1,22 +1,84 @@
 import { router } from "expo-router";
-import { LoaderCircle, Search, UserRound, Users, XCircle } from "lucide-react-native";
-import { useEffect, useState } from "react";
-import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  AtSign,
+  Clock,
+  LoaderCircle,
+  Mail,
+  Phone,
+  Search,
+  Settings,
+  Trash2,
+  UserRound,
+  Users,
+  XCircle,
+} from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
+import { useAuthStore } from "@/stores/authStore";
 import { getAuthSession, type StoredAuthSession } from "@/services/authStorage";
-import { listUsers, type UserProfile } from "@/services/userApi";
+import {
+  listUsers,
+  deleteUser,
+  type UserProfile,
+} from "@/services/userApi";
+import { UserRoleBadges } from "@/features/admin/components/UserRoleBadges";
+import { RoleAssignmentModal } from "@/features/admin/components/RoleAssignmentModal";
+import { DeleteUserDialog } from "@/features/admin/components/DeleteUserDialog";
+import { useUserRoles } from "@/features/admin/hooks/useUserRoles";
+import type { UserRole } from "@/features/admin/types/admin";
+
+function ProviderIcon({ provider }: { provider: string }) {
+  switch (provider) {
+    case "GOOGLE":
+      return <AtSign color="#DB4437" size={12} />;
+    case "PHONE":
+      return <Phone color={colors.blue} size={12} />;
+    case "LOCAL":
+    default:
+      return <Mail color={colors.green} size={12} />;
+  }
+}
+
+function UserRolesLoader({ userId }: { userId: string }) {
+  const { data: roles } = useUserRoles(userId);
+  if (!roles || roles.length === 0) return null;
+  return <UserRoleBadges roles={roles} />;
+}
 
 export function UsersScreen() {
   const { isPhone } = useResponsive();
+  const userRoles = useAuthStore((s) => s.userRoles);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<StoredAuthSession | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [roleModalUser, setRoleModalUser] = useState<UserProfile | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UserProfile | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const canManageRoles = userRoles.some(
+    (ur) =>
+      ur.role.name === "admin" ||
+      ur.role.name === "superadmin" ||
+      ur.role.role_permissions?.some(
+        (rp) => rp.permission.name === "manage_roles" || rp.permission.name === "manage_users",
+      ),
+  );
 
   useEffect(() => {
     void loadUsers();
@@ -60,38 +122,98 @@ export function UsersScreen() {
   }
 
   function handleUserPress(user: UserProfile) {
-    if (!session) return;
-    router.push(`/users/${user.id}` as any);
+    router.push(`/users/${user.id}` as never);
   }
 
-  function renderUser({ item }: { item: UserProfile }) {
-    const primaryEmail = item.auth_identities?.[0]?.email;
-    const isVerified = !!item.auth_identities?.[0]?.verified_at;
-
-    return (
-      <Pressable
-        onPress={() => handleUserPress(item)}
-        style={({ pressed }) => [styles.userRow, pressed && styles.userRowPressed, webPointer]}
-      >
-        <View style={styles.userAvatar}>
-          {item.avatar_url ? (
-            <Image source={{ uri: item.avatar_url }} style={styles.userAvatarImage} />
-          ) : (
-            <UserRound color={colors.muted} size={20} />
-          )}
-        </View>
-        <View style={styles.userInfo}>
-          <Text style={styles.userName}>{item.full_name}</Text>
-          <Text style={styles.userEmail}>{primaryEmail ?? "No email"}</Text>
-        </View>
-        <View style={[styles.verifiedBadge, isVerified && styles.verifiedBadgeActive]}>
-          <Text style={[styles.verifiedText, isVerified && styles.verifiedTextActive]}>
-            {isVerified ? "Verified" : "Pending"}
-          </Text>
-        </View>
-      </Pressable>
-    );
+  async function handleDeleteConfirm() {
+    if (!deleteTarget || !session) return;
+    setDeleting(true);
+    try {
+      await deleteUser(session.accessToken, deleteTarget.id);
+      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      setFilteredUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (err) {
+      Alert.alert("Error", err instanceof Error ? err.message : "Failed to delete user");
+    } finally {
+      setDeleting(false);
+    }
   }
+
+  const renderUser = useCallback(
+    ({ item }: { item: UserProfile }) => {
+      const primaryIdentity = item.auth_identities?.[0];
+      const isVerified = !!primaryIdentity?.verified_at;
+
+      return (
+        <View style={styles.userCard}>
+          <Pressable
+            onPress={() => handleUserPress(item)}
+            style={({ pressed }) => [styles.userRow, pressed && styles.userRowPressed, webPointer]}
+            accessibilityLabel={`View ${item.full_name}`}
+          >
+            <View style={styles.userAvatar}>
+              {item.avatar_url ? (
+                <Image source={{ uri: item.avatar_url }} style={styles.userAvatarImage} />
+              ) : (
+                <UserRound color={colors.muted} size={20} />
+              )}
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{item.full_name}</Text>
+              <View style={styles.emailRow}>
+                {primaryIdentity?.provider ? (
+                  <ProviderIcon provider={primaryIdentity.provider} />
+                ) : null}
+                <Text style={styles.userEmail}>
+                  {primaryIdentity?.email ?? "No email"}
+                </Text>
+              </View>
+              {isVerified && primaryIdentity?.verified_at ? (
+                <View style={styles.verifiedRow}>
+                  <Clock color={colors.green} size={10} />
+                  <Text style={styles.verifiedTimestamp}>
+                    Verified {new Date(primaryIdentity.verified_at).toLocaleDateString()}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+            <View style={[styles.verifiedBadge, isVerified && styles.verifiedBadgeActive]}>
+              <Text style={[styles.verifiedText, isVerified && styles.verifiedTextActive]}>
+                {isVerified ? "Verified" : "Pending"}
+              </Text>
+            </View>
+          </Pressable>
+
+          <View style={styles.userRolesRow}>
+            <UserRolesLoader userId={item.id} />
+          </View>
+
+          {canManageRoles ? (
+            <View style={styles.userActions}>
+              <Pressable
+                onPress={() => setRoleModalUser(item)}
+                style={[styles.actionBtn, { backgroundColor: colors.greenLight }]}
+                accessibilityLabel={`Manage roles for ${item.full_name}`}
+              >
+                <Settings color={colors.green} size={13} />
+                <Text style={[styles.actionText, { color: colors.greenDark }]}>Roles</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setDeleteTarget(item)}
+                style={[styles.actionBtn, { backgroundColor: "#FDF0EE" }]}
+                accessibilityLabel={`Delete ${item.full_name}`}
+              >
+                <Trash2 color={colors.coral} size={13} />
+                <Text style={[styles.actionText, { color: colors.coral }]}>Delete</Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+      );
+    },
+    [canManageRoles],
+  );
 
   if (!session) {
     return (
@@ -114,7 +236,7 @@ export function UsersScreen() {
           <Search color={colors.muted} size={16} />
           <TextInput
             onChangeText={handleSearch}
-            placeholder="Search by name or email…"
+            placeholder="Search by name or email..."
             placeholderTextColor="#899790"
             style={styles.searchInput}
             value={searchQuery}
@@ -122,10 +244,18 @@ export function UsersScreen() {
         </View>
       </View>
 
-      {error ? <View style={styles.notice}><XCircle color={colors.coral} size={16} /><Text style={styles.noticeText}>{error}</Text></View> : null}
+      {error ? (
+        <View style={styles.notice}>
+          <XCircle color={colors.coral} size={16} />
+          <Text style={styles.noticeText}>{error}</Text>
+        </View>
+      ) : null}
 
       {loading ? (
-        <View style={styles.center}><LoaderCircle color={colors.green} size={24} /><Text style={styles.loadingText}>Loading users…</Text></View>
+        <View style={styles.center}>
+          <LoaderCircle color={colors.green} size={24} />
+          <Text style={styles.loadingText}>Loading users...</Text>
+        </View>
       ) : (
         <FlatList
           contentContainerStyle={styles.list}
@@ -134,12 +264,28 @@ export function UsersScreen() {
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <UserRound color={colors.muted} size={40} />
-              <Text style={styles.emptyTitle}>{searchQuery ? "No users match your search" : "No users found"}</Text>
+              <Text style={styles.emptyTitle}>
+                {searchQuery ? "No users match your search" : "No users found"}
+              </Text>
             </View>
           }
           renderItem={renderUser}
         />
       )}
+
+      <RoleAssignmentModal
+        visible={!!roleModalUser}
+        user={roleModalUser ? { id: roleModalUser.id, full_name: roleModalUser.full_name } as never : null}
+        onClose={() => setRoleModalUser(null)}
+      />
+
+      <DeleteUserDialog
+        visible={!!deleteTarget}
+        userName={deleteTarget?.full_name ?? ""}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
+        loading={deleting}
+      />
     </AppChrome>
   );
 }
@@ -147,25 +293,90 @@ export function UsersScreen() {
 const styles = StyleSheet.create({
   header: { gap: 6, marginBottom: 16 },
   title: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 32, letterSpacing: -1.5 },
-  searchBox: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 6, paddingHorizontal: 13, minHeight: 42, borderRadius: 12, backgroundColor: colors.soft, borderWidth: 1, borderColor: colors.line },
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 6,
+    paddingHorizontal: 13,
+    minHeight: 42,
+    borderRadius: 12,
+    backgroundColor: colors.soft,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
   searchInput: { flex: 1, color: colors.ink, fontFamily: fonts.regular, fontSize: 13 },
-  list: { gap: 6, paddingBottom: 30 },
-  userRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
+  list: { gap: 8, paddingBottom: 30 },
+  userCard: {
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.line,
+    gap: 10,
+  },
+  userRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   userRowPressed: { opacity: 0.7 },
-  userAvatar: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft, overflow: "hidden" },
+  userAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.soft,
+    overflow: "hidden",
+  },
   userAvatarImage: { width: 44, height: 44, borderRadius: 22 },
-  userInfo: { flex: 1 },
+  userInfo: { flex: 1, gap: 2 },
   userName: { color: colors.ink, fontFamily: fonts.semiBold, fontSize: 14 },
-  userEmail: { marginTop: 2, color: colors.muted, fontFamily: fonts.regular, fontSize: 11 },
-  verifiedBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: colors.soft },
+  emailRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+  userEmail: { color: colors.muted, fontFamily: fonts.regular, fontSize: 11 },
+  verifiedRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 1 },
+  verifiedTimestamp: { color: colors.greenDark, fontFamily: fonts.regular, fontSize: 9 },
+  verifiedBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: colors.soft,
+  },
   verifiedBadgeActive: { backgroundColor: colors.greenLight },
   verifiedText: { color: colors.muted, fontFamily: fonts.extraBold, fontSize: 9 },
   verifiedTextActive: { color: colors.greenDark },
+  userRolesRow: { paddingHorizontal: 2 },
+  userActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  actionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  actionText: { fontSize: 11, fontFamily: fonts.semiBold },
   center: { alignItems: "center", justifyContent: "center", paddingVertical: 60, gap: 10 },
   loadingText: { color: colors.muted, fontFamily: fonts.regular, fontSize: 12 },
-  notice: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: 12, backgroundColor: "#FFF4F4", borderWidth: 1, borderColor: "#F9D8D8", marginBottom: 12 },
+  notice: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: "#FFF4F4",
+    borderWidth: 1,
+    borderColor: "#F9D8D8",
+    marginBottom: 12,
+  },
   noticeText: { color: colors.coral, fontFamily: fonts.regular, fontSize: 12, flexShrink: 1 },
   emptyState: { alignItems: "center", justifyContent: "center", paddingVertical: 60, gap: 12 },
   emptyTitle: { color: colors.muted, fontFamily: fonts.semiBold, fontSize: 16 },
-  emptyCopy: { color: colors.muted, fontFamily: fonts.regular, fontSize: 12, textAlign: "center", maxWidth: 300 },
+  emptyCopy: {
+    color: colors.muted,
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    textAlign: "center",
+    maxWidth: 300,
+  },
 });
