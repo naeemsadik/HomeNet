@@ -45,3 +45,12 @@ export interface AuthMeResponse {
   email_verified: boolean;
   created_at: string;
 }
+
+// ─── Area / Location Module ────────────────────────────────────────────────
+export interface Area {
+  id: string;
+  name: string;
+  city: string;
+  parent_area_id: string | null;
+}
+
