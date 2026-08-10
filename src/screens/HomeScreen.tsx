@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   typeFieldPhone: { width: 84, height: 44 },
   searchButton: { width: 110, minHeight: 43, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, borderRadius: 999, backgroundColor: colors.green },
   searchButtonPhone: { width: "100%", minHeight: 42, borderRadius: 10 },
-  searchButtonText: { color: colors.white, fontFamily: fonts.extraBold, fontSize: 11 },
+  searchButtonText: { color: colors.white, fontFamily: fonts.extraBold, fontSize: 14 },
   quickSearches: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 },
   quickLabel: { color: "rgba(255,255,255,0.69)", fontFamily: fonts.regular, fontSize: 10 },
   quickButton: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 99, backgroundColor: "rgba(255,255,255,0.12)", borderWidth: 1, borderColor: "rgba(255,255,255,0.19)" },
