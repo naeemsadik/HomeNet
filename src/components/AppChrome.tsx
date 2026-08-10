@@ -36,7 +36,9 @@ import { colors, fonts, shadow, webPointer } from "@/theme";
 import { Brand } from "./Brand";
 import { AppLink } from "./ui";
 
-export type ActivePage = "home" | "buy" | "rent" | "saved" | "sell" | "ai" | "market" | "property" | "profile" | "users";
+import { LayoutDashboard } from "lucide-react-native";
+
+export type ActivePage = "home" | "buy" | "rent" | "saved" | "sell" | "ai" | "market" | "property" | "profile" | "users" | "seller" | "messages";
 
 const shellNav: { label: string; href: string; icon: LucideIcon; key: ActivePage }[] = [
   { label: "Home", href: "/", icon: Home, key: "home" },
@@ -44,7 +46,9 @@ const shellNav: { label: string; href: string; icon: LucideIcon; key: ActivePage
   { label: "Rent a home", href: "/rent", icon: KeyRound, key: "rent" },
   { label: "Community", href: "/users", icon: UserRound, key: "users" },
   { label: "Saved homes", href: "/saved", icon: Heart, key: "saved" },
+  { label: "Messages", href: "/messages", icon: MessageSquareText, key: "messages" },
   { label: "Sell property", href: "/sell", icon: LandPlot, key: "sell" },
+  { label: "Seller dashboard", href: "/seller", icon: LayoutDashboard, key: "seller" },
   { label: "AI finder", href: "/ai-finder", icon: Sparkles, key: "ai" },
 ];
 

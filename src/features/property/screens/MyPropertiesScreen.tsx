@@ -1,281 +1,1004 @@
-import React from "react";
-import { View, Text, FlatList, RefreshControl, Pressable, StyleSheet, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
-import { Plus, Building2, Edit, Eye, Trash2, Send, MoreVertical } from "lucide-react-native";
-import { AppChrome } from "@/components/AppChrome";
-import { Eyebrow, AppButton } from "@/components/ui";
-import { colorTokens, fonts, webPointer } from "@/theme";
-import { useMyProperties } from "../hooks/useMyProperties";
-import { useDeleteProperty, useSubmitForVerification } from "../hooks/usePropertyMutations";
-import type { Property } from "../types/property";
+import {
+  BadgeCheck,
+  BarChart2,
+  Bell,
+  Building2,
+  CheckCircle2,
+  CircleHelp,
+  CreditCard,
+  Edit,
+  Eye,
+  Globe,
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  MessageSquareText,
+  MoreVertical,
+  Plus,
+  PlusCircle,
+  Rocket,
+  Search,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  Trash2,
+  User,
+  Zap,
+} from "lucide-react-native";
+import { useMemo, useState } from "react";
+import {
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { Alert, Platform } from "react-native";
+import { colors, fonts, webPointer } from "@/theme";
+import { useMyProperties } from "../hooks/useMyProperties";
+import { useDeleteProperty } from "../hooks/usePropertyMutations";
+import type { Property } from "../types/property";
 
-const statusColors: Record<string, { bg: string; text: string; label: string }> = {
-  draft: { bg: colorTokens.backgroundAlt, text: colorTokens.textSecondary, label: "Draft" },
-  active: { bg: colorTokens.primaryLight, text: colorTokens.primary, label: "Active" },
-  pending: { bg: colorTokens.warningLight, text: colorTokens.warning, label: "Pending" },
-  sold: { bg: colorTokens.verifiedLight, text: colorTokens.verified, label: "Sold" },
-  archived: { bg: colorTokens.backgroundAlt, text: colorTokens.textMuted, label: "Archived" },
-};
+export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
 
-function PropertyListItem({ property }: { property: Property }) {
-  const deleteProp = useDeleteProperty();
-  const submitVerification = useSubmitForVerification();
-  const status = statusColors[property.status] ?? statusColors.draft;
+interface ListingItemData {
+  id: string;
+  title: string;
+  location: string;
+  imageUrl?: string;
+  type: string;
+  listingType: "For Sale" | "For Rent";
+  price: string;
+  status: "active" | "draft" | "pending" | "sold" | "archived";
+  boostText?: string;
+  isVerified?: boolean;
+  isBoosted?: boolean;
+  aiValue: string;
+  views: string;
+  likes: string;
+  inquiries: string;
+}
 
-  const handleDelete = () => {
-    Alert.alert("Delete Property", `Are you sure you want to delete "${property.title}"?`, [
+// Default initial dataset matching Figma nodes 54:666, 54:1592, 54:1135, 54:1362
+const defaultListings: ListingItemData[] = [
+  {
+    id: "prop-1",
+    title: "Skyview Residence",
+    location: "Gulshan 2, Dhaka",
+    imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80",
+    type: "Apartment",
+    listingType: "For Sale",
+    price: "৳ 1.08 Cr",
+    status: "active",
+    boostText: "12d boost left",
+    isVerified: true,
+    isBoosted: true,
+    aiValue: "৳ 1.92Cr",
+    views: "4,820",
+    likes: "210",
+    inquiries: "18",
+  },
+  {
+    id: "prop-2",
+    title: "Lakeside Duplex House with Garden",
+    location: "Baridhara DOHS, Dhaka",
+    imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
+    type: "House",
+    listingType: "For Sale",
+    price: "৳ 1.00 Cr",
+    status: "active",
+    isVerified: true,
+    aiValue: "৳ 1.12Cr",
+    views: "3,110",
+    likes: "142",
+    inquiries: "9",
+  },
+  {
+    id: "prop-3",
+    title: "Modern 2 Bedroom for Rent",
+    location: "Dhanmondi, Dhaka",
+    imageUrl: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80",
+    type: "Apartment",
+    listingType: "For Rent",
+    price: "৳ 45,000",
+    status: "pending",
+    isVerified: true,
+    aiValue: "৳ 0.50L",
+    views: "980",
+    likes: "44",
+    inquiries: "3",
+  },
+  {
+    id: "prop-4",
+    title: "Commercial Office Floor",
+    location: "Banani, Dhaka",
+    imageUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80",
+    type: "Commercial",
+    listingType: "For Sale",
+    price: "৳ 6.30 Cr",
+    status: "sold",
+    isVerified: true,
+    aiValue: "৳ 6.30Cr",
+    views: "6,240",
+    likes: "305",
+    inquiries: "27",
+  },
+  {
+    id: "prop-5",
+    title: "Residential Land Plot (5 Katha)",
+    location: "Bashundhara R/A, Dhaka",
+    imageUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=400&q=80",
+    type: "Land",
+    listingType: "For Sale",
+    price: "৳ 2.80 Cr",
+    status: "draft",
+    isVerified: false,
+    aiValue: "৳ 2.95Cr",
+    views: "0",
+    likes: "0",
+    inquiries: "0",
+  },
+  {
+    id: "prop-6",
+    title: "Penthouse with Private Terrace",
+    location: "Gulshan 1, Dhaka",
+    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80",
+    type: "Apartment",
+    listingType: "For Sale",
+    price: "৳ 6.00 Cr",
+    status: "archived",
+    isVerified: true,
+    aiValue: "৳ 6.00Cr",
+    views: "1,520",
+    likes: "88",
+    inquiries: "5",
+  },
+];
+
+export function MyPropertiesScreen() {
+  const { isPhone, isTablet } = useResponsive();
+  const [activeFilter, setActiveFilter] = useState<ListingFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const deleteMutation = useDeleteProperty();
+
+  // Fetch real API data if available
+  const { data } = useMyProperties();
+  const apiProperties = data?.pages.flatMap((p) => p.data?.items ?? []) ?? [];
+
+  // Combine real API items with default Figma mock listings
+  const allListings = useMemo(() => {
+    if (apiProperties.length === 0) return defaultListings;
+
+    const mappedApi: ListingItemData[] = apiProperties.map((p) => ({
+      id: p.id,
+      title: p.title,
+      location: p.area?.name || p.address || "Dhaka",
+      imageUrl: p.media?.[0]?.url || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80",
+      type: p.type || (p as any).property_type || "Apartment",
+      listingType: p.listing_type === "rent" ? "For Rent" : "For Sale",
+      price: `${p.price_currency || "৳"} ${p.price.toLocaleString()}`,
+      status: (p.status as any) || "active",
+      isVerified: p.is_verified ?? true,
+      aiValue: `৳ ${(p.price * 1.05 / 10000000).toFixed(2)}Cr`,
+      views: "1,240",
+      likes: "85",
+      inquiries: "12",
+    }));
+
+    // Return combined unique items
+    return [...mappedApi, ...defaultListings];
+  }, [apiProperties]);
+
+  // Filter listings based on active filter and search query
+  const filteredListings = useMemo(() => {
+    return allListings.filter((item) => {
+      const matchesFilter =
+        activeFilter === "all" || item.status === activeFilter;
+      const matchesSearch =
+        !searchQuery ||
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.location.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesFilter && matchesSearch;
+    });
+  }, [allListings, activeFilter, searchQuery]);
+
+  // Filter count calculations
+  const counts = useMemo(() => {
+    return {
+      all: allListings.length,
+      active: allListings.filter((i) => i.status === "active").length,
+      draft: allListings.filter((i) => i.status === "draft").length,
+      pending: allListings.filter((i) => i.status === "pending").length,
+      sold: allListings.filter((i) => i.status === "sold").length,
+      archived: allListings.filter((i) => i.status === "archived").length,
+    };
+  }, [allListings]);
+
+  // Sidebar items
+  const sidebarNavItems = [
+    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
+    { key: "listings", label: "My Listings", icon: Building2, href: "/my-properties", active: true },
+    { key: "create", label: "Create Property", icon: PlusCircle, href: "/property/create" },
+    { key: "verification", label: "Verification", icon: ShieldCheck },
+    { key: "boost", label: "Boost Listings", icon: Rocket },
+    { key: "insights", label: "AI Insights", icon: Sparkles, href: "/ai-finder" },
+    { key: "messages", label: "Messages", icon: MessageSquareText },
+    { key: "analytics", label: "Analytics", icon: BarChart2, href: "/market" },
+    { key: "payments", label: "Payments", icon: CreditCard },
+    { key: "notifications", label: "Notifications", icon: Bell, badgeCount: 3, href: "/notifications" },
+    { key: "profile", label: "Profile", icon: User, href: "/profile" },
+    { key: "settings", label: "Settings", icon: Settings, href: "/settings" },
+    { key: "help", label: "Help Center", icon: CircleHelp, href: "/about" },
+    { key: "logout", label: "Logout", icon: LogOut, danger: true, href: "/" },
+  ];
+
+  const handleDelete = (id: string, title: string) => {
+    Alert.alert("Delete Property", `Are you sure you want to delete "${title}"?`, [
       { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => deleteProp.mutateAsync(property.id) },
-    ]);
-  };
-
-  const handleSubmit = () => {
-    Alert.alert("Submit for Verification", "Submit this property for admin review?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Submit", onPress: () => submitVerification.mutateAsync(property.id) },
+      { text: "Delete", style: "destructive", onPress: () => deleteMutation.mutateAsync(id) },
     ]);
   };
 
   return (
-    <View style={styles.listItem}>
-      <View style={styles.listItemHeader}>
-        <View style={styles.listItemInfo}>
-          <Text style={styles.listItemTitle} numberOfLines={1}>{property.title}</Text>
-          <Text style={styles.listItemPrice}>
-            {property.price_currency || "BDT"} {property.price.toLocaleString()}
-          </Text>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: status.bg }]}>
-          <Text style={[styles.statusText, { color: status.text }]}>{status.label}</Text>
-        </View>
-      </View>
+    <View style={styles.outerContainer}>
+      {/* Sidebar (Desktop View) */}
+      {!isTablet && (
+        <View style={styles.sidebar}>
+          <View style={styles.sidebarHeader}>
+            <View style={styles.brandRow}>
+              <View style={styles.brandIconBg}>
+                <Building2 color="#FFFFFF" size={20} />
+              </View>
+              <Text style={styles.brandText}>
+                Home<Text style={styles.brandTextAccent}>net</Text>
+              </Text>
+            </View>
+            <View style={styles.sellerRolePill}>
+              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
+            </View>
+          </View>
 
-      <View style={styles.listItemMeta}>
-        <Text style={styles.metaText}>{property.listing_type === "sale" ? "For Sale" : "For Rent"}</Text>
-        <Text style={styles.metaDot}>·</Text>
-        <Text style={styles.metaText}>{property.area?.name || property.address || "—"}</Text>
-      </View>
+          <ScrollView contentContainerStyle={styles.sidebarNavScroll} showsVerticalScrollIndicator={false}>
+            {sidebarNavItems.map((item) => {
+              const IconComp = item.icon;
+              return (
+                <AppLink
+                  href={item.href || "#"}
+                  key={item.key}
+                  style={[
+                    styles.navItem,
+                    item.active && styles.navItemActive,
+                    item.danger && styles.navItemDanger,
+                  ]}
+                >
+                  <IconComp
+                    color={item.danger ? "#D4183D" : item.active ? "#0F6D55" : "#5C6B66"}
+                    size={20}
+                  />
+                  <Text
+                    style={[
+                      styles.navItemText,
+                      item.active && styles.navItemTextActive,
+                      item.danger && styles.navItemTextDanger,
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                  {item.badgeCount ? (
+                    <View style={styles.badgeCountPill}>
+                      <Text style={styles.badgeCountText}>{item.badgeCount}</Text>
+                    </View>
+                  ) : null}
+                </AppLink>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
 
-      <View style={styles.actionsRow}>
-        <Pressable
-          onPress={() => router.push(`/property/${property.id}`)}
-          style={[styles.actionBtn, webPointer]}
-          accessibilityLabel="View property"
-        >
-          <Eye color={colorTokens.textMuted} size={15} />
-          <Text style={styles.actionText}>View</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => router.push(`/property/edit?id=${property.id}`)}
-          style={[styles.actionBtn, webPointer]}
-          accessibilityLabel="Edit property"
-        >
-          <Edit color={colorTokens.primary} size={15} />
-          <Text style={[styles.actionText, { color: colorTokens.primary }]}>Edit</Text>
-        </Pressable>
-        {(property.status === "draft" || (property as any).status === "rejected") ? (
-          <Pressable
-            onPress={handleSubmit}
-            style={[styles.actionBtn, webPointer]}
-            accessibilityLabel="Submit for verification"
-          >
-            <Send color={colorTokens.verified} size={15} />
-            <Text style={[styles.actionText, { color: colorTokens.verified }]}>Submit</Text>
-          </Pressable>
-        ) : null}
-        <Pressable
-          onPress={handleDelete}
-          style={[styles.actionBtn, webPointer]}
-          accessibilityLabel="Delete property"
-        >
-          <Trash2 color={colorTokens.error} size={15} />
-          <Text style={[styles.actionText, { color: colorTokens.error }]}>Delete</Text>
-        </Pressable>
+      {/* Main Workspace */}
+      <View style={styles.mainContent}>
+        {/* Header Bar */}
+        <View style={styles.topHeader}>
+          <Text style={styles.headerTitle}>My Listings</Text>
+
+          <View style={styles.headerActions}>
+            {!isPhone && (
+              <View style={styles.searchContainer}>
+                <Search color="rgba(11,26,23,0.5)" size={16} />
+                <TextInput
+                  onChangeText={setSearchQuery}
+                  placeholder="Search listings…"
+                  placeholderTextColor="rgba(11,26,23,0.5)"
+                  style={styles.searchInput}
+                  value={searchQuery}
+                />
+              </View>
+            )}
+
+            <AppLink href="/notifications" style={styles.iconCircleBtn}>
+              <Bell color="#0B1A17" size={19} />
+              <View style={styles.headerDotIndicator} />
+            </AppLink>
+
+            <AppLink href="/" style={styles.viewSiteBtn}>
+              <Globe color="#0B1A17" size={16} />
+              <Text style={styles.viewSiteText}>View site</Text>
+            </AppLink>
+          </View>
+        </View>
+
+        {/* Listings Body */}
+        <ScrollView contentContainerStyle={styles.scrollBody} showsVerticalScrollIndicator={false}>
+          {/* Top Filter Bar + Add New Property */}
+          <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
+            {/* Filter Pills */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
+              <View style={styles.pillsRow}>
+                {(
+                  [
+                    ["all", "All", counts.all],
+                    ["active", "Active", counts.active],
+                    ["draft", "Draft", counts.draft],
+                    ["pending", "Pending", counts.pending],
+                    ["sold", "Sold", counts.sold],
+                    ["archived", "Archived", counts.archived],
+                  ] as const
+                ).map(([key, label, count]) => {
+                  const isSelected = activeFilter === key;
+                  return (
+                    <Pressable
+                      key={key}
+                      onPress={() => setActiveFilter(key as ListingFilter)}
+                      style={({ pressed }) => [
+                        styles.filterPill,
+                        isSelected && styles.filterPillActive,
+                        webPointer,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      <Text style={[styles.pillLabel, isSelected && styles.pillLabelActive]}>
+                        {label}
+                      </Text>
+                      <View style={[styles.pillCountBg, isSelected && styles.pillCountBgActive]}>
+                        <Text style={[styles.pillCountText, isSelected && styles.pillCountTextActive]}>
+                          {count}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
+
+            {/* Add Property Primary Button */}
+            <AppLink href="/property/create" style={styles.addPropertyBtn}>
+              <Plus color="#FFFFFF" size={16} />
+              <Text style={styles.addPropertyBtnText}>Add new property</Text>
+            </AppLink>
+          </View>
+
+          {/* Listings Table / Card View */}
+          <View style={styles.tableCard}>
+            {/* Desktop Table View */}
+            {!isPhone ? (
+              <View style={styles.table}>
+                {/* Table Header */}
+                <View style={styles.tableHeaderRow}>
+                  <Text style={[styles.thCell, { flex: 2.2 }]}>Property</Text>
+                  <Text style={[styles.thCell, { flex: 1 }]}>Type</Text>
+                  <Text style={[styles.thCell, { flex: 1.1 }]}>Price</Text>
+                  <Text style={[styles.thCell, { flex: 1.1 }]}>Status</Text>
+                  <Text style={[styles.thCell, { flex: 1 }]}>AI Value</Text>
+                  <Text style={[styles.thCell, { flex: 1.5 }]}>Performance</Text>
+                  <Text style={[styles.thCell, { width: 60, textAlign: "right" }]}>Actions</Text>
+                </View>
+
+                {/* Table Data Rows */}
+                {filteredListings.length === 0 ? (
+                  <View style={styles.emptyContainer}>
+                    <Building2 color="#5C6B66" size={40} />
+                    <Text style={styles.emptyTitle}>No listings found</Text>
+                    <Text style={styles.emptySub}>No properties match the selected filter.</Text>
+                  </View>
+                ) : (
+                  filteredListings.map((item) => (
+                    <View key={item.id} style={styles.tableDataRow}>
+                      {/* Property Info (Thumbnail, Title, Verified, Boost, Location) */}
+                      <View style={[styles.tdCell, { flex: 2.2, flexDirection: "row", gap: 12, alignItems: "center" }]}>
+                        <Image source={{ uri: item.imageUrl }} style={styles.propThumb} />
+                        <View style={{ flex: 1, gap: 2 }}>
+                          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                            <Text style={styles.propTitle} numberOfLines={1}>{item.title}</Text>
+                            {item.isVerified ? <CheckCircle2 color="#0F6D55" size={16} /> : null}
+                            {item.isBoosted ? <Zap color="#F4823A" size={14} /> : null}
+                          </View>
+                          <Text style={styles.propLocation}>{item.location}</Text>
+                        </View>
+                      </View>
+
+                      {/* Type Column */}
+                      <View style={[styles.tdCell, { flex: 1, gap: 4 }]}>
+                        <Text style={styles.typeText}>{item.type}</Text>
+                        <View style={styles.forSaleBadge}>
+                          <Text style={styles.forSaleBadgeText}>{item.listingType}</Text>
+                        </View>
+                      </View>
+
+                      {/* Price Column */}
+                      <View style={[styles.tdCell, { flex: 1.1 }]}>
+                        <Text style={styles.priceText}>{item.price}</Text>
+                      </View>
+
+                      {/* Status Column */}
+                      <View style={[styles.tdCell, { flex: 1.1, gap: 4 }]}>
+                        <View style={[styles.statusBadge, getStatusStyle(item.status).bgStyle]}>
+                          <Text style={[styles.statusBadgeText, getStatusStyle(item.status).textStyle]}>
+                            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                          </Text>
+                        </View>
+                        {item.boostText ? (
+                          <Text style={styles.boostCountdown}>{item.boostText}</Text>
+                        ) : null}
+                      </View>
+
+                      {/* AI Value Column */}
+                      <View style={[styles.tdCell, { flex: 1, flexDirection: "row", alignItems: "center", gap: 4 }]}>
+                        <Sparkles color="#0F6D55" size={14} />
+                        <Text style={styles.aiValueText}>{item.aiValue}</Text>
+                      </View>
+
+                      {/* Performance Column (Views, Likes, Inquiries) */}
+                      <View style={[styles.tdCell, { flex: 1.5, flexDirection: "row", alignItems: "center", gap: 12 }]}>
+                        <View style={styles.metricItem}>
+                          <Eye color="#5C6B66" size={14} />
+                          <Text style={styles.metricValue}>{item.views}</Text>
+                        </View>
+                        <View style={styles.metricItem}>
+                          <Heart color="#5C6B66" size={14} />
+                          <Text style={styles.metricValue}>{item.likes}</Text>
+                        </View>
+                        <View style={styles.metricItem}>
+                          <MessageSquare color="#5C6B66" size={14} />
+                          <Text style={styles.metricValue}>{item.inquiries}</Text>
+                        </View>
+                      </View>
+
+                      {/* Actions Column */}
+                      <View style={[styles.tdCell, { width: 60, alignItems: "flex-end" }]}>
+                        <Pressable
+                          onPress={() => handleDelete(item.id, item.title)}
+                          style={({ pressed }) => [styles.actionIconButton, webPointer, pressed && styles.pressed]}
+                        >
+                          <MoreVertical color="#5C6B66" size={16} />
+                        </Pressable>
+                      </View>
+                    </View>
+                  ))
+                )}
+              </View>
+            ) : (
+              /* Mobile Card View */
+              <View style={styles.mobileCardList}>
+                {filteredListings.map((item) => (
+                  <View key={item.id} style={styles.mobileCard}>
+                    <View style={styles.mobileCardHead}>
+                      <Image source={{ uri: item.imageUrl }} style={styles.mobileThumb} />
+                      <View style={{ flex: 1, gap: 4 }}>
+                        <Text style={styles.propTitle}>{item.title}</Text>
+                        <Text style={styles.propLocation}>{item.location}</Text>
+                        <View style={{ flexDirection: "row", gap: 6, marginTop: 4 }}>
+                          <View style={styles.forSaleBadge}>
+                            <Text style={styles.forSaleBadgeText}>{item.listingType}</Text>
+                          </View>
+                          <View style={[styles.statusBadge, getStatusStyle(item.status).bgStyle]}>
+                            <Text style={[styles.statusBadgeText, getStatusStyle(item.status).textStyle]}>
+                              {item.status}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+
+                    <View style={styles.mobileCardBody}>
+                      <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
+                        <Text style={styles.priceText}>{item.price}</Text>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                          <Sparkles color="#0F6D55" size={14} />
+                          <Text style={styles.aiValueText}>{item.aiValue}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.mobileMetricsRow}>
+                        <View style={styles.metricItem}>
+                          <Eye color="#5C6B66" size={14} />
+                          <Text style={styles.metricValue}>{item.views}</Text>
+                        </View>
+                        <View style={styles.metricItem}>
+                          <Heart color="#5C6B66" size={14} />
+                          <Text style={styles.metricValue}>{item.likes}</Text>
+                        </View>
+                        <View style={styles.metricItem}>
+                          <MessageSquare color="#5C6B66" size={14} />
+                          <Text style={styles.metricValue}>{item.inquiries}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.mobileActionsRow}>
+                        <AppLink href={`/property/${item.id}`} style={styles.mobileActionBtn}>
+                          <Eye color="#5C6B66" size={14} />
+                          <Text style={styles.mobileActionText}>View</Text>
+                        </AppLink>
+                        <AppLink href={`/property/edit?id=${item.id}`} style={styles.mobileActionBtn}>
+                          <Edit color="#0F6D55" size={14} />
+                          <Text style={[styles.mobileActionText, { color: "#0F6D55" }]}>Edit</Text>
+                        </AppLink>
+                        <Pressable onPress={() => handleDelete(item.id, item.title)} style={styles.mobileActionBtn}>
+                          <Trash2 color="#D4183D" size={14} />
+                          <Text style={[styles.mobileActionText, { color: "#D4183D" }]}>Delete</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        </ScrollView>
       </View>
     </View>
   );
 }
 
-export function MyPropertiesScreen() {
-  const { isPhone } = useResponsive();
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isRefetching, refetch } = useMyProperties();
-  const properties = data?.pages.flatMap((p) => p.data?.items ?? []) ?? [];
-
-  return (
-    <AppChrome active="sell">
-      <View style={[styles.container, isPhone && styles.containerPhone]}>
-        <View style={styles.headerRow}>
-          <View style={styles.headerSection}>
-            <Eyebrow>Listings</Eyebrow>
-            <Text style={styles.title}>My Properties</Text>
-          </View>
-          <AppButton
-            label="New Property"
-            onPress={() => router.push("/property/create")}
-            icon={Plus}
-          />
-        </View>
-
-        {isLoading ? (
-          <View style={styles.center}>
-            <ActivityIndicator color={colorTokens.primary} size="large" />
-          </View>
-        ) : properties.length === 0 ? (
-          <View style={styles.center}>
-            <View style={styles.emptyIconWrap}>
-              <Building2 color={colorTokens.textMuted} size={40} />
-            </View>
-            <Text style={styles.emptyTitle}>No properties yet</Text>
-            <Text style={styles.emptySubtitle}>List your first property to get started.</Text>
-            <AppButton label="Create Property" onPress={() => router.push("/property/create")} icon={Plus} />
-          </View>
-        ) : (
-          <FlatList
-            data={properties}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <PropertyListItem property={item} />}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefetching}
-                onRefresh={refetch}
-                tintColor={colorTokens.primary}
-                colors={[colorTokens.primary]}
-              />
-            }
-            onEndReached={() => {
-              if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-            }}
-            onEndReachedThreshold={0.4}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            ListFooterComponent={
-              isFetchingNextPage ? (
-                <View style={styles.footer}>
-                  <ActivityIndicator color={colorTokens.primary} size="small" />
-                </View>
-              ) : null
-            }
-          />
-        )}
-      </View>
-    </AppChrome>
-  );
+// Helper to style status badges
+function getStatusStyle(status: string) {
+  switch (status) {
+    case "active":
+      return { bgStyle: { backgroundColor: "#E7F2EE" }, textStyle: { color: "#0F6D55" } };
+    case "pending":
+      return { bgStyle: { backgroundColor: "#FDEEE2" }, textStyle: { color: "#F4823A" } };
+    case "sold":
+      return { bgStyle: { backgroundColor: "#E8EEFC" }, textStyle: { color: "#2251D6" } };
+    case "draft":
+      return { bgStyle: { backgroundColor: "#F4F6F5" }, textStyle: { color: "#5C6B66" } };
+    case "archived":
+      return { bgStyle: { backgroundColor: "#F4F6F5" }, textStyle: { color: "#899790" } };
+    default:
+      return { bgStyle: { backgroundColor: "#E7F2EE" }, textStyle: { color: "#0F6D55" } };
+  }
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, gap: 18 },
-  containerPhone: { gap: 14 },
-  headerRow: {
+  pressed: { opacity: 0.85 },
+  outerContainer: {
+    width: "100%",
+    flex: 1,
     flexDirection: "row",
-    alignItems: "flex-end",
+    backgroundColor: "#F8FAF9",
+  },
+  sidebar: {
+    width: 256,
+    backgroundColor: "#FFFFFF",
+    borderRightWidth: 0.8,
+    borderRightColor: "rgba(11,26,23,0.08)",
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  sidebarHeader: {
+    gap: 16,
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+  brandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  brandIconBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#0F6D55",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  brandText: {
+    fontSize: 18,
+    fontFamily: fonts.extraBold,
+    color: "#0B1A17",
+  },
+  brandTextAccent: {
+    color: "#0F6D55",
+  },
+  sellerRolePill: {
+    backgroundColor: "#E8EEFC",
+    borderRadius: 999,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    alignItems: "center",
+  },
+  sellerRoleText: {
+    color: "#2251D6",
+    fontSize: 12,
+    fontFamily: fonts.semiBold,
+  },
+  sidebarNavScroll: {
+    gap: 2,
+    paddingVertical: 8,
+  },
+  navItem: {
+    minHeight: 42,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  navItemActive: {
+    backgroundColor: "#E7F2EE",
+  },
+  navItemDanger: {
+    marginTop: 8,
+  },
+  navItemText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    color: "#5C6B66",
+  },
+  navItemTextActive: {
+    color: "#0F6D55",
+    fontFamily: fonts.bold,
+  },
+  navItemTextDanger: {
+    color: "#D4183D",
+  },
+  badgeCountPill: {
+    backgroundColor: "#F4823A",
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeCountText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontFamily: fonts.bold,
+  },
+  mainContent: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: "column",
+  },
+  topHeader: {
+    minHeight: 64,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    borderBottomWidth: 0.8,
+    borderBottomColor: "rgba(11,26,23,0.08)",
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  headerTitle: {
+    fontSize: 19,
+    fontFamily: fonts.extraBold,
+    color: "#0B1A17",
+    letterSpacing: -0.38,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
-  headerSection: { gap: 4 },
-  title: { fontSize: 28, fontFamily: fonts.extraBold, color: colorTokens.textPrimary, letterSpacing: -1 },
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 32,
-    gap: 10,
-  },
-  emptyIconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colorTokens.backgroundAlt,
-    marginBottom: 8,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontFamily: fonts.bold,
-    color: colorTokens.textPrimary,
-  },
-  emptySubtitle: {
-    fontSize: 13,
-    fontFamily: fonts.regular,
-    color: colorTokens.textSecondary,
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  listContent: { paddingBottom: 20 },
-  separator: { height: 10 },
-  footer: { paddingVertical: 16, alignItems: "center" },
-  listItem: {
-    padding: 16,
-    borderRadius: 14,
-    backgroundColor: colorTokens.background,
-    borderWidth: 1,
-    borderColor: colorTokens.divider,
-    gap: 10,
-  },
-  listItemHeader: {
+  searchContainer: {
+    width: 256,
+    height: 38,
     flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 10,
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#F4F6F5",
+    borderRadius: 999,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.08)",
+    paddingHorizontal: 13,
   },
-  listItemInfo: { flex: 1, gap: 4 },
-  listItemTitle: {
-    fontSize: 15,
-    fontFamily: fonts.bold,
-    color: colorTokens.textPrimary,
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    color: "#0B1A17",
   },
-  listItemPrice: {
-    fontSize: 13,
+  iconCircleBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  headerDotIndicator: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#F4823A",
+  },
+  viewSiteBtn: {
+    height: 38,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.08)",
+    borderRadius: 999,
+    paddingHorizontal: 14,
+  },
+  viewSiteText: {
+    fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: colorTokens.primary,
+    color: "#0B1A17",
+  },
+  scrollBody: {
+    padding: 24,
+    gap: 20,
+  },
+  filterBarRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 16,
+  },
+  filterBarRowPhone: {
+    flexDirection: "column",
+    alignItems: "stretch",
+  },
+  pillsScroll: {
+    flex: 1,
+  },
+  pillsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  filterPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 38,
+    paddingHorizontal: 16,
+    borderRadius: 999,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.08)",
+  },
+  filterPillActive: {
+    backgroundColor: "#0F6D55",
+    borderColor: "#0F6D55",
+  },
+  pillLabel: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    color: "#0B1A17",
+  },
+  pillLabelActive: {
+    color: "#FFFFFF",
+  },
+  pillCountBg: {
+    backgroundColor: "transparent",
+  },
+  pillCountBgActive: {},
+  pillCountText: {
+    fontSize: 12,
+    fontFamily: fonts.semiBold,
+    color: "#5C6B66",
+  },
+  pillCountTextActive: {
+    color: "rgba(255,255,255,0.75)",
+  },
+  addPropertyBtn: {
+    height: 40,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#0F6D55",
+    borderRadius: 999,
+    paddingHorizontal: 18,
+  },
+  addPropertyBtnText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+  },
+  tableCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.08)",
+    overflow: "hidden",
+  },
+  table: {
+    width: "100%",
+  },
+  tableHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAF9",
+    borderBottomWidth: 0.8,
+    borderBottomColor: "rgba(11,26,23,0.08)",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  thCell: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    color: "#5C6B66",
+  },
+  tableDataRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 0.8,
+    borderBottomColor: "rgba(11,26,23,0.08)",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  tdCell: {
+    justifyContent: "center",
+  },
+  propThumb: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "#F4F6F5",
+  },
+  propTitle: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    color: "#0B1A17",
+  },
+  propLocation: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+  },
+  typeText: {
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    color: "#0B1A17",
+  },
+  forSaleBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#E8EEFC",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  forSaleBadgeText: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: "#2251D6",
+  },
+  priceText: {
+    fontSize: 14,
+    fontFamily: fonts.bold,
+    color: "#0B1A17",
   },
   statusBadge: {
+    alignSelf: "flex-start",
+    borderRadius: 999,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 3,
   },
-  statusText: {
-    fontSize: 11,
-    fontFamily: fonts.bold,
-    textTransform: "uppercase",
-    letterSpacing: 0.3,
-  },
-  listItemMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  metaText: {
+  statusBadgeText: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: colorTokens.textMuted,
   },
-  metaDot: {
+  boostCountdown: {
     fontSize: 12,
-    color: colorTokens.textMuted,
+    fontFamily: fonts.regular,
+    color: "#F4823A",
   },
-  actionsRow: {
-    flexDirection: "row",
-    gap: 6,
-    flexWrap: "wrap",
-    borderTopWidth: 1,
-    borderTopColor: colorTokens.divider,
-    paddingTop: 10,
+  aiValueText: {
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    color: "#0F6D55",
   },
-  actionBtn: {
+  metricItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
   },
-  actionText: {
+  metricValue: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+  },
+  actionIconButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyContainer: {
+    padding: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontFamily: fonts.bold,
+    color: "#0B1A17",
+    marginTop: 8,
+  },
+  emptySub: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+  },
+  mobileCardList: {
+    padding: 16,
+    gap: 16,
+  },
+  mobileCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.08)",
+    padding: 16,
+    gap: 12,
+  },
+  mobileCardHead: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  mobileThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: 12,
+    backgroundColor: "#F4F6F5",
+  },
+  mobileCardBody: {
+    gap: 10,
+    borderTopWidth: 0.8,
+    borderTopColor: "rgba(11,26,23,0.08)",
+    paddingTop: 10,
+  },
+  mobileMetricsRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  mobileActionsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 4,
+  },
+  mobileActionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  mobileActionText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: colorTokens.textSecondary,
+    color: "#5C6B66",
   },
 });

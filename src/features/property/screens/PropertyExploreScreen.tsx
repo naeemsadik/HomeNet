@@ -1,19 +1,12 @@
 import React from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { AppChrome } from "@/components/AppChrome";
 import { PropertyFeed } from "../components/PropertyFeed";
-import { feedColors } from "../components/PropertyBadge";
 
 export function PropertyExploreScreen() {
   return (
-    <SafeAreaView style={styles.container}>
+    <AppChrome active="buy">
       <PropertyFeed />
-    </SafeAreaView>
+    </AppChrome>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: feedColors.white,
-  },
-});
