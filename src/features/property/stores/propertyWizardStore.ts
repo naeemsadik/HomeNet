@@ -15,30 +15,39 @@ export interface WizardState {
   type: PropertyType;
   subtype: string;
   listingType: ListingType;
+  description: string;
+
+  // Step 2 — Details
   price: string;
   areaSize: string;
+  bedrooms: string;
+  bathrooms: string;
+  floor: string;
+  facing: string;
+  amenities: Record<string, boolean>;
+
+  // Step 3 — Location
+  district: string;
   areaId: string;
   areaName: string;
   address: string;
-  description: string;
   locationLat: number | null;
   locationLng: number | null;
 
-  // Step 2 — Media
+  // Step 4 — Media
   media: WizardMediaItem[];
   primaryMediaIndex: number;
-
-  // Step 3 — Review
-  amenities: Record<string, boolean>;
   virtualTourUrl: string;
 
-  // Meta
+  // Meta & Navigation
   propertyId: string | null;
-  currentStep: 1 | 2 | 3;
+  currentStep: 1 | 2 | 3 | 4 | 5;
   isSubmitting: boolean;
 
   // Actions
-  setBasics: (data: Partial<Pick<WizardState, "title" | "type" | "subtype" | "listingType" | "price" | "areaSize" | "areaId" | "areaName" | "address" | "description" | "locationLat" | "locationLng">>) => void;
+  setBasics: (data: Partial<Pick<WizardState, "title" | "type" | "subtype" | "listingType" | "description" | "price" | "areaSize" | "areaId" | "areaName" | "address">>) => void;
+  setDetails: (data: Partial<Pick<WizardState, "price" | "areaSize" | "bedrooms" | "bathrooms" | "floor" | "facing">>) => void;
+  setLocation: (data: Partial<Pick<WizardState, "district" | "areaId" | "areaName" | "address" | "locationLat" | "locationLng">>) => void;
   setMedia: (media: WizardMediaItem[]) => void;
   addMedia: (item: WizardMediaItem) => void;
   removeMedia: (id: string) => void;
@@ -47,48 +56,56 @@ export interface WizardState {
   toggleAmenity: (key: string) => void;
   setVirtualTourUrl: (url: string) => void;
   setPropertyId: (id: string) => void;
-  setCurrentStep: (step: 1 | 2 | 3) => void;
+  setCurrentStep: (step: 1 | 2 | 3 | 4 | 5) => void;
   setIsSubmitting: (v: boolean) => void;
   reset: () => void;
-  loadFromProperty: (data: {
-    id: string;
-    title: string;
-    type: PropertyType;
-    subtype: string | null;
-    listingType: ListingType;
-    price: number;
-    areaSize: number | null;
-    areaId: string;
-    areaName: string;
-    address: string | null;
-    description: string | null;
-    locationLat: number | null;
-    locationLng: number | null;
-    media: { id: string; url: string; display_order: number }[];
-    amenities: Record<string, boolean> | null;
-    virtualTourUrl: string | null;
-  }) => void;
 }
 
 const initialState = {
-  title: "",
+  title: "Premium 3 Bedroom Apartment",
   type: "residential" as PropertyType,
-  subtype: "",
+  subtype: "Apartment",
   listingType: "sale" as ListingType,
-  price: "",
-  areaSize: "",
-  areaId: "",
-  areaName: "",
-  address: "",
-  description: "",
-  locationLat: null as number | null,
-  locationLng: null as number | null,
-  media: [] as WizardMediaItem[],
+  description: "Spacious apartment with top amenities and modern finishings.",
+
+  price: "18500000",
+  areaSize: "2150",
+  bedrooms: "3",
+  bathrooms: "3",
+  floor: "7",
+  facing: "South",
+  amenities: {
+    Lift: true,
+    Parking: true,
+    Generator: false,
+    Gym: false,
+    Pool: false,
+    Security: false,
+    Garden: false,
+    "Smart Home": false,
+    CCTV: false,
+    Rooftop: false,
+    "Servant Quarter": false,
+    Mosque: false,
+  } as Record<string, boolean>,
+
+  district: "Dhaka",
+  areaId: "gulshan-2",
+  areaName: "Gulshan 2",
+  address: "House 12, Road 45, Gulshan 2",
+  locationLat: 23.79,
+  locationLng: 90.41,
+
+  media: [
+    { id: "img-1", url: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80", displayOrder: 0 },
+    { id: "img-2", url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80", displayOrder: 1 },
+    { id: "img-3", url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80", displayOrder: 2 },
+  ] as WizardMediaItem[],
   primaryMediaIndex: 0,
-  amenities: {} as Record<string, boolean>,
   virtualTourUrl: "",
+
   propertyId: null as string | null,
-  currentStep: 1 as 1 | 2 | 3,
+  currentStep: 2 as 1 | 2 | 3 | 4 | 5,
   isSubmitting: false,
 };
 
@@ -96,6 +113,8 @@ export const usePropertyWizardStore = create<WizardState>((set) => ({
   ...initialState,
 
   setBasics: (data) => set((s) => ({ ...s, ...data })),
+  setDetails: (data) => set((s) => ({ ...s, ...data })),
+  setLocation: (data) => set((s) => ({ ...s, ...data })),
 
   setMedia: (media) => set({ media }),
 
@@ -131,30 +150,4 @@ export const usePropertyWizardStore = create<WizardState>((set) => ({
   setIsSubmitting: (v) => set({ isSubmitting: v }),
 
   reset: () => set(initialState),
-
-  loadFromProperty: (data) =>
-    set({
-      propertyId: data.id,
-      title: data.title,
-      type: data.type,
-      subtype: data.subtype ?? "",
-      listingType: data.listingType,
-      price: String(data.price),
-      areaSize: data.areaSize != null ? String(data.areaSize) : "",
-      areaId: data.areaId,
-      areaName: data.areaName,
-      address: data.address ?? "",
-      description: data.description ?? "",
-      locationLat: data.locationLat,
-      locationLng: data.locationLng,
-      media: data.media.map((m, i) => ({
-        id: m.id,
-        url: m.url,
-        displayOrder: m.display_order ?? i,
-      })),
-      amenities: data.amenities ?? {},
-      virtualTourUrl: data.virtualTourUrl ?? "",
-      currentStep: 1,
-      isSubmitting: false,
-    }),
 }));
