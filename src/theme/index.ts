@@ -25,6 +25,7 @@ import type { TextStyle, ViewStyle } from "react-native";
 /** @deprecated Use `colorTokens` via `useTheme().colors` instead. */
 export const colors = {
   ink: colorTokens.textPrimary,
+  black: colorTokens.textBlack,
   muted: colorTokens.textSecondary,
   line: colorTokens.divider,
   soft: colorTokens.backgroundAlt,
