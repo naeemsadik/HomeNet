@@ -20,6 +20,7 @@ export const colorTokens = {
   textSecondary: "#687B73",
   textInverse: "#FFFFFF",
   textMuted: "#9BADA3",
+  textBlack: "#0B1A17",
 
   // ─── Primary Accent (teal/green) ────────────────────────────────────────
   primary: "#087A5B",
