@@ -1,343 +1,1156 @@
 import { LinearGradient } from "expo-linear-gradient";
 import {
-  Bell,
+  ArrowRight,
+  ArrowUpRight,
+  BadgePercent,
+  Briefcase,
   Building2,
+  ChevronDown,
+  ChevronRight,
   Compass,
   Home,
-  House,
+  KeyRound,
+  LandPlot,
   MapPin,
   Search,
   ShieldCheck,
-  SlidersHorizontal,
   Sparkles,
-  Store,
-  Trees,
   TrendingUp,
-  Warehouse,
   type LucideIcon,
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Image,
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from "react-native-svg";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
-import { PropertyGrid } from "@/components/PropertyGrid";
-import { AppLink, Eyebrow, SectionHeader, SelectField } from "@/components/ui";
-import { allProperties, propertyImages } from "@/data/properties";
+import { AppLink } from "@/components/ui";
+import {
+  aiInvestmentPicksListings,
+  featuredListings,
+  latestNews,
+  popularLocations,
+  recentlyAddedListings,
+  recommendedListings,
+  trustedPartners,
+  verifiedPropertiesListings,
+} from "@/data/properties";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
-const categories: { label: string; icon: LucideIcon }[] = [
-  { label: "Apartments", icon: Building2 },
-  { label: "Houses", icon: House },
-  { label: "Condos", icon: Home },
-  { label: "Land", icon: Trees },
-  { label: "Commercial", icon: Store },
-  { label: "Warehouses", icon: Warehouse },
-];
-
-const neighborhoods = [
-  { name: "Gulshan", image: propertyImages.tower },
-  { name: "Banani", image: propertyImages.apartment },
-  { name: "Baridhara", image: propertyImages.house },
-  { name: "Dhanmondi", image: propertyImages.living },
-  { name: "Uttara", image: propertyImages.skyline },
-  { name: "Bashundhara", image: propertyImages.bright },
+const categoryButtons: { label: string; icon: LucideIcon }[] = [
+  { label: "Apartment", icon: Building2 },
+  { label: "House", icon: Home },
+  { label: "Commercial", icon: Briefcase },
+  { label: "Land", icon: LandPlot },
+  { label: "Rent", icon: KeyRound },
+  { label: "Sale", icon: BadgePercent },
 ];
 
 export function HomeScreen() {
   const { isPhone, isTablet, width } = useResponsive();
-  const [favorites, setFavorites] = useState<number[]>([2]);
-  const [query, setQuery] = useState("");
-  const [propertyType, setPropertyType] = useState("Buy");
-  const [activeCategory, setActiveCategory] = useState("Apartments");
-  const [searchMessage, setSearchMessage] = useState("");
-
-  const visibleProperties = useMemo(() => {
-    if (!query.trim()) return allProperties.slice(0, 6);
-    const normalized = query.toLowerCase();
-    return allProperties.filter((property) => `${property.title} ${property.location}`.toLowerCase().includes(normalized));
-  }, [query]);
+  const [favorites, setFavorites] = useState<number[]>([1, 7]);
+  const [heroSearch, setHeroSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState("Apartment");
 
   function toggleFavorite(id: number) {
-    setFavorites((current) => current.includes(id) ? current.filter((favoriteId) => favoriteId !== id) : [...current, id]);
-  }
-
-  function search() {
-    const resultCount = visibleProperties.length;
-    setSearchMessage(
-      query.trim()
-        ? `${resultCount} ${propertyType.toLowerCase()} option${resultCount === 1 ? "" : "s"} found near ${query}.`
-        : `Showing AI-ranked homes available to ${propertyType.toLowerCase()}.`,
+    setFavorites((current) =>
+      current.includes(id) ? current.filter((favId) => favId !== id) : [...current, id]
     );
   }
 
   return (
     <AppChrome active="home">
-      <ImageBackground
-        imageStyle={styles.heroImage}
-        resizeMode="cover"
-        source={{ uri: propertyImages.tower }}
-        style={[styles.hero, isTablet && styles.heroTablet, isPhone && styles.heroPhone]}
-      >
-        <LinearGradient
-          colors={isPhone ? ["rgba(49,91,194,0.58)", "rgba(5,91,69,0.82)", "rgba(5,91,69,0.98)"] : ["rgba(5,108,77,0.96)", "rgba(5,108,77,0.80)", "rgba(49,91,194,0.81)"]}
-          end={isPhone ? { x: 0, y: 1 } : { x: 1, y: 0 }}
-          start={{ x: 0, y: 0 }}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={[styles.heroContent, isTablet && styles.heroContentTablet, isPhone && styles.heroContentPhone]}>
-          <View style={styles.heroKicker}>
-            <Sparkles color="rgba(255,255,255,0.82)" size={14} />
-            <Eyebrow light>AI-powered home search</Eyebrow>
-          </View>
-          <Text style={[styles.heroTitle, isTablet && styles.heroTitleTablet, isPhone && styles.heroTitlePhone]}>Find a home you can trust, priced by AI.</Text>
-          <Text style={[styles.heroCopy, isPhone && styles.heroCopyPhone]}>Search verified properties, compare fair values, and move with confidence.</Text>
-          <View style={[styles.searchBox, isPhone && styles.searchBoxPhone]}>
-            <View style={[styles.searchField, isPhone && styles.searchFieldPhone]}>
-              <MapPin color={colors.green} size={19} />
-              <TextInput
-                accessibilityLabel="Search location"
-                onChangeText={setQuery}
-                onSubmitEditing={search}
-                placeholder="Area, neighborhood, or property"
-                placeholderTextColor="#899790"
-                style={styles.searchInput}
-                value={query}
-              />
+      {/* ─────────────────────────────────────────────────────────────
+          1. HERO SECTION (Figma data-node-id="1:92")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={[styles.heroContainer, isPhone && styles.heroContainerPhone]}>
+        <ImageBackground
+          source={{
+            uri: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1600&q=85",
+          }}
+          style={styles.heroBg}
+          resizeMode="cover"
+        >
+          {/* Exact Figma Hero Gradient Overlay: 136.17deg from rgba(15, 109, 85, 0.92) to rgba(34, 81, 214, 0.75) */}
+          <LinearGradient
+            colors={["rgba(15, 109, 85, 0.92)", "rgba(34, 81, 214, 0.75)"]}
+            end={{ x: 1, y: 0.85 }}
+            start={{ x: 0, y: 0.15 }}
+            style={StyleSheet.absoluteFill}
+          />
+
+          <View style={[styles.heroContent, isPhone && styles.heroContentPhone]}>
+            {/* Tag Pill */}
+            <View style={styles.heroTagPill}>
+              <Sparkles color="#FFFFFF" size={14} />
+              <Text style={styles.heroTagText}>
+                Bangladesh's AI property marketplace
+              </Text>
             </View>
-            <SelectField onChange={setPropertyType} options={["Buy", "Rent"]} style={[styles.typeField, isPhone && styles.typeFieldPhone]} value={propertyType} />
-            <Pressable onPress={search} style={({ pressed }) => [styles.searchButton, isPhone && styles.searchButtonPhone, webPointer, pressed && styles.pressed]}>
-              <Search color={colors.white} size={18} />
-              <Text style={styles.searchButtonText}>Search</Text>
-            </Pressable>
-          </View>
-          <View style={styles.quickSearches}>
-            <Text style={styles.quickLabel}>Popular:</Text>
-            {["Gulshan", "Banani", "Dhanmondi"].map((area) => (
-              <Pressable key={area} onPress={() => setQuery(area)} style={[styles.quickButton, webPointer]}>
-                <Text style={styles.quickButtonText}>{area}</Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-      </ImageBackground>
 
-      <View style={[styles.categoryStrip, isPhone && styles.categoryStripPhone]}>
-        {categories.slice(0, isPhone ? 4 : 6).map(({ label, icon: Icon }) => {
-          const selected = activeCategory === label;
-          return (
-            <Pressable key={label} onPress={() => setActiveCategory(label)} style={[styles.categoryButton, { width: isPhone ? "23%" : "15.3%" }, webPointer]}>
-              <View style={[styles.categoryIcon, isPhone && styles.categoryIconPhone, selected && styles.categoryIconActive]}>
-                <Icon color={selected ? colors.white : colors.green} size={20} />
+            {/* Heading 1 */}
+            <Text style={[styles.heroHeading, isPhone && styles.heroHeadingPhone]}>
+              Find a home you can trust, priced by AI.
+            </Text>
+
+            {/* Subtitle Paragraph */}
+            <Text style={[styles.heroSubtitle, isPhone && styles.heroSubtitlePhone]}>
+              Verified listings, AI valuation and investment scores for apartments, houses, land and commercial spaces across Bangladesh.
+            </Text>
+
+            {/* Hero Search Box */}
+            <View style={[styles.heroSearchBox, isPhone && styles.heroSearchBoxPhone]}>
+              <Search color="#5C6B66" size={20} />
+              <TextInput
+                onChangeText={setHeroSearch}
+                placeholder="Try: 3 bedroom in Gulshan under 40000"
+                placeholderTextColor="#5C6B66"
+                style={styles.heroSearchInput}
+                value={heroSearch}
+              />
+              <AppLink href={`/buy?query=${encodeURIComponent(heroSearch)}`} style={styles.heroAiSearchBtn}>
+                <Sparkles color="#FFFFFF" size={16} />
+                <Text style={styles.heroAiSearchBtnText}>AI Search</Text>
+              </AppLink>
+            </View>
+
+            {/* Below Search Meta Row */}
+            <View style={[styles.heroMetaRow, isPhone && styles.heroMetaRowPhone]}>
+              {/* Location Pill */}
+              <View style={styles.heroLocationPill}>
+                <MapPin color="#0B1A17" size={16} />
+                <Text style={styles.heroLocationPillText}>Dhaka</Text>
+                <ChevronDown color="#5C6B66" size={16} />
               </View>
-              <Text style={[styles.categoryLabel, selected && styles.categoryLabelActive]}>{label}</Text>
-            </Pressable>
-          );
-        })}
+
+              <View style={styles.heroMetaItem}>
+                <ShieldCheck color="rgba(255, 255, 255, 0.9)" size={16} />
+                <Text style={styles.heroMetaText}>12,400+ verified</Text>
+              </View>
+
+              <View style={styles.heroMetaItem}>
+                <TrendingUp color="rgba(255, 255, 255, 0.9)" size={16} />
+                <Text style={styles.heroMetaText}>Live market data</Text>
+              </View>
+            </View>
+          </View>
+        </ImageBackground>
       </View>
 
-      <View style={styles.featuredSection}>
-        <SectionHeader eyebrow="Handpicked for you" href="/buy" title="Featured properties" />
-        <View style={[styles.featuredGrid, isPhone && styles.featuredGridPhone]}>
-          {allProperties.slice(0, isPhone ? 1 : 2).map((property, index) => (
-            <PropertyCard
-              feature
-              key={property.id}
-              onSave={() => toggleFavorite(property.id)}
-              property={property}
-              saved={favorites.includes(property.id)}
-              style={isPhone ? styles.featureCardPhone : { flex: index === 0 ? 1.28 : 0.72 }}
-            />
-          ))}
+      {/* ─────────────────────────────────────────────────────────────
+          2. CATEGORY BUTTONS ROW (Figma data-node-id="1:147")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryRow}
+        >
+          {categoryButtons.map(({ label, icon: Icon }) => {
+            const isSelected = activeCategory === label;
+            return (
+              <Pressable
+                key={label}
+                onPress={() => setActiveCategory(label)}
+                style={[styles.categoryCard, webPointer]}
+              >
+                <View style={styles.categoryIconCircle}>
+                  <Icon color="#0F6D55" size={24} strokeWidth={1.8} />
+                </View>
+                <Text style={styles.categoryCardText}>{label}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          3. FEATURED PROPERTIES (Figma data-node-id="1:194")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <View>
+            <Text style={styles.sectionTitle}>Featured properties</Text>
+            <Text style={styles.sectionSubtitle}>Hand-picked premium listings</Text>
+          </View>
+          <AppLink href="/buy" style={styles.seeAllLink}>
+            <Text style={styles.seeAllText}>See all</Text>
+            <ChevronRight color="#0F6D55" size={16} />
+          </AppLink>
         </View>
-      </View>
 
-      <LinearGradient colors={["#EDF8F3", "#F3F5FB"]} end={{ x: 1, y: 0 }} style={[styles.trustBanner, isPhone && styles.trustBannerPhone]}>
-        <View style={styles.trustIcon}><Sparkles color={colors.white} size={20} /></View>
-        <View style={styles.trustCopyWrap}>
-          <Text style={styles.trustTitle}>Buy with a clearer view of value</Text>
-          <Text style={styles.trustCopy}>HomeNet compares location, amenities, demand, and recent sales to flag fair prices.</Text>
-        </View>
-        <AppLink href="/ai-finder" style={[styles.trustLink, isPhone && styles.trustLinkPhone]}>
-          <Text style={styles.trustLinkText}>How AI pricing works</Text>
-          <TrendingUp color={colors.green} size={15} />
-        </AppLink>
-      </LinearGradient>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.featuredCardsRow}
+        >
+          {featuredListings.map((item) => (
+            <AppLink
+              href={`/property/${item.id}`}
+              key={item.id}
+              style={[
+                styles.featuredCard,
+                isPhone && { width: Math.min(width - 48, 380) },
+              ]}
+            >
+              <ImageBackground
+                source={{ uri: item.image }}
+                style={styles.featuredCardBg}
+                resizeMode="cover"
+              >
+                <LinearGradient
+                  colors={["rgba(0, 0, 0, 0.0)", "rgba(0, 0, 0, 0.1)", "rgba(0, 0, 0, 0.7)"]}
+                  locations={[0, 0.5, 1]}
+                  style={StyleSheet.absoluteFill}
+                />
 
-      <View style={styles.contentSection}>
-        <SectionHeader eyebrow={`Selected category: ${activeCategory}`} href="/buy" title="Recommended for you" />
-        {searchMessage ? (
-          <View style={styles.searchResult}><SlidersHorizontal color={colors.greenDark} size={15} /><Text style={styles.searchResultText}>{searchMessage}</Text></View>
-        ) : null}
-        <PropertyGrid>
-          {(visibleProperties.length ? visibleProperties : allProperties).slice(0, 3).map((property) => (
-            <PropertyCard badgeText="Est. fair" key={property.id} onSave={() => toggleFavorite(property.id)} property={property} saved={favorites.includes(property.id)} />
-          ))}
-        </PropertyGrid>
-      </View>
+                {/* Top badges */}
+                <View style={styles.featuredTopBadges}>
+                  <View style={styles.featuredVerifiedBadge}>
+                    <ShieldCheck color="#0F6D55" size={14} />
+                    <Text style={styles.featuredVerifiedText}>Verified</Text>
+                  </View>
+                  {item.investmentScore ? (
+                    <View style={styles.featuredInvestmentBadge}>
+                      <Text style={styles.featuredInvestmentText}>
+                        {item.investmentScore}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
 
-      <View style={styles.contentSection}>
-        <SectionHeader eyebrow="Homes moving this week" href="/buy" title="Trending near you" />
-        <PropertyGrid>
-          {allProperties.slice(3, 6).map((property) => (
-            <PropertyCard badgeText="Est. fair" key={property.id} onSave={() => toggleFavorite(property.id)} property={property} saved={favorites.includes(property.id)} />
-          ))}
-        </PropertyGrid>
-      </View>
-
-      <View style={styles.contentSection}>
-        <SectionHeader eyebrow="Explore the city" href="/buy" title="Popular neighborhoods" />
-        <ScrollView contentContainerStyle={[styles.neighborhoodRow, !isPhone && styles.neighborhoodRowDesktop]} horizontal={isPhone} showsHorizontalScrollIndicator={false}>
-          {neighborhoods.map((neighborhood) => (
-            <AppLink href={`/buy?area=${neighborhood.name}`} key={neighborhood.name} style={[styles.neighborhood, isPhone ? styles.neighborhoodPhone : { width: `${(100 - 5 * 0.95) / 6}%` }]}>
-              <ImageBackground source={{ uri: neighborhood.image }} style={styles.neighborhoodImage}>
-                <LinearGradient colors={["transparent", "rgba(5,26,20,0.80)"]} style={StyleSheet.absoluteFill} />
-                <Text style={styles.neighborhoodName}>{neighborhood.name}</Text>
+                {/* Bottom details */}
+                <View style={styles.featuredBottomDetails}>
+                  <Text style={styles.featuredLocation}>{item.location}</Text>
+                  <Text style={styles.featuredTitle}>{item.title}</Text>
+                  <Text style={styles.featuredPrice}>{item.price}</Text>
+                </View>
               </ImageBackground>
             </AppLink>
           ))}
         </ScrollView>
       </View>
 
-      <View style={[styles.marketSection, isPhone && styles.marketSectionPhone]}>
-        <View style={styles.marketHeading}>
-          <View><Eyebrow style={styles.marketEyebrow}>HomeNet intelligence</Eyebrow><Text style={styles.marketTitle}>Dhaka market pulse</Text></View>
-          <Text style={styles.marketUpdated}>Updated this week</Text>
-        </View>
-        <View style={[styles.marketGrid, isTablet && styles.marketGridTablet]}>
-          <View style={styles.trendCard}>
-            <View style={styles.trendTopline}>
-              <View><Text style={styles.trendLabel}>Average asking price</Text><View style={styles.trendPriceRow}><Text style={styles.trendPrice}>BDT 12,480</Text><Text style={styles.trendUnit}>per sq ft</Text></View></View>
-              <View style={styles.trendUp}><TrendingUp color={colors.green} size={15} /><Text style={styles.trendUpText}>4.8%</Text></View>
+      {/* ─────────────────────────────────────────────────────────────
+          4. AI INVESTMENT PICKS BANNER CARD (Figma data-node-id="1:276")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <LinearGradient
+          colors={["#E7F2EE", "#E8EEFC"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.3, y: 1 }}
+          style={styles.aiInsightCard}
+        >
+          <View style={styles.aiInsightHeader}>
+            <View style={styles.aiInsightIconCircle}>
+              <Sparkles color="#FFFFFF" size={16} />
             </View>
-            <View style={styles.barChart}>
-              {[38, 48, 45, 62, 72, 88, 81, 96, 106, 120, 132, 146].map((height, index) => <LinearGradient colors={["rgba(8,122,91,0.20)", "rgba(8,122,91,0.72)"]} key={index} style={[styles.bar, { height }]} />)}
-            </View>
-            <View style={styles.chartLabels}>{["Feb", "Mar", "Apr", "May", "Jun", "Jul"].map((month) => <Text key={month} style={styles.chartLabel}>{month}</Text>)}</View>
+            <Text style={styles.aiInsightTitle}>AI Investment Picks</Text>
           </View>
-          <View style={[styles.marketList, isTablet && styles.marketListTablet]}>
-            {[
-              ["Homes for sale", "1,284", Compass],
-              ["Median time listed", "34 days", Bell],
-              ["Buyer competition", "High", TrendingUp],
-              ["AI fair-price matches", "86%", ShieldCheck],
-            ].map(([label, value, Icon]) => {
-              const MarketIcon = Icon as LucideIcon;
-              return <View key={label as string} style={styles.marketListRow}><View style={styles.marketListIcon}><MarketIcon color={colors.green} size={17} /></View><Text style={styles.marketListLabel}>{label as string}</Text><Text style={styles.marketListValue}>{value as string}</Text></View>;
-            })}
+
+          <Text style={styles.aiInsightBody}>
+            Based on price trends and rental yield,{" "}
+            <Text style={styles.aiInsightBodyBold}>Banani &amp; Bashundhara</Text> show
+            the strongest growth this quarter — up to{" "}
+            <Text style={styles.aiInsightBodyBold}>+11%</Text>. Explore AI-scored
+            listings with the highest projected returns.
+          </Text>
+
+          <AppLink href="/ai-finder" style={styles.aiInsightLink}>
+            <Text style={styles.aiInsightLinkText}>Explore picks</Text>
+            <ArrowUpRight color="#0F6D55" size={16} />
+          </AppLink>
+        </LinearGradient>
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          5. RECOMMENDED FOR YOU (Figma data-node-id="1:295")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <View>
+            <Text style={styles.sectionTitle}>Recommended for you</Text>
+            <Text style={styles.sectionSubtitle}>Tuned to your searches</Text>
+          </View>
+          <AppLink href="/buy" style={styles.seeAllLink}>
+            <Text style={styles.seeAllText}>See all</Text>
+            <ChevronRight color="#0F6D55" size={16} />
+          </AppLink>
+        </View>
+
+        <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+          {recommendedListings.map((prop) => (
+            <PropertyCard
+              key={prop.id}
+              property={prop}
+              saved={favorites.includes(prop.id)}
+              onSave={() => toggleFavorite(prop.id)}
+              style={styles.propertyCardItem}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          6. RECENTLY ADDED (Figma data-node-id="1:496")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recently added</Text>
+          <AppLink href="/buy" style={styles.seeAllLink}>
+            <Text style={styles.seeAllText}>See all</Text>
+            <ChevronRight color="#0F6D55" size={16} />
+          </AppLink>
+        </View>
+
+        <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+          {recentlyAddedListings.map((prop) => (
+            <PropertyCard
+              key={prop.id}
+              property={prop}
+              saved={favorites.includes(prop.id)}
+              onSave={() => toggleFavorite(prop.id)}
+              style={styles.propertyCardItem}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          7. VERIFIED PROPERTIES (Figma data-node-id="1:698")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <View>
+            <View style={styles.titleWithIconRow}>
+              <ShieldCheck color="#0B1A17" size={20} />
+              <Text style={styles.sectionTitle}>Verified properties</Text>
+            </View>
+            <Text style={styles.sectionSubtitle}>Documents checked by Homenet</Text>
+          </View>
+          <AppLink href="/buy" style={styles.seeAllLink}>
+            <Text style={styles.seeAllText}>See all</Text>
+            <ChevronRight color="#0F6D55" size={16} />
+          </AppLink>
+        </View>
+
+        <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+          {verifiedPropertiesListings.map((prop) => (
+            <PropertyCard
+              key={prop.id}
+              property={prop}
+              saved={favorites.includes(prop.id)}
+              onSave={() => toggleFavorite(prop.id)}
+              style={styles.propertyCardItem}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          8. AI INVESTMENT PICKS (Figma data-node-id="1:902")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <View>
+            <View style={styles.titleWithIconRow}>
+              <Sparkles color="#0B1A17" size={20} />
+              <Text style={styles.sectionTitle}>AI investment picks</Text>
+            </View>
+            <Text style={styles.sectionSubtitle}>Highest projected returns</Text>
+          </View>
+          <AppLink href="/ai-finder" style={styles.seeAllLink}>
+            <Text style={styles.seeAllText}>See all</Text>
+            <ChevronRight color="#0F6D55" size={16} />
+          </AppLink>
+        </View>
+
+        <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+          {aiInvestmentPicksListings.map((prop) => (
+            <PropertyCard
+              key={prop.id}
+              property={prop}
+              saved={favorites.includes(prop.id)}
+              onSave={() => toggleFavorite(prop.id)}
+              style={styles.propertyCardItem}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          9. POPULAR LOCATIONS (Figma data-node-id="1:1098")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <View>
+            <Text style={styles.sectionTitle}>Popular locations</Text>
+            <Text style={styles.sectionSubtitle}>Where buyers are searching now</Text>
+          </View>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.locationsRow}
+        >
+          {popularLocations.map((loc) => (
+            <AppLink
+              href={`/buy?area=${encodeURIComponent(loc.name)}`}
+              key={loc.name}
+              style={styles.locationCard}
+            >
+              <ImageBackground
+                source={{ uri: loc.image }}
+                style={styles.locationCardBg}
+                resizeMode="cover"
+              >
+                <LinearGradient
+                  colors={["transparent", "rgba(0,0,0,0.7)"]}
+                  style={StyleSheet.absoluteFill}
+                />
+                <View style={styles.locationCardCaption}>
+                  <Text style={styles.locationCardName}>{loc.name}</Text>
+                  <Text style={styles.locationCardCount}>{loc.count}</Text>
+                </View>
+              </ImageBackground>
+            </AppLink>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          10. MARKET INSIGHTS & TRUSTED PARTNERS (Figma data-node-id="1:1156")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={[styles.twoColSection, isTablet && styles.twoColSectionTablet]}>
+          {/* Left: Market insights */}
+          <View style={styles.marketInsightCard}>
+            <View style={styles.sectionHeaderInner}>
+              <View>
+                <Text style={styles.sectionTitle}>Market insights</Text>
+                <Text style={styles.sectionSubtitle}>
+                  Avg. price per sqft (in ৳ thousands)
+                </Text>
+              </View>
+              <View style={styles.trendPill}>
+                <TrendingUp color="#0F6D55" size={12} />
+                <Text style={styles.trendPillText}>+8.4%</Text>
+              </View>
+            </View>
+
+            {/* SVG Area Chart */}
+            <View style={styles.chartWrapper}>
+              <Svg height="160" width="100%" viewBox="0 0 360 160">
+                <Defs>
+                  <SvgGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0%" stopColor="#0F6D55" stopOpacity="0.35" />
+                    <Stop offset="100%" stopColor="#0F6D55" stopOpacity="0.0" />
+                  </SvgGradient>
+                </Defs>
+
+                {/* Filled Area */}
+                <Path
+                  d="M 10 120 C 60 110, 110 95, 160 85 C 210 75, 260 55, 310 40 C 330 35, 345 32, 350 30 L 350 150 L 10 150 Z"
+                  fill="url(#chartGradient)"
+                />
+
+                {/* Smooth Curve Line */}
+                <Path
+                  d="M 10 120 C 60 110, 110 95, 160 85 C 210 75, 260 55, 310 40 C 330 35, 345 32, 350 30"
+                  fill="none"
+                  stroke="#0F6D55"
+                  strokeWidth="2.5"
+                />
+              </Svg>
+
+              {/* Month Labels */}
+              <View style={styles.chartMonthsRow}>
+                {["Feb", "Mar", "Apr", "May", "Jun", "Jul"].map((month) => (
+                  <Text key={month} style={styles.chartMonthText}>
+                    {month}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Right: Trusted partners */}
+          <View style={styles.trustedPartnersCard}>
+            <View style={styles.sectionHeaderInner}>
+              <View>
+                <Text style={styles.sectionTitle}>Trusted partners</Text>
+                <Text style={styles.sectionSubtitle}>Verified agencies on Homenet</Text>
+              </View>
+            </View>
+
+            <View style={styles.partnersList}>
+              {trustedPartners.map((partner) => (
+                <View key={partner.name} style={styles.partnerRow}>
+                  <View style={styles.partnerInfoWrap}>
+                    <View style={styles.partnerAvatarCircle}>
+                      <Text style={styles.partnerAvatarText}>{partner.initial}</Text>
+                    </View>
+                    <View>
+                      <View style={styles.partnerNameRow}>
+                        <Text style={styles.partnerNameText}>{partner.name}</Text>
+                        <ShieldCheck color="#0F6D55" size={16} />
+                      </View>
+                      <Text style={styles.partnerDealsText}>{partner.deals}</Text>
+                    </View>
+                  </View>
+
+                  <AppLink href="/users" style={styles.partnerViewBtn}>
+                    <Text style={styles.partnerViewBtnText}>View</Text>
+                  </AppLink>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
       </View>
 
-      <View style={styles.contentSection}>
-        <SectionHeader eyebrow="Learn before you move" href="/about" title="Latest property guides" />
-        <ScrollView contentContainerStyle={[styles.articleGrid, !isPhone && styles.articleGridDesktop]} horizontal={isPhone} showsHorizontalScrollIndicator={false}>
-          {[
-            ["A practical guide to buying your first apartment", propertyImages.apartment, "8 min read"],
-            ["Five details to check before making an offer", propertyImages.interior, "6 min read"],
-            ["What Dhaka home values are telling us now", propertyImages.skyline, "5 min read"],
-          ].map(([title, image, readTime]) => (
-            <View key={title} style={[styles.articleCard, isPhone ? { width: Math.min(width * 0.78, 302) } : { width: "32.5%" }]}>
-              <ImageBackground source={{ uri: image }} style={styles.articleImage} />
-              <View style={styles.articleBody}><Eyebrow>{readTime}</Eyebrow><Text style={styles.articleTitle}>{title}</Text><AppLink href="/about"><Text style={styles.articleLink}>Read guide</Text></AppLink></View>
-            </View>
+      {/* ─────────────────────────────────────────────────────────────
+          11. LATEST PROPERTY NEWS (Figma data-node-id="1:1262")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Latest property news</Text>
+          <AppLink href="/about" style={styles.seeAllLink}>
+            <Text style={styles.seeAllText}>See all</Text>
+          </AppLink>
+        </View>
+
+        <View style={[styles.newsGrid, isPhone && styles.newsGridPhone]}>
+          {latestNews.map((article) => (
+            <AppLink href="/about" key={article.id} style={styles.newsCard}>
+              <View style={styles.newsImageWrap}>
+                <Image
+                  source={{ uri: article.image }}
+                  style={styles.newsImage}
+                  resizeMode="cover"
+                />
+              </View>
+              <View style={styles.newsBody}>
+                <View style={styles.newsTagRow}>
+                  <View style={styles.newsTagPill}>
+                    <Text style={styles.newsTagPillText}>{article.tag}</Text>
+                  </View>
+                  <Text style={styles.newsTimeText}>{article.time}</Text>
+                </View>
+                <Text numberOfLines={2} style={styles.newsTitle}>
+                  {article.title}
+                </Text>
+              </View>
+            </AppLink>
           ))}
-        </ScrollView>
+        </View>
       </View>
     </AppChrome>
   );
 }
 
 const styles = StyleSheet.create({
-  pressed: { opacity: 0.8 },
-  hero: { minWidth: 0, width: "100%", maxWidth: "100%", minHeight: 355, overflow: "hidden", borderRadius: 24, backgroundColor: "#135F65", ...shadow },
-  heroTablet: { minHeight: 415, borderRadius: 19 },
-  heroPhone: { minHeight: 446 },
-  heroImage: { borderRadius: 24 },
-  heroContent: { minHeight: 355, justifyContent: "center", padding: 61 },
-  heroContentTablet: { minHeight: 415, justifyContent: "flex-end", padding: 30 },
-  heroContentPhone: { minHeight: 446, paddingHorizontal: 21, paddingVertical: 25 },
-  heroKicker: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 13 },
-  heroTitle: { maxWidth: 540, color: colors.white, fontFamily: fonts.bold, fontSize: 52, letterSpacing: -2.9, lineHeight: 55 },
-  heroTitleTablet: { fontSize: 44, lineHeight: 47 },
-  heroTitlePhone: { maxWidth: 340, fontSize: 34, lineHeight: 36, letterSpacing: -1.9 },
-  heroCopy: { maxWidth: 560, marginTop: 13, marginBottom: 22, color: "rgba(242,250,255,0.78)", fontFamily: fonts.regular, fontSize: 13, lineHeight: 20 },
-  heroCopyPhone: { fontSize: 11, lineHeight: 17, marginTop: 11, marginBottom: 18 },
-  searchBox: { width: "100%", maxWidth: 720, minHeight: 55, flexDirection: "row", gap: 6, padding: 6, borderRadius: 999, backgroundColor: colors.white, borderWidth: 1, borderColor: "rgba(255,255,255,0.5)" },
-  searchBoxPhone: { maxWidth: "100%", minWidth: 0, minHeight: 102, flexWrap: "wrap", overflow: "hidden", borderRadius: 15 },
-  searchField: { minWidth: 0, flex: 1, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 12 },
-  searchFieldPhone: { flexBasis: "68%", height: 44 },
-  searchInput: { minWidth: 0, flex: 1, color: colors.ink, fontFamily: fonts.regular, fontSize: 12 },
-  typeField: { width: 100, borderLeftWidth: 1, borderLeftColor: colors.line },
-  typeFieldPhone: { width: 84, height: 44 },
-  searchButton: { width: 110, minHeight: 43, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, borderRadius: 999, backgroundColor: colors.green },
-  searchButtonPhone: { width: "100%", minHeight: 42, borderRadius: 10 },
-  searchButtonText: { color: colors.white, fontFamily: fonts.extraBold, fontSize: 14 },
-  quickSearches: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 },
-  quickLabel: { color: "rgba(255,255,255,0.69)", fontFamily: fonts.regular, fontSize: 10 },
-  quickButton: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 99, backgroundColor: "rgba(255,255,255,0.12)", borderWidth: 1, borderColor: "rgba(255,255,255,0.19)" },
-  quickButtonText: { color: "rgba(255,255,255,0.9)", fontFamily: fonts.regular, fontSize: 10 },
-  categoryStrip: { flexDirection: "row", justifyContent: "space-between", gap: 10, marginTop: 27, marginBottom: 52 },
-  categoryStripPhone: { gap: 4, marginTop: 20, marginBottom: 37 },
-  categoryButton: { alignItems: "center", gap: 8, padding: 5 },
-  categoryIcon: { width: 46, height: 46, alignItems: "center", justifyContent: "center", borderRadius: 23, backgroundColor: "#F1F8F5", borderWidth: 1, borderColor: "#E2EEE8" },
-  categoryIconPhone: { width: 42, height: 42, borderRadius: 21 },
-  categoryIconActive: { backgroundColor: colors.green, borderColor: colors.green },
-  categoryLabel: { color: "#687A72", fontFamily: fonts.bold, fontSize: 10 },
-  categoryLabelActive: { color: colors.greenDark, fontFamily: fonts.extraBold },
-  featuredSection: { marginTop: 0 },
-  featuredGrid: { flexDirection: "row", gap: 15 },
-  featuredGridPhone: { flexDirection: "column" },
-  featureCardPhone: { width: "100%" },
-  contentSection: { marginTop: 47 },
-  trustBanner: { flexDirection: "row", alignItems: "center", gap: 15, marginTop: 25, paddingHorizontal: 22, paddingVertical: 19, borderRadius: 15, borderWidth: 1, borderColor: "#E2EEE8" },
-  trustBannerPhone: { flexWrap: "wrap", padding: 16 },
-  trustIcon: { width: 39, height: 39, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: colors.green },
-  trustCopyWrap: { flex: 1, minWidth: 180 },
-  trustTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 12 },
-  trustCopy: { marginTop: 4, color: colors.muted, fontFamily: fonts.regular, fontSize: 10, lineHeight: 15 },
-  trustLink: { flexDirection: "row", alignItems: "center", gap: 6 },
-  trustLinkPhone: { marginLeft: 54 },
-  trustLinkText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 9 },
-  searchResult: { flexDirection: "row", alignItems: "center", gap: 7, marginTop: -5, marginBottom: 15 },
-  searchResultText: { color: colors.greenDark, fontFamily: fonts.bold, fontSize: 10 },
-  neighborhoodRow: { gap: 11 },
-  neighborhoodRowDesktop: { width: "100%", flexDirection: "row" },
-  neighborhood: { height: 125, overflow: "hidden", borderRadius: 14, backgroundColor: "#D8E1DD" },
-  neighborhoodPhone: { width: 108, height: 108 },
-  neighborhoodImage: { flex: 1, justifyContent: "flex-end", paddingHorizontal: 8, paddingBottom: 10 },
-  neighborhoodName: { color: colors.white, fontFamily: fonts.extraBold, fontSize: 10 },
-  marketSection: { marginTop: 53, padding: 27, borderRadius: 20, backgroundColor: "#FBFDFC", borderWidth: 1, borderColor: colors.line },
-  marketSectionPhone: { paddingHorizontal: 14, paddingVertical: 20 },
-  marketHeading: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 20, marginBottom: 18 },
-  marketEyebrow: { marginBottom: 4 },
-  marketTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 24, letterSpacing: -1 },
-  marketUpdated: { color: colors.muted, fontFamily: fonts.regular, fontSize: 9 },
-  marketGrid: { flexDirection: "row", gap: 18 },
-  marketGridTablet: { flexDirection: "column" },
-  trendCard: { flex: 1.25, paddingHorizontal: 21, paddingTop: 21, paddingBottom: 15, borderRadius: 14, backgroundColor: colors.white, borderWidth: 1, borderColor: "#E7ECE9" },
-  trendTopline: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" },
-  trendLabel: { color: colors.muted, fontFamily: fonts.regular, fontSize: 9 },
-  trendPriceRow: { flexDirection: "row", alignItems: "baseline", gap: 7, marginTop: 2 },
-  trendPrice: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 20, letterSpacing: -0.8 },
-  trendUnit: { color: colors.muted, fontFamily: fonts.regular, fontSize: 8 },
-  trendUp: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 7, paddingVertical: 5, borderRadius: 6, backgroundColor: colors.greenLight },
-  trendUpText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 9 },
-  barChart: { height: 155, flexDirection: "row", alignItems: "flex-end", justifyContent: "space-around", gap: 7, marginTop: 15, paddingTop: 9, paddingHorizontal: 7, borderBottomWidth: 1, borderBottomColor: "#DFE8E3" },
-  bar: { width: "6%", maxHeight: 145, borderTopLeftRadius: 4, borderTopRightRadius: 4 },
-  chartLabels: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 7, paddingTop: 8 },
-  chartLabel: { color: "#91A098", fontFamily: fonts.regular, fontSize: 8 },
-  marketList: { flex: 0.75, justifyContent: "center", paddingHorizontal: 18, paddingVertical: 9, borderRadius: 14, backgroundColor: colors.white, borderWidth: 1, borderColor: "#E7ECE9" },
-  marketListTablet: { flexDirection: "row", flexWrap: "wrap" },
-  marketListRow: { minHeight: 55, flexDirection: "row", alignItems: "center", gap: 10, borderBottomWidth: 1, borderBottomColor: "#EDF2EF" },
-  marketListIcon: { width: 30, height: 30, alignItems: "center", justifyContent: "center", borderRadius: 9, backgroundColor: "#EDF7F2" },
-  marketListLabel: { flex: 1, color: colors.muted, fontFamily: fonts.regular, fontSize: 9 },
-  marketListValue: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 10 },
-  articleGrid: { gap: 15 },
-  articleGridDesktop: { width: "100%", flexDirection: "row" },
-  articleCard: { overflow: "hidden", borderRadius: 14, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
-  articleImage: { height: 145 },
-  articleBody: { paddingHorizontal: 15, paddingTop: 14, paddingBottom: 16 },
-  articleTitle: { minHeight: 37, marginTop: 7, marginBottom: 12, color: colors.ink, fontFamily: fonts.bold, fontSize: 12, lineHeight: 17 },
-  articleLink: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 9 },
+  sectionSpacing: {
+    marginTop: 40,
+    width: "100%",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  sectionHeaderInner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    color: "#0B1A17",
+    fontFamily: fonts.headingBold,
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 30,
+    letterSpacing: -0.4,
+  },
+  sectionSubtitle: {
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 2,
+  },
+  titleWithIconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  seeAllLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  seeAllText: {
+    color: "#0F6D55",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  /* 1. Hero Section */
+  heroContainer: {
+    width: "100%",
+    borderRadius: 28,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    overflow: "hidden",
+    minHeight: 495,
+  },
+  heroContainerPhone: {
+    minHeight: 460,
+  },
+  heroBg: {
+    width: "100%",
+    minHeight: 495,
+    justifyContent: "center",
+  },
+  heroContent: {
+    paddingHorizontal: 40,
+    paddingVertical: 56,
+    maxWidth: 760,
+  },
+  heroContentPhone: {
+    paddingHorizontal: 20,
+    paddingVertical: 36,
+  },
+  heroTagPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    marginBottom: 16,
+  },
+  heroTagText: {
+    color: "#FFFFFF",
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  heroHeading: {
+    color: "#FFFFFF",
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 47.8,
+    fontWeight: "800",
+    lineHeight: 50.2,
+    letterSpacing: -0.95,
+    marginBottom: 12,
+  },
+  heroHeadingPhone: {
+    fontSize: 32,
+    lineHeight: 36,
+    letterSpacing: -0.6,
+  },
+  heroSubtitle: {
+    color: "rgba(255, 255, 255, 0.85)",
+    fontFamily: fonts.regular,
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 24,
+    maxWidth: 576,
+  },
+  heroSubtitlePhone: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  heroSearchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 999,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    paddingLeft: 20.8,
+    paddingRight: 8.8,
+    paddingVertical: 8.8,
+    gap: 8,
+    maxWidth: 672,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1.5,
+    elevation: 2,
+  },
+  heroSearchBoxPhone: {
+    width: "100%",
+    paddingLeft: 14,
+    paddingRight: 6,
+  },
+  heroSearchInput: {
+    flex: 1,
+    height: 24,
+    color: "#0B1A17",
+    fontFamily: fonts.regular,
+    fontSize: 16,
+    outlineStyle: "none",
+  } as any,
+  heroAiSearchBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#0F6D55",
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  heroAiSearchBtnText: {
+    color: "#FFFFFF",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  heroMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    marginTop: 12,
+    flexWrap: "wrap",
+  },
+  heroMetaRowPhone: {
+    gap: 10,
+  },
+  heroLocationPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 999,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    paddingHorizontal: 12.8,
+    paddingVertical: 8.8,
+  },
+  heroLocationPillText: {
+    color: "#0B1A17",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  heroMetaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  heroMetaText: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+
+  /* 2. Category Cards */
+  categoryRow: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+    justifyContent: "space-between",
+  },
+  categoryCard: {
+    flex: 1,
+    minWidth: 100,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    padding: 16.8,
+    alignItems: "center",
+    gap: 8,
+  },
+  categoryIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: "#E7F2EE",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  categoryCardText: {
+    color: "#0B1A17",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+  },
+
+  /* 3. Featured Properties */
+  featuredCardsRow: {
+    flexDirection: "row",
+    gap: 20,
+  },
+  featuredCard: {
+    width: 520,
+    height: 325,
+    borderRadius: 24,
+    overflow: "hidden",
+  },
+  featuredCardBg: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "space-between",
+    padding: 16,
+  },
+  featuredTopBadges: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  featuredVerifiedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#E7F2EE",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  featuredVerifiedText: {
+    color: "#0F6D55",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  featuredInvestmentBadge: {
+    backgroundColor: "#FDEEE2",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  featuredInvestmentText: {
+    color: "#F4823A",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  featuredBottomDetails: {
+    gap: 2,
+  },
+  featuredLocation: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  featuredTitle: {
+    color: "#FFFFFF",
+    fontFamily: fonts.bold,
+    fontSize: 18,
+    fontWeight: "700",
+    lineHeight: 28,
+  },
+  featuredPrice: {
+    color: "#FFFFFF",
+    fontFamily: fonts.headingBold,
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 28,
+    marginTop: 2,
+  },
+
+  /* 4. AI Insight Banner Card */
+  aiInsightCard: {
+    borderRadius: 20,
+    borderWidth: 0.8,
+    borderColor: "rgba(15, 109, 85, 0.15)",
+    padding: 20.8,
+    gap: 8,
+  },
+  aiInsightHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  aiInsightIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#0F6D55",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  aiInsightTitle: {
+    color: "#0F6D55",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  aiInsightBody: {
+    color: "rgba(11, 26, 23, 0.8)",
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  aiInsightBodyBold: {
+    fontFamily: fonts.bold,
+    fontWeight: "700",
+    color: "#0B1A17",
+  },
+  aiInsightLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
+  aiInsightLinkText: {
+    color: "#0F6D55",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  /* 5, 6, 7, 8: Property Grid */
+  propertiesGrid: {
+    flexDirection: "row",
+    gap: 16,
+    width: "100%",
+  },
+  propertiesGridPhone: {
+    flexDirection: "column",
+  },
+  propertyCardItem: {
+    flex: 1,
+    minWidth: 260,
+  },
+
+  /* 9. Popular Locations */
+  locationsRow: {
+    flexDirection: "row",
+    gap: 16,
+    width: "100%",
+    justifyContent: "space-between",
+  },
+  locationCard: {
+    flex: 1,
+    minWidth: 120,
+    height: 132.4,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  locationCardBg: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "flex-end",
+    padding: 12,
+  },
+  locationCardCaption: {
+    gap: 2,
+  },
+  locationCardName: {
+    color: "#FFFFFF",
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    fontWeight: "700",
+    lineHeight: 24,
+  },
+  locationCardCount: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+
+  /* 10. Market Insights & Trusted Partners */
+  twoColSection: {
+    flexDirection: "row",
+    gap: 16,
+    width: "100%",
+  },
+  twoColSectionTablet: {
+    flexDirection: "column",
+  },
+  marketInsightCard: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    padding: 24.8,
+  },
+  trendPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#E7F2EE",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  trendPillText: {
+    color: "#0F6D55",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  chartWrapper: {
+    marginTop: 16,
+    width: "100%",
+  },
+  chartMonthsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+    marginTop: 8,
+  },
+  chartMonthText: {
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 12,
+  },
+
+  trustedPartnersCard: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    padding: 24.8,
+  },
+  partnersList: {
+    gap: 12,
+    marginTop: 8,
+  },
+  partnerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#F8FAF9",
+    borderRadius: 16,
+    padding: 12,
+  },
+  partnerInfoWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  partnerAvatarCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#E8EEFC",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  partnerAvatarText: {
+    color: "#2251D6",
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  partnerNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  partnerNameText: {
+    color: "#0B1A17",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  partnerDealsText: {
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 12,
+  },
+  partnerViewBtn: {
+    paddingHorizontal: 12.8,
+    paddingVertical: 6.8,
+    borderRadius: 999,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    backgroundColor: "#FFFFFF",
+  },
+  partnerViewBtnText: {
+    color: "#0B1A17",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+
+  /* 11. Latest Property News */
+  newsGrid: {
+    flexDirection: "row",
+    gap: 16,
+    width: "100%",
+  },
+  newsGridPhone: {
+    flexDirection: "column",
+  },
+  newsCard: {
+    flex: 1,
+    minWidth: 260,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    overflow: "hidden",
+    padding: 0.8,
+  },
+  newsImageWrap: {
+    height: 157,
+    backgroundColor: "#F4F6F5",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: "hidden",
+  },
+  newsImage: {
+    width: "100%",
+    height: "100%",
+  },
+  newsBody: {
+    padding: 16,
+    gap: 8,
+  },
+  newsTagRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  newsTagPill: {
+    backgroundColor: "#E8EEFC",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  newsTagPillText: {
+    color: "#2251D6",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  newsTimeText: {
+    color: "#5C6B66",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+  },
+  newsTitle: {
+    color: "#0B1A17",
+    fontFamily: fonts.semiBold,
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
 });
