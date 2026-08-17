@@ -1,6 +1,5 @@
-import { LinearGradient } from "expo-linear-gradient";
-import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck } from "lucide-react-native";
-import { ImageBackground, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle, View } from "react-native";
+import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck, Sparkles } from "lucide-react-native";
+import { Image, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle, View } from "react-native";
 import type { Property } from "@/data/properties";
 import { colors, fonts, webPointer } from "@/theme";
 import { AppLink } from "./ui";
@@ -9,10 +8,10 @@ export function PropertyCard({
   property,
   saved,
   onSave,
-  mode = "buy",
-  feature = false,
-  list = false,
+  mode,
   imageHeight,
+  list = false,
+  feature = false,
   badgeText,
   style,
 }: {
@@ -20,91 +19,269 @@ export function PropertyCard({
   saved: boolean;
   onSave: () => void;
   mode?: "buy" | "rent";
-  feature?: boolean;
-  list?: boolean;
   imageHeight?: number;
+  list?: boolean;
+  feature?: boolean;
   badgeText?: string;
   style?: StyleProp<ViewStyle>;
 }) {
+  const isRent = mode === "rent" || property.forRent === true;
+  const isNew = property.tag === "New" || property.id % 2 === 1;
+
   return (
-    <View style={[styles.card, list && styles.cardList, style]}>
-      <View style={[styles.imageWrap, feature && styles.featureImage, list && styles.listImage, imageHeight ? { height: imageHeight } : null]}>
-        <ImageBackground resizeMode="cover" source={{ uri: property.image }} style={styles.image}>
-          <AppLink href={`/property/${property.id}`} accessibilityLabel={`View ${property.title}`} style={StyleSheet.absoluteFill}>
-            <View style={styles.fill} />
-          </AppLink>
-          <View style={styles.tag}>
-            <ShieldCheck color={colors.greenDark} size={13} />
-            <Text style={styles.tagText}>{property.tag}</Text>
-          </View>
-          <Pressable
-            accessibilityLabel={saved ? "Remove from saved homes" : "Save this home"}
-            accessibilityRole="button"
-            onPress={onSave}
-            style={({ pressed }) => [styles.favorite, webPointer, pressed && styles.pressed]}
-          >
-            <Heart color={saved ? colors.coral : "#345248"} fill={saved ? colors.coral : "transparent"} size={17} />
-          </Pressable>
-          {feature ? (
-            <LinearGradient colors={["transparent", "rgba(5,27,22,0.84)"]} style={styles.featureCaption}>
-              <Text style={styles.featureMeta}>{property.location}</Text>
-              <Text style={styles.featureTitle}>{property.title}</Text>
-              <Text style={styles.featureMeta}>{property.price}</Text>
-            </LinearGradient>
-          ) : null}
-        </ImageBackground>
-      </View>
-      {!feature ? (
-        <View style={[styles.body, list && styles.bodyList]}>
-          <View style={styles.topline}>
-            <Text style={styles.price}>{mode === "rent" ? property.monthlyPrice : property.price}</Text>
-            <View style={styles.matchBadge}>
-              <Text style={styles.matchText}>{badgeText ?? `${property.score}% match`}</Text>
+    <View style={[styles.card, style]}>
+      {/* Image Container */}
+      <View style={[styles.imageWrap, imageHeight ? { height: imageHeight } : null]}>
+        <Image source={{ uri: property.image }} style={styles.image} resizeMode="cover" />
+
+        {/* Top Badges */}
+        <View style={styles.topBadgesRow}>
+          <View style={styles.badgeCluster}>
+            <View style={styles.verifiedBadge}>
+              <ShieldCheck color="#0F6D55" size={14} />
+              <Text style={styles.verifiedText}>Verified</Text>
             </View>
+            {isNew ? (
+              <View style={styles.newBadge}>
+                <Text style={styles.newBadgeText}>New</Text>
+              </View>
+            ) : null}
           </View>
-          <AppLink href={`/property/${property.id}`}>
-            <Text numberOfLines={2} style={styles.title}>{property.title}</Text>
-          </AppLink>
-          <View style={styles.location}>
-            <MapPin color={colors.muted} size={13} />
-            <Text numberOfLines={1} style={styles.locationText}>{property.location}</Text>
-          </View>
-          <View style={styles.meta}>
-            <View style={styles.metaItem}><BedDouble color="#71827A" size={14} /><Text style={styles.metaText}>{property.beds} beds</Text></View>
-            <View style={styles.metaItem}><Bath color="#71827A" size={14} /><Text style={styles.metaText}>{property.baths} baths</Text></View>
-            <View style={styles.metaItem}><LandPlot color="#71827A" size={14} /><Text style={styles.metaText}>{property.area}</Text></View>
+
+          {/* Heart / Save Button */}
+          <Pressable
+            accessibilityLabel={saved ? "Remove from saved" : "Save property"}
+            onPress={onSave}
+            style={[styles.saveButton, webPointer]}
+          >
+            <Heart
+              color={saved ? "#F4823A" : "#0B1A17"}
+              fill={saved ? "#F4823A" : "transparent"}
+              size={18}
+            />
+          </Pressable>
+        </View>
+
+        {/* Bottom Tag on Image (For Sale / For Rent) */}
+        <View style={styles.intentTagWrap}>
+          <View style={styles.intentTag}>
+            <Text style={styles.intentTagText}>
+              {isRent ? "For Rent" : "For Sale"}
+            </Text>
           </View>
         </View>
-      ) : null}
+      </View>
+
+      {/* Card Body */}
+      <View style={styles.body}>
+        {/* Price & Investment Score */}
+        <View style={styles.priceRow}>
+          <View style={styles.priceContainer}>
+            <Text style={styles.priceText}>
+              {isRent ? property.monthlyPrice : property.price}
+            </Text>
+          </View>
+          <View style={styles.scoreContainer}>
+            <Sparkles color="#0F6D55" size={14} />
+            <Text style={styles.scoreText}>{property.score}</Text>
+          </View>
+        </View>
+
+        {/* Title */}
+        <AppLink href={`/property/${property.id}`} style={styles.titleLink}>
+          <Text numberOfLines={1} style={styles.titleText}>
+            {property.title}
+          </Text>
+        </AppLink>
+
+        {/* Location */}
+        <View style={styles.locationRow}>
+          <MapPin color="#5C6B66" size={14} />
+          <Text numberOfLines={1} style={styles.locationText}>
+            {property.location}
+          </Text>
+        </View>
+
+        {/* Specs Row */}
+        <View style={styles.specsRow}>
+          <View style={styles.specItem}>
+            <BedDouble color="#5C6B66" size={16} />
+            <Text style={styles.specText}>{property.beds}</Text>
+          </View>
+          <View style={styles.specItem}>
+            <Bath color="#5C6B66" size={16} />
+            <Text style={styles.specText}>{property.baths}</Text>
+          </View>
+          <View style={styles.specItem}>
+            <LandPlot color="#5C6B66" size={16} />
+            <Text style={styles.specText}>{property.area}</Text>
+          </View>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { minWidth: 0, overflow: "hidden", backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line, borderRadius: 15 },
-  cardList: { flexDirection: "row" },
-  imageWrap: { position: "relative", height: 168, overflow: "hidden", backgroundColor: "#DAE4DF" },
-  featureImage: { height: 272 },
-  listImage: { width: 270, height: "auto", minHeight: 190 },
-  image: { flex: 1 },
-  fill: { flex: 1 },
-  tag: { position: "absolute", top: 11, left: 11, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 99, backgroundColor: "rgba(241,255,249,0.94)", borderWidth: 1, borderColor: "rgba(255,255,255,0.75)" },
-  tagText: { color: colors.greenDark, fontFamily: fonts.extraBold, fontSize: 9 },
-  favorite: { position: "absolute", top: 10, right: 10, width: 32, height: 32, alignItems: "center", justifyContent: "center", borderRadius: 16, backgroundColor: "rgba(255,255,255,0.94)", borderWidth: 1, borderColor: "rgba(255,255,255,0.78)" },
-  pressed: { opacity: 0.78 },
-  featureCaption: { position: "absolute", right: 0, bottom: 0, left: 0, gap: 4, paddingTop: 46, paddingHorizontal: 17, paddingBottom: 16 },
-  featureMeta: { color: "rgba(255,255,255,0.8)", fontFamily: fonts.regular, fontSize: 10 },
-  featureTitle: { color: colors.white, fontFamily: fonts.extraBold, fontSize: 14, letterSpacing: -0.3 },
-  body: { paddingHorizontal: 14, paddingTop: 14, paddingBottom: 15 },
-  bodyList: { flex: 1, justifyContent: "center", padding: 23 },
-  topline: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
-  price: { color: "#172D25", fontFamily: fonts.extraBold, fontSize: 13 },
-  matchBadge: { paddingHorizontal: 6, paddingVertical: 3, borderRadius: 5, backgroundColor: colors.greenLight },
-  matchText: { color: colors.greenDark, fontFamily: fonts.extraBold, fontSize: 8 },
-  title: { minHeight: 34, marginTop: 8, marginBottom: 5, color: colors.ink, fontFamily: fonts.bold, fontSize: 12, letterSpacing: -0.3, lineHeight: 17 },
-  location: { flexDirection: "row", alignItems: "center", gap: 4 },
-  locationText: { flexShrink: 1, color: colors.muted, fontFamily: fonts.regular, fontSize: 9 },
-  meta: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 13, marginTop: 12, paddingTop: 11, borderTopWidth: 1, borderTopColor: "#EDF1EF" },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
-  metaText: { color: "#71827A", fontFamily: fonts.regular, fontSize: 8 },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    overflow: "hidden",
+    padding: 0.8,
+  },
+  imageWrap: {
+    position: "relative",
+    width: "100%",
+    height: 209.4,
+    backgroundColor: "#F4F6F5",
+    overflow: "hidden",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  topBadgesRow: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  badgeCluster: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  verifiedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#E7F2EE",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  verifiedText: {
+    color: "#0F6D55",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  newBadge: {
+    backgroundColor: "#FDEEE2",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  newBadgeText: {
+    color: "#F4823A",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  saveButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  intentTagWrap: {
+    position: "absolute",
+    bottom: 12,
+    left: 12,
+  },
+  intentTag: {
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  intentTagText: {
+    color: "#2251D6",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  body: {
+    padding: 16,
+    gap: 6,
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  priceContainer: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  priceText: {
+    color: "#0B1A17",
+    fontFamily: fonts.headingBold,
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 28,
+  },
+  scoreContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  scoreText: {
+    color: "#0F6D55",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  titleLink: {
+    marginTop: 2,
+  },
+  titleText: {
+    color: "#0B1A17",
+    fontFamily: fonts.semiBold,
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  locationText: {
+    color: "#5C6B66",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+  },
+  specsRow: {
+    marginTop: 6,
+    paddingTop: 12.8,
+    borderTopWidth: 0.8,
+    borderTopColor: "rgba(11, 26, 23, 0.08)",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  specItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  specText: {
+    color: "#5C6B66",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+  },
 });

@@ -1,126 +1,367 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { ArrowLeft, ArrowRight, Heart, Search, SlidersHorizontal } from "lucide-react-native";
-import { useMemo, useState } from "react";
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Bookmark,
+  Eye,
+  GitCompare,
+  Heart,
+  Plus,
+  Share2,
+} from "lucide-react-native";
+import { useState } from "react";
+import {
+  ImageBackground,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
-import { PropertyGrid } from "@/components/PropertyGrid";
-import { AppButton, AppLink, Eyebrow, SectionHeader, SelectField } from "@/components/ui";
-import { allProperties, savedPropertyIds } from "@/data/properties";
+import { AppLink } from "@/components/ui";
+import {
+  recentlyViewedListings,
+  savedCollections,
+  savedPageListings,
+} from "@/data/properties";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 
 export function SavedScreen() {
-  const { isPhone } = useResponsive();
-  const [savedIds, setSavedIds] = useState(savedPropertyIds);
-  const [tab, setTab] = useState<"all" | "sale" | "rent">("all");
-  const [sort, setSort] = useState("Recently saved");
-
-  const savedHomes = useMemo(() => allProperties.filter((property) => savedIds.includes(property.id)), [savedIds]);
-  const suggestions = allProperties.filter((property) => !savedIds.includes(property.id)).slice(0, 3);
+  const { isPhone, isTablet, width } = useResponsive();
+  const [selectedFolder, setSelectedFolder] = useState<string>("all");
+  const [savedIds, setSavedIds] = useState<number[]>([201, 202, 203, 301]);
 
   function toggleSaved(id: number) {
-    setSavedIds((current) => current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]);
+    setSavedIds((current) =>
+      current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]
+    );
   }
 
   return (
     <AppChrome active="saved">
-      <View style={[styles.pageIntro, isPhone && styles.pageIntroPhone]}>
-        <View style={styles.introCopy}>
-          <Eyebrow style={styles.eyebrow}>Your collection</Eyebrow>
-          <Text style={[styles.pageTitle, isPhone && styles.pageTitlePhone]}>Saved homes</Text>
-          <Text style={styles.pageDescription}>Keep your shortlist together and compare the homes that feel right.</Text>
+      {/* ─────────────────────────────────────────────────────────────
+          1. PAGE HEADER (Figma data-node-id="1:1452")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={[styles.headerRow, isPhone && styles.headerRowPhone]}>
+        <View style={styles.headerTitleWrap}>
+          <Text style={styles.pageHeading}>Saved</Text>
+          <Text style={styles.pageSubtitle}>
+            Your collections, comparisons &amp; recently viewed
+          </Text>
         </View>
-        <View style={styles.pageActions}>
-          <AppLink href="/" style={styles.secondaryLink}><ArrowLeft color={colors.green} size={15} /><Text style={styles.secondaryLinkText}>Back to home</Text></AppLink>
-          <AppLink href="/buy" style={styles.primaryLink}><Text style={styles.primaryLinkText}>Browse homes</Text><ArrowRight color={colors.white} size={15} /></AppLink>
+
+        <View style={styles.headerActions}>
+          <Pressable
+            accessibilityLabel="Share collection"
+            style={[styles.shareBtn, webPointer]}
+          >
+            <Share2 color="#0B1A17" size={16} />
+            <Text style={styles.shareBtnText}>Share collection</Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityLabel="Compare properties"
+            style={[styles.compareBtn, webPointer]}
+          >
+            <GitCompare color="#FFFFFF" size={16} />
+            <Text style={styles.compareBtnText}>Compare</Text>
+          </Pressable>
         </View>
       </View>
 
-      {savedHomes.length ? (
-        <ScrollView contentContainerStyle={[styles.previewStrip, isPhone && styles.previewStripPhone]} horizontal={isPhone} showsHorizontalScrollIndicator={false}>
-          {savedHomes.slice(0, 3).map((property) => (
-            <AppLink href={`/property/${property.id}`} key={property.id} style={[styles.previewCard, isPhone && styles.previewCardPhone]}>
-              <ImageBackground source={{ uri: property.image }} style={styles.previewImage}>
-                <LinearGradient colors={["transparent", "rgba(5,29,21,0.80)"]} style={StyleSheet.absoluteFill} />
-                <Text style={styles.previewLocation}>{property.location}</Text>
-                <Text style={styles.previewPrice}>{property.price}</Text>
-              </ImageBackground>
-            </AppLink>
-          ))}
-          {!isPhone ? <View style={styles.savedCount}><Heart color={colors.green} fill={colors.green} size={18} /><Text style={styles.savedCountNumber}>{savedHomes.length}</Text><Text style={styles.savedCountLabel}>saved homes</Text></View> : null}
+      {/* ─────────────────────────────────────────────────────────────
+          2. COLLECTIONS / FOLDERS ROW (Figma data-node-id="1:1476")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.foldersSection}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.foldersRow}
+        >
+          {savedCollections.map((folder) => {
+            const isSelected = selectedFolder === folder.id;
+            return (
+              <Pressable
+                key={folder.id}
+                onPress={() => setSelectedFolder(folder.id)}
+                style={[
+                  styles.folderCard,
+                  isSelected && styles.folderCardActive,
+                  webPointer,
+                ]}
+              >
+                <ImageBackground
+                  source={{ uri: folder.image }}
+                  style={styles.folderBg}
+                  resizeMode="cover"
+                >
+                  <LinearGradient
+                    colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.75)"]}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <View style={styles.folderContent}>
+                    <Bookmark color="#FFFFFF" size={20} />
+                    <Text style={styles.folderName}>{folder.name}</Text>
+                    <Text style={styles.folderCount}>{folder.count}</Text>
+                  </View>
+                </ImageBackground>
+              </Pressable>
+            );
+          })}
+
+          {/* New Folder Button */}
+          <Pressable
+            accessibilityLabel="Create new folder"
+            style={[styles.newFolderCard, webPointer]}
+          >
+            <Plus color="#5C6B66" size={24} />
+            <Text style={styles.newFolderText}>New folder</Text>
+          </Pressable>
         </ScrollView>
-      ) : null}
-
-      <View style={styles.savedContent}>
-        <SectionHeader
-          eyebrow="Shortlisted by you"
-          right={
-            <View style={styles.savedTools}>
-              <View style={styles.segmented}>
-                {(["all", "sale", "rent"] as const).map((value) => (
-                  <Pressable key={value} onPress={() => setTab(value)} style={[styles.segmentButton, tab === value && styles.segmentButtonActive, webPointer]}>
-                    <Text style={[styles.segmentText, tab === value && styles.segmentTextActive]}>{value === "all" ? "All" : value === "sale" ? "For sale" : "For rent"}</Text>
-                  </Pressable>
-                ))}
-              </View>
-              {!isPhone ? <View style={styles.sortSelect}><SlidersHorizontal color={colors.muted} size={14} /><SelectField onChange={setSort} options={["Recently saved", "Price: low to high", "Best AI match"]} style={styles.sortPicker} value={sort} /></View> : null}
-            </View>
-          }
-          title="Saved properties"
-        />
-        {savedHomes.length ? (
-          <PropertyGrid desktopColumns={2} horizontalOnPhone={false} tabletColumns={2} gap={17}>
-            {savedHomes.map((property) => <PropertyCard imageHeight={isPhone ? 228 : 244} key={property.id} mode={tab === "rent" ? "rent" : "buy"} onSave={() => toggleSaved(property.id)} property={property} saved={savedIds.includes(property.id)} />)}
-          </PropertyGrid>
-        ) : (
-          <View style={styles.emptyState}><View style={styles.emptyIcon}><Heart color={colors.green} size={28} /></View><Text style={styles.emptyTitle}>Your shortlist is ready for a first home</Text><Text style={styles.emptyCopy}>Save properties while you browse and they will appear here for easy comparison.</Text><AppButton icon={Search} label="Find a home" /></View>
-        )}
       </View>
 
-      <View style={styles.recommendations}>
-        <SectionHeader eyebrow="Based on your shortlist" href="/buy" title="You may also like" />
-        <PropertyGrid>{suggestions.map((property) => <PropertyCard key={property.id} onSave={() => toggleSaved(property.id)} property={property} saved={savedIds.includes(property.id)} />)}</PropertyGrid>
+      {/* ─────────────────────────────────────────────────────────────
+          3. SAVED PROPERTIES (Figma data-node-id="1:1516")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.titleWithIconRow}>
+            <Bookmark color="#0B1A17" size={20} />
+            <Text style={styles.sectionTitle}>Saved properties</Text>
+          </View>
+        </View>
+
+        {/* 2-Column Large Card Grid matching Figma (imageHeight ~320.7px) */}
+        <View style={[styles.savedPropertiesGrid, isPhone && styles.savedPropertiesGridPhone]}>
+          {savedPageListings.map((prop) => (
+            <PropertyCard
+              key={prop.id}
+              property={prop}
+              imageHeight={isPhone ? 220 : 320.7}
+              saved={savedIds.includes(prop.id)}
+              onSave={() => toggleSaved(prop.id)}
+              style={styles.savedCardItem}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          4. RECENTLY VIEWED (Figma data-node-id="1:1701")
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.titleWithIconRow}>
+            <Eye color="#0B1A17" size={20} />
+            <Text style={styles.sectionTitle}>Recently viewed</Text>
+          </View>
+        </View>
+
+        {/* 3-Column Standard Card Grid matching Figma */}
+        <View style={[styles.recentlyViewedGrid, isPhone && styles.recentlyViewedGridPhone]}>
+          {recentlyViewedListings.map((prop) => (
+            <PropertyCard
+              key={prop.id}
+              property={prop}
+              imageHeight={209.4}
+              saved={savedIds.includes(prop.id)}
+              onSave={() => toggleSaved(prop.id)}
+              style={styles.recentCardItem}
+            />
+          ))}
+        </View>
       </View>
     </AppChrome>
   );
 }
 
 const styles = StyleSheet.create({
-  pageIntro: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 28, paddingTop: 22, paddingBottom: 25 },
-  pageIntroPhone: { flexDirection: "column", alignItems: "flex-start", gap: 18, paddingTop: 13 },
-  introCopy: { flex: 1 },
-  eyebrow: { marginBottom: 7 },
-  pageTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 46, lineHeight: 49, letterSpacing: -2.5 },
-  pageTitlePhone: { fontSize: 33, lineHeight: 36, letterSpacing: -1.8 },
-  pageDescription: { maxWidth: 580, marginTop: 9, color: colors.muted, fontFamily: fonts.regular, fontSize: 12, lineHeight: 19 },
-  pageActions: { flexDirection: "row", alignItems: "center", gap: 9 },
-  secondaryLink: { minHeight: 41, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, paddingHorizontal: 17, borderRadius: 999, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
-  secondaryLinkText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 10 },
-  primaryLink: { minHeight: 41, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, paddingHorizontal: 17, borderRadius: 999, backgroundColor: colors.green, borderWidth: 1, borderColor: colors.green },
-  primaryLinkText: { color: colors.white, fontFamily: fonts.extraBold, fontSize: 10 },
-  previewStrip: { flexDirection: "row", gap: 11, padding: 14, borderRadius: 18, backgroundColor: "#F7FAF8", borderWidth: 1, borderColor: colors.line },
-  previewStripPhone: { padding: 0, backgroundColor: "transparent", borderWidth: 0, borderRadius: 0, gap: 9 },
-  previewCard: { flex: 1, height: 112, overflow: "hidden", borderRadius: 12, backgroundColor: "#DBE5E0" },
-  previewCardPhone: { width: 220, flex: 0 },
-  previewImage: { flex: 1, justifyContent: "flex-end", padding: 12 },
-  previewLocation: { color: "rgba(255,255,255,0.78)", fontFamily: fonts.regular, fontSize: 8 },
-  previewPrice: { marginTop: 2, color: colors.white, fontFamily: fonts.extraBold, fontSize: 11 },
-  savedCount: { width: 145, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: colors.white, borderWidth: 1, borderStyle: "dashed", borderColor: "#C7DED3" },
-  savedCountNumber: { marginTop: 6, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 18 },
-  savedCountLabel: { color: colors.muted, fontFamily: fonts.regular, fontSize: 8 },
-  savedContent: { marginTop: 38 },
-  savedTools: { flexDirection: "row", alignItems: "center", gap: 9 },
-  segmented: { flexDirection: "row", gap: 3, padding: 3, borderRadius: 9, backgroundColor: colors.soft, borderWidth: 1, borderColor: colors.line },
-  segmentButton: { minHeight: 29, justifyContent: "center", paddingHorizontal: 10, borderRadius: 6 },
-  segmentButtonActive: { backgroundColor: colors.white },
-  segmentText: { color: colors.muted, fontFamily: fonts.extraBold, fontSize: 8 },
-  segmentTextActive: { color: colors.greenDark },
-  sortSelect: { width: 155, minHeight: 36, flexDirection: "row", alignItems: "center", gap: 2, paddingLeft: 9, borderRadius: 9, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
-  sortPicker: { flex: 1, minHeight: 34 },
-  emptyState: { minHeight: 330, alignItems: "center", justifyContent: "center", padding: 34, borderRadius: 18, backgroundColor: "#F8FBF9", borderWidth: 1, borderStyle: "dashed", borderColor: "#CBDCD4" },
-  emptyIcon: { width: 60, height: 60, alignItems: "center", justifyContent: "center", borderRadius: 30, backgroundColor: colors.greenLight },
-  emptyTitle: { marginTop: 17, marginBottom: 7, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 20, letterSpacing: -0.8, textAlign: "center" },
-  emptyCopy: { maxWidth: 430, marginBottom: 18, color: colors.muted, fontFamily: fonts.regular, fontSize: 11, lineHeight: 17, textAlign: "center" },
-  recommendations: { marginTop: 50 },
+  /* 1. Page Header */
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    paddingTop: 16,
+    width: "100%",
+  },
+  headerRowPhone: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+  headerTitleWrap: {
+    gap: 4,
+  },
+  pageHeading: {
+    color: "#0B1A17",
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 25.6,
+    fontWeight: "800",
+    lineHeight: 38.4,
+    letterSpacing: -0.512,
+  },
+  pageSubtitle: {
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    height: 40,
+  },
+  shareBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16.8,
+    paddingVertical: 8.8,
+    borderRadius: 999,
+    borderWidth: 0.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    backgroundColor: "#FFFFFF",
+  },
+  shareBtnText: {
+    color: "#0B1A17",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+  },
+  compareBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999,
+    backgroundColor: "#0F6D55",
+  },
+  compareBtnText: {
+    color: "#FFFFFF",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+  },
+
+  /* 2. Folders Row */
+  foldersSection: {
+    marginTop: 32,
+    width: "100%",
+  },
+  foldersRow: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  folderCard: {
+    width: 176,
+    height: 132,
+    borderRadius: 20,
+    overflow: "hidden",
+    borderWidth: 1.6,
+    borderColor: "transparent",
+  },
+  folderCardActive: {
+    borderColor: "#0F6D55",
+  },
+  folderBg: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "flex-end",
+  },
+  folderContent: {
+    padding: 12,
+    gap: 2,
+  },
+  folderName: {
+    marginTop: 4,
+    color: "#FFFFFF",
+    fontFamily: fonts.semiBold,
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
+  folderCount: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontWeight: "600",
+    lineHeight: 16,
+  },
+  newFolderCard: {
+    width: 176,
+    height: 132,
+    borderRadius: 20,
+    borderWidth: 1.6,
+    borderStyle: "dashed",
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+  },
+  newFolderText: {
+    color: "#5C6B66",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+  },
+
+  /* Common Section Header */
+  sectionSpacing: {
+    marginTop: 32,
+    width: "100%",
+  },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  titleWithIconRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  sectionTitle: {
+    color: "#0B1A17",
+    fontFamily: fonts.headingBold,
+    fontSize: 20,
+    fontWeight: "700",
+    lineHeight: 30,
+    letterSpacing: -0.4,
+  },
+
+  /* 3. Saved Properties (2 Columns) */
+  savedPropertiesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
+    width: "100%",
+  },
+  savedPropertiesGridPhone: {
+    flexDirection: "column",
+  },
+  savedCardItem: {
+    flexBasis: "48.5%",
+    flexGrow: 1,
+    minWidth: 320,
+  },
+
+  /* 4. Recently Viewed (3 Columns) */
+  recentlyViewedGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
+    width: "100%",
+  },
+  recentlyViewedGridPhone: {
+    flexDirection: "column",
+  },
+  recentCardItem: {
+    flex: 1,
+    minWidth: 260,
+  },
 });
