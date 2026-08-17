@@ -1,6 +1,5 @@
 node_modules
 .expo
-dist
 *.log
 .DS_Store
 *.tsbuildinfo
@@ -10,3 +9,5 @@ dist
 
 expo-env.d.ts
 # @end expo-cli
+
+/docs
