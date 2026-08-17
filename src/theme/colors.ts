@@ -1,50 +1,51 @@
 /**
- * HomeNet color tokens.
- *
- * Every colour used across the app should come from this palette so a future
- * dark-mode toggle only needs to swap this single object.
+ * HomeNet color tokens matching Figma design exactly.
  */
 export const colorTokens = {
   // ─── Backgrounds ────────────────────────────────────────────────────────
   background: "#FFFFFF",
-  backgroundAlt: "#F4F8F6",
-  sidebar: "#FBFDFC",
+  backgroundAlt: "#F8FAF9",
+  sidebar: "#FFFFFF",
 
   // ─── Cards / Surfaces ───────────────────────────────────────────────────
   card: "#FFFFFF",
-  cardBorder: "#E4EBE7",
-  cardHover: "#F4F8F6",
+  cardBorder: "rgba(11, 26, 23, 0.08)",
+  cardHover: "#F8FAF9",
 
   // ─── Text ───────────────────────────────────────────────────────────────
-  textPrimary: "#132820",
-  textSecondary: "#687B73",
+  textPrimary: "#0B1A17",
+  textSecondary: "#5C6B66",
   textInverse: "#FFFFFF",
-  textMuted: "#9BADA3",
+  textMuted: "#5C6B66",
   textBlack: "#0B1A17",
 
-  // ─── Primary Accent (teal/green) ────────────────────────────────────────
-  primary: "#087A5B",
-  primaryDark: "#075C46",
-  primaryLight: "#E5F4ED",
+  // ─── Primary Accent (Figma Green) ───────────────────────────────────────
+  primary: "#0F6D55",
+  primaryDark: "#0B5743",
+  primaryLight: "#E7F2EE",
   primaryText: "#FFFFFF",
 
-  // ─── Verified Badge ─────────────────────────────────────────────────────
-  verified: "#3B63C7",
-  verifiedLight: "#F0F5FB",
+  // ─── Verified / Blue Badge ──────────────────────────────────────────────
+  verified: "#2251D6",
+  verifiedLight: "#E8EEFC",
+
+  // ─── Orange / Notification / Investment Score Accent ────────────────────
+  orange: "#F4823A",
+  orangeLight: "#FDEEE2",
 
   // ─── Error / Danger ─────────────────────────────────────────────────────
-  error: "#D7655A",
-  errorLight: "#FDF0EE",
-  errorDark: "#B5453A",
+  error: "#F4823A",
+  errorLight: "#FDEEE2",
+  errorDark: "#D96A24",
 
   // ─── Warning ────────────────────────────────────────────────────────────
-  warning: "#E9A452",
-  warningLight: "#FEF6E9",
+  warning: "#F4823A",
+  warningLight: "#FDEEE2",
 
   // ─── Misc ───────────────────────────────────────────────────────────────
-  divider: "#E4EBE7",
-  overlay: "rgba(19,40,32,0.45)",
-  shadow: "#1A352B",
+  divider: "rgba(11, 26, 23, 0.08)",
+  overlay: "rgba(11, 26, 23, 0.45)",
+  shadow: "rgba(0, 0, 0, 0.06)",
 } as const;
 
 export type ColorTokens = typeof colorTokens;
