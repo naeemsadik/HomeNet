@@ -90,7 +90,7 @@ export function UsersScreen() {
       setError(null);
       const stored = await getAuthSession();
       if (!stored) {
-        setError("You must be signed in to view users.");
+        setError("You must be logged in to view users.");
         return;
       }
       setSession(stored);
@@ -220,7 +220,7 @@ export function UsersScreen() {
       <AppChrome active="users">
         <View style={styles.emptyState}>
           <Users color={colors.muted} size={40} />
-          <Text style={styles.emptyTitle}>Sign in to view users</Text>
+          <Text style={styles.emptyTitle}>Log in to view users</Text>
           <Text style={styles.emptyCopy}>You need to be logged in to access the users directory.</Text>
         </View>
       </AppChrome>
@@ -298,14 +298,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginTop: 6,
-    paddingHorizontal: 13,
-    minHeight: 42,
+    paddingHorizontal: 14,
+    minHeight: 48,
     borderRadius: 12,
     backgroundColor: colors.soft,
     borderWidth: 1,
     borderColor: colors.line,
   },
-  searchInput: { flex: 1, color: colors.ink, fontFamily: fonts.regular, fontSize: 13 },
+  searchInput: { flex: 1, height: 42, color: colors.ink, fontFamily: fonts.regular, fontSize: 14 },
   list: { gap: 8, paddingBottom: 30 },
   userCard: {
     padding: 14,

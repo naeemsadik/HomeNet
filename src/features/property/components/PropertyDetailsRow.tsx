@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
+    flexShrink: 1,
   },
   locationItem: {
     flexShrink: 1,

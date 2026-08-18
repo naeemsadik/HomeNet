@@ -656,6 +656,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.08)",
     padding: 24,
     gap: 12,
+    overflow: "hidden",
   },
   titleCategoryRow: {
     flexDirection: "row",
@@ -702,13 +703,16 @@ const styles = StyleSheet.create({
   keySpecsRow: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
     marginTop: 8,
-    gap: 16,
+    gap: 12,
+    rowGap: 8,
   },
   specItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    flexShrink: 1,
   },
   specText: {
     fontSize: 14,

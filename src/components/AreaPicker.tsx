@@ -474,7 +474,8 @@ export function AreaPicker({
                 ref={flatListRef}
                 data={areas}
                 keyExtractor={(item) => item.id}
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
+                contentContainerStyle={{ paddingBottom: 32 }}
                 onScrollToIndexFailed={(info) => {
                   flatListRef.current?.scrollToOffset({
                     offset: info.highestMeasuredFrameIndex * info.averageItemLength,
