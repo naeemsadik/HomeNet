@@ -270,12 +270,15 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(11, 26, 23, 0.08)",
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
     gap: 12,
+    rowGap: 6,
   },
   specItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    flexShrink: 1,
   },
   specText: {
     color: "#5C6B66",

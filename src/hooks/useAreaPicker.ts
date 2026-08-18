@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Area } from "@/types/api";
 import { fetchAreas, fetchAreaChildren } from "@/services/areaApi";
+import { BANGLADESH_AREAS } from "@/data/bangladeshAreas";
 
 export interface UseAreaPickerOptions {
   initialCity?: string;
@@ -8,7 +9,7 @@ export interface UseAreaPickerOptions {
 }
 
 export function useAreaPicker(options: UseAreaPickerOptions = {}) {
-  const { initialCity, limit = 50 } = options;
+  const { initialCity, limit = 100 } = options;
 
   // Selected city filter chip
   const [selectedCity, setSelectedCity] = useState<string | null>(initialCity || null);
@@ -20,11 +21,55 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Available cities list (could be static or dynamic, we'll offer a set of primary ones and allow custom ones)
-  const availableCities = ["Dhaka", "Chittagong", "Sylhet", "Rajshahi", "Khulna"];
+  // Available major cities of Bangladesh
+  const availableCities = [
+    "Dhaka",
+    "Chottogram",
+    "Rajshahi",
+    "Khulna",
+    "Barishal",
+    "Rangpur",
+    "Maymensingh",
+    "Sylhet",
+    "Cumilla",
+    "Gazipur",
+  ];
 
   // Helper to get current parent ID
   const currentParentId = navPath.length > 0 ? navPath[navPath.length - 1].id : null;
+
+  // Helper to filter fallback areas locally
+  const getFallbackAreas = useCallback(() => {
+    let result = BANGLADESH_AREAS;
+
+    if (searchQuery.trim().length > 0) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(
+        (a) =>
+          a.name.toLowerCase().includes(q) ||
+          (a.city && a.city.toLowerCase().includes(q))
+      );
+      if (selectedCity) {
+        result = result.filter((a) => a.city?.toLowerCase() === selectedCity.toLowerCase());
+      }
+      return result;
+    }
+
+    if (currentParentId) {
+      return result.filter((a) => a.parent_area_id === currentParentId);
+    }
+
+    if (selectedCity) {
+      return result.filter(
+        (a) =>
+          a.city?.toLowerCase() === selectedCity.toLowerCase() &&
+          (!a.parent_area_id || a.type === "DISTRICT" || a.type === "CITY")
+      );
+    }
+
+    // Root level: return all top-level areas
+    return result.filter((a) => !a.parent_area_id || a.type === "DISTRICT" || a.type === "CITY");
+  }, [selectedCity, currentParentId, searchQuery]);
 
   // Fetch areas based on current path, selected city, and search
   const loadAreas = useCallback(async () => {
@@ -32,32 +77,33 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
     setError(null);
     try {
       if (searchQuery.trim().length > 0) {
-        // If searching, search globally or within chosen city
         const res = await fetchAreas({
           search: searchQuery.trim(),
           city: selectedCity || undefined,
           limit,
         });
-        setAreas(res.data?.items || []);
+        const items = res.data?.items || [];
+        setAreas(items.length > 0 ? items : getFallbackAreas());
       } else if (currentParentId) {
-        // If we have a drill down parent, get child areas
         const res = await fetchAreaChildren(currentParentId);
-        setAreas(res.data?.items || []);
+        const items = res.data?.items || [];
+        setAreas(items.length > 0 ? items : getFallbackAreas());
       } else {
-        // If we are at root, fetch root level areas (e.g. cities or main areas in the city)
         const res = await fetchAreas({
           city: selectedCity || undefined,
           parent_area_id: null,
           limit,
         });
-        setAreas(res.data?.items || []);
+        const items = res.data?.items || [];
+        setAreas(items.length > 0 ? items : getFallbackAreas());
       }
-    } catch (err: any) {
-      setError(err?.message || "Failed to load locations");
+    } catch {
+      // Fallback seamlessly to built-in comprehensive Bangladesh area dataset
+      setAreas(getFallbackAreas());
     } finally {
       setLoading(false);
     }
-  }, [selectedCity, currentParentId, searchQuery, limit]);
+  }, [selectedCity, currentParentId, searchQuery, limit, getFallbackAreas]);
 
   // Debounced/Triggered loading
   useEffect(() => {
