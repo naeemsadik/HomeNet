@@ -241,13 +241,13 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
               </AppLink>
             </>
           ) : (
-            /* Log In Button */
+            /* Log In Button (Figma node 183:14) */
             <AppLink
               href="/profile"
               accessibilityLabel="Log In"
-              style={styles.signUpPill}
+              style={styles.logInPill}
             >
-              <Text style={styles.signUpPillText}>Log In</Text>
+              <Text style={styles.logInPillText}>Log In</Text>
             </AppLink>
           )}
         </View>
@@ -628,8 +628,8 @@ const styles = StyleSheet.create({
     paddingRight: 16.8,
     paddingVertical: 24,
     backgroundColor: "#FFFFFF",
-    borderRightWidth: 0.8,
-    borderRightColor: "rgba(11, 26, 23, 0.08)",
+    borderRightWidth: 1.8,
+    borderRightColor: "rgba(11, 26, 23, 0.05)",
   },
   sidebarModal: {
     width: 260,
@@ -764,6 +764,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     paddingVertical: 16,
     gap: 16,
+    borderBottomWidth: 1.8,
+    borderColor: "rgba(11, 26, 23, 0.08)",
   },
   topbarTablet: {
     minHeight: 64,
@@ -796,7 +798,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     backgroundColor: "#FFFFFF",
     borderRadius: 999,
-    borderWidth: 0.8,
+    borderWidth: 1.5,
     borderColor: "rgba(11, 26, 23, 0.08)",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -818,15 +820,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 999,
     backgroundColor: "#0F6D55",
   },
   aiSearchBtnText: {
     color: "#FFFFFF",
     fontFamily: fonts.semiBold,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "600",
   },
   topRightActions: {
@@ -842,7 +844,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 999,
     backgroundColor: "#FFFFFF",
-    borderWidth: 1.3,
+    borderWidth: 1.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
   locationPillText: {
@@ -851,7 +853,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-  signUpPill: {
+  logInPill: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -859,10 +861,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 999,
     backgroundColor: "#FFFFFF",
-    borderWidth: 1.3,
+    borderWidth: 1.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
-  signUpPillText: {
+  logInPillText: {
     color: "#0B1A17",
     fontFamily: fonts.semiBold,
     fontSize: 14,
