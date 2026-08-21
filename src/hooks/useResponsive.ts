@@ -13,6 +13,7 @@ export function useResponsive() {
   // so that server-rendered HTML matches the client's initial render.
   const width = mounted ? windowWidth : 1200;
   const height = mounted ? windowHeight : 800;
+  //Osthir jinish!!
 
   const isPhone = mounted ? width <= 600 : false;
   const isTablet = mounted ? width <= 820 : false;
