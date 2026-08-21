@@ -25,7 +25,7 @@ export function UserDetailScreen({ userId }: { userId: string }) {
       setError(null);
       const stored = await getAuthSession();
       if (!stored) {
-        setError("You must be signed in to view user details.");
+        setError("You must be logged in to view user details.");
         return;
       }
       const result = await getUser(stored.accessToken, userId);

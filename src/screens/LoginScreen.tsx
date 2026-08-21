@@ -27,7 +27,7 @@ export function LoginScreen() {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
           <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.subtitle}>Sign in to continue exploring your local properties</Text>
+          <Text style={styles.subtitle}>Log in to continue exploring your local properties</Text>
 
           <ErrorBanner message={error} />
 
@@ -58,7 +58,7 @@ export function LoginScreen() {
           />
 
           <AuthButton
-            label="Sign In"
+            label="Log In"
             onPress={handleLogin}
             loading={loading}
             disabled={!email || !password}

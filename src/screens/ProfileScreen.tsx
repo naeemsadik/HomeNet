@@ -221,7 +221,7 @@ export function ProfileScreen() {
         {!user ? (
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>
-              {mode === "login" ? "Sign in to HomeNet" : "Create your HomeNet account"}
+              {mode === "login" ? "Log in to HomeNet" : "Create your HomeNet account"}
             </Text>
             <Text style={styles.supportText}>
               Access saved properties, list new homes, and verify pricing.
@@ -268,7 +268,7 @@ export function ProfileScreen() {
               />
 
               <AuthButton
-                label={mode === "login" ? "Sign In" : "Register"}
+                label={mode === "login" ? "Log In" : "Register"}
                 onPress={handleAuthSubmit}
                 loading={authLoading}
                 disabled={!email || !password || (mode === "register" && !fullName)}
@@ -278,7 +278,7 @@ export function ProfileScreen() {
               <Divider text="or" />
 
               <AuthButton
-                label={mode === "login" ? "Create an account" : "Back to Sign In"}
+                label={mode === "login" ? "Create an account" : "Back to Log In"}
                 onPress={() => {
                   setMode((current) => (current === "login" ? "register" : "login"));
                   setLocalError(null);

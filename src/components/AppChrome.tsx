@@ -32,6 +32,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { Brand } from "./Brand";
+import { AreaPicker } from "./AreaPicker";
 import { AppLink } from "./ui";
 
 export type ActivePage =
@@ -152,10 +153,12 @@ function SideBar({
   );
 }
 
-function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
+function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const { isTablet, width } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [headerSearch, setHeaderSearch] = useState("");
+  const [areaPickerOpen, setAreaPickerOpen] = useState(false);
+  const [selectedCity, setSelectedCity] = useState("Dhaka");
   const { user } = useAuthStore();
 
   return (
@@ -166,13 +169,6 @@ function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
       <View style={[styles.topbar, isTablet && styles.topbarTablet]}>
         {isTablet ? (
           <View style={styles.mobileBrandRow}>
-            <Pressable
-              accessibilityLabel="Open navigation"
-              onPress={onOpenMenu}
-              style={[styles.menuButton, webPointer]}
-            >
-              <Menu color="#0B1A17" size={21} />
-            </Pressable>
             <Brand compact />
           </View>
         ) : (
@@ -195,11 +191,16 @@ function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
 
         <View style={styles.topRightActions}>
           {/* Location Selector Pill */}
-          <View style={styles.locationPill}>
+          <Pressable
+            onPress={() => setAreaPickerOpen(true)}
+            style={[styles.locationPill, webPointer]}
+            accessibilityRole="button"
+            accessibilityLabel={`Select location, current: ${selectedCity}`}
+          >
             <MapPin color="#0F6D55" size={16} />
-            <Text style={styles.locationPillText}>Dhaka</Text>
+            <Text style={styles.locationPillText}>{selectedCity}</Text>
             <ChevronDown color="#0B1A17" size={16} />
-          </View>
+          </Pressable>
 
           {user ? (
             <>
@@ -251,6 +252,15 @@ function TopBar({ onOpenMenu }: { onOpenMenu: () => void }) {
           )}
         </View>
       </View>
+
+      <AreaPicker
+        visible={areaPickerOpen}
+        onClose={() => setAreaPickerOpen(false)}
+        onSelect={(area) => {
+          setSelectedCity(area?.city || area?.name || "Dhaka");
+        }}
+        selectedArea={null}
+      />
     </SafeAreaView>
   );
 }
@@ -446,14 +456,26 @@ function Footer() {
               onChangeText={setEmail}
               placeholder="Your email address"
               placeholderTextColor="rgba(11, 26, 23, 0.5)"
-              style={styles.newsletterInput}
+              style={[
+                styles.newsletterInput,
+                isPhone && styles.newsletterInputPhone,
+              ]}
               value={email}
             />
             <Pressable
               onPress={() => setSubscribed(true)}
-              style={[styles.subscribeButton, webPointer]}
+              style={[
+                styles.subscribeButton,
+                isPhone && styles.subscribeButtonPhone,
+                webPointer,
+              ]}
             >
-              <Text style={styles.subscribeButtonText}>
+              <Text
+                style={[
+                  styles.subscribeButtonText,
+                  isPhone && styles.subscribeButtonTextPhone,
+                ]}
+              >
                 {subscribed ? "Subscribed!" : "Subscribe"}
               </Text>
             </Pressable>
@@ -767,13 +789,13 @@ const styles = StyleSheet.create({
   headerSearchBar: {
     flex: 1,
     maxWidth: 576,
-    height: 45.6,
+    height: 48,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     paddingLeft: 16.8,
-    paddingRight: 8.8,
-    paddingVertical: 8.8,
+    paddingRight: 6.8,
+    paddingVertical: 4,
     backgroundColor: "#FFFFFF",
     borderRadius: 999,
     borderWidth: 1.5,
@@ -786,10 +808,12 @@ const styles = StyleSheet.create({
   },
   headerSearchInput: {
     flex: 1,
-    height: 24,
+    minWidth: 0,
+    height: 40,
     color: "#0B1A17",
     fontFamily: fonts.regular,
-    fontSize: 16,
+    fontSize: 15,
+    paddingVertical: 6,
     outlineStyle: "none",
   } as any,
   aiSearchBtn: {
@@ -1024,7 +1048,9 @@ const styles = StyleSheet.create({
   },
   newsletterCardPhone: {
     flexDirection: "column",
-    alignItems: "flex-start",
+    alignItems: "stretch",
+    padding: 18,
+    gap: 16,
   },
   newsletterLeft: {
     flex: 1,
@@ -1049,21 +1075,35 @@ const styles = StyleSheet.create({
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
     paddingLeft: 16.8,
-    paddingRight: 6.8,
-    paddingVertical: 6.8,
+    paddingRight: 4.8,
+    paddingVertical: 4,
+    minHeight: 50,
     width: 320,
+    maxWidth: "100%",
   },
   newsletterInputWrapPhone: {
     width: "100%",
+    minHeight: 48,
+    paddingLeft: 14,
+    paddingRight: 4,
+    paddingVertical: 4,
+    gap: 6,
   },
   newsletterInput: {
     flex: 1,
-    height: 24,
+    minWidth: 0,
+    height: 40,
     color: "#0B1A17",
     fontFamily: fonts.regular,
     fontSize: 14,
+    paddingVertical: 6,
     outlineStyle: "none",
   } as any,
+  newsletterInputPhone: {
+    fontSize: 14,
+    height: 38,
+    paddingVertical: 6,
+  },
   subscribeButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -1071,12 +1111,20 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
+  },
+  subscribeButtonPhone: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
   },
   subscribeButtonText: {
     color: "#FFFFFF",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
+  },
+  subscribeButtonTextPhone: {
+    fontSize: 12,
   },
 
   footerBottom: {

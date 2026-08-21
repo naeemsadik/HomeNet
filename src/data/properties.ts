@@ -258,12 +258,16 @@ export const allProperties: Property[] = [
 ];
 
 export const popularLocations = [
-  { name: "Gulshan", count: "1240 listings", image: propertyImages.tower },
-  { name: "Dhanmondi", count: "980 listings", image: propertyImages.interior },
-  { name: "Banani", count: "760 listings", image: propertyImages.skyline },
-  { name: "Bashundhara", count: "1520 listings", image: propertyImages.bright },
-  { name: "Uttara", count: "1100 listings", image: propertyImages.apartment },
-  { name: "Baridhara", count: "540 listings", image: propertyImages.house },
+  { name: "Dhaka", count: "8,420 listings", subtext: "Gulshan, Banani, Uttara...", image: "https://images.unsplash.com/photo-1588880331179-bc9b93a8cb5e?auto=format&fit=crop&w=600&q=80" },
+  { name: "Chottogram", count: "3,150 listings", subtext: "Agrabad, Nasirabad, Khulshi...", image: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=600&q=80" },
+  { name: "Sylhet", count: "1,890 listings", subtext: "Zindabazar, Upashahar...", image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80" },
+  { name: "Rajshahi", count: "1,420 listings", subtext: "Boalia, Motihar, Upashahar...", image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80" },
+  { name: "Khulna", count: "1,260 listings", subtext: "Sonadanga, Boyra, Nirala...", image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80" },
+  { name: "Barishal", count: "890 listings", subtext: "Sadar, Band Road, Rupatali...", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80" },
+  { name: "Rangpur", count: "780 listings", subtext: "Dhap, Modern Mor, Shalbon...", image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=600&q=80" },
+  { name: "Maymensingh", count: "670 listings", subtext: "Town Hall, Charpara...", image: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=600&q=80" },
+  { name: "Cumilla", count: "920 listings", subtext: "Kandirpar, Kotbari...", image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=600&q=80" },
+  { name: "Gazipur", count: "1,640 listings", subtext: "Joydebpur, Tongi, Chowrasta...", image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=600&q=80" },
 ];
 
 export const trustedPartners = [

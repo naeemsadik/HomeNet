@@ -113,7 +113,7 @@ export function RegisterScreen() {
           <Divider text="Already have an account?" />
 
           <AuthButton
-            label="Sign In instead"
+            label="Log In instead"
             onPress={() => {
               clearError();
               router.push("/profile"); // goes to login if not authenticated

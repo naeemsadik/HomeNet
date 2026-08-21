@@ -31,6 +31,7 @@ import {
 } from "react-native";
 import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from "react-native-svg";
 import { AppChrome } from "@/components/AppChrome";
+import { AreaPicker } from "@/components/AreaPicker";
 import { PropertyCard } from "@/components/PropertyCard";
 import { AppLink } from "@/components/ui";
 import {
@@ -60,6 +61,8 @@ export function HomeScreen() {
   const [favorites, setFavorites] = useState<number[]>([1, 7]);
   const [heroSearch, setHeroSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Apartment");
+  const [areaPickerOpen, setAreaPickerOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState("Dhaka");
 
   function toggleFavorite(id: number) {
     setFavorites((current) =>
@@ -109,28 +112,38 @@ export function HomeScreen() {
 
             {/* Hero Search Box */}
             <View style={[styles.heroSearchBox, isPhone && styles.heroSearchBoxPhone]}>
-              <Search color="#5C6B66" size={20} />
+              <Search color="#5C6B66" size={isPhone ? 18 : 20} />
               <TextInput
                 onChangeText={setHeroSearch}
-                placeholder="Try: 3 bedroom in Gulshan under 40000"
+                placeholder={isPhone ? "Search area, project or AI…" : "Try: 3 bedroom in Gulshan under 40000"}
                 placeholderTextColor="#5C6B66"
-                style={styles.heroSearchInput}
+                style={[styles.heroSearchInput, isPhone && styles.heroSearchInputPhone]}
                 value={heroSearch}
               />
-              <AppLink href={`/buy?query=${encodeURIComponent(heroSearch)}`} style={styles.heroAiSearchBtn}>
-                <Sparkles color="#FFFFFF" size={16} />
-                <Text style={styles.heroAiSearchBtnText}>AI Search</Text>
+              <AppLink
+                href={`/buy?query=${encodeURIComponent(heroSearch)}`}
+                style={[styles.heroAiSearchBtn, isPhone && styles.heroAiSearchBtnPhone]}
+              >
+                <Sparkles color="#FFFFFF" size={isPhone ? 14 : 16} />
+                <Text style={[styles.heroAiSearchBtnText, isPhone && styles.heroAiSearchBtnTextPhone]}>
+                  AI Search
+                </Text>
               </AppLink>
             </View>
 
             {/* Below Search Meta Row */}
             <View style={[styles.heroMetaRow, isPhone && styles.heroMetaRowPhone]}>
               {/* Location Pill */}
-              <View style={styles.heroLocationPill}>
+              <Pressable
+                onPress={() => setAreaPickerOpen(true)}
+                style={[styles.heroLocationPill, webPointer]}
+                accessibilityRole="button"
+                accessibilityLabel={`Select location, current: ${selectedLocation}`}
+              >
                 <MapPin color="#0B1A17" size={16} />
-                <Text style={styles.heroLocationPillText}>Dhaka</Text>
+                <Text style={styles.heroLocationPillText}>{selectedLocation}</Text>
                 <ChevronDown color="#5C6B66" size={16} />
-              </View>
+              </Pressable>
 
               <View style={styles.heroMetaItem}>
                 <ShieldCheck color="rgba(255, 255, 255, 0.9)" size={16} />
@@ -388,14 +401,21 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          9. POPULAR LOCATIONS (Figma data-node-id="1:1098")
+          9. MAJOR CITIES ACROSS BANGLADESH (Figma data-node-id="1:1098")
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.sectionTitle}>Popular locations</Text>
-            <Text style={styles.sectionSubtitle}>Where buyers are searching now</Text>
+            <Text style={styles.sectionTitle}>Explore major cities</Text>
+            <Text style={styles.sectionSubtitle}>Browse verified properties across Bangladesh</Text>
           </View>
+          <Pressable
+            onPress={() => setAreaPickerOpen(true)}
+            style={[styles.seeAllLink, webPointer]}
+          >
+            <Text style={styles.seeAllText}>All areas</Text>
+            <ChevronRight color="#0F6D55" size={16} />
+          </Pressable>
         </View>
 
         <ScrollView
@@ -404,10 +424,13 @@ export function HomeScreen() {
           contentContainerStyle={styles.locationsRow}
         >
           {popularLocations.map((loc) => (
-            <AppLink
-              href={`/buy?area=${encodeURIComponent(loc.name)}`}
+            <Pressable
               key={loc.name}
-              style={styles.locationCard}
+              onPress={() => {
+                setSelectedLocation(loc.name);
+                setAreaPickerOpen(true);
+              }}
+              style={[styles.locationCard, webPointer]}
             >
               <ImageBackground
                 source={{ uri: loc.image }}
@@ -415,15 +438,20 @@ export function HomeScreen() {
                 resizeMode="cover"
               >
                 <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.7)"]}
+                  colors={["transparent", "rgba(0,0,0,0.3)", "rgba(0,0,0,0.85)"]}
                   style={StyleSheet.absoluteFill}
                 />
                 <View style={styles.locationCardCaption}>
                   <Text style={styles.locationCardName}>{loc.name}</Text>
                   <Text style={styles.locationCardCount}>{loc.count}</Text>
+                  {"subtext" in loc && (
+                    <Text numberOfLines={1} style={styles.locationCardSubtext}>
+                      {(loc as any).subtext}
+                    </Text>
+                  )}
                 </View>
               </ImageBackground>
-            </AppLink>
+            </Pressable>
           ))}
         </ScrollView>
       </View>
@@ -555,6 +583,15 @@ export function HomeScreen() {
           ))}
         </View>
       </View>
+
+      <AreaPicker
+        visible={areaPickerOpen}
+        onClose={() => setAreaPickerOpen(false)}
+        onSelect={(area) => {
+          setSelectedLocation(area?.name || area?.city || "Dhaka");
+        }}
+        selectedArea={null}
+      />
     </AppChrome>
   );
 }
@@ -685,8 +722,9 @@ const styles = StyleSheet.create({
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
     paddingLeft: 20.8,
-    paddingRight: 8.8,
-    paddingVertical: 8.8,
+    paddingRight: 6.8,
+    paddingVertical: 6.8,
+    minHeight: 56,
     gap: 8,
     maxWidth: 672,
     shadowColor: "#000",
@@ -697,17 +735,27 @@ const styles = StyleSheet.create({
   },
   heroSearchBoxPhone: {
     width: "100%",
+    minHeight: 48,
     paddingLeft: 14,
-    paddingRight: 6,
+    paddingRight: 4,
+    paddingVertical: 4,
+    gap: 6,
   },
   heroSearchInput: {
     flex: 1,
-    height: 24,
+    minWidth: 0,
+    height: 42,
     color: "#0B1A17",
     fontFamily: fonts.regular,
     fontSize: 16,
+    paddingVertical: 8,
     outlineStyle: "none",
   } as any,
+  heroSearchInputPhone: {
+    fontSize: 14,
+    height: 38,
+    paddingVertical: 6,
+  },
   heroAiSearchBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -716,12 +764,21 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 16,
     paddingVertical: 10,
+    flexShrink: 0,
+  },
+  heroAiSearchBtnPhone: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    gap: 4,
   },
   heroAiSearchBtnText: {
     color: "#FFFFFF",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
+  },
+  heroAiSearchBtnTextPhone: {
+    fontSize: 12,
   },
   heroMetaRow: {
     flexDirection: "row",
@@ -935,25 +992,28 @@ const styles = StyleSheet.create({
     minWidth: 260,
   },
 
-  /* 9. Popular Locations */
+  /* 9. Popular Locations / Major Cities */
   locationsRow: {
     flexDirection: "row",
-    gap: 16,
-    width: "100%",
-    justifyContent: "space-between",
+    gap: 14,
+    paddingRight: 16,
   },
   locationCard: {
-    flex: 1,
-    minWidth: 120,
-    height: 132.4,
+    width: 172,
+    height: 154,
     borderRadius: 20,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   locationCardBg: {
     width: "100%",
     height: "100%",
     justifyContent: "flex-end",
-    padding: 12,
+    padding: 14,
   },
   locationCardCaption: {
     gap: 2,
@@ -963,13 +1023,20 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 16,
     fontWeight: "700",
-    lineHeight: 24,
+    lineHeight: 22,
   },
   locationCardCount: {
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#4AE8B0",
     fontFamily: fonts.semiBold,
     fontSize: 12,
     lineHeight: 16,
+  },
+  locationCardSubtext: {
+    color: "rgba(255, 255, 255, 0.75)",
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    lineHeight: 14,
+    marginTop: 1,
   },
 
   /* 10. Market Insights & Trusted Partners */
