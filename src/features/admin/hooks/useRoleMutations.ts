@@ -1,5 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import apiClient from "@/services/apiClient";
+import {
+  assignPermission as assignPermissionRequest,
+  assignRole as assignRoleRequest,
+  revokePermission as revokePermissionRequest,
+  revokeRole as revokeRoleRequest,
+} from "@/services/roleApi";
 import type { AssignRoleDto, RevokeRoleDto, AssignPermissionDto } from "../types/admin";
 
 export function useRoleMutations(userId?: string) {
@@ -14,14 +19,14 @@ export function useRoleMutations(userId?: string) {
 
   const assignRole = useMutation({
     mutationFn: async (dto: AssignRoleDto) => {
-      await apiClient.post("/v1/roles/assign", dto);
+      await assignRoleRequest(dto);
     },
     onSuccess: invalidateUserRoles,
   });
 
   const revokeRole = useMutation({
     mutationFn: async (dto: RevokeRoleDto) => {
-      await apiClient.delete("/v1/roles/revoke", { data: dto });
+      await revokeRoleRequest(dto);
     },
     onSuccess: invalidateUserRoles,
   });
@@ -41,14 +46,16 @@ export function usePermissionMutations(roleId?: string) {
 
   const assignPermission = useMutation({
     mutationFn: async (dto: AssignPermissionDto) => {
-      await apiClient.post(`/v1/roles/${roleId}/permissions`, dto);
+      if (!roleId) throw new Error("Role is required");
+      await assignPermissionRequest(roleId, dto);
     },
     onSuccess: invalidateRoles,
   });
 
   const revokePermission = useMutation({
     mutationFn: async (permissionId: string) => {
-      await apiClient.delete(`/v1/roles/${roleId}/permissions/${permissionId}`);
+      if (!roleId) throw new Error("Role is required");
+      await revokePermissionRequest(roleId, permissionId);
     },
     onSuccess: invalidateRoles,
   });

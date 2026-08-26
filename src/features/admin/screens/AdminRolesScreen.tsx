@@ -5,9 +5,10 @@ import { colorTokens, fontTokens } from "@/theme";
 import { useRoles } from "../hooks/useRoles";
 import { PermissionEditorModal } from "../components/PermissionEditorModal";
 import type { RoleWithPermissions } from "../types/admin";
+import { toApiError } from "@/services/apiClient";
 
 export function AdminRolesScreen() {
-  const { data: roles = [], isLoading } = useRoles();
+  const { data: roles = [], error, isLoading, refetch } = useRoles();
   const [editRole, setEditRole] = useState<RoleWithPermissions | null>(null);
 
   return (
@@ -21,6 +22,10 @@ export function AdminRolesScreen() {
         <View style={styles.center}>
           <ActivityIndicator color={colorTokens.primary} size="large" />
         </View>
+      ) : error ? (
+        <Text onPress={() => void refetch()} style={styles.errorText}>
+          {toApiError(error).message} Press to retry.
+        </Text>
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
           {roles.map((role) => (
@@ -97,6 +102,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 60,
   },
+  errorText: { color: colorTokens.error, fontFamily: fontTokens.regular, fontSize: 12 },
   list: { gap: 12, paddingBottom: 20 },
   roleCard: {
     padding: 18,

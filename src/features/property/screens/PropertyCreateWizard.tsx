@@ -28,6 +28,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Trash2,
   Upload,
   User,
   Video,
@@ -35,6 +36,7 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Pressable,
@@ -44,17 +46,43 @@ import {
   TextInput,
   View,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { AreaPicker } from "@/components/AreaPicker";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
+import { toApiError } from "@/services/apiClient";
+import type { UploadInput } from "@/services/upload";
 import { colors, fonts, webPointer } from "@/theme";
-import { useCreateProperty } from "../hooks/usePropertyMutations";
+import type { Area, PropertyType, UpsertPropertyDto } from "@/types/api";
+import {
+  useCreateProperty,
+  useDeleteMedia,
+  useSubmitForVerification,
+  useUpdateProperty,
+  useUploadMedia,
+} from "../hooks/usePropertyMutations";
 import { usePropertyWizardStore } from "../stores/propertyWizardStore";
 
 export function PropertyCreateWizard() {
   const { isPhone, isTablet } = useResponsive();
   const store = usePropertyWizardStore();
   const createPropertyMutation = useCreateProperty();
+  const updatePropertyMutation = useUpdateProperty();
+  const uploadMediaMutation = useUploadMedia();
+  const deleteMediaMutation = useDeleteMedia();
+  const submitMutation = useSubmitForVerification();
   const [searchQuery, setSearchQuery] = useState("");
+  const [areaPickerVisible, setAreaPickerVisible] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const selectedArea: Area | null = store.areaId
+    ? {
+        id: store.areaId,
+        name: store.areaName,
+        city: store.district || null,
+        parent_area_id: null,
+      }
+    : null;
 
   const steps = [
     { num: 1, title: "Basics" },
@@ -79,9 +107,87 @@ export function PropertyCreateWizard() {
     "Mosque",
   ];
 
-  const handleNext = () => {
-    if (store.currentStep < 5) {
-      store.setCurrentStep((store.currentStep + 1) as any);
+  const propertyTypes: { value: PropertyType; label: string }[] = [
+    { value: "residential", label: "Residential" },
+    { value: "commercial", label: "Commercial" },
+    { value: "land", label: "Land" },
+    { value: "parking", label: "Parking" },
+  ];
+
+  const buildDto = (): UpsertPropertyDto => ({
+    area_id: store.areaId || undefined,
+    title: store.title.trim() || undefined,
+    description: store.description.trim() || undefined,
+    type: store.type,
+    subtype: store.subtype.trim() || undefined,
+    listing_type: store.listingType,
+    price: store.price ? Number(store.price) : undefined,
+    price_currency: "BDT",
+    area_size: store.areaSize ? Number(store.areaSize) : undefined,
+    area_unit: "sqft",
+    location_lat: store.locationLat ?? undefined,
+    location_lng: store.locationLng ?? undefined,
+    address: store.address.trim() || undefined,
+    amenities: {
+      bedrooms: store.bedrooms ? Number(store.bedrooms) : undefined,
+      bathrooms: store.bathrooms ? Number(store.bathrooms) : undefined,
+      floor: store.floor ? Number(store.floor) : undefined,
+      facing: store.facing.trim() || undefined,
+      ...Object.fromEntries(
+        Object.entries(store.amenities).map(([key, value]) => [key.toLowerCase().replaceAll(" ", "_"), value]),
+      ),
+    },
+    virtual_tour_url: store.virtualTourUrl.trim() || undefined,
+    status: "draft",
+  });
+
+  const upsertDraft = async () => {
+    const result = store.propertyId
+      ? await updatePropertyMutation.mutateAsync({ id: store.propertyId, dto: buildDto() })
+      : await createPropertyMutation.mutateAsync(buildDto());
+    const propertyId = result.data?.id ?? store.propertyId;
+    if (!propertyId) throw new Error("The API did not return a property ID.");
+    store.setPropertyId(propertyId);
+    return propertyId;
+  };
+
+  const validateStep = (step: number) => {
+    if (step === 1 && (!store.title.trim() || !store.description.trim())) {
+      return "Add a title and description before continuing.";
+    }
+    if (step === 2 && (!(Number(store.price) > 0) || !(Number(store.areaSize) > 0))) {
+      return "Price and area must be greater than zero.";
+    }
+    if (
+      step === 3 &&
+      (!store.areaId ||
+        !store.address.trim() ||
+        store.locationLat === null ||
+        !Number.isFinite(store.locationLat) ||
+        store.locationLat < -90 ||
+        store.locationLat > 90 ||
+        store.locationLng === null ||
+        !Number.isFinite(store.locationLng) ||
+        store.locationLng < -180 ||
+        store.locationLng > 180)
+    ) {
+      return "Select an API area and enter the address, latitude, and longitude.";
+    }
+    return null;
+  };
+
+  const handleNext = async () => {
+    const validationError = validateStep(store.currentStep);
+    if (validationError) {
+      setLocalError(validationError);
+      return;
+    }
+    setLocalError(null);
+    try {
+      if (store.currentStep === 3) await upsertDraft();
+      if (store.currentStep < 5) store.setCurrentStep((store.currentStep + 1) as 1 | 2 | 3 | 4 | 5);
+    } catch (error) {
+      setLocalError(toApiError(error).message);
     }
   };
 
@@ -91,29 +197,125 @@ export function PropertyCreateWizard() {
     }
   };
 
-  const handlePublish = async () => {
+  const handleSaveDraft = async () => {
     try {
       store.setIsSubmitting(true);
-      await createPropertyMutation.mutateAsync({
-        title: store.title,
-        type: store.type,
-        listing_type: store.listingType,
-        price: Number(store.price) || 18500000,
-        area_id: store.areaId || "gulshan-2",
-        area_size: Number(store.areaSize) || 2150,
-        address: store.address,
-        description: store.description,
-      });
-
-      Alert.alert(
-        "Listing Published!",
-        "Your property is now live and visible to buyers.",
-        [{ text: "View My Listings", onPress: () => router.push("/my-properties") }]
-      );
-    } catch (err: any) {
-      Alert.alert("Success", "Your property draft has been published!", [
-        { text: "Go to My Listings", onPress: () => router.push("/my-properties") },
+      setLocalError(null);
+      await upsertDraft();
+      Alert.alert("Draft saved", "Your latest property details were saved.", [
+        {
+          text: "View my listings",
+          onPress: () => {
+            store.reset();
+            router.replace("/my-properties" as never);
+          },
+        },
       ]);
+    } catch (error) {
+      setLocalError(toApiError(error).message);
+    } finally {
+      store.setIsSubmitting(false);
+    }
+  };
+
+  const handlePickMedia = async (mediaType: "image" | "video") => {
+    if (!store.propertyId) {
+      setLocalError("Complete Location first so the draft can be created before media upload.");
+      return;
+    }
+    const existingCount = store.media.filter((media) => media.mediaType === mediaType).length;
+    const maxCount = mediaType === "image" ? 20 : 3;
+    if (existingCount >= maxCount) {
+      setLocalError(`You can upload up to ${maxCount} ${mediaType === "image" ? "images" : "videos"}.`);
+      return;
+    }
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setLocalError("Media library permission is required to upload property media.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: [mediaType === "image" ? "images" : "videos"],
+      quality: mediaType === "image" ? 0.85 : undefined,
+    });
+    if (result.canceled || !result.assets[0]) return;
+
+    const asset = result.assets[0];
+    const allowedTypes = mediaType === "image"
+      ? ["image/jpeg", "image/png", "image/webp"]
+      : ["video/mp4", "video/webm"];
+    if (asset.mimeType && !allowedTypes.includes(asset.mimeType)) {
+      setLocalError(
+        mediaType === "image"
+          ? "Images must be JPEG, PNG, or WebP."
+          : "Videos must be MP4 or WebM.",
+      );
+      return;
+    }
+    const maxBytes = mediaType === "image" ? 10 * 1024 * 1024 : 100 * 1024 * 1024;
+    if (asset.fileSize && asset.fileSize > maxBytes) {
+      setLocalError(`${mediaType === "image" ? "Images" : "Videos"} must be under ${mediaType === "image" ? "10 MB" : "100 MB"}.`);
+      return;
+    }
+
+    const file: UploadInput = asset.file ?? {
+      uri: asset.uri,
+      name: asset.fileName || (mediaType === "image" ? "property.jpg" : "property.mp4"),
+      type: asset.mimeType || (mediaType === "image" ? "image/jpeg" : "video/mp4"),
+    };
+    try {
+      setLocalError(null);
+      const response = await uploadMediaMutation.mutateAsync({
+        propertyId: store.propertyId,
+        file,
+        type: mediaType,
+        displayOrder: store.media.length,
+      });
+      if (!response.data) throw new Error("The API did not return uploaded media.");
+      store.addMedia({
+        id: response.data.id,
+        url: response.data.url,
+        displayOrder: response.data.display_order,
+        mediaType: response.data.media_type,
+      });
+    } catch (error) {
+      setLocalError(toApiError(error).message);
+    }
+  };
+
+  const handleDeleteMedia = async (mediaId: string) => {
+    try {
+      setLocalError(null);
+      await deleteMediaMutation.mutateAsync({ mediaId, propertyId: store.propertyId ?? undefined });
+      store.removeMedia(mediaId);
+    } catch (error) {
+      setLocalError(toApiError(error).message);
+    }
+  };
+
+  const handleSubmit = async () => {
+    const errors = [validateStep(1), validateStep(2), validateStep(3)].filter(Boolean);
+    if (!store.media.some((media) => media.mediaType === "image")) errors.push("Upload at least one property image.");
+    if (errors.length) {
+      setLocalError(errors[0] as string);
+      return;
+    }
+    try {
+      store.setIsSubmitting(true);
+      setLocalError(null);
+      const propertyId = await upsertDraft();
+      await submitMutation.mutateAsync(propertyId);
+      Alert.alert("Submitted for verification", "Your listing is pending review.", [
+        {
+          text: "View my listings",
+          onPress: () => {
+            store.reset();
+            router.replace("/my-properties" as never);
+          },
+        },
+      ]);
+    } catch (error) {
+      setLocalError(toApiError(error).message);
     } finally {
       store.setIsSubmitting(false);
     }
@@ -239,7 +441,9 @@ export function PropertyCreateWizard() {
                   <View key={st.num} style={styles.stepItemWrap}>
                     <View style={styles.stepCircleWrap}>
                       <Pressable
-                        onPress={() => store.setCurrentStep(st.num as any)}
+                        onPress={() => {
+                          if (st.num < store.currentStep) store.setCurrentStep(st.num as 1 | 2 | 3 | 4 | 5);
+                        }}
                         style={[
                           styles.stepCircle,
                           isDone && styles.stepCircleDone,
@@ -272,6 +476,11 @@ export function PropertyCreateWizard() {
 
           {/* Wizard Step Main Card */}
           <View style={styles.stepCard}>
+            {localError ? (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorBannerText}>{localError}</Text>
+              </View>
+            ) : null}
             {/* STEP 1: BASICS */}
             {store.currentStep === 1 && (
               <View style={styles.stepFormBody}>
@@ -286,9 +495,34 @@ export function PropertyCreateWizard() {
                   />
                 </View>
 
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>Property category</Text>
+                  <View style={styles.toggleRow}>
+                    {propertyTypes.map((propertyType) => (
+                      <Pressable
+                        key={propertyType.value}
+                        onPress={() => store.setBasics({ type: propertyType.value })}
+                        style={[
+                          styles.toggleBtn,
+                          store.type === propertyType.value && styles.toggleBtnActive,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.toggleBtnText,
+                            store.type === propertyType.value && styles.toggleBtnTextActive,
+                          ]}
+                        >
+                          {propertyType.label}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
                 <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
                   <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Property Type</Text>
+                    <Text style={styles.formLabel}>Subtype</Text>
                     <TextInput
                       onChangeText={(v) => store.setBasics({ subtype: v })}
                       placeholder="e.g. Apartment / House / Commercial"
@@ -348,7 +582,7 @@ export function PropertyCreateWizard() {
                 {/* Price & Area Size Row */}
                 <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
                   <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Price (৳)</Text>
+                    <Text style={styles.formLabel}>Price (BDT)</Text>
                     <TextInput
                       keyboardType="numeric"
                       onChangeText={(v) => store.setDetails({ price: v })}
@@ -466,48 +700,47 @@ export function PropertyCreateWizard() {
 
                 <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
                   <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>District</Text>
-                    <TextInput
-                      onChangeText={(v) => store.setLocation({ district: v })}
-                      placeholder="Dhaka"
-                      placeholderTextColor="#899790"
-                      style={styles.formInput}
-                      value={store.district}
-                    />
-                  </View>
-
-                  <View style={[styles.formGroup, { flex: 1 }]}>
                     <Text style={styles.formLabel}>Area / Neighbourhood</Text>
-                    <TextInput
-                      onChangeText={(v) => store.setLocation({ areaName: v })}
-                      placeholder="Gulshan 2"
-                      placeholderTextColor="#899790"
-                      style={styles.formInput}
-                      value={store.areaName}
-                    />
+                    <Pressable
+                      onPress={() => setAreaPickerVisible(true)}
+                      style={({ pressed }) => [styles.formInput, styles.areaPickerButton, pressed && styles.pressed]}
+                    >
+                      <MapPin color="#0F6D55" size={17} />
+                      <Text style={[styles.areaPickerText, !store.areaId && styles.areaPickerPlaceholder]}>
+                        {store.areaId
+                          ? [store.areaName, store.district].filter(Boolean).join(", ")
+                          : "Select an area from the API"}
+                      </Text>
+                    </Pressable>
                   </View>
                 </View>
 
-                {/* Map View Section */}
-                <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>Pin location on map</Text>
-                  <View style={styles.mapContainer}>
-                    <Image
-                      source={{ uri: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80" }}
-                      style={styles.mapImage}
+                <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
+                  <View style={[styles.formGroup, { flex: 1 }]}>
+                    <Text style={styles.formLabel}>Latitude</Text>
+                    <TextInput
+                      keyboardType="numbers-and-punctuation"
+                      onChangeText={(value) =>
+                        store.setLocation({ locationLat: value.trim() === "" ? null : Number(value) })
+                      }
+                      placeholder="23.8103"
+                      placeholderTextColor="#899790"
+                      style={styles.formInput}
+                      value={store.locationLat === null ? "" : String(store.locationLat)}
                     />
-                    <View style={styles.mapOverlayCenter}>
-                      <View style={styles.mapTooltip}>
-                        <Text style={styles.mapTooltipText}>Dhanmondi, Dhaka 1205, Bangladesh</Text>
-                      </View>
-                      <View style={styles.mapPinCircle}>
-                        <MapPin color="#FFFFFF" size={18} />
-                      </View>
-                    </View>
-
-                    <View style={styles.mapCoordPill}>
-                      <Text style={styles.mapCoordText}>Drag pin to adjust · 23.79°N, 90.41°E</Text>
-                    </View>
+                  </View>
+                  <View style={[styles.formGroup, { flex: 1 }]}>
+                    <Text style={styles.formLabel}>Longitude</Text>
+                    <TextInput
+                      keyboardType="numbers-and-punctuation"
+                      onChangeText={(value) =>
+                        store.setLocation({ locationLng: value.trim() === "" ? null : Number(value) })
+                      }
+                      placeholder="90.4125"
+                      placeholderTextColor="#899790"
+                      style={styles.formInput}
+                      value={store.locationLng === null ? "" : String(store.locationLng)}
+                    />
                   </View>
                 </View>
               </View>
@@ -518,46 +751,83 @@ export function PropertyCreateWizard() {
               <View style={styles.stepFormBody}>
                 <Text style={styles.formLabel}>Property images</Text>
                 <View style={styles.mediaGrid}>
-                  {store.media.map((img, idx) => (
-                    <View key={img.id} style={styles.mediaCard}>
-                      <Image source={{ uri: img.url }} style={styles.mediaImg} />
-                      {idx === 0 && (
+                  {store.media.filter((media) => media.mediaType === "image").map((media, idx) => (
+                    <View key={media.id} style={styles.mediaCard}>
+                      <Image source={{ uri: media.url }} style={styles.mediaImg} />
+                      {idx === 0 ? (
                         <View style={styles.coverBadge}>
                           <Text style={styles.coverBadgeText}>Cover</Text>
                         </View>
-                      )}
+                      ) : null}
+                      <Pressable onPress={() => void handleDeleteMedia(media.id)} style={styles.removeMediaButton}>
+                        <Trash2 color="#FFFFFF" size={14} />
+                      </Pressable>
                     </View>
                   ))}
 
-                  {/* Add Media Card */}
-                  <Pressable style={({ pressed }) => [styles.addMediaCard, webPointer, pressed && styles.pressed]}>
-                    <Camera color="#5C6B66" size={28} />
-                    <Text style={styles.addMediaText}>Add</Text>
+                  <Pressable
+                    disabled={uploadMediaMutation.isPending}
+                    onPress={() => void handlePickMedia("image")}
+                    style={({ pressed }) => [styles.addMediaCard, webPointer, pressed && styles.pressed]}
+                  >
+                    {uploadMediaMutation.isPending ? (
+                      <ActivityIndicator color="#0F6D55" />
+                    ) : (
+                      <Camera color="#5C6B66" size={28} />
+                    )}
+                    <Text style={styles.addMediaText}>Add image</Text>
                   </Pressable>
                 </View>
+                <Text style={styles.uploadHint}>JPEG, PNG, or WebP. Up to 20 images, 10 MB each.</Text>
 
-                {/* Video Upload Dropzone */}
                 <View style={{ marginTop: 16 }}>
                   <Text style={styles.formLabel}>Property video (optional)</Text>
-                  <View style={styles.videoDropzone}>
+                  {store.media.filter((media) => media.mediaType === "video").map((media) => (
+                    <View key={media.id} style={styles.uploadedVideoRow}>
+                      <Video color="#0F6D55" size={20} />
+                      <Text numberOfLines={1} style={styles.uploadedVideoText}>{media.url}</Text>
+                      <Pressable onPress={() => void handleDeleteMedia(media.id)}>
+                        <Trash2 color="#D4183D" size={17} />
+                      </Pressable>
+                    </View>
+                  ))}
+                  <Pressable
+                    disabled={uploadMediaMutation.isPending}
+                    onPress={() => void handlePickMedia("video")}
+                    style={styles.videoDropzone}
+                  >
                     <Video color="#5C6B66" size={24} />
                     <Text style={styles.videoDropzoneText}>Upload a walkthrough video</Text>
-                  </View>
+                  </Pressable>
+                  <Text style={styles.uploadHint}>MP4 or WebM. Up to 3 videos, 100 MB each.</Text>
+                </View>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.formLabel}>Virtual tour URL (optional)</Text>
+                  <TextInput
+                    autoCapitalize="none"
+                    keyboardType="url"
+                    onChangeText={store.setVirtualTourUrl}
+                    placeholder="https://example.com/virtual-tour"
+                    placeholderTextColor="#899790"
+                    style={styles.formInput}
+                    value={store.virtualTourUrl}
+                  />
                 </View>
               </View>
             )}
 
-            {/* STEP 5: REVIEW & PUBLISH (Figma Node 57:1790) */}
+            {/* STEP 5: REVIEW */}
             {store.currentStep === 5 && (
               <View style={styles.stepFormBody}>
                 {/* Ready to Publish Alert Banner */}
                 <View style={styles.readyAlertBanner}>
                   <View style={styles.readyAlertTitleRow}>
                     <CheckCircle2 color="#0F6D55" size={18} />
-                    <Text style={styles.readyAlertTitle}>Ready to publish</Text>
+                    <Text style={styles.readyAlertTitle}>Ready for verification</Text>
                   </View>
                   <Text style={styles.readyAlertDesc}>
-                    Review your listing below. You can save it as a draft or publish it live for buyers.
+                    Review your listing below. Submission sends it to the verification queue.
                   </Text>
                 </View>
 
@@ -571,37 +841,37 @@ export function PropertyCreateWizard() {
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Type</Text>
                     <Text style={styles.reviewCardValue}>
-                      {store.subtype || "Residential"} · {store.listingType === "sale" ? "For Sale" : "For Rent"}
+                      {store.subtype || store.type} · {store.listingType === "sale" ? "For Sale" : "For Rent"}
                     </Text>
                   </View>
 
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Price</Text>
                     <Text style={styles.reviewCardValue}>
-                      ৳ {(Number(store.price) / 10000000).toFixed(2)} Cr
+                      BDT {Number(store.price).toLocaleString()}
                     </Text>
                   </View>
 
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Area</Text>
-                    <Text style={styles.reviewCardValue}>{store.areaSize || "2,150"} sqft</Text>
+                    <Text style={styles.reviewCardValue}>{store.areaSize || "Not specified"} sqft</Text>
                   </View>
 
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Beds / Baths</Text>
                     <Text style={styles.reviewCardValue}>
-                      {store.bedrooms || "3"} / {store.bathrooms || "3"}
+                      {store.bedrooms || "Not specified"} / {store.bathrooms || "Not specified"}
                     </Text>
                   </View>
 
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Facing</Text>
-                    <Text style={styles.reviewCardValue}>{store.facing || "South"}</Text>
+                    <Text style={styles.reviewCardValue}>{store.facing || "Not specified"}</Text>
                   </View>
 
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Location</Text>
-                    <Text style={styles.reviewCardValue}>{store.address || "Gulshan 2, Dhaka"}</Text>
+                    <Text style={styles.reviewCardValue}>{store.address || "Not specified"}</Text>
                   </View>
 
                   <View style={styles.reviewCard}>
@@ -612,7 +882,7 @@ export function PropertyCreateWizard() {
                   </View>
 
                   <View style={styles.reviewCard}>
-                    <Text style={styles.reviewCardLabel}>Images</Text>
+                    <Text style={styles.reviewCardLabel}>Media</Text>
                     <Text style={styles.reviewCardValue}>{store.media.length} uploaded</Text>
                   </View>
                 </View>
@@ -635,10 +905,8 @@ export function PropertyCreateWizard() {
 
               <View style={styles.wizardRightActions}>
                 <Pressable
-                  onPress={() => {
-                    Alert.alert("Draft Saved", "Your property draft has been saved.");
-                    router.push("/my-properties");
-                  }}
+                  disabled={store.isSubmitting}
+                  onPress={() => void handleSaveDraft()}
                   style={({ pressed }) => [styles.saveDraftBtn, webPointer, pressed && styles.pressed]}
                 >
                   <Building2 color="#0B1A17" size={16} />
@@ -647,7 +915,8 @@ export function PropertyCreateWizard() {
 
                 {store.currentStep < 5 ? (
                   <Pressable
-                    onPress={handleNext}
+                    disabled={store.isSubmitting}
+                    onPress={() => void handleNext()}
                     style={({ pressed }) => [styles.nextBtn, webPointer, pressed && styles.pressed]}
                   >
                     <Text style={styles.nextBtnText}>Next</Text>
@@ -655,11 +924,16 @@ export function PropertyCreateWizard() {
                   </Pressable>
                 ) : (
                   <Pressable
-                    onPress={handlePublish}
+                    disabled={store.isSubmitting}
+                    onPress={() => void handleSubmit()}
                     style={({ pressed }) => [styles.publishBtn, webPointer, pressed && styles.pressed]}
                   >
-                    <Send color="#FFFFFF" size={16} />
-                    <Text style={styles.publishBtnText}>Publish listing</Text>
+                    {store.isSubmitting ? (
+                      <ActivityIndicator color="#FFFFFF" size="small" />
+                    ) : (
+                      <Send color="#FFFFFF" size={16} />
+                    )}
+                    <Text style={styles.publishBtnText}>Submit for verification</Text>
                   </Pressable>
                 )}
               </View>
@@ -667,6 +941,18 @@ export function PropertyCreateWizard() {
           </View>
         </ScrollView>
       </View>
+      <AreaPicker
+        visible={areaPickerVisible}
+        onClose={() => setAreaPickerVisible(false)}
+        selectedArea={selectedArea}
+        initialCity={store.district || undefined}
+        onSelect={(area) => {
+          if (!area) return;
+          store.setLocation({ areaId: area.id, areaName: area.name, district: area.city ?? "" });
+          setAreaPickerVisible(false);
+          setLocalError(null);
+        }}
+      />
     </View>
   );
 }
@@ -926,6 +1212,14 @@ const styles = StyleSheet.create({
     padding: 32,
     gap: 24,
   },
+  errorBanner: {
+    backgroundColor: "#FDEBEC",
+    borderColor: "#F4B9C1",
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 12,
+  },
+  errorBannerText: { color: "#A50F2D", fontFamily: fonts.semiBold, fontSize: 13 },
   stepFormBody: {
     gap: 20,
   },
@@ -946,6 +1240,9 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     color: "#0B1A17",
   },
+  areaPickerButton: { alignItems: "center", flexDirection: "row", gap: 10 },
+  areaPickerText: { color: "#0B1A17", flex: 1, fontFamily: fonts.regular, fontSize: 14 },
+  areaPickerPlaceholder: { color: "#899790" },
   formRow: {
     flexDirection: "row",
     gap: 16,
@@ -1087,6 +1384,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: fonts.bold,
   },
+  removeMediaButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(11,26,23,0.82)",
+    borderRadius: 16,
+    height: 30,
+    justifyContent: "center",
+    position: "absolute",
+    right: 8,
+    top: 8,
+    width: 30,
+  },
   addMediaCard: {
     width: 140,
     height: 140,
@@ -1120,6 +1428,17 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     color: "#5C6B66",
   },
+  uploadHint: { color: "#6B7D78", fontFamily: fonts.regular, fontSize: 12, marginTop: 8 },
+  uploadedVideoRow: {
+    alignItems: "center",
+    backgroundColor: "#E7F2EE",
+    borderRadius: 10,
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 8,
+    padding: 12,
+  },
+  uploadedVideoText: { color: "#0B1A17", flex: 1, fontFamily: fonts.regular, fontSize: 13 },
   readyAlertBanner: {
     backgroundColor: "#E7F2EE",
     borderRadius: 16,

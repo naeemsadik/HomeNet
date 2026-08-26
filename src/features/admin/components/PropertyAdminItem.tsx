@@ -57,20 +57,20 @@ export function PropertyAdminItemRow({
             <Pressable
               onPress={() => onApprove(item.id)}
               style={[styles.actionBtn, { backgroundColor: colorTokens.primaryLight }]}
-              accessibilityLabel="Approve property"
+              accessibilityLabel="Activate property"
               disabled={isMutating}
             >
               <Check color={colorTokens.primary} size={14} />
-              <Text style={[styles.actionText, { color: colorTokens.primary }]}>Approve</Text>
+              <Text style={[styles.actionText, { color: colorTokens.primary }]}>Activate</Text>
             </Pressable>
             <Pressable
               onPress={() => onReject(item.id)}
               style={[styles.actionBtn, { backgroundColor: colorTokens.warningLight }]}
-              accessibilityLabel="Reject property"
+              accessibilityLabel="Move property to draft"
               disabled={isMutating}
             >
               <X color={colorTokens.warning} size={14} />
-              <Text style={[styles.actionText, { color: colorTokens.warning }]}>Reject</Text>
+              <Text style={[styles.actionText, { color: colorTokens.warning }]}>Move to draft</Text>
             </Pressable>
           </>
         ) : null}

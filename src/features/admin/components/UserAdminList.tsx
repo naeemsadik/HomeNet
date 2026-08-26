@@ -12,6 +12,7 @@ interface UserAdminListProps {
   onSearchChange: (query: string) => void;
   onManageRoles: (user: UserWithRoles) => void;
   onView: (userId: string) => void;
+  onDelete: (user: UserWithRoles) => void;
 }
 
 export function UserAdminList({
@@ -22,6 +23,7 @@ export function UserAdminList({
   onSearchChange,
   onManageRoles,
   onView,
+  onDelete,
 }: UserAdminListProps) {
   return (
     <View style={styles.container}>
@@ -52,6 +54,7 @@ export function UserAdminList({
               item={item}
               onManageRoles={onManageRoles}
               onView={onView}
+              onDelete={onDelete}
             />
           )}
           contentContainerStyle={styles.list}

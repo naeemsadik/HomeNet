@@ -18,7 +18,7 @@ export function LoginScreen() {
     }
     const success = await login({ email: email.trim(), password });
     if (success) {
-      router.replace("/profile");
+      router.replace("/profile" as never);
     }
   };
 

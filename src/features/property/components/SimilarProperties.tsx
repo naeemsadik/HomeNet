@@ -11,7 +11,7 @@ import { router } from "expo-router";
 import { MapPin } from "lucide-react-native";
 import { colorTokens, fontTokens, webPointer } from "@/theme";
 import { useSimilarProperties } from "../hooks/usePropertyDetail";
-import type { PropertyDetail } from "../hooks/usePropertyDetail";
+import type { Property } from "../types/property";
 
 interface SimilarPropertiesProps {
   type: string;
@@ -29,7 +29,7 @@ function formatPrice(price: number, currency: string): string {
   return `${currency} ${price.toLocaleString()}`;
 }
 
-function SimilarCard({ property }: { property: PropertyDetail }) {
+function SimilarCard({ property }: { property: Property }) {
   const coverImage =
     property.media?.find((m) => m.media_type === "image")?.url ?? null;
 

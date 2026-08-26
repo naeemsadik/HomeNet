@@ -4,13 +4,11 @@ import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyForm } from "../components/PropertyForm";
 import { useUpdateProperty, useUploadMedia } from "../hooks/usePropertyMutations";
-import type { CreatePropertyDto } from "@/types/api";
+import type { UpsertPropertyDto } from "@/types/api";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, fonts } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "@/services/apiClient";
-import type { ApiResponse } from "@/types/api";
-import type { Property } from "../types/property";
+import { getPropertyById } from "@/services/propertyApi";
 
 export function PropertyEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -18,16 +16,16 @@ export function PropertyEditScreen() {
   const updateProperty = useUpdateProperty();
   const uploadMedia = useUploadMedia();
 
-  const { data: propertyData, isLoading } = useQuery({
+  const { data: propertyData, error: propertyError, isLoading } = useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
-      const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/properties/${id}`);
-      return data.data;
+      const response = await getPropertyById(id!);
+      return response.data;
     },
     enabled: !!id,
   });
 
-  const handleSubmit = async (dto: CreatePropertyDto, images: Array<{ uri: string; file?: Blob | File }>) => {
+  const handleSubmit = async (dto: UpsertPropertyDto, images: Array<{ uri: string; file?: Blob | File }>) => {
     if (!id) return;
     try {
       const result = await updateProperty.mutateAsync({ id, dto });
@@ -57,17 +55,19 @@ export function PropertyEditScreen() {
     );
   }
 
-  if (!propertyData) {
+  if (propertyError || !propertyData) {
     return (
       <AppChrome active="sell">
         <View style={styles.center}>
-          <Text style={styles.errorText}>Property not found.</Text>
+          <Text style={styles.errorText}>
+            {propertyError instanceof Error ? propertyError.message : "Property not found."}
+          </Text>
         </View>
       </AppChrome>
     );
   }
 
-  const initialData: Partial<CreatePropertyDto> = {
+  const initialData: Partial<UpsertPropertyDto> = {
     title: propertyData.title,
     description: propertyData.description ?? undefined,
     type: propertyData.type,
@@ -75,9 +75,14 @@ export function PropertyEditScreen() {
     price: propertyData.price,
     area_id: propertyData.area_id,
     address: propertyData.address ?? undefined,
-    bedrooms: propertyData.bedrooms,
-    bathrooms: propertyData.bathrooms,
     area_size: propertyData.area_size ?? undefined,
+    area_unit: propertyData.area_unit ?? undefined,
+    price_currency: propertyData.price_currency,
+    location_lat: propertyData.location_lat ?? undefined,
+    location_lng: propertyData.location_lng ?? undefined,
+    amenities: propertyData.amenities ?? undefined,
+    subtype: propertyData.subtype ?? undefined,
+    virtual_tour_url: propertyData.virtual_tour_url ?? undefined,
   };
 
   const initialImages = (propertyData.media ?? [])
@@ -90,6 +95,7 @@ export function PropertyEditScreen() {
         <PropertyForm
           mode="edit"
           initialData={initialData}
+          initialArea={propertyData.area ?? null}
           initialImages={initialImages}
           onSubmit={handleSubmit}
           onCancel={() => router.back()}

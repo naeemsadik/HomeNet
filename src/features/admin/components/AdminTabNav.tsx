@@ -1,9 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Building2, Settings, ShieldCheck, Users } from "lucide-react-native";
+import { Building2, MapPinned, Settings, ShieldCheck, Users } from "lucide-react-native";
 import { colorTokens, fontTokens } from "@/theme";
 import type { UserRole } from "../types/admin";
 
-type AdminTab = "properties" | "users" | "roles" | "settings";
+type AdminTab = "properties" | "users" | "roles" | "areas" | "settings";
 
 interface AdminTabNavProps {
   active: AdminTab;
@@ -15,11 +15,12 @@ const TABS: {
   key: AdminTab;
   label: string;
   icon: typeof Building2;
-  permission?: string;
+  permissions?: string[];
 }[] = [
-  { key: "properties", label: "Properties", icon: Building2, permission: "manage_properties" },
-  { key: "users", label: "Users", icon: Users, permission: "manage_users" },
-  { key: "roles", label: "Roles", icon: ShieldCheck, permission: "manage_roles" },
+  { key: "properties", label: "Properties", icon: Building2, permissions: ["manage_properties", "moderate_listing", "review_verification"] },
+  { key: "users", label: "Users", icon: Users, permissions: ["manage_users"] },
+  { key: "roles", label: "Roles", icon: ShieldCheck, permissions: ["view_roles", "manage_roles"] },
+  { key: "areas", label: "Areas", icon: MapPinned, permissions: ["manage_areas"] },
   { key: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -35,8 +36,8 @@ function isAdmin(userRoles: UserRole[]): boolean {
 
 export function AdminTabNav({ active, onChange, userRoles }: AdminTabNavProps) {
   const visibleTabs = TABS.filter((tab) => {
-    if (!tab.permission) return true;
-    return isAdmin(userRoles) || hasPermission(userRoles, tab.permission);
+    if (!tab.permissions) return true;
+    return isAdmin(userRoles) || tab.permissions.some((permission) => hasPermission(userRoles, permission));
   });
 
   return (

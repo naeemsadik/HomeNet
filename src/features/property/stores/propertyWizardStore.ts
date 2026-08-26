@@ -7,6 +7,7 @@ export interface WizardMediaItem {
   id: string;
   url: string;
   displayOrder: number;
+  mediaType: "image" | "video";
 }
 
 export interface WizardState {
@@ -55,57 +56,40 @@ export interface WizardState {
   setAmenities: (amenities: Record<string, boolean>) => void;
   toggleAmenity: (key: string) => void;
   setVirtualTourUrl: (url: string) => void;
-  setPropertyId: (id: string) => void;
+  setPropertyId: (id: string | null) => void;
   setCurrentStep: (step: 1 | 2 | 3 | 4 | 5) => void;
   setIsSubmitting: (v: boolean) => void;
   reset: () => void;
 }
 
 const initialState = {
-  title: "Premium 3 Bedroom Apartment",
+  title: "",
   type: "residential" as PropertyType,
-  subtype: "Apartment",
+  subtype: "",
   listingType: "sale" as ListingType,
-  description: "Spacious apartment with top amenities and modern finishings.",
+  description: "",
 
-  price: "18500000",
-  areaSize: "2150",
-  bedrooms: "3",
-  bathrooms: "3",
-  floor: "7",
-  facing: "South",
-  amenities: {
-    Lift: true,
-    Parking: true,
-    Generator: false,
-    Gym: false,
-    Pool: false,
-    Security: false,
-    Garden: false,
-    "Smart Home": false,
-    CCTV: false,
-    Rooftop: false,
-    "Servant Quarter": false,
-    Mosque: false,
-  } as Record<string, boolean>,
+  price: "",
+  areaSize: "",
+  bedrooms: "",
+  bathrooms: "",
+  floor: "",
+  facing: "",
+  amenities: {} as Record<string, boolean>,
 
-  district: "Dhaka",
-  areaId: "gulshan-2",
-  areaName: "Gulshan 2",
-  address: "House 12, Road 45, Gulshan 2",
-  locationLat: 23.79,
-  locationLng: 90.41,
+  district: "",
+  areaId: "",
+  areaName: "",
+  address: "",
+  locationLat: null,
+  locationLng: null,
 
-  media: [
-    { id: "img-1", url: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80", displayOrder: 0 },
-    { id: "img-2", url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=600&q=80", displayOrder: 1 },
-    { id: "img-3", url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80", displayOrder: 2 },
-  ] as WizardMediaItem[],
+  media: [] as WizardMediaItem[],
   primaryMediaIndex: 0,
   virtualTourUrl: "",
 
   propertyId: null as string | null,
-  currentStep: 2 as 1 | 2 | 3 | 4 | 5,
+  currentStep: 1 as 1 | 2 | 3 | 4 | 5,
   isSubmitting: false,
 };
 

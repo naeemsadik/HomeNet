@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "@/services/apiClient";
-import type { ApiResponse } from "@/types/api";
+import { getProperties, getPropertyById } from "@/services/propertyApi";
 
 export interface PropertyDetailArea {
   id: string;
@@ -56,13 +55,12 @@ export function usePropertyDetail(id: string) {
   return useQuery({
     queryKey: ["property", id],
     queryFn: async () => {
-      const { data } = await apiClient.get<ApiResponse<PropertyDetail>>(
-        `/v1/properties/${id}`,
-      );
-      if (!data.data) throw new Error("Property not found");
-      return data.data;
+      const response = await getPropertyById(id);
+      if (!response.data) throw new Error(response.message || "Property not found");
+      return response.data as PropertyDetail;
     },
     enabled: !!id,
+    refetchInterval: (query) => query.state.data?.status === "pending" ? 10_000 : false,
   });
 }
 
@@ -74,12 +72,15 @@ export function useSimilarProperties(
   return useQuery({
     queryKey: ["properties", "similar", type, areaId, excludeId],
     queryFn: async () => {
-      const { data } = await apiClient.get<
-        ApiResponse<{ items: PropertyDetail[]; total: number }>
-      >("/v1/properties", {
-        params: { type, area_id: areaId, limit: 5, status: "active" },
+      const response = await getProperties({
+        type: type as "residential" | "commercial" | "land" | "parking" | undefined,
+        area_id: areaId,
+        limit: 5,
+        status: "active",
       });
-      return (data.data?.items ?? []).filter((p) => p.id !== excludeId).slice(0, 4);
+      return (response.data?.items ?? [])
+        .filter((property) => property.id !== excludeId)
+        .slice(0, 4);
     },
     enabled: !!type,
   });

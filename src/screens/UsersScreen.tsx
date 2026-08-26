@@ -28,7 +28,6 @@ import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
-import { getAuthSession, type StoredAuthSession } from "@/services/authStorage";
 import {
   listUsers,
   deleteUser,
@@ -61,11 +60,11 @@ function UserRolesLoader({ userId }: { userId: string }) {
 export function UsersScreen() {
   const { isPhone } = useResponsive();
   const userRoles = useAuthStore((s) => s.userRoles);
+  const currentUser = useAuthStore((s) => s.user);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [session, setSession] = useState<StoredAuthSession | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleModalUser, setRoleModalUser] = useState<UserProfile | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserProfile | null>(null);
@@ -81,20 +80,18 @@ export function UsersScreen() {
   );
 
   useEffect(() => {
-    void loadUsers();
-  }, []);
+    if (currentUser) void loadUsers();
+  }, [currentUser?.id]);
 
   async function loadUsers() {
     try {
       setLoading(true);
       setError(null);
-      const stored = await getAuthSession();
-      if (!stored) {
+      if (!useAuthStore.getState().user) {
         setError("You must be logged in to view users.");
         return;
       }
-      setSession(stored);
-      const result = await listUsers(stored.accessToken);
+      const result = await listUsers();
       const data = result.data || [];
       setUsers(data);
       setFilteredUsers(data);
@@ -126,10 +123,10 @@ export function UsersScreen() {
   }
 
   async function handleDeleteConfirm() {
-    if (!deleteTarget || !session) return;
+    if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await deleteUser(session.accessToken, deleteTarget.id);
+      await deleteUser(deleteTarget.id);
       setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
       setFilteredUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
       setDeleteTarget(null);
@@ -215,7 +212,7 @@ export function UsersScreen() {
     [canManageRoles],
   );
 
-  if (!session) {
+  if (!currentUser) {
     return (
       <AppChrome active="users">
         <View style={styles.emptyState}>

@@ -13,6 +13,7 @@ import { colorTokens, fontTokens } from "@/theme";
 import { useRoleDetail } from "../hooks/useRoles";
 import { usePermissionMutations } from "../hooks/useRoleMutations";
 import type { RoleWithPermissions } from "../types/admin";
+import { toApiError } from "@/services/apiClient";
 
 interface PermissionEditorModalProps {
   visible: boolean;
@@ -21,24 +22,28 @@ interface PermissionEditorModalProps {
 }
 
 const ALL_PERMISSIONS = [
-  { id: "view_roles", name: "view_roles", label: "View Roles" },
-  { id: "manage_roles", name: "manage_roles", label: "Manage Roles" },
-  { id: "create_listing", name: "create_listing", label: "Create Listing" },
-  { id: "moderate_listing", name: "moderate_listing", label: "Moderate Listing" },
-  { id: "manage_users", name: "manage_users", label: "Manage Users" },
-  { id: "review_verification", name: "review_verification", label: "Review Verification" },
-  { id: "manage_content", name: "manage_content", label: "Manage Content" },
-  { id: "manage_areas", name: "manage_areas", label: "Manage Areas" },
-  { id: "manage_properties", name: "manage_properties", label: "Manage Properties" },
+  { id: "perm-001", name: "view_roles", label: "View Roles" },
+  { id: "perm-002", name: "manage_roles", label: "Manage Roles" },
+  { id: "perm-003", name: "create_listing", label: "Create Listing" },
+  { id: "perm-004", name: "moderate_listing", label: "Moderate Listing" },
+  { id: "perm-005", name: "manage_users", label: "Manage Users" },
+  { id: "perm-006", name: "review_verification", label: "Review Verification" },
+  { id: "perm-007", name: "manage_content", label: "Manage Content" },
+  { id: "perm-008", name: "manage_areas", label: "Manage Areas" },
+  { id: "perm-009", name: "manage_properties", label: "Manage Properties" },
 ];
 
 export function PermissionEditorModal({ visible, role, onClose }: PermissionEditorModalProps) {
   const { data: roleDetail, isLoading } = useRoleDetail(role?.id ?? "");
   const { assignPermission, revokePermission } = usePermissionMutations(role?.id);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!visible) setProcessing(null);
+    if (!visible) {
+      setProcessing(null);
+      setError(null);
+    }
   }, [visible]);
 
   function isAssigned(permissionName: string): boolean {
@@ -47,19 +52,22 @@ export function PermissionEditorModal({ visible, role, onClose }: PermissionEdit
     );
   }
 
-  async function togglePermission(permissionName: string) {
-    setProcessing(permissionName);
+  async function togglePermission(permission: { id: string; name: string }) {
+    setProcessing(permission.id);
+    setError(null);
     try {
-      if (isAssigned(permissionName)) {
+      if (isAssigned(permission.name)) {
         const rp = roleDetail?.role_permissions?.find(
-          (p) => p.permission.name === permissionName,
+          (p) => p.permission.name === permission.name,
         );
         if (rp) {
           await revokePermission.mutateAsync(rp.permission.id);
         }
       } else {
-        await assignPermission.mutateAsync({ permissionId: permissionName });
+        await assignPermission.mutateAsync({ permissionId: permission.id });
       }
+    } catch (requestError) {
+      setError(toApiError(requestError).message);
     } finally {
       setProcessing(null);
     }
@@ -81,6 +89,8 @@ export function PermissionEditorModal({ visible, role, onClose }: PermissionEdit
             </Pressable>
           </View>
 
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
           {isLoading ? (
             <View style={styles.center}>
               <ActivityIndicator color={colorTokens.primary} size="large" />
@@ -91,10 +101,10 @@ export function PermissionEditorModal({ visible, role, onClose }: PermissionEdit
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => {
                 const assigned = isAssigned(item.name);
-                const isProcessing = processing === item.name;
+                const isProcessing = processing === item.id;
                 return (
                   <Pressable
-                    onPress={() => togglePermission(item.name)}
+                    onPress={() => togglePermission(item)}
                     style={[styles.permRow, assigned && styles.permRowActive]}
                     accessibilityLabel={`${assigned ? "Remove" : "Assign"} ${item.label} permission`}
                     disabled={isProcessing}
@@ -163,6 +173,7 @@ const styles = StyleSheet.create({
     color: colorTokens.textSecondary,
     marginTop: 2,
   },
+  errorText: { color: colorTokens.error, fontFamily: fontTokens.regular, fontSize: 12, paddingHorizontal: 20 },
   closeBtn: {
     width: 32,
     height: 32,

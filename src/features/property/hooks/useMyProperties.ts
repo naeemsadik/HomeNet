@@ -1,13 +1,8 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import apiClient from "@/services/apiClient";
-import type { ApiResponse } from "@/types/api";
-import type { Property, PaginatedResponse } from "../types/property";
+import { getMyProperties } from "@/services/propertyApi";
 
 async function fetchMyProperties(page: number = 1, limit: number = 20) {
-  const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>("/v1/properties/my", {
-    params: { page, limit },
-  });
-  return data;
+  return getMyProperties({ page, limit });
 }
 
 export function useMyProperties() {
@@ -21,5 +16,11 @@ export function useMyProperties() {
       return loaded < total ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
+    refetchInterval: (query) =>
+      query.state.data?.pages.some((page) =>
+        page.data?.items.some((property) => property.status === "pending"),
+      )
+        ? 10_000
+        : false,
   });
 }

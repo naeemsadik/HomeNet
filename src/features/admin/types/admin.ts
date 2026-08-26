@@ -4,7 +4,7 @@ import type { Property } from "@/features/property/types/property";
 export interface Permission {
   id: string;
   name: string;
-  description: string | null;
+  description?: string | null;
 }
 
 // ─── Role ──────────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ export interface UserWithRoles {
     phone: string | null;
     provider: string;
   }[];
-  user_roles: UserRole[];
+  user_roles?: UserRole[];
 }
 
 // ─── Property Admin ────────────────────────────────────────────────────────

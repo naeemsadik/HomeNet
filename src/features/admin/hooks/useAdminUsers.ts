@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import apiClient from "@/services/apiClient";
-import type { ApiResponse } from "@/types/api";
+import { getUser, listUsers } from "@/services/userApi";
 import type { UserWithRoles, UserAdminFilters } from "../types/admin";
 
 interface UserAdminListResponse {
@@ -14,16 +13,19 @@ export function useAdminUsers(filters: UserAdminFilters) {
   return useQuery({
     queryKey: ["admin", "users", filters],
     queryFn: async () => {
-      const params: Record<string, string | number> = {};
-      if (filters.search) params.search = filters.search;
-      params.page = filters.page ?? 1;
-      params.limit = filters.limit ?? 20;
-
-      const { data } = await apiClient.get<ApiResponse<UserAdminListResponse>>(
-        "/v1/users",
-        { params },
+      const response = await listUsers();
+      const query = filters.search?.trim().toLowerCase();
+      const users = (response.data ?? []).filter((user) =>
+        !query ||
+        user.full_name.toLowerCase().includes(query) ||
+        user.auth_identities.some((identity) => identity.email?.toLowerCase().includes(query)),
       );
-      return data.data ?? { items: [], total: 0, page: 1, limit: 20 };
+      return {
+        items: users as UserWithRoles[],
+        total: users.length,
+        page: 1,
+        limit: users.length,
+      };
     },
   });
 }
@@ -32,10 +34,8 @@ export function useAdminUserDetail(userId: string) {
   return useQuery({
     queryKey: ["admin", "users", userId],
     queryFn: async () => {
-      const { data } = await apiClient.get<ApiResponse<UserWithRoles>>(
-        `/v1/users/${userId}`,
-      );
-      return data.data;
+      const response = await getUser(userId);
+      return response.data as UserWithRoles | null;
     },
     enabled: !!userId,
   });

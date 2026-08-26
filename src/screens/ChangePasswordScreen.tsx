@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { Lock, ArrowLeft } from "lucide-react-native";
 import { router } from "expo-router";
 import { useAuthStore } from "@/stores/authStore";
-import { FloatingInput, ErrorBanner, SuccessBanner, AuthButton } from "@/components/AuthFormFields";
+import { FloatingInput, ErrorBanner, AuthButton } from "@/components/AuthFormFields";
 import { AppChrome } from "@/components/AppChrome";
 import { colors, fonts } from "@/theme";
 
@@ -13,11 +13,9 @@ export function ChangePasswordScreen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleChangePassword = async () => {
     setLocalError(null);
-    setSuccessMsg(null);
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       return;
@@ -37,10 +35,10 @@ export function ChangePasswordScreen() {
     });
 
     if (success) {
-      setSuccessMsg("Password changed successfully!");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      router.replace("/profile" as never);
     }
   };
 
@@ -52,7 +50,6 @@ export function ChangePasswordScreen() {
           <Text style={styles.subtitle}>Enter your current password and your new password</Text>
 
           <ErrorBanner message={localError || error} />
-          <SuccessBanner message={successMsg} />
 
           <FloatingInput
             label="Current Password"
@@ -60,7 +57,6 @@ export function ChangePasswordScreen() {
             onChangeText={(val) => {
               setCurrentPassword(val);
               setLocalError(null);
-              setSuccessMsg(null);
               if (error) clearError();
             }}
             secureTextEntry
@@ -75,7 +71,6 @@ export function ChangePasswordScreen() {
             onChangeText={(val) => {
               setNewPassword(val);
               setLocalError(null);
-              setSuccessMsg(null);
               if (error) clearError();
             }}
             secureTextEntry
@@ -90,7 +85,6 @@ export function ChangePasswordScreen() {
             onChangeText={(val) => {
               setConfirmPassword(val);
               setLocalError(null);
-              setSuccessMsg(null);
               if (error) clearError();
             }}
             secureTextEntry
