@@ -36,6 +36,7 @@ import {
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Linking,
@@ -50,47 +51,14 @@ import { AppChrome } from "@/components/AppChrome";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
-import { usePropertyDetail } from "../hooks/usePropertyDetail";
+import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
 
-// Default mockup fallback property matching Figma Node 53:2
-const mockPropertyData = {
-  id: "prop-3",
-  title: "Modern 2 Bedroom for Rent",
-  location: "Dhanmondi, Dhaka",
-  address: "House 12, Road 7A, Dhanmondi, Dhaka 1209",
-  type: "Apartment",
-  listingType: "For Rent",
-  price: "45,000",
-  priceCurrency: "৳",
-  pricePeriod: "/mo",
-  isVerified: true,
-  isBoosted: true,
-  bedrooms: 2,
-  bathrooms: 2,
-  areaSqft: "1,250",
+const unsupportedDetailContent = {
   aiValuation: {
     estimatedValue: "47,000",
     differencePercent: "4%",
     comparisonText: "This listing is priced below AI estimate by 4%.",
     trend: "+4.2% vs 30-day average",
-  },
-  description:
-    "Freshly renovated 2 bedroom close to Rabindra Sarobar. Ideal for a small family or professionals. Ready to move in with modern fixtures and spacious balcony.",
-  amenities: ["Lift", "Parking", "Generator", "CCTV", "Gas Connection"],
-  mediaImages: [
-    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
-  ],
-  seller: {
-    name: "Sun Welly",
-    agency: "Metro Properties",
-    rating: "4.7",
-    reviewsCount: 16,
-    isVerified: true,
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-    phone: "+8801700000000",
-    email: "sunwelly@metroproperties.bd",
   },
   aiRecommendation:
     "Buyers who viewed this also considered penthouses in Gulshan 1. Based on your budget, this property offers 12% better value per sqft than similar verified listings.",
@@ -99,99 +67,120 @@ const mockPropertyData = {
     { name: "Anwer Khan Hospital", distance: "1.2 km", icon: Hospital },
     { name: "Metro Station", distance: "0.8 km", icon: Train },
   ],
-  similarProperties: [
-    {
-      id: "prop-1",
-      title: "Skyview Residence",
-      location: "Gulshan 2, Dhaka",
-      price: "৳ 1.85 Cr",
-      specs: "3 Beds · 3 Baths · 2,150 sqft",
-      imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80",
-      status: "active",
-      views: "4,820",
-    },
-    {
-      id: "prop-2",
-      title: "Cozy 1 Bedroom Apartment",
-      location: "Uttara Sector 7, Dhaka",
-      price: "৳ 22,000 /mo",
-      specs: "1 Bed · 1 Bath · 720 sqft",
-      imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
-      status: "active",
-      views: "3,110",
-    },
-    {
-      id: "prop-3-s",
-      title: "Family Apartment with Terrace",
-      location: "Mirpur DOHS, Dhaka",
-      price: "৳ 1.25 Cr",
-      specs: "3 Beds · 2 Baths · 1,550 sqft",
-      imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80",
-      status: "active",
-      views: "1,980",
-    },
-  ],
 };
 
 export function PropertyDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isPhone, isTablet } = useResponsive();
-  const { data: apiDetail } = usePropertyDetail(id ?? "");
+  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(id ?? "");
+  const {
+    data: similarProperties = [],
+    error: similarError,
+    isLoading: similarLoading,
+    refetch: refetchSimilar,
+  } = useSimilarProperties(
+    apiDetail?.type,
+    apiDetail?.area?.id,
+    id ?? "",
+  );
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [saved, setSaved] = useState(false);
   const [bookModalVisible, setBookModalVisible] = useState(false);
 
-  // Merge real detail data with default mock values for Figma accuracy
   const property = useMemo(() => {
-    if (!apiDetail) return mockPropertyData;
+    if (!apiDetail) return null;
+
+    const amenities = apiDetail.amenities ?? {};
+    const identity = apiDetail.user?.auth_identities?.[0];
+    const location = [apiDetail.area?.name, apiDetail.area?.city].filter(Boolean).join(", ");
 
     return {
       id: apiDetail.id,
       title: apiDetail.title,
-      location: apiDetail.area?.name ? `${apiDetail.area.name}, Dhaka` : "Dhanmondi, Dhaka",
-      address: apiDetail.address || mockPropertyData.address,
-      type: apiDetail.type || "Apartment",
+      location: location || apiDetail.address || "Location unavailable",
+      address: apiDetail.address || "Address unavailable",
+      type: apiDetail.subtype || apiDetail.type,
       listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
       price: apiDetail.price.toLocaleString(),
-      priceCurrency: apiDetail.price_currency || "৳",
+      priceCurrency: apiDetail.price_currency || "BDT",
       pricePeriod: apiDetail.listing_type === "rent" ? "/mo" : "",
-      isVerified: apiDetail.is_verified ?? true,
-      isBoosted: true,
-      bedrooms: (apiDetail as any).bedrooms ?? 2,
-      bathrooms: (apiDetail as any).bathrooms ?? 2,
-      areaSqft: (apiDetail as any).sqft ? (apiDetail as any).sqft.toLocaleString() : "1,250",
-      aiValuation: mockPropertyData.aiValuation,
-      description: apiDetail.description || mockPropertyData.description,
-      amenities: apiDetail.amenities
-        ? Object.keys(apiDetail.amenities).filter((k) => apiDetail.amenities?.[k])
-        : mockPropertyData.amenities,
-      mediaImages:
-        apiDetail.media?.filter((m) => m.media_type === "image").map((m) => m.url) ||
-        mockPropertyData.mediaImages,
+      isVerified: apiDetail.is_verified,
+      isBoosted: false,
+      bedrooms: Number(amenities.bedrooms ?? 0),
+      bathrooms: Number(amenities.bathrooms ?? 0),
+      areaSqft: apiDetail.area_size?.toLocaleString() ?? "Not specified",
+      aiValuation: unsupportedDetailContent.aiValuation,
+      description: apiDetail.description || "No description provided.",
+      amenities: Object.keys(amenities).filter(
+        (key) => !["bedrooms", "bathrooms", "floor", "facing"].includes(key) && amenities[key],
+      ),
+      mediaImages: apiDetail.media.filter((media) => media.media_type === "image").map((media) => media.url),
       seller: {
-        name: apiDetail.user?.full_name || mockPropertyData.seller.name,
-        agency: "Metro Properties",
-        rating: "4.7",
-        reviewsCount: 16,
-        isVerified: true,
-        avatarUrl: apiDetail.user?.avatar_url || mockPropertyData.seller.avatarUrl,
-        phone: "+8801700000000",
-        email: "contact@homenet.bd",
+        name: apiDetail.user?.full_name || "Property owner",
+        agency: "Independent listing",
+        rating: "New",
+        reviewsCount: 0,
+        isVerified: apiDetail.is_verified,
+        avatarUrl: apiDetail.user?.avatar_url ?? null,
+        phone: identity?.phone ?? "",
+        email: identity?.email ?? "",
       },
-      aiRecommendation: mockPropertyData.aiRecommendation,
-      nearbyPlaces: mockPropertyData.nearbyPlaces,
-      similarProperties: mockPropertyData.similarProperties,
+      aiRecommendation: unsupportedDetailContent.aiRecommendation,
+      nearbyPlaces: unsupportedDetailContent.nearbyPlaces,
+      similarProperties: similarProperties.map((similar) => {
+        const similarAmenities = similar.amenities ?? {};
+        return {
+          id: similar.id,
+          title: similar.title,
+          location: [similar.area?.name, similar.area?.city].filter(Boolean).join(", ") || similar.address || "Location unavailable",
+          price: `${similar.price_currency || "BDT"} ${similar.price.toLocaleString()}`,
+          specs: `${Number(similarAmenities.bedrooms ?? 0)} Beds · ${Number(similarAmenities.bathrooms ?? 0)} Baths · ${similar.area_size?.toLocaleString() ?? "N/A"} ${similar.area_unit || "sqft"}`,
+          imageUrl: similar.media?.find((media) => media.media_type === "image")?.url,
+          status: similar.status,
+          views: similar.view_count.toLocaleString(),
+        };
+      }),
     };
-  }, [apiDetail]);
+  }, [apiDetail, similarProperties]);
 
   const handleCall = () => {
+    if (!property?.seller.phone) {
+      Alert.alert("Phone unavailable", "The property owner has not shared a phone number.");
+      return;
+    }
     void Linking.openURL(`tel:${property.seller.phone}`);
   };
 
   const handleShare = () => {
+    if (!property) return;
     Alert.alert("Share Property", `Share link for "${property.title}" copied to clipboard.`);
   };
+
+  if (isLoading) {
+    return (
+      <AppChrome active="property">
+        <View style={styles.requestState}>
+          <ActivityIndicator color={colors.green} size="large" />
+          <Text style={styles.requestError}>Loading property...</Text>
+        </View>
+      </AppChrome>
+    );
+  }
+
+  if (error || !property) {
+    return (
+      <AppChrome active="property">
+        <View style={styles.requestState}>
+          <Text style={styles.requestError}>{error instanceof Error ? error.message : "Property not found."}</Text>
+          <Pressable onPress={() => void refetch()} style={styles.retryButton}>
+            <RotateCcw color="#FFFFFF" size={16} />
+            <Text style={styles.retryText}>Retry</Text>
+          </Pressable>
+        </View>
+      </AppChrome>
+    );
+  }
 
   return (
     <AppChrome active="property">
@@ -240,10 +229,17 @@ export function PropertyDetailScreen() {
             {/* Hero Image Gallery */}
             <View style={styles.galleryContainer}>
               <View style={styles.mainImageWrap}>
-                <Image
-                  source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
-                  style={styles.mainImage}
-                />
+                {property.mediaImages.length ? (
+                  <Image
+                    source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
+                    style={styles.mainImage}
+                  />
+                ) : (
+                  <View style={styles.mediaPlaceholder}>
+                    <Building2 color="#6B7D78" size={48} />
+                    <Text style={styles.mediaPlaceholderText}>No property media</Text>
+                  </View>
+                )}
 
                 {/* Status Badges Overlay */}
                 <View style={styles.galleryBadgesRow}>
@@ -403,21 +399,41 @@ export function PropertyDetailScreen() {
                 </AppLink>
               </View>
 
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.similarScroll}>
-                <View style={styles.similarRow}>
-                  {property.similarProperties.map((sim) => (
-                    <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
-                      <Image source={{ uri: sim.imageUrl }} style={styles.similarThumb} />
-                      <View style={styles.similarInfo}>
-                        <Text style={styles.similarPrice}>{sim.price}</Text>
-                        <Text numberOfLines={1} style={styles.similarTitle}>{sim.title}</Text>
-                        <Text style={styles.similarLoc}>{sim.location}</Text>
-                        <Text style={styles.similarSpecs}>{sim.specs}</Text>
-                      </View>
-                    </AppLink>
-                  ))}
-                </View>
-              </ScrollView>
+              {similarLoading ? (
+                <ActivityIndicator color="#0F6D55" size="small" />
+              ) : similarError ? (
+                <Pressable onPress={() => void refetchSimilar()} style={styles.similarRequestState}>
+                  <RotateCcw color="#0F6D55" size={15} />
+                  <Text style={styles.similarLoc}>
+                    {similarError instanceof Error ? similarError.message : "Could not load similar listings."} Press to retry.
+                  </Text>
+                </Pressable>
+              ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.similarScroll}>
+                  <View style={styles.similarRow}>
+                    {property.similarProperties.map((sim) => (
+                      <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
+                        {sim.imageUrl ? (
+                          <Image source={{ uri: sim.imageUrl }} style={styles.similarThumb} />
+                        ) : (
+                          <View style={[styles.similarThumb, styles.similarThumbPlaceholder]}>
+                            <Building2 color="#6B7D78" size={24} />
+                          </View>
+                        )}
+                        <View style={styles.similarInfo}>
+                          <Text style={styles.similarPrice}>{sim.price}</Text>
+                          <Text numberOfLines={1} style={styles.similarTitle}>{sim.title}</Text>
+                          <Text style={styles.similarLoc}>{sim.location}</Text>
+                          <Text style={styles.similarSpecs}>{sim.specs}</Text>
+                        </View>
+                      </AppLink>
+                    ))}
+                    {property.similarProperties.length === 0 ? (
+                      <Text style={styles.similarLoc}>No similar active listings found.</Text>
+                    ) : null}
+                  </View>
+                </ScrollView>
+              )}
             </View>
           </View>
 
@@ -426,7 +442,13 @@ export function PropertyDetailScreen() {
             {/* Seller Contact Card */}
             <View style={styles.sellerCard}>
               <View style={styles.sellerRow}>
-                <Image source={{ uri: property.seller.avatarUrl }} style={styles.sellerAvatar} />
+                {property.seller.avatarUrl ? (
+                  <Image source={{ uri: property.seller.avatarUrl }} style={styles.sellerAvatar} />
+                ) : (
+                  <View style={[styles.sellerAvatar, styles.sellerAvatarPlaceholder]}>
+                    <UserRound color="#4F625D" size={24} />
+                  </View>
+                )}
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.sellerName}>{property.seller.name}</Text>
                   <Text style={styles.sellerAgency}>{property.seller.agency}</Text>
@@ -523,6 +545,30 @@ export function PropertyDetailScreen() {
 
 const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
+  requestState: {
+    flex: 1,
+    minHeight: 420,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    padding: 24,
+  },
+  requestError: {
+    color: "#4F625D",
+    fontFamily: fonts.regular,
+    fontSize: 15,
+    textAlign: "center",
+  },
+  retryButton: {
+    alignItems: "center",
+    backgroundColor: "#0F6D55",
+    borderRadius: 10,
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+  },
+  retryText: { color: "#FFFFFF", fontFamily: fonts.semiBold, fontSize: 14 },
   scrollBody: {
     padding: 24,
     gap: 20,
@@ -597,6 +643,15 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  mediaPlaceholder: {
+    alignItems: "center",
+    height: "100%",
+    justifyContent: "center",
+    gap: 10,
+    width: "100%",
+  },
+  mediaPlaceholderText: { color: "#6B7D78", fontFamily: fonts.regular, fontSize: 14 },
+  similarThumbPlaceholder: { alignItems: "center", backgroundColor: "#E8EEEC", justifyContent: "center" },
   galleryBadgesRow: {
     position: "absolute",
     top: 16,
@@ -939,6 +994,12 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
+  },
+  similarRequestState: { alignItems: "center", flexDirection: "row", gap: 8, paddingVertical: 14 },
+  sellerAvatarPlaceholder: {
+    alignItems: "center",
+    backgroundColor: "#E8EEEC",
+    justifyContent: "center",
   },
   sellerName: {
     fontSize: 16,

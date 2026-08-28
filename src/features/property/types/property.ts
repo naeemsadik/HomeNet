@@ -1,13 +1,8 @@
-export interface Area {
-  id: string;
-  name: string;
-  type: 'DIVISION' | 'CITY' | 'DISTRICT' | 'NEIGHBORHOOD' | 'UPZILA';
-  parent_area_id: string | null;
-}
+import type { Area, ListingType, PropertyStatus, PropertyType } from "@/types/api";
 
 export interface Verification {
   id: string;
-  status: 'pending' | 'verified' | 'rejected';
+  status: "pending" | "verified" | "rejected";
   notes: string | null;
   verified_at: string | null;
 }
@@ -15,7 +10,7 @@ export interface Verification {
 export interface PropertyMedia {
   id: string;
   property_id: string;
-  media_type: 'image' | 'video';
+  media_type: "image" | "video";
   url: string;
   public_id: string;
   thumbnail_url: string | null;
@@ -28,9 +23,9 @@ export interface Property {
   area_id: string;
   title: string;
   description: string | null;
-  type: 'residential' | 'commercial' | 'land' | 'parking';
+  type: PropertyType;
   subtype: string | null;
-  listing_type: 'sale' | 'rent';
+  listing_type: ListingType;
   price: number;
   price_currency: string;
   area_size: number | null;
@@ -39,18 +34,24 @@ export interface Property {
   location_lng: number | null;
   address: string | null;
   amenities: Record<string, unknown> | null;
-  status: 'draft' | 'active' | 'pending' | 'sold' | 'archived';
+  status: PropertyStatus;
   is_verified: boolean;
   virtual_tour_url: string | null;
   view_count: number;
   published_at: string | null;
   created_at: string;
   updated_at: string;
-  area?: Area;
+  distance?: number;
+  area?: Area | null;
+  user?: {
+    id: string;
+    full_name: string;
+    avatar_url: string | null;
+    auth_identities?: { email: string | null; phone: string | null }[];
+  } | null;
   media?: PropertyMedia[];
   verification?: Verification | null;
-
-  // Convenience display properties
+  _count?: { media: number };
   bedrooms?: number;
   bathrooms?: number;
   sqft?: number;
@@ -61,14 +62,15 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   limit: number;
+  total_pages?: number;
 }
 
 export interface PropertyFilters {
   city?: string;
   area_id?: string;
-  type?: 'residential' | 'commercial' | 'land' | 'parking';
-  listing_type?: 'sale' | 'rent';
-  status?: 'active';
+  type?: PropertyType;
+  listing_type?: ListingType;
+  status?: PropertyStatus;
   min_price?: number;
   max_price?: number;
   min_area?: number;
@@ -77,7 +79,7 @@ export interface PropertyFilters {
   bathrooms?: number;
   search?: string;
   is_verified?: boolean;
-  sort_by?: string;
+  sort_by?: "price_asc" | "price_desc" | "created_at_asc" | "created_at_desc" | "view_count_desc";
   lat?: number;
   lng?: number;
   radius?: number;

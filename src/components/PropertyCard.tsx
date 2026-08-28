@@ -4,6 +4,8 @@ import type { Property } from "@/data/properties";
 import { colors, fonts, webPointer } from "@/theme";
 import { AppLink } from "./ui";
 
+type PropertyCardData = Omit<Property, "id"> & { id: string | number };
+
 export function PropertyCard({
   property,
   saved,
@@ -15,7 +17,7 @@ export function PropertyCard({
   badgeText,
   style,
 }: {
-  property: Property;
+  property: PropertyCardData;
   saved: boolean;
   onSave: () => void;
   mode?: "buy" | "rent";
@@ -26,21 +28,30 @@ export function PropertyCard({
   style?: StyleProp<ViewStyle>;
 }) {
   const isRent = mode === "rent" || property.forRent === true;
-  const isNew = property.tag === "New" || property.id % 2 === 1;
+  const isNew = property.tag === "New";
 
   return (
     <View style={[styles.card, style]}>
       {/* Image Container */}
       <View style={[styles.imageWrap, imageHeight ? { height: imageHeight } : null]}>
-        <Image source={{ uri: property.image }} style={styles.image} resizeMode="cover" />
+        {property.image ? (
+          <Image source={{ uri: property.image }} style={styles.image} resizeMode="cover" />
+        ) : (
+          <View style={styles.imagePlaceholder}>
+            <LandPlot color="#6B7D78" size={36} />
+            <Text style={styles.imagePlaceholderText}>No media</Text>
+          </View>
+        )}
 
         {/* Top Badges */}
         <View style={styles.topBadgesRow}>
           <View style={styles.badgeCluster}>
-            <View style={styles.verifiedBadge}>
-              <ShieldCheck color="#0F6D55" size={14} />
-              <Text style={styles.verifiedText}>Verified</Text>
-            </View>
+            {property.isVerified !== false ? (
+              <View style={styles.verifiedBadge}>
+                <ShieldCheck color="#0F6D55" size={14} />
+                <Text style={styles.verifiedText}>Verified</Text>
+              </View>
+            ) : null}
             {isNew ? (
               <View style={styles.newBadge}>
                 <Text style={styles.newBadgeText}>New</Text>
@@ -81,10 +92,12 @@ export function PropertyCard({
               {isRent ? property.monthlyPrice : property.price}
             </Text>
           </View>
-          <View style={styles.scoreContainer}>
-            <Sparkles color="#0F6D55" size={14} />
-            <Text style={styles.scoreText}>{property.score}</Text>
-          </View>
+          {property.score !== undefined ? (
+            <View style={styles.scoreContainer}>
+              <Sparkles color="#0F6D55" size={14} />
+              <Text style={styles.scoreText}>{property.score}</Text>
+            </View>
+          ) : null}
         </View>
 
         {/* Title */}
@@ -144,6 +157,8 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  imagePlaceholder: { alignItems: "center", flex: 1, gap: 6, justifyContent: "center" },
+  imagePlaceholderText: { color: "#6B7D78", fontFamily: fonts.regular, fontSize: 12 },
   topBadgesRow: {
     position: "absolute",
     top: 12,

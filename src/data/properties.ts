@@ -10,8 +10,9 @@ export type Property = {
   baths: number;
   area: string;
   type: "Apartment" | "House" | "Commercial" | "Condo";
-  score: number;
+  score?: number;
   forRent?: boolean;
+  isVerified?: boolean;
 };
 
 export const propertyImages = {

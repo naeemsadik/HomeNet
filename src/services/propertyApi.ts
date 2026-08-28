@@ -1,104 +1,126 @@
 import apiClient from "./apiClient";
-import type { ApiResponse, CreatePropertyDto, UpdatePropertyDto } from "@/types/api";
-import type { Property, PropertyFilters, PaginatedResponse, PropertyMedia } from "@/features/property/types/property";
+import { appendUpload, type UploadInput } from "./upload";
+import type { ApiResponse, PropertyStatus, UpsertPropertyDto } from "@/types/api";
+import type {
+  PaginatedResponse,
+  Property,
+  PropertyFilters,
+  PropertyMedia,
+} from "@/features/property/types/property";
 
-/**
- * Fetch published/active properties with filters & pagination (GET /v1/properties).
- */
-export async function getProperties(params: PropertyFilters = {}): Promise<ApiResponse<PaginatedResponse<Property>>> {
-  const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>("/v1/properties", { params });
-  return data;
-}
+export type PropertyMutationResult = Pick<Property, "id"> & Partial<Property>;
 
-/**
- * Fetch single property details by ID (GET /v1/properties/:id).
- */
-export async function getPropertyById(id: string): Promise<ApiResponse<Property>> {
-  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/properties/${id}`);
-  return data;
-}
-
-/**
- * Create a new property listing (POST /v1/properties).
- */
-export async function createProperty(dto: CreatePropertyDto): Promise<ApiResponse<Property>> {
-  const { data } = await apiClient.post<ApiResponse<Property>>("/v1/properties", dto);
-  return data;
-}
-
-/**
- * Update an existing property listing (PATCH /v1/properties/:id).
- */
-export async function updateProperty(id: string, dto: UpdatePropertyDto): Promise<ApiResponse<Property>> {
-  const { data } = await apiClient.patch<ApiResponse<Property>>(`/v1/properties/${id}`, dto);
-  return data;
-}
-
-/**
- * Submit property for verification (POST /v1/properties/:id/submit).
- */
-export async function submitProperty(id: string): Promise<ApiResponse<Property>> {
-  const { data } = await apiClient.post<ApiResponse<Property>>(`/v1/properties/${id}/submit`);
-  return data;
-}
-
-/**
- * Upload media file for a property (POST /v1/properties/:id/media).
- */
-export async function uploadPropertyMedia(id: string, formData: FormData): Promise<ApiResponse<PropertyMedia>> {
-  const { data } = await apiClient.post<ApiResponse<PropertyMedia>>(`/v1/properties/${id}/media`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+export async function getProperties(params: PropertyFilters = {}) {
+  const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>("/v1/properties", {
+    params,
   });
   return data;
 }
 
-/**
- * Delete a media file (DELETE /v1/properties/:id/media/:mediaId).
- */
-export async function deletePropertyMedia(id: string, mediaId: string): Promise<ApiResponse<null>> {
-  const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/properties/${id}/media/${mediaId}`);
+export async function getAdminProperties(params: PropertyFilters = {}) {
+  const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>(
+    "/v1/properties/admin",
+    { params },
+  );
   return data;
 }
 
-/**
- * Save / Favorite a property (POST /v1/properties/:id/save).
- */
-export async function saveProperty(id: string): Promise<ApiResponse<{ saved: boolean }>> {
+export async function getMyProperties(params: PropertyFilters = {}) {
+  const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>("/v1/properties/my", {
+    params,
+  });
+  return data;
+}
+
+export async function getPropertyById(id: string) {
+  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/properties/${id}`);
+  return data;
+}
+
+export async function upsertProperty(dto: UpsertPropertyDto) {
+  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/v1/properties", dto);
+  return data;
+}
+
+export async function createProperty(dto: UpsertPropertyDto) {
+  return upsertProperty(dto);
+}
+
+export async function updateProperty(id: string, dto: UpsertPropertyDto) {
+  return upsertProperty({ ...dto, property_id: id });
+}
+
+export async function legacyPatchProperty(id: string, dto: UpsertPropertyDto) {
+  const { data } = await apiClient.patch<ApiResponse<PropertyMutationResult>>(
+    `/v1/properties/${id}`,
+    dto,
+  );
+  return data;
+}
+
+export async function deleteProperty(id: string) {
+  const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/properties/${id}`);
+  return data;
+}
+
+export async function submitProperty(id: string) {
+  const { data } = await apiClient.post<
+    ApiResponse<{ id: string; status: PropertyStatus }>
+  >(`/v1/properties/${id}/submit`);
+  return data;
+}
+
+export async function uploadPropertyMedia(
+  id: string,
+  file: UploadInput,
+  mediaType: "image" | "video",
+  displayOrder?: number,
+) {
+  const formData = new FormData();
+  appendUpload(formData, "file", file, mediaType === "image" ? "property.jpg" : "property.mp4");
+  formData.append("media_type", mediaType);
+  if (displayOrder !== undefined) formData.append("display_order", String(displayOrder));
+
+  const { data } = await apiClient.post<ApiResponse<PropertyMedia>>(
+    `/v1/properties/${id}/media`,
+    formData,
+    { headers: { "Content-Type": undefined } },
+  );
+  return data;
+}
+
+export async function deletePropertyMedia(mediaId: string) {
+  const { data } = await apiClient.delete<ApiResponse<null>>(
+    `/v1/properties/media/${mediaId}`,
+  );
+  return data;
+}
+
+export async function adminUpdateProperty(id: string, dto: UpsertPropertyDto) {
+  const { data } = await apiClient.patch<ApiResponse<PropertyMutationResult>>(
+    `/v1/properties/${id}/admin`,
+    dto,
+  );
+  return data;
+}
+
+export async function adminDeleteProperty(id: string) {
+  const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/properties/${id}/admin`);
+  return data;
+}
+
+// Not documented by the supplied API; retained for existing unsupported screens.
+export async function saveProperty(id: string) {
   const { data } = await apiClient.post<ApiResponse<{ saved: boolean }>>(`/v1/properties/${id}/save`);
   return data;
 }
 
-/**
- * Remove property from saved list (DELETE /v1/properties/:id/save).
- */
-export async function unsaveProperty(id: string): Promise<ApiResponse<{ saved: boolean }>> {
+export async function unsaveProperty(id: string) {
   const { data } = await apiClient.delete<ApiResponse<{ saved: boolean }>>(`/v1/properties/${id}/save`);
   return data;
 }
 
-/**
- * Get current user's saved properties (GET /v1/properties/saved).
- */
-export async function getSavedProperties(): Promise<ApiResponse<Property[]>> {
+export async function getSavedProperties() {
   const { data } = await apiClient.get<ApiResponse<Property[]>>("/v1/properties/saved");
-  return data;
-}
-
-/**
- * Get current user's uploaded properties (GET /v1/properties/my-properties).
- */
-export async function getMyProperties(): Promise<ApiResponse<Property[]>> {
-  const { data } = await apiClient.get<ApiResponse<Property[]>>("/v1/properties/my-properties");
-  return data;
-}
-
-/**
- * Admin: Update property status (PATCH /v1/properties/:id/admin).
- */
-export async function adminUpdatePropertyStatus(
-  id: string,
-  status: "draft" | "pending" | "active" | "sold" | "archived"
-): Promise<ApiResponse<Property>> {
-  const { data } = await apiClient.patch<ApiResponse<Property>>(`/v1/properties/${id}/admin`, { status });
   return data;
 }

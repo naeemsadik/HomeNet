@@ -4,23 +4,27 @@ import {
   Grid2X2,
   List,
   MapPin,
+  RotateCcw,
   Search,
   SlidersHorizontal,
   X,
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
 import { AppButton, AppLink, Eyebrow, SelectField } from "@/components/ui";
-import { allProperties, savedPropertyIds } from "@/data/properties";
+import { savedPropertyIds, type Property as CardProperty } from "@/data/properties";
+import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
 import { AreaPicker } from "@/components/AreaPicker";
-import type { Area } from "@/types/api";
+import type { Area, PropertyType } from "@/types/api";
+
+type BrowseCardProperty = Omit<CardProperty, "id"> & { id: string };
 
 function FilterPanel({
   beds,
@@ -103,7 +107,7 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState("All types");
   const [beds, setBeds] = useState(0);
-  const [savedIds, setSavedIds] = useState(savedPropertyIds);
+  const [savedIds, setSavedIds] = useState<Array<string | number>>(savedPropertyIds);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [checks, setChecks] = useState(["AI verified price"]);
@@ -113,24 +117,54 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
   const [selectedAreaPath, setSelectedAreaPath] = useState<Area[]>([]);
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
 
-  const results = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return allProperties.filter((property) => {
-      // Area match filter
-      let matchesArea = true;
-      if (selectedArea) {
-        const propLocLower = property.location.toLowerCase();
-        // Check if property location includes selected area name or any ancestor area in the path
-        matchesArea = selectedAreaPath.some(node => propLocLower.includes(node.name.toLowerCase())) ||
-                      propLocLower.includes(selectedArea.name.toLowerCase());
-      }
+  const apiFilters = useMemo(
+    () => ({
+      listing_type: mode === "buy" ? ("sale" as const) : ("rent" as const),
+      area_id: selectedArea?.id,
+      search: query.trim() || undefined,
+      type: type === "All types" ? undefined : (type.toLowerCase() as PropertyType),
+      bedrooms: beds || undefined,
+      status: "active" as const,
+      limit: 18,
+    }),
+    [beds, mode, query, selectedArea?.id, type],
+  );
+  const { properties, loading, error, hasMore, fetchingNextPage, loadMore, refresh } = usePropertyFeed(apiFilters);
+  const results = useMemo(
+    () =>
+      properties.map((property): BrowseCardProperty => {
+        const amenities = property.amenities ?? {};
+        const formattedPrice = `${property.price_currency || "BDT"} ${property.price.toLocaleString()}`;
+        return {
+          id: property.id,
+          title: property.title,
+          location:
+            [property.area?.name, property.area?.city].filter(Boolean).join(", ") ||
+            property.address ||
+            "Location unavailable",
+          price: formattedPrice,
+          monthlyPrice: `${formattedPrice}/mo`,
+          image: property.media?.find((media) => media.media_type === "image")?.url || "",
+          tag: property.is_verified ? "Verified" : "",
+          beds: Number(amenities.bedrooms ?? 0),
+          baths: Number(amenities.bathrooms ?? 0),
+          area: `${property.area_size?.toLocaleString() ?? "N/A"} ${property.area_unit || "sqft"}`,
+          type:
+            property.type === "commercial"
+              ? "Commercial"
+              : property.subtype?.toLowerCase().includes("house")
+                ? "House"
+                : property.subtype?.toLowerCase().includes("condo")
+                  ? "Condo"
+                  : "Apartment",
+          forRent: property.listing_type === "rent",
+          isVerified: property.is_verified,
+        };
+      }),
+    [properties],
+  );
 
-      const matchesQuery = !normalized || `${property.title} ${property.location}`.toLowerCase().includes(normalized);
-      return matchesArea && matchesQuery && (type === "All types" || property.type === type) && (beds === 0 || property.beds >= beds);
-    });
-  }, [beds, query, type, selectedArea, selectedAreaPath]);
-
-  function toggleSaved(id: number) {
+  function toggleSaved(id: string | number) {
     setSavedIds((current) => current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]);
   }
 
@@ -201,7 +235,7 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
             value={query} 
           />
         </View>
-        <View style={styles.typeSelect}><Building2 color={colors.green} size={17} /><SelectField onChange={setType} options={["All types", "Apartment", "House", "Condo"]} style={styles.typePicker} value={type} /></View>
+        <View style={styles.typeSelect}><Building2 color={colors.green} size={17} /><SelectField onChange={setType} options={["All types", "Residential", "Commercial", "Land", "Parking"]} style={styles.typePicker} value={type} /></View>
         <AppButton icon={Search} label="Search" style={[styles.searchAction, isPhone && styles.searchActionPhone]} />
       </View>
 
@@ -223,14 +257,35 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
           <View style={styles.filterColumn}><FilterPanel beds={beds} checks={checks} mode={mode} resetFilters={resetFilters} setBeds={setBeds} toggleCheck={toggleCheck} /></View>
         ) : null}
         <View style={styles.resultsColumn}>
-          {results.length ? (
-            view === "grid" ? (
-              <PropertyGrid desktopColumns={3} horizontalOnPhone={false} tabletColumns={2} gap={14}>
-                {results.map((property) => <PropertyCard imageHeight={isPhone ? 220 : 158} key={property.id} mode={mode} onSave={() => toggleSaved(property.id)} property={property} saved={savedIds.includes(property.id)} />)}
-              </PropertyGrid>
-            ) : (
-              <View style={styles.listResults}>{results.map((property) => <PropertyCard imageHeight={isPhone ? 220 : undefined} key={property.id} list={!isPhone} mode={mode} onSave={() => toggleSaved(property.id)} property={property} saved={savedIds.includes(property.id)} />)}</View>
-            )
+          {loading ? (
+            <View style={styles.requestState}>
+              <ActivityIndicator color={colors.green} size="large" />
+              <Text style={styles.resultHint}>Loading properties...</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.requestState}>
+              <Text style={styles.emptyTitle}>Could not load properties</Text>
+              <Text style={styles.emptyCopy}>{error}</Text>
+              <AppButton icon={RotateCcw} label="Retry" onPress={() => void refresh()} />
+            </View>
+          ) : results.length ? (
+            <View style={styles.resultsWithPagination}>
+              {view === "grid" ? (
+                <PropertyGrid desktopColumns={3} horizontalOnPhone={false} tabletColumns={2} gap={14}>
+                  {results.map((property) => <PropertyCard imageHeight={isPhone ? 220 : 158} key={property.id} mode={mode} onSave={() => toggleSaved(property.id)} property={property} saved={savedIds.includes(property.id)} />)}
+                </PropertyGrid>
+              ) : (
+                <View style={styles.listResults}>{results.map((property) => <PropertyCard imageHeight={isPhone ? 220 : undefined} key={property.id} list={!isPhone} mode={mode} onSave={() => toggleSaved(property.id)} property={property} saved={savedIds.includes(property.id)} />)}</View>
+              )}
+              {hasMore ? (
+                <AppButton
+                  label={fetchingNextPage ? "Loading..." : "Load more"}
+                  onPress={() => void loadMore()}
+                  disabled={fetchingNextPage}
+                  style={styles.loadMoreButton}
+                />
+              ) : null}
+            </View>
           ) : (
             <View style={styles.empty}><Search color={colors.green} size={26} /><Text style={styles.emptyTitle}>No homes match these filters</Text><Text style={styles.emptyCopy}>Try a nearby area or clear one of your filters.</Text><AppButton label="Clear filters" onPress={resetFilters} /></View>
           )}
@@ -314,6 +369,9 @@ const styles = StyleSheet.create({
   resetButton: { width: "100%", marginTop: 16, padding: 10, alignItems: "center" },
   resetText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 12 },
   resultsColumn: { minWidth: 0, flex: 1 },
+  resultsWithPagination: { gap: 18 },
+  requestState: { alignItems: "center", gap: 12, justifyContent: "center", minHeight: 380, padding: 32 },
+  loadMoreButton: { alignSelf: "center", minWidth: 160 },
   listResults: { gap: 14 },
   empty: { minHeight: 380, alignItems: "center", justifyContent: "center", padding: 35, borderRadius: 16, backgroundColor: "#F8FBF9", borderWidth: 1, borderStyle: "dashed", borderColor: "#CADBD3" },
   emptyTitle: { marginTop: 12, marginBottom: 5, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 17 },

@@ -10,6 +10,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useUpdateUserProfile, useUploadAvatar, useDeleteAvatar } from "../hooks/useUserMutations";
 import { colorTokens, fonts, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import type { UploadInput } from "@/services/upload";
 
 export function EditProfileScreen() {
   const { isPhone } = useResponsive();
@@ -52,19 +53,13 @@ export function EditProfileScreen() {
     if (result.canceled || !result.assets?.[0]) return;
 
     try {
-      const asset = result.assets[0] as any;
-      let file: Blob | File | null = null;
-      if (asset.uri) {
-        const response = await fetch(asset.uri);
-        file = await response.blob();
-        if ((globalThis as any).File && !(file instanceof (globalThis as any).File)) {
-          file = new (globalThis as any).File([file], asset.fileName || "avatar.jpg", {
-            type: file.type || "image/jpeg",
-          });
-        }
-      }
-      if (!file) throw new Error("Could not obtain file");
-      await uploadAvatar.mutateAsync(file as Blob | File);
+      const asset = result.assets[0];
+      const file: UploadInput = asset.file ?? {
+        uri: asset.uri,
+        name: asset.fileName || "avatar.jpg",
+        type: asset.mimeType || "image/jpeg",
+      };
+      await uploadAvatar.mutateAsync(file);
       await fetchMe();
       Alert.alert("Success", "Avatar updated.");
     } catch (err: any) {

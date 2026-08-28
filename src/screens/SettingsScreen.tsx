@@ -97,7 +97,7 @@ export function SettingsScreen() {
             icon={Bell}
             label="Notifications"
             description="Manage notification preferences"
-            onPress={() => router.push("/notifications")}
+            onPress={() => router.push("/notifications" as never)}
           />
         </View>
 

@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Settings, UserRound } from "lucide-react-native";
+import { Settings, Trash2, UserRound } from "lucide-react-native";
 import { colorTokens, fontTokens } from "@/theme";
 import { RoleBadge } from "./StatusBadge";
 import type { UserWithRoles } from "../types/admin";
@@ -8,9 +8,10 @@ interface UserAdminItemProps {
   item: UserWithRoles;
   onManageRoles: (user: UserWithRoles) => void;
   onView: (userId: string) => void;
+  onDelete: (user: UserWithRoles) => void;
 }
 
-export function UserAdminItemRow({ item, onManageRoles, onView }: UserAdminItemProps) {
+export function UserAdminItemRow({ item, onManageRoles, onView, onDelete }: UserAdminItemProps) {
   const email = item.auth_identities?.[0]?.email;
   const primaryRole = item.user_roles?.[0]?.role?.name ?? "buyer_seller";
 
@@ -45,6 +46,14 @@ export function UserAdminItemRow({ item, onManageRoles, onView }: UserAdminItemP
         >
           <Settings color={colorTokens.primary} size={14} />
           <Text style={[styles.actionText, { color: colorTokens.primary }]}>Roles</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => onDelete(item)}
+          style={[styles.actionBtn, { backgroundColor: colorTokens.errorLight }]}
+          accessibilityLabel={`Delete ${item.full_name}`}
+        >
+          <Trash2 color={colorTokens.error} size={14} />
+          <Text style={[styles.actionText, { color: colorTokens.error }]}>Delete</Text>
         </Pressable>
         <Pressable
           onPress={() => onView(item.id)}

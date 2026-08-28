@@ -160,17 +160,17 @@ export function PropertyFeed() {
       </View>
 
       {/* ─── 2. Main Feed Content ────────────────────────────────────────── */}
-      {viewMode === "list" ? (
+      {error ? (
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <Pressable onPress={() => void refresh()} style={styles.retryBtn}>
+            <RotateCcw color={feedColors.primary} size={16} />
+            <Text style={styles.retryBtnText}>Retry</Text>
+          </Pressable>
+        </View>
+      ) : viewMode === "list" ? (
         loading && properties.length === 0 ? (
           <PropertySkeletonFeed />
-        ) : error ? (
-          <View style={styles.centerContainer}>
-            <Text style={styles.errorText}>{error}</Text>
-            <Pressable onPress={refresh} style={styles.retryBtn}>
-              <RotateCcw color={feedColors.primary} size={16} />
-              <Text style={styles.retryBtnText}>Retry</Text>
-            </Pressable>
-          </View>
         ) : properties.length === 0 ? (
           <View style={styles.centerContainer}>
             <Building2 color={feedColors.border} size={56} style={{ marginBottom: 12 }} />
@@ -196,7 +196,9 @@ export function PropertyFeed() {
                 colors={[feedColors.primary]}
               />
             }
-            onEndReached={loadMore}
+            onEndReached={() => {
+              if (hasMore && !fetchingNextPage) void loadMore();
+            }}
             onEndReachedThreshold={0.4}
             renderItem={({ item }) => <PropertyCard property={item} />}
             ListFooterComponent={

@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, Alert, KeyboardAvoidingView, Platform } from "react-native";
-import { Send, ArrowRight, ArrowLeft, Check } from "lucide-react-native";
+import { Send, ArrowRight, ArrowLeft, Check, MapPin } from "lucide-react-native";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { FloatingInput, ErrorBanner, AuthButton } from "@/components/AuthFormFields";
 import { SelectField } from "@/components/ui";
+import { AreaPicker } from "@/components/AreaPicker";
 import { ImageUploader } from "./ImageUploader";
-import type { CreatePropertyDto } from "@/types/api";
+import type { Area, UpsertPropertyDto } from "@/types/api";
 
 interface PropertyFormProps {
   mode: "create" | "edit";
-  initialData?: Partial<CreatePropertyDto>;
+  initialData?: Partial<UpsertPropertyDto>;
+  initialArea?: Area | null;
   initialImages?: Array<{ uri: string; file?: Blob | File }>;
-  onSubmit: (data: CreatePropertyDto, images: Array<{ uri: string; file?: Blob | File }>) => void;
+  onSubmit: (data: UpsertPropertyDto, images: Array<{ uri: string; file?: Blob | File }>) => void;
   onCancel?: () => void;
   loading?: boolean;
   error?: string | null;
@@ -22,6 +24,7 @@ const STEPS = ["Details", "Location", "Features", "Images"] as const;
 export function PropertyForm({
   mode,
   initialData,
+  initialArea = null,
   initialImages = [],
   onSubmit,
   onCancel,
@@ -29,16 +32,18 @@ export function PropertyForm({
   error = null,
 }: PropertyFormProps) {
   const [step, setStep] = useState(0);
+  const [areaPickerVisible, setAreaPickerVisible] = useState(false);
 
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [description, setDescription] = useState(initialData?.description ?? "");
   const [type, setType] = useState<string>(initialData?.type ?? "residential");
   const [listingType, setListingType] = useState<string>(initialData?.listing_type ?? "sale");
   const [price, setPrice] = useState(initialData?.price ? String(initialData.price) : "");
-  const [areaId, setAreaId] = useState(initialData?.area_id ?? "");
+  const [area, setArea] = useState<Area | null>(initialArea);
+  const areaId = area?.id ?? initialData?.area_id ?? "";
   const [address, setAddress] = useState(initialData?.address ?? "");
-  const [bedrooms, setBedrooms] = useState(initialData?.bedrooms ? String(initialData.bedrooms) : "");
-  const [bathrooms, setBathrooms] = useState(initialData?.bathrooms ? String(initialData.bathrooms) : "");
+  const [bedrooms, setBedrooms] = useState(initialData?.amenities?.bedrooms ? String(initialData.amenities.bedrooms) : "");
+  const [bathrooms, setBathrooms] = useState(initialData?.amenities?.bathrooms ? String(initialData.amenities.bathrooms) : "");
   const [areaSize, setAreaSize] = useState(initialData?.area_size ? String(initialData.area_size) : "");
   const [images, setImages] = useState<Array<{ uri: string; file?: Blob | File }>>(initialImages);
 
@@ -62,17 +67,26 @@ export function PropertyForm({
       return;
     }
 
-    const dto: CreatePropertyDto = {
+    const dto: UpsertPropertyDto = {
       title: title.trim(),
       description: description.trim() || undefined,
-      type: type as CreatePropertyDto["type"],
-      listing_type: listingType as CreatePropertyDto["listing_type"],
+      type: type as UpsertPropertyDto["type"],
+      subtype: initialData?.subtype,
+      listing_type: listingType as UpsertPropertyDto["listing_type"],
       price: Number(price),
+      price_currency: initialData?.price_currency || "BDT",
       area_id: areaId.trim(),
       address: address.trim() || undefined,
-      bedrooms: bedrooms ? Number(bedrooms) : undefined,
-      bathrooms: bathrooms ? Number(bathrooms) : undefined,
       area_size: areaSize ? Number(areaSize) : undefined,
+      area_unit: initialData?.area_unit || "sqft",
+      location_lat: initialData?.location_lat,
+      location_lng: initialData?.location_lng,
+      amenities: {
+        ...initialData?.amenities,
+        bedrooms: bedrooms ? Number(bedrooms) : undefined,
+        bathrooms: bathrooms ? Number(bathrooms) : undefined,
+      },
+      virtual_tour_url: initialData?.virtual_tour_url,
     };
 
     onSubmit(dto, images);
@@ -86,7 +100,11 @@ export function PropertyForm({
           {STEPS.map((s, i) => (
             <View key={s} style={styles.stepItem}>
               <View style={[styles.stepDot, i <= step && styles.stepDotActive, i < step && styles.stepDotDone]}>
-                <Text style={[styles.stepDotText, i <= step && styles.stepDotTextActive]}>{i < step ? "✓" : i + 1}</Text>
+                {i < step ? (
+                  <Check color={colorTokens.textInverse} size={13} />
+                ) : (
+                  <Text style={[styles.stepDotText, i <= step && styles.stepDotTextActive]}>{i + 1}</Text>
+                )}
               </View>
               <Text style={[styles.stepLabel, i === step && styles.stepLabelActive]}>{s}</Text>
               {i < STEPS.length - 1 && <View style={[styles.stepLine, i < step && styles.stepLineActive]} />}
@@ -141,12 +159,11 @@ export function PropertyForm({
         {step === 1 && (
           <View style={styles.stepContent}>
             <Text style={styles.sectionTitle}>Location</Text>
-            <FloatingInput
-              label="Area ID"
-              value={areaId}
-              onChangeText={setAreaId}
-              autoCapitalize="none"
-            />
+            <Text style={styles.fieldLabel}>Area</Text>
+            <Pressable onPress={() => setAreaPickerVisible(true)} style={styles.areaButton}>
+              <MapPin color={colorTokens.primary} size={18} />
+              <Text style={styles.areaButtonText}>{area?.name || initialArea?.name || "Select an API area"}</Text>
+            </Pressable>
             <FloatingInput
               label="Address (optional)"
               value={address}
@@ -193,6 +210,7 @@ export function PropertyForm({
               images={images}
               onAdd={(newImgs) => setImages((prev) => [...prev, ...newImgs])}
               onRemove={(idx) => setImages((prev) => prev.filter((_, i) => i !== idx))}
+              maxImages={20}
             />
           </View>
         )}
@@ -238,6 +256,17 @@ export function PropertyForm({
           )}
         </View>
       </ScrollView>
+      <AreaPicker
+        visible={areaPickerVisible}
+        onClose={() => setAreaPickerVisible(false)}
+        onSelect={(selected) => {
+          if (!selected) return;
+          setArea(selected);
+          setAreaPickerVisible(false);
+        }}
+        selectedArea={area ?? initialArea}
+        initialCity={area?.city ?? initialArea?.city ?? undefined}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -315,6 +344,21 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     color: colorTokens.textPrimary,
     marginBottom: 6,
+  },
+  areaButton: {
+    alignItems: "center",
+    backgroundColor: colorTokens.backgroundAlt,
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 48,
+    paddingHorizontal: 16,
+  },
+  areaButtonText: {
+    color: colorTokens.textPrimary,
+    flex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 14,
   },
   row: {
     flexDirection: "row",
