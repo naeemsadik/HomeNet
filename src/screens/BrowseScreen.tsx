@@ -16,15 +16,14 @@ import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
 import { AppButton, AppLink, Eyebrow, SelectField } from "@/components/ui";
-import { savedPropertyIds, type Property as CardProperty } from "@/data/properties";
+import { savedPropertyIds } from "@/data/properties";
+import { toPropertyCard } from "@/features/property/adapters/toPropertyCard";
 import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
 import { AreaPicker } from "@/components/AreaPicker";
 import type { Area, PropertyType } from "@/types/api";
-
-type BrowseCardProperty = Omit<CardProperty, "id"> & { id: string };
 
 function FilterPanel({
   beds,
@@ -131,36 +130,7 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
   );
   const { properties, loading, error, hasMore, fetchingNextPage, loadMore, refresh } = usePropertyFeed(apiFilters);
   const results = useMemo(
-    () =>
-      properties.map((property): BrowseCardProperty => {
-        const amenities = property.amenities ?? {};
-        const formattedPrice = `${property.price_currency || "BDT"} ${property.price.toLocaleString()}`;
-        return {
-          id: property.id,
-          title: property.title,
-          location:
-            [property.area?.name, property.area?.city].filter(Boolean).join(", ") ||
-            property.address ||
-            "Location unavailable",
-          price: formattedPrice,
-          monthlyPrice: `${formattedPrice}/mo`,
-          image: property.media?.find((media) => media.media_type === "image")?.url || "",
-          tag: property.is_verified ? "Verified" : "",
-          beds: Number(amenities.bedrooms ?? 0),
-          baths: Number(amenities.bathrooms ?? 0),
-          area: `${property.area_size?.toLocaleString() ?? "N/A"} ${property.area_unit || "sqft"}`,
-          type:
-            property.type === "commercial"
-              ? "Commercial"
-              : property.subtype?.toLowerCase().includes("house")
-                ? "House"
-                : property.subtype?.toLowerCase().includes("condo")
-                  ? "Condo"
-                  : "Apartment",
-          forRent: property.listing_type === "rent",
-          isVerified: property.is_verified,
-        };
-      }),
+    () => properties.map(toPropertyCard),
     [properties],
   );
 
