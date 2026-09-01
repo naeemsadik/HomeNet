@@ -25,18 +25,13 @@ import {
   savedPageListings,
 } from "@/data/properties";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useSavedStore } from "@/stores/savedStore";
 import { colors, fonts, webPointer } from "@/theme";
 
 export function SavedScreen() {
   const { isPhone, isTablet, width } = useResponsive();
   const [selectedFolder, setSelectedFolder] = useState<string>("all");
-  const [savedIds, setSavedIds] = useState<number[]>([201, 202, 203, 301]);
-
-  function toggleSaved(id: number) {
-    setSavedIds((current) =>
-      current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]
-    );
-  }
+  const { savedIds, toggleSaved } = useSavedStore();
 
   return (
     <AppChrome active="saved">
