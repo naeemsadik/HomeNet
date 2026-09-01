@@ -29,6 +29,14 @@ export function PropertyCard({
 }) {
   const isRent = mode === "rent" || property.forRent === true;
   const isNew = property.tag === "New";
+  const score = property.score;
+  const isHighTierScore = score !== undefined && score >= 85;
+
+  // Split rent price if contains /mo
+  const rawPrice = isRent ? (property.monthlyPrice || property.price) : property.price;
+  const priceParts = rawPrice ? rawPrice.split("/mo") : [rawPrice];
+  const mainPrice = priceParts[0]?.trim();
+  const hasMo = isRent || priceParts.length > 1;
 
   return (
     <View style={[styles.card, style]}>
@@ -88,14 +96,20 @@ export function PropertyCard({
         {/* Price & Investment Score */}
         <View style={styles.priceRow}>
           <View style={styles.priceContainer}>
-            <Text style={styles.priceText}>
-              {isRent ? property.monthlyPrice : property.price}
-            </Text>
+            <Text style={styles.priceText}>{mainPrice}</Text>
+            {hasMo ? <Text style={styles.moText}> /mo</Text> : null}
           </View>
-          {property.score !== undefined ? (
+          {score !== undefined ? (
             <View style={styles.scoreContainer}>
-              <Sparkles color="#0F6D55" size={14} />
-              <Text style={styles.scoreText}>{property.score}</Text>
+              <Sparkles color={isHighTierScore ? "#0F6D55" : "#2251D6"} size={14} />
+              <Text
+                style={[
+                  styles.scoreText,
+                  { color: isHighTierScore ? "#0F6D55" : "#2251D6" },
+                ]}
+              >
+                {score}
+              </Text>
             </View>
           ) : null}
         </View>
@@ -117,18 +131,24 @@ export function PropertyCard({
 
         {/* Specs Row */}
         <View style={styles.specsRow}>
-          <View style={styles.specItem}>
-            <BedDouble color="#5C6B66" size={16} />
-            <Text style={styles.specText}>{property.beds}</Text>
-          </View>
-          <View style={styles.specItem}>
-            <Bath color="#5C6B66" size={16} />
-            <Text style={styles.specText}>{property.baths}</Text>
-          </View>
-          <View style={styles.specItem}>
-            <LandPlot color="#5C6B66" size={16} />
-            <Text style={styles.specText}>{property.area}</Text>
-          </View>
+          {property.beds !== undefined && property.beds > 0 ? (
+            <View style={styles.specItem}>
+              <BedDouble color="#5C6B66" size={16} />
+              <Text style={styles.specText}>{property.beds}</Text>
+            </View>
+          ) : null}
+          {property.baths !== undefined && property.baths > 0 ? (
+            <View style={styles.specItem}>
+              <Bath color="#5C6B66" size={16} />
+              <Text style={styles.specText}>{property.baths}</Text>
+            </View>
+          ) : null}
+          {property.area ? (
+            <View style={styles.specItem}>
+              <LandPlot color="#5C6B66" size={16} />
+              <Text style={styles.specText}>{property.area}</Text>
+            </View>
+          ) : null}
         </View>
       </View>
     </View>
@@ -139,10 +159,9 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    borderWidth: 0.8,
+    borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.08)",
     overflow: "hidden",
-    padding: 0.8,
   },
   imageWrap: {
     position: "relative",
@@ -244,6 +263,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     lineHeight: 28,
+  },
+  moText: {
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 20,
   },
   scoreContainer: {
     flexDirection: "row",

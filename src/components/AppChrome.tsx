@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Heart,
   Home,
+  LogIn,
   Mail,
   MapPin,
   Menu,
@@ -33,6 +34,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { Brand } from "./Brand";
 import { AreaPicker } from "./AreaPicker";
+import { LoginModal } from "./LoginModal";
 import { AppLink } from "./ui";
 
 export type ActivePage =
@@ -159,6 +161,7 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const [headerSearch, setHeaderSearch] = useState("");
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState("Dhaka");
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user } = useAuthStore();
 
   return (
@@ -182,7 +185,10 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
               style={styles.headerSearchInput}
               value={headerSearch}
             />
-            <AppLink href="/buy" style={styles.aiSearchBtn}>
+            <AppLink
+              href={headerSearch.trim() ? `/buy?query=${encodeURIComponent(headerSearch.trim())}` : "/buy"}
+              style={styles.aiSearchBtn}
+            >
               <Sparkles color="#FFFFFF" size={14} />
               <Text style={styles.aiSearchBtnText}>AI Search</Text>
             </AppLink>
@@ -241,14 +247,15 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
               </AppLink>
             </>
           ) : (
-            /* Log In Button (Figma node 183:14) */
-            <AppLink
-              href="/profile"
-              accessibilityLabel="Log In"
-              style={styles.logInPill}
+            /* Sign In Button (Figma node 220:6776) */
+            <Pressable
+              onPress={() => setAuthModalOpen(true)}
+              accessibilityLabel="Sign In"
+              style={[styles.signInButton, webPointer]}
             >
-              <Text style={styles.logInPillText}>Log In</Text>
-            </AppLink>
+              <LogIn color="#FFFFFF" size={16} />
+              <Text style={styles.signInButtonText}>Sign In</Text>
+            </Pressable>
           )}
         </View>
       </View>
@@ -258,8 +265,14 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
         onClose={() => setAreaPickerOpen(false)}
         onSelect={(area) => {
           setSelectedCity(area?.city || area?.name || "Dhaka");
+          setAreaPickerOpen(false);
         }}
         selectedArea={null}
+      />
+
+      <LoginModal
+        visible={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
       />
     </SafeAreaView>
   );
@@ -871,6 +884,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 20,
     textAlign: "center",
+  },
+  signInButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#0F6D55",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    height: 38.4,
+  },
+  signInButtonText: {
+    color: "#FFFFFF",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
   },
   notificationWrap: {
     position: "relative",

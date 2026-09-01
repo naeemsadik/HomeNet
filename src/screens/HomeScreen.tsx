@@ -37,6 +37,7 @@ import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from "react-nati
 import { AppChrome } from "@/components/AppChrome";
 import { AreaPicker } from "@/components/AreaPicker";
 import { PropertyCard } from "@/components/PropertyCard";
+import { HeroSearchWidget } from "@/components/HeroSearchWidget";
 import { AppButton, AppLink } from "@/components/ui";
 import {
   latestNews,
@@ -48,15 +49,16 @@ import type { Property as ApiProperty } from "@/features/property/types/property
 import { useResponsive } from "@/hooks/useResponsive";
 import { toApiError } from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
+import { useSavedStore } from "@/stores/savedStore";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
-const categoryButtons: { label: string; icon: LucideIcon }[] = [
-  { label: "Apartment", icon: Building2 },
-  { label: "House", icon: Home },
-  { label: "Commercial", icon: Briefcase },
-  { label: "Land", icon: LandPlot },
-  { label: "Rent", icon: KeyRound },
-  { label: "Sale", icon: BadgePercent },
+const categoryButtons: { label: string; icon: LucideIcon; href: string }[] = [
+  { label: "Apartment", icon: Building2, href: "/buy?type=apartment" },
+  { label: "House", icon: Home, href: "/buy?type=house" },
+  { label: "Commercial", icon: Briefcase, href: "/buy?type=commercial" },
+  { label: "Land", icon: LandPlot, href: "/buy?type=land" },
+  { label: "Rent", icon: KeyRound, href: "/rent" },
+  { label: "Sale", icon: BadgePercent, href: "/buy" },
 ];
 
 function PropertyResult({
@@ -163,7 +165,7 @@ function FeaturedPropertyCard({ property, width }: { property: ApiProperty; widt
 
 export function HomeScreen() {
   const { isPhone, isTablet, width } = useResponsive();
-  const [favorites, setFavorites] = useState<Array<string | number>>([]);
+  const { savedIds: favorites, toggleSaved: toggleFavorite } = useSavedStore();
   const [heroSearch, setHeroSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Apartment");
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
@@ -205,12 +207,6 @@ export function HomeScreen() {
   const popularError = popularQuery.error ? toApiError(popularQuery.error).message : null;
   const recentError = recentQuery.error ? toApiError(recentQuery.error).message : null;
 
-  function toggleFavorite(id: string | number) {
-    setFavorites((current) =>
-      current.includes(id) ? current.filter((favId) => favId !== id) : [...current, id]
-    );
-  }
-
   return (
     <AppChrome active="home">
       {/* ─────────────────────────────────────────────────────────────
@@ -251,55 +247,8 @@ export function HomeScreen() {
               Verified listings, AI valuation and investment scores for apartments, houses, land and commercial spaces across Bangladesh.
             </Text>
 
-            {/* Hero Search Box */}
-            <View style={[styles.heroSearchBox, isPhone && styles.heroSearchBoxPhone]}>
-              <Search color="#5C6B66" size={isPhone ? 18 : 20} />
-              <TextInput
-                onChangeText={setHeroSearch}
-                placeholder={isPhone ? "Search area, project or AI…" : "Try: 3 bedroom in Gulshan under 40000"}
-                placeholderTextColor="#5C6B66"
-                style={[styles.heroSearchInput, isPhone && styles.heroSearchInputPhone]}
-                value={heroSearch}
-              />
-              <AppLink
-                href={`/buy?query=${encodeURIComponent(heroSearch)}`}
-                style={[styles.heroAiSearchBtn, isPhone && styles.heroAiSearchBtnPhone]}
-              >
-                <Sparkles color="#FFFFFF" size={isPhone ? 14 : 16} />
-                <Text style={[styles.heroAiSearchBtnText, isPhone && styles.heroAiSearchBtnTextPhone]}>
-                  AI Search
-                </Text>
-              </AppLink>
-            </View>
-
-            {/* Below Search Meta Row */}
-            <View style={[styles.heroMetaRow, isPhone && styles.heroMetaRowPhone]}>
-              {/* Location Pill */}
-              <Pressable
-                onPress={() => setAreaPickerOpen(true)}
-                style={[styles.heroLocationPill, webPointer]}
-                accessibilityRole="button"
-                accessibilityLabel={`Select location, current: ${selectedLocation}`}
-              >
-                <MapPin color="#0B1A17" size={16} />
-                <Text style={styles.heroLocationPillText}>{selectedLocation}</Text>
-                <ChevronDown color="#5C6B66" size={16} />
-              </Pressable>
-
-              <View style={styles.heroMetaItem}>
-                <ShieldCheck color="rgba(255, 255, 255, 0.9)" size={16} />
-                <Text style={styles.heroMetaText}>
-                  {popularQuery.data?.data
-                    ? `${popularQuery.data.data.total.toLocaleString()} active listings`
-                    : "Active listings"}
-                </Text>
-              </View>
-
-              <View style={styles.heroMetaItem}>
-                <TrendingUp color="rgba(255, 255, 255, 0.9)" size={16} />
-                <Text style={styles.heroMetaText}>Live market data</Text>
-              </View>
-            </View>
+            {/* Hero Search Widget (Figma node 214:4655) */}
+            <HeroSearchWidget />
           </View>
         </ImageBackground>
       </View>
@@ -313,21 +262,18 @@ export function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoryRow}
         >
-          {categoryButtons.map(({ label, icon: Icon }) => {
-            const isSelected = activeCategory === label;
-            return (
-              <Pressable
-                key={label}
-                onPress={() => setActiveCategory(label)}
-                style={[styles.categoryCard, webPointer]}
-              >
-                <View style={styles.categoryIconCircle}>
-                  <Icon color="#0F6D55" size={24} strokeWidth={1.8} />
-                </View>
-                <Text style={styles.categoryCardText}>{label}</Text>
-              </Pressable>
-            );
-          })}
+          {categoryButtons.map(({ label, icon: Icon, href }) => (
+            <AppLink
+              key={label}
+              href={href}
+              style={styles.categoryCard}
+            >
+              <View style={styles.categoryIconCircle}>
+                <Icon color="#0F6D55" size={24} strokeWidth={1.8} />
+              </View>
+              <Text style={styles.categoryCardText}>{label}</Text>
+            </AppLink>
+          ))}
         </ScrollView>
       </View>
 

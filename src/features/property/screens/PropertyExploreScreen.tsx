@@ -1,12 +1,6 @@
 import React from "react";
-import { AppChrome } from "@/components/AppChrome";
-import { PropertyFeed } from "../components/PropertyFeed";
+import { BrowseScreen } from "@/screens/BrowseScreen";
 
 export function PropertyExploreScreen() {
-  return (
-    <AppChrome active="buy">
-      <PropertyFeed />
-    </AppChrome>
-  );
+  return <BrowseScreen mode="buy" />;
 }
-
