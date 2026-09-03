@@ -39,6 +39,7 @@ import { AppLink } from "./ui";
 
 export type ActivePage =
   | "home"
+  | "search"
   | "buy"
   | "rent"
   | "saved"
@@ -59,15 +60,8 @@ const sidebarNav: {
   badge?: number;
 }[] = [
     { label: "Home", href: "/", icon: Home, key: "home" },
-    { label: "Search", href: "/buy", icon: Search, key: "buy" },
+    { label: "Search", href: "/search", icon: Search, key: "search" },
     { label: "Saved", href: "/saved", icon: Heart, key: "saved" },
-    {
-      label: "Messages",
-      href: "/messages",
-      icon: MessageCircle,
-      key: "messages",
-      badge: 2,
-    },
     { label: "Profile", href: "/profile", icon: User, key: "profile" },
   ];
 
@@ -102,8 +96,10 @@ function SideBar({
         {sidebarNav.map(({ label, href, icon: Icon, key, badge }) => {
           const selected =
             active === key ||
-            (key === "buy" &&
-              (active === "market" ||
+            ((key === "search" || key === "buy") &&
+              (active === "search" ||
+                active === "buy" ||
+                active === "market" ||
                 active === "property" ||
                 active === "rent"));
           return (
@@ -520,21 +516,15 @@ function MobileNav({ active }: { active: ActivePage }) {
     { label: "Home", href: "/", icon: Home, selected: active === "home" },
     {
       label: "Search",
-      href: "/buy",
+      href: "/search",
       icon: Search,
-      selected: active === "buy" || active === "property",
+      selected: active === "search" || active === "buy" || active === "property",
     },
     {
       label: "Saved",
       href: "/saved",
       icon: Heart,
       selected: active === "saved",
-    },
-    {
-      label: "Messages",
-      href: "/messages",
-      icon: MessageCircle,
-      selected: active === "messages",
     },
     {
       label: "Profile",

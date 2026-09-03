@@ -54,6 +54,8 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
     bedrooms?: string;
     bathrooms?: string;
     is_verified?: string;
+    filters?: string;
+    modal?: string;
   }>();
 
   // Search input state
@@ -89,7 +91,9 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
   );
 
   // Advanced modal state
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(
+    params.filters === "open" || params.filters === "true" || params.modal === "filters"
+  );
   const [modalFilters, setModalFilters] = useState<FilterState>({
     ...defaultFilterState,
     location: params.location || params.city || defaultFilterState.location,
@@ -272,7 +276,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
   }, [modalFilters]);
 
   return (
-    <AppChrome active={mode || "buy"}>
+    <AppChrome active={mode || "search"}>
       <View style={styles.container}>
         {/* ─── 1. AI Search Input Bar ──────────────────────────────────────── */}
         <View style={styles.searchBarCard}>
@@ -347,18 +351,18 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
             onPress={() => setIsFilterModalOpen(true)}
             style={[
               styles.filterTriggerChip,
-              activeAdvancedCount > 0 && styles.filterTriggerChipActive,
+              (isFilterModalOpen || activeAdvancedCount > 0) && styles.filterTriggerChipActive,
               webPointer,
             ]}
           >
             <SlidersHorizontal
-              color={activeAdvancedCount > 0 ? "#FFFFFF" : "#0F6D55"}
+              color={isFilterModalOpen || activeAdvancedCount > 0 ? "#FFFFFF" : "#0F6D55"}
               size={16}
             />
             <Text
               style={[
                 styles.filterTriggerText,
-                activeAdvancedCount > 0 && styles.filterTriggerTextActive,
+                (isFilterModalOpen || activeAdvancedCount > 0) && styles.filterTriggerTextActive,
               ]}
             >
               Filters
