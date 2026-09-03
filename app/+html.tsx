@@ -25,6 +25,18 @@ export default function Root({ children }: PropsWithChildren) {
           * {
             box-sizing: border-box;
           }
+          input, textarea, select, [contenteditable] {
+            outline: none !important;
+            outline-style: none !important;
+            box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+          }
+          input:focus, textarea:focus, select:focus, [contenteditable]:focus,
+          input:focus-visible, textarea:focus-visible, select:focus-visible {
+            outline: none !important;
+            outline-style: none !important;
+            box-shadow: none !important;
+          }
         ` }} />
       </head>
       <body>{children}</body>

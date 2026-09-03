@@ -329,7 +329,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 14,
     minHeight: 56,
-  },
+    outlineStyle: "none",
+  } as any,
   textInputWithIcon: {
     paddingLeft: 10,
   },

@@ -106,6 +106,7 @@ export function PropertyDetailsScreen({ propertyId }: { propertyId: number }) {
           </View>
           {messageSent ? <View style={styles.success}><Check color={colors.greenDark} size={14} /><Text style={styles.successText}>Inquiry sent. An advisor will contact you shortly.</Text></View> : null}
           <View style={styles.divider}><View style={styles.dividerLine} /><Text style={styles.dividerText}>or</Text></View>
+          <AppLink href={`https://wa.me/8801700000000?text=${encodeURIComponent(`Hi, I'm interested in "${property.title}" on Homenet.`)}`} style={styles.whatsAppButton}><Text style={styles.whatsAppButtonText}>💬 Chat on WhatsApp</Text></AppLink>
           <AppLink href="tel:+8801700000000" style={styles.callButton}><Phone color={colors.green} size={15} /><Text style={styles.callButtonText}>Call property advisor</Text></AppLink>
           <Pressable style={[styles.scheduleButton, webPointer]}><CalendarCheck2 color={colors.green} size={15} /><Text style={styles.scheduleText}>Schedule a viewing</Text><ArrowRight color={colors.green} size={14} /></Pressable>
         </View>
@@ -186,6 +187,8 @@ const styles = StyleSheet.create({
   divider: { position: "relative", alignItems: "center", justifyContent: "center", marginVertical: 15 },
   dividerLine: { position: "absolute", right: 0, left: 0, height: 1, backgroundColor: colors.line },
   dividerText: { paddingHorizontal: 8, color: "#9AA69F", fontFamily: fonts.regular, fontSize: 12, backgroundColor: "#FBFDFC" },
+  whatsAppButton: { width: "100%", minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, borderRadius: 999, backgroundColor: "#25D366", marginBottom: 10 },
+  whatsAppButtonText: { color: colors.white, fontFamily: fonts.extraBold, fontSize: 14 },
   callButton: { width: "100%", minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, borderRadius: 999, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
   callButtonText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 14 },
   scheduleButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 8, padding: 10 },
