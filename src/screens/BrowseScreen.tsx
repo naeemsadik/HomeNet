@@ -706,12 +706,16 @@ const styles = StyleSheet.create({
   },
   searchBarLeft: {
     flex: 1,
+    minWidth: 0,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    overflow: "hidden",
   },
   searchBarInput: {
     flex: 1,
+    minWidth: 0,
+    width: "100%",
     height: 36,
     color: "#0B1A17",
     fontFamily: fonts.regular,
@@ -722,6 +726,7 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   searchButton: {
+    flexShrink: 0,
     flexDirection: "row",
     alignItems: "center",
     gap: 6,

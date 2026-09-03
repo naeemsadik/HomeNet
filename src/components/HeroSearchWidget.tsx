@@ -14,6 +14,7 @@ import {
   TrendingUp,
 } from "lucide-react-native";
 import { fonts, webPointer } from "@/theme";
+import { useResponsive } from "@/hooks/useResponsive";
 
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
 
@@ -30,6 +31,7 @@ export function HeroSearchWidget({
   onSearch,
   showMetaStats = true,
 }: HeroSearchWidgetProps) {
+  const { isPhone } = useResponsive();
   const [activeTab, setActiveTab] = useState<HeroSearchTab>(initialTab);
   const [query, setQuery] = useState("");
 
@@ -81,8 +83,8 @@ export function HeroSearchWidget({
         <View style={styles.searchBody}>
           <Text style={styles.promptLabel}>{getPromptText()}</Text>
 
-          <View style={styles.inputActionRow}>
-            <View style={styles.inputContainer}>
+          <View style={[styles.inputActionRow, isPhone && styles.inputActionRowPhone]}>
+            <View style={[styles.inputContainer, isPhone && styles.inputContainerPhone]}>
               <Search color="#5C6B66" size={16} />
               <TextInput
                 onChangeText={setQuery}
@@ -90,15 +92,16 @@ export function HeroSearchWidget({
                 placeholder="Try: 3 bed apartment in Gulshan under ৳2Cr"
                 placeholderTextColor="#5C6B66"
                 returnKeyType="search"
-                style={styles.textInput}
+                style={[styles.textInput, isPhone && styles.textInputPhone]}
                 value={query}
               />
             </View>
 
             <Pressable
               onPress={handleSearch}
-              style={[styles.searchButton, webPointer]}
+              style={[styles.searchButton, isPhone && styles.searchButtonPhone, webPointer]}
             >
+              {isPhone ? <Search color="#FFFFFF" size={16} /> : null}
               <Text style={styles.searchButtonText}>Search</Text>
             </Pressable>
           </View>
@@ -145,8 +148,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 4,
+    paddingLeft: 16,
+    paddingRight: 18,
+    paddingTop: 8,
+    paddingBottom: 0,
     borderBottomWidth: 1.2,
     borderBottomColor: "rgba(11, 26, 23, 0.08)",
   },
@@ -158,6 +163,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
+    marginRight: 6,
+    marginTop: 2,
   },
   aiBadgeText: {
     color: "#0F6D55",
@@ -181,9 +188,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     width: "100%",
+    maxWidth: "100%",
+  },
+  inputActionRowPhone: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 10,
   },
   inputContainer: {
     flex: 1,
+    minWidth: 0,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -192,18 +206,29 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11, 26, 23, 0.08)",
     borderRadius: 20,
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    height: 44,
+    height: 46,
+    overflow: "hidden",
+  },
+  inputContainerPhone: {
+    width: "100%",
+    height: 46,
+    paddingHorizontal: 14,
   },
   textInput: {
     flex: 1,
-    height: "100%",
+    minWidth: 0,
+    height: 40,
     color: "#0B1A17",
     fontFamily: fonts.regular,
     fontSize: 14,
     paddingVertical: 0,
+    outlineStyle: "none",
+  } as any,
+  textInputPhone: {
+    fontSize: 13,
   },
   searchButton: {
+    flexShrink: 0,
     backgroundColor: "#0F6D55",
     paddingHorizontal: 18,
     paddingVertical: 10,
@@ -211,6 +236,12 @@ const styles = StyleSheet.create({
     height: 44,
     alignItems: "center",
     justifyContent: "center",
+    flexDirection: "row",
+    gap: 6,
+  },
+  searchButtonPhone: {
+    width: "100%",
+    height: 46,
   },
   searchButtonText: {
     color: "#FFFFFF",
