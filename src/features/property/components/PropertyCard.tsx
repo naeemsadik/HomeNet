@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
+import { router } from "expo-router";
 import type { Property } from "../types/property";
 import {
   StatusBadge,
@@ -18,9 +19,17 @@ interface PropertyCardProps {
 export function PropertyCard({ property, onPress }: PropertyCardProps) {
   const areaName = property.area?.name || property.address || "Dhaka";
 
+  const handlePress = () => {
+    if (onPress) {
+      onPress(property);
+    } else if (property.id) {
+      router.push(`/property/${property.id}` as any);
+    }
+  };
+
   return (
     <Pressable
-      onPress={() => onPress?.(property)}
+      onPress={handlePress}
       style={({ pressed }) => [
         styles.card,
         pressed && styles.pressed,

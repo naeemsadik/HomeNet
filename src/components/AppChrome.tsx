@@ -15,6 +15,7 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
+  TrendingUp,
   User,
   X,
   type LucideIcon,
@@ -61,6 +62,7 @@ const sidebarNav: {
 }[] = [
     { label: "Home", href: "/", icon: Home, key: "home" },
     { label: "Search", href: "/search", icon: Search, key: "search" },
+    { label: "Insights", href: "/market", icon: TrendingUp, key: "market" },
     { label: "Saved", href: "/saved", icon: Heart, key: "saved" },
     { label: "Profile", href: "/profile", icon: User, key: "profile" },
   ];
@@ -99,7 +101,6 @@ function SideBar({
             ((key === "search" || key === "buy") &&
               (active === "search" ||
                 active === "buy" ||
-                active === "market" ||
                 active === "property" ||
                 active === "rent"));
           return (
@@ -527,6 +528,12 @@ function MobileNav({ active }: { active: ActivePage }) {
       href: "/search",
       icon: Search,
       selected: active === "search" || active === "buy" || active === "property",
+    },
+    {
+      label: "Insights",
+      href: "/market",
+      icon: TrendingUp,
+      selected: active === "market",
     },
     {
       label: "Saved",
