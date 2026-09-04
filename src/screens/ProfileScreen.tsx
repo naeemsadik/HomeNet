@@ -3,24 +3,25 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Camera, LoaderCircle, LogOut, Save, ShieldCheck, Trash2, UserRound, KeyRound } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
-import { FloatingInput, ErrorBanner, AuthButton, Divider } from "@/components/AuthFormFields";
+import { FloatingInput, ErrorBanner, AuthButton } from "@/components/AuthFormFields";
+import { AuthCard } from "@/components/AuthCard";
 import { updateUser, uploadAvatar, deleteAvatar, deleteUser } from "@/services/userApi";
 import type { UploadInput } from "@/services/upload";
 
 export function ProfileScreen() {
   const { isPhone } = useResponsive();
-  const { user, login, register, logout, loading: authLoading, error: authError, clearError } = useAuthStore();
-
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  const { user, logout } = useAuthStore();
+  const params = useLocalSearchParams<{ register?: string; mode?: string }>();
+  const initialAuthMode =
+    params.register === "true" || params.mode === "register" || params.mode === "signup"
+      ? "signup"
+      : "signin";
 
   const [editingName, setEditingName] = useState("");
   const [updatingProfile, setUpdatingProfile] = useState(false);
@@ -32,23 +33,6 @@ export function ProfileScreen() {
       setEditingName(user.full_name);
     }
   }, [user]);
-
-  const handleAuthSubmit = async () => {
-    setLocalError(null);
-    if (mode === "login") {
-      await login({ email: email.trim(), password });
-    } else {
-      if (!fullName.trim()) {
-        setLocalError("Full name is required");
-        return;
-      }
-      if (password.length < 8) {
-        setLocalError("Password must be at least 8 characters");
-        return;
-      }
-      await register({ full_name: fullName.trim(), email: email.trim(), password });
-    }
-  };
 
   const handleSaveName = async () => {
     if (!user || !editingName.trim()) return;
@@ -180,83 +164,17 @@ export function ProfileScreen() {
           </View>
         ) : null}
 
-        {/* Global Errors */}
-        <ErrorBanner message={localError || authError} />
-
         {/* Unauthenticated State */}
         {!user ? (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>
-              {mode === "login" ? "Log in to HomeNet" : "Create your HomeNet account"}
-            </Text>
-            <Text style={styles.supportText}>
-              Access saved properties, list new homes, and verify pricing.
-            </Text>
-
-            <View style={styles.formContainer}>
-              {mode === "register" ? (
-                <FloatingInput
-                  label="Full Name"
-                  value={fullName}
-                  onChangeText={(val) => {
-                    setFullName(val);
-                    setLocalError(null);
-                    clearError();
-                  }}
-                  autoCapitalize="words"
-                />
-              ) : null}
-
-              <FloatingInput
-                label="Email"
-                value={email}
-                onChangeText={(val) => {
-                  setEmail(val);
-                  setLocalError(null);
-                  clearError();
-                }}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-
-              <FloatingInput
-                label="Password"
-                value={password}
-                onChangeText={(val) => {
-                  setPassword(val);
-                  setLocalError(null);
-                  clearError();
-                }}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-
-              <AuthButton
-                label={mode === "login" ? "Log In" : "Register"}
-                onPress={handleAuthSubmit}
-                loading={authLoading}
-                disabled={!email || !password || (mode === "register" && !fullName)}
-                style={styles.submitBtn}
-              />
-
-              <Divider text="or" />
-
-              <AuthButton
-                label={mode === "login" ? "Create an account" : "Back to Log In"}
-                onPress={() => {
-                  setMode((current) => (current === "login" ? "register" : "login"));
-                  setLocalError(null);
-                  clearError();
-                }}
-                variant="secondary"
-              />
-            </View>
+          <View style={styles.authWrapper}>
+            <AuthCard initialMode={initialAuthMode} />
           </View>
         ) : (
           /* Authenticated Settings State */
           <>
+            {/* Global Errors for Authenticated Actions */}
+            <ErrorBanner message={localError} />
+
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>Profile details</Text>
               
@@ -350,11 +268,11 @@ const styles = StyleSheet.create({
   sectionTitle: { marginBottom: 4, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 18 },
   supportText: { color: colors.muted, fontFamily: fonts.regular, fontSize: 13, lineHeight: 18, marginBottom: 18 },
   
-  formContainer: {
-    marginTop: 16,
-  },
-  submitBtn: {
-    marginTop: 10,
+  authWrapper: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
   },
   
   actionsRow: { flexDirection: "row", gap: 12, marginTop: 14, flexWrap: "wrap" },
