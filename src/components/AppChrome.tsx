@@ -288,17 +288,21 @@ function Footer() {
         >
           {/* Column 1: Brand & Contact Info */}
           <View style={[styles.footerCol1, isPhone && styles.footerColFull]}>
-            <Brand />
+            <Brand size="large" />
             <Text style={styles.footerTagline}>
               Bangladesh's AI-powered property marketplace. Verified listings,
               smart valuation and trusted partners — all in one place.
             </Text>
             <View style={styles.contactItem}>
-              <Mail color="#5C6B66" size={16} />
+              <View style={styles.contactIconWrap}>
+                <Mail color="#0F6D55" size={14} />
+              </View>
               <Text style={styles.contactText}>hello@homenet.com.bd</Text>
             </View>
             <View style={styles.contactItem}>
-              <Phone color="#5C6B66" size={16} />
+              <View style={styles.contactIconWrap}>
+                <Phone color="#0F6D55" size={14} />
+              </View>
               <Text style={styles.contactText}>+880 1700-000000</Text>
             </View>
             <View style={styles.socialRow}>
@@ -448,6 +452,10 @@ function Footer() {
           style={[styles.newsletterCard, isPhone && styles.newsletterCardPhone]}
         >
           <View style={styles.newsletterLeft}>
+            <View style={styles.newsletterBadge}>
+              <Sparkles color="#0F6D55" size={13} />
+              <Text style={styles.newsletterBadgeText}>MARKET DIGEST</Text>
+            </View>
             <Text style={styles.newsletterTitle}>
               Get market insights in your inbox
             </Text>
@@ -464,7 +472,7 @@ function Footer() {
             <TextInput
               onChangeText={setEmail}
               placeholder="Your email address"
-              placeholderTextColor="rgba(11, 26, 23, 0.5)"
+              placeholderTextColor="rgba(11, 26, 23, 0.45)"
               style={[
                 styles.newsletterInput,
                 isPhone && styles.newsletterInputPhone,
@@ -496,11 +504,11 @@ function Footer() {
           style={[styles.footerBottom, isPhone && styles.footerBottomPhone]}
         >
           <Text style={styles.footerBottomText}>
-            © 2026 Homenet. All rights reserved.
+            © 2026 HomeNet Ltd. All rights reserved.
           </Text>
           <View style={styles.verifiedListingsTag}>
-            <ShieldCheck color="#0F6D55" size={16} />
-            <Text style={styles.footerBottomText}>
+            <ShieldCheck color="#0F6D55" size={15} />
+            <Text style={styles.verifiedListingsTagText}>
               12,400+ verified listings across Bangladesh
             </Text>
           </View>
@@ -974,63 +982,71 @@ const styles = StyleSheet.create({
   /* Footer Styles */
   footer: {
     width: "100%",
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 0.8,
-    borderTopColor: "rgba(11, 26, 23, 0.08)",
+    backgroundColor: "#FAFCFA",
+    borderTopWidth: 1.2,
+    borderTopColor: "rgba(11, 26, 23, 0.14)",
     alignItems: "center",
   },
   footerInner: {
     width: "100%",
     maxWidth: 1665,
     paddingHorizontal: 40,
-    paddingVertical: 48,
+    paddingVertical: 52,
   },
   footerColumns: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 32,
+    gap: 36,
   },
   footerColumnsPhone: {
     flexWrap: "wrap",
-    gap: 24,
+    gap: 28,
   },
   footerCol1: {
-    flex: 2,
-    minWidth: 220,
+    flex: 2.2,
+    minWidth: 240,
   },
   footerColFull: {
     flexBasis: "100%",
   },
   footerTagline: {
-    marginTop: 16,
-    marginBottom: 16,
-    color: "#5C6B66",
+    marginTop: 18,
+    marginBottom: 20,
+    color: "#52635E",
     fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 20,
-    maxWidth: 280,
+    fontSize: 15,
+    lineHeight: 23,
+    maxWidth: 310,
   },
   contactItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 6,
+    gap: 10,
+    marginBottom: 8,
+  },
+  contactIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(15, 109, 85, 0.08)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   contactText: {
-    color: "#5C6B66",
-    fontFamily: fonts.regular,
-    fontSize: 14,
+    color: "#31443F",
+    fontFamily: fonts.medium,
+    fontSize: 14.5,
   },
   socialRow: {
     flexDirection: "row",
-    gap: 8,
-    marginTop: 16,
+    gap: 10,
+    marginTop: 20,
   },
   socialCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 0.8,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
     alignItems: "center",
     justifyContent: "center",
@@ -1038,28 +1054,31 @@ const styles = StyleSheet.create({
   },
   footerCol: {
     flex: 1,
-    minWidth: 120,
-    gap: 10,
+    minWidth: 125,
+    gap: 11,
   },
   footerColHeading: {
-    color: "#0B1A17",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 4,
+    color: "#081613",
+    fontFamily: fonts.headingBold,
+    fontSize: 15,
+    fontWeight: "700",
+    letterSpacing: -0.2,
+    marginBottom: 14,
   },
   footerLinkText: {
-    color: "#5C6B66",
+    color: "#4A5D57",
     fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 14.5,
+    lineHeight: 22,
   },
 
   newsletterCard: {
-    marginTop: 40,
-    backgroundColor: "#F8FAF9",
+    marginTop: 44,
+    backgroundColor: "#F2F7F4",
     borderRadius: 20,
-    padding: 24,
+    borderWidth: 1,
+    borderColor: "rgba(15, 109, 85, 0.1)",
+    padding: 26,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -1068,36 +1087,56 @@ const styles = StyleSheet.create({
   newsletterCardPhone: {
     flexDirection: "column",
     alignItems: "stretch",
-    padding: 18,
+    padding: 20,
     gap: 16,
   },
   newsletterLeft: {
     flex: 1,
   },
+  newsletterBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(15, 109, 85, 0.08)",
+    alignSelf: "flex-start",
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginBottom: 8,
+  },
+  newsletterBadgeText: {
+    color: "#0F6D55",
+    fontFamily: fonts.bold,
+    fontSize: 10.5,
+    letterSpacing: 0.6,
+    fontWeight: "700",
+  },
   newsletterTitle: {
-    color: "#0B1A17",
-    fontFamily: fonts.semiBold,
-    fontSize: 16,
-    fontWeight: "600",
+    color: "#081613",
+    fontFamily: fonts.headingBold,
+    fontSize: 17,
+    fontWeight: "700",
+    letterSpacing: -0.3,
   },
   newsletterSubtitle: {
-    marginTop: 4,
-    color: "#5C6B66",
+    marginTop: 3,
+    color: "#52635E",
     fontFamily: fonts.regular,
     fontSize: 14,
+    lineHeight: 20,
   },
   newsletterInputWrap: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
     borderRadius: 999,
-    borderWidth: 0.8,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    paddingLeft: 16.8,
-    paddingRight: 4.8,
+    borderWidth: 1,
+    borderColor: "rgba(15, 109, 85, 0.16)",
+    paddingLeft: 16,
+    paddingRight: 4.5,
     paddingVertical: 4,
     minHeight: 50,
-    width: 320,
+    width: 330,
     maxWidth: "100%",
   },
   newsletterInputWrapPhone: {
@@ -1114,7 +1153,7 @@ const styles = StyleSheet.create({
     height: 40,
     color: "#0B1A17",
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 14.5,
     paddingVertical: 6,
     outlineStyle: "none",
   } as any,
@@ -1124,8 +1163,8 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   subscribeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
     backgroundColor: "#0F6D55",
     borderRadius: 999,
     alignItems: "center",
@@ -1147,28 +1186,40 @@ const styles = StyleSheet.create({
   },
 
   footerBottom: {
-    marginTop: 32,
-    paddingTop: 24.8,
-    borderTopWidth: 0.8,
-    borderTopColor: "rgba(11, 26, 23, 0.08)",
+    marginTop: 36,
+    paddingTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(11, 26, 23, 0.07)",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   footerBottomPhone: {
     flexDirection: "column",
-    gap: 8,
+    gap: 12,
     alignItems: "flex-start",
   },
   footerBottomText: {
-    color: "#5C6B66",
+    color: "#60716B",
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 13.5,
   },
   verifiedListingsTag: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    backgroundColor: "rgba(15, 109, 85, 0.06)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(15, 109, 85, 0.1)",
+  },
+  verifiedListingsTagText: {
+    color: "#0F6D55",
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    fontWeight: "600",
   },
 
   /* Mobile bottom bar */
