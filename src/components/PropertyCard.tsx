@@ -1,8 +1,8 @@
 import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck, Sparkles } from "lucide-react-native";
+import { router } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle, View } from "react-native";
 import type { Property } from "@/data/properties";
 import { colors, fonts, webPointer } from "@/theme";
-import { AppLink } from "./ui";
 
 type PropertyCardData = Omit<Property, "id"> & { id: string | number };
 
@@ -16,6 +16,7 @@ export function PropertyCard({
   feature = false,
   badgeText,
   style,
+  onPress,
 }: {
   property: PropertyCardData;
   saved: boolean;
@@ -26,6 +27,7 @@ export function PropertyCard({
   feature?: boolean;
   badgeText?: string;
   style?: StyleProp<ViewStyle>;
+  onPress?: () => void;
 }) {
   const isRent = mode === "rent" || property.forRent === true;
   const isNew = property.tag === "New";
@@ -38,8 +40,26 @@ export function PropertyCard({
   const mainPrice = priceParts[0]?.trim();
   const hasMo = isRent || priceParts.length > 1;
 
+  const handleCardPress = () => {
+    if (onPress) {
+      onPress();
+    } else if (property.id) {
+      router.push(`/property/${property.id}` as any);
+    }
+  };
+
   return (
-    <View style={[styles.card, style]}>
+    <Pressable
+      accessibilityLabel={`Property ${property.title}`}
+      accessibilityRole="button"
+      onPress={handleCardPress}
+      style={({ pressed }) => [
+        styles.card,
+        webPointer,
+        style,
+        pressed && styles.cardPressed,
+      ]}
+    >
       {/* Image Container */}
       <View style={[styles.imageWrap, imageHeight ? { height: imageHeight } : null]}>
         {property.image ? (
@@ -70,7 +90,10 @@ export function PropertyCard({
           {/* Heart / Save Button */}
           <Pressable
             accessibilityLabel={saved ? "Remove from saved" : "Save property"}
-            onPress={onSave}
+            onPress={(e) => {
+              e?.stopPropagation?.();
+              onSave();
+            }}
             style={[styles.saveButton, webPointer]}
           >
             <Heart
@@ -115,11 +138,11 @@ export function PropertyCard({
         </View>
 
         {/* Title */}
-        <AppLink href={`/property/${property.id}`} style={styles.titleLink}>
+        <View style={styles.titleLink}>
           <Text numberOfLines={1} style={styles.titleText}>
             {property.title}
           </Text>
-        </AppLink>
+        </View>
 
         {/* Location */}
         <View style={styles.locationRow}>
@@ -151,7 +174,7 @@ export function PropertyCard({
           ) : null}
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -162,6 +185,9 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.08)",
     overflow: "hidden",
+  },
+  cardPressed: {
+    opacity: 0.96,
   },
   imageWrap: {
     position: "relative",
