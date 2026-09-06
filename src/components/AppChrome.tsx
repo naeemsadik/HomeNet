@@ -168,7 +168,13 @@ function SideBar({
   );
 }
 
-function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
+function TopBar({
+  active,
+  onOpenMenu,
+}: {
+  active?: ActivePage;
+  onOpenMenu?: () => void;
+}) {
   const { isTablet, width } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
@@ -176,19 +182,81 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user } = useAuthStore();
 
+  const topNavLinks: {
+    label: string;
+    href: string;
+    key: string;
+    authGated?: boolean;
+  }[] = [
+    { label: "Buy", href: "/buy", key: "buy" },
+    { label: "Rent", href: "/rent", key: "rent" },
+    { label: "Commercial", href: "/buy?type=commercial", key: "commercial" },
+    { label: "Short-let", href: "/rent?subtype=short-let", key: "short-let" },
+    { label: "Insights", href: "/market", key: "market" },
+    { label: "Saved", href: "/saved", key: "saved", authGated: true },
+  ];
+
   return (
     <SafeAreaView
       edges={["top"]}
       style={[styles.topbarSafe, isTablet && { width, maxWidth: width }]}
     >
       <View style={[styles.topbar, isTablet && styles.topbarTablet]}>
-        {isTablet ? (
-          <View style={styles.mobileBrandRow}>
-            <Brand compact />
+        {/* Left: Brand + Hamburger (mobile) */}
+        <View style={styles.topbarLeft}>
+          {isTablet ? (
+            <Pressable
+              onPress={onOpenMenu}
+              style={[styles.menuButton, webPointer]}
+              accessibilityLabel="Open navigation menu"
+            >
+              <Menu color="#0B1A17" size={20} />
+            </Pressable>
+          ) : null}
+          <Brand />
+        </View>
+
+        {/* Center: Rightmove Desktop Nav Links */}
+        {!isTablet ? (
+          <View style={styles.topNavCenter}>
+            {topNavLinks.map((link) => {
+              const isSelected =
+                active === link.key ||
+                (link.key === "buy" && (active === "search" || active === "property"));
+
+              const handlePress = () => {
+                if (link.authGated && !user) {
+                  useAuthModalStore.getState().open(() => router.push(link.href as any));
+                } else {
+                  router.push(link.href as any);
+                }
+              };
+
+              return (
+                <Pressable
+                  key={link.label}
+                  onPress={handlePress}
+                  style={({ pressed }) => [
+                    styles.topNavLink,
+                    webPointer,
+                    pressed && { opacity: 0.8 },
+                  ]}
+                  accessibilityRole="link"
+                >
+                  <Text
+                    style={[
+                      styles.topNavLinkText,
+                      isSelected && styles.topNavLinkTextActive,
+                    ]}
+                  >
+                    {link.label}
+                  </Text>
+                  {isSelected ? <View style={styles.topNavIndicator} /> : null}
+                </Pressable>
+              );
+            })}
           </View>
-        ) : (
-          <View style={styles.topbarLeftSpacer} />
-        )}
+        ) : null}
 
         <View style={styles.topRightActions}>
           {/* Location Selector Pill */}
@@ -198,9 +266,9 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
             accessibilityRole="button"
             accessibilityLabel={`Select location, current: ${selectedCity}`}
           >
-            <MapPin color="#0F6D55" size={16} />
+            <MapPin color="#0F6D55" size={15} />
             <Text style={styles.locationPillText}>{selectedCity}</Text>
-            <ChevronDown color="#0B1A17" size={16} />
+            <ChevronDown color="#0B1A17" size={14} />
           </Pressable>
 
           {user ? (
@@ -212,7 +280,7 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
                   onPress={() => setNotificationsOpen((open) => !open)}
                   style={[styles.iconCircleButton, webPointer]}
                 >
-                  <Bell color="#0B1A17" size={20} />
+                  <Bell color="#0B1A17" size={19} />
                 </Pressable>
                 {notificationsOpen ? (
                   <View style={styles.notificationPopover}>
@@ -241,14 +309,18 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
               </AppLink>
             </>
           ) : (
-            /* Sign In Button (Figma node 220:6776) */
+            /* Rightmove Sign In Pill Button (Image 2) */
             <Pressable
               onPress={() => setAuthModalOpen(true)}
-              accessibilityLabel="Sign In"
-              style={[styles.signInButton, webPointer]}
+              accessibilityLabel="Sign in"
+              style={({ pressed }) => [
+                styles.rightmoveSignInBtn,
+                webPointer,
+                pressed && { opacity: 0.88, backgroundColor: "rgba(0, 207, 146, 0.08)" },
+              ]}
             >
-              <LogIn color="#FFFFFF" size={16} />
-              <Text style={styles.signInButtonText}>Sign In</Text>
+              <User color="#00CF92" size={18} strokeWidth={2.2} />
+              <Text style={styles.rightmoveSignInText}>Sign in</Text>
             </Pressable>
           )}
         </View>
@@ -602,20 +674,14 @@ export function AppChrome({
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <View
-      style={[
-        styles.shell,
-        isTablet && { width, maxWidth: width, overflow: "hidden" },
-      ]}
-    >
-      {!isTablet ? <SideBar active={active} /> : null}
-      <View style={[styles.pageColumn, isTablet && styles.pageColumnMobile]}>
-        <TopBar onOpenMenu={() => setMenuOpen(true)} />
+    <View style={styles.shell}>
+      <View style={styles.pageColumn}>
+        <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} />
         <ScrollView
           contentContainerStyle={styles.pageScrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          style={isTablet ? { width, maxWidth: width } : undefined}
+          style={{ width: "100%" }}
         >
           <View style={styles.mainGutter}>
             <View style={styles.main}>{children}</View>
@@ -651,7 +717,6 @@ const styles = StyleSheet.create({
   shell: {
     width: "100%",
     flex: 1,
-    flexDirection: "row",
     backgroundColor: "#F8FAF9",
   },
   sidebar: {
@@ -731,34 +796,42 @@ const styles = StyleSheet.create({
     minHeight: 30,
   },
   sidebarCard: {
-    backgroundColor: "#0F6D55",
-    borderRadius: 16,
     padding: 16,
-    gap: 6,
+    backgroundColor: "#E7F2EE",
+    borderRadius: 16,
+    alignItems: "center",
+    gap: 8,
   },
   sidebarCardIconWrap: {
-    marginBottom: 2,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#0F6D55",
+    alignItems: "center",
+    justifyContent: "center",
   },
   sidebarCardTitle: {
-    color: "#FFFFFF",
+    color: "#0B1A17",
     fontFamily: fonts.semiBold,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "600",
+    textAlign: "center",
   },
   sidebarCardSubtitle: {
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#5C6B66",
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 16,
+    textAlign: "center",
   },
   postAdButton: {
-    marginTop: 6,
-    height: 36,
     width: "100%",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    height: 38.4,
+    backgroundColor: "#0F6D55",
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 4,
   },
   postAdButtonText: {
     color: "#FFFFFF",
@@ -768,9 +841,7 @@ const styles = StyleSheet.create({
   },
 
   pageColumn: {
-    width: 0,
-    maxWidth: "100%",
-    minWidth: 0,
+    width: "100%",
     flex: 1,
     backgroundColor: "#F8FAF9",
   },
@@ -784,24 +855,61 @@ const styles = StyleSheet.create({
   },
   topbarSafe: {
     zIndex: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    borderBottomWidth: 0.8,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1.2,
     borderBottomColor: "rgba(11, 26, 23, 0.08)",
+    width: "100%",
   },
   topbar: {
-    minHeight: 78.4,
+    width: "100%",
+    maxWidth: 1600,
+    marginHorizontal: "auto",
+    minHeight: 74,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 32,
-    paddingVertical: 16,
+    paddingVertical: 12,
     gap: 16,
-    borderBottomWidth: 1.8,
-    borderColor: "rgba(11, 26, 23, 0.08)",
   },
   topbarTablet: {
     minHeight: 64,
     paddingHorizontal: 16,
+  },
+  topbarLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  topNavCenter: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 28,
+  },
+  topNavLink: {
+    position: "relative",
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+  },
+  topNavLinkText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0B1A17",
+    letterSpacing: -0.2,
+  },
+  topNavLinkTextActive: {
+    color: "#0F6D55",
+    fontWeight: "700",
+  },
+  topNavIndicator: {
+    position: "absolute",
+    bottom: 0,
+    left: 4,
+    right: 4,
+    height: 2.5,
+    borderRadius: 999,
+    backgroundColor: "#0F6D55",
   },
   mobileBrandRow: {
     flexDirection: "row",
@@ -818,13 +926,28 @@ const styles = StyleSheet.create({
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
-  topbarLeftSpacer: {
-    flex: 1,
-  },
   topRightActions: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+  },
+  rightmoveSignInBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1.8,
+    borderColor: "#00CF92",
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: 8,
+    height: 38,
+  },
+  rightmoveSignInText: {
+    color: "#0B1A17",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "700",
   },
   locationPill: {
     flexDirection: "row",
