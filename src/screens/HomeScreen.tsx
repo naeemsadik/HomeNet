@@ -30,19 +30,17 @@ import {
   View,
 } from "react-native";
 import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from "react-native-svg";
+import { ActivityIndicator } from "react-native";
+import { useQuery } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
 import { AreaPicker } from "@/components/AreaPicker";
-import { PropertyCard } from "@/components/PropertyCard";
+import { PropertyCard, formatApiPropertyToCardModel } from "@/components/PropertyCard";
 import { AppLink } from "@/components/ui";
+import { getProperties } from "@/services/propertyApi";
 import {
-  aiInvestmentPicksListings,
-  featuredListings,
   latestNews,
   popularLocations,
-  recentlyAddedListings,
-  recommendedListings,
   trustedPartners,
-  verifiedPropertiesListings,
 } from "@/data/properties";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
@@ -58,13 +56,56 @@ const categoryButtons: { label: string; icon: LucideIcon }[] = [
 
 export function HomeScreen() {
   const { isPhone, isTablet, width } = useResponsive();
-  const [favorites, setFavorites] = useState<number[]>([1, 7]);
+  const [favorites, setFavorites] = useState<(string | number)[]>([]);
   const [heroSearch, setHeroSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Apartment");
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("Dhaka");
 
-  function toggleFavorite(id: number) {
+  // Live properties with client-side caching
+  const { data: propertiesData, isLoading: propertiesLoading } = useQuery({
+    queryKey: ["properties", "home"],
+    queryFn: () => getProperties({ limit: 40, status: "active" }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const allApiProperties = useMemo(
+    () => propertiesData?.data?.items ?? [],
+    [propertiesData]
+  );
+
+  const featuredListings = useMemo(
+    () => allApiProperties.slice(0, 4),
+    [allApiProperties]
+  );
+
+  const recommendedListings = useMemo(() => {
+    const filtered = allApiProperties.filter((p) => {
+      if (activeCategory === "Rent") return p.listing_type === "rent";
+      if (activeCategory === "Sale") return p.listing_type === "sale";
+      return p.type?.toLowerCase() === activeCategory.toLowerCase();
+    });
+    return filtered.length > 0 ? filtered.slice(0, 4) : allApiProperties.slice(0, 4);
+  }, [allApiProperties, activeCategory]);
+
+  const recentlyAddedListings = useMemo(
+    () => allApiProperties.slice(4, 8),
+    [allApiProperties]
+  );
+
+  const verifiedPropertiesListings = useMemo(() => {
+    const list = allApiProperties.filter((p) => p.is_verified);
+    return list.length > 0 ? list.slice(0, 4) : allApiProperties.slice(0, 4);
+  }, [allApiProperties]);
+
+  const aiInvestmentPicksListings = useMemo(() => {
+    const list = allApiProperties.filter(
+      (p) => p.type === "commercial" || p.type === "residential"
+    );
+    return list.length > 0 ? list.slice(0, 4) : allApiProperties.slice(0, 4);
+  }, [allApiProperties]);
+
+  function toggleFavorite(id: string | number) {
     setFavorites((current) =>
       current.includes(id) ? current.filter((favId) => favId !== id) : [...current, id]
     );
@@ -201,56 +242,69 @@ export function HomeScreen() {
           </AppLink>
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.featuredCardsRow}
-        >
-          {featuredListings.map((item) => (
-            <AppLink
-              href={`/property/${item.id}`}
-              key={item.id}
-              style={[
-                styles.featuredCard,
-                isPhone && { width: Math.min(width - 48, 380) },
-              ]}
-            >
-              <ImageBackground
-                source={{ uri: item.image }}
-                style={styles.featuredCardBg}
-                resizeMode="cover"
-              >
-                <LinearGradient
-                  colors={["rgba(0, 0, 0, 0.0)", "rgba(0, 0, 0, 0.1)", "rgba(0, 0, 0, 0.7)"]}
-                  locations={[0, 0.5, 1]}
-                  style={StyleSheet.absoluteFill}
-                />
+        {propertiesLoading ? (
+          <View style={{ padding: 32, alignItems: "center" }}>
+            <ActivityIndicator size="small" color="#0F6D55" />
+          </View>
+        ) : featuredListings.length === 0 ? (
+          <View style={{ padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
+            <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No featured properties available at the moment.</Text>
+          </View>
+        ) : (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.featuredCardsRow}
+          >
+            {featuredListings.map((item) => {
+              const cardData = formatApiPropertyToCardModel(item);
+              return (
+                <AppLink
+                  href={`/property/${item.id}`}
+                  key={item.id}
+                  style={[
+                    styles.featuredCard,
+                    isPhone && { width: Math.min(width - 48, 380) },
+                  ]}
+                >
+                  <ImageBackground
+                    source={{ uri: cardData.image }}
+                    style={styles.featuredCardBg}
+                    resizeMode="cover"
+                  >
+                    <LinearGradient
+                      colors={["rgba(0, 0, 0, 0.0)", "rgba(0, 0, 0, 0.1)", "rgba(0, 0, 0, 0.7)"]}
+                      locations={[0, 0.5, 1]}
+                      style={StyleSheet.absoluteFill}
+                    />
 
-                {/* Top badges */}
-                <View style={styles.featuredTopBadges}>
-                  <View style={styles.featuredVerifiedBadge}>
-                    <ShieldCheck color="#0F6D55" size={14} />
-                    <Text style={styles.featuredVerifiedText}>Verified</Text>
-                  </View>
-                  {item.investmentScore ? (
-                    <View style={styles.featuredInvestmentBadge}>
-                      <Text style={styles.featuredInvestmentText}>
-                        {item.investmentScore}
-                      </Text>
+                    {/* Top badges */}
+                    <View style={styles.featuredTopBadges}>
+                      {cardData.isVerified ? (
+                        <View style={styles.featuredVerifiedBadge}>
+                          <ShieldCheck color="#0F6D55" size={14} />
+                          <Text style={styles.featuredVerifiedText}>Verified</Text>
+                        </View>
+                      ) : null}
+                      <View style={styles.featuredInvestmentBadge}>
+                        <Text style={styles.featuredInvestmentText}>
+                          Score {cardData.score}
+                        </Text>
+                      </View>
                     </View>
-                  ) : null}
-                </View>
 
-                {/* Bottom details */}
-                <View style={styles.featuredBottomDetails}>
-                  <Text style={styles.featuredLocation}>{item.location}</Text>
-                  <Text style={styles.featuredTitle}>{item.title}</Text>
-                  <Text style={styles.featuredPrice}>{item.price}</Text>
-                </View>
-              </ImageBackground>
-            </AppLink>
-          ))}
-        </ScrollView>
+                    {/* Bottom details */}
+                    <View style={styles.featuredBottomDetails}>
+                      <Text style={styles.featuredLocation}>{cardData.location}</Text>
+                      <Text style={styles.featuredTitle}>{cardData.title}</Text>
+                      <Text style={styles.featuredPrice}>{cardData.price}</Text>
+                    </View>
+                  </ImageBackground>
+                </AppLink>
+              );
+            })}
+          </ScrollView>
+        )}
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -301,15 +355,21 @@ export function HomeScreen() {
         </View>
 
         <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
-          {recommendedListings.map((prop) => (
-            <PropertyCard
-              key={prop.id}
-              property={prop}
-              saved={favorites.includes(prop.id)}
-              onSave={() => toggleFavorite(prop.id)}
-              style={styles.propertyCardItem}
-            />
-          ))}
+          {recommendedListings.length === 0 ? (
+            <View style={{ width: "100%", padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
+              <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No properties listed in this category yet.</Text>
+            </View>
+          ) : (
+            recommendedListings.map((prop) => (
+              <PropertyCard
+                key={prop.id}
+                property={prop}
+                saved={favorites.includes(prop.id)}
+                onSave={() => toggleFavorite(prop.id)}
+                style={styles.propertyCardItem}
+              />
+            ))
+          )}
         </View>
       </View>
 
@@ -326,15 +386,21 @@ export function HomeScreen() {
         </View>
 
         <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
-          {recentlyAddedListings.map((prop) => (
-            <PropertyCard
-              key={prop.id}
-              property={prop}
-              saved={favorites.includes(prop.id)}
-              onSave={() => toggleFavorite(prop.id)}
-              style={styles.propertyCardItem}
-            />
-          ))}
+          {recentlyAddedListings.length === 0 ? (
+            <View style={{ width: "100%", padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
+              <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No recently added listings available.</Text>
+            </View>
+          ) : (
+            recentlyAddedListings.map((prop) => (
+              <PropertyCard
+                key={prop.id}
+                property={prop}
+                saved={favorites.includes(prop.id)}
+                onSave={() => toggleFavorite(prop.id)}
+                style={styles.propertyCardItem}
+              />
+            ))
+          )}
         </View>
       </View>
 
@@ -357,15 +423,21 @@ export function HomeScreen() {
         </View>
 
         <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
-          {verifiedPropertiesListings.map((prop) => (
-            <PropertyCard
-              key={prop.id}
-              property={prop}
-              saved={favorites.includes(prop.id)}
-              onSave={() => toggleFavorite(prop.id)}
-              style={styles.propertyCardItem}
-            />
-          ))}
+          {verifiedPropertiesListings.length === 0 ? (
+            <View style={{ width: "100%", padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
+              <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No verified properties available at the moment.</Text>
+            </View>
+          ) : (
+            verifiedPropertiesListings.map((prop) => (
+              <PropertyCard
+                key={prop.id}
+                property={prop}
+                saved={favorites.includes(prop.id)}
+                onSave={() => toggleFavorite(prop.id)}
+                style={styles.propertyCardItem}
+              />
+            ))
+          )}
         </View>
       </View>
 
@@ -388,15 +460,21 @@ export function HomeScreen() {
         </View>
 
         <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
-          {aiInvestmentPicksListings.map((prop) => (
-            <PropertyCard
-              key={prop.id}
-              property={prop}
-              saved={favorites.includes(prop.id)}
-              onSave={() => toggleFavorite(prop.id)}
-              style={styles.propertyCardItem}
-            />
-          ))}
+          {aiInvestmentPicksListings.length === 0 ? (
+            <View style={{ width: "100%", padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
+              <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No investment picks available yet.</Text>
+            </View>
+          ) : (
+            aiInvestmentPicksListings.map((prop) => (
+              <PropertyCard
+                key={prop.id}
+                property={prop}
+                saved={favorites.includes(prop.id)}
+                onSave={() => toggleFavorite(prop.id)}
+                style={styles.propertyCardItem}
+              />
+            ))
+          )}
         </View>
       </View>
 

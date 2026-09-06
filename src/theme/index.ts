@@ -8,7 +8,7 @@ export { ThemeProvider, useTheme, type Theme, type ThemeProviderProps } from "./
 
 import { colorTokens } from "./colors";
 import { fontTokens } from "./fonts";
-import type { TextStyle, ViewStyle } from "react-native";
+import { Platform, type TextStyle, type ViewStyle } from "react-native";
 
 export const colors = {
   ink: colorTokens.textPrimary,
@@ -31,13 +31,18 @@ export const colors = {
 
 export const fonts = fontTokens;
 
-export const shadow: ViewStyle = {
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.05,
-  shadowRadius: 4,
-  elevation: 2,
-};
+export const shadow: ViewStyle = Platform.select({
+  web: {
+    boxShadow: "0px 1px 4px rgba(0, 0, 0, 0.05)",
+  } as ViewStyle,
+  default: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+}) as ViewStyle;
 
 export const textBase: TextStyle = {
   color: colorTokens.textPrimary,

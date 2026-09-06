@@ -1,6 +1,7 @@
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
+import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
   Bell,
   ChevronDown,
@@ -31,6 +32,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
+import { router } from "expo-router";
 import { Brand } from "./Brand";
 import { AreaPicker } from "./AreaPicker";
 import { AppLink } from "./ui";
@@ -55,18 +57,19 @@ const sidebarNav: {
   icon: LucideIcon;
   key: ActivePage;
   badge?: number;
+  authGated?: boolean;
 }[] = [
     { label: "Home", href: "/", icon: Home, key: "home" },
     { label: "Search", href: "/buy", icon: Search, key: "buy" },
-    { label: "Saved", href: "/saved", icon: Heart, key: "saved" },
+    { label: "Saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
     {
       label: "Messages",
       href: "/messages",
       icon: MessageCircle,
       key: "messages",
-      badge: 2,
+      authGated: true,
     },
-    { label: "Profile", href: "/profile", icon: User, key: "profile" },
+    { label: "Profile", href: "/profile", icon: User, key: "profile", authGated: true },
   ];
 
 function SideBar({
@@ -78,6 +81,7 @@ function SideBar({
   onNavigate?: () => void;
   modal?: boolean;
 }) {
+  const user = useAuthStore((s) => s.user);
   return (
     <SafeAreaView
       edges={["top", "bottom"]}
@@ -97,19 +101,34 @@ function SideBar({
       </View>
 
       <View style={styles.sideNav}>
-        {sidebarNav.map(({ label, href, icon: Icon, key, badge }) => {
+        {sidebarNav.map(({ label, href, icon: Icon, key, badge, authGated }) => {
           const selected =
             active === key ||
             (key === "buy" &&
               (active === "market" ||
                 active === "property" ||
                 active === "rent"));
+
+          const handlePress = () => {
+            onNavigate?.();
+            if (authGated && !user) {
+              useAuthModalStore.getState().open(() => router.push(href as any));
+            } else {
+              router.push(href as any);
+            }
+          };
+
           return (
-            <AppLink
-              href={href}
+            <Pressable
               key={key}
-              onPress={onNavigate}
-              style={[styles.sideLink, selected && styles.sideLinkActive]}
+              onPress={handlePress}
+              style={({ pressed }) => [
+                styles.sideLink,
+                selected && styles.sideLinkActive,
+                webPointer,
+                pressed && { opacity: 0.85 },
+              ]}
+              accessibilityRole="link"
             >
               <Icon
                 color={selected ? "#0F6D55" : "#5C6B66"}
@@ -129,7 +148,7 @@ function SideBar({
                   <Text style={styles.badgeText}>{badge}</Text>
                 </View>
               ) : null}
-            </AppLink>
+            </Pressable>
           );
         })}
       </View>
@@ -212,13 +231,12 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
                   style={[styles.iconCircleButton, webPointer]}
                 >
                   <Bell color="#0B1A17" size={20} />
-                  <View style={styles.orangeDot} />
                 </Pressable>
                 {notificationsOpen ? (
                   <View style={styles.notificationPopover}>
-                    <Text style={styles.notificationTitle}>Property update</Text>
+                    <Text style={styles.notificationTitle}>Notifications</Text>
                     <Text style={styles.notificationCopy}>
-                      A saved home in Banani has a newly verified price.
+                      You have no new notifications.
                     </Text>
                   </View>
                 ) : null}
@@ -503,31 +521,36 @@ function Footer() {
 
 function MobileNav({ active }: { active: ActivePage }) {
   const { width } = useResponsive();
+  const user = useAuthStore((s) => s.user);
   const links = [
-    { label: "Home", href: "/", icon: Home, selected: active === "home" },
+    { label: "Home", href: "/", icon: Home, selected: active === "home", authGated: false },
     {
       label: "Search",
       href: "/buy",
       icon: Search,
       selected: active === "buy" || active === "property",
+      authGated: false,
     },
     {
       label: "Saved",
       href: "/saved",
       icon: Heart,
       selected: active === "saved",
+      authGated: true,
     },
     {
       label: "Messages",
       href: "/messages",
       icon: MessageCircle,
       selected: active === "messages",
+      authGated: true,
     },
     {
       label: "Profile",
       href: "/profile",
       icon: User,
       selected: active === "profile",
+      authGated: true,
     },
   ];
 
@@ -537,23 +560,42 @@ function MobileNav({ active }: { active: ActivePage }) {
       style={[styles.mobileNavSafe, { width, maxWidth: width }]}
     >
       <View style={styles.mobileNav}>
-        {links.map(({ label, href, icon: Icon, selected }) => (
-          <AppLink href={href} key={label} style={styles.mobileNavLink}>
-            <Icon
-              color={selected ? "#0F6D55" : "#7B8983"}
-              size={20}
-              strokeWidth={selected ? 2.2 : 1.8}
-            />
-            <Text
-              style={[
-                styles.mobileNavText,
-                selected && styles.mobileNavTextActive,
+        {links.map(({ label, href, icon: Icon, selected, authGated }) => {
+          const handlePress = () => {
+            if (authGated && !user) {
+              useAuthModalStore.getState().open(() => router.push(href as any));
+            } else {
+              router.push(href as any);
+            }
+          };
+
+          return (
+            <Pressable
+              key={label}
+              onPress={handlePress}
+              style={({ pressed }) => [
+                styles.mobileNavLink,
+                webPointer,
+                pressed && { opacity: 0.8 },
               ]}
+              accessibilityRole="link"
             >
-              {label}
-            </Text>
-          </AppLink>
-        ))}
+              <Icon
+                color={selected ? "#0F6D55" : "#7B8983"}
+                size={20}
+                strokeWidth={selected ? 2.2 : 1.8}
+              />
+              <Text
+                style={[
+                  styles.mobileNavText,
+                  selected && styles.mobileNavTextActive,
+                ]}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
     </SafeAreaView>
   );

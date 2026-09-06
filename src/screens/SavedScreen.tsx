@@ -1,6 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import {
   Bookmark,
+  Building2,
   Eye,
   GitCompare,
   Heart,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   ImageBackground,
   Pressable,
   ScrollView,
@@ -16,26 +18,35 @@ import {
   Text,
   View,
 } from "react-native";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
 import { AppLink } from "@/components/ui";
-import {
-  recentlyViewedListings,
-  savedCollections,
-  savedPageListings,
-} from "@/data/properties";
+import { getSavedProperties, unsaveProperty } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 
 export function SavedScreen() {
   const { isPhone, isTablet, width } = useResponsive();
-  const [selectedFolder, setSelectedFolder] = useState<string>("all");
-  const [savedIds, setSavedIds] = useState<number[]>([201, 202, 203, 301]);
+  const queryClient = useQueryClient();
 
-  function toggleSaved(id: number) {
-    setSavedIds((current) =>
-      current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]
-    );
+  const { data: savedData, isLoading } = useQuery({
+    queryKey: ["properties", "saved"],
+    queryFn: getSavedProperties,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const savedListings = savedData?.data ?? [];
+
+  const unsaveMutation = useMutation({
+    mutationFn: (id: string) => unsaveProperty(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["properties", "saved"] });
+    },
+  });
+
+  function handleToggleSaved(id: string | number) {
+    unsaveMutation.mutate(String(id));
   }
 
   return (
@@ -47,130 +58,60 @@ export function SavedScreen() {
         <View style={styles.headerTitleWrap}>
           <Text style={styles.pageHeading}>Saved</Text>
           <Text style={styles.pageSubtitle}>
-            Your collections, comparisons &amp; recently viewed
+            Your saved properties &amp; bookmarks
           </Text>
         </View>
 
         <View style={styles.headerActions}>
-          <Pressable
-            accessibilityLabel="Share collection"
-            style={[styles.shareBtn, webPointer]}
-          >
-            <Share2 color="#0B1A17" size={16} />
-            <Text style={styles.shareBtnText}>Share collection</Text>
-          </Pressable>
-
-          <Pressable
-            accessibilityLabel="Compare properties"
-            style={[styles.compareBtn, webPointer]}
-          >
-            <GitCompare color="#FFFFFF" size={16} />
-            <Text style={styles.compareBtnText}>Compare</Text>
-          </Pressable>
+          <AppLink href="/buy" style={styles.exploreLink}>
+            <Text style={styles.exploreLinkText}>Browse more homes</Text>
+          </AppLink>
         </View>
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          2. COLLECTIONS / FOLDERS ROW (Figma data-node-id="1:1476")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.foldersSection}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.foldersRow}
-        >
-          {savedCollections.map((folder) => {
-            const isSelected = selectedFolder === folder.id;
-            return (
-              <Pressable
-                key={folder.id}
-                onPress={() => setSelectedFolder(folder.id)}
-                style={[
-                  styles.folderCard,
-                  isSelected && styles.folderCardActive,
-                  webPointer,
-                ]}
-              >
-                <ImageBackground
-                  source={{ uri: folder.image }}
-                  style={styles.folderBg}
-                  resizeMode="cover"
-                >
-                  <LinearGradient
-                    colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.75)"]}
-                    style={StyleSheet.absoluteFill}
-                  />
-                  <View style={styles.folderContent}>
-                    <Bookmark color="#FFFFFF" size={20} />
-                    <Text style={styles.folderName}>{folder.name}</Text>
-                    <Text style={styles.folderCount}>{folder.count}</Text>
-                  </View>
-                </ImageBackground>
-              </Pressable>
-            );
-          })}
-
-          {/* New Folder Button */}
-          <Pressable
-            accessibilityLabel="Create new folder"
-            style={[styles.newFolderCard, webPointer]}
-          >
-            <Plus color="#5C6B66" size={24} />
-            <Text style={styles.newFolderText}>New folder</Text>
-          </Pressable>
-        </ScrollView>
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          3. SAVED PROPERTIES (Figma data-node-id="1:1516")
+          2. SAVED PROPERTIES
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
           <View style={styles.titleWithIconRow}>
             <Bookmark color="#0B1A17" size={20} />
-            <Text style={styles.sectionTitle}>Saved properties</Text>
+            <Text style={styles.sectionTitle}>Saved properties ({savedListings.length})</Text>
           </View>
         </View>
 
-        {/* 2-Column Large Card Grid matching Figma (imageHeight ~320.7px) */}
-        <View style={[styles.savedPropertiesGrid, isPhone && styles.savedPropertiesGridPhone]}>
-          {savedPageListings.map((prop) => (
-            <PropertyCard
-              key={prop.id}
-              property={prop}
-              imageHeight={isPhone ? 220 : 320.7}
-              saved={savedIds.includes(prop.id)}
-              onSave={() => toggleSaved(prop.id)}
-              style={styles.savedCardItem}
-            />
-          ))}
-        </View>
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          4. RECENTLY VIEWED (Figma data-node-id="1:1701")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <View style={styles.titleWithIconRow}>
-            <Eye color="#0B1A17" size={20} />
-            <Text style={styles.sectionTitle}>Recently viewed</Text>
+        {isLoading ? (
+          <View style={{ padding: 48, alignItems: "center" }}>
+            <ActivityIndicator size="large" color="#0F6D55" />
+            <Text style={{ marginTop: 12, color: "#5C6B66", fontFamily: fonts.medium }}>
+              Loading saved properties...
+            </Text>
           </View>
-        </View>
-
-        {/* 3-Column Standard Card Grid matching Figma */}
-        <View style={[styles.recentlyViewedGrid, isPhone && styles.recentlyViewedGridPhone]}>
-          {recentlyViewedListings.map((prop) => (
-            <PropertyCard
-              key={prop.id}
-              property={prop}
-              imageHeight={209.4}
-              saved={savedIds.includes(prop.id)}
-              onSave={() => toggleSaved(prop.id)}
-              style={styles.recentCardItem}
-            />
-          ))}
-        </View>
+        ) : savedListings.length === 0 ? (
+          <View style={styles.emptySavedBox}>
+            <Heart color="#899790" size={48} />
+            <Text style={styles.emptySavedTitle}>No saved properties yet</Text>
+            <Text style={styles.emptySavedText}>
+              Properties you save while browsing will appear here for easy comparison.
+            </Text>
+            <AppLink href="/buy" style={styles.browseButton}>
+              <Text style={styles.browseButtonText}>Explore properties</Text>
+            </AppLink>
+          </View>
+        ) : (
+          <View style={[styles.savedPropertiesGrid, isPhone && styles.savedPropertiesGridPhone]}>
+            {savedListings.map((prop) => (
+              <PropertyCard
+                key={prop.id}
+                property={prop}
+                imageHeight={isPhone ? 220 : 320.7}
+                saved={true}
+                onSave={() => handleToggleSaved(prop.id)}
+                style={styles.savedCardItem}
+              />
+            ))}
+          </View>
+        )}
       </View>
     </AppChrome>
   );
@@ -363,5 +304,52 @@ const styles = StyleSheet.create({
   recentCardItem: {
     flex: 1,
     minWidth: 260,
+  },
+  exploreLink: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: "#E7F2EE",
+  },
+  exploreLinkText: {
+    color: "#0F6D55",
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+  },
+  emptySavedBox: {
+    width: "100%",
+    padding: 48,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  emptySavedTitle: {
+    marginTop: 16,
+    fontSize: 18,
+    fontFamily: fonts.headingBold,
+    color: "#0B1A17",
+  },
+  emptySavedText: {
+    marginTop: 8,
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+    textAlign: "center",
+    maxWidth: 400,
+  },
+  browseButton: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999,
+    backgroundColor: "#0F6D55",
+  },
+  browseButtonText: {
+    color: "#FFFFFF",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
   },
 });

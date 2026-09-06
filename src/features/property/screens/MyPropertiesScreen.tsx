@@ -65,134 +65,35 @@ interface ListingItemData {
   inquiries: string;
 }
 
-// Default initial dataset matching Figma nodes 54:666, 54:1592, 54:1135, 54:1362
-const defaultListings: ListingItemData[] = [
-  {
-    id: "prop-1",
-    title: "Skyview Residence",
-    location: "Gulshan 2, Dhaka",
-    imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80",
-    type: "Apartment",
-    listingType: "For Sale",
-    price: "৳ 1.08 Cr",
-    status: "active",
-    boostText: "12d boost left",
-    isVerified: true,
-    isBoosted: true,
-    aiValue: "৳ 1.92Cr",
-    views: "4,820",
-    likes: "210",
-    inquiries: "18",
-  },
-  {
-    id: "prop-2",
-    title: "Lakeside Duplex House with Garden",
-    location: "Baridhara DOHS, Dhaka",
-    imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
-    type: "House",
-    listingType: "For Sale",
-    price: "৳ 1.00 Cr",
-    status: "active",
-    isVerified: true,
-    aiValue: "৳ 1.12Cr",
-    views: "3,110",
-    likes: "142",
-    inquiries: "9",
-  },
-  {
-    id: "prop-3",
-    title: "Modern 2 Bedroom for Rent",
-    location: "Dhanmondi, Dhaka",
-    imageUrl: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80",
-    type: "Apartment",
-    listingType: "For Rent",
-    price: "৳ 45,000",
-    status: "pending",
-    isVerified: true,
-    aiValue: "৳ 0.50L",
-    views: "980",
-    likes: "44",
-    inquiries: "3",
-  },
-  {
-    id: "prop-4",
-    title: "Commercial Office Floor",
-    location: "Banani, Dhaka",
-    imageUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80",
-    type: "Commercial",
-    listingType: "For Sale",
-    price: "৳ 6.30 Cr",
-    status: "sold",
-    isVerified: true,
-    aiValue: "৳ 6.30Cr",
-    views: "6,240",
-    likes: "305",
-    inquiries: "27",
-  },
-  {
-    id: "prop-5",
-    title: "Residential Land Plot (5 Katha)",
-    location: "Bashundhara R/A, Dhaka",
-    imageUrl: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=400&q=80",
-    type: "Land",
-    listingType: "For Sale",
-    price: "৳ 2.80 Cr",
-    status: "draft",
-    isVerified: false,
-    aiValue: "৳ 2.95Cr",
-    views: "0",
-    likes: "0",
-    inquiries: "0",
-  },
-  {
-    id: "prop-6",
-    title: "Penthouse with Private Terrace",
-    location: "Gulshan 1, Dhaka",
-    imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80",
-    type: "Apartment",
-    listingType: "For Sale",
-    price: "৳ 6.00 Cr",
-    status: "archived",
-    isVerified: true,
-    aiValue: "৳ 6.00Cr",
-    views: "1,520",
-    likes: "88",
-    inquiries: "5",
-  },
-];
-
 export function MyPropertiesScreen() {
   const { isPhone, isTablet } = useResponsive();
   const [activeFilter, setActiveFilter] = useState<ListingFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const deleteMutation = useDeleteProperty();
 
-  // Fetch real API data if available
-  const { data } = useMyProperties();
+  // Fetch real API data
+  const { data, isLoading } = useMyProperties();
   const apiProperties = data?.pages.flatMap((p) => p.data?.items ?? []) ?? [];
 
-  // Combine real API items with default Figma mock listings
+  // Mapped real API listings
   const allListings = useMemo(() => {
-    if (apiProperties.length === 0) return defaultListings;
-
-    const mappedApi: ListingItemData[] = apiProperties.map((p) => ({
+    return apiProperties.map((p) => ({
       id: p.id,
-      title: p.title,
-      location: p.area?.name || p.address || "Dhaka",
-      imageUrl: p.media?.[0]?.url || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80",
-      type: p.type || (p as any).property_type || "Apartment",
-      listingType: p.listing_type === "rent" ? "For Rent" : "For Sale",
-      price: `${p.price_currency || "৳"} ${p.price.toLocaleString()}`,
+      title: p.title || "Untitled Property",
+      location: p.area?.name ? `${p.area.name}, ${(p.area as any)?.city || "Dhaka"}` : p.address || "Dhaka",
+      imageUrl: p.media?.find((m) => m.media_type === "image")?.url || p.media?.[0]?.url || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80",
+      type: p.type ? p.type.charAt(0).toUpperCase() + p.type.slice(1) : "Apartment",
+      listingType: (p.listing_type === "rent" ? "For Rent" : "For Sale") as "For Rent" | "For Sale",
+      price: `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${p.listing_type === "rent" ? "/mo" : ""}`,
       status: (p.status as any) || "active",
-      isVerified: p.is_verified ?? true,
-      aiValue: `৳ ${(p.price * 1.05 / 10000000).toFixed(2)}Cr`,
-      views: "1,240",
-      likes: "85",
-      inquiries: "12",
+      isVerified: p.is_verified ?? false,
+      isBoosted: false,
+      boostText: undefined as string | undefined,
+      aiValue: typeof p.price === "number" ? `৳ ${((p.price * 1.05) / 10000000).toFixed(2)}Cr` : "—",
+      views: String(p.view_count || 0),
+      likes: "0",
+      inquiries: "0",
     }));
-
-    // Return combined unique items
-    return [...mappedApi, ...defaultListings];
   }, [apiProperties]);
 
   // Filter listings based on active filter and search query
@@ -486,10 +387,17 @@ export function MyPropertiesScreen() {
             ) : (
               /* Mobile Card View */
               <View style={styles.mobileCardList}>
-                {filteredListings.map((item) => (
-                  <View key={item.id} style={styles.mobileCard}>
-                    <View style={styles.mobileCardHead}>
-                      <Image source={{ uri: item.imageUrl }} style={styles.mobileThumb} />
+                {filteredListings.length === 0 ? (
+                  <View style={styles.emptyContainer}>
+                    <Building2 color="#5C6B66" size={40} />
+                    <Text style={styles.emptyTitle}>No listings found</Text>
+                    <Text style={styles.emptySub}>No properties match the selected filter.</Text>
+                  </View>
+                ) : (
+                  filteredListings.map((item) => (
+                    <View key={item.id} style={styles.mobileCard}>
+                      <View style={styles.mobileCardHead}>
+                        <Image source={{ uri: item.imageUrl }} style={styles.mobileThumb} />
                       <View style={{ flex: 1, gap: 4 }}>
                         <Text style={styles.propTitle}>{item.title}</Text>
                         <Text style={styles.propLocation}>{item.location}</Text>
@@ -546,7 +454,7 @@ export function MyPropertiesScreen() {
                       </View>
                     </View>
                   </View>
-                ))}
+                )))}
               </View>
             )}
           </View>

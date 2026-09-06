@@ -1,11 +1,72 @@
 import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck, Sparkles } from "lucide-react-native";
-import { Image, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle, View } from "react-native";
-import type { Property } from "@/data/properties";
+import { Image, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle, View, Platform } from "react-native";
 import { colors, fonts, webPointer } from "@/theme";
 import { AppLink } from "./ui";
 
+export interface PropertyCardModel {
+  id: string | number;
+  title: string;
+  location: string;
+  price: string;
+  monthlyPrice?: string;
+  image: string;
+  tag?: string;
+  beds?: number | null;
+  baths?: number | null;
+  area?: string | null;
+  type?: string;
+  score?: number;
+  forRent?: boolean;
+  isVerified?: boolean;
+}
+
+export function formatApiPropertyToCardModel(p: any): PropertyCardModel {
+  const isRent = p.listing_type === "rent" || Boolean(p.forRent);
+  const currency = p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳");
+  const formattedPrice = typeof p.price === "number"
+    ? `${currency} ${p.price.toLocaleString("en-BD")}`
+    : String(p.price || "");
+  const monthlyPrice = isRent && !formattedPrice.endsWith("/mo") ? `${formattedPrice}/mo` : formattedPrice;
+
+  // Media
+  const image =
+    p.media?.find((m: any) => m.media_type === "image")?.url ||
+    p.media?.[0]?.url ||
+    p.image ||
+    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=85";
+
+  // Location
+  const location = p.area?.name
+    ? `${p.area.name}, ${p.area.city || "Dhaka"}`
+    : p.address || p.location || "Dhaka";
+
+  // Specs
+  const rawAmenities = (p.amenities as any) || {};
+  const beds = p.bedrooms ?? rawAmenities.bedrooms ?? (p.beds !== undefined ? p.beds : null);
+  const baths = p.bathrooms ?? rawAmenities.bathrooms ?? (p.baths !== undefined ? p.baths : null);
+  const areaSize = p.area_size || p.sqft;
+  const area = areaSize ? `${areaSize} ${p.area_unit || "sqft"}` : (p.area || "");
+
+  return {
+    id: p.id,
+    title: p.title || "Property",
+    location,
+    price: formattedPrice,
+    monthlyPrice,
+    image,
+    tag: p.is_verified ? "Verified" : p.tag || "New",
+    beds,
+    baths,
+    area,
+    type: p.type || "Apartment",
+    score: p.score ?? Math.min(99, Math.max(82, Math.round(85 + ((p.view_count || 0) % 14)))),
+    forRent: isRent,
+    isVerified: Boolean(p.is_verified ?? (p.tag === "Verified")),
+  };
+}
+
 export function PropertyCard({
-  property,
+  property: rawProp,
   saved,
   onSave,
   mode,
@@ -15,7 +76,7 @@ export function PropertyCard({
   badgeText,
   style,
 }: {
-  property: Property;
+  property: PropertyCardModel | any;
   saved: boolean;
   onSave: () => void;
   mode?: "buy" | "rent";
@@ -25,8 +86,13 @@ export function PropertyCard({
   badgeText?: string;
   style?: StyleProp<ViewStyle>;
 }) {
+  const property = ("media" in rawProp || "area_size" in rawProp || "listing_type" in rawProp || !rawProp.monthlyPrice)
+    ? formatApiPropertyToCardModel(rawProp)
+    : rawProp;
+
   const isRent = mode === "rent" || property.forRent === true;
-  const isNew = property.tag === "New" || property.id % 2 === 1;
+  const isNew = property.tag === "New";
+  const isVerified = property.isVerified ?? (property.tag === "Verified");
 
   return (
     <View style={[styles.card, style]}>
@@ -37,10 +103,12 @@ export function PropertyCard({
         {/* Top Badges */}
         <View style={styles.topBadgesRow}>
           <View style={styles.badgeCluster}>
-            <View style={styles.verifiedBadge}>
-              <ShieldCheck color="#0F6D55" size={14} />
-              <Text style={styles.verifiedText}>Verified</Text>
-            </View>
+            {isVerified ? (
+              <View style={styles.verifiedBadge}>
+                <ShieldCheck color="#0F6D55" size={14} />
+                <Text style={styles.verifiedText}>Verified</Text>
+              </View>
+            ) : null}
             {isNew ? (
               <View style={styles.newBadge}>
                 <Text style={styles.newBadgeText}>New</Text>

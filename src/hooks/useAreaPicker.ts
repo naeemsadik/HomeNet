@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { Area } from "@/types/api";
 import { fetchAreas, fetchAreaChildren } from "@/services/areaApi";
-import { BANGLADESH_AREAS } from "@/data/bangladeshAreas";
 
 export interface UseAreaPickerOptions {
   initialCity?: string;
@@ -38,40 +37,6 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
   // Helper to get current parent ID
   const currentParentId = navPath.length > 0 ? navPath[navPath.length - 1].id : null;
 
-  // Helper to filter fallback areas locally
-  const getFallbackAreas = useCallback(() => {
-    let result = BANGLADESH_AREAS;
-
-    if (searchQuery.trim().length > 0) {
-      const q = searchQuery.trim().toLowerCase();
-      result = result.filter(
-        (a) =>
-          a.name.toLowerCase().includes(q) ||
-          (a.city && a.city.toLowerCase().includes(q))
-      );
-      if (selectedCity) {
-        result = result.filter((a) => a.city?.toLowerCase() === selectedCity.toLowerCase());
-      }
-      return result;
-    }
-
-    if (currentParentId) {
-      return result.filter((a) => a.parent_area_id === currentParentId);
-    }
-
-    if (selectedCity) {
-      return result.filter(
-        (a) =>
-          a.city?.toLowerCase() === selectedCity.toLowerCase() &&
-          (!a.parent_area_id || a.type === "DISTRICT" || a.type === "CITY")
-      );
-    }
-
-    // Root level: return all top-level areas
-    return result.filter((a) => !a.parent_area_id || a.type === "DISTRICT" || a.type === "CITY");
-  }, [selectedCity, currentParentId, searchQuery]);
-
-  // Fetch areas based on current path, selected city, and search
   const loadAreas = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -83,11 +48,11 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
           limit,
         });
         const items = res.data?.items || [];
-        setAreas(items.length > 0 ? items : getFallbackAreas());
+        setAreas(items);
       } else if (currentParentId) {
         const res = await fetchAreaChildren(currentParentId);
         const items = res.data?.items || [];
-        setAreas(items.length > 0 ? items : getFallbackAreas());
+        setAreas(items);
       } else {
         const res = await fetchAreas({
           city: selectedCity || undefined,
@@ -95,15 +60,15 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
           limit,
         });
         const items = res.data?.items || [];
-        setAreas(items.length > 0 ? items : getFallbackAreas());
+        setAreas(items);
       }
     } catch {
       // Fallback seamlessly to built-in comprehensive Bangladesh area dataset
-      setAreas(getFallbackAreas());
+      setAreas([]);
     } finally {
       setLoading(false);
     }
-  }, [selectedCity, currentParentId, searchQuery, limit, getFallbackAreas]);
+  }, [selectedCity, currentParentId, searchQuery, limit]);
 
   // Debounced/Triggered loading
   useEffect(() => {

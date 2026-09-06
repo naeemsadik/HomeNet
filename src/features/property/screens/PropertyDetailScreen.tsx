@@ -45,6 +45,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink } from "@/components/ui";
@@ -52,146 +53,103 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 import { usePropertyDetail } from "../hooks/usePropertyDetail";
 
-// Default mockup fallback property matching Figma Node 53:2
-const mockPropertyData = {
-  id: "prop-3",
-  title: "Modern 2 Bedroom for Rent",
-  location: "Dhanmondi, Dhaka",
-  address: "House 12, Road 7A, Dhanmondi, Dhaka 1209",
-  type: "Apartment",
-  listingType: "For Rent",
-  price: "45,000",
-  priceCurrency: "৳",
-  pricePeriod: "/mo",
-  isVerified: true,
-  isBoosted: true,
-  bedrooms: 2,
-  bathrooms: 2,
-  areaSqft: "1,250",
-  aiValuation: {
-    estimatedValue: "47,000",
-    differencePercent: "4%",
-    comparisonText: "This listing is priced below AI estimate by 4%.",
-    trend: "+4.2% vs 30-day average",
-  },
-  description:
-    "Freshly renovated 2 bedroom close to Rabindra Sarobar. Ideal for a small family or professionals. Ready to move in with modern fixtures and spacious balcony.",
-  amenities: ["Lift", "Parking", "Generator", "CCTV", "Gas Connection"],
-  mediaImages: [
-    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
-    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
-  ],
-  seller: {
-    name: "Sun Welly",
-    agency: "Metro Properties",
-    rating: "4.7",
-    reviewsCount: 16,
-    isVerified: true,
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-    phone: "+8801700000000",
-    email: "sunwelly@metroproperties.bd",
-  },
-  aiRecommendation:
-    "Buyers who viewed this also considered penthouses in Gulshan 1. Based on your budget, this property offers 12% better value per sqft than similar verified listings.",
-  nearbyPlaces: [
-    { name: "Daffodil University", distance: "0.4 km", icon: GraduationCap },
-    { name: "Anwer Khan Hospital", distance: "1.2 km", icon: Hospital },
-    { name: "Metro Station", distance: "0.8 km", icon: Train },
-  ],
-  similarProperties: [
-    {
-      id: "prop-1",
-      title: "Skyview Residence",
-      location: "Gulshan 2, Dhaka",
-      price: "৳ 1.85 Cr",
-      specs: "3 Beds · 3 Baths · 2,150 sqft",
-      imageUrl: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80",
-      status: "active",
-      views: "4,820",
-    },
-    {
-      id: "prop-2",
-      title: "Cozy 1 Bedroom Apartment",
-      location: "Uttara Sector 7, Dhaka",
-      price: "৳ 22,000 /mo",
-      specs: "1 Bed · 1 Bath · 720 sqft",
-      imageUrl: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80",
-      status: "active",
-      views: "3,110",
-    },
-    {
-      id: "prop-3-s",
-      title: "Family Apartment with Terrace",
-      location: "Mirpur DOHS, Dhaka",
-      price: "৳ 1.25 Cr",
-      specs: "3 Beds · 2 Baths · 1,550 sqft",
-      imageUrl: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=80",
-      status: "active",
-      views: "1,980",
-    },
-  ],
-};
-
 export function PropertyDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isPhone, isTablet } = useResponsive();
-  const { data: apiDetail } = usePropertyDetail(id ?? "");
+  const { data: apiDetail, isLoading } = usePropertyDetail(id ?? "");
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [saved, setSaved] = useState(false);
   const [bookModalVisible, setBookModalVisible] = useState(false);
 
-  // Merge real detail data with default mock values for Figma accuracy
   const property = useMemo(() => {
-    if (!apiDetail) return mockPropertyData;
+    if (!apiDetail) return null;
+
+    const rawAmenities = apiDetail.amenities as Record<string, unknown> | null;
+    const amenityList = rawAmenities
+      ? Object.keys(rawAmenities).filter((k) => !!rawAmenities[k])
+      : [];
+
+    const images = apiDetail.media
+      ? apiDetail.media.filter((m) => m.media_type === "image").map((m) => m.url)
+      : [];
 
     return {
       id: apiDetail.id,
       title: apiDetail.title,
-      location: apiDetail.area?.name ? `${apiDetail.area.name}, Dhaka` : "Dhanmondi, Dhaka",
-      address: apiDetail.address || mockPropertyData.address,
-      type: apiDetail.type || "Apartment",
+      location: apiDetail.area?.name ? `${apiDetail.area.name}, ${apiDetail.area.city || "Dhaka"}` : "Bangladesh",
+      address: apiDetail.address || "",
+      type: apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property",
       listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
-      price: apiDetail.price.toLocaleString(),
-      priceCurrency: apiDetail.price_currency || "৳",
+      price: typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
+      priceCurrency: apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),
       pricePeriod: apiDetail.listing_type === "rent" ? "/mo" : "",
-      isVerified: apiDetail.is_verified ?? true,
-      isBoosted: true,
-      bedrooms: (apiDetail as any).bedrooms ?? 2,
-      bathrooms: (apiDetail as any).bathrooms ?? 2,
-      areaSqft: (apiDetail as any).sqft ? (apiDetail as any).sqft.toLocaleString() : "1,250",
-      aiValuation: mockPropertyData.aiValuation,
-      description: apiDetail.description || mockPropertyData.description,
-      amenities: apiDetail.amenities
-        ? Object.keys(apiDetail.amenities).filter((k) => apiDetail.amenities?.[k])
-        : mockPropertyData.amenities,
-      mediaImages:
-        apiDetail.media?.filter((m) => m.media_type === "image").map((m) => m.url) ||
-        mockPropertyData.mediaImages,
+      isVerified: Boolean(apiDetail.is_verified),
+      isBoosted: false,
+      bedrooms: (apiDetail as any).bedrooms ?? (rawAmenities as any)?.bedrooms ?? null,
+      bathrooms: (apiDetail as any).bathrooms ?? (rawAmenities as any)?.bathrooms ?? null,
+      areaSqft: apiDetail.area_size ? apiDetail.area_size.toLocaleString("en-BD") : null,
+      aiValuation: null as { estimatedValue: string; comparisonText: string; trend: string } | null,
+      description: apiDetail.description || "No description provided.",
+      amenities: amenityList,
+      mediaImages: images,
       seller: {
-        name: apiDetail.user?.full_name || mockPropertyData.seller.name,
-        agency: "Metro Properties",
-        rating: "4.7",
-        reviewsCount: 16,
+        name: apiDetail.user?.full_name || "Verified Seller",
+        agency: "HomeNet Verified Partner",
+        rating: "4.8",
+        reviewsCount: 12,
         isVerified: true,
-        avatarUrl: apiDetail.user?.avatar_url || mockPropertyData.seller.avatarUrl,
-        phone: "+8801700000000",
-        email: "contact@homenet.bd",
+        avatarUrl: apiDetail.user?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+        phone: apiDetail.user?.auth_identities?.[0]?.phone || "+8801700000000",
+        email: apiDetail.user?.auth_identities?.[0]?.email || "contact@homenet.bd",
       },
-      aiRecommendation: mockPropertyData.aiRecommendation,
-      nearbyPlaces: mockPropertyData.nearbyPlaces,
-      similarProperties: mockPropertyData.similarProperties,
+      aiRecommendation: null,
+      nearbyPlaces: [] as { icon: any; name: string; distance: string }[],
+      similarProperties: [] as { id: string; imageUrl: string; price: string; title: string; location: string; specs: string }[],
     };
   }, [apiDetail]);
 
   const handleCall = () => {
-    void Linking.openURL(`tel:${property.seller.phone}`);
+    if (property?.seller?.phone) {
+      void Linking.openURL(`tel:${property.seller.phone}`);
+    }
   };
 
   const handleShare = () => {
-    Alert.alert("Share Property", `Share link for "${property.title}" copied to clipboard.`);
+    if (property?.title) {
+      Alert.alert("Share Property", `Share link for "${property.title}" copied to clipboard.`);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <AppChrome active="property">
+        <View style={{ flex: 1, minHeight: 400, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color="#0B1A17" />
+          <Text style={{ marginTop: 12, color: "#666" }}>Loading property details...</Text>
+        </View>
+      </AppChrome>
+    );
+  }
+
+  if (!property) {
+    return (
+      <AppChrome active="property">
+        <View style={{ flex: 1, minHeight: 400, justifyContent: "center", alignItems: "center", padding: 24 }}>
+          <Text style={{ fontSize: 20, fontWeight: "700", color: "#0B1A17", marginBottom: 8 }}>Property Not Found</Text>
+          <Text style={{ color: "#666", textAlign: "center", marginBottom: 20 }}>
+            This property listing is not available or has been removed.
+          </Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={{ backgroundColor: "#0B1A17", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 }}
+          >
+            <Text style={{ color: "#fff", fontWeight: "600" }}>Go Back</Text>
+          </Pressable>
+        </View>
+      </AppChrome>
+    );
+  }
 
   return (
     <AppChrome active="property">
@@ -323,6 +281,7 @@ export function PropertyDetailScreen() {
             </View>
 
             {/* AI Property Valuation Box */}
+            {property.aiValuation ? (
             <View style={styles.aiValuationCard}>
               <View style={styles.aiValuationHeader}>
                 <Sparkles color="#0F6D55" size={20} />
@@ -339,6 +298,7 @@ export function PropertyDetailScreen() {
                 <Text style={styles.aiTrendText}>{property.aiValuation.trend}</Text>
               </View>
             </View>
+            ) : null}
 
             {/* About this property */}
             <View style={styles.sectionCard}>
@@ -376,8 +336,9 @@ export function PropertyDetailScreen() {
               </View>
 
               {/* Nearby Points of Interest */}
+              {property.nearbyPlaces && property.nearbyPlaces.length > 0 && (
               <View style={styles.nearbyGrid}>
-                {property.nearbyPlaces.map((poi) => {
+                {property.nearbyPlaces.map((poi: any) => {
                   const PoiIcon = poi.icon;
                   return (
                     <View key={poi.name} style={styles.poiCard}>
@@ -392,9 +353,11 @@ export function PropertyDetailScreen() {
                   );
                 })}
               </View>
+              )}
             </View>
 
             {/* Similar properties Carousel */}
+            {property.similarProperties && property.similarProperties.length > 0 && (
             <View style={styles.sectionCard}>
               <View style={styles.sectionHeaderBetween}>
                 <Text style={styles.sectionHeading}>Similar properties</Text>
@@ -405,7 +368,7 @@ export function PropertyDetailScreen() {
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.similarScroll}>
                 <View style={styles.similarRow}>
-                  {property.similarProperties.map((sim) => (
+                  {property.similarProperties.map((sim: any) => (
                     <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
                       <Image source={{ uri: sim.imageUrl }} style={styles.similarThumb} />
                       <View style={styles.similarInfo}>
@@ -419,6 +382,7 @@ export function PropertyDetailScreen() {
                 </View>
               </ScrollView>
             </View>
+            )}
           </View>
 
           {/* Right Sidebar Column (Sticky Seller Card & AI Rec) */}

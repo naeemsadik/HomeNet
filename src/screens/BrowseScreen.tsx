@@ -9,13 +9,14 @@ import {
   X,
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
 import { AppButton, AppLink, Eyebrow, SelectField } from "@/components/ui";
-import { allProperties, savedPropertyIds } from "@/data/properties";
+import { getProperties } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
@@ -103,7 +104,7 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState("All types");
   const [beds, setBeds] = useState(0);
-  const [savedIds, setSavedIds] = useState(savedPropertyIds);
+  const [savedIds, setSavedIds] = useState<(string | number)[]>([]);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [checks, setChecks] = useState(["AI verified price"]);
@@ -113,24 +114,24 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
   const [selectedAreaPath, setSelectedAreaPath] = useState<Area[]>([]);
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
 
-  const results = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return allProperties.filter((property) => {
-      // Area match filter
-      let matchesArea = true;
-      if (selectedArea) {
-        const propLocLower = property.location.toLowerCase();
-        // Check if property location includes selected area name or any ancestor area in the path
-        matchesArea = selectedAreaPath.some(node => propLocLower.includes(node.name.toLowerCase())) ||
-                      propLocLower.includes(selectedArea.name.toLowerCase());
-      }
+  const queryParams = useMemo(() => ({
+    listing_type: mode === "buy" ? ("sale" as const) : ("rent" as const),
+    search: query.trim() || undefined,
+    area_id: selectedArea?.id,
+    type: type === "All types" ? undefined : (type.toLowerCase() as any),
+    bedrooms: beds > 0 ? beds : undefined,
+    limit: 50,
+  }), [mode, query, selectedArea, type, beds]);
 
-      const matchesQuery = !normalized || `${property.title} ${property.location}`.toLowerCase().includes(normalized);
-      return matchesArea && matchesQuery && (type === "All types" || property.type === type) && (beds === 0 || property.beds >= beds);
-    });
-  }, [beds, query, type, selectedArea, selectedAreaPath]);
+  const { data: apiResponse, isLoading } = useQuery({
+    queryKey: ["properties", "browse", queryParams],
+    queryFn: () => getProperties(queryParams),
+    staleTime: 5 * 60 * 1000,
+  });
 
-  function toggleSaved(id: number) {
+  const results = useMemo(() => apiResponse?.data?.items ?? [], [apiResponse]);
+
+  function toggleSaved(id: string | number) {
     setSavedIds((current) => current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]);
   }
 
@@ -223,7 +224,12 @@ export function BrowseScreen({ mode }: { mode: "buy" | "rent" }) {
           <View style={styles.filterColumn}><FilterPanel beds={beds} checks={checks} mode={mode} resetFilters={resetFilters} setBeds={setBeds} toggleCheck={toggleCheck} /></View>
         ) : null}
         <View style={styles.resultsColumn}>
-          {results.length ? (
+          {isLoading ? (
+            <View style={{ minHeight: 300, justifyContent: "center", alignItems: "center" }}>
+              <ActivityIndicator size="large" color={colors.green} />
+              <Text style={{ marginTop: 12, color: colors.muted, fontFamily: fonts.medium }}>Loading properties...</Text>
+            </View>
+          ) : results.length ? (
             view === "grid" ? (
               <PropertyGrid desktopColumns={3} horizontalOnPhone={false} tabletColumns={2} gap={14}>
                 {results.map((property) => <PropertyCard imageHeight={isPhone ? 220 : 158} key={property.id} mode={mode} onSave={() => toggleSaved(property.id)} property={property} saved={savedIds.includes(property.id)} />)}
