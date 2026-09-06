@@ -11,7 +11,6 @@ import {
   Mail,
   MapPin,
   Menu,
-  MessageCircle,
   Phone,
   Search,
   ShieldCheck,
@@ -67,13 +66,6 @@ const sidebarNav: {
     { label: "Search", href: "/buy", icon: Search, key: "buy" },
     { label: "Insights", href: "/market", icon: TrendingUp, key: "market" },
     { label: "Saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
-    {
-      label: "Messages",
-      href: "/messages",
-      icon: MessageCircle,
-      key: "messages",
-      authGated: true,
-    },
     { label: "Profile", href: "/profile", icon: User, key: "profile", authGated: true },
   ];
 
@@ -568,13 +560,6 @@ function MobileNav({ active }: { active: ActivePage }) {
       href: "/saved",
       icon: Heart,
       selected: active === "saved",
-      authGated: true,
-    },
-    {
-      label: "Messages",
-      href: "/messages",
-      icon: MessageCircle,
-      selected: active === "messages",
       authGated: true,
     },
     {

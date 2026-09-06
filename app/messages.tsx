@@ -1,3 +1,5 @@
-import { MessagesScreen } from "@/screens/MessagesScreen";
+import { Redirect } from "expo-router";
 
-export default MessagesScreen;
+export default function MessagesRoute() {
+  return <Redirect href="/" />;
+}

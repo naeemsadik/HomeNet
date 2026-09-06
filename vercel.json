@@ -20,6 +20,11 @@
       "source": "/listings",
       "destination": "/buy",
       "permanent": true
+    },
+    {
+      "source": "/messages",
+      "destination": "/",
+      "permanent": false
     }
   ],
   "rewrites": [
