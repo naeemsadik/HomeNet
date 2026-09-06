@@ -13,7 +13,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 
 export interface RightmoveFilters {
   radius: string; // "0", "1", "3", "5", "10", "20"
-  propertyType: string; // "all", "apartment", "house", "commercial", "land"
+  propertyType: string; // "all", "apartment", "house", "commercial", "land", "short-let"
   addedToSite: string; // "", "24h", "3d", "7d", "14d"
   includeSold: boolean;
   verifiedOnly: boolean;
@@ -22,7 +22,8 @@ export interface RightmoveFilters {
   minBedrooms: string;
   maxBedrooms: string;
   query: string;
-  purpose: "all" | "sale" | "rent";
+  purpose: "all" | "sale" | "rent" | "short-let";
+  subtype?: string;
 }
 
 interface RightmoveFilterCardProps {
@@ -188,7 +189,9 @@ export function RightmoveFilterCard({
 
   const getHeading = () => {
     const purposeText =
-      filters.purpose === "rent"
+      filters.purpose === "short-let"
+        ? "for short-let"
+        : filters.purpose === "rent"
         ? "to rent"
         : filters.purpose === "sale"
         ? "for sale"

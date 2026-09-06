@@ -38,6 +38,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
     query?: string;
     search?: string;
     type?: string;
+    subtype?: string;
     status?: string;
     listing_type?: string;
     city?: string;
@@ -52,7 +53,9 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
   }>();
 
   const initialPurpose =
-    params.listing_type === "rent" || mode === "rent"
+    params.subtype === "short-let"
+      ? "short-let"
+      : params.listing_type === "rent" || mode === "rent"
       ? "rent"
       : params.listing_type === "sale" || mode === "buy"
       ? "sale"
@@ -103,7 +106,12 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
         query: q,
       }));
     }
-    if (params.listing_type || mode) {
+    if (params.subtype === "short-let") {
+      setRightmoveFilters((prev) => ({
+        ...prev,
+        purpose: "short-let",
+      }));
+    } else if (params.listing_type || mode) {
       setRightmoveFilters((prev) => ({
         ...prev,
         purpose:
@@ -114,7 +122,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
             : "all",
       }));
     }
-  }, [params.query, params.search, params.listing_type, mode]);
+  }, [params.query, params.search, params.listing_type, params.subtype, mode]);
 
   // Helper to parse price string to number
   const parsePriceToNumber = (val: string): number | undefined => {
@@ -137,15 +145,16 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
     const minP = parsePriceToNumber(rightmoveFilters.minPrice);
     const maxP = parsePriceToNumber(rightmoveFilters.maxPrice);
     const bedrooms = rightmoveFilters.minBedrooms ? parseInt(rightmoveFilters.minBedrooms, 10) : undefined;
+    const isShortLet = rightmoveFilters.purpose === "short-let";
 
     return {
       listing_type:
         rightmoveFilters.purpose === "sale"
           ? ("sale" as const)
-          : rightmoveFilters.purpose === "rent"
+          : rightmoveFilters.purpose === "rent" || isShortLet
           ? ("rent" as const)
           : undefined,
-      search: rightmoveFilters.query.trim() || undefined,
+      search: rightmoveFilters.query.trim() || (isShortLet ? "short-let" : undefined),
       type:
         rightmoveFilters.propertyType === "all"
           ? undefined

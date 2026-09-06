@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { fonts, webPointer } from "@/theme";
 
-export type SearchTabType = "buy" | "rent" | "sold";
+export type SearchTabType = "buy" | "rent" | "short-let";
 
 interface SearchTabsProps {
   activeTab: SearchTabType;
@@ -12,7 +12,7 @@ interface SearchTabsProps {
 const TABS: { key: SearchTabType; label: string }[] = [
   { key: "buy", label: "Buy" },
   { key: "rent", label: "Rent" },
-  { key: "sold", label: "Sold" },
+  { key: "short-let", label: "Short-let" },
 ];
 
 export function SearchTabs({ activeTab, onChange }: SearchTabsProps) {
