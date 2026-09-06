@@ -1,4 +1,3 @@
-// ─── Generic API Envelope ──────────────────────────────────────────────────
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -6,7 +5,10 @@ export interface ApiResponse<T> {
   error_code?: number;
 }
 
-// ─── Auth Module ───────────────────────────────────────────────────────────
+export interface ApiValidationData {
+  errors?: string[];
+}
+
 export interface AuthUser {
   id: string;
   full_name: string;
@@ -36,28 +38,52 @@ export interface ChangePasswordDto {
   new_password: string;
 }
 
-// ─── Extended profile returned by GET /v1/auth/me ──────────────────────────
-export interface AuthMeResponse {
-  id: string;
-  full_name: string;
-  avatar_url: string | null;
-  email: string;
+export interface AuthMeResponse extends AuthUser {
   email_verified: boolean;
   created_at: string;
 }
 
-// ─── Area / Location Module ────────────────────────────────────────────────
+export interface AuthIdentity {
+  provider: string;
+  email: string | null;
+  phone: string | null;
+  verified_at: string | null;
+}
+
+export interface UserProfile {
+  id: string;
+  full_name: string;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+  auth_identities: AuthIdentity[];
+}
+
+export interface UpdateUserDto {
+  full_name?: string;
+}
+
+export interface UploadableFile {
+  uri: string;
+  name: string;
+  type: string;
+}
+
 export interface Area {
   id: string;
   name: string;
-  type: 'DIVISION' | 'CITY' | 'DISTRICT' | 'NEIGHBORHOOD' | 'UPZILA';
   parent_area_id: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  city?: string;
-  _count?: {
-    children: number;
-  };
+  city: string | null;
+  created_at?: string;
+  updated_at?: string;
+  _count?: { children: number };
+}
+
+export interface AreaDetail extends Area {
+  boundary?: string | null;
+  centroid?: string | null;
+  parent: Pick<Area, "id" | "name"> | null;
+  children: Pick<Area, "id" | "name">[];
 }
 
 export interface AreaListResponse {
@@ -65,9 +91,79 @@ export interface AreaListResponse {
   total: number;
   page: number;
   limit: number;
+  total_pages: number;
 }
 
-// ─── Notification Module ────────────────────────────────────────────────────
+export interface CreateAreaDto {
+  name: string;
+  parent_area_id?: string | null;
+  city?: string;
+  boundary?: string;
+  centroid?: string;
+}
+
+export type UpdateAreaDto = Partial<CreateAreaDto>;
+
+export type PropertyType = "residential" | "commercial" | "land" | "parking";
+export type ListingType = "sale" | "rent";
+export type PropertyStatus = "draft" | "pending" | "active" | "sold" | "archived";
+
+export interface UpsertPropertyDto {
+  property_id?: string;
+  area_id?: string;
+  title?: string;
+  description?: string;
+  type?: PropertyType;
+  subtype?: string;
+  listing_type?: ListingType;
+  price?: number;
+  price_currency?: string;
+  area_size?: number;
+  area_unit?: string;
+  location_lat?: number;
+  location_lng?: number;
+  address?: string;
+  amenities?: Record<string, unknown>;
+  virtual_tour_url?: string;
+  status?: PropertyStatus;
+}
+
+export type CreatePropertyDto = UpsertPropertyDto & { area_id: string };
+export type UpdatePropertyDto = Omit<UpsertPropertyDto, "property_id">;
+
+export interface Permission {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  description?: string | null;
+  created_at: string;
+  updated_at: string;
+  role_permissions: { permission: Permission }[];
+}
+
+export interface UserRole {
+  id: string;
+  user_id: string;
+  role_id: string;
+  role: Pick<Role, "id" | "name"> & {
+    role_permissions?: { permission: Permission }[];
+  };
+}
+
+export interface AssignRoleDto {
+  userId: string;
+  roleId: string;
+}
+
+export interface AssignPermissionDto {
+  permissionId: string;
+}
+
 export interface Notification {
   id: string;
   user_id: string;
@@ -90,34 +186,6 @@ export interface UnreadCountResponse {
   count: number;
 }
 
-// ─── Role Module ────────────────────────────────────────────────────────────
-export interface Role {
-  id: string;
-  name: string;
-  description: string | null;
-  created_at: string;
-  updated_at: string;
-  role_permissions?: {
-    permission: {
-      id: string;
-      name: string;
-      description: string | null;
-    };
-  }[];
-}
-
-export interface UserRole {
-  id: string;
-  user_id: string;
-  role_id: string;
-  role: {
-    id: string;
-    name: string;
-    description: string | null;
-  };
-}
-
-// ─── Admin Module ───────────────────────────────────────────────────────────
 export interface AdminStats {
   totalUsers: number;
   totalProperties: number;
@@ -133,29 +201,3 @@ export interface AdminUser {
   role: string;
   created_at: string;
 }
-
-// ─── Property Create/Update DTO ────────────────────────────────────────────
-export interface CreatePropertyDto {
-  title: string;
-  description?: string;
-  type: "residential" | "commercial" | "land" | "parking";
-  listing_type: "sale" | "rent";
-  price: number;
-  area_id: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  area_size?: number;
-  address?: string;
-  location_lat?: number;
-  location_lng?: number;
-  amenities?: Record<string, unknown>;
-  virtual_tour_url?: string;
-}
-
-export type UpdatePropertyDto = Partial<CreatePropertyDto>;
-
-// ─── User Update DTO ───────────────────────────────────────────────────────
-export interface UpdateUserDto {
-  full_name?: string;
-}
-

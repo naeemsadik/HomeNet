@@ -43,7 +43,7 @@ export function RegisterScreen() {
       password,
     });
     if (success) {
-      router.replace("/profile");
+      router.replace("/profile" as never);
     }
   };
 
@@ -124,7 +124,7 @@ export function RegisterScreen() {
             label="Log In instead"
             onPress={() => {
               clearError();
-              router.push("/profile"); // goes to login if not authenticated
+              router.push("/profile" as never); // goes to login if not authenticated
             }}
             variant="secondary"
             icon={LogIn}

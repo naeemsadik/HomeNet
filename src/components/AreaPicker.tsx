@@ -121,20 +121,7 @@ export function AreaPicker({
       }
     }
     
-    // Fallback for search or arbitrary direct selection
-    const path: Area[] = [];
-    if (area.city && area.name !== area.city) {
-      path.push({
-        id: area.parent_area_id || `city-${area.city}`,
-        name: area.city,
-        type: 'CITY',
-        parent_area_id: null,
-        latitude: null,
-        longitude: null,
-      } as Area);
-    }
-    path.push(area);
-    return path;
+    return [area];
   };
 
   // Handle final selection of an area
@@ -154,17 +141,6 @@ export function AreaPicker({
   const handleSelectCurrentLevel = () => {
     if (navPath.length > 0) {
       handleSelectArea(navPath[navPath.length - 1]);
-    } else if (selectedCity) {
-      const cityArea: Area = {
-        id: `city-${selectedCity}`,
-        name: selectedCity,
-        type: 'CITY',
-        parent_area_id: null,
-        latitude: null,
-        longitude: null,
-        city: selectedCity,
-      };
-      handleSelectArea(cityArea);
     } else {
       handleClearSelection();
     }
@@ -208,7 +184,7 @@ export function AreaPicker({
         e.preventDefault();
         if (focusedIndex >= 0 && focusedIndex < areas.length) {
           const selectedItem = areas[focusedIndex];
-          const isLeaf = selectedItem.type === 'NEIGHBORHOOD' || selectedItem._count?.children === 0;
+          const isLeaf = (selectedItem._count?.children ?? 0) === 0;
           if (isLeaf) {
             handleSelectArea(selectedItem);
           } else {
@@ -427,7 +403,7 @@ export function AreaPicker({
           ) : null}
 
           {/* Current Selection / Action Banner */}
-          {(selectedCity || navPath.length > 0) && !searchQuery ? (
+          {navPath.length > 0 && !searchQuery ? (
             <View style={styles.selectionBanner}>
               <Text style={styles.selectionBannerLabel}>
                 Current level:{" "}
@@ -485,7 +461,7 @@ export function AreaPicker({
                 renderItem={({ item, index }) => {
                   const isSelected = selectedArea?.id === item.id;
                   const isKeyboardFocused = index === focusedIndex;
-                  const isLeaf = item.type === 'NEIGHBORHOOD' || item._count?.children === 0;
+                  const isLeaf = (item._count?.children ?? 0) === 0;
 
                   return (
                     <View 
@@ -523,7 +499,7 @@ export function AreaPicker({
                             {item.name}
                           </Text>
                           <Text style={styles.areaCity}>
-                            {item.type} {item.city ? `• ${item.city}` : ""}
+                            {item.city || "Area"}
                           </Text>
                         </View>
                       </Pressable>

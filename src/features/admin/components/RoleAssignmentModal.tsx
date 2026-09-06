@@ -14,6 +14,7 @@ import { useUserRoles } from "../hooks/useUserRoles";
 import { useRoleMutations } from "../hooks/useRoleMutations";
 import { useRoles } from "../hooks/useRoles";
 import type { UserWithRoles, RoleWithPermissions } from "../types/admin";
+import { toApiError } from "@/services/apiClient";
 
 interface RoleAssignmentModalProps {
   visible: boolean;
@@ -26,9 +27,13 @@ export function RoleAssignmentModal({ visible, user, onClose }: RoleAssignmentMo
   const { data: userRoles = [], isLoading: userRolesLoading } = useUserRoles(user?.id ?? "");
   const { assignRole, revokeRole } = useRoleMutations(user?.id);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!visible) setProcessing(null);
+    if (!visible) {
+      setProcessing(null);
+      setError(null);
+    }
   }, [visible]);
 
   function isAssigned(role: RoleWithPermissions): boolean {
@@ -38,12 +43,15 @@ export function RoleAssignmentModal({ visible, user, onClose }: RoleAssignmentMo
   async function toggleRole(role: RoleWithPermissions) {
     if (!user) return;
     setProcessing(role.id);
+    setError(null);
     try {
       if (isAssigned(role)) {
         await revokeRole.mutateAsync({ userId: user.id, roleId: role.id });
       } else {
         await assignRole.mutateAsync({ userId: user.id, roleId: role.id });
       }
+    } catch (requestError) {
+      setError(toApiError(requestError).message);
     } finally {
       setProcessing(null);
     }
@@ -64,6 +72,8 @@ export function RoleAssignmentModal({ visible, user, onClose }: RoleAssignmentMo
               <X color={colorTokens.textSecondary} size={18} />
             </Pressable>
           </View>
+
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
           {rolesLoading || userRolesLoading ? (
             <View style={styles.center}>
@@ -147,6 +157,7 @@ const styles = StyleSheet.create({
     color: colorTokens.textSecondary,
     marginTop: 2,
   },
+  errorText: { color: colorTokens.error, fontFamily: fontTokens.regular, fontSize: 12, paddingHorizontal: 20 },
   closeBtn: {
     width: 32,
     height: 32,

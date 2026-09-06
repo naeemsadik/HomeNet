@@ -1,91 +1,29 @@
-import { useState, useEffect, useCallback } from "react";
-import apiClient from "@/services/apiClient";
-import type { Property, PropertyFilters, PaginatedResponse } from "../types/property";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { getProperties } from "@/services/propertyApi";
+import { toApiError } from "@/services/apiClient";
+import type { PropertyFilters } from "../types/property";
 
 export function usePropertyFeed(filters: PropertyFilters) {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [fetchingNextPage, setFetchingNextPage] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-
-  const fetchProperties = useCallback(
-    async (targetPage: number, isRefresh = false) => {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else if (targetPage > 1) {
-        setFetchingNextPage(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-
-      try {
-        const queryParams = {
-          ...filters,
-          page: targetPage,
-          limit: filters.limit || 20,
-        };
-
-        const res = await apiClient.get<{
-          success: boolean;
-          message: string;
-          data: PaginatedResponse<Property> | null;
-        }>("/v1/properties", { params: queryParams });
-
-        const data = res.data?.data;
-        const newItems = data?.items || [];
-        const total = data?.total || 0;
-
-        if (isRefresh || targetPage === 1) {
-          setProperties(newItems);
-        } else {
-          setProperties((prev) => [...prev, ...newItems]);
-        }
-
-        setPage(targetPage);
-        setHasMore(targetPage * (filters.limit || 20) < total);
-      } catch (err: any) {
-        console.error("Failed to load properties from API:", err);
-        setError(err?.response?.data?.message || err?.message || "Failed to load properties");
-        if (isRefresh || targetPage === 1) {
-          setProperties([]);
-        }
-        setHasMore(false);
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-        setFetchingNextPage(false);
-      }
+  const query = useInfiniteQuery({
+    queryKey: ["properties", filters],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) =>
+      getProperties({ ...filters, page: pageParam, limit: filters.limit ?? 20 }),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.data) return undefined;
+      const loaded = lastPage.data.page * lastPage.data.limit;
+      return loaded < lastPage.data.total ? lastPage.data.page + 1 : undefined;
     },
-    [filters]
-  );
-
-  // Re-fetch when filters change
-  useEffect(() => {
-    fetchProperties(1);
-  }, [fetchProperties]);
-
-  const loadMore = useCallback(() => {
-    if (!loading && !fetchingNextPage && hasMore) {
-      fetchProperties(page + 1);
-    }
-  }, [loading, fetchingNextPage, hasMore, page, fetchProperties]);
-
-  const refresh = useCallback(() => {
-    fetchProperties(1, true);
-  }, [fetchProperties]);
+  });
 
   return {
-    properties,
-    loading,
-    refreshing,
-    fetchingNextPage,
-    error,
-    hasMore,
-    loadMore,
-    refresh,
+    properties: query.data?.pages.flatMap((page) => page.data?.items ?? []) ?? [],
+    loading: query.isLoading,
+    refreshing: query.isRefetching && !query.isFetchingNextPage,
+    fetchingNextPage: query.isFetchingNextPage,
+    error: query.error ? toApiError(query.error).message : null,
+    hasMore: query.hasNextPage,
+    loadMore: query.fetchNextPage,
+    refresh: query.refetch,
   };
 }

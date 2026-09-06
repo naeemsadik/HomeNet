@@ -19,6 +19,7 @@ import {
   Plus,
   PlusCircle,
   Rocket,
+  RotateCcw,
   Search,
   Settings,
   ShieldCheck,
@@ -29,6 +30,7 @@ import {
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Pressable,
@@ -71,26 +73,24 @@ export function MyPropertiesScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const deleteMutation = useDeleteProperty();
 
-  // Fetch real API data
-  const { data, isLoading } = useMyProperties();
+  const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useMyProperties();
   const apiProperties = data?.pages.flatMap((p) => p.data?.items ?? []) ?? [];
 
-  // Mapped real API listings
   const allListings = useMemo(() => {
-    return apiProperties.map((p) => ({
+    return apiProperties.map((p): ListingItemData => ({
       id: p.id,
       title: p.title || "Untitled Property",
-      location: p.area?.name ? `${p.area.name}, ${(p.area as any)?.city || "Dhaka"}` : p.address || "Dhaka",
-      imageUrl: p.media?.find((m) => m.media_type === "image")?.url || p.media?.[0]?.url || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=400&q=80",
-      type: p.type ? p.type.charAt(0).toUpperCase() + p.type.slice(1) : "Apartment",
-      listingType: (p.listing_type === "rent" ? "For Rent" : "For Sale") as "For Rent" | "For Sale",
+      location: [p.area?.name, (p.area as any)?.city].filter(Boolean).join(", ") || p.address || "Location unavailable",
+      imageUrl: p.media?.find((media) => media.media_type === "image")?.url || p.media?.[0]?.url,
+      type: p.subtype || p.type || "Apartment",
+      listingType: p.listing_type === "rent" ? "For Rent" : "For Sale",
       price: `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${p.listing_type === "rent" ? "/mo" : ""}`,
-      status: (p.status as any) || "active",
-      isVerified: p.is_verified ?? false,
+      status: p.status,
+      isVerified: p.is_verified,
       isBoosted: false,
-      boostText: undefined as string | undefined,
+      boostText: undefined,
       aiValue: typeof p.price === "number" ? `৳ ${((p.price * 1.05) / 10000000).toFixed(2)}Cr` : "—",
-      views: String(p.view_count || 0),
+      views: (p.view_count || 0).toLocaleString(),
       likes: "0",
       inquiries: "0",
     }));
@@ -142,7 +142,17 @@ export function MyPropertiesScreen() {
   const handleDelete = (id: string, title: string) => {
     Alert.alert("Delete Property", `Are you sure you want to delete "${title}"?`, [
       { text: "Cancel", style: "cancel" },
-      { text: "Delete", style: "destructive", onPress: () => deleteMutation.mutateAsync(id) },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteMutation.mutateAsync(id);
+          } catch (deleteError) {
+            Alert.alert("Delete failed", deleteError instanceof Error ? deleteError.message : "Request failed.");
+          }
+        },
+      },
     ]);
   };
 
@@ -287,8 +297,21 @@ export function MyPropertiesScreen() {
 
           {/* Listings Table / Card View */}
           <View style={styles.tableCard}>
-            {/* Desktop Table View */}
-            {!isPhone ? (
+            {isLoading ? (
+              <View style={styles.emptyContainer}>
+                <ActivityIndicator color="#0F6D55" size="large" />
+                <Text style={styles.emptySub}>Loading your listings...</Text>
+              </View>
+            ) : error ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyTitle}>Could not load listings</Text>
+                <Text style={styles.emptySub}>{error instanceof Error ? error.message : "Request failed."}</Text>
+                <Pressable onPress={() => void refetch()} style={styles.retryButton}>
+                  <RotateCcw color="#FFFFFF" size={16} />
+                  <Text style={styles.retryText}>Retry</Text>
+                </Pressable>
+              </View>
+            ) : !isPhone ? (
               <View style={styles.table}>
                 {/* Table Header */}
                 <View style={styles.tableHeaderRow}>
@@ -313,7 +336,13 @@ export function MyPropertiesScreen() {
                     <View key={item.id} style={styles.tableDataRow}>
                       {/* Property Info (Thumbnail, Title, Verified, Boost, Location) */}
                       <View style={[styles.tdCell, { flex: 2.2, flexDirection: "row", gap: 12, alignItems: "center" }]}>
-                        <Image source={{ uri: item.imageUrl }} style={styles.propThumb} />
+                        {item.imageUrl ? (
+                          <Image source={{ uri: item.imageUrl }} style={styles.propThumb} />
+                        ) : (
+                          <View style={[styles.propThumb, styles.imagePlaceholder]}>
+                            <Building2 color="#6B7D78" size={20} />
+                          </View>
+                        )}
                         <View style={{ flex: 1, gap: 2 }}>
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                             <Text style={styles.propTitle} numberOfLines={1}>{item.title}</Text>
@@ -397,7 +426,13 @@ export function MyPropertiesScreen() {
                   filteredListings.map((item) => (
                     <View key={item.id} style={styles.mobileCard}>
                       <View style={styles.mobileCardHead}>
-                        <Image source={{ uri: item.imageUrl }} style={styles.mobileThumb} />
+                        {item.imageUrl ? (
+                          <Image source={{ uri: item.imageUrl }} style={styles.mobileThumb} />
+                        ) : (
+                          <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
+                            <Building2 color="#6B7D78" size={20} />
+                          </View>
+                        )}
                       <View style={{ flex: 1, gap: 4 }}>
                         <Text style={styles.propTitle}>{item.title}</Text>
                         <Text style={styles.propLocation}>{item.location}</Text>
@@ -457,6 +492,16 @@ export function MyPropertiesScreen() {
                 )))}
               </View>
             )}
+            {hasNextPage && !isLoading && !error ? (
+              <Pressable
+                disabled={isFetchingNextPage}
+                onPress={() => void fetchNextPage()}
+                style={styles.loadMoreButton}
+              >
+                {isFetchingNextPage ? <ActivityIndicator color="#0F6D55" size="small" /> : null}
+                <Text style={styles.loadMoreText}>{isFetchingNextPage ? "Loading..." : "Load more"}</Text>
+              </Pressable>
+            ) : null}
           </View>
         </ScrollView>
       </View>
@@ -772,6 +817,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#F4F6F5",
   },
+  imagePlaceholder: { alignItems: "center", justifyContent: "center" },
   propTitle: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
@@ -859,7 +905,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.regular,
     color: "#5C6B66",
+    textAlign: "center",
   },
+  retryButton: {
+    alignItems: "center",
+    backgroundColor: "#0F6D55",
+    borderRadius: 10,
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  retryText: { color: "#FFFFFF", fontFamily: fonts.semiBold, fontSize: 14 },
+  loadMoreButton: {
+    alignItems: "center",
+    alignSelf: "center",
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  loadMoreText: { color: "#0F6D55", fontFamily: fonts.semiBold, fontSize: 13 },
   mobileCardList: {
     padding: 16,
     gap: 16,

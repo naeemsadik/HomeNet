@@ -3,24 +3,25 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Camera, LoaderCircle, LogOut, Save, ShieldCheck, Trash2, UserRound, KeyRound } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
-import { FloatingInput, ErrorBanner, AuthButton, Divider } from "@/components/AuthFormFields";
-import { getAccessToken } from "@/services/tokenStorage";
+import { FloatingInput, ErrorBanner, AuthButton } from "@/components/AuthFormFields";
+import { AuthCard } from "@/components/AuthCard";
 import { updateUser, uploadAvatar, deleteAvatar, deleteUser } from "@/services/userApi";
+import type { UploadInput } from "@/services/upload";
 
 export function ProfileScreen() {
   const { isPhone } = useResponsive();
-  const { user, login, register, logout, loading: authLoading, error: authError, clearError, hydrate } = useAuthStore();
-
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [email, setEmail] = useState("john@example.com");
-  const [password, setPassword] = useState("Password123");
-  const [fullName, setFullName] = useState("John Doe");
+  const { user, logout } = useAuthStore();
+  const params = useLocalSearchParams<{ register?: string; mode?: string }>();
+  const initialAuthMode =
+    params.register === "true" || params.mode === "register" || params.mode === "signup"
+      ? "signup"
+      : "signin";
 
   const [editingName, setEditingName] = useState("");
   const [updatingProfile, setUpdatingProfile] = useState(false);
@@ -28,39 +29,17 @@ export function ProfileScreen() {
   const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
-    void hydrate();
-  }, []);
-
-  useEffect(() => {
     if (user) {
       setEditingName(user.full_name);
     }
   }, [user]);
-
-  const handleAuthSubmit = async () => {
-    setLocalError(null);
-    if (mode === "login") {
-      await login({ email: email.trim(), password });
-    } else {
-      if (!fullName.trim()) {
-        setLocalError("Full name is required");
-        return;
-      }
-      if (password.length < 8) {
-        setLocalError("Password must be at least 8 characters");
-        return;
-      }
-      await register({ full_name: fullName.trim(), email: email.trim(), password });
-    }
-  };
 
   const handleSaveName = async () => {
     if (!user || !editingName.trim()) return;
     try {
       setUpdatingProfile(true);
       setLocalError(null);
-      const token = await getAccessToken();
-      await updateUser(token || "", user.id, editingName.trim());
+      await updateUser(user.id, { full_name: editingName.trim() });
       // Refresh user details in store
       const { fetchMe } = useAuthStore.getState();
       await fetchMe();
@@ -92,40 +71,13 @@ export function ProfileScreen() {
     try {
       setUploadingAvatar(true);
       setLocalError(null);
-      const asset = result.assets[0] as any;
-
-      let fileToUpload: Blob | File | null = null;
-      if (asset.file && (globalThis as any).File && asset.file instanceof (globalThis as any).File) {
-        fileToUpload = asset.file as File;
-      } else if (asset.uri && asset.uri.startsWith("data:")) {
-        const base64 = asset.uri.split(",")[1];
-        const res = await fetch(asset.uri);
-        fileToUpload = await res.blob();
-      } else if (asset.uri) {
-        try {
-          const response = await fetch(asset.uri);
-          fileToUpload = await response.blob();
-        } catch (fetchErr) {
-          throw new Error("Unable to read selected file from browser.");
-        }
-      }
-
-      if (!fileToUpload) {
-        throw new Error("Could not obtain file from image picker");
-      }
-
-      try {
-        if ((globalThis as any).File && !(fileToUpload instanceof (globalThis as any).File)) {
-          fileToUpload = new (globalThis as any).File([fileToUpload], asset.fileName || "avatar.jpg", {
-            type: (fileToUpload as Blob).type || "image/jpeg",
-          });
-        }
-      } catch {
-        // ignore
-      }
-
-      const token = await getAccessToken();
-      await uploadAvatar(token || "", fileToUpload as Blob | File, asset.fileName || "avatar.jpg");
+      const asset = result.assets[0];
+      const file: UploadInput = asset.file ?? {
+        uri: asset.uri,
+        name: asset.fileName || "avatar.jpg",
+        type: asset.mimeType || "image/jpeg",
+      };
+      await uploadAvatar(file, asset.fileName || "avatar.jpg");
       
       const { fetchMe } = useAuthStore.getState();
       await fetchMe();
@@ -142,8 +94,7 @@ export function ProfileScreen() {
     try {
       setUploadingAvatar(true);
       setLocalError(null);
-      const token = await getAccessToken();
-      await deleteAvatar(token || "");
+      await deleteAvatar();
       
       const { fetchMe } = useAuthStore.getState();
       await fetchMe();
@@ -165,8 +116,7 @@ export function ProfileScreen() {
         onPress: async () => {
           try {
             setUpdatingProfile(true);
-            const token = await getAccessToken();
-            await deleteUser(token || "", user.id);
+            await deleteUser(user.id);
             await logout();
             Alert.alert("Deleted", "Your account has been deleted.");
           } catch (err: any) {
@@ -214,83 +164,17 @@ export function ProfileScreen() {
           </View>
         ) : null}
 
-        {/* Global Errors */}
-        <ErrorBanner message={localError || authError} />
-
         {/* Unauthenticated State */}
         {!user ? (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>
-              {mode === "login" ? "Log in to HomeNet" : "Create your HomeNet account"}
-            </Text>
-            <Text style={styles.supportText}>
-              Access saved properties, list new homes, and verify pricing.
-            </Text>
-
-            <View style={styles.formContainer}>
-              {mode === "register" ? (
-                <FloatingInput
-                  label="Full Name"
-                  value={fullName}
-                  onChangeText={(val) => {
-                    setFullName(val);
-                    setLocalError(null);
-                    clearError();
-                  }}
-                  autoCapitalize="words"
-                />
-              ) : null}
-
-              <FloatingInput
-                label="Email"
-                value={email}
-                onChangeText={(val) => {
-                  setEmail(val);
-                  setLocalError(null);
-                  clearError();
-                }}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-
-              <FloatingInput
-                label="Password"
-                value={password}
-                onChangeText={(val) => {
-                  setPassword(val);
-                  setLocalError(null);
-                  clearError();
-                }}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-
-              <AuthButton
-                label={mode === "login" ? "Log In" : "Register"}
-                onPress={handleAuthSubmit}
-                loading={authLoading}
-                disabled={!email || !password || (mode === "register" && !fullName)}
-                style={styles.submitBtn}
-              />
-
-              <Divider text="or" />
-
-              <AuthButton
-                label={mode === "login" ? "Create an account" : "Back to Log In"}
-                onPress={() => {
-                  setMode((current) => (current === "login" ? "register" : "login"));
-                  setLocalError(null);
-                  clearError();
-                }}
-                variant="secondary"
-              />
-            </View>
+          <View style={styles.authWrapper}>
+            <AuthCard initialMode={initialAuthMode} />
           </View>
         ) : (
           /* Authenticated Settings State */
           <>
+            {/* Global Errors for Authenticated Actions */}
+            <ErrorBanner message={localError} />
+
             <View style={styles.card}>
               <Text style={styles.sectionTitle}>Profile details</Text>
               
@@ -334,7 +218,7 @@ export function ProfileScreen() {
               <View style={styles.actionsRow}>
                 <AuthButton
                   label="Change Password"
-                  onPress={() => router.push("/profile/change-password")}
+                  onPress={() => router.push("/profile/change-password" as never)}
                   variant="secondary"
                   icon={KeyRound}
                   style={styles.flexBtn}
@@ -384,11 +268,11 @@ const styles = StyleSheet.create({
   sectionTitle: { marginBottom: 4, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 18 },
   supportText: { color: colors.muted, fontFamily: fonts.regular, fontSize: 13, lineHeight: 18, marginBottom: 18 },
   
-  formContainer: {
-    marginTop: 16,
-  },
-  submitBtn: {
-    marginTop: 10,
+  authWrapper: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
   },
   
   actionsRow: { flexDirection: "row", gap: 12, marginTop: 14, flexWrap: "wrap" },

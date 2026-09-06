@@ -9,9 +9,10 @@ import { AdminTabNav } from "../components/AdminTabNav";
 import { AdminPropertiesScreen } from "./AdminPropertiesScreen";
 import { AdminUsersScreen } from "./AdminUsersScreen";
 import { AdminRolesScreen } from "./AdminRolesScreen";
+import { AdminAreasScreen } from "./AdminAreasScreen";
 import { hasAnyAdminPermission } from "@/lib/permissions";
 
-type AdminTab = "properties" | "users" | "roles" | "settings";
+type AdminTab = "properties" | "users" | "roles" | "areas" | "settings";
 
 export function AdminDashboardScreen() {
   const { isPhone, contentPadding } = useResponsive();
@@ -19,6 +20,22 @@ export function AdminDashboardScreen() {
   const [activeTab, setActiveTab] = useState<AdminTab>("properties");
 
   const hasAccess = hasAnyAdminPermission(userRoles);
+  const isFullAdmin = userRoles.some((userRole) => ["admin", "superadmin"].includes(userRole.role.name));
+  const permissionNames = new Set(
+    userRoles.flatMap((userRole) =>
+      userRole.role.role_permissions?.map((rolePermission) => rolePermission.permission.name) ?? [],
+    ),
+  );
+  const allowedTabs: AdminTab[] = isFullAdmin
+    ? ["properties", "users", "roles", "areas", "settings"]
+    : [
+        ...(["manage_properties", "moderate_listing", "review_verification"].some((name) => permissionNames.has(name)) ? ["properties" as const] : []),
+        ...(permissionNames.has("manage_users") ? ["users" as const] : []),
+        ...(["view_roles", "manage_roles"].some((name) => permissionNames.has(name)) ? ["roles" as const] : []),
+        ...(permissionNames.has("manage_areas") ? ["areas" as const] : []),
+        "settings" as const,
+      ];
+  const visibleTab = allowedTabs.includes(activeTab) ? activeTab : allowedTabs[0];
 
   if (!hasAccess) {
     return (
@@ -45,13 +62,14 @@ export function AdminDashboardScreen() {
           <Text style={styles.subtitle}>Manage properties, users, and roles.</Text>
         </View>
 
-        <AdminTabNav active={activeTab} onChange={setActiveTab} userRoles={userRoles} />
+        <AdminTabNav active={visibleTab} onChange={setActiveTab} userRoles={userRoles} />
 
         <View style={styles.tabContent}>
-          {activeTab === "properties" && <AdminPropertiesScreen />}
-          {activeTab === "users" && <AdminUsersScreen />}
-          {activeTab === "roles" && <AdminRolesScreen />}
-          {activeTab === "settings" && (
+          {visibleTab === "properties" && <AdminPropertiesScreen />}
+          {visibleTab === "users" && <AdminUsersScreen />}
+          {visibleTab === "roles" && <AdminRolesScreen />}
+          {visibleTab === "areas" && <AdminAreasScreen />}
+          {visibleTab === "settings" && (
             <View style={styles.settingsPlaceholder}>
               <Text style={styles.settingsText}>Settings coming soon.</Text>
             </View>

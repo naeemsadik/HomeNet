@@ -17,6 +17,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthModal } from "@/components/AuthModal";
+import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 
 const queryClient = new QueryClient({
@@ -44,7 +45,35 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    if (typeof document !== "undefined") {
+      const styleId = "homenet-remove-focus-outline";
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement("style");
+        style.id = styleId;
+        style.textContent = `
+          input, textarea, select, [contenteditable] {
+            outline: none !important;
+            outline-style: none !important;
+            box-shadow: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+          }
+          input:focus, textarea:focus, select:focus, [contenteditable]:focus,
+          input:focus-visible, textarea:focus-visible, select:focus-visible {
+            outline: none !important;
+            outline-style: none !important;
+            box-shadow: none !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+
+    setUnauthorizedHandler(() => {
+      useAuthStore.getState().resetSession();
+      queryClient.clear();
+    });
     void useAuthStore.getState().hydrate();
+    return () => setUnauthorizedHandler(null);
   }, []);
 
   if (!loaded) return null;

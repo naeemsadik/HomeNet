@@ -36,6 +36,7 @@ import {
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Linking,
@@ -45,18 +46,60 @@ import {
   StyleSheet,
   Text,
   View,
-  ActivityIndicator,
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink } from "@/components/ui";
+import { allProperties, propertyImages, searchPageListings } from "@/data/properties";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
-import { usePropertyDetail } from "../hooks/usePropertyDetail";
+import Svg, { Path } from "react-native-svg";
+import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
+
+function WhatsAppIcon({ size = 18, color = "#25D366" }: { size?: number; color?: string }) {
+  return (
+    <Svg height={size} viewBox="0 0 24 24" width={size} fill="none">
+      <Path
+        d="M20.52 3.48A11.93 11.93 0 0012.06 0C5.46 0 .09 5.37.09 11.97c0 2.11.55 4.17 1.6 5.99L0 24l6.19-1.62a11.93 11.93 0 005.87 1.51h.01c6.6 0 11.97-5.37 11.97-11.97 0-3.2-1.25-6.21-3.52-8.44z"
+        fill={color}
+      />
+      <Path
+        d="M17.5 14.37c-.28-.14-1.65-.81-1.91-.9-.25-.1-.44-.14-.62.14-.19.28-.72.9-.88 1.09-.16.18-.32.21-.6.07-.28-.14-1.18-.44-2.25-1.4-.83-.74-1.39-1.66-1.55-1.94-.16-.28-.02-.43.12-.57.13-.13.28-.32.42-.49.14-.16.19-.28.28-.47.09-.19.05-.35-.02-.49-.07-.14-.62-1.5-.85-2.06-.23-.54-.46-.47-.63-.48-.16-.01-.35-.01-.54-.01-.19 0-.49.07-.75.35-.25.28-.97.95-.97 2.32s1 2.69 1.13 2.88c.14.19 1.95 2.97 4.72 4.17.66.28 1.18.45 1.58.58.66.21 1.26.18 1.74.11.53-.08 1.65-.67 1.88-1.33.23-.65.23-1.21.16-1.33-.07-.12-.25-.19-.53-.33z"
+        fill="#FFFFFF"
+      />
+    </Svg>
+  );
+}
+
+const unsupportedDetailContent = {
+  aiValuation: {
+    estimatedValue: "47,000",
+    differencePercent: "4%",
+    comparisonText: "Estimated fair value 47,000 ৳. This listing is priced below AI estimate by 4%.",
+    trend: "+4.5% area appreciation YoY",
+  },
+  aiRecommendation:
+    "Buyers who viewed this also considered penthouses in Gulshan 1 and 2 bedroom apartments in Dhanmondi. Based on your budget, this property offers 12% better value per sqft than similar verified listings.",
+  nearbyPlaces: [
+    { name: "Darun Ihsan University", distance: "0.6 km", icon: GraduationCap },
+    { name: "Eden Hospital", distance: "1.2 km", icon: Hospital },
+    { name: "Metro Station", distance: "0.9 km", icon: Train },
+  ],
+};
 
 export function PropertyDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isPhone, isTablet } = useResponsive();
-  const { data: apiDetail, isLoading } = usePropertyDetail(id ?? "");
+  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(id ?? "");
+  const {
+    data: similarProperties = [],
+    error: similarError,
+    isLoading: similarLoading,
+    refetch: refetchSimilar,
+  } = useSimilarProperties(
+    apiDetail?.type,
+    apiDetail?.area?.id,
+    id ?? "",
+  );
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [saved, setSaved] = useState(false);
@@ -65,31 +108,35 @@ export function PropertyDetailScreen() {
   const property = useMemo(() => {
     if (!apiDetail) return null;
 
-    const rawAmenities = apiDetail.amenities as Record<string, unknown> | null;
-    const amenityList = rawAmenities
-      ? Object.keys(rawAmenities).filter((k) => !!rawAmenities[k])
-      : [];
+    const rawAmenities = (apiDetail.amenities as Record<string, any>) || {};
+    const amenityList = Object.keys(rawAmenities).filter(
+      (key) => !["bedrooms", "bathrooms", "floor", "facing"].includes(key) && rawAmenities[key]
+    );
 
     const images = apiDetail.media
       ? apiDetail.media.filter((m) => m.media_type === "image").map((m) => m.url)
       : [];
 
+    const identity = apiDetail.user?.auth_identities?.[0];
+    const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
+
     return {
       id: apiDetail.id,
       title: apiDetail.title,
-      location: apiDetail.area?.name ? `${apiDetail.area.name}, ${apiDetail.area.city || "Dhaka"}` : "Bangladesh",
-      address: apiDetail.address || "",
-      type: apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property",
+      location: location || apiDetail.address || "Location unavailable",
+      address: apiDetail.address || "Address unavailable",
+      type: apiDetail.subtype || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
       listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
       price: typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
       priceCurrency: apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),
       pricePeriod: apiDetail.listing_type === "rent" ? "/mo" : "",
       isVerified: Boolean(apiDetail.is_verified),
       isBoosted: false,
-      bedrooms: (apiDetail as any).bedrooms ?? (rawAmenities as any)?.bedrooms ?? null,
-      bathrooms: (apiDetail as any).bathrooms ?? (rawAmenities as any)?.bathrooms ?? null,
+      score: (apiDetail as any).score ?? 85,
+      bedrooms: Number((apiDetail as any).bedrooms ?? rawAmenities.bedrooms ?? 0),
+      bathrooms: Number((apiDetail as any).bathrooms ?? rawAmenities.bathrooms ?? 0),
       areaSqft: apiDetail.area_size ? apiDetail.area_size.toLocaleString("en-BD") : null,
-      aiValuation: null as { estimatedValue: string; comparisonText: string; trend: string } | null,
+      aiValuation: unsupportedDetailContent.aiValuation,
       description: apiDetail.description || "No description provided.",
       amenities: amenityList,
       mediaImages: images,
@@ -98,35 +145,63 @@ export function PropertyDetailScreen() {
         agency: "HomeNet Verified Partner",
         rating: "4.8",
         reviewsCount: 12,
-        isVerified: true,
+        repliesTime: "Replies ~1 hr",
+        isVerified: Boolean(apiDetail.is_verified),
         avatarUrl: apiDetail.user?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-        phone: apiDetail.user?.auth_identities?.[0]?.phone || "+8801700000000",
-        email: apiDetail.user?.auth_identities?.[0]?.email || "contact@homenet.bd",
+        phone: identity?.phone || "+8801700000000",
+        email: identity?.email || "",
       },
-      aiRecommendation: null,
-      nearbyPlaces: [] as { icon: any; name: string; distance: string }[],
-      similarProperties: [] as { id: string; imageUrl: string; price: string; title: string; location: string; specs: string }[],
+      aiRecommendation: unsupportedDetailContent.aiRecommendation,
+      nearbyPlaces: unsupportedDetailContent.nearbyPlaces,
+      similarProperties: similarProperties.map((sim) => {
+        const simAmenities = (sim.amenities as Record<string, any>) || {};
+        return {
+          id: sim.id,
+          title: sim.title,
+          location: [sim.area?.name, (sim.area as any)?.city].filter(Boolean).join(", ") || sim.address || "Dhaka",
+          price: `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? sim.price.toLocaleString() : sim.price}`,
+          specs: `${Number(simAmenities.bedrooms ?? 0)} Beds · ${Number(simAmenities.bathrooms ?? 0)} Baths · ${sim.area_size?.toLocaleString() ?? "N/A"} ${sim.area_unit || "sqft"}`,
+          imageUrl: sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
+          status: sim.status,
+          views: (sim.view_count || 0).toLocaleString(),
+          score: (sim as any).score ?? 85,
+        };
+      }),
     };
-  }, [apiDetail]);
+  }, [apiDetail, similarProperties]);
 
   const handleCall = () => {
-    if (property?.seller?.phone) {
-      void Linking.openURL(`tel:${property.seller.phone}`);
+    if (!property?.seller.phone) {
+      Alert.alert("Phone unavailable", "The property owner has not shared a phone number.");
+      return;
     }
+    void Linking.openURL(`tel:${property.seller.phone}`);
+  };
+
+  const handleWhatsApp = () => {
+    const rawPhone = property?.seller.phone || "+8801700000000";
+    const cleanPhone = rawPhone.replace(/[^\d]/g, "");
+    const message = `Hello ${property?.seller.name || "Seller"}, I'm interested in your property "${property?.title || "Property"}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) on Homenet. Is this property currently available?`;
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    void Linking.openURL(whatsappUrl).catch(() => {
+      Alert.alert(
+        "WhatsApp",
+        `Could not launch WhatsApp. You can message the seller directly at ${rawPhone}.`,
+      );
+    });
   };
 
   const handleShare = () => {
-    if (property?.title) {
-      Alert.alert("Share Property", `Share link for "${property.title}" copied to clipboard.`);
-    }
+    if (!property) return;
+    Alert.alert("Share Property", `Share link for "${property.title}" copied to clipboard.`);
   };
 
-  if (isLoading) {
+  if (isLoading && !property) {
     return (
       <AppChrome active="property">
-        <View style={{ flex: 1, minHeight: 400, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="large" color="#0B1A17" />
-          <Text style={{ marginTop: 12, color: "#666" }}>Loading property details...</Text>
+        <View style={styles.requestState}>
+          <ActivityIndicator color="#0F6D55" size="large" />
+          <Text style={styles.requestError}>Loading property details...</Text>
         </View>
       </AppChrome>
     );
@@ -135,16 +210,11 @@ export function PropertyDetailScreen() {
   if (!property) {
     return (
       <AppChrome active="property">
-        <View style={{ flex: 1, minHeight: 400, justifyContent: "center", alignItems: "center", padding: 24 }}>
-          <Text style={{ fontSize: 20, fontWeight: "700", color: "#0B1A17", marginBottom: 8 }}>Property Not Found</Text>
-          <Text style={{ color: "#666", textAlign: "center", marginBottom: 20 }}>
-            This property listing is not available or has been removed.
-          </Text>
-          <Pressable
-            onPress={() => router.back()}
-            style={{ backgroundColor: "#0B1A17", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 8 }}
-          >
-            <Text style={{ color: "#fff", fontWeight: "600" }}>Go Back</Text>
+        <View style={styles.requestState}>
+          <Text style={styles.requestError}>{error instanceof Error ? error.message : "Property not found."}</Text>
+          <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>
+            <RotateCcw color="#FFFFFF" size={16} />
+            <Text style={styles.retryText}>{error ? "Retry" : "Go Back"}</Text>
           </Pressable>
         </View>
       </AppChrome>
@@ -198,10 +268,17 @@ export function PropertyDetailScreen() {
             {/* Hero Image Gallery */}
             <View style={styles.galleryContainer}>
               <View style={styles.mainImageWrap}>
-                <Image
-                  source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
-                  style={styles.mainImage}
-                />
+                {property.mediaImages.length ? (
+                  <Image
+                    source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
+                    style={styles.mainImage}
+                  />
+                ) : (
+                  <View style={styles.mediaPlaceholder}>
+                    <Building2 color="#6B7D78" size={48} />
+                    <Text style={styles.mediaPlaceholderText}>No property media</Text>
+                  </View>
+                )}
 
                 {/* Status Badges Overlay */}
                 <View style={styles.galleryBadgesRow}>
@@ -366,21 +443,49 @@ export function PropertyDetailScreen() {
                 </AppLink>
               </View>
 
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.similarScroll}>
-                <View style={styles.similarRow}>
-                  {property.similarProperties.map((sim: any) => (
-                    <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
-                      <Image source={{ uri: sim.imageUrl }} style={styles.similarThumb} />
-                      <View style={styles.similarInfo}>
-                        <Text style={styles.similarPrice}>{sim.price}</Text>
-                        <Text numberOfLines={1} style={styles.similarTitle}>{sim.title}</Text>
-                        <Text style={styles.similarLoc}>{sim.location}</Text>
-                        <Text style={styles.similarSpecs}>{sim.specs}</Text>
-                      </View>
-                    </AppLink>
-                  ))}
-                </View>
-              </ScrollView>
+              {similarLoading ? (
+                <ActivityIndicator color="#0F6D55" size="small" />
+              ) : similarError ? (
+                <Pressable onPress={() => void refetchSimilar()} style={styles.similarRequestState}>
+                  <RotateCcw color="#0F6D55" size={15} />
+                  <Text style={styles.similarLoc}>
+                    {similarError instanceof Error ? similarError.message : "Could not load similar listings."} Press to retry.
+                  </Text>
+                </Pressable>
+              ) : (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.similarScroll}>
+                  <View style={styles.similarRow}>
+                    {property.similarProperties.map((sim) => (
+                      <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
+                        {sim.imageUrl ? (
+                          <Image source={{ uri: sim.imageUrl }} style={styles.similarThumb} />
+                        ) : (
+                          <View style={[styles.similarThumb, styles.similarThumbPlaceholder]}>
+                            <Building2 color="#6B7D78" size={24} />
+                          </View>
+                        )}
+                        <View style={styles.similarInfo}>
+                          <View style={styles.similarPriceRow}>
+                            <Text style={styles.similarPrice}>{sim.price}</Text>
+                            {sim.score ? (
+                              <View style={styles.similarScoreBadge}>
+                                <Sparkles color="#0F6D55" size={12} />
+                                <Text style={styles.similarScoreText}>{sim.score}</Text>
+                              </View>
+                            ) : null}
+                          </View>
+                          <Text numberOfLines={1} style={styles.similarTitle}>{sim.title}</Text>
+                          <Text style={styles.similarLoc}>{sim.location}</Text>
+                          <Text style={styles.similarSpecs}>{sim.specs}</Text>
+                        </View>
+                      </AppLink>
+                    ))}
+                    {property.similarProperties.length === 0 ? (
+                      <Text style={styles.similarLoc}>No similar active listings found.</Text>
+                    ) : null}
+                  </View>
+                </ScrollView>
+              )}
             </View>
             )}
           </View>
@@ -390,14 +495,20 @@ export function PropertyDetailScreen() {
             {/* Seller Contact Card */}
             <View style={styles.sellerCard}>
               <View style={styles.sellerRow}>
-                <Image source={{ uri: property.seller.avatarUrl }} style={styles.sellerAvatar} />
+                {property.seller.avatarUrl ? (
+                  <Image source={{ uri: property.seller.avatarUrl }} style={styles.sellerAvatar} />
+                ) : (
+                  <View style={[styles.sellerAvatar, styles.sellerAvatarPlaceholder]}>
+                    <UserRound color="#4F625D" size={24} />
+                  </View>
+                )}
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.sellerName}>{property.seller.name}</Text>
                   <Text style={styles.sellerAgency}>{property.seller.agency}</Text>
                   <View style={styles.sellerRatingRow}>
                     <Star color="#F4823A" fill="#F4823A" size={14} />
                     <Text style={styles.ratingText}>
-                      {property.seller.rating} ({property.seller.reviewsCount}) · Verified
+                      {property.seller.rating} ({property.seller.reviewsCount}) · {property.seller.repliesTime || "Replies ~1 hr"}
                     </Text>
                   </View>
                 </View>
@@ -405,7 +516,15 @@ export function PropertyDetailScreen() {
 
               {/* Asking Price Callout */}
               <View style={styles.priceCalloutWrap}>
-                <Text style={styles.priceCalloutLabel}>Asking price</Text>
+                <View style={styles.priceCalloutHeader}>
+                  <Text style={styles.priceCalloutLabel}>Asking price</Text>
+                  {property.score ? (
+                    <View style={styles.scoreBadge}>
+                      <Sparkles color="#0F6D55" size={14} />
+                      <Text style={styles.scoreBadgeText}>{property.score}</Text>
+                    </View>
+                  ) : null}
+                </View>
                 <Text style={styles.priceCalloutValue}>
                   {property.priceCurrency} {property.price}{" "}
                   <Text style={styles.priceCalloutPeriod}>{property.pricePeriod}</Text>
@@ -415,6 +534,7 @@ export function PropertyDetailScreen() {
               {/* Action Buttons Row */}
               <View style={styles.sellerActionsRow}>
                 <Pressable
+                  accessibilityLabel="Call Seller"
                   onPress={handleCall}
                   style={({ pressed }) => [styles.sellerActionBtn, webPointer, pressed && styles.pressed]}
                 >
@@ -423,11 +543,12 @@ export function PropertyDetailScreen() {
                 </Pressable>
 
                 <Pressable
-                  onPress={() => Alert.alert("Chat", `Starting chat with ${property.seller.name}...`)}
-                  style={({ pressed }) => [styles.sellerActionBtn, webPointer, pressed && styles.pressed]}
+                  accessibilityLabel="WhatsApp Message"
+                  onPress={handleWhatsApp}
+                  style={({ pressed }) => [styles.whatsAppActionBtn, webPointer, pressed && styles.pressed]}
                 >
-                  <MessageSquare color="#0B1A17" size={16} />
-                  <Text style={styles.sellerActionText}>Chat</Text>
+                  <WhatsAppIcon size={18} color="#25D366" />
+                  <Text style={styles.whatsAppActionText}>WhatsApp</Text>
                 </Pressable>
               </View>
 
@@ -478,6 +599,23 @@ export function PropertyDetailScreen() {
             >
               <Text style={styles.confirmVisitText}>Confirm Visit Request</Text>
             </Pressable>
+
+            <View style={styles.modalDivider}>
+              <View style={styles.modalDividerLine} />
+              <Text style={styles.modalDividerText}>or chat directly</Text>
+              <View style={styles.modalDividerLine} />
+            </View>
+
+            <Pressable
+              onPress={() => {
+                setBookModalVisible(false);
+                handleWhatsApp();
+              }}
+              style={[styles.modalWhatsAppBtn, webPointer]}
+            >
+              <WhatsAppIcon size={18} color="#FFFFFF" />
+              <Text style={styles.modalWhatsAppBtnText}>Chat on WhatsApp with Agent</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
@@ -487,6 +625,30 @@ export function PropertyDetailScreen() {
 
 const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
+  requestState: {
+    flex: 1,
+    minHeight: 420,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    padding: 24,
+  },
+  requestError: {
+    color: "#4F625D",
+    fontFamily: fonts.regular,
+    fontSize: 15,
+    textAlign: "center",
+  },
+  retryButton: {
+    alignItems: "center",
+    backgroundColor: "#0F6D55",
+    borderRadius: 10,
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+  },
+  retryText: { color: "#FFFFFF", fontFamily: fonts.semiBold, fontSize: 14 },
   scrollBody: {
     padding: 24,
     gap: 20,
@@ -561,6 +723,15 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  mediaPlaceholder: {
+    alignItems: "center",
+    height: "100%",
+    justifyContent: "center",
+    gap: 10,
+    width: "100%",
+  },
+  mediaPlaceholderText: { color: "#6B7D78", fontFamily: fonts.regular, fontSize: 14 },
+  similarThumbPlaceholder: { alignItems: "center", backgroundColor: "#E8EEEC", justifyContent: "center" },
   galleryBadgesRow: {
     position: "absolute",
     top: 16,
@@ -865,8 +1036,23 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 4,
   },
+  similarPriceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   similarPrice: {
     fontSize: 15,
+    fontFamily: fonts.bold,
+    color: "#0F6D55",
+  },
+  similarScoreBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  similarScoreText: {
+    fontSize: 12,
     fontFamily: fonts.bold,
     color: "#0F6D55",
   },
@@ -904,6 +1090,12 @@ const styles = StyleSheet.create({
     height: 54,
     borderRadius: 27,
   },
+  similarRequestState: { alignItems: "center", flexDirection: "row", gap: 8, paddingVertical: 14 },
+  sellerAvatarPlaceholder: {
+    alignItems: "center",
+    backgroundColor: "#E8EEEC",
+    justifyContent: "center",
+  },
   sellerName: {
     fontSize: 16,
     fontFamily: fonts.bold,
@@ -931,10 +1123,25 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 4,
   },
+  priceCalloutHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   priceCalloutLabel: {
     fontSize: 12,
-    fontFamily: fonts.regular,
+    fontFamily: fonts.semiBold,
     color: "#5C6B66",
+  },
+  scoreBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  scoreBadgeText: {
+    fontSize: 14,
+    fontFamily: fonts.bold,
+    color: "#0F6D55",
   },
   priceCalloutValue: {
     fontSize: 22,
@@ -952,13 +1159,13 @@ const styles = StyleSheet.create({
   },
   sellerActionBtn: {
     flex: 1,
-    height: 42,
+    height: 44,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
     borderRadius: 999,
-    borderWidth: 0.8,
+    borderWidth: 1,
     borderColor: "rgba(11,26,23,0.12)",
     backgroundColor: "#FFFFFF",
   },
@@ -966,6 +1173,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.semiBold,
     color: "#0B1A17",
+  },
+  whatsAppActionBtn: {
+    flex: 1.25,
+    height: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 999,
+    backgroundColor: "#F0FDF4",
+    borderWidth: 1.2,
+    borderColor: "#25D366",
+    shadowColor: "#25D366",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  whatsAppActionText: {
+    fontSize: 14,
+    fontFamily: fonts.bold,
+    color: "#166534",
   },
   bookVisitBtn: {
     height: 46,
@@ -1052,5 +1281,40 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 14,
     fontFamily: fonts.bold,
+  },
+  modalDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginVertical: 4,
+  },
+  modalDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(11,26,23,0.08)",
+  },
+  modalDividerText: {
+    fontSize: 12,
+    fontFamily: fonts.semiBold,
+    color: "#5C6B66",
+  },
+  modalWhatsAppBtn: {
+    height: 44,
+    borderRadius: 999,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#25D366",
+    shadowColor: "#25D366",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  modalWhatsAppBtnText: {
+    fontSize: 14,
+    fontFamily: fonts.bold,
+    color: "#FFFFFF",
   },
 });

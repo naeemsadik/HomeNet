@@ -1,4 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -12,6 +13,7 @@ import {
   KeyRound,
   LandPlot,
   MapPin,
+  RotateCcw,
   Search,
   ShieldCheck,
   Sparkles,
@@ -19,7 +21,9 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import {
+  ActivityIndicator,
   Image,
   ImageBackground,
   Pressable,
@@ -30,86 +34,178 @@ import {
   View,
 } from "react-native";
 import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from "react-native-svg";
-import { ActivityIndicator } from "react-native";
-import { useQuery } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
 import { AreaPicker } from "@/components/AreaPicker";
-import { PropertyCard, formatApiPropertyToCardModel } from "@/components/PropertyCard";
-import { AppLink } from "@/components/ui";
-import { getProperties } from "@/services/propertyApi";
+import { PropertyCard } from "@/components/PropertyCard";
+import { HeroSearchWidget } from "@/components/HeroSearchWidget";
+import { AppButton, AppLink } from "@/components/ui";
 import {
   latestNews,
   popularLocations,
   trustedPartners,
 } from "@/data/properties";
+import { toPropertyCard } from "@/features/property/adapters/toPropertyCard";
+import type { Property as ApiProperty } from "@/features/property/types/property";
 import { useResponsive } from "@/hooks/useResponsive";
+import { toApiError } from "@/services/apiClient";
+import { getProperties } from "@/services/propertyApi";
+import { useSavedStore } from "@/stores/savedStore";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
-const categoryButtons: { label: string; icon: LucideIcon }[] = [
-  { label: "Apartment", icon: Building2 },
-  { label: "House", icon: Home },
-  { label: "Commercial", icon: Briefcase },
-  { label: "Land", icon: LandPlot },
-  { label: "Rent", icon: KeyRound },
-  { label: "Sale", icon: BadgePercent },
+const categoryButtons: { label: string; icon: LucideIcon; href: string }[] = [
+  { label: "Apartment", icon: Building2, href: "/buy?type=apartment" },
+  { label: "House", icon: Home, href: "/buy?type=house" },
+  { label: "Commercial", icon: Briefcase, href: "/buy?type=commercial" },
+  { label: "Land", icon: LandPlot, href: "/buy?type=land" },
+  { label: "Rent", icon: KeyRound, href: "/rent" },
+  { label: "Sale", icon: BadgePercent, href: "/buy" },
 ];
+
+function PropertyResult({
+  children,
+  empty,
+  error,
+  loading,
+  onRetry,
+}: {
+  children: ReactNode;
+  empty: boolean;
+  error: string | null;
+  loading: boolean;
+  onRetry: () => void;
+}) {
+  if (loading) {
+    return (
+      <View style={styles.requestState}>
+        <ActivityIndicator color={colors.green} size="large" />
+        <Text style={styles.requestStateCopy}>Loading properties...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.requestState}>
+        <Text style={styles.requestStateTitle}>Could not load properties</Text>
+        <Text style={styles.requestStateCopy}>{error}</Text>
+        <AppButton icon={RotateCcw} label="Retry" onPress={onRetry} />
+      </View>
+    );
+  }
+
+  if (empty) {
+    return (
+      <View style={styles.requestState}>
+        <LandPlot color={colors.green} size={26} />
+        <Text style={styles.requestStateTitle}>No properties available</Text>
+        <Text style={styles.requestStateCopy}>Check again when new listings are published.</Text>
+      </View>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+function FeaturedPropertyCard({ property, width }: { property: ApiProperty; width?: number }) {
+  const imageMedia = property.media?.find((media) => media.media_type === "image") ?? property.media?.[0];
+  const image = imageMedia?.url;
+  const location =
+    [property.area?.name, property.area?.city].filter(Boolean).join(", ") ||
+    property.address ||
+    "Location unavailable";
+  const contents = (
+    <>
+      {image ? (
+        <LinearGradient
+          colors={["rgba(0, 0, 0, 0.0)", "rgba(0, 0, 0, 0.1)", "rgba(0, 0, 0, 0.7)"]}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : (
+        <View style={styles.featuredPlaceholderIcon}>
+          <LandPlot color="#6B7D78" size={40} />
+        </View>
+      )}
+      <View style={styles.featuredTopBadges}>
+        {property.is_verified ? (
+          <View style={styles.featuredVerifiedBadge}>
+            <ShieldCheck color="#0F6D55" size={14} />
+            <Text style={styles.featuredVerifiedText}>Verified</Text>
+          </View>
+        ) : <View />}
+        {property.view_count > 0 ? (
+          <View style={styles.featuredInvestmentBadge}>
+            <Text style={styles.featuredInvestmentText}>{property.view_count} views</Text>
+          </View>
+        ) : null}
+      </View>
+      <View style={styles.featuredBottomDetails}>
+        <Text style={[styles.featuredLocation, !image && styles.featuredTextDark]}>{location}</Text>
+        <Text style={[styles.featuredTitle, !image && styles.featuredTextDark]}>{property.title}</Text>
+        <Text style={[styles.featuredPrice, !image && styles.featuredTextDark]}>
+          {property.price_currency || "BDT"} {property.price.toLocaleString()}
+          {property.listing_type === "rent" ? "/mo" : ""}
+        </Text>
+      </View>
+    </>
+  );
+
+  return (
+    <AppLink href={`/property/${property.id}`} style={[styles.featuredCard, width ? { width } : null]}>
+      {image ? (
+        <ImageBackground source={{ uri: image }} style={styles.featuredCardBg} resizeMode="cover">
+          {contents}
+        </ImageBackground>
+      ) : (
+        <View style={[styles.featuredCardBg, styles.featuredCardPlaceholder]}>{contents}</View>
+      )}
+    </AppLink>
+  );
+}
 
 export function HomeScreen() {
   const { isPhone, isTablet, width } = useResponsive();
-  const [favorites, setFavorites] = useState<(string | number)[]>([]);
+  const { savedIds: favorites, toggleSaved: toggleFavorite } = useSavedStore();
   const [heroSearch, setHeroSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Apartment");
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState("Dhaka");
 
-  // Live properties with client-side caching
-  const { data: propertiesData, isLoading: propertiesLoading } = useQuery({
-    queryKey: ["properties", "home"],
-    queryFn: () => getProperties({ limit: 40, status: "active" }),
-    staleTime: 5 * 60 * 1000,
+  const popularQuery = useQuery({
+    queryKey: ["properties", "home", "popular"],
+    queryFn: () =>
+      getProperties({ status: "active", sort_by: "view_count_desc", page: 1, limit: 20 }),
+  });
+  const recentQuery = useQuery({
+    queryKey: ["properties", "home", "recent"],
+    queryFn: () =>
+      getProperties({ status: "active", sort_by: "created_at_desc", page: 1, limit: 3 }),
   });
 
-  const allApiProperties = useMemo(
-    () => propertiesData?.data?.items ?? [],
-    [propertiesData]
+  const popularProperties = popularQuery.data?.data?.items ?? [];
+  const featuredProperties = popularProperties.slice(0, 4);
+  const recommendedProperties = useMemo(
+    () => popularProperties.slice(4, 7).map(toPropertyCard),
+    [popularProperties],
   );
-
-  const featuredListings = useMemo(
-    () => allApiProperties.slice(0, 4),
-    [allApiProperties]
+  const verifiedProperties = useMemo(
+    () => popularProperties.filter((property) => property.is_verified),
+    [popularProperties],
   );
-
-  const recommendedListings = useMemo(() => {
-    const filtered = allApiProperties.filter((p) => {
-      if (activeCategory === "Rent") return p.listing_type === "rent";
-      if (activeCategory === "Sale") return p.listing_type === "sale";
-      return p.type?.toLowerCase() === activeCategory.toLowerCase();
-    });
-    return filtered.length > 0 ? filtered.slice(0, 4) : allApiProperties.slice(0, 4);
-  }, [allApiProperties, activeCategory]);
-
-  const recentlyAddedListings = useMemo(
-    () => allApiProperties.slice(4, 8),
-    [allApiProperties]
+  const verifiedCards = useMemo(
+    () => verifiedProperties.slice(0, 3).map(toPropertyCard),
+    [verifiedProperties],
   );
-
-  const verifiedPropertiesListings = useMemo(() => {
-    const list = allApiProperties.filter((p) => p.is_verified);
-    return list.length > 0 ? list.slice(0, 4) : allApiProperties.slice(0, 4);
-  }, [allApiProperties]);
-
-  const aiInvestmentPicksListings = useMemo(() => {
-    const list = allApiProperties.filter(
-      (p) => p.type === "commercial" || p.type === "residential"
-    );
-    return list.length > 0 ? list.slice(0, 4) : allApiProperties.slice(0, 4);
-  }, [allApiProperties]);
-
-  function toggleFavorite(id: string | number) {
-    setFavorites((current) =>
-      current.includes(id) ? current.filter((favId) => favId !== id) : [...current, id]
-    );
-  }
+  const moreVerifiedCards = useMemo(
+    () => verifiedProperties.slice(3, 6).map(toPropertyCard),
+    [verifiedProperties],
+  );
+  const recentlyAddedProperties = useMemo(
+    () => (recentQuery.data?.data?.items ?? []).map(toPropertyCard),
+    [recentQuery.data],
+  );
+  const popularError = popularQuery.error ? toApiError(popularQuery.error).message : null;
+  const recentError = recentQuery.error ? toApiError(recentQuery.error).message : null;
 
   return (
     <AppChrome active="home">
@@ -151,51 +247,8 @@ export function HomeScreen() {
               Verified listings, AI valuation and investment scores for apartments, houses, land and commercial spaces across Bangladesh.
             </Text>
 
-            {/* Hero Search Box */}
-            <View style={[styles.heroSearchBox, isPhone && styles.heroSearchBoxPhone]}>
-              <Search color="#5C6B66" size={isPhone ? 18 : 20} />
-              <TextInput
-                onChangeText={setHeroSearch}
-                placeholder={isPhone ? "Search area, project or AI…" : "Try: 3 bedroom in Gulshan under 40000"}
-                placeholderTextColor="#5C6B66"
-                style={[styles.heroSearchInput, isPhone && styles.heroSearchInputPhone]}
-                value={heroSearch}
-              />
-              <AppLink
-                href={`/buy?query=${encodeURIComponent(heroSearch)}`}
-                style={[styles.heroAiSearchBtn, isPhone && styles.heroAiSearchBtnPhone]}
-              >
-                <Sparkles color="#FFFFFF" size={isPhone ? 14 : 16} />
-                <Text style={[styles.heroAiSearchBtnText, isPhone && styles.heroAiSearchBtnTextPhone]}>
-                  AI Search
-                </Text>
-              </AppLink>
-            </View>
-
-            {/* Below Search Meta Row */}
-            <View style={[styles.heroMetaRow, isPhone && styles.heroMetaRowPhone]}>
-              {/* Location Pill */}
-              <Pressable
-                onPress={() => setAreaPickerOpen(true)}
-                style={[styles.heroLocationPill, webPointer]}
-                accessibilityRole="button"
-                accessibilityLabel={`Select location, current: ${selectedLocation}`}
-              >
-                <MapPin color="#0B1A17" size={16} />
-                <Text style={styles.heroLocationPillText}>{selectedLocation}</Text>
-                <ChevronDown color="#5C6B66" size={16} />
-              </Pressable>
-
-              <View style={styles.heroMetaItem}>
-                <ShieldCheck color="rgba(255, 255, 255, 0.9)" size={16} />
-                <Text style={styles.heroMetaText}>12,400+ verified</Text>
-              </View>
-
-              <View style={styles.heroMetaItem}>
-                <TrendingUp color="rgba(255, 255, 255, 0.9)" size={16} />
-                <Text style={styles.heroMetaText}>Live market data</Text>
-              </View>
-            </View>
+            {/* Hero Search Widget (Figma node 214:4655) */}
+            <HeroSearchWidget />
           </View>
         </ImageBackground>
       </View>
@@ -209,21 +262,18 @@ export function HomeScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.categoryRow}
         >
-          {categoryButtons.map(({ label, icon: Icon }) => {
-            const isSelected = activeCategory === label;
-            return (
-              <Pressable
-                key={label}
-                onPress={() => setActiveCategory(label)}
-                style={[styles.categoryCard, webPointer]}
-              >
-                <View style={styles.categoryIconCircle}>
-                  <Icon color="#0F6D55" size={24} strokeWidth={1.8} />
-                </View>
-                <Text style={styles.categoryCardText}>{label}</Text>
-              </Pressable>
-            );
-          })}
+          {categoryButtons.map(({ label, icon: Icon, href }) => (
+            <AppLink
+              key={label}
+              href={href}
+              style={styles.categoryCard}
+            >
+              <View style={styles.categoryIconCircle}>
+                <Icon color="#0F6D55" size={24} strokeWidth={1.8} />
+              </View>
+              <Text style={styles.categoryCardText}>{label}</Text>
+            </AppLink>
+          ))}
         </ScrollView>
       </View>
 
@@ -234,7 +284,7 @@ export function HomeScreen() {
         <View style={styles.sectionHeader}>
           <View>
             <Text style={styles.sectionTitle}>Featured properties</Text>
-            <Text style={styles.sectionSubtitle}>Hand-picked premium listings</Text>
+            <Text style={styles.sectionSubtitle}>Most viewed active listings</Text>
           </View>
           <AppLink href="/buy" style={styles.seeAllLink}>
             <Text style={styles.seeAllText}>See all</Text>
@@ -242,69 +292,26 @@ export function HomeScreen() {
           </AppLink>
         </View>
 
-        {propertiesLoading ? (
-          <View style={{ padding: 32, alignItems: "center" }}>
-            <ActivityIndicator size="small" color="#0F6D55" />
-          </View>
-        ) : featuredListings.length === 0 ? (
-          <View style={{ padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
-            <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No featured properties available at the moment.</Text>
-          </View>
-        ) : (
+        <PropertyResult
+          empty={!featuredProperties.length}
+          error={popularError}
+          loading={popularQuery.isLoading}
+          onRetry={() => void popularQuery.refetch()}
+        >
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.featuredCardsRow}
           >
-            {featuredListings.map((item) => {
-              const cardData = formatApiPropertyToCardModel(item);
-              return (
-                <AppLink
-                  href={`/property/${item.id}`}
-                  key={item.id}
-                  style={[
-                    styles.featuredCard,
-                    isPhone && { width: Math.min(width - 48, 380) },
-                  ]}
-                >
-                  <ImageBackground
-                    source={{ uri: cardData.image }}
-                    style={styles.featuredCardBg}
-                    resizeMode="cover"
-                  >
-                    <LinearGradient
-                      colors={["rgba(0, 0, 0, 0.0)", "rgba(0, 0, 0, 0.1)", "rgba(0, 0, 0, 0.7)"]}
-                      locations={[0, 0.5, 1]}
-                      style={StyleSheet.absoluteFill}
-                    />
-
-                    {/* Top badges */}
-                    <View style={styles.featuredTopBadges}>
-                      {cardData.isVerified ? (
-                        <View style={styles.featuredVerifiedBadge}>
-                          <ShieldCheck color="#0F6D55" size={14} />
-                          <Text style={styles.featuredVerifiedText}>Verified</Text>
-                        </View>
-                      ) : null}
-                      <View style={styles.featuredInvestmentBadge}>
-                        <Text style={styles.featuredInvestmentText}>
-                          Score {cardData.score}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Bottom details */}
-                    <View style={styles.featuredBottomDetails}>
-                      <Text style={styles.featuredLocation}>{cardData.location}</Text>
-                      <Text style={styles.featuredTitle}>{cardData.title}</Text>
-                      <Text style={styles.featuredPrice}>{cardData.price}</Text>
-                    </View>
-                  </ImageBackground>
-                </AppLink>
-              );
-            })}
+            {featuredProperties.map((property) => (
+              <FeaturedPropertyCard
+                key={property.id}
+                property={property}
+                width={isPhone ? Math.min(width - 48, 380) : undefined}
+              />
+            ))}
           </ScrollView>
-        )}
+        </PropertyResult>
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -345,8 +352,8 @@ export function HomeScreen() {
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.sectionTitle}>Recommended for you</Text>
-            <Text style={styles.sectionSubtitle}>Tuned to your searches</Text>
+            <Text style={styles.sectionTitle}>Popular properties</Text>
+            <Text style={styles.sectionSubtitle}>Trending with home seekers</Text>
           </View>
           <AppLink href="/buy" style={styles.seeAllLink}>
             <Text style={styles.seeAllText}>See all</Text>
@@ -354,13 +361,14 @@ export function HomeScreen() {
           </AppLink>
         </View>
 
-        <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
-          {recommendedListings.length === 0 ? (
-            <View style={{ width: "100%", padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
-              <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No properties listed in this category yet.</Text>
-            </View>
-          ) : (
-            recommendedListings.map((prop) => (
+        <PropertyResult
+          empty={!recommendedProperties.length}
+          error={popularError}
+          loading={popularQuery.isLoading}
+          onRetry={() => void popularQuery.refetch()}
+        >
+          <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+            {recommendedProperties.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}
@@ -368,9 +376,9 @@ export function HomeScreen() {
                 onSave={() => toggleFavorite(prop.id)}
                 style={styles.propertyCardItem}
               />
-            ))
-          )}
-        </View>
+            ))}
+          </View>
+        </PropertyResult>
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -385,13 +393,14 @@ export function HomeScreen() {
           </AppLink>
         </View>
 
-        <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
-          {recentlyAddedListings.length === 0 ? (
-            <View style={{ width: "100%", padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
-              <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No recently added listings available.</Text>
-            </View>
-          ) : (
-            recentlyAddedListings.map((prop) => (
+        <PropertyResult
+          empty={!recentlyAddedProperties.length}
+          error={recentError}
+          loading={recentQuery.isLoading}
+          onRetry={() => void recentQuery.refetch()}
+        >
+          <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+            {recentlyAddedProperties.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}
@@ -399,9 +408,9 @@ export function HomeScreen() {
                 onSave={() => toggleFavorite(prop.id)}
                 style={styles.propertyCardItem}
               />
-            ))
-          )}
-        </View>
+            ))}
+          </View>
+        </PropertyResult>
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -422,13 +431,14 @@ export function HomeScreen() {
           </AppLink>
         </View>
 
-        <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
-          {verifiedPropertiesListings.length === 0 ? (
-            <View style={{ width: "100%", padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
-              <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No verified properties available at the moment.</Text>
-            </View>
-          ) : (
-            verifiedPropertiesListings.map((prop) => (
+        <PropertyResult
+          empty={!verifiedCards.length}
+          error={popularError}
+          loading={popularQuery.isLoading}
+          onRetry={() => void popularQuery.refetch()}
+        >
+          <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+            {verifiedCards.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}
@@ -436,9 +446,9 @@ export function HomeScreen() {
                 onSave={() => toggleFavorite(prop.id)}
                 style={styles.propertyCardItem}
               />
-            ))
-          )}
-        </View>
+            ))}
+          </View>
+        </PropertyResult>
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -448,24 +458,25 @@ export function HomeScreen() {
         <View style={styles.sectionHeader}>
           <View>
             <View style={styles.titleWithIconRow}>
-              <Sparkles color="#0B1A17" size={20} />
-              <Text style={styles.sectionTitle}>AI investment picks</Text>
+              <ShieldCheck color="#0B1A17" size={20} />
+              <Text style={styles.sectionTitle}>More verified homes</Text>
             </View>
-            <Text style={styles.sectionSubtitle}>Highest projected returns</Text>
+            <Text style={styles.sectionSubtitle}>More active listings checked by Homenet</Text>
           </View>
-          <AppLink href="/ai-finder" style={styles.seeAllLink}>
+          <AppLink href="/buy" style={styles.seeAllLink}>
             <Text style={styles.seeAllText}>See all</Text>
             <ChevronRight color="#0F6D55" size={16} />
           </AppLink>
         </View>
 
-        <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
-          {aiInvestmentPicksListings.length === 0 ? (
-            <View style={{ width: "100%", padding: 24, backgroundColor: "#FFFFFF", borderRadius: 16, alignItems: "center" }}>
-              <Text style={{ color: "#5C6B66", fontFamily: fonts.medium, fontSize: 14 }}>No investment picks available yet.</Text>
-            </View>
-          ) : (
-            aiInvestmentPicksListings.map((prop) => (
+        <PropertyResult
+          empty={!moreVerifiedCards.length}
+          error={popularError}
+          loading={popularQuery.isLoading}
+          onRetry={() => void popularQuery.refetch()}
+        >
+          <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+            {moreVerifiedCards.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}
@@ -473,9 +484,9 @@ export function HomeScreen() {
                 onSave={() => toggleFavorite(prop.id)}
                 style={styles.propertyCardItem}
               />
-            ))
-          )}
-        </View>
+            ))}
+          </View>
+        </PropertyResult>
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -755,16 +766,16 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     gap: 4,
     backgroundColor: "rgba(255, 255, 255, 0.15)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 999,
     marginBottom: 16,
   },
   heroTagText: {
     color: "#FFFFFF",
     fontFamily: fonts.regular,
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 14,
+    lineHeight: 18,
   },
   heroHeading: {
     color: "#FFFFFF",
@@ -892,7 +903,7 @@ const styles = StyleSheet.create({
   },
   heroMetaText: {
     color: "rgba(255, 255, 255, 0.8)",
-    fontFamily: fonts.regular,
+    fontFamily: fonts.semiBold,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -947,6 +958,18 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "space-between",
     padding: 16,
+  },
+  featuredCardPlaceholder: {
+    backgroundColor: "#EEF3F1",
+  },
+  featuredPlaceholderIcon: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: "center",
+    justifyContent: "center",
   },
   featuredTopBadges: {
     flexDirection: "row",
@@ -1003,6 +1026,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 28,
     marginTop: 2,
+  },
+  featuredTextDark: {
+    color: "#0B1A17",
   },
 
   /* 4. AI Insight Banner Card */
@@ -1068,6 +1094,30 @@ const styles = StyleSheet.create({
   propertyCardItem: {
     flex: 1,
     minWidth: 260,
+  },
+  requestState: {
+    minHeight: 180,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    padding: 28,
+    borderRadius: 16,
+    backgroundColor: "#F8FBF9",
+    borderWidth: 1,
+    borderColor: "#DDE8E3",
+  },
+  requestStateTitle: {
+    color: colors.ink,
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    textAlign: "center",
+  },
+  requestStateCopy: {
+    color: colors.muted,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: "center",
   },
 
   /* 9. Popular Locations / Major Cities */

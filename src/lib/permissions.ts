@@ -26,6 +26,7 @@ export function hasAnyAdminPermission(userRoles: UserRole[]): boolean {
           "manage_properties",
           "manage_users",
           "manage_roles",
+          "manage_areas",
           "moderate_listing",
           "review_verification",
         ].includes(rp.permission.name),

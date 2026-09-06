@@ -6,7 +6,6 @@ import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
-import { getAuthSession } from "@/services/authStorage";
 import { getUser, type UserProfile } from "@/services/userApi";
 
 export function UserDetailScreen({ userId }: { userId: string }) {
@@ -23,12 +22,7 @@ export function UserDetailScreen({ userId }: { userId: string }) {
     try {
       setLoading(true);
       setError(null);
-      const stored = await getAuthSession();
-      if (!stored) {
-        setError("You must be logged in to view user details.");
-        return;
-      }
-      const result = await getUser(stored.accessToken, userId);
+      const result = await getUser(userId);
       setUser(result.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load user");

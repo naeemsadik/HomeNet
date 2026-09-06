@@ -7,6 +7,7 @@ import {
   Bell,
   Bookmark,
   Building2,
+  Check,
   CheckCircle2,
   CircleHelp,
   CreditCard,
@@ -31,10 +32,12 @@ import {
   Sparkles,
   TrendingUp,
   User,
+  X,
   Zap,
 } from "lucide-react-native";
 import { useState } from "react";
 import {
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -52,9 +55,10 @@ import Svg, {
 } from "react-native-svg";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
+import { colors, fonts, shadow, webPointer } from "@/theme";
 import { useMyProperties } from "@/features/property/hooks/useMyProperties";
+import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
 
 // Types
 export type SellerNavKey =
@@ -96,10 +100,12 @@ interface ActivityItem {
 
 export function SellerDashboardScreen() {
   const { isPhone, isTablet, width } = useResponsive();
+  const { user } = useAuthStore();
   const [activeNav, setActiveNav] = useState<SellerNavKey>("dashboard");
   const [searchQuery, setSearchQuery] = useState("");
+  const [boostModalVisible, setBoostModalVisible] = useState(false);
+  const [selectedBoostPkg, setSelectedBoostPkg] = useState<string>("featured");
 
-  const { user } = useAuthStore();
   const { data: myPropertiesData } = useMyProperties();
   const allMyListings =
     myPropertiesData?.pages.flatMap((page) => page.data?.items ?? (page.data as any)?.data ?? []) ?? [];
@@ -339,45 +345,13 @@ export function SellerDashboardScreen() {
           ]}
           showsVerticalScrollIndicator={false}
         >
-          {/* Welcome Banner */}
-          <LinearGradient
-            colors={["#0F6D55", "#2251D6"]}
-            end={{ x: 1, y: 1 }}
-            start={{ x: 0, y: 0 }}
-            style={styles.heroBanner}
-          >
-            <View style={styles.heroContentLeft}>
-              <Text style={styles.heroSubtitle}>Welcome back,</Text>
-              <Text style={styles.heroTitle}>{sellerName}</Text>
-              <Text style={styles.heroDescription}>
-                {totalCount > 0 ? (
-                  <>
-                    You have <Text style={styles.boldSpan}>{activeCount} active</Text> listings live. Track views and buyer inquiries below.
-                  </>
-                ) : (
-                  "Welcome to your seller dashboard. Add your first property to reach verified buyers across Bangladesh."
-                )}
-              </Text>
-
-              <View style={styles.heroButtonRow}>
-                <AppLink href="/property/create" style={styles.heroBtnPrimary}>
-                  <Plus color="#0F6D55" size={16} />
-                  <Text style={styles.heroBtnPrimaryText}>Add new property</Text>
-                </AppLink>
-
-                <Pressable style={({ pressed }) => [styles.heroBtnSecondary, pressed && styles.pressed]}>
-                  <Sparkles color="#FFFFFF" size={16} />
-                  <Text style={styles.heroBtnSecondaryText}>Boost a listing</Text>
-                </Pressable>
-              </View>
-            </View>
-
-            {!isPhone && (
-              <View style={styles.heroDecorationIcon}>
-                <Rocket color="rgba(255,255,255,0.25)" size={140} />
-              </View>
-            )}
-          </LinearGradient>
+          {/* Welcome Banner (Figma Node 220:8881) */}
+          <SellerWelcomeBanner
+            name={sellerName}
+            viewsThisWeek={totalCount > 0 ? totalCount * 14 : 0}
+            inquiriesThisWeek={0}
+            onBoostListing={() => setBoostModalVisible(true)}
+          />
 
           {/* Stats Grid (3x3 Cards) */}
           <View style={[styles.statsGrid, isPhone && styles.statsGridPhone]}>
@@ -518,6 +492,119 @@ export function SellerDashboardScreen() {
           </View>
         </ScrollView>
       </View>
+
+      {/* Boost Listings Modal */}
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setBoostModalVisible(false)}
+        transparent
+        visible={boostModalVisible}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable
+            onPress={() => setBoostModalVisible(false)}
+            style={styles.modalBackdropTouch}
+          />
+          <View style={styles.boostModalCard}>
+            <View style={styles.boostModalHeader}>
+              <View style={styles.boostHeaderIconWrap}>
+                <Rocket color="#0F6D55" size={20} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.boostModalTitle}>Boost a listing</Text>
+                <Text style={styles.boostModalSub}>
+                  Get up to 10x more buyer views and inquiries.
+                </Text>
+              </View>
+              <Pressable
+                accessibilityLabel="Close modal"
+                onPress={() => setBoostModalVisible(false)}
+                style={[styles.modalCloseBtn, webPointer]}
+              >
+                <X color="#5C6B66" size={18} />
+              </Pressable>
+            </View>
+
+            {/* Boost Packages */}
+            <View style={styles.packagesList}>
+              {[
+                {
+                  id: "featured",
+                  name: "Featured Spotlight",
+                  price: "৳ 1,500 / 7 days",
+                  highlight: "3x More Views",
+                  desc: "Top placement in search results and category landing pages.",
+                },
+                {
+                  id: "ai_priority",
+                  name: "AI Recommendation Priority",
+                  price: "৳ 2,500 / 14 days",
+                  highlight: "5x More Inquiries",
+                  desc: "Ranked #1 in Homenet's AI Matchmaker search algorithm.",
+                },
+                {
+                  id: "omni_blast",
+                  name: "VIP Omni-Channel Blast",
+                  price: "৳ 4,500 / 30 days",
+                  highlight: "10x Reach",
+                  desc: "Included in weekly buyer newsletter and verified partner badges.",
+                },
+              ].map((pkg) => {
+                const isSelected = selectedBoostPkg === pkg.id;
+                return (
+                  <Pressable
+                    key={pkg.id}
+                    onPress={() => setSelectedBoostPkg(pkg.id)}
+                    style={[
+                      styles.pkgCard,
+                      isSelected && styles.pkgCardSelected,
+                      webPointer,
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.pkgRadio,
+                        isSelected && styles.pkgRadioSelected,
+                      ]}
+                    >
+                      {isSelected ? (
+                        <Check color="#FFFFFF" size={12} strokeWidth={3} />
+                      ) : null}
+                    </View>
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <View style={styles.pkgTitleRow}>
+                        <Text style={styles.pkgName}>{pkg.name}</Text>
+                        <View style={styles.pkgBadge}>
+                          <Text style={styles.pkgBadgeText}>{pkg.highlight}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.pkgDesc}>{pkg.desc}</Text>
+                      <Text style={styles.pkgPrice}>{pkg.price}</Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Modal Actions */}
+            <View style={styles.boostModalActions}>
+              <Pressable
+                onPress={() => setBoostModalVisible(false)}
+                style={[styles.boostCancelBtn, webPointer]}
+              >
+                <Text style={styles.boostCancelBtnText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setBoostModalVisible(false)}
+                style={[styles.boostConfirmBtn, webPointer]}
+              >
+                <Rocket color="#FFFFFF" size={16} />
+                <Text style={styles.boostConfirmBtnText}>Activate Boost</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -946,5 +1033,170 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: fonts.semiBold,
     color: "#5C6B66",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  modalBackdropTouch: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+  boostModalCard: {
+    width: "100%",
+    maxWidth: 520,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 24,
+    gap: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  boostModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  boostHeaderIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#E7F2EE",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  boostModalTitle: {
+    fontSize: 18,
+    fontFamily: fonts.headingBold,
+    fontWeight: "700",
+    color: "#0B1A17",
+  },
+  boostModalSub: {
+    fontSize: 13,
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    marginTop: 2,
+  },
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F4F6F5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  packagesList: {
+    gap: 12,
+  },
+  pkgCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    backgroundColor: "#FFFFFF",
+  },
+  pkgCardSelected: {
+    borderColor: "#0F6D55",
+    backgroundColor: "#F4F9F7",
+  },
+  pkgRadio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#767676",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  pkgRadioSelected: {
+    backgroundColor: "#0F6D55",
+    borderColor: "#0F6D55",
+  },
+  pkgTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  pkgName: {
+    fontSize: 15,
+    fontFamily: fonts.semiBold,
+    fontWeight: "600",
+    color: "#0B1A17",
+  },
+  pkgBadge: {
+    backgroundColor: "#E7F2EE",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  pkgBadgeText: {
+    fontSize: 11,
+    fontFamily: fonts.bold,
+    color: "#0F6D55",
+  },
+  pkgDesc: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+    lineHeight: 18,
+  },
+  pkgPrice: {
+    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    color: "#0F6D55",
+    marginTop: 4,
+  },
+  boostModalActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 4,
+  },
+  boostCancelBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: 999,
+    borderWidth: 1.2,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  boostCancelBtnText: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    color: "#5C6B66",
+  },
+  boostConfirmBtn: {
+    flex: 2,
+    height: 44,
+    borderRadius: 999,
+    backgroundColor: "#0F6D55",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    shadowColor: "#0F6D55",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  boostConfirmBtnText: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    color: "#FFFFFF",
   },
 });

@@ -1,128 +1,100 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Area } from "@/types/api";
-import { fetchAreas, fetchAreaChildren } from "@/services/areaApi";
+import { fetchAreaChildren, fetchAreas } from "@/services/areaApi";
+import { toApiError } from "@/services/apiClient";
 
 export interface UseAreaPickerOptions {
   initialCity?: string;
   limit?: number;
 }
 
+const availableCities = [
+  "Dhaka",
+  "Chattogram",
+  "Rajshahi",
+  "Khulna",
+  "Barishal",
+  "Rangpur",
+  "Mymensingh",
+  "Sylhet",
+  "Cumilla",
+  "Gazipur",
+];
+
 export function useAreaPicker(options: UseAreaPickerOptions = {}) {
   const { initialCity, limit = 100 } = options;
-
-  // Selected city filter chip
   const [selectedCity, setSelectedCity] = useState<string | null>(initialCity || null);
-  // Navigation drill-down path (stack of parents)
   const [navPath, setNavPath] = useState<Area[]>([]);
-  
   const [searchQuery, setSearchQuery] = useState("");
   const [areas, setAreas] = useState<Area[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Available major cities of Bangladesh
-  const availableCities = [
-    "Dhaka",
-    "Chottogram",
-    "Rajshahi",
-    "Khulna",
-    "Barishal",
-    "Rangpur",
-    "Maymensingh",
-    "Sylhet",
-    "Cumilla",
-    "Gazipur",
-  ];
-
-  // Helper to get current parent ID
-  const currentParentId = navPath.length > 0 ? navPath[navPath.length - 1].id : null;
+  const currentParentId = navPath.at(-1)?.id;
 
   const loadAreas = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      if (searchQuery.trim().length > 0) {
-        const res = await fetchAreas({
-          search: searchQuery.trim(),
-          city: selectedCity || undefined,
-          limit,
-        });
-        const items = res.data?.items || [];
-        setAreas(items);
-      } else if (currentParentId) {
-        const res = await fetchAreaChildren(currentParentId);
-        const items = res.data?.items || [];
-        setAreas(items);
+      if (currentParentId && !searchQuery.trim()) {
+        const response = await fetchAreaChildren(currentParentId);
+        setAreas(response.data ?? []);
       } else {
-        const res = await fetchAreas({
+        const response = await fetchAreas({
           city: selectedCity || undefined,
-          parent_area_id: null,
+          search: searchQuery.trim() || undefined,
           limit,
         });
-        const items = res.data?.items || [];
-        setAreas(items);
+        const items = response.data?.items ?? [];
+        setAreas(searchQuery.trim() ? items : items.filter((area) => !area.parent_area_id));
       }
-    } catch {
-      // Fallback seamlessly to built-in comprehensive Bangladesh area dataset
+    } catch (requestError) {
       setAreas([]);
+      setError(toApiError(requestError).message);
     } finally {
       setLoading(false);
     }
-  }, [selectedCity, currentParentId, searchQuery, limit]);
+  }, [currentParentId, limit, searchQuery, selectedCity]);
 
-  // Debounced/Triggered loading
   useEffect(() => {
-    const handler = setTimeout(() => {
-      loadAreas();
-    }, searchQuery ? 300 : 0);
-
-    return () => clearTimeout(handler);
+    const timer = setTimeout(loadAreas, searchQuery ? 300 : 0);
+    return () => clearTimeout(timer);
   }, [loadAreas, searchQuery]);
 
-  // Navigate down to child area
   const drillDown = useCallback((area: Area) => {
-    // Clear search query when drilling down to see the real hierarchy
     setSearchQuery("");
-    setNavPath((prev) => [...prev, area]);
+    setNavPath((path) => [...path, area]);
   }, []);
 
-  // Navigate up the path stack
-  const drillUp = useCallback(() => {
-    setNavPath((prev) => prev.slice(0, prev.length - 1));
-  }, []);
-
-  // Navigate directly to a specific breadcrumb index
-  const navigateToBreadcrumb = useCallback((index: number) => {
-    setNavPath((prev) => prev.slice(0, index + 1));
-  }, []);
-
-  // Reset navigation to root
+  const drillUp = useCallback(() => setNavPath((path) => path.slice(0, -1)), []);
+  const navigateToBreadcrumb = useCallback(
+    (index: number) => setNavPath((path) => path.slice(0, index + 1)),
+    [],
+  );
   const resetNav = useCallback(() => {
     setNavPath([]);
     setSearchQuery("");
   }, []);
 
-  // Handle city chip selection
   const selectCity = useCallback((city: string | null) => {
     setSelectedCity(city);
-    setNavPath([]); // Reset hierarchy drill down on city change
+    setNavPath([]);
     setSearchQuery("");
   }, []);
 
   return {
-    areas,
-    loading,
-    error,
-    navPath,
     selectedCity,
+    selectCity,
     availableCities,
-    searchQuery,
-    setSearchQuery,
+    navPath,
     drillDown,
     drillUp,
     navigateToBreadcrumb,
     resetNav,
-    selectCity,
+    searchQuery,
+    setSearchQuery,
+    areas,
+    loading,
+    error,
     refresh: loadAreas,
   };
 }

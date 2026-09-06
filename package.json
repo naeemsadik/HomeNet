@@ -11,6 +11,7 @@
     "web": "expo start --web",
     "build": "expo export --platform web",
     "export:web": "expo export --platform web",
+    "smoke:api": "node scripts/api-smoke.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

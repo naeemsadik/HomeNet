@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import apiClient from "@/services/apiClient";
-import type { ApiResponse } from "@/types/api";
+import {
+  adminDeleteProperty,
+  adminUpdateProperty,
+  getAdminProperties,
+} from "@/services/propertyApi";
 import type {
   PropertyAdminItem,
   PropertyAdminListResponse,
@@ -17,11 +20,8 @@ export function useAdminProperties(filters: PropertyAdminFilters) {
       params.page = filters.page ?? 1;
       params.limit = filters.limit ?? 20;
 
-      const { data } = await apiClient.get<ApiResponse<PropertyAdminListResponse>>(
-        "/v1/properties/admin",
-        { params },
-      );
-      return data.data ?? { items: [], total: 0, page: 1, limit: 20 };
+      const response = await getAdminProperties(params);
+      return (response.data ?? { items: [], total: 0, page: 1, limit: 20 }) as PropertyAdminListResponse;
     },
   });
 }
@@ -31,7 +31,7 @@ export function useAdminPropertyMutations() {
 
   const approveProperty = useMutation({
     mutationFn: async (id: string) => {
-      await apiClient.patch(`/v1/properties/${id}/admin`, { status: "active" });
+      await adminUpdateProperty(id, { status: "active" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
@@ -40,7 +40,7 @@ export function useAdminPropertyMutations() {
 
   const rejectProperty = useMutation({
     mutationFn: async (id: string) => {
-      await apiClient.patch(`/v1/properties/${id}/admin`, { status: "draft" });
+      await adminUpdateProperty(id, { status: "draft" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
@@ -49,7 +49,7 @@ export function useAdminPropertyMutations() {
 
   const deleteProperty = useMutation({
     mutationFn: async (id: string) => {
-      await apiClient.delete(`/v1/properties/${id}/admin`);
+      await adminDeleteProperty(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
