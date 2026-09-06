@@ -86,42 +86,6 @@ const unsupportedDetailContent = {
   ],
 };
 
-const defaultFigmaSimilar = [
-  {
-    id: "1",
-    title: "Skyview Residence — Premium 3 Bedroom",
-    location: "Gulshan 2, Dhaka",
-    price: "৳ 1.85 Cr",
-    specs: "3 Beds · 3 Baths · 2,150 sqft",
-    imageUrl: propertyImages.tower,
-    status: "active",
-    views: "1,240",
-    score: 92,
-  },
-  {
-    id: "6",
-    title: "Cozy 1 Bedroom Studio for Rent",
-    location: "Uttara Sector 7, Dhaka",
-    price: "৳ 22,000 /mo",
-    specs: "1 Beds · 1 Baths · 720 sqft",
-    imageUrl: propertyImages.studio,
-    status: "active",
-    views: "890",
-    score: 72,
-  },
-  {
-    id: "7",
-    title: "Family Apartment near Lake",
-    location: "Mirpur DOHS, Dhaka",
-    price: "৳ 1.25 Cr",
-    specs: "3 Beds · 2 Baths · 1,650 sqft",
-    imageUrl: propertyImages.living,
-    status: "active",
-    views: "1,100",
-    score: 81,
-  },
-];
-
 export function PropertyDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isPhone, isTablet } = useResponsive();
@@ -142,117 +106,69 @@ export function PropertyDetailScreen() {
   const [bookModalVisible, setBookModalVisible] = useState(false);
 
   const property = useMemo(() => {
-    if (apiDetail) {
-      const amenities = apiDetail.amenities ?? {};
-      const identity = apiDetail.user?.auth_identities?.[0];
-      const location = [apiDetail.area?.name, apiDetail.area?.city].filter(Boolean).join(", ");
+    if (!apiDetail) return null;
 
-      return {
-        id: apiDetail.id,
-        title: apiDetail.title,
-        location: location || apiDetail.address || "Location unavailable",
-        address: apiDetail.address || "Address unavailable",
-        type: apiDetail.subtype || apiDetail.type,
-        listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
-        price: apiDetail.price.toLocaleString(),
-        priceCurrency: apiDetail.price_currency || "৳",
-        pricePeriod: apiDetail.listing_type === "rent" ? "/mo" : "",
-        isVerified: apiDetail.is_verified,
-        isBoosted: false,
-        score: (apiDetail as any).score ?? 79,
-        bedrooms: Number(amenities.bedrooms ?? 0),
-        bathrooms: Number(amenities.bathrooms ?? 0),
-        areaSqft: apiDetail.area_size?.toLocaleString() ?? "Not specified",
-        aiValuation: unsupportedDetailContent.aiValuation,
-        description: apiDetail.description || "No description provided.",
-        amenities: Object.keys(amenities).filter(
-          (key) => !["bedrooms", "bathrooms", "floor", "facing"].includes(key) && amenities[key],
-        ),
-        mediaImages: apiDetail.media.filter((media) => media.media_type === "image").map((media) => media.url),
-        seller: {
-          name: apiDetail.user?.full_name || "Sun velly",
-          agency: "Metro Properties",
-          rating: "4.7",
-          reviewsCount: 74,
-          repliesTime: "Replies ~1 hr",
-          isVerified: apiDetail.is_verified,
-          avatarUrl: apiDetail.user?.avatar_url ?? "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&q=80",
-          phone: identity?.phone ?? "+880 1700-000000",
-          email: identity?.email ?? "",
-        },
-        aiRecommendation: unsupportedDetailContent.aiRecommendation,
-        nearbyPlaces: unsupportedDetailContent.nearbyPlaces,
-        similarProperties: similarProperties.length > 0 ? similarProperties.map((similar) => {
-          const similarAmenities = similar.amenities ?? {};
-          return {
-            id: similar.id,
-            title: similar.title,
-            location: [similar.area?.name, similar.area?.city].filter(Boolean).join(", ") || similar.address || "Location unavailable",
-            price: `${similar.price_currency || "৳"} ${similar.price.toLocaleString()}`,
-            specs: `${Number(similarAmenities.bedrooms ?? 0)} Beds · ${Number(similarAmenities.bathrooms ?? 0)} Baths · ${similar.area_size?.toLocaleString() ?? "N/A"} ${similar.area_unit || "sqft"}`,
-            imageUrl: similar.media?.find((media) => media.media_type === "image")?.url,
-            status: similar.status,
-            views: similar.view_count.toLocaleString(),
-            score: (similar as any).score ?? 85,
-          };
-        }) : defaultFigmaSimilar,
-      };
-    }
+    const rawAmenities = (apiDetail.amenities as Record<string, any>) || {};
+    const amenityList = Object.keys(rawAmenities).filter(
+      (key) => !["bedrooms", "bathrooms", "floor", "facing"].includes(key) && rawAmenities[key]
+    );
 
-    // Fallback to local Figma mock property (e.g. Modern 2 Bedroom for Rent)
-    const local =
-      searchPageListings.find((item) => String(item.id) === String(id)) ||
-      allProperties.find((item) => String(item.id) === String(id)) ||
-      searchPageListings[2]; // Modern 2 Bedroom for Rent
+    const images = apiDetail.media
+      ? apiDetail.media.filter((m) => m.media_type === "image").map((m) => m.url)
+      : [];
+
+    const identity = apiDetail.user?.auth_identities?.[0];
+    const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
 
     return {
-      id: String(local.id),
-      title: local.title,
-      location: local.location,
-      address: local.location.includes("Dhanmondi") ? "Road 8A, Dhanmondi, Dhaka 1205" : local.location,
-      type: local.type,
-      listingType: local.forRent ? "For Rent" : "For Sale",
-      price: local.price.replace("৳", "").trim(),
-      priceCurrency: "৳",
-      pricePeriod: local.forRent ? "/mo" : "",
-      isVerified: local.isVerified !== false,
+      id: apiDetail.id,
+      title: apiDetail.title,
+      location: location || apiDetail.address || "Location unavailable",
+      address: apiDetail.address || "Address unavailable",
+      type: apiDetail.subtype || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
+      listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
+      price: typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
+      priceCurrency: apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),
+      pricePeriod: apiDetail.listing_type === "rent" ? "/mo" : "",
+      isVerified: Boolean(apiDetail.is_verified),
       isBoosted: false,
-      score: local.score ?? 79,
-      bedrooms: local.beds,
-      bathrooms: local.baths,
-      areaSqft: local.area.replace("sqft", "").trim(),
+      score: (apiDetail as any).score ?? 85,
+      bedrooms: Number((apiDetail as any).bedrooms ?? rawAmenities.bedrooms ?? 0),
+      bathrooms: Number((apiDetail as any).bathrooms ?? rawAmenities.bathrooms ?? 0),
+      areaSqft: apiDetail.area_size ? apiDetail.area_size.toLocaleString("en-BD") : null,
       aiValuation: unsupportedDetailContent.aiValuation,
-      description:
-        "Freshly renovated 2 bedroom close to Rabindra Sarobar with lake-view balconies, fitted kitchen, and secure covered parking. Ready for immediate move-in.",
-      amenities: [
-        "Lift",
-        "Parking",
-        "Generator",
-        "CCTV",
-        "Gas Connection",
-      ],
-      mediaImages: [
-        local.image,
-        propertyImages.interior,
-        propertyImages.living,
-        propertyImages.kitchen,
-      ],
+      description: apiDetail.description || "No description provided.",
+      amenities: amenityList,
+      mediaImages: images,
       seller: {
-        name: "Sun velly",
-        agency: "Metro Properties",
-        rating: "4.7",
-        reviewsCount: 74,
+        name: apiDetail.user?.full_name || "Verified Seller",
+        agency: "HomeNet Verified Partner",
+        rating: "4.8",
+        reviewsCount: 12,
         repliesTime: "Replies ~1 hr",
-        isVerified: true,
-        avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&q=80",
-        phone: "+880 1700-000000",
-        email: "sunvelly@metroproperties.bd",
+        isVerified: Boolean(apiDetail.is_verified),
+        avatarUrl: apiDetail.user?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+        phone: identity?.phone || "+8801700000000",
+        email: identity?.email || "",
       },
       aiRecommendation: unsupportedDetailContent.aiRecommendation,
       nearbyPlaces: unsupportedDetailContent.nearbyPlaces,
-      similarProperties: defaultFigmaSimilar,
+      similarProperties: similarProperties.map((sim) => {
+        const simAmenities = (sim.amenities as Record<string, any>) || {};
+        return {
+          id: sim.id,
+          title: sim.title,
+          location: [sim.area?.name, (sim.area as any)?.city].filter(Boolean).join(", ") || sim.address || "Dhaka",
+          price: `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? sim.price.toLocaleString() : sim.price}`,
+          specs: `${Number(simAmenities.bedrooms ?? 0)} Beds · ${Number(simAmenities.bathrooms ?? 0)} Baths · ${sim.area_size?.toLocaleString() ?? "N/A"} ${sim.area_unit || "sqft"}`,
+          imageUrl: sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
+          status: sim.status,
+          views: (sim.view_count || 0).toLocaleString(),
+          score: (sim as any).score ?? 85,
+        };
+      }),
     };
-  }, [apiDetail, id, similarProperties]);
+  }, [apiDetail, similarProperties]);
 
   const handleCall = () => {
     if (!property?.seller.phone) {
@@ -284,21 +200,21 @@ export function PropertyDetailScreen() {
     return (
       <AppChrome active="property">
         <View style={styles.requestState}>
-          <ActivityIndicator color={colors.green} size="large" />
-          <Text style={styles.requestError}>Loading property...</Text>
+          <ActivityIndicator color="#0F6D55" size="large" />
+          <Text style={styles.requestError}>Loading property details...</Text>
         </View>
       </AppChrome>
     );
   }
 
-  if (error && !property) {
+  if (!property) {
     return (
       <AppChrome active="property">
         <View style={styles.requestState}>
           <Text style={styles.requestError}>{error instanceof Error ? error.message : "Property not found."}</Text>
-          <Pressable onPress={() => void refetch()} style={styles.retryButton}>
+          <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>
             <RotateCcw color="#FFFFFF" size={16} />
-            <Text style={styles.retryText}>Retry</Text>
+            <Text style={styles.retryText}>{error ? "Retry" : "Go Back"}</Text>
           </Pressable>
         </View>
       </AppChrome>
@@ -442,6 +358,7 @@ export function PropertyDetailScreen() {
             </View>
 
             {/* AI Property Valuation Box */}
+            {property.aiValuation ? (
             <View style={styles.aiValuationCard}>
               <View style={styles.aiValuationHeader}>
                 <Sparkles color="#0F6D55" size={20} />
@@ -458,6 +375,7 @@ export function PropertyDetailScreen() {
                 <Text style={styles.aiTrendText}>{property.aiValuation.trend}</Text>
               </View>
             </View>
+            ) : null}
 
             {/* About this property */}
             <View style={styles.sectionCard}>
@@ -495,8 +413,9 @@ export function PropertyDetailScreen() {
               </View>
 
               {/* Nearby Points of Interest */}
+              {property.nearbyPlaces && property.nearbyPlaces.length > 0 && (
               <View style={styles.nearbyGrid}>
-                {property.nearbyPlaces.map((poi) => {
+                {property.nearbyPlaces.map((poi: any) => {
                   const PoiIcon = poi.icon;
                   return (
                     <View key={poi.name} style={styles.poiCard}>
@@ -511,9 +430,11 @@ export function PropertyDetailScreen() {
                   );
                 })}
               </View>
+              )}
             </View>
 
             {/* Similar properties Carousel */}
+            {property.similarProperties && property.similarProperties.length > 0 && (
             <View style={styles.sectionCard}>
               <View style={styles.sectionHeaderBetween}>
                 <Text style={styles.sectionHeading}>Similar properties</Text>
@@ -566,6 +487,7 @@ export function PropertyDetailScreen() {
                 </ScrollView>
               )}
             </View>
+            )}
           </View>
 
           {/* Right Sidebar Column (Sticky Seller Card & AI Rec) */}

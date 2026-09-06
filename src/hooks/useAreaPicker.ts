@@ -74,6 +74,7 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
     setNavPath([]);
     setSearchQuery("");
   }, []);
+
   const selectCity = useCallback((city: string | null) => {
     setSelectedCity(city);
     setNavPath([]);
@@ -81,19 +82,19 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
   }, []);
 
   return {
-    areas,
-    loading,
-    error,
-    navPath,
     selectedCity,
+    selectCity,
     availableCities,
-    searchQuery,
-    setSearchQuery,
+    navPath,
     drillDown,
     drillUp,
     navigateToBreadcrumb,
     resetNav,
-    selectCity,
+    searchQuery,
+    setSearchQuery,
+    areas,
+    loading,
+    error,
     refresh: loadAreas,
   };
 }

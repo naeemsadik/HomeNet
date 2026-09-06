@@ -28,7 +28,6 @@ import {
   defaultFilterState,
   type FilterState,
 } from "@/components/AdvancedFiltersModal";
-import { searchPageListings } from "@/data/properties";
 import { toPropertyCard } from "@/features/property/adapters/toPropertyCard";
 import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -170,89 +169,13 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
     refresh,
   } = usePropertyFeed(apiFilters);
 
-  // Fallback to Figma default properties when API returns empty or isn't running
+  // Return mapped API properties without fallback mock data
   const results = useMemo(() => {
     if (apiProperties && apiProperties.length > 0) {
       return apiProperties.map(toPropertyCard);
     }
-
-    // Filter the 8 Figma mock properties based on active UI filters
-    return searchPageListings.filter((prop) => {
-      // Purpose filter
-      if (purpose === "sale" && prop.forRent === true) return false;
-      if (purpose === "rent" && prop.forRent !== true) return false;
-
-      // Property type filter
-      if (propertyType !== "all") {
-        if (
-          propertyType === "apartment" &&
-          prop.type.toLowerCase() !== "apartment" &&
-          prop.type.toLowerCase() !== "condo"
-        )
-          return false;
-        if (
-          propertyType === "house" &&
-          prop.type.toLowerCase() !== "house"
-        )
-          return false;
-        if (
-          propertyType === "commercial" &&
-          prop.type.toLowerCase() !== "commercial"
-        )
-          return false;
-        if (
-          propertyType === "land" &&
-          !prop.title.toLowerCase().includes("land") &&
-          prop.type.toLowerCase() !== "land"
-        )
-          return false;
-      }
-
-      // Verified only
-      if ((verifiedOnly || modalFilters.verifiedOnly) && !prop.isVerified) {
-        return false;
-      }
-
-      // Modal bedrooms filter
-      if (modalFilters.bedrooms !== null) {
-        if (modalFilters.bedrooms === 4) {
-          if (prop.beds < 4) return false;
-        } else if (prop.beds !== modalFilters.bedrooms) {
-          return false;
-        }
-      }
-
-      // Modal bathrooms filter
-      if (modalFilters.bathrooms !== null) {
-        if (modalFilters.bathrooms === 3) {
-          if (prop.baths < 3) return false;
-        } else if (prop.baths !== modalFilters.bathrooms) {
-          return false;
-        }
-      }
-
-      // Location search
-      if (
-        modalFilters.location &&
-        modalFilters.location.trim() &&
-        !modalFilters.location.toLowerCase().includes("all")
-      ) {
-        const locTerm = modalFilters.location.split(",")[0].trim().toLowerCase();
-        if (
-          locTerm &&
-          !prop.location.toLowerCase().includes(locTerm) &&
-          !prop.title.toLowerCase().includes(locTerm)
-        ) {
-          // Soft check: allow if location is just default
-          if (modalFilters.location !== defaultFilterState.location) {
-            return false;
-          }
-        }
-      }
-
-      return true;
-    });
-  }, [apiProperties, modalFilters, propertyType, purpose, verifiedOnly]);
+    return [];
+  }, [apiProperties]);
 
   function handleSearchSubmit() {
     setActiveQuery(searchQuery);

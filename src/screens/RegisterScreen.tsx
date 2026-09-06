@@ -24,6 +24,14 @@ export function RegisterScreen() {
       setLocalError("Password must be at least 8 characters long");
       return;
     }
+    if (/\s/.test(password)) {
+      setLocalError("Password cannot contain spaces");
+      return;
+    }
+    if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+      setLocalError("Password must contain at least one letter and one number");
+      return;
+    }
     if (password !== confirmPassword) {
       setLocalError("Passwords do not match");
       return;

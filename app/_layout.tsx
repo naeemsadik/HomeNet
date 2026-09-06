@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -11,11 +12,11 @@ import {
   PlusJakartaSans_800ExtraBold,
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { useFonts } from "expo-font";
-import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AuthModal } from "@/components/AuthModal";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -23,8 +24,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 2,
-      staleTime: 30_000,
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
     },
   },
 });
@@ -80,6 +83,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <StatusBar style="dark" />
         <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
+        <AuthModal />
       </SafeAreaProvider>
     </QueryClientProvider>
   );

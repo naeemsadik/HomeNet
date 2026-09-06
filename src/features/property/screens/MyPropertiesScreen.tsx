@@ -79,16 +79,18 @@ export function MyPropertiesScreen() {
   const allListings = useMemo(() => {
     return apiProperties.map((p): ListingItemData => ({
       id: p.id,
-      title: p.title,
-      location: [p.area?.name, p.area?.city].filter(Boolean).join(", ") || p.address || "Location unavailable",
-      imageUrl: p.media?.find((media) => media.media_type === "image")?.url,
-      type: p.subtype || p.type,
+      title: p.title || "Untitled Property",
+      location: [p.area?.name, (p.area as any)?.city].filter(Boolean).join(", ") || p.address || "Location unavailable",
+      imageUrl: p.media?.find((media) => media.media_type === "image")?.url || p.media?.[0]?.url,
+      type: p.subtype || p.type || "Apartment",
       listingType: p.listing_type === "rent" ? "For Rent" : "For Sale",
-      price: `${p.price_currency || "BDT"} ${p.price.toLocaleString()}`,
+      price: `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${p.listing_type === "rent" ? "/mo" : ""}`,
       status: p.status,
       isVerified: p.is_verified,
-      aiValue: `${p.price_currency || "BDT"} ${(p.price * 1.05).toLocaleString()}`,
-      views: p.view_count.toLocaleString(),
+      isBoosted: false,
+      boostText: undefined,
+      aiValue: typeof p.price === "number" ? `৳ ${((p.price * 1.05) / 10000000).toFixed(2)}Cr` : "—",
+      views: (p.view_count || 0).toLocaleString(),
       likes: "0",
       inquiries: "0",
     }));
@@ -420,16 +422,17 @@ export function MyPropertiesScreen() {
                     <Text style={styles.emptyTitle}>No listings found</Text>
                     <Text style={styles.emptySub}>No properties match the selected filter.</Text>
                   </View>
-                ) : filteredListings.map((item) => (
-                  <View key={item.id} style={styles.mobileCard}>
-                    <View style={styles.mobileCardHead}>
-                      {item.imageUrl ? (
-                        <Image source={{ uri: item.imageUrl }} style={styles.mobileThumb} />
-                      ) : (
-                        <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
-                          <Building2 color="#6B7D78" size={20} />
-                        </View>
-                      )}
+                ) : (
+                  filteredListings.map((item) => (
+                    <View key={item.id} style={styles.mobileCard}>
+                      <View style={styles.mobileCardHead}>
+                        {item.imageUrl ? (
+                          <Image source={{ uri: item.imageUrl }} style={styles.mobileThumb} />
+                        ) : (
+                          <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
+                            <Building2 color="#6B7D78" size={20} />
+                          </View>
+                        )}
                       <View style={{ flex: 1, gap: 4 }}>
                         <Text style={styles.propTitle}>{item.title}</Text>
                         <Text style={styles.propLocation}>{item.location}</Text>
@@ -486,7 +489,7 @@ export function MyPropertiesScreen() {
                       </View>
                     </View>
                   </View>
-                ))}
+                )))}
               </View>
             )}
             {hasNextPage && !isLoading && !error ? (

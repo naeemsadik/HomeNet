@@ -11,17 +11,29 @@ import {
   WalletCards,
   type LucideIcon,
 } from "lucide-react-native";
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, type DimensionValue, View } from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, type DimensionValue, View } from "react-native";
+import { useQuery } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
 import { AppButton, Eyebrow } from "@/components/ui";
-import { allProperties, savedPropertyIds } from "@/data/properties";
+import { getProperties } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
 const steps = ["Goal", "Location", "Budget", "Matches"];
+
+const budgetRanges: Record<string, { min_price?: number; max_price?: number }> = {
+  "Under BDT 70k": { max_price: 70000 },
+  "BDT 70k–120k": { min_price: 70000, max_price: 120000 },
+  "BDT 120k–180k": { min_price: 120000, max_price: 180000 },
+  "BDT 180k+": { min_price: 180000 },
+  "Under BDT 2 Cr": { max_price: 20000000 },
+  "BDT 2–4 Cr": { min_price: 20000000, max_price: 40000000 },
+  "BDT 4–6 Cr": { min_price: 40000000, max_price: 60000000 },
+  "BDT 6 Cr+": { min_price: 60000000 },
+};
 
 function Choice({
   label,
@@ -56,9 +68,28 @@ export function AiFinderScreen() {
   const [goal, setGoal] = useState("Buy a home");
   const [area, setArea] = useState("Gulshan & Banani");
   const [budget, setBudget] = useState("BDT 2–4 Cr");
-  const [savedIds, setSavedIds] = useState(savedPropertyIds);
+  const [savedIds, setSavedIds] = useState<(string | number)[]>([]);
 
-  function toggleSaved(id: number) {
+  const queryParams = useMemo(() => {
+    const range = budgetRanges[budget] || {};
+    return {
+      listing_type: goal === "Rent a home" ? ("rent" as const) : ("sale" as const),
+      limit: 6,
+      status: "active" as const,
+      ...range,
+    };
+  }, [goal, budget]);
+
+  const { data: matchesData, isLoading: matchesLoading } = useQuery({
+    queryKey: ["properties", "ai-finder", goal, budget],
+    queryFn: () => getProperties(queryParams),
+    enabled: step === 3,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const matches = useMemo(() => matchesData?.data?.items ?? [], [matchesData]);
+
+  function toggleSaved(id: string | number) {
     setSavedIds((current) => current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]);
   }
 
@@ -121,7 +152,32 @@ export function AiFinderScreen() {
               <View style={styles.resultCopyWrap}><Eyebrow style={styles.resultEyebrow}>Your strongest matches</Eyebrow><Text style={styles.resultTitle}>Homes aligned with your priorities</Text><Text style={styles.resultCopy}>{goal} around {area}, within {budget}. Ranked by value, verification, and livability.</Text></View>
               <AppButton icon={RotateCcw} label="Start over" onPress={() => setStep(0)} variant="ghost" />
             </View>
-            <PropertyGrid>{allProperties.slice(0, 3).map((property) => <PropertyCard key={property.id} mode={goal === "Rent a home" ? "rent" : "buy"} onSave={() => toggleSaved(property.id)} property={property} saved={savedIds.includes(property.id)} />)}</PropertyGrid>
+            {matchesLoading ? (
+              <View style={{ padding: 40, alignItems: "center" }}>
+                <ActivityIndicator size="large" color={colors.green} />
+                <Text style={{ marginTop: 12, color: colors.muted, fontFamily: fonts.medium }}>Finding matching properties...</Text>
+              </View>
+            ) : matches.length === 0 ? (
+              <View style={{ padding: 32, alignItems: "center", backgroundColor: "#F8FAF9", borderRadius: 16 }}>
+                <Text style={{ fontSize: 16, fontFamily: fonts.bold, color: colors.ink }}>No matching listings found</Text>
+                <Text style={{ marginTop: 6, color: colors.muted, fontFamily: fonts.regular, textAlign: "center" }}>
+                  Try selecting a different budget range or browse all properties.
+                </Text>
+                <AppButton label="View all homes" onPress={() => setStep(0)} style={{ marginTop: 16 }} />
+              </View>
+            ) : (
+              <PropertyGrid>
+                {matches.map((property) => (
+                  <PropertyCard
+                    key={property.id}
+                    mode={goal === "Rent a home" ? "rent" : "buy"}
+                    onSave={() => toggleSaved(property.id)}
+                    property={property}
+                    saved={savedIds.includes(property.id)}
+                  />
+                ))}
+              </PropertyGrid>
+            )}
           </View>
         )}
 

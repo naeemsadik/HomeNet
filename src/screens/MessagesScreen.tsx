@@ -23,6 +23,7 @@ import {
   View,
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
+import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 
@@ -46,72 +47,6 @@ interface ChatMessage {
   timestamp: string;
 }
 
-const mockConversations: Conversation[] = [
-  {
-    id: "conv-1",
-    name: "Farhan Ahmed",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
-    isOnline: true,
-    isVerified: true,
-    propertyTitle: "Skyview Residence",
-    propertyLocation: "Gulshan 2",
-    lastMessage: "Sure, the apartment is available for a visit tomorrow.",
-    timestamp: "10:24",
-    unreadCount: 2,
-  },
-  {
-    id: "conv-2",
-    name: "Abrar",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
-    isOnline: false,
-    isVerified: true,
-    propertyTitle: "Lakeside Duplex",
-    propertyLocation: "Baridhara",
-    lastMessage: "The final price is negotiable for serious buyers.",
-    timestamp: "Yesterday",
-  },
-  {
-    id: "conv-3",
-    name: "Tanvir Hasan",
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80",
-    isOnline: true,
-    isVerified: false,
-    propertyTitle: "Modern 2BR",
-    propertyLocation: "Dhanmondi",
-    lastMessage: "You: I'll get back to you shortly.",
-    timestamp: "Mon",
-  },
-];
-
-const mockChatMessages: Record<string, ChatMessage[]> = {
-  "conv-1": [
-    {
-      id: "m-1",
-      sender: "user",
-      text: "Hi, is the Skyview apartment still available?",
-      timestamp: "10:02",
-    },
-    {
-      id: "m-2",
-      sender: "agent",
-      text: "Hello! Yes it is. Would you like to schedule a visit?",
-      timestamp: "10:15",
-    },
-    {
-      id: "m-3",
-      sender: "user",
-      text: "Yes please, sometime this week?",
-      timestamp: "10:20",
-    },
-    {
-      id: "m-4",
-      sender: "agent",
-      text: "Sure, the apartment is available for a visit tomorrow.",
-      timestamp: "10:24",
-    },
-  ],
-};
-
 const quickSuggestions = [
   "Is it still available?",
   "Can I schedule a visit?",
@@ -120,15 +55,13 @@ const quickSuggestions = [
 
 export function MessagesScreen() {
   const { isPhone } = useResponsive();
-  const [activeConvId, setActiveConvId] = useState("conv-1");
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>(
-    mockChatMessages["conv-1"] || []
-  );
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-  const activeConv =
-    mockConversations.find((c) => c.id === activeConvId) || mockConversations[0];
+  const activeConv = conversations.find((c) => c.id === activeConvId) || conversations[0];
 
   const handleSendMessage = (textToSend?: string) => {
     const text = textToSend || inputText;
@@ -148,6 +81,25 @@ export function MessagesScreen() {
     setMessages((prev) => [...prev, newMsg]);
     if (!textToSend) setInputText("");
   };
+
+  if (conversations.length === 0) {
+    return (
+      <AppChrome active="messages">
+        <View style={styles.emptyContainer}>
+          <View style={styles.emptyIconCircle}>
+            <Send color="#0F6D55" size={32} />
+          </View>
+          <Text style={styles.emptyTitle}>No messages yet</Text>
+          <Text style={styles.emptySubtitle}>
+            When you inquire about a property or message an agent or seller, your conversations will appear here.
+          </Text>
+          <AppLink href="/buy" style={styles.emptyBtn}>
+            <Text style={styles.emptyBtnText}>Explore Properties</Text>
+          </AppLink>
+        </View>
+      </AppChrome>
+    );
+  }
 
   return (
     <AppChrome active="messages">
@@ -170,20 +122,20 @@ export function MessagesScreen() {
 
           {/* Conversations List */}
           <ScrollView showsVerticalScrollIndicator={false} style={styles.conversationsScroll}>
-            {mockConversations
+            {conversations
               .filter(
-                (c) =>
+                (c: Conversation) =>
                   c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   c.propertyTitle.toLowerCase().includes(searchQuery.toLowerCase())
               )
-              .map((conv) => {
+              .map((conv: Conversation) => {
                 const isActive = conv.id === activeConvId;
                 return (
                   <Pressable
                     key={conv.id}
                     onPress={() => {
                       setActiveConvId(conv.id);
-                      setMessages(mockChatMessages[conv.id] || []);
+                      setMessages([]);
                     }}
                     style={[
                       styles.convItem,
@@ -696,5 +648,51 @@ const styles = StyleSheet.create({
     backgroundColor: "#0F6D55",
     alignItems: "center",
     justifyContent: "center",
+  },
+  emptyContainer: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.08)",
+    paddingVertical: 80,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 460,
+  },
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#E7F2EE",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontFamily: fonts.bold,
+    color: "#0B1A17",
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+    textAlign: "center",
+    maxWidth: 420,
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  emptyBtn: {
+    backgroundColor: "#0F6D55",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 999,
+  },
+  emptyBtnText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
   },
 });

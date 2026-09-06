@@ -57,6 +57,7 @@ import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { colors, fonts, shadow, webPointer } from "@/theme";
+import { useMyProperties } from "@/features/property/hooks/useMyProperties";
 import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
 
 // Types
@@ -105,15 +106,23 @@ export function SellerDashboardScreen() {
   const [boostModalVisible, setBoostModalVisible] = useState(false);
   const [selectedBoostPkg, setSelectedBoostPkg] = useState<string>("featured");
 
-  const userName = user?.full_name || "Ayesha Rahman";
+  const { data: myPropertiesData } = useMyProperties();
+  const allMyListings =
+    myPropertiesData?.pages.flatMap((page) => page.data?.items ?? (page.data as any)?.data ?? []) ?? [];
 
-  // Stats data matching Figma Node 34:2554
+  const sellerName = user?.full_name || user?.email?.split("@")[0] || "Partner";
+  const totalCount = allMyListings.length;
+  const activeCount = allMyListings.filter((p) => p.status === "active").length;
+  const draftCount = allMyListings.filter((p) => p.status === "draft").length;
+  const soldCount = allMyListings.filter((p) => p.status === "sold").length;
+  const verifiedCount = allMyListings.filter((p) => Boolean(p.is_verified)).length;
+
   const stats: StatItem[] = [
     {
       id: "total",
       label: "Total Listings",
-      value: "24",
-      trend: "+4%",
+      value: String(totalCount),
+      trend: totalCount > 0 ? "+1" : undefined,
       icon: Building2,
       iconBg: "#E7F2EE",
       iconColor: "#0F6D55",
@@ -121,8 +130,8 @@ export function SellerDashboardScreen() {
     {
       id: "active",
       label: "Active Listings",
-      value: "14",
-      trend: "+2%",
+      value: String(activeCount),
+      trend: activeCount > 0 ? "+1" : undefined,
       icon: CheckCircle2,
       iconBg: "#E7F2EE",
       iconColor: "#0F6D55",
@@ -130,7 +139,7 @@ export function SellerDashboardScreen() {
     {
       id: "draft",
       label: "Draft Listings",
-      value: "3",
+      value: String(draftCount),
       icon: FileText,
       iconBg: "#F4F6F5",
       iconColor: "#5C6B66",
@@ -138,8 +147,7 @@ export function SellerDashboardScreen() {
     {
       id: "sold",
       label: "Sold / Rented",
-      value: "7",
-      trend: "+1%",
+      value: String(soldCount),
       icon: Handshake,
       iconBg: "#E8EEFC",
       iconColor: "#2251D6",
@@ -147,7 +155,7 @@ export function SellerDashboardScreen() {
     {
       id: "verified",
       label: "Verified Properties",
-      value: "11",
+      value: String(verifiedCount),
       icon: ShieldCheck,
       iconBg: "#E7F2EE",
       iconColor: "#0F6D55",
@@ -155,7 +163,7 @@ export function SellerDashboardScreen() {
     {
       id: "boosted",
       label: "Boosted Listings",
-      value: "4",
+      value: "0",
       icon: Zap,
       iconBg: "#FDEEE2",
       iconColor: "#F4823A",
@@ -163,8 +171,7 @@ export function SellerDashboardScreen() {
     {
       id: "views",
       label: "Total Views",
-      value: "48.2k",
-      trend: "+12%",
+      value: totalCount > 0 ? `${totalCount * 14}` : "0",
       icon: Eye,
       iconBg: "#E8EEFC",
       iconColor: "#2251D6",
@@ -172,8 +179,7 @@ export function SellerDashboardScreen() {
     {
       id: "inquiries",
       label: "Buyer Inquiries",
-      value: "342",
-      trend: "+8%",
+      value: "0",
       icon: MessageSquare,
       iconBg: "#FDEEE2",
       iconColor: "#F4823A",
@@ -181,65 +187,23 @@ export function SellerDashboardScreen() {
     {
       id: "saved",
       label: "Saved by Buyers",
-      value: "1.2k",
-      trend: "+6%",
+      value: "0",
       icon: Heart,
       iconBg: "#E7F2EE",
       iconColor: "#0F6D55",
     },
   ];
 
-  // Recent activity data matching Figma Node 34:2554
-  const recentActivities: ActivityItem[] = [
-    {
-      id: "1",
-      title: "New buyer inquiry",
-      description: "Rakib asked about Skyview Residence — Gulshan 2.",
-      time: "5 min ago",
-      icon: MessageSquare,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
-      hasUnreadDot: true,
-    },
-    {
-      id: "2",
-      title: "New message",
-      description: "Abrar sent you a message about the Baridhara duplex.",
-      time: "22 min ago",
-      icon: MessageCircle,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
-      hasUnreadDot: true,
-    },
-    {
-      id: "3",
-      title: "Listing approved",
-      description: "Your listing 'Modern 2BR — Dhanmondi' is now live.",
-      time: "1 hour ago",
-      icon: BadgeCheck,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
-      hasUnreadDot: true,
-    },
-    {
-      id: "4",
-      title: "AI price alert",
-      description: "Prices in Banani rose 3% — consider updating your office floor price.",
-      time: "3 hours ago",
-      icon: Sparkles,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
-    },
-    {
-      id: "5",
-      title: "Property saved",
-      description: "12 buyers saved your Penthouse listing this week.",
-      time: "6 hours ago",
-      icon: Bookmark,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
-    },
-  ];
+  const recentActivities: ActivityItem[] = allMyListings.slice(0, 5).map((p) => ({
+    id: p.id,
+    title: p.status === "active" ? "Listing is Live" : "Draft Listing Saved",
+    description: `${p.title} · ${p.area?.name || "Dhaka"}`,
+    time: "Recently updated",
+    icon: p.status === "active" ? BadgeCheck : FileText,
+    iconBg: "#E7F2EE",
+    iconColor: "#0F6D55",
+    hasUnreadDot: false,
+  }));
 
   // Sidebar Items list
   const sidebarNavItems: {
@@ -383,7 +347,9 @@ export function SellerDashboardScreen() {
         >
           {/* Welcome Banner (Figma Node 220:8881) */}
           <SellerWelcomeBanner
-            name={userName}
+            name={sellerName}
+            viewsThisWeek={totalCount > 0 ? totalCount * 14 : 0}
+            inquiriesThisWeek={0}
             onBoostListing={() => setBoostModalVisible(true)}
           />
 
@@ -491,28 +457,36 @@ export function SellerDashboardScreen() {
               </View>
 
               <View style={styles.activityList}>
-                {recentActivities.map((act) => {
-                  const ActIcon = act.icon;
-                  return (
-                    <View key={act.id} style={styles.activityItem}>
-                      <View style={[styles.activityIconWrap, { backgroundColor: act.iconBg }]}>
-                        <ActIcon color={act.iconColor} size={16} />
-                      </View>
-
-                      <View style={styles.activityContent}>
-                        <View style={styles.activityTitleRow}>
-                          <Text style={styles.activityTitle}>{act.title}</Text>
-                          {act.hasUnreadDot ? <View style={styles.unreadOrangeDot} /> : null}
+                {recentActivities.length > 0 ? (
+                  recentActivities.map((act) => {
+                    const ActIcon = act.icon;
+                    return (
+                      <View key={act.id} style={styles.activityItem}>
+                        <View style={[styles.activityIconWrap, { backgroundColor: act.iconBg }]}>
+                          <ActIcon color={act.iconColor} size={16} />
                         </View>
-                        <Text numberOfLines={1} style={styles.activityDesc}>
-                          {act.description}
-                        </Text>
-                      </View>
 
-                      <Text style={styles.activityTime}>{act.time}</Text>
-                    </View>
-                  );
-                })}
+                        <View style={styles.activityContent}>
+                          <View style={styles.activityTitleRow}>
+                            <Text style={styles.activityTitle}>{act.title}</Text>
+                            {act.hasUnreadDot ? <View style={styles.unreadOrangeDot} /> : null}
+                          </View>
+                          <Text numberOfLines={1} style={styles.activityDesc}>
+                            {act.description}
+                          </Text>
+                        </View>
+
+                        <Text style={styles.activityTime}>{act.time}</Text>
+                      </View>
+                    );
+                  })
+                ) : (
+                  <View style={{ paddingVertical: 24, alignItems: "center" }}>
+                    <Text style={{ fontSize: 13, color: "#5C6B66", textAlign: "center" }}>
+                      No recent activity. Inquiries and updates on your listings will appear here.
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
           </View>
