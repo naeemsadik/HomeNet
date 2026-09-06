@@ -12,7 +12,6 @@ import {
   MapPin,
   Menu,
   Phone,
-  Search,
   ShieldCheck,
   Sparkles,
   TrendingUp,
@@ -63,7 +62,6 @@ const sidebarNav: {
   authGated?: boolean;
 }[] = [
     { label: "Home", href: "/", icon: Home, key: "home" },
-    { label: "Search", href: "/buy", icon: Search, key: "buy" },
     { label: "Insights", href: "/market", icon: TrendingUp, key: "market" },
     { label: "Saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
     { label: "Profile", href: "/profile", icon: User, key: "profile", authGated: true },
@@ -173,7 +171,6 @@ function SideBar({
 function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
   const { isTablet, width } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [headerSearch, setHeaderSearch] = useState("");
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState("Dhaka");
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -190,24 +187,7 @@ function TopBar({ onOpenMenu }: { onOpenMenu?: () => void }) {
             <Brand compact />
           </View>
         ) : (
-          /* Desktop Header Search Bar */
-          <View style={styles.headerSearchBar}>
-            <Search color="#5C6B66" size={20} />
-            <TextInput
-              onChangeText={setHeaderSearch}
-              placeholder="Search area, project or use AI…"
-              placeholderTextColor="#5C6B66"
-              style={styles.headerSearchInput}
-              value={headerSearch}
-            />
-            <AppLink
-              href={headerSearch.trim() ? `/buy?query=${encodeURIComponent(headerSearch.trim())}` : "/buy"}
-              style={styles.aiSearchBtn}
-            >
-              <Sparkles color="#FFFFFF" size={14} />
-              <Text style={styles.aiSearchBtnText}>AI Search</Text>
-            </AppLink>
-          </View>
+          <View style={styles.topbarLeftSpacer} />
         )}
 
         <View style={styles.topRightActions}>
@@ -542,13 +522,6 @@ function MobileNav({ active }: { active: ActivePage }) {
   const links = [
     { label: "Home", href: "/", icon: Home, selected: active === "home", authGated: false },
     {
-      label: "Search",
-      href: "/search",
-      icon: Search,
-      selected: active === "search" || active === "buy" || active === "property",
-      authGated: false,
-    },
-    {
       label: "Insights",
       href: "/market",
       icon: TrendingUp,
@@ -845,50 +818,8 @@ const styles = StyleSheet.create({
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
-  headerSearchBar: {
+  topbarLeftSpacer: {
     flex: 1,
-    maxWidth: 576,
-    height: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingLeft: 16.8,
-    paddingRight: 6.8,
-    paddingVertical: 4,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 999,
-    borderWidth: 1.5,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  headerSearchInput: {
-    flex: 1,
-    minWidth: 0,
-    height: 40,
-    color: "#0B1A17",
-    fontFamily: fonts.regular,
-    fontSize: 15,
-    paddingVertical: 6,
-    outlineStyle: "none",
-  } as any,
-  aiSearchBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "#0F6D55",
-  },
-  aiSearchBtnText: {
-    color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
   },
   topRightActions: {
     flexDirection: "row",

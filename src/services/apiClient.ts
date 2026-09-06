@@ -56,7 +56,21 @@ export function toApiError(error: unknown): ApiError {
   return new ApiError(String(error));
 }
 
-const apiBaseUrl = (process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+export const VERCEL_API_BASE_URL = "https://homenet-api.vercel.app";
+export const LOCAL_API_BASE_URL = "http://localhost:3000";
+
+let apiBaseUrl = (
+  process.env.EXPO_PUBLIC_API_BASE_URL || VERCEL_API_BASE_URL
+).replace(/\/$/, "");
+
+export function getApiBaseUrl(): string {
+  return apiBaseUrl;
+}
+
+export function setApiBaseUrl(newUrl: string) {
+  apiBaseUrl = newUrl.replace(/\/$/, "");
+  apiClient.defaults.baseURL = apiBaseUrl;
+}
 
 const apiClient = axios.create({
   baseURL: apiBaseUrl,
@@ -107,8 +121,41 @@ apiClient.interceptors.response.use(
   },
   async (error: AxiosError<ApiResponse<unknown>>) => {
     const originalRequest = error.config as
-      | (InternalAxiosRequestConfig & { _retry?: boolean })
+      | (InternalAxiosRequestConfig & { _retry?: boolean; _fallbackTried?: boolean })
       | undefined;
+
+    // Auto-failover: If connecting to localhost failed because port 3000 is unavailable, switch to Vercel
+    const isNetworkError =
+      !error.response &&
+      (error.code === "ECONNREFUSED" ||
+        error.code === "ERR_NETWORK" ||
+        error.code === "ECONNABORTED" ||
+        error.code === "ETIMEDOUT" ||
+        (error.message && error.message.includes("Network Error")));
+
+    const isTargetingLocalhost =
+      apiBaseUrl.includes("localhost:3000") ||
+      apiBaseUrl.includes("127.0.0.1:3000") ||
+      Boolean(originalRequest?.url?.includes("localhost:3000"));
+
+    if (isNetworkError && isTargetingLocalhost && !originalRequest?._fallbackTried) {
+      console.warn(
+        `[apiClient] Local server at ${apiBaseUrl} is unavailable. Switching to Vercel endpoint: ${VERCEL_API_BASE_URL}`,
+      );
+      setApiBaseUrl(VERCEL_API_BASE_URL);
+
+      if (originalRequest) {
+        originalRequest._fallbackTried = true;
+        originalRequest.baseURL = VERCEL_API_BASE_URL;
+        if (originalRequest.url?.includes("localhost:3000")) {
+          originalRequest.url = originalRequest.url.replace(
+            /http:\/\/(localhost|127\.0\.0\.1):3000/,
+            VERCEL_API_BASE_URL,
+          );
+        }
+        return apiClient(originalRequest);
+      }
+    }
 
     if (
       error.response?.status !== 401 ||
