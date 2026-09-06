@@ -39,13 +39,13 @@ export function HeroSearchWidget({
     if (onSearch) {
       onSearch(query, activeTab);
     } else {
-      const targetRoute = activeTab === "rent" ? "/rent" : "/buy";
+      const targetRoute = (activeTab === "rent" || activeTab === "short-let") ? "/rent" : "/buy";
       const params = new URLSearchParams();
       if (query.trim()) {
         params.set("query", query.trim());
       }
-      if (activeTab === "sold") {
-        params.set("status", "sold");
+      if (activeTab === "short-let") {
+        params.set("subtype", "short-let");
       }
       const queryString = params.toString();
       router.push((queryString ? `${targetRoute}?${queryString}` : targetRoute) as any);
@@ -54,10 +54,10 @@ export function HeroSearchWidget({
 
   const getPromptText = () => {
     switch (activeTab) {
+      case "short-let":
+        return "Search short-let & serviced apartments";
       case "rent":
         return "Search properties to rent";
-      case "sold":
-        return "Search recently sold properties";
       case "buy":
       default:
         return "Search properties to buy";

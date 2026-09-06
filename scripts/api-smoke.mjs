@@ -1,4 +1,4 @@
-const baseUrl = (process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
+const baseUrl = (process.env.EXPO_PUBLIC_API_BASE_URL || "https://homenet-api.vercel.app").replace(/\/$/, "");
 
 function assertEnvelope(value, label) {
   if (!value || typeof value !== "object" || typeof value.success !== "boolean" || !("data" in value)) {

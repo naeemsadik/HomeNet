@@ -3,14 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   ArrowUpRight,
-  BadgePercent,
-  Briefcase,
-  Building2,
   ChevronDown,
   ChevronRight,
   Compass,
   Home,
-  KeyRound,
   LandPlot,
   MapPin,
   RotateCcw,
@@ -52,14 +48,7 @@ import { getProperties } from "@/services/propertyApi";
 import { useSavedStore } from "@/stores/savedStore";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
-const categoryButtons: { label: string; icon: LucideIcon; href: string }[] = [
-  { label: "Apartment", icon: Building2, href: "/buy?type=apartment" },
-  { label: "House", icon: Home, href: "/buy?type=house" },
-  { label: "Commercial", icon: Briefcase, href: "/buy?type=commercial" },
-  { label: "Land", icon: LandPlot, href: "/buy?type=land" },
-  { label: "Rent", icon: KeyRound, href: "/rent" },
-  { label: "Sale", icon: BadgePercent, href: "/buy" },
-];
+
 
 function PropertyResult({
   children,
@@ -253,29 +242,7 @@ export function HomeScreen() {
         </ImageBackground>
       </View>
 
-      {/* ─────────────────────────────────────────────────────────────
-          2. CATEGORY BUTTONS ROW (Figma data-node-id="1:147")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryRow}
-        >
-          {categoryButtons.map(({ label, icon: Icon, href }) => (
-            <AppLink
-              key={label}
-              href={href}
-              style={styles.categoryCard}
-            >
-              <View style={styles.categoryIconCircle}>
-                <Icon color="#0F6D55" size={24} strokeWidth={1.8} />
-              </View>
-              <Text style={styles.categoryCardText}>{label}</Text>
-            </AppLink>
-          ))}
-        </ScrollView>
-      </View>
+
 
       {/* ─────────────────────────────────────────────────────────────
           3. FEATURED PROPERTIES (Figma data-node-id="1:194")
@@ -908,39 +875,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  /* 2. Category Cards */
-  categoryRow: {
-    flexDirection: "row",
-    gap: 12,
-    width: "100%",
-    justifyContent: "space-between",
-  },
-  categoryCard: {
-    flex: 1,
-    minWidth: 100,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    borderWidth: 0.8,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    padding: 16.8,
-    alignItems: "center",
-    gap: 8,
-  },
-  categoryIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: "#E7F2EE",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  categoryCardText: {
-    color: "#0B1A17",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
+
 
   /* 3. Featured Properties */
   featuredCardsRow: {
