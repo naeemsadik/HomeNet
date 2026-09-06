@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock,
+  ExternalLink,
   Eye,
   Flame,
   Globe,
@@ -20,8 +21,6 @@ import {
   Layers,
   MapPin,
   Maximize2,
-  MessageCircle,
-  MessageSquare,
   Phone,
   RotateCcw,
   Share2,
@@ -41,6 +40,7 @@ import {
   Image,
   Linking,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -124,7 +124,9 @@ export function PropertyDetailScreen() {
       id: apiDetail.id,
       title: apiDetail.title,
       location: location || apiDetail.address || "Location unavailable",
-      address: apiDetail.address || "Address unavailable",
+      address: apiDetail.address || location || "Address unavailable",
+      latitude: apiDetail.location_lat,
+      longitude: apiDetail.location_lng,
       type: apiDetail.subtype || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
       listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
       price: typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
@@ -195,6 +197,15 @@ export function PropertyDetailScreen() {
     if (!property) return;
     Alert.alert("Share Property", `Share link for "${property.title}" copied to clipboard.`);
   };
+
+  const mapLocationQuery = property
+    ? property.latitude && property.longitude
+      ? `${property.latitude},${property.longitude}`
+      : `${property.address ? property.address + ", " : ""}${property.location}, Bangladesh`
+    : "";
+
+  const googleMapsEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapLocationQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  const googleMapsExternalUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapLocationQuery)}`;
 
   if (isLoading && !property) {
     return (
@@ -395,20 +406,58 @@ export function PropertyDetailScreen() {
 
             {/* Location & neighbourhood */}
             <View style={styles.sectionCard}>
-              <Text style={styles.sectionHeading}>Location & neighbourhood</Text>
+              <View style={styles.sectionHeaderBetween}>
+                <Text style={styles.sectionHeading}>Location & neighbourhood</Text>
+                <Pressable
+                  accessibilityLabel="Open in Google Maps"
+                  onPress={() => void Linking.openURL(googleMapsExternalUrl)}
+                  style={({ pressed }) => [styles.openMapsBtn, webPointer, pressed && styles.pressed]}
+                >
+                  <ExternalLink color="#0F6D55" size={14} />
+                  <Text style={styles.openMapsBtnText}>Open Google Maps</Text>
+                </Pressable>
+              </View>
 
               <View style={styles.mapCard}>
-                <Image
-                  source={{ uri: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80" }}
-                  style={styles.mapImage}
-                />
-                <View style={styles.mapPinOverlay}>
-                  <View style={styles.mapTooltip}>
-                    <Text style={styles.mapTooltipText}>Dhanmondi, Dhaka 1205, Bangladesh</Text>
-                  </View>
-                  <View style={styles.mapPinCircle}>
-                    <MapPin color="#FFFFFF" size={18} />
-                  </View>
+                {Platform.OS === "web" ? (
+                  <iframe
+                    title={`Google Map for ${property.title}`}
+                    src={googleMapsEmbedUrl}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      border: 0,
+                      borderRadius: 16,
+                    }}
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                ) : (
+                  <Pressable
+                    onPress={() => void Linking.openURL(googleMapsExternalUrl)}
+                    style={styles.nativeMapContainer}
+                  >
+                    <Image
+                      source={{ uri: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80" }}
+                      style={styles.mapImage}
+                    />
+                    <View style={styles.mapPinOverlay}>
+                      <View style={styles.mapTooltip}>
+                        <Text style={styles.mapTooltipText}>{property.address || property.location}</Text>
+                      </View>
+                      <View style={styles.mapPinCircle}>
+                        <MapPin color="#FFFFFF" size={18} />
+                      </View>
+                    </View>
+                  </Pressable>
+                )}
+
+                <View style={styles.mapAddressPill}>
+                  <MapPin color="#0F6D55" size={14} />
+                  <Text numberOfLines={1} style={styles.mapAddressPillText}>
+                    {property.address || property.location}
+                  </Text>
                 </View>
               </View>
 
@@ -947,9 +996,51 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
   },
   mapCard: {
-    height: 240,
+    height: 320,
     borderRadius: 16,
     overflow: "hidden",
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "rgba(11,26,23,0.08)",
+    backgroundColor: "#E8EEEC",
+  },
+  openMapsBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#E7F2EE",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  openMapsBtnText: {
+    color: "#0F6D55",
+    fontSize: 13,
+    fontFamily: fonts.semiBold,
+  },
+  mapAddressPill: {
+    position: "absolute",
+    bottom: 12,
+    left: 12,
+    maxWidth: "85%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    borderWidth: 0.5,
+    borderColor: "rgba(11,26,23,0.1)",
+  },
+  mapAddressPillText: {
+    color: "#0B1A17",
+    fontSize: 12,
+    fontFamily: fonts.semiBold,
+  },
+  nativeMapContainer: {
+    width: "100%",
+    height: "100%",
     position: "relative",
   },
   mapImage: {
