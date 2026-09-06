@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: fonts.extraBold,
     color: colorTokens.textPrimary,
-    letterSpacing: -1,
+    letterSpacing: -0.4,
   },
   subtitle: {
     fontSize: 13,

@@ -7,6 +7,7 @@ export type SearchTabType = "buy" | "rent" | "short-let";
 interface SearchTabsProps {
   activeTab: SearchTabType;
   onChange: (tab: SearchTabType) => void;
+  compact?: boolean;
 }
 
 const TABS: { key: SearchTabType; label: string }[] = [
@@ -15,9 +16,9 @@ const TABS: { key: SearchTabType; label: string }[] = [
   { key: "short-let", label: "Short-let" },
 ];
 
-export function SearchTabs({ activeTab, onChange }: SearchTabsProps) {
+export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, compact && styles.containerCompact]}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab.key;
         return (
@@ -27,11 +28,12 @@ export function SearchTabs({ activeTab, onChange }: SearchTabsProps) {
             accessibilityState={{ selected: isActive }}
             accessibilityLabel={`${tab.label} tab`}
             onPress={() => onChange(tab.key)}
-            style={[styles.tabButton, webPointer]}
+            style={[styles.tabButton, compact && styles.tabButtonCompact, webPointer]}
           >
             <Text
               style={[
                 styles.tabText,
+                compact && styles.tabTextCompact,
                 isActive ? styles.tabTextActive : styles.tabTextInactive,
               ]}
             >
@@ -51,6 +53,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 44,
   },
+  containerCompact: {
+    height: 40,
+  },
   tabButton: {
     position: "relative",
     paddingHorizontal: 16,
@@ -60,10 +65,19 @@ const styles = StyleSheet.create({
     height: 44,
     backgroundColor: "transparent",
   },
+  tabButtonCompact: {
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    height: 40,
+  },
   tabText: {
     fontSize: 14,
     lineHeight: 20,
     textAlign: "center",
+  },
+  tabTextCompact: {
+    fontSize: 13,
+    lineHeight: 18,
   },
   tabTextActive: {
     color: "#0F6D55",

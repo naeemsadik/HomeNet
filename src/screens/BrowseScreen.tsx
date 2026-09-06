@@ -283,7 +283,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
               >
                 {results.map((prop) => (
                   <PropertyCard
-                    imageHeight={isPhone ? 220 : 280}
+                    imageHeight={isPhone ? 180 : 220}
                     key={prop.id}
                     mode={mode}
                     onSave={() => toggleSaved(prop.id)}
@@ -296,7 +296,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
               <View style={styles.listLayout}>
                 {results.map((prop) => (
                   <PropertyCard
-                    imageHeight={isPhone ? 220 : undefined}
+                    imageHeight={isPhone ? 180 : undefined}
                     key={prop.id}
                     list={!isPhone}
                     mode={mode}
