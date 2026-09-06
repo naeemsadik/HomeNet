@@ -104,10 +104,10 @@ export function SavedScreen() {
               <PropertyCard
                 key={prop.id}
                 property={prop}
-                imageHeight={isPhone ? 220 : 320.7}
+                imageHeight={isPhone ? 180 : 220}
                 saved={true}
                 onSave={() => handleToggleSaved(prop.id)}
-                style={styles.savedCardItem}
+                style={[styles.savedCardItem, isPhone && styles.savedCardItemPhone]}
               />
             ))}
           </View>
@@ -281,14 +281,22 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 16,
     width: "100%",
+    alignItems: "flex-start",
   },
   savedPropertiesGridPhone: {
     flexDirection: "column",
+    alignItems: "stretch",
   },
   savedCardItem: {
     flexBasis: "48.5%",
     flexGrow: 1,
     minWidth: 320,
+  },
+  savedCardItemPhone: {
+    flexBasis: "auto",
+    flexGrow: 0,
+    minWidth: 0,
+    width: "100%",
   },
 
   /* 4. Recently Viewed (3 Columns) */
@@ -297,13 +305,21 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 16,
     width: "100%",
+    alignItems: "flex-start",
   },
   recentlyViewedGridPhone: {
     flexDirection: "column",
+    alignItems: "stretch",
   },
   recentCardItem: {
     flex: 1,
     minWidth: 260,
+  },
+  recentCardItemPhone: {
+    flex: 0,
+    flexGrow: 0,
+    minWidth: 0,
+    width: "100%",
   },
   exploreLink: {
     paddingHorizontal: 16,

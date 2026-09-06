@@ -47,6 +47,11 @@ export function PropertyGrid({
 }
 
 const styles = StyleSheet.create({
-  grid: { width: "100%", flexDirection: "row", flexWrap: "wrap" },
+  grid: {
+    width: "100%",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+  },
   horizontalContent: { paddingRight: 14, paddingBottom: 20 },
 });

@@ -149,7 +149,7 @@ export function EditProfileScreen() {
 const styles = StyleSheet.create({
   container: { gap: 18, paddingBottom: 30 },
   headerSection: { gap: 6 },
-  title: { fontSize: 28, fontFamily: fonts.extraBold, color: colorTokens.textPrimary, letterSpacing: -1 },
+  title: { fontSize: 28, fontFamily: fonts.extraBold, color: colorTokens.textPrimary, letterSpacing: -0.4 },
   card: {
     padding: 24,
     borderRadius: 18,

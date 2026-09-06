@@ -1,7 +1,9 @@
 <!DOCTYPE html><html  lang="en"><head><title data-rh="true"></title><meta charSet="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="AI-assisted property discovery and market insights in Bangladesh." name="description"/><title>HomeNet | Find a home you can trust, priced by AI</title><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/><style id="expo-reset">#root,body,html{height:100%}body{overflow:hidden}#root{display:flex}</style><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/><style>
           html, body, #root {
             height: 100%;
+            width: 100%;
             margin: 0;
+            overflow-x: hidden;
             background: #f8faf9;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -51,9 +53,9 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1awa8pu{border-bottom-color:rgba(101,119,134,1.00);border-left-color:rgba(101,119,134,1.00);border-right-color:rgba(101,119,134,1.00);border-top-color:rgba(101,119,134,1.00);}
 .r-1bq2mok{margin:3px;}
 .r-1byvm9q{padding:24.8px;}
-.r-1c3admb{border-bottom-left-radius:57px;border-bottom-right-radius:57px;border-top-left-radius:57px;border-top-right-radius:57px;}
 .r-1d4xg89{border-bottom-color:rgba(170,184,194,1.00);border-left-color:rgba(170,184,194,1.00);border-right-color:rgba(170,184,194,1.00);border-top-color:rgba(170,184,194,1.00);}
 .r-1d6rzhh{border-bottom-width:3px;border-left-width:3px;border-right-width:3px;border-top-width:3px;}
+.r-1d9yedq{flex:0;}
 .r-1dedoh8{border-bottom-left-radius:9px;border-bottom-right-radius:9px;border-top-left-radius:9px;border-top-right-radius:9px;}
 .r-1dksxoc{border-bottom-color:rgba(208,213,221,1.00);border-left-color:rgba(208,213,221,1.00);border-right-color:rgba(208,213,221,1.00);border-top-color:rgba(208,213,221,1.00);}
 .r-1do9v87{border-bottom-color:rgba(11,26,23,0.10);border-left-color:rgba(11,26,23,0.10);border-right-color:rgba(11,26,23,0.10);border-top-color:rgba(11,26,23,0.10);}
@@ -72,6 +74,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1jyn79y{border-bottom-color:rgba(0,150,136,1.00);border-left-color:rgba(0,150,136,1.00);border-right-color:rgba(0,150,136,1.00);border-top-color:rgba(0,150,136,1.00);}
 .r-1kmbk02{flex:1.45;}
 .r-1l7qd3h{border-bottom-color:rgba(15,109,85,0.16);border-left-color:rgba(15,109,85,0.16);border-right-color:rgba(15,109,85,0.16);border-top-color:rgba(15,109,85,0.16);}
+.r-1ly6xb9{border-bottom-color:rgba(11,26,23,0.06);border-left-color:rgba(11,26,23,0.06);border-right-color:rgba(11,26,23,0.06);border-top-color:rgba(11,26,23,0.06);}
 .r-1m7mu0x{border-bottom-left-radius:36px;border-bottom-right-radius:36px;border-top-left-radius:36px;border-top-right-radius:36px;}
 .r-1mbl9jf{border-bottom-width:0.5px;border-left-width:0.5px;border-right-width:0.5px;border-top-width:0.5px;}
 .r-1o29zwn{border-bottom-color:rgba(11,26,23,0.15);border-left-color:rgba(11,26,23,0.15);border-right-color:rgba(11,26,23,0.15);border-top-color:rgba(11,26,23,0.15);}
@@ -83,7 +86,6 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1phboty{border-bottom-style:solid;border-left-style:solid;border-right-style:solid;border-top-style:solid;}
 .r-1q9bdsx{border-bottom-left-radius:12px;border-bottom-right-radius:12px;border-top-left-radius:12px;border-top-right-radius:12px;}
 .r-1qsk4np{overflow-x:clip;overflow-y:clip;}
-.r-1rbt618{border-bottom-color:rgba(8,122,91,0.15);border-left-color:rgba(8,122,91,0.15);border-right-color:rgba(8,122,91,0.15);border-top-color:rgba(8,122,91,0.15);}
 .r-1rf8fdq{border-bottom-width:1.5px;border-left-width:1.5px;border-right-width:1.5px;border-top-width:1.5px;}
 .r-1rvyss1{border-bottom-color:rgba(255,255,255,0.20);border-left-color:rgba(255,255,255,0.20);border-right-color:rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.20);}
 .r-1sbahrg{padding:28px;}
@@ -107,9 +109,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-4yxgho{border-bottom-color:rgba(255,255,255,0.72);border-left-color:rgba(255,255,255,0.72);border-right-color:rgba(255,255,255,0.72);border-top-color:rgba(255,255,255,0.72);}
 .r-4zvafu{border-bottom-left-radius:26px;border-bottom-right-radius:26px;border-top-left-radius:26px;border-top-right-radius:26px;}
 .r-60ke3l{border-bottom-color:rgba(0,128,0,1.00);border-left-color:rgba(0,128,0,1.00);border-right-color:rgba(0,128,0,1.00);border-top-color:rgba(0,128,0,1.00);}
-.r-6koalj{display:flex;}
 .r-6ncur5{border-bottom-left-radius:18px;border-bottom-right-radius:18px;border-top-left-radius:18px;border-top-right-radius:18px;}
-.r-6rfqhm{flex:0.55;}
 .r-6t2glc{border-bottom-left-radius:40px;border-bottom-right-radius:40px;border-top-left-radius:40px;border-top-right-radius:40px;}
 .r-78vmp4{border-bottom-left-radius:99px;border-bottom-right-radius:99px;border-top-left-radius:99px;border-top-right-radius:99px;}
 .r-9x6qib{border-bottom-color:rgba(204,214,221,1.00);border-left-color:rgba(204,214,221,1.00);border-right-color:rgba(204,214,221,1.00);border-top-color:rgba(204,214,221,1.00);}
@@ -129,6 +129,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-eg6o18{border-bottom-style:dashed;border-left-style:dashed;border-right-style:dashed;border-top-style:dashed;}
 .r-fx7oqy{border-bottom-color:rgba(0,0,255,1.00);border-left-color:rgba(0,0,255,1.00);border-right-color:rgba(0,0,255,1.00);border-top-color:rgba(0,0,255,1.00);}
 .r-hpp454{border-bottom-color:rgba(15,109,85,1.00);border-left-color:rgba(15,109,85,1.00);border-right-color:rgba(15,109,85,1.00);border-top-color:rgba(15,109,85,1.00);}
+.r-jprt8p{flex:0.85;}
 .r-k63uuh{padding:20.8px;}
 .r-kdyh1x{border-bottom-left-radius:6px;border-bottom-right-radius:6px;border-top-left-radius:6px;border-top-right-radius:6px;}
 .r-krxsd3{display:-webkit-box;}
@@ -139,6 +140,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-nmrrla{border-bottom-color:rgba(118,118,118,1.00);border-left-color:rgba(118,118,118,1.00);border-right-color:rgba(118,118,118,1.00);border-top-color:rgba(118,118,118,1.00);}
 .r-nsbfu8{padding:16px;}
 .r-pv33jp{flex:0.9;}
+.r-q0oxfv{flex:1.15;}
 .r-qgi43r{padding:17px;}
 .r-qpntkw{padding:6px;}
 .r-qxtw8h{border-bottom-left-radius:27px;border-bottom-right-radius:27px;border-top-left-radius:27px;border-top-right-radius:27px;}
@@ -150,6 +152,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-t8tyuf{border-bottom-color:rgba(37,211,102,1.00);border-left-color:rgba(37,211,102,1.00);border-right-color:rgba(37,211,102,1.00);border-top-color:rgba(37,211,102,1.00);}
 .r-tuq35u{padding:4px;}
 .r-ugvmm4{border-bottom-width:1.2px;border-left-width:1.2px;border-right-width:1.2px;border-top-width:1.2px;}
+.r-v3zo9w{border-bottom-left-radius:52px;border-bottom-right-radius:52px;border-top-left-radius:52px;border-top-right-radius:52px;}
 .r-wg31gx{border-bottom-color:rgba(49,53,56,1.00);border-left-color:rgba(49,53,56,1.00);border-right-color:rgba(49,53,56,1.00);border-top-color:rgba(49,53,56,1.00);}
 .r-whuqzp{padding:18px;}
 .r-wikqur{border-bottom-color:rgba(15,109,85,0.10);border-left-color:rgba(15,109,85,0.10);border-right-color:rgba(15,109,85,0.10);border-top-color:rgba(15,109,85,0.10);}
@@ -222,7 +225,6 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-vuvdlw{padding-bottom:6px;padding-top:6px;}
 .r-w7s2jr{padding-bottom:16px;padding-top:16px;}
 .r-wnp491{margin-left:2px;margin-right:2px;}
-.r-x53rwf{padding-bottom:36px;padding-top:36px;}
 .r-xjggfu{padding-bottom:3px;padding-top:3px;}
 .r-ytbthy{padding-bottom:10px;padding-top:10px;}
 .r-z0qa68{padding-left:16.8px;padding-right:16.8px;}
@@ -260,6 +262,8 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-10v3vxq{transform:scaleX(-1);}
 .r-10x49cs{font-size:10px;}
 .r-10xqauy{padding-top:env(safe-area-inset-top);}
+.r-10yl4k{line-height:21px;}
+.r-116b19x{padding-left:40px;}
 .r-116b78n{color:rgba(255,255,255,0.85);}
 .r-116nhou{box-shadow:0px 2px 6px rgba(37,211,102,0.15);}
 .r-117bsoe{margin-bottom:20px;}
@@ -269,8 +273,10 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-11mo1y0{margin-bottom:7px;}
 .r-11mpjr4{background-color:rgba(223,223,223,1.00);}
 .r-11udlyb{background-color:rgba(0,150,136,1.00);}
+.r-11ujhjy{padding-bottom:22px;}
 .r-11v9fek{min-width:180px;}
 .r-11yh6sk{overflow-x:hidden;}
+.r-128vcen{font-size:50px;}
 .r-129l8ac{height:85%;}
 .r-12erymk{border-right-width:0.8px;}
 .r-12f6czt{top:17px;}
@@ -279,10 +285,9 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-12sm5po{letter-spacing:-0.3px;}
 .r-12vffkv>* {pointer-events:auto;}
 .r-12vffkv{pointer-events:none!important;}
+.r-131miar{padding-top:18px;}
 .r-131xog0{width:38px;}
 .r-135wba7{line-height:24px;}
-.r-135wwtq{background-color:rgba(246,249,247,1.00);}
-.r-139bd39{width:184px;}
 .r-13a208h{color:rgba(160,172,166,1.00);}
 .r-13aq9py{animation-name:r-1iq689l;}
 .r-13i4ljo{width:172px;}
@@ -295,7 +300,6 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1472mwg{height:24px;}
 .r-147sbnu{border-bottom-color:rgba(15,109,85,1.00);}
 .r-14gqq1x{margin-top:4px;}
-.r-14ijz5o{font-size:38px;}
 .r-14lw9ot{background-color:rgba(255,255,255,1.00);}
 .r-14n71q7{background-color:rgba(255,255,255,0.92);}
 .r-14nhqyt{color:rgba(74,93,87,1.00);}
@@ -313,14 +317,13 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1599tul{gap:3px;}
 .r-15d164r{margin-bottom:10px;}
 .r-15pr9z9{padding-right:16.8px;}
-.r-15ysp7h{min-height:32px;}
 .r-15zivkp{margin-bottom:4px;}
 .r-161ttwi{left:12px;}
 .r-163o072{background-color:rgba(15,109,85,0.08);}
 .r-164w8gm{color:rgba(137,151,144,1.00);}
 .r-1677hl4{top:6px;}
 .r-16860cj{background-color:rgba(232,238,236,1.00);}
-.r-16krg75{letter-spacing:-1px;}
+.r-169fny8{box-shadow:0px 1px 2px rgba(0,0,0,0.05);}
 .r-16okoll{opacity:0.82;}
 .r-16pcm1t{gap:20px;}
 .r-16uduqj{background-color:rgba(248,250,249,1.00);}
@@ -332,6 +335,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-172d8v1{border-top-color:rgba(11,26,23,0.08);}
 .r-173mn98{align-self:flex-end;}
 .r-173mzie{transform:scaleY(-1);}
+.r-174vidy{min-height:28px;}
 .r-1777fci{justify-content:center;}
 .r-17bb2tj{animation-duration:0.75s;}
 .r-17leim2{background-repeat:repeat;}
@@ -344,20 +348,23 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-17x6qj0{width:45%;}
 .r-1845tqf{border-bottom-width:2.5px;}
 .r-184en5c{z-index:1;}
-.r-18i18we{font-size:60px;}
+.r-18kv9lu{top:22px;}
+.r-18kxxzh{flex-grow:0;}
 .r-18nhz7w{top:-3px;}
 .r-18tzken{width:56px;}
 .r-18u1ve8{color:rgba(255,255,255,0.40);}
 .r-18u37iz{flex-direction:row;}
+.r-18xqfo6{right:22px;}
 .r-195d4m8{height:46px;}
+.r-198d08l{font-size:27px;}
 .r-199wky7{width:30px;}
 .r-19jf5ij{background-color:rgba(255,244,244,1.00);}
 .r-19lq7b1{top:16px;}
 .r-19nmmlc{background-color:rgba(0,207,146,1.00);}
 .r-19oahor{font-size:64px;}
+.r-19om4ov{flex-basis:48%;}
 .r-19qrga8{margin-top:3px;}
 .r-19qsa7v{gap:13px;}
-.r-19urhcx{padding-top:13px;}
 .r-19wmn03{width:20px;}
 .r-19yu4yl{padding-right:4.5px;}
 .r-19yznuf{min-height:52px;}
@@ -370,16 +377,17 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1aa9ipq{color:rgba(255,255,255,0.88);}
 .r-1abnn5w{animation-play-state:paused;}
 .r-1acpoxo{width:36px;}
-.r-1akm30i{line-height:13px;}
 .r-1aockid{width:40px;}
-.r-1armvtb{font-size:8px;}
+.r-1asdmkh{font-size:15.5px;}
 .r-1awozwy{align-items:center;}
 .r-1ay1djp{animation-duration:1s;}
+.r-1b2k2p3{border-bottom-color:rgba(11,26,23,0.06);}
 .r-1b43r93{font-size:14px;}
 .r-1b6yd1w{font-size:19px;}
 .r-1beipz4{background-color:rgba(238,243,241,1.00);}
 .r-1betnmo{max-width:672px;}
 .r-1bfwvb3{background-color:rgba(34,81,214,1.00);}
+.r-1bgnf4w{min-width:40%;}
 .r-1blnp2b{width:72px;}
 .r-1blvdjr{font-size:23px;}
 .r-1bq57o9{margin-top:-2px;}
@@ -393,12 +401,12 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1c8i11{min-width:60px;}
 .r-1c9u1y3{background-color:rgba(231,242,238,1.00);}
 .r-1cad53l{margin-bottom:14px;}
+.r-1ceczpf{min-height:24px;}
 .r-1ces89m{max-width:420px;}
 .r-1cgfkqw{font-family:PlusJakartaSans_800ExtraBold;}
 .r-1ciqxss{letter-spacing:-0.38px;}
 .r-1cmwbt1{gap:8px;}
 .r-1cnfj6b{box-shadow:0px 1px 4px rgba(0, 0, 0, 0.05);}
-.r-1cpgegm{line-height:41px;}
 .r-1ctr6rm{color:rgba(140,154,149,1.00);}
 .r-1cvj4g8{margin-top:1px;}
 .r-1cwl3u0{line-height:16px;}
@@ -406,10 +414,12 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1d2f490{left:0px;}
 .r-1d5kdc7{flex-direction:column-reverse;}
 .r-1dc68t7{border-bottom-width:0.8px;}
+.r-1dciyrv{height:170px;}
 .r-1ddef8g{-webkit-text-decoration-line:underline;text-decoration-line:underline;}
 .r-1dernwh{height:70%;}
 .r-1dfvkrz{letter-spacing:-0.95px;}
 .r-1diydf2{font-size:14.5px;}
+.r-1dn12g7{line-height:48px;}
 .r-1dpkw9{letter-spacing:0.3px;}
 .r-1duo419{max-height:96%;}
 .r-1e7him5{min-width:220px;}
@@ -421,6 +431,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1evsa4c{color:rgba(15,109,85,1.00);}
 .r-1ewcgjf{box-shadow:0px 1px 3px rgba(0,0,0,0.5);}
 .r-1ex07yu{opacity:0.78;}
+.r-1exf2r{font-size:9.5px;}
 .r-1ey881g{gap:7px;}
 .r-1f0cr8{transform:scale(0.98);}
 .r-1f12m5q{left:14px;}
@@ -443,13 +454,17 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1ghxqbu{font-variant:tabular-nums;}
 .r-1gkfh8e{font-size:11px;}
 .r-1glkqn6{width:80px;}
+.r-1grwqd5{font-size:12.5px;}
 .r-1gyjz5u{color:rgba(221,68,68,1.00);}
+.r-1gymjhz{width:68px;}
 .r-1h0z5md{justify-content:flex-start;}
+.r-1h8ys4a{padding-top:4px;}
 .r-1habvwh{align-items:flex-start;}
 .r-1hfyk0a{padding-left:10px;}
 .r-1hmxqee{margin-top:54px;}
 .r-1hn27dp{max-height:95%;}
 .r-1holuhd{font-family:Inter_800ExtraBold;}
+.r-1hqja3y{min-width:130px;}
 .r-1hsi953{min-height:180px;}
 .r-1hvjb8t{padding-right:4px;}
 .r-1hy97zq{padding-top:80px;}
@@ -464,11 +479,11 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1iln25a{word-wrap:normal;}
 .r-1inkyih{font-size:17px;}
 .r-1iolym3{background-color:rgba(11,26,23,0.82);}
-.r-1ip75l1{line-height:49px;}
 .r-1iud8zs{height:50px;}
 .r-1iusvr4{flex-basis:0px;}
 .r-1iww7jx{width:28px;}
 .r-1ixa6m7{top:35%;}
+.r-1j8sj39{line-height:33px;}
 .r-1janqcz{width:16px;}
 .r-1jfjq5a{color:rgba(220,38,38,1.00);}
 .r-1jg9483{width:8px;}
@@ -488,6 +503,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1ke4jpx{row-gap:6px;}
 .r-1kfrs79{font-weight:600;}
 .r-1kihuf0{align-self:center;}
+.r-1kjfbxo{background-color:rgba(231,242,238,0.50);}
 .r-1kl45b1{color:rgba(34,81,214,1.00);}
 .r-1knelpx{padding-top:20px;}
 .r-1kx9rxx{line-height:50.2px;}
@@ -501,7 +517,6 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1ljj7th{height:132px;}
 .r-1loqt21{cursor:pointer;}
 .r-1m04atk{padding-left:8px;}
-.r-1m1ebzj{font-size:33px;}
 .r-1mdbw0j{padding-bottom:0px;}
 .r-1mhb1uw{width:42px;}
 .r-1mlwlqe{flex-basis:auto;}
@@ -519,6 +534,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1ny4l3l{outline-style:none;}
 .r-1o100io{color:rgba(8,22,19,1.00);}
 .r-1o3jrms{background-color:rgba(250,251,251,1.00);}
+.r-1oa20y{max-width:80px;}
 .r-1ocf4r9{scroll-snap-type:y mandatory;}
 .r-1oji4za{width:30%;}
 .r-1onu96p{border-curve:continuous;}
@@ -542,10 +558,10 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1qat69b{opacity:0.96;}
 .r-1qd0xha{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
 .r-1qd7xl{top:12px;}
+.r-1qd80n2{flex-basis:21%;}
 .r-1qewag5{width:256px;}
 .r-1qfoi16{padding-right:10px;}
 .r-1qulhi1{animation-name:r-1pzkwqh;}
-.r-1qx62rd{-webkit-column-gap:24px;column-gap:24px;}
 .r-1r3d7ds{box-shadow:0px 0px 6px rgba(15,109,85,0.08);}
 .r-1r4fvd0{color:rgba(82,169,255,1.00);}
 .r-1r4t7k3{color:rgba(255,255,255,0.78);}
@@ -556,9 +572,9 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1rbvymc{line-height:50px;}
 .r-1rky07m{border-top-color:rgba(11,26,23,0.14);}
 .r-1rnoaur{overflow-y:auto;}
+.r-1rxb9bi{row-gap:4px;}
 .r-1s2bzr4{margin-top:12px;}
 .r-1s367qj{gap:11px;}
-.r-1s5i4rc{height:285px;}
 .r-1sfrq86{box-shadow:0px 10px 20px rgba(0,0,0,0.15);}
 .r-1sg05vv{background-color:rgba(243,250,247,1.00);}
 .r-1smd7e2{letter-spacing:0.8px;}
@@ -567,10 +583,11 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1sv84sj{padding-bottom:30px;}
 .r-1sxrcry{background-size:auto;}
 .r-1szzd3u{color:rgba(74,232,176,1.00);}
+.r-1t2hasf{padding-bottom:18px;}
 .r-1t70e42{background-color:rgba(37,211,102,1.00);}
 .r-1td4blj{box-shadow:0px 0px 8px rgba(15,109,85,0.10);}
 .r-1thvrfs{background-color:rgba(217,166,87,1.00);}
-.r-1tvmfnk{height:114px;}
+.r-1ty4vvm{left:40px;}
 .r-1u8kdu{bottom:24px;}
 .r-1udbk01{text-overflow:ellipsis;}
 .r-1ugchlj{height:44px;}
@@ -587,11 +604,13 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1vravvw{min-height:420px;}
 .r-1vsu8ta{min-height:30px;}
 .r-1vzvgu{border-top-width:0.8px;}
+.r-1w0ad5y{width:104px;}
 .r-1w69j0z{min-height:320px;}
 .r-1w6e6rj{flex-wrap:wrap;}
 .r-1w88a7h{width:220px;}
 .r-1wbh5a2{flex-shrink:1;}
 .r-1wngk81{max-width:980px;}
+.r-1ws2f5x{font-size:11.5px;}
 .r-1wtj0ep{justify-content:space-between;}
 .r-1wyyakw{z-index:-1;}
 .r-1wzrnnt{margin-top:16px;}
@@ -599,7 +618,6 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1x0uki6{margin-top:20px;}
 .r-1x35g6{font-size:24px;}
 .r-1x66iry{min-height:92px;}
-.r-1xbbgt2{letter-spacing:-1.8px;}
 .r-1xbve24{height:6px;}
 .r-1xcajam{position:fixed;}
 .r-1xlum0f{background-color:rgba(24,119,242,1.00);}
@@ -620,8 +638,8 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-1yvhtrz{width:32px;}
 .r-1yxedwg{top:8px;}
 .r-1yxhnot{min-height:480px;}
+.r-2agvir{line-height:34px;}
 .r-2amjay{max-width:1665px;}
-.r-2cl14b{letter-spacing:-2.5px;}
 .r-2e17l4{box-shadow:0px 25px 50px rgba(0,0,0,0.25);}
 .r-2eszeu::-webkit-scrollbar{display:none}
 .r-2eszeu{scrollbar-width:none;}
@@ -636,10 +654,9 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-39q6xx{top:48px;}
 .r-3b040n{letter-spacing:0.6px;}
 .r-3da1kt{height:8px;}
-.r-3i2nvb{font-size:36px;}
+.r-3e7lpq{min-width:100%;}
 .r-3lpwum{max-width:440px;}
 .r-3mc0re{right:8px;}
-.r-3mtglp{row-gap:16px;}
 .r-3qlxmk{color:rgba(107,125,120,1.00);}
 .r-3s2u2q{white-space:nowrap;}
 .r-3ucsff{letter-spacing:0.2px;}
@@ -647,7 +664,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-3yykes{background-color:rgba(11,26,23,0.08);}
 .r-3z9gw1{max-height:90%;}
 .r-417010{z-index:0;}
-.r-4e8qsg{letter-spacing:-2.2px;}
+.r-4d76ec{height:200px;}
 .r-4el1u1{gap:36px;}
 .r-4gszlv{background-size:cover;}
 .r-4h3a1q{background-color:rgba(11,26,23,0.40);}
@@ -669,26 +686,23 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-5t7p9m{padding-top:14px;}
 .r-6026j{background-color:rgba(255,255,255,0.85);}
 .r-60vfwk{min-width:1px;}
+.r-62p4ah{width:170px;}
 .r-633pao>* {pointer-events:none;}
 .r-633pao{pointer-events:none!important;}
-.r-69ddv2{background-color:rgba(226,245,237,0.48);}
 .r-6axsvj{min-height:340px;}
 .r-6dt33c{opacity:1;}
 .r-6gpygo{margin-bottom:12px;}
 .r-6kmigx{color:rgba(255,255,255,0.82);}
 .r-6moc30{line-height:54px;}
-.r-6p9vr8{width:85px;}
 .r-6st0mw{background-color:rgba(255,255,255,0.90);}
 .r-6taxm2:-ms-input-placeholder{color:var(--placeholderTextColor);opacity:1;}
 .r-6taxm2::-moz-placeholder{color:var(--placeholderTextColor);opacity:1;}
 .r-6taxm2::-webkit-input-placeholder{color:var(--placeholderTextColor);opacity:1;}
 .r-6taxm2::placeholder{color:var(--placeholderTextColor);opacity:1;}
 .r-726pan{width:31px;}
-.r-74jtu8{line-height:39px;}
 .r-76blku{height:21px;}
 .r-7a29px{width:64px;}
 .r-7cikom{font-size:inherit;}
-.r-7ezvna{letter-spacing:-3.6px;}
 .r-7l9xyp{background-color:rgba(255,255,255,0.20);}
 .r-7mdpej{max-width:360px;}
 .r-7p11b{color:rgba(255,255,255,0.75);}
@@ -705,7 +719,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-8hc5te{width:6px;}
 .r-8upyzv{width:260px;}
 .r-92ng3h{width:1px;}
-.r-9404uu{letter-spacing:-1.5px;}
+.r-934yyj{padding-left:34px;}
 .r-95jzfe{padding-top:16px;}
 .r-97e31f{padding-bottom:env(safe-area-inset-bottom);}
 .r-9aemit{padding-right:0px;}
@@ -713,10 +727,10 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-9daxd3{animation-duration:250ms;}
 .r-9f00t4{background-color:rgba(248,251,249,1.00);}
 .r-9njtsq{height:130px;}
-.r-9rh5za{height:184px;}
 .r-a023e6{font-size:15px;}
 .r-a1w0r5{width:48%;}
 .r-a2tzq0{justify-content:space-around;}
+.r-a5pmau{margin-right:2px;}
 .r-aaduuk{opacity:0.95;}
 .r-aao5de{background-color:rgba(155,173,163,1.00);}
 .r-ac34gu{border-right-color:rgba(11,26,23,0.05);}
@@ -731,13 +745,10 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-am3kiz{color:rgba(255,255,255,0.90);}
 .r-aruset{font-weight:200;}
 .r-ausclg{background-color:rgba(240,253,244,1.00);}
-.r-b1yau9{letter-spacing:-0.7px;}
 .r-b26j4k{color:rgba(255,255,255,0.92);}
-.r-b6sd5j{padding-bottom:25px;}
 .r-b88u0q{font-weight:700;}
 .r-b8lwoo{width:100px;}
 .r-bahu2v{color:rgba(22,101,52,1.00);}
-.r-bajy9j{height:230px;}
 .r-bcqeeo{min-width:0px;}
 .r-bgjw32{color:rgba(165,15,45,1.00);}
 .r-bgnin{min-width:150px;}
@@ -749,20 +760,21 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-buy8e9{overflow-y:hidden;}
 .r-bv2aro{padding-left:env(safe-area-inset-left);}
 .r-bzilt{min-width:125px;}
-.r-c4c50z{letter-spacing:-0.6px;}
+.r-c540o3{bottom:22px;}
 .r-c68hjy{color:rgba(161,161,161,1.00);}
 .r-c9eks5{padding-right:18px;}
 .r-ccneqy{color:rgba(96,113,107,1.00);}
-.r-ch3q5j{left:42px;}
 .r-cpa5s6{scroll-snap-align:start;}
 .r-cqee49{color:rgba(0,0,0,1.00);}
 .r-cqzzvf{border-top-right-radius:20px;}
+.r-cv586b{min-width:48%;}
 .r-cwd8qu{width:41px;}
 .r-d0c3f3{margin-top:50px;}
 .r-d9jaho{left:6px;}
 .r-d9xt4j{color:rgba(82,99,94,1.00);}
 .r-dfe81l{min-height:46px;}
 .r-dkge59{background-color:rgba(170,184,194,1.00);}
+.r-dmk0t2{row-gap:32px;}
 .r-dmk1x5{color:rgba(152,165,159,1.00);}
 .r-dnmrzs{max-width:100%;}
 .r-dr54s0{margin-bottom:13px;}
@@ -776,29 +788,24 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-ehq7j7{background-size:contain;}
 .r-ek4qxl{min-width:260px;}
 .r-epq5cr{height:2px;}
-.r-eqo98v{top:24px;}
 .r-eqz5dr{flex-direction:column;}
 .r-ero68b{min-height:40px;}
 .r-eu3ka{height:40px;}
 .r-evnaw{font-size:22px;}
 .r-f1odvy{margin-bottom:6px;}
 .r-f1w8kp{border-top-left-radius:20px;}
-.r-f2mvze{letter-spacing:-0.8px;}
 .r-f4gmv6{gap:16px;}
-.r-f6ua0u{letter-spacing:-2.1px;}
 .r-f727ji{padding-left:12px;}
+.r-f9274a{left:22px;}
 .r-fd4yh7{padding-top:32px;}
 .r-fdjqy7{text-align:left;}
 .r-fl1hpu{color:rgba(212,24,61,1.00);}
 .r-fnigne{border-right-width:0px;}
 .r-foe95m{letter-spacing:-0.4px;}
-.r-fv37au{padding-left:42px;}
 .r-fxxt2n{line-height:15px;}
 .r-fzohbp{color:rgba(92,107,102,1.00);}
 .r-g3mlsw{animation-name:r-t2lo5v;}
 .r-ghxds0{transform:translateY(0%);}
-.r-gjtt5x{margin-top:21px;}
-.r-glunga{padding-top:5px;}
 .r-gtdqiz{position:-webkit-sticky;position:sticky;}
 .r-gy4na3{padding-left:0px;}
 .r-h0d30l{height:28px;}
@@ -818,25 +825,22 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-hxflta{padding-right:env(safe-area-inset-right);}
 .r-hzcoqn{max-width:510px;}
 .r-i03k3n{padding-bottom:14px;}
-.r-i5ea98{margin-left:60px;}
 .r-icoktb{opacity:0.5;}
 .r-icto9i{letter-spacing:-0.5px;}
 .r-icxjq6{opacity:0.85;}
-.r-ie3wiu{width:650px;}
 .r-ifefl9{min-height:0px;}
 .r-io04ft{height:94px;}
 .r-ip21x2{min-height:41px;}
 .r-ipm5af{top:0px;}
 .r-ipub7v{min-height:88px;}
 .r-irdyr2{background-color:rgba(255,255,255,0.25);}
-.r-j6daep{height:209.4px;}
 .r-j7q5x7{min-height:330px;}
 .r-jjmaes{max-width:760px;}
 .r-jumn1c{bottom:-1px;}
 .r-jv1ppg{margin-top:36px;}
 .r-jwli3a{color:rgba(255,255,255,1.00);}
-.r-jxjwwx{left:24px;}
 .r-k200y{align-self:flex-start;}
+.r-k73bfn{-webkit-column-gap:20px;column-gap:20px;}
 .r-k8qxaj{padding-bottom:20px;}
 .r-kc8jnq{margin-top:6px;}
 .r-kemksi{background-color:rgba(0,0,0,1.00);}
@@ -860,6 +864,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-mabqd8{height:32px;}
 .r-majxgm{font-weight:500;}
 .r-mdk239{height:325px;}
+.r-me5xia{height:104px;}
 .r-meisx5{width:19px;}
 .r-mfh4gg{scroll-snap-type:x mandatory;}
 .r-mg3oao{background-color:rgba(244,249,247,1.00);}
@@ -871,7 +876,6 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-mro3nb{background-color:rgba(21,23,24,1.00);}
 .r-ms8t9i{border-left-width:3px;}
 .r-n3sdqm{padding-right:14px;}
-.r-n5msql{min-height:460px;}
 .r-n61qyd{background-color:rgba(232,238,252,1.00);}
 .r-n6v787{font-size:13px;}
 .r-n7aj9u{background-color:rgba(255,255,255,0.80);}
@@ -889,27 +893,29 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-obd0qt{align-items:flex-end;}
 .r-oho8x9{border-top-right-radius:24px;}
 .r-ojf8lh{gap:6px;}
-.r-om8m7q{letter-spacing:-3.1px;}
 .r-op3p1c{width:520px;}
 .r-opfehf{flex-basis:48.5%;}
 .r-oqe911{left:40%;}
 .r-orgf3d{opacity:0;}
 .r-oucylx{border-bottom-color:rgba(0,0,0,0.00);}
+.r-oxtfae{letter-spacing:0px;}
 .r-oyptcs{width:330px;}
 .r-p1pxzi{margin-bottom:0px;}
 .r-p2pvxb{box-shadow:0px 2px 6px rgba(37,211,102,0.20);}
+.r-pcx3i2{max-width:48.5%;}
 .r-peo1c{min-height:44px;}
-.r-psjefw{margin-top:9px;}
+.r-pfqljz{min-width:200px;}
 .r-q4m81j{text-align:center;}
+.r-q79j{min-width:48.5%;}
 .r-qfi6ny{top:30000px;}
 .r-qklmqi{border-bottom-width:1px;}
 .r-qn3fzs{padding-bottom:24px;}
 .r-qopk4i{max-width:448px;}
 .r-qqjak8{font-size:9px;}
 .r-qtcq6h{background-color:rgba(11,26,23,0.12);}
+.r-qtfnoi{min-width:140px;}
 .r-qu4leh{min-height:74px;}
 .r-r2ppx5{color:rgba(95,113,103,1.00);}
-.r-rfq24y{font-size:52px;}
 .r-rjixqe{line-height:20px;}
 .r-rki7wi{bottom:12px;}
 .r-rpnbwx{margin-top:13px;}
@@ -924,7 +930,7 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-si415q{height:157px;}
 .r-sjivec{max-height:92%;}
 .r-so7y2g{line-height:64px;}
-.r-suhe1l{font-size:46px;}
+.r-ss4zfz{height:260px;}
 .r-t06nfe{background-color:rgba(244,246,245,1.00);}
 .r-tbmifm{height:12px;}
 .r-tceitz{left:16px;}
@@ -939,7 +945,6 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-u08qam{background-color:rgba(11,26,23,1.00);}
 .r-u33jf4{min-height:95px;}
 .r-u6sd8q{background-repeat:no-repeat;}
-.r-u8a1cj{line-height:61px;}
 .r-u8s1d{position:absolute;}
 .r-u92y06{background-color:rgba(255,165,0,1.00);}
 .r-uaa2di{gap:10px;}
@@ -955,11 +960,11 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-v53qcl{width:94px;}
 .r-v9s95q{border-left-color:rgba(15,109,85,1.00);}
 .r-vacyoi{padding-bottom:64px;}
+.r-vakc41{max-width:550px;}
 .r-vampta{max-width:95%;}
 .r-van48c{caret-color:transparent;}
 .r-vbi3md{font-size:13.5px;}
 .r-vboj7i{top:-7px;}
-.r-vgjmkd{margin-top:45px;}
 .r-vjl3ol{min-height:495px;}
 .r-vo4d95{max-width:680px;}
 .r-vqwk0k{background-color:rgba(15,109,85,1.00);}
@@ -982,15 +987,14 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 .r-x3cy2q{background-size:100% 100%;}
 .r-xd6kpl{padding-bottom:8px;}
 .r-xj4fhj{top:13px;}
+.r-xnfwke{line-height:38px;}
 .r-xpkm2g{border-bottom-color:rgba(11,26,23,0.08);}
 .r-xx3c9p{animation-name:r-imtty0;}
 .r-xze5tk{color:rgba(208,111,95,1.00);}
 .r-y46g1k{width:240px;}
-.r-y4zi3t{width:114px;}
 .r-y7v2we{background-color:rgba(32,36,37,1.00);}
 .r-y8nl5v{padding-left:14px;}
 .r-ybsjkg{border-right-color:rgba(11,26,23,0.08);}
-.r-yj30ev{right:24px;}
 .r-yp55cy{max-width:1600px;}
 .r-ys8793{box-shadow:0px 12px 18px rgba(0,0,0,0.10);}
 .r-ytfskt{min-width:90px;}
@@ -1023,5 +1027,5 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
 @font-face{font-family:"Inter_800ExtraBold";src:url("/assets/node_modules/@expo-google-fonts/inter/800ExtraBold/Inter_800ExtraBold.6016034293c084aa0c056e83938bf1cc.ttf");font-display:auto}
 @font-face{font-family:"PlusJakartaSans_600SemiBold";src:url("/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/600SemiBold/PlusJakartaSans_600SemiBold.73de6fb49299ccb6478575127008c120.ttf");font-display:auto}
 @font-face{font-family:"PlusJakartaSans_700Bold";src:url("/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/700Bold/PlusJakartaSans_700Bold.bac8ecad2d6da4aa6b4200699a80a9dd.ttf");font-display:auto}
-@font-face{font-family:"PlusJakartaSans_800ExtraBold";src:url("/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/800ExtraBold/PlusJakartaSans_800ExtraBold.f90855567d2c693a26e66f7184645099.ttf");font-display:auto}</style><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.51b6ad87261f18b6433ec52871ddfabc.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.137ab18bace28dd0bd83eb3b8ed2bc54.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.a5f35888d2da465de352e0dcfaf33324.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.6e237de4f1f413afa2fcc45c77ac343a.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/800ExtraBold/Inter_800ExtraBold.6016034293c084aa0c056e83938bf1cc.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/600SemiBold/PlusJakartaSans_600SemiBold.73de6fb49299ccb6478575127008c120.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/700Bold/PlusJakartaSans_700Bold.bac8ecad2d6da4aa6b4200699a80a9dd.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/800ExtraBold/PlusJakartaSans_800ExtraBold.f90855567d2c693a26e66f7184645099.ttf" as="font" crossorigin="" /><script type="module">globalThis.__EXPO_ROUTER_HYDRATE__=true;</script></head><body><div id="root"><div class="css-g5y9jx r-13awgt0"><!--$--><div class="css-g5y9jx r-13awgt0"><div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;visibility:hidden"></div><div class="css-g5y9jx r-13awgt0"><div class="css-g5y9jx r-13awgt0 r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="background-color:rgba(242,242,242,1.00);display:flex"><div class="css-g5y9jx r-13awgt0"><div class="css-g5y9jx r-13awgt0" style="background-color:rgba(248,250,249,1.00)"><!--$--><div class="css-g5y9jx r-16uduqj r-13awgt0 r-18u37iz r-13qz1uu"><div class="css-g5y9jx r-14lw9ot r-ybsjkg r-12erymk r-dd0y9b r-3pj75a r-1qewag5"><div class="css-g5y9jx r-f4gmv6 r-1ifxtd0 r-is05cd"><div class="css-g5y9jx r-1awozwy r-18u37iz r-1cmwbt1"><div class="css-g5y9jx r-1awozwy r-vqwk0k r-6ncur5 r-1r8g8re r-1777fci r-1acpoxo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 12h4"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 8h4"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 21v-3a2 2 0 0 0-4 0v3"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"></path></svg></div><div dir="auto" class="css-146c3p1 r-170hcd r-1holuhd r-1i10wst">Home<span class="css-1jxf684 r-1evsa4c">net</span></div></div><div class="css-g5y9jx r-1awozwy r-n61qyd r-cpet4d r-cnw61z r-3o4zer"><div dir="auto" class="css-146c3p1 r-1kl45b1 r-1bxoz39 r-1enofrn">Seller Dashboard</div></div></div><div class="css-g5y9jx r-150rngu r-eqz5dr r-16y2uox r-1wbh5a2 r-11yh6sk r-1rnoaur r-agouwx r-2eszeu"><div class="css-g5y9jx r-z5qs1h r-11f147o"><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="7" height="9" x="3" y="3" rx="1"></rect><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="7" height="5" x="14" y="3" rx="1"></rect><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="7" height="9" x="14" y="12" rx="1"></rect><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="7" height="5" x="3" y="16" rx="1"></rect></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Dashboard</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 12h4"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 8h4"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 21v-3a2 2 0 0 0-4 0v3"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">My Listings</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer r-1c9u1y3" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F6D55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle fill="none" stroke="#0F6D55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="10"></circle><path fill="none" stroke="#0F6D55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 12h8"></path><path fill="none" stroke="#0F6D55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v8"></path></svg><div dir="auto" class="css-146c3p1 r-13awgt0 r-1b43r93 r-1evsa4c r-1fx275y">Create Property</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Verification</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Boost Listings</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 2v4"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 4h-4"></path><circle fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="4" cy="20" r="2"></circle></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">AI Insights</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 21v-6"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21V3"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21V9"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Analytics</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="14" x="2" y="5" rx="2"></rect><line fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" x1="2" x2="22" y1="10" y2="10"></line></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Payments</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10.268 21a2 2 0 0 0 3.464 0"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Notifications</div><div class="css-g5y9jx r-1awozwy r-5lwox1 r-1dzdj1l r-z80fyv r-1777fci r-19wmn03"><div dir="auto" class="css-146c3p1 r-jwli3a r-1fx275y r-1enofrn">3</div></div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="7" r="4"></circle></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Profile</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="3"></circle></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Settings</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="10"></circle><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 17h.01"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Help Center</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer r-knv0ih" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4183D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#D4183D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m16 17 5-5-5-5"></path><path fill="none" stroke="#D4183D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12H9"></path><path fill="none" stroke="#D4183D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg><div dir="auto" class="css-146c3p1 r-13awgt0 r-1bxoz39 r-1b43r93 r-fl1hpu">Logout</div></div></div></div></div><div class="css-g5y9jx r-13awgt0 r-eqz5dr r-bcqeeo"><div class="css-g5y9jx r-1awozwy r-14n71q7 r-xpkm2g r-1dc68t7 r-18u37iz r-1wtj0ep r-adacv r-1mmae3n r-cxgwc0"><div dir="auto" class="css-146c3p1 r-170hcd r-1holuhd r-1b6yd1w r-1ciqxss">Create Property</div><div class="css-g5y9jx r-1awozwy r-18u37iz r-1ssbvtb"><div class="css-g5y9jx r-1awozwy r-t06nfe r-ltt5tk r-cpet4d r-m2f38z r-18u37iz r-1cmwbt1 r-1a8msfu r-u4gi5m r-1qewag5"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(11,26,23,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="rgba(11,26,23,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.34-4.34"></path><circle fill="none" stroke="rgba(11,26,23,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="11" cy="11" r="8"></circle></svg><input placeholder="Search listings…" autoCapitalize="sentences" autoComplete="on" autoCorrect="on" dir="auto" rows="1" spellCheck="true" virtualkeyboardpolicy="auto" class="css-11aywtz r-6taxm2 r-170hcd r-13awgt0 r-vsb09d r-1b43r93" style="--placeholderTextColor:rgba(11,26,23,0.5)" value=""/></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-ltt5tk r-y47klf r-m2f38z r-eu3ka r-1777fci r-bnwqim r-1aockid" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10.268 21a2 2 0 0 0 3.464 0"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg><div class="css-g5y9jx r-5lwox1 r-z2wwpe r-3da1kt r-u8s1d r-3mc0re r-1yxedwg r-1jg9483"></div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-ltt5tk r-cpet4d r-m2f38z r-18u37iz r-1cmwbt1 r-1a8msfu r-gu64tb" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="10"></circle><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 12h20"></path></svg><div dir="auto" class="css-146c3p1 r-170hcd r-1bxoz39 r-1b43r93">View site</div></div></div></div><div class="css-g5y9jx r-150rngu r-eqz5dr r-16y2uox r-1wbh5a2 r-11yh6sk r-1rnoaur r-agouwx r-2eszeu"><div class="css-g5y9jx r-16pcm1t r-d23pfw"><div class="css-g5y9jx r-1awozwy r-1777fci r-ytbthy"><div class="css-g5y9jx r-1awozwy r-18u37iz r-1ye8kvj r-13qz1uu"><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo r-14lw9ot r-hpp454" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-1fx275y r-1b43r93 r-1evsa4c">1</div></div><div dir="auto" class="css-146c3p1 r-1enofrn r-170hcd r-1fx275y">Basics</div></div><div class="css-g5y9jx r-qtcq6h r-13awgt0 r-epq5cr r-117bsoe r-8dgmk1"></div></div><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-t06nfe r-1o29zwn r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-fzohbp r-1fx275y r-1b43r93">2</div></div><div dir="auto" class="css-146c3p1 r-fzohbp r-vsb09d r-1enofrn">Details</div></div><div class="css-g5y9jx r-qtcq6h r-13awgt0 r-epq5cr r-117bsoe r-8dgmk1"></div></div><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-t06nfe r-1o29zwn r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-fzohbp r-1fx275y r-1b43r93">3</div></div><div dir="auto" class="css-146c3p1 r-fzohbp r-vsb09d r-1enofrn">Location</div></div><div class="css-g5y9jx r-qtcq6h r-13awgt0 r-epq5cr r-117bsoe r-8dgmk1"></div></div><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-t06nfe r-1o29zwn r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-fzohbp r-1fx275y r-1b43r93">4</div></div><div dir="auto" class="css-146c3p1 r-fzohbp r-vsb09d r-1enofrn">Media</div></div><div class="css-g5y9jx r-qtcq6h r-13awgt0 r-epq5cr r-117bsoe r-8dgmk1"></div></div><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-t06nfe r-1o29zwn r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-fzohbp r-1fx275y r-1b43r93">5</div></div><div dir="auto" class="css-146c3p1 r-fzohbp r-vsb09d r-1enofrn">Review</div></div></div></div></div><div class="css-g5y9jx r-14lw9ot r-ltt5tk r-1fuqb1j r-m2f38z r-1fdih9r r-494qqr"><div class="css-g5y9jx r-16pcm1t"><div class="css-g5y9jx r-1cmwbt1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Property Title</div><input placeholder="e.g. Premium 3 Bedroom Apartment" autoCapitalize="sentences" autoComplete="on" autoCorrect="on" dir="auto" rows="1" spellCheck="true" virtualkeyboardpolicy="auto" class="css-11aywtz r-6taxm2 r-t06nfe r-1q9bdsx r-170hcd r-vsb09d r-1b43r93 r-h3s6tt r-3pj75a" style="--placeholderTextColor:#899790" value=""/></div><div class="css-g5y9jx r-1cmwbt1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Property category</div><div class="css-g5y9jx r-t06nfe r-1q9bdsx r-18u37iz r-h3s6tt r-tuq35u"><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci r-14lw9ot"><div dir="auto" class="css-146c3p1 r-1bxoz39 r-1b43r93 r-1evsa4c">Residential</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci"><div dir="auto" class="css-146c3p1 r-fzohbp r-1bxoz39 r-1b43r93">Commercial</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci"><div dir="auto" class="css-146c3p1 r-fzohbp r-1bxoz39 r-1b43r93">Land</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci"><div dir="auto" class="css-146c3p1 r-fzohbp r-1bxoz39 r-1b43r93">Parking</div></div></div></div><div class="css-g5y9jx r-18u37iz r-f4gmv6"><div class="css-g5y9jx r-1cmwbt1" style="flex:1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Subtype</div><input placeholder="e.g. Apartment / House / Commercial" autoCapitalize="sentences" autoComplete="on" autoCorrect="on" dir="auto" rows="1" spellCheck="true" virtualkeyboardpolicy="auto" class="css-11aywtz r-6taxm2 r-t06nfe r-1q9bdsx r-170hcd r-vsb09d r-1b43r93 r-h3s6tt r-3pj75a" style="--placeholderTextColor:#899790" value=""/></div><div class="css-g5y9jx r-1cmwbt1" style="flex:1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Listing Purpose</div><div class="css-g5y9jx r-t06nfe r-1q9bdsx r-18u37iz r-h3s6tt r-tuq35u"><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci r-14lw9ot"><div dir="auto" class="css-146c3p1 r-1bxoz39 r-1b43r93 r-1evsa4c">For Sale</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci"><div dir="auto" class="css-146c3p1 r-fzohbp r-1bxoz39 r-1b43r93">For Rent</div></div></div></div></div><div class="css-g5y9jx r-1cmwbt1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Description</div><textarea placeholder="Describe your property details, condition, and key features..." autoCapitalize="sentences" autoComplete="on" autoCorrect="on" dir="auto" rows="4" spellCheck="true" virtualkeyboardpolicy="auto" class="css-11aywtz r-6taxm2 r-t06nfe r-1q9bdsx r-170hcd r-vsb09d r-1b43r93 r-3pj75a" style="--placeholderTextColor:#899790;height:100px;vertical-align:top"></textarea></div></div><div class="css-g5y9jx r-1awozwy r-172d8v1 r-1vzvgu r-18u37iz r-1wtj0ep r-95jzfe"><div class="css-g5y9jx"></div><div class="css-g5y9jx r-1awozwy r-18u37iz r-1ssbvtb"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-azzjac r-cpet4d r-m2f38z r-18u37iz r-ojf8lh r-eu3ka r-284m6k" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 12h4"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 8h4"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 21v-3a2 2 0 0 0-4 0v3"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"></path></svg><div dir="auto" class="css-146c3p1 r-170hcd r-1bxoz39 r-1b43r93">Save draft</div></div><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-vqwk0k r-cpet4d r-18u37iz r-1cmwbt1 r-eu3ka r-h0bjfv" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-jwli3a r-1bxoz39 r-1b43r93">Next</div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg)"><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m12 19-7-7 7-7" style="transform:rotate(180deg)"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5" style="transform:rotate(180deg)"></path></svg></div></div></div></div></div></div></div></div><!--/$--></div></div></div></div></div><!--/$--></div></div><script src="/_expo/static/js/web/entry-02f69e80d61b3e644b2d43b9fbe19b0c.js" defer></script>
+@font-face{font-family:"PlusJakartaSans_800ExtraBold";src:url("/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/800ExtraBold/PlusJakartaSans_800ExtraBold.f90855567d2c693a26e66f7184645099.ttf");font-display:auto}</style><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.51b6ad87261f18b6433ec52871ddfabc.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.137ab18bace28dd0bd83eb3b8ed2bc54.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.a5f35888d2da465de352e0dcfaf33324.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.6e237de4f1f413afa2fcc45c77ac343a.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/inter/800ExtraBold/Inter_800ExtraBold.6016034293c084aa0c056e83938bf1cc.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/600SemiBold/PlusJakartaSans_600SemiBold.73de6fb49299ccb6478575127008c120.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/700Bold/PlusJakartaSans_700Bold.bac8ecad2d6da4aa6b4200699a80a9dd.ttf" as="font" crossorigin="" /><link rel="preload" href="/assets/node_modules/@expo-google-fonts/plus-jakarta-sans/800ExtraBold/PlusJakartaSans_800ExtraBold.f90855567d2c693a26e66f7184645099.ttf" as="font" crossorigin="" /><script type="module">globalThis.__EXPO_ROUTER_HYDRATE__=true;</script></head><body><div id="root"><div class="css-g5y9jx r-13awgt0"><!--$--><div class="css-g5y9jx r-13awgt0"><div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;visibility:hidden"></div><div class="css-g5y9jx r-13awgt0"><div class="css-g5y9jx r-13awgt0 r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="background-color:rgba(242,242,242,1.00);display:flex"><div class="css-g5y9jx r-13awgt0"><div class="css-g5y9jx r-13awgt0" style="background-color:rgba(248,250,249,1.00)"><!--$--><div class="css-g5y9jx r-16uduqj r-13awgt0 r-18u37iz r-13qz1uu"><div class="css-g5y9jx r-14lw9ot r-ybsjkg r-12erymk r-dd0y9b r-3pj75a r-1qewag5"><div class="css-g5y9jx r-f4gmv6 r-1ifxtd0 r-is05cd"><div class="css-g5y9jx r-1awozwy r-18u37iz r-1cmwbt1"><div class="css-g5y9jx r-1awozwy r-vqwk0k r-6ncur5 r-1r8g8re r-1777fci r-1acpoxo"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 12h4"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 8h4"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 21v-3a2 2 0 0 0-4 0v3"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"></path></svg></div><div dir="auto" class="css-146c3p1 r-170hcd r-1holuhd r-1i10wst">Home<span class="css-1jxf684 r-1evsa4c">net</span></div></div><div class="css-g5y9jx r-1awozwy r-n61qyd r-cpet4d r-cnw61z r-3o4zer"><div dir="auto" class="css-146c3p1 r-1kl45b1 r-1bxoz39 r-1enofrn">Seller Dashboard</div></div></div><div class="css-g5y9jx r-150rngu r-eqz5dr r-16y2uox r-1wbh5a2 r-11yh6sk r-1rnoaur r-agouwx r-2eszeu"><div class="css-g5y9jx r-z5qs1h r-11f147o"><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="7" height="9" x="3" y="3" rx="1"></rect><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="7" height="5" x="14" y="3" rx="1"></rect><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="7" height="9" x="14" y="12" rx="1"></rect><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="7" height="5" x="3" y="16" rx="1"></rect></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Dashboard</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 12h4"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 8h4"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 21v-3a2 2 0 0 0-4 0v3"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">My Listings</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer r-1c9u1y3" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F6D55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle fill="none" stroke="#0F6D55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="10"></circle><path fill="none" stroke="#0F6D55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 12h8"></path><path fill="none" stroke="#0F6D55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v8"></path></svg><div dir="auto" class="css-146c3p1 r-13awgt0 r-1b43r93 r-1evsa4c r-1fx275y">Create Property</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 12 2 2 4-4"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Verification</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Boost Listings</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 2v4"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 4h-4"></path><circle fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="4" cy="20" r="2"></circle></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">AI Insights</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 21v-6"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21V3"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21V9"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Analytics</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="14" x="2" y="5" rx="2"></rect><line fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" x1="2" x2="22" y1="10" y2="10"></line></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Payments</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10.268 21a2 2 0 0 0 3.464 0"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Notifications</div><div class="css-g5y9jx r-1awozwy r-5lwox1 r-1dzdj1l r-z80fyv r-1777fci r-19wmn03"><div dir="auto" class="css-146c3p1 r-jwli3a r-1fx275y r-1enofrn">3</div></div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="7" r="4"></circle></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Profile</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="3"></circle></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Settings</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="10"></circle><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path fill="none" stroke="#5C6B66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 17h.01"></path></svg><div dir="auto" class="css-146c3p1 r-fzohbp r-13awgt0 r-1bxoz39 r-1b43r93">Help Center</div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1q9bdsx r-18u37iz r-1ssbvtb r-5prp13 r-ytbthy r-3o4zer r-knv0ih" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4183D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#D4183D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m16 17 5-5-5-5"></path><path fill="none" stroke="#D4183D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12H9"></path><path fill="none" stroke="#D4183D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg><div dir="auto" class="css-146c3p1 r-13awgt0 r-1bxoz39 r-1b43r93 r-fl1hpu">Logout</div></div></div></div></div><div class="css-g5y9jx r-13awgt0 r-eqz5dr r-bcqeeo"><div class="css-g5y9jx r-1awozwy r-14n71q7 r-xpkm2g r-1dc68t7 r-18u37iz r-1wtj0ep r-adacv r-1mmae3n r-cxgwc0"><div dir="auto" class="css-146c3p1 r-170hcd r-1holuhd r-1b6yd1w r-1ciqxss">Create Property</div><div class="css-g5y9jx r-1awozwy r-18u37iz r-1ssbvtb"><div class="css-g5y9jx r-1awozwy r-t06nfe r-ltt5tk r-cpet4d r-m2f38z r-18u37iz r-1cmwbt1 r-1a8msfu r-u4gi5m r-1qewag5"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(11,26,23,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="rgba(11,26,23,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.34-4.34"></path><circle fill="none" stroke="rgba(11,26,23,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="11" cy="11" r="8"></circle></svg><input placeholder="Search listings…" autoCapitalize="sentences" autoComplete="on" autoCorrect="on" dir="auto" rows="1" spellCheck="true" virtualkeyboardpolicy="auto" class="css-11aywtz r-6taxm2 r-170hcd r-13awgt0 r-vsb09d r-1b43r93" style="--placeholderTextColor:rgba(11,26,23,0.5)" value=""/></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-ltt5tk r-y47klf r-m2f38z r-eu3ka r-1777fci r-bnwqim r-1aockid" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10.268 21a2 2 0 0 0 3.464 0"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg><div class="css-g5y9jx r-5lwox1 r-z2wwpe r-3da1kt r-u8s1d r-3mc0re r-1yxedwg r-1jg9483"></div></div><div role="link" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-ltt5tk r-cpet4d r-m2f38z r-18u37iz r-1cmwbt1 r-1a8msfu r-gu64tb" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cx="12" cy="12" r="10"></circle><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 12h20"></path></svg><div dir="auto" class="css-146c3p1 r-170hcd r-1bxoz39 r-1b43r93">View site</div></div></div></div><div class="css-g5y9jx r-150rngu r-eqz5dr r-16y2uox r-1wbh5a2 r-11yh6sk r-1rnoaur r-agouwx r-2eszeu"><div class="css-g5y9jx r-16pcm1t r-d23pfw"><div class="css-g5y9jx r-1awozwy r-1777fci r-ytbthy"><div class="css-g5y9jx r-1awozwy r-18u37iz r-1ye8kvj r-13qz1uu"><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo r-14lw9ot r-hpp454" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-1fx275y r-1b43r93 r-1evsa4c">1</div></div><div dir="auto" class="css-146c3p1 r-1enofrn r-170hcd r-1fx275y">Basics</div></div><div class="css-g5y9jx r-qtcq6h r-13awgt0 r-epq5cr r-117bsoe r-8dgmk1"></div></div><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-t06nfe r-1o29zwn r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-fzohbp r-1fx275y r-1b43r93">2</div></div><div dir="auto" class="css-146c3p1 r-fzohbp r-vsb09d r-1enofrn">Details</div></div><div class="css-g5y9jx r-qtcq6h r-13awgt0 r-epq5cr r-117bsoe r-8dgmk1"></div></div><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-t06nfe r-1o29zwn r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-fzohbp r-1fx275y r-1b43r93">3</div></div><div dir="auto" class="css-146c3p1 r-fzohbp r-vsb09d r-1enofrn">Location</div></div><div class="css-g5y9jx r-qtcq6h r-13awgt0 r-epq5cr r-117bsoe r-8dgmk1"></div></div><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-t06nfe r-1o29zwn r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-fzohbp r-1fx275y r-1b43r93">4</div></div><div dir="auto" class="css-146c3p1 r-fzohbp r-vsb09d r-1enofrn">Media</div></div><div class="css-g5y9jx r-qtcq6h r-13awgt0 r-epq5cr r-117bsoe r-8dgmk1"></div></div><div class="css-g5y9jx r-1awozwy r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-1awozwy r-ojf8lh"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-t06nfe r-1o29zwn r-6ncur5 r-1rf8fdq r-1r8g8re r-1777fci r-1acpoxo" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-fzohbp r-1fx275y r-1b43r93">5</div></div><div dir="auto" class="css-146c3p1 r-fzohbp r-vsb09d r-1enofrn">Review</div></div></div></div></div><div class="css-g5y9jx r-14lw9ot r-ltt5tk r-1fuqb1j r-m2f38z r-1fdih9r r-494qqr"><div class="css-g5y9jx r-16pcm1t"><div class="css-g5y9jx r-1cmwbt1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Property Title</div><input placeholder="e.g. Premium 3 Bedroom Apartment" autoCapitalize="sentences" autoComplete="on" autoCorrect="on" dir="auto" rows="1" spellCheck="true" virtualkeyboardpolicy="auto" class="css-11aywtz r-6taxm2 r-t06nfe r-1q9bdsx r-170hcd r-vsb09d r-1b43r93 r-h3s6tt r-3pj75a" style="--placeholderTextColor:#899790" value=""/></div><div class="css-g5y9jx r-1cmwbt1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Property category</div><div class="css-g5y9jx r-t06nfe r-1q9bdsx r-18u37iz r-h3s6tt r-tuq35u"><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci r-14lw9ot"><div dir="auto" class="css-146c3p1 r-1bxoz39 r-1b43r93 r-1evsa4c">Residential</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci"><div dir="auto" class="css-146c3p1 r-fzohbp r-1bxoz39 r-1b43r93">Commercial</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci"><div dir="auto" class="css-146c3p1 r-fzohbp r-1bxoz39 r-1b43r93">Land</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci"><div dir="auto" class="css-146c3p1 r-fzohbp r-1bxoz39 r-1b43r93">Parking</div></div></div></div><div class="css-g5y9jx r-18u37iz r-f4gmv6"><div class="css-g5y9jx r-1cmwbt1" style="flex:1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Subtype</div><input placeholder="e.g. Apartment / House / Commercial" autoCapitalize="sentences" autoComplete="on" autoCorrect="on" dir="auto" rows="1" spellCheck="true" virtualkeyboardpolicy="auto" class="css-11aywtz r-6taxm2 r-t06nfe r-1q9bdsx r-170hcd r-vsb09d r-1b43r93 r-h3s6tt r-3pj75a" style="--placeholderTextColor:#899790" value=""/></div><div class="css-g5y9jx r-1cmwbt1" style="flex:1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Listing Purpose</div><div class="css-g5y9jx r-t06nfe r-1q9bdsx r-18u37iz r-h3s6tt r-tuq35u"><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci r-14lw9ot"><div dir="auto" class="css-146c3p1 r-1bxoz39 r-1b43r93 r-1evsa4c">For Sale</div></div><div tabindex="0" class="css-g5y9jx r-1loqt21 r-1otgn73 r-1awozwy r-1xfd6ze r-13awgt0 r-1777fci"><div dir="auto" class="css-146c3p1 r-fzohbp r-1bxoz39 r-1b43r93">For Rent</div></div></div></div></div><div class="css-g5y9jx r-1cmwbt1"><div dir="auto" class="css-146c3p1 r-170hcd r-1fx275y r-1b43r93">Description</div><textarea placeholder="Describe your property details, condition, and key features..." autoCapitalize="sentences" autoComplete="on" autoCorrect="on" dir="auto" rows="4" spellCheck="true" virtualkeyboardpolicy="auto" class="css-11aywtz r-6taxm2 r-t06nfe r-1q9bdsx r-170hcd r-vsb09d r-1b43r93 r-3pj75a" style="--placeholderTextColor:#899790;height:100px;vertical-align:top"></textarea></div></div><div class="css-g5y9jx r-1awozwy r-172d8v1 r-1vzvgu r-18u37iz r-1wtj0ep r-95jzfe"><div class="css-g5y9jx"></div><div class="css-g5y9jx r-1awozwy r-18u37iz r-1ssbvtb"><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-azzjac r-cpet4d r-m2f38z r-18u37iz r-ojf8lh r-eu3ka r-284m6k" style="cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 12h4"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 8h4"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 21v-3a2 2 0 0 0-4 0v3"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"></path><path fill="none" stroke="#0B1A17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"></path></svg><div dir="auto" class="css-146c3p1 r-170hcd r-1bxoz39 r-1b43r93">Save draft</div></div><div tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-vqwk0k r-cpet4d r-18u37iz r-1cmwbt1 r-eu3ka r-h0bjfv" style="cursor:pointer"><div dir="auto" class="css-146c3p1 r-jwli3a r-1bxoz39 r-1b43r93">Next</div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg)"><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m12 19-7-7 7-7" style="transform:rotate(180deg)"></path><path fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5" style="transform:rotate(180deg)"></path></svg></div></div></div></div></div></div></div></div><!--/$--></div></div></div></div></div><!--/$--></div></div><script src="/_expo/static/js/web/entry-2768859bb964824936a1a00a8848453f.js" defer></script>
 </body></html>

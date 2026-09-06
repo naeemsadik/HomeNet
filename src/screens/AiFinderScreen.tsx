@@ -63,7 +63,7 @@ function Choice({
 }
 
 export function AiFinderScreen() {
-  const { isPhone } = useResponsive();
+  const { isPhone, isTablet } = useResponsive();
   const [step, setStep] = useState(0);
   const [goal, setGoal] = useState("Buy a home");
   const [area, setArea] = useState("Gulshan & Banani");
@@ -93,7 +93,13 @@ export function AiFinderScreen() {
     setSavedIds((current) => current.includes(id) ? current.filter((savedId) => savedId !== id) : [...current, id]);
   }
 
-  const choiceWidth = isPhone ? "100%" : step === 0 ? "49%" : "23.8%";
+  const choiceWidth = isPhone
+    ? "100%"
+    : isTablet
+    ? "48.5%"
+    : step === 0
+    ? "48.5%"
+    : "23.8%";
 
   return (
     <AppChrome active="ai">
@@ -197,9 +203,9 @@ const styles = StyleSheet.create({
   introPhone: { marginTop: 8 },
   introIcon: { width: 50, height: 50, alignItems: "center", justifyContent: "center", marginBottom: 14, borderRadius: 15, backgroundColor: colors.green, ...shadow },
   introEyebrow: { marginBottom: 7 },
-  introTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 52, lineHeight: 54, letterSpacing: -3.1, textAlign: "center" },
-  introTitlePhone: { fontSize: 36, lineHeight: 39, letterSpacing: -2.1 },
-  introCopy: { maxWidth: 570, marginTop: 12, color: colors.muted, fontFamily: fonts.regular, fontSize: 11, lineHeight: 18, textAlign: "center" },
+  introTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 44, lineHeight: 48, letterSpacing: -0.5, textAlign: "center" },
+  introTitlePhone: { fontSize: 32, lineHeight: 36, letterSpacing: -0.4 },
+  introCopy: { maxWidth: 570, marginTop: 12, color: colors.muted, fontFamily: fonts.regular, fontSize: 15, lineHeight: 22, textAlign: "center" },
   finderShell: { maxWidth: 910, width: "100%", alignSelf: "center", overflow: "hidden", borderRadius: 20, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line, ...shadow },
   progress: { flexDirection: "row", paddingHorizontal: 26, paddingVertical: 18, backgroundColor: "#F7FAF8", borderBottomWidth: 1, borderBottomColor: colors.line },
   progressItem: { position: "relative", flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7 },
@@ -207,23 +213,23 @@ const styles = StyleSheet.create({
   progressLineActive: { backgroundColor: colors.green },
   progressCircle: { zIndex: 1, width: 28, height: 28, alignItems: "center", justifyContent: "center", borderRadius: 14, backgroundColor: colors.white, borderWidth: 1, borderColor: "#D8E2DD" },
   progressCircleActive: { backgroundColor: colors.green, borderColor: colors.green },
-  progressNumber: { color: "#98A59F", fontFamily: fonts.extraBold, fontSize: 9 },
+  progressNumber: { color: "#98A59F", fontFamily: fonts.extraBold, fontSize: 12 },
   progressNumberActive: { color: colors.white },
-  progressLabel: { color: "#98A59F", fontFamily: fonts.extraBold, fontSize: 8 },
+  progressLabel: { color: "#98A59F", fontFamily: fonts.extraBold, fontSize: 12 },
   progressLabelActive: { color: colors.greenDark },
   question: { minHeight: 330, paddingHorizontal: 34, paddingVertical: 32 },
   questionPhone: { minHeight: 0, paddingHorizontal: 16, paddingVertical: 24 },
   questionTitle: { flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 24 },
-  questionKicker: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 8, textTransform: "uppercase", letterSpacing: 0.8 },
-  questionHeading: { marginTop: 4, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 20, letterSpacing: -0.7 },
+  questionKicker: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.8 },
+  questionHeading: { marginTop: 4, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 20, letterSpacing: -0.4 },
   choiceGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   choice: { position: "relative", minHeight: 130, padding: 17, borderRadius: 14, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
   choiceSelected: { borderColor: colors.green, backgroundColor: "#F3FAF7" },
   choiceCompact: { minHeight: 92, justifyContent: "center" },
   choiceIcon: { width: 41, height: 41, alignItems: "center", justifyContent: "center", marginBottom: 13, borderRadius: 12, backgroundColor: colors.greenLight },
   choiceIconSelected: { backgroundColor: colors.green },
-  choiceTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 11 },
-  choiceCopy: { marginTop: 5, color: colors.muted, fontFamily: fonts.regular, fontSize: 8, lineHeight: 13 },
+  choiceTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 14 },
+  choiceCopy: { marginTop: 5, color: colors.muted, fontFamily: fonts.regular, fontSize: 12, lineHeight: 16 },
   choiceCheck: { position: "absolute", top: 12, right: 12, width: 20, height: 20, alignItems: "center", justifyContent: "center", borderRadius: 10, borderWidth: 1, borderColor: "#D4DFD9" },
   choiceCheckSelected: { backgroundColor: colors.green, borderColor: colors.green },
   actions: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 26, paddingVertical: 18, backgroundColor: "#FBFDFC", borderTopWidth: 1, borderTopColor: colors.line },
@@ -235,6 +241,6 @@ const styles = StyleSheet.create({
   resultIcon: { width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 13, backgroundColor: colors.green },
   resultCopyWrap: { minWidth: 0, flex: 1 },
   resultEyebrow: { marginBottom: 3 },
-  resultTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 15 },
-  resultCopy: { marginTop: 4, color: colors.muted, fontFamily: fonts.regular, fontSize: 8, lineHeight: 13 },
+  resultTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 18 },
+  resultCopy: { marginTop: 4, color: colors.muted, fontFamily: fonts.regular, fontSize: 13, lineHeight: 18 },
 });
