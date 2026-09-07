@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F6D55" />
+      <stop offset="100%" stop-color="#14B881" />
+    </linearGradient>
+  </defs>
+  <!-- Rounded Badge -->
+  <rect width="64" height="64" rx="18" fill="url(#brandGrad)" />
+  <!-- House Icon matching Brand & Lucide Home -->
+  <path d="M16 29.5L32 17L48 29.5V47C48 48.6569 46.6569 50 45 50H19C17.3431 50 16 48.6569 16 47V29.5Z" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M26 50V34H38V50" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

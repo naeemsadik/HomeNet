@@ -18,7 +18,8 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "favicon": "./public/favicon.ico"
     },
     "experiments": {
       "typedRoutes": true
