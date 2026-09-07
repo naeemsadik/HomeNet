@@ -108,13 +108,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 44,
     lineHeight: 50,
-    letterSpacing: -1.5,
+    letterSpacing: -0.5,
     textAlign: "center",
   },
   titlePhone: {
     fontSize: 30,
     lineHeight: 36,
-    letterSpacing: -1,
+    letterSpacing: -0.4,
   },
   copy: {
     maxWidth: 600,

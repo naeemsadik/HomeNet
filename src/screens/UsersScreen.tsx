@@ -289,7 +289,7 @@ export function UsersScreen() {
 
 const styles = StyleSheet.create({
   header: { gap: 6, marginBottom: 16 },
-  title: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 32, letterSpacing: -1.5 },
+  title: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 30, letterSpacing: -0.5 },
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
@@ -325,11 +325,11 @@ const styles = StyleSheet.create({
   },
   userAvatarImage: { width: 44, height: 44, borderRadius: 22 },
   userInfo: { flex: 1, gap: 2 },
-  userName: { color: colors.ink, fontFamily: fonts.semiBold, fontSize: 14 },
+  userName: { color: colors.ink, fontFamily: fonts.semiBold, fontSize: 15 },
   emailRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  userEmail: { color: colors.muted, fontFamily: fonts.regular, fontSize: 11 },
+  userEmail: { color: colors.muted, fontFamily: fonts.regular, fontSize: 13 },
   verifiedRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 1 },
-  verifiedTimestamp: { color: colors.greenDark, fontFamily: fonts.regular, fontSize: 9 },
+  verifiedTimestamp: { color: colors.greenDark, fontFamily: fonts.regular, fontSize: 11 },
   verifiedBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.soft,
   },
   verifiedBadgeActive: { backgroundColor: colors.greenLight },
-  verifiedText: { color: colors.muted, fontFamily: fonts.extraBold, fontSize: 9 },
+  verifiedText: { color: colors.muted, fontFamily: fonts.extraBold, fontSize: 11 },
   verifiedTextActive: { color: colors.greenDark },
   userRolesRow: { paddingHorizontal: 2 },
   userActions: {

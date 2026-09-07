@@ -114,11 +114,15 @@ export function MarketScreen() {
 
   return (
     <AppChrome active="market">
-      <View style={[styles.pageIntro, isPhone && styles.pageIntroPhone]}>
+      <View style={[styles.pageIntro, isTablet && styles.pageIntroTablet, isPhone && styles.pageIntroPhone]}>
         <View style={styles.introCopy}>
           <Eyebrow style={styles.introEyebrow}>HomeNet intelligence</Eyebrow>
-          <Text style={[styles.pageTitle, isPhone && styles.pageTitlePhone]}>Dhaka market pulse</Text>
-          <Text style={styles.pageDescription}>Current pricing, demand, and neighborhood movement, made easier to read.</Text>
+          <Text style={[styles.pageTitle, isTablet && styles.pageTitleTablet, isPhone && styles.pageTitlePhone]}>
+            Dhaka market pulse
+          </Text>
+          <Text style={[styles.pageDescription, isPhone && styles.pageDescriptionPhone]}>
+            Current pricing, demand, and neighborhood movement, made easier to read.
+          </Text>
         </View>
         <Pressable
           onPress={() => {
@@ -146,66 +150,204 @@ export function MarketScreen() {
           const StatIcon = Icon as LucideIcon;
           const down = (change as string).startsWith("-");
           return (
-            <View key={label as string} style={[styles.statCard, { width: isPhone || isTablet ? "48.7%" : "24%" }]}>
-              <View style={styles.statIcon}><StatIcon color={colors.green} size={19} /></View>
-              <Text style={styles.statLabel}>{label as string}</Text>
-              <Text style={styles.statValue}>{value as string}</Text>
-              <View style={styles.statBottom}><Text style={styles.statDetail}>{detail as string}</Text><View style={styles.change}>{down ? <TrendingDown color="#D06F5F" size={12} /> : <TrendingUp color={colors.green} size={12} />}<Text style={[styles.changeText, down && styles.changeTextDown]}>{change as string}</Text></View></View>
+            <View
+              key={label as string}
+              style={[
+                styles.statCard,
+                isTablet && styles.statCardTablet,
+                isPhone && styles.statCardPhone,
+              ]}
+            >
+              <View style={styles.statIcon}>
+                <StatIcon color={colors.green} size={19} />
+              </View>
+              <Text style={[styles.statLabel, isPhone && styles.statLabelPhone]}>
+                {label as string}
+              </Text>
+              <Text style={[styles.statValue, isPhone && styles.statValuePhone]}>
+                {value as string}
+              </Text>
+              <View style={styles.statBottom}>
+                <Text style={styles.statDetail}>{detail as string}</Text>
+                <View style={styles.change}>
+                  {down ? (
+                    <TrendingDown color="#D06F5F" size={12} />
+                  ) : (
+                    <TrendingUp color={colors.green} size={12} />
+                  )}
+                  <Text style={[styles.changeText, down && styles.changeTextDown]}>
+                    {change as string}
+                  </Text>
+                </View>
+              </View>
             </View>
           );
         })}
       </View>
 
-      <View style={[styles.dashboard, isTablet && styles.dashboardTablet]}>
-        <View style={styles.chartCard}>
-          <View style={styles.cardHeading}>
-            <View><Eyebrow style={styles.cardEyebrow}>Price movement</Eyebrow><Text style={styles.cardTitle}>Average asking price</Text></View>
+      <View style={[styles.dashboard, (isTablet || isPhone) && styles.dashboardTablet]}>
+        <View style={[styles.chartCard, (isTablet || isPhone) && styles.chartCardTablet, isPhone && styles.chartCardPhone]}>
+          <View style={[styles.cardHeading, isPhone && styles.cardHeadingPhone]}>
+            <View>
+              <Eyebrow style={styles.cardEyebrow}>Price movement</Eyebrow>
+              <Text style={styles.cardTitle}>Average asking price</Text>
+            </View>
             <View style={styles.segmented}>
-              {(["3 months", "6 months", "1 year"] as const).map((value, index) => isPhone && index === 0 ? null : (
-                <Pressable key={value} onPress={() => setPeriod(value)} style={[styles.segmentButton, period === value && styles.segmentButtonActive, webPointer]}><Text style={[styles.segmentText, period === value && styles.segmentTextActive]}>{value}</Text></Pressable>
+              {(["3 months", "6 months", "1 year"] as const).map((value) => (
+                <Pressable
+                  key={value}
+                  onPress={() => setPeriod(value)}
+                  style={[
+                    styles.segmentButton,
+                    period === value && styles.segmentButtonActive,
+                    isPhone && styles.segmentButtonPhone,
+                    webPointer,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.segmentText,
+                      period === value && styles.segmentTextActive,
+                      isPhone && styles.segmentTextPhone,
+                    ]}
+                  >
+                    {value}
+                  </Text>
+                </Pressable>
               ))}
             </View>
           </View>
           <View style={[styles.lineChart, isPhone && styles.lineChartPhone]}>
-            <View style={styles.yLabels}>{["14k", "12k", "10k", "8k"].map((label) => <Text key={label} style={styles.axisLabel}>{label}</Text>)}</View>
+            <View style={styles.yLabels}>
+              {["14k", "12k", "10k", "8k"].map((label) => (
+                <Text key={label} style={styles.axisLabel}>
+                  {label}
+                </Text>
+              ))}
+            </View>
             <Svg height="100%" style={styles.svg} viewBox="0 0 700 230" width="100%">
-              <Defs><SvgGradient id="areaFill" x1="0" x2="0" y1="0" y2="1"><Stop offset="0" stopColor={colors.green} stopOpacity="0.25" /><Stop offset="1" stopColor={colors.green} stopOpacity="0" /></SvgGradient></Defs>
-              <Path d="M0,190 C65,176 92,188 145,150 C195,116 235,142 286,115 C338,87 382,100 430,73 C475,49 515,69 558,42 C610,17 648,32 700,15 L700,230 L0,230 Z" fill="url(#areaFill)" />
-              <Path d="M0,190 C65,176 92,188 145,150 C195,116 235,142 286,115 C338,87 382,100 430,73 C475,49 515,69 558,42 C610,17 648,32 700,15" fill="none" stroke={colors.green} strokeLinecap="round" strokeWidth={5} />
+              <Defs>
+                <SvgGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="0%" stopColor={colors.green} stopOpacity="0.25" />
+                  <Stop offset="100%" stopColor={colors.green} stopOpacity="0" />
+                </SvgGradient>
+              </Defs>
+              <Path
+                d="M0,190 C65,176 92,188 145,150 C195,116 235,142 286,115 C338,87 382,100 430,73 C475,49 515,69 558,42 C610,17 648,32 700,15 L700,230 L0,230 Z"
+                fill="url(#areaFill)"
+              />
+              <Path
+                d="M0,190 C65,176 92,188 145,150 C195,116 235,142 286,115 C338,87 382,100 430,73 C475,49 515,69 558,42 C610,17 648,32 700,15"
+                fill="none"
+                stroke={colors.green}
+                strokeLinecap="round"
+                strokeWidth={5}
+              />
             </Svg>
-            <View style={styles.xLabels}>{["Feb", "Mar", "Apr", "May", "Jun", "Jul"].map((label) => <Text key={label} style={styles.axisLabel}>{label}</Text>)}</View>
+            <View style={styles.xLabels}>
+              {["Feb", "Mar", "Apr", "May", "Jun", "Jul"].map((label) => (
+                <Text key={label} style={styles.axisLabel}>
+                  {label}
+                </Text>
+              ))}
+            </View>
           </View>
         </View>
 
-        <View style={styles.demandCard}>
-          <View style={styles.cardHeading}><View><Eyebrow style={styles.cardEyebrow}>Demand signal</Eyebrow><Text style={styles.cardTitle}>Buyer activity</Text></View><Info color="#91A098" size={16} /></View>
-          <View style={styles.orbit}><View style={styles.orbitOne} /><View style={styles.orbitTwo} /><View style={styles.orbitCenter}><TrendingUp color={colors.white} size={20} /><Text style={styles.orbitValue}>High</Text><Text style={styles.orbitLabel}>Current demand</Text></View></View>
+        <View style={[styles.demandCard, (isTablet || isPhone) && styles.demandCardTablet, isPhone && styles.demandCardPhone]}>
+          <View style={styles.cardHeading}>
+            <View>
+              <Eyebrow style={styles.cardEyebrow}>Demand signal</Eyebrow>
+              <Text style={styles.cardTitle}>Buyer activity</Text>
+            </View>
+            <Info color="#91A098" size={16} />
+          </View>
+          <View style={styles.orbit}>
+            <View style={styles.orbitOne} />
+            <View style={styles.orbitTwo} />
+            <View style={styles.orbitCenter}>
+              <TrendingUp color={colors.white} size={20} />
+              <Text style={styles.orbitValue}>High</Text>
+              <Text style={styles.orbitLabel}>Current demand</Text>
+            </View>
+          </View>
           <View style={styles.demandBars}>
-            {[["Apartments", 88], ["Houses", 66], ["Condos", 73]].map(([label, value]) => (
-              <View key={label as string} style={styles.demandRow}><Text style={styles.demandLabel}>{label as string}</Text><View style={styles.demandTrack}><View style={[styles.demandFill, { width: `${value as number}%` }]} /></View><Text style={styles.demandValue}>{value as number}%</Text></View>
+            {[
+              ["Apartments", 88],
+              ["Houses", 66],
+              ["Condos", 73],
+            ].map(([label, value]) => (
+              <View key={label as string} style={styles.demandRow}>
+                <Text style={[styles.demandLabel, isPhone && styles.demandLabelPhone]}>{label as string}</Text>
+                <View style={styles.demandTrack}>
+                  <View style={[styles.demandFill, { width: `${value as number}%` }]} />
+                </View>
+                <Text style={[styles.demandValue, isPhone && styles.demandValuePhone]}>{value as number}%</Text>
+              </View>
             ))}
           </View>
         </View>
       </View>
 
       <View style={styles.areaSection}>
-        <SectionHeader action="Explore homes" eyebrow="Neighborhood comparison" href="/buy" title="Where the market is moving" />
-        <ScrollView horizontal={isPhone} showsHorizontalScrollIndicator={false}>
-          <View style={[styles.areaTable, isPhone && styles.areaTablePhone]}>
-            <View style={[styles.areaRow, styles.areaHead]}><Text style={[styles.areaCell, styles.areaHeadText]}>Area</Text><Text style={[styles.areaCell, styles.areaHeadText]}>Average per sq ft</Text><Text style={[styles.areaCell, styles.areaHeadText]}>12-month change</Text><Text style={[styles.areaCell, styles.areaHeadText]}>Buyer demand</Text><View style={styles.areaArrow} /></View>
-            {areaRows.map(([area, price, change, demand]) => (
-              <AppLink href={`/buy?area=${area}`} key={area} style={styles.areaRow}>
-                <Text style={[styles.areaCell, styles.areaName]}>{area}</Text><Text style={styles.areaCell}>{price}</Text><View style={[styles.areaCell, styles.change]}><TrendingUp color={colors.green} size={12} /><Text style={styles.areaChange}>{change}</Text></View><View style={[styles.areaCell, styles.demandCell]}><View style={[styles.demandDot, demand === "Moderate" && styles.demandDotModerate, demand === "Growing" && styles.demandDotGrowing]} /><Text style={styles.areaCellText}>{demand}</Text></View><View style={styles.areaArrow}><ChevronRight color={colors.muted} size={15} /></View>
-              </AppLink>
-            ))}
+        <SectionHeader
+          action="Explore homes"
+          eyebrow="Neighborhood comparison"
+          href="/buy"
+          title="Where the market is moving"
+        />
+        <View style={styles.areaTable}>
+          <View style={[styles.areaRow, styles.areaHead, isPhone && styles.areaRowPhone]}>
+            <Text numberOfLines={1} style={[styles.areaCell, styles.areaColName, styles.areaHeadText, isPhone && styles.areaHeadTextPhone]}>Area</Text>
+            <Text numberOfLines={1} style={[styles.areaCell, styles.areaColPrice, styles.areaHeadText, isPhone && styles.areaHeadTextPhone]}>{isPhone ? "Avg / sq ft" : "Average per sq ft"}</Text>
+            <Text numberOfLines={1} style={[styles.areaCell, styles.areaColChange, styles.areaHeadText, isPhone && styles.areaHeadTextPhone]}>{isPhone ? "12m Change" : "12-month change"}</Text>
+            <Text numberOfLines={1} style={[styles.areaCell, styles.areaColDemand, styles.areaHeadText, isPhone && styles.areaHeadTextPhone]}>Buyer demand</Text>
+            <View style={styles.areaArrow} />
           </View>
-        </ScrollView>
+          {areaRows.map(([area, price, change, demand]) => (
+            <AppLink href={`/buy?area=${area}`} key={area} style={[styles.areaRow, isPhone && styles.areaRowPhone]}>
+              <Text numberOfLines={1} style={[styles.areaCell, styles.areaColName, styles.areaName, isPhone && styles.areaNamePhone]}>{area}</Text>
+              <Text numberOfLines={1} style={[styles.areaCell, styles.areaColPrice, styles.areaPriceText, isPhone && styles.areaPriceTextPhone]}>{price}</Text>
+              <View style={[styles.areaColChange, styles.change]}>
+                <TrendingUp color={colors.green} size={isPhone ? 11 : 13} />
+                <Text numberOfLines={1} style={[styles.areaChange, isPhone && styles.areaChangePhone]}>{change}</Text>
+              </View>
+              <View style={[styles.areaColDemand, styles.demandCell]}>
+                <View
+                  style={[
+                    styles.demandDot,
+                    demand === "Moderate" && styles.demandDotModerate,
+                    demand === "Growing" && styles.demandDotGrowing,
+                  ]}
+                />
+                <Text numberOfLines={1} style={[styles.areaCell, styles.areaCellText, isPhone && styles.areaCellTextPhone]}>{demand}</Text>
+              </View>
+              <View style={styles.areaArrow}>
+                <ChevronRight color={colors.muted} size={isPhone ? 14 : 16} />
+              </View>
+            </AppLink>
+          ))}
+        </View>
       </View>
 
-      <LinearGradient colors={["#EAF7F1", "#EEF3FB"]} end={{ x: 1, y: 0 }} style={[styles.aiNote, isPhone && styles.aiNotePhone]}>
-        <View style={styles.aiNoteIcon}><Sparkles color={colors.white} size={20} /></View>
-        <View style={styles.aiNoteCopyWrap}><Text style={styles.aiNoteTitle}>What this means for your search</Text><Text style={styles.aiNoteCopy}>Prices are rising steadily, but verified listings in Uttara and Dhanmondi still show room to negotiate. HomeNet flags those opportunities in your results.</Text></View>
-        <AppLink href="/ai-finder" style={[styles.aiNoteLink, isPhone && styles.aiNoteLinkPhone]}><Text style={styles.aiNoteLinkText}>Find my best area</Text><ArrowRight color={colors.green} size={15} /></AppLink>
+      <LinearGradient
+        colors={["#EAF7F1", "#EEF3FB"]}
+        end={{ x: 1, y: 0 }}
+        style={[styles.aiNote, isPhone && styles.aiNotePhone]}
+      >
+        <View style={styles.aiNoteIcon}>
+          <Sparkles color={colors.white} size={20} />
+        </View>
+        <View style={styles.aiNoteCopyWrap}>
+          <Text style={styles.aiNoteTitle}>What this means for your search</Text>
+          <Text style={styles.aiNoteCopy}>
+            Prices are rising steadily, but verified listings in Uttara and Dhanmondi still show room to negotiate. HomeNet flags those opportunities in your results.
+          </Text>
+        </View>
+        <AppLink href="/ai-finder" style={[styles.aiNoteLink, isPhone && styles.aiNoteLinkPhone]}>
+          <Text style={styles.aiNoteLinkText}>Find my best area</Text>
+          <ArrowRight color={colors.green} size={15} />
+        </AppLink>
       </LinearGradient>
 
       {/* Calendar Snapshot Modal */}
@@ -385,79 +527,554 @@ export function MarketScreen() {
 }
 
 const styles = StyleSheet.create({
-  pageIntro: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 28, paddingTop: 22, paddingBottom: 25 },
-  pageIntroPhone: { flexDirection: "column", alignItems: "flex-start", gap: 18, paddingTop: 13 },
+  pageIntro: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: 24,
+    paddingTop: 16,
+    paddingBottom: 22,
+  },
+  pageIntroTablet: {
+    paddingTop: 12,
+    paddingBottom: 18,
+    gap: 16,
+  },
+  pageIntroPhone: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 14,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },
   introCopy: { flex: 1 },
-  introEyebrow: { marginBottom: 7 },
-  pageTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 46, lineHeight: 49, letterSpacing: -2.5 },
-  pageTitlePhone: { fontSize: 33, lineHeight: 36, letterSpacing: -1.8 },
-  pageDescription: { maxWidth: 580, marginTop: 9, color: colors.muted, fontFamily: fonts.regular, fontSize: 15, lineHeight: 22 },
-  marketUpdate: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: colors.soft, borderWidth: 1, borderColor: colors.line },
-  marketUpdateText: { color: colors.ink, fontFamily: fonts.medium, fontSize: 13 },
-  statGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  statCard: { padding: 18, borderRadius: 14, backgroundColor: "#FBFDFC", borderWidth: 1, borderColor: colors.line },
-  statIcon: { width: 36, height: 36, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: colors.greenLight },
-  statLabel: { marginTop: 12, marginBottom: 4, color: colors.muted, fontFamily: fonts.semiBold, fontSize: 13 },
-  statValue: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 22, letterSpacing: -0.8 },
-  statBottom: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 8 },
-  statDetail: { color: "#899790", fontFamily: fonts.regular, fontSize: 12 },
-  change: { flexDirection: "row", alignItems: "center", gap: 4 },
-  changeText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 12 },
-  changeTextDown: { color: "#D06F5F" },
-  dashboard: { flexDirection: "row", alignItems: "stretch", gap: 15, marginTop: 18 },
-  dashboardTablet: { flexDirection: "column" },
-  chartCard: { flex: 1.45, padding: 22, borderRadius: 16, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
-  demandCard: { flex: 0.55, padding: 22, borderRadius: 16, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
-  cardHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
-  cardEyebrow: { marginBottom: 4 },
-  cardTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 18, letterSpacing: -0.5 },
-  segmented: { flexDirection: "row", gap: 3, padding: 3, borderRadius: 9, backgroundColor: colors.soft, borderWidth: 1, borderColor: colors.line },
-  segmentButton: { minHeight: 32, justifyContent: "center", paddingHorizontal: 12, borderRadius: 6 },
-  segmentButtonActive: { backgroundColor: colors.white },
-  segmentText: { color: colors.muted, fontFamily: fonts.extraBold, fontSize: 12 },
-  segmentTextActive: { color: colors.greenDark },
-  lineChart: { position: "relative", height: 285, marginTop: 21, paddingTop: 5, paddingRight: 0, paddingBottom: 25, paddingLeft: 42 },
-  lineChartPhone: { height: 230 },
-  svg: { overflow: "visible" },
-  yLabels: { position: "absolute", top: 0, bottom: 24, left: 0, justifyContent: "space-between" },
-  xLabels: { position: "absolute", right: 0, bottom: 0, left: 42, flexDirection: "row", justifyContent: "space-between" },
-  axisLabel: { color: "#7B8A83", fontFamily: fonts.medium, fontSize: 12 },
-  orbit: { position: "relative", width: 184, height: 184, alignSelf: "center", alignItems: "center", justifyContent: "center", marginTop: 16, marginBottom: 16 },
-  orbitOne: { position: "absolute", top: 6, right: 6, bottom: 6, left: 6, borderRadius: 999, borderWidth: 1, borderColor: "rgba(8,122,91,0.15)" },
-  orbitTwo: { position: "absolute", top: 24, right: 24, bottom: 24, left: 24, borderRadius: 999, backgroundColor: "rgba(226,245,237,0.48)", borderWidth: 1, borderColor: "rgba(8,122,91,0.15)" },
-  orbitCenter: { width: 114, height: 114, alignItems: "center", justifyContent: "center", borderRadius: 57, backgroundColor: colors.green, paddingHorizontal: 10 },
-  orbitValue: { marginTop: 2, color: colors.white, fontFamily: fonts.extraBold, fontSize: 18, lineHeight: 22 },
-  orbitLabel: { marginTop: 1, color: "rgba(255,255,255,0.9)", fontFamily: fonts.medium, fontSize: 10.5, textAlign: "center" },
-  demandBars: { gap: 10 },
-  demandRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  demandLabel: { width: 85, color: colors.ink, fontFamily: fonts.medium, fontSize: 13 },
-  demandTrack: { minWidth: 0, flex: 1, height: 6, overflow: "hidden", borderRadius: 99, backgroundColor: "#E8EEEB" },
-  demandFill: { height: "100%", borderRadius: 99, backgroundColor: colors.green },
-  demandValue: { width: 36, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 13, textAlign: "right" },
-  areaSection: { marginTop: 45 },
-  areaTable: { width: "100%", overflow: "hidden", borderRadius: 14, borderWidth: 1, borderColor: colors.line },
-  areaTablePhone: { width: 650 },
-  areaRow: { minHeight: 56, flexDirection: "row", alignItems: "center", gap: 14, paddingHorizontal: 18, backgroundColor: colors.white, borderBottomWidth: 1, borderBottomColor: colors.line },
-  areaHead: { minHeight: 46, backgroundColor: "#F6F9F7" },
-  areaCell: { flex: 1, color: "#3D4F46", fontFamily: fonts.regular, fontSize: 14 },
-  areaHeadText: { color: "#5F7167", fontFamily: fonts.extraBold, fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5 },
-  areaName: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 15 },
-  areaChange: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 13 },
-  demandCell: { flexDirection: "row", alignItems: "center", gap: 6 },
-  areaCellText: { color: "#3D4F46", fontFamily: fonts.medium, fontSize: 13 },
-  demandDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.green },
-  demandDotModerate: { backgroundColor: "#D9A657" },
-  demandDotGrowing: { backgroundColor: colors.blue },
-  areaArrow: { width: 24, alignItems: "flex-end" },
-  aiNote: { flexDirection: "row", alignItems: "center", gap: 16, marginTop: 24, padding: 20, borderRadius: 14, borderWidth: 1, borderColor: "#DFEAE5" },
-  aiNotePhone: { flexWrap: "wrap" },
-  aiNoteIcon: { width: 44, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: colors.green },
-  aiNoteCopyWrap: { minWidth: 0, flex: 1 },
-  aiNoteTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 16 },
-  aiNoteCopy: { marginTop: 4, color: colors.muted, fontFamily: fonts.regular, fontSize: 13, lineHeight: 19 },
-  aiNoteLink: { flexDirection: "row", alignItems: "center", gap: 6 },
-  aiNoteLinkPhone: { marginLeft: 60 },
-  aiNoteLinkText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 14 },
+  introEyebrow: { marginBottom: 6 },
+  pageTitle: {
+    color: "#0B1A17",
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: -0.5,
+  },
+  pageTitleTablet: {
+    fontSize: 28,
+    lineHeight: 34,
+    letterSpacing: -0.4,
+  },
+  pageTitlePhone: {
+    fontSize: 24,
+    lineHeight: 30,
+    letterSpacing: -0.3,
+  },
+  pageDescription: {
+    maxWidth: 580,
+    marginTop: 6,
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 14.5,
+    lineHeight: 21,
+  },
+  pageDescriptionPhone: {
+    fontSize: 13.5,
+    lineHeight: 19,
+  },
+  marketUpdate: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  marketUpdateText: {
+    color: "#0B1A17",
+    fontFamily: fonts.medium,
+    fontSize: 13,
+  },
+  statGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    marginTop: 4,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: 200,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  statCardTablet: {
+    flexBasis: "48%",
+    minWidth: "48%",
+  },
+  statCardPhone: {
+    flexBasis: "48%",
+    minWidth: "48%",
+    padding: 12,
+  },
+  statIcon: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+    backgroundColor: "rgba(15, 109, 85, 0.08)",
+  },
+  statLabel: {
+    marginTop: 10,
+    marginBottom: 4,
+    color: "#5C6B66",
+    fontFamily: fonts.medium,
+    fontSize: 12.5,
+  },
+  statLabelPhone: {
+    fontSize: 11.5,
+  },
+  statValue: {
+    color: "#0B1A17",
+    fontFamily: fonts.headingBold,
+    fontSize: 22,
+    letterSpacing: -0.3,
+  },
+  statValuePhone: {
+    fontSize: 18,
+  },
+  statBottom: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 4,
+    marginTop: 6,
+    flexWrap: "wrap",
+  },
+  statDetail: {
+    color: "#7B8A83",
+    fontFamily: fonts.regular,
+    fontSize: 11.5,
+  },
+  change: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  changeText: {
+    color: "#0F6D55",
+    fontFamily: fonts.bold,
+    fontSize: 12,
+  },
+  changeTextDown: {
+    color: "#D06F5F",
+  },
+  dashboard: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    gap: 16,
+    marginTop: 20,
+  },
+  dashboardTablet: {
+    flexDirection: "column",
+    alignItems: "stretch",
+  },
+  chartCard: {
+    flex: 1.45,
+    padding: 20,
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  chartCardTablet: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+    width: "100%",
+  },
+  chartCardPhone: {
+    padding: 14,
+  },
+  demandCard: {
+    flex: 0.85,
+    padding: 20,
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  demandCardTablet: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+    width: "100%",
+  },
+  demandCardPhone: {
+    padding: 14,
+  },
+  cardHeading: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  cardHeadingPhone: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  cardEyebrow: {
+    marginBottom: 4,
+  },
+  cardTitle: {
+    color: "#0B1A17",
+    fontFamily: fonts.headingBold,
+    fontSize: 18,
+    letterSpacing: -0.3,
+  },
+  segmented: {
+    flexDirection: "row",
+    gap: 3,
+    padding: 3,
+    borderRadius: 10,
+    backgroundColor: "#F4F6F5",
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.06)",
+  },
+  segmentButton: {
+    minHeight: 30,
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  segmentButtonPhone: {
+    minHeight: 28,
+    paddingHorizontal: 8,
+  },
+  segmentButtonActive: {
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  segmentText: {
+    color: "#5C6B66",
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+  },
+  segmentTextPhone: {
+    fontSize: 11,
+  },
+  segmentTextActive: {
+    color: "#0F6D55",
+    fontFamily: fonts.bold,
+  },
+  lineChart: {
+    position: "relative",
+    height: 260,
+    marginTop: 20,
+    paddingTop: 8,
+    paddingRight: 0,
+    paddingBottom: 24,
+    paddingLeft: 40,
+  },
+  lineChartPhone: {
+    height: 200,
+    paddingLeft: 34,
+  },
+  svg: {
+    overflow: "visible",
+  },
+  yLabels: {
+    position: "absolute",
+    top: 0,
+    bottom: 24,
+    left: 0,
+    justifyContent: "space-between",
+  },
+  xLabels: {
+    position: "absolute",
+    right: 0,
+    bottom: 0,
+    left: 40,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  axisLabel: {
+    color: "#7B8A83",
+    fontFamily: fonts.medium,
+    fontSize: 11.5,
+  },
+  orbit: {
+    position: "relative",
+    width: 170,
+    height: 170,
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  orbitOne: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    bottom: 6,
+    left: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(15, 109, 85, 0.15)",
+  },
+  orbitTwo: {
+    position: "absolute",
+    top: 22,
+    right: 22,
+    bottom: 22,
+    left: 22,
+    borderRadius: 999,
+    backgroundColor: "rgba(231, 242, 238, 0.5)",
+    borderWidth: 1,
+    borderColor: "rgba(15, 109, 85, 0.15)",
+  },
+  orbitCenter: {
+    width: 104,
+    height: 104,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 52,
+    backgroundColor: "#0F6D55",
+    paddingHorizontal: 8,
+  },
+  orbitValue: {
+    marginTop: 2,
+    color: "#FFFFFF",
+    fontFamily: fonts.headingBold,
+    fontSize: 17,
+    lineHeight: 21,
+  },
+  orbitLabel: {
+    marginTop: 1,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontFamily: fonts.medium,
+    fontSize: 10,
+    textAlign: "center",
+  },
+  demandBars: {
+    gap: 10,
+    marginTop: 6,
+  },
+  demandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  demandLabel: {
+    width: 80,
+    color: "#0B1A17",
+    fontFamily: fonts.medium,
+    fontSize: 12.5,
+  },
+  demandLabelPhone: {
+    width: 68,
+    fontSize: 11.5,
+  },
+  demandTrack: {
+    minWidth: 0,
+    flex: 1,
+    height: 6,
+    overflow: "hidden",
+    borderRadius: 99,
+    backgroundColor: "#E8EEEB",
+  },
+  demandFill: {
+    height: "100%",
+    borderRadius: 99,
+    backgroundColor: "#0F6D55",
+  },
+  demandValue: {
+    width: 34,
+    color: "#0B1A17",
+    fontFamily: fonts.bold,
+    fontSize: 12.5,
+    textAlign: "right",
+  },
+  demandValuePhone: {
+    width: 30,
+    fontSize: 11.5,
+  },
+  areaSection: {
+    marginTop: 28,
+  },
+  areaTable: {
+    width: "100%",
+    overflow: "hidden",
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  areaRow: {
+    minHeight: 52,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(11, 26, 23, 0.06)",
+  },
+  areaRowPhone: {
+    minHeight: 48,
+    gap: 4,
+    paddingHorizontal: 10,
+  },
+  areaHead: {
+    minHeight: 44,
+    backgroundColor: "#F4F6F5",
+  },
+  areaCell: {
+    color: "#3D4F46",
+    fontFamily: fonts.regular,
+    fontSize: 13.5,
+  },
+  areaCellPhone: {
+    fontSize: 11.5,
+  },
+  areaColName: {
+    flex: 1.15,
+  },
+  areaColPrice: {
+    flex: 1.25,
+  },
+  areaColChange: {
+    flex: 1,
+  },
+  areaColDemand: {
+    flex: 1.15,
+  },
+  areaHeadText: {
+    color: "#5F7167",
+    fontFamily: fonts.bold,
+    fontSize: 11.5,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  areaHeadTextPhone: {
+    fontSize: 9.5,
+    letterSpacing: 0,
+  },
+  areaName: {
+    color: "#0B1A17",
+    fontFamily: fonts.bold,
+    fontSize: 14.5,
+  },
+  areaNamePhone: {
+    fontSize: 12.5,
+  },
+  areaPriceText: {
+    color: "#3D4F46",
+    fontFamily: fonts.regular,
+    fontSize: 13.5,
+  },
+  areaPriceTextPhone: {
+    fontSize: 11.5,
+  },
+  areaChange: {
+    color: "#0F6D55",
+    fontFamily: fonts.bold,
+    fontSize: 13,
+  },
+  areaChangePhone: {
+    fontSize: 11.5,
+  },
+  demandCell: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  areaCellText: {
+    color: "#3D4F46",
+    fontFamily: fonts.medium,
+    fontSize: 13,
+  },
+  areaCellTextPhone: {
+    fontSize: 11.5,
+  },
+  demandDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: "#0F6D55",
+    flexShrink: 0,
+  },
+  demandDotModerate: {
+    backgroundColor: "#D9A657",
+  },
+  demandDotGrowing: {
+    backgroundColor: "#2251D6",
+  },
+  areaArrow: {
+    width: 16,
+    alignItems: "flex-end",
+    flexShrink: 0,
+  },
+  aiNote: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    marginTop: 24,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(15, 109, 85, 0.15)",
+  },
+  aiNotePhone: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 12,
+    padding: 16,
+  },
+  aiNoteIcon: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    backgroundColor: "#0F6D55",
+  },
+  aiNoteCopyWrap: {
+    minWidth: 0,
+    flex: 1,
+  },
+  aiNoteTitle: {
+    color: "#0B1A17",
+    fontFamily: fonts.headingBold,
+    fontSize: 15.5,
+  },
+  aiNoteCopy: {
+    marginTop: 4,
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  aiNoteLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  aiNoteLinkPhone: {
+    marginTop: 4,
+  },
+  aiNoteLinkText: {
+    color: "#0F6D55",
+    fontFamily: fonts.bold,
+    fontSize: 13.5,
+  },
 
   modalBackdrop: {
     flex: 1,
