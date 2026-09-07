@@ -369,4 +369,3 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
-// text for pull request

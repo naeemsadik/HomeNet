@@ -197,8 +197,17 @@ function TopBar({
   ];
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.topbarSafe}>
-      <View style={[styles.topbar, isTablet && styles.topbarTablet, isPhone && styles.topbarPhone]}>
+    <SafeAreaView
+      edges={["top"]}
+      style={styles.topbarSafe}
+    >
+      <View
+        style={[
+          styles.topbar,
+          isTablet && styles.topbarTablet,
+          isPhone && styles.topbarPhone,
+        ]}
+      >
         {/* Left: Brand + Hamburger (mobile) */}
         <View style={[styles.topbarLeft, isPhone && styles.topbarLeftPhone]}>
           {isTablet ? (
@@ -210,7 +219,7 @@ function TopBar({
               <Menu color="#0B1A17" size={isPhone ? 18 : 20} />
             </Pressable>
           ) : null}
-          <Brand compact={isPhone} />
+          <Brand compact={isTablet} />
         </View>
 
         {/* Center: Rightmove Desktop Nav Links */}
@@ -306,12 +315,12 @@ function TopBar({
                       user.avatar_url ||
                       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
                   }}
-                  style={styles.avatarImage}
+                  style={[styles.avatarImage, isPhone && styles.avatarImagePhone]}
                 />
               </AppLink>
             </>
           ) : (
-            /* Rightmove Sign In Pill Button (Image 2) */
+            /* Previous Sign In Button Design (White background, emerald border, User icon) */
             <Pressable
               onPress={() => setAuthModalOpen(true)}
               accessibilityLabel="Sign in"
@@ -319,11 +328,20 @@ function TopBar({
                 styles.rightmoveSignInBtn,
                 isPhone && styles.rightmoveSignInBtnPhone,
                 webPointer,
-                pressed && { opacity: 0.88, backgroundColor: "rgba(0, 207, 146, 0.08)" },
+                pressed && { opacity: 0.85, backgroundColor: "rgba(0, 207, 146, 0.08)" },
               ]}
             >
-              <User color="#00CF92" size={isPhone ? 15 : 18} strokeWidth={2.2} />
-              <Text style={[styles.rightmoveSignInText, isPhone && styles.rightmoveSignInTextPhone]}>
+              <User
+                color="#00CF92"
+                size={isPhone ? 15 : 17}
+                strokeWidth={2.2}
+              />
+              <Text
+                style={[
+                  styles.rightmoveSignInText,
+                  isPhone && styles.rightmoveSignInTextPhone,
+                ]}
+              >
                 Sign in
               </Text>
             </Pressable>
@@ -928,15 +946,17 @@ const styles = StyleSheet.create({
   },
   topbarPhone: {
     minHeight: 56,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    gap: 8,
+    paddingHorizontal: 8,
+    gap: 4,
   },
   topbarLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     flexShrink: 0,
+  },
+  topbarLeftPhone: {
+    gap: 6,
   },
   topbarLeftPhone: {
     gap: 6,
@@ -1000,6 +1020,10 @@ const styles = StyleSheet.create({
   topRightActionsPhone: {
     gap: 6,
   },
+  topRightActionsPhone: {
+    gap: 5,
+    flexShrink: 0,
+  },
   rightmoveSignInBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -1011,6 +1035,14 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 8,
     height: 38,
+    flexShrink: 0,
+  },
+  rightmoveSignInBtnPhone: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    gap: 4,
+    height: 34,
+    borderWidth: 1.5,
   },
   rightmoveSignInBtnPhone: {
     paddingHorizontal: 10,
@@ -1041,9 +1073,9 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
   locationPillPhone: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 7,
     paddingVertical: 5,
-    gap: 4,
+    gap: 3,
     borderWidth: 1.2,
   },
   locationPillText: {
@@ -1053,8 +1085,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   locationPillTextPhone: {
-    fontSize: 12,
-    maxWidth: 80,
+    fontSize: 11.5,
+    maxWidth: 52,
   },
   logInPill: {
     flexDirection: "row",
@@ -1078,17 +1110,28 @@ const styles = StyleSheet.create({
   signInButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 7,
     backgroundColor: "#0F6D55",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 999,
-    height: 38.4,
+    height: 38,
+    flexShrink: 0,
+  },
+  signInButtonPhone: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    gap: 4,
+    height: 32,
   },
   signInButtonText: {
     color: "#FFFFFF",
     fontFamily: fonts.semiBold,
     fontSize: 14,
+    fontWeight: "600",
+  },
+  signInButtonTextPhone: {
+    fontSize: 12,
     fontWeight: "600",
   },
   notificationWrap: {
@@ -1160,6 +1203,11 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: "100%",
     height: "100%",
+  },
+  avatarImagePhone: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
 
   pageScrollContent: {

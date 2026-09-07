@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { colors, fonts, webPointer } from "@/theme";
+import { useResponsive } from "@/hooks/useResponsive";
 
 export function AppLink({
   href,
@@ -120,26 +121,27 @@ export function SectionHeader({
   onAction?: () => void;
   right?: ReactNode;
 }) {
+  const { isPhone } = useResponsive();
   const actionContent = (
     <View style={styles.textLinkInner}>
-      <Text style={styles.textLinkText}>{action}</Text>
-      <ArrowRight color={colors.green} size={15} />
+      <Text style={[styles.textLinkText, isPhone && styles.textLinkTextPhone]}>{action}</Text>
+      <ArrowRight color={colors.green} size={isPhone ? 13 : 15} />
     </View>
   );
 
   return (
-    <View style={styles.sectionHeading}>
+    <View style={[styles.sectionHeading, isPhone && styles.sectionHeadingPhone]}>
       <View style={styles.sectionHeadingCopy}>
         {eyebrow ? <Eyebrow style={styles.headingEyebrow}>{eyebrow}</Eyebrow> : null}
-        <Text style={styles.sectionTitle}>{title}</Text>
+        <Text style={[styles.sectionTitle, isPhone && styles.sectionTitlePhone]}>{title}</Text>
       </View>
       {right ??
         (href ? (
-          <AppLink href={href} style={styles.textLink}>
+          <AppLink href={href} style={[styles.textLink, isPhone && styles.textLinkPhone]}>
             {actionContent}
           </AppLink>
         ) : (
-          <Pressable onPress={onAction} style={[styles.textLink, webPointer]}>
+          <Pressable onPress={onAction} style={[styles.textLink, isPhone && styles.textLinkPhone, webPointer]}>
             {actionContent}
           </Pressable>
         ))}
@@ -259,7 +261,11 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     marginBottom: 16,
   },
-  sectionHeadingCopy: { flexShrink: 1, minWidth: 200 },
+  sectionHeadingPhone: {
+    gap: 12,
+    marginBottom: 14,
+  },
+  sectionHeadingCopy: { flexShrink: 1 },
   headingEyebrow: { marginBottom: 4 },
   sectionTitle: {
     color: colors.ink,
@@ -267,9 +273,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     letterSpacing: -0.4,
   },
+  sectionTitlePhone: {
+    fontSize: 19,
+    lineHeight: 24,
+    letterSpacing: -0.6,
+  },
   textLink: { paddingVertical: 5 },
+  textLinkPhone: { paddingVertical: 3 },
   textLinkInner: { flexDirection: "row", alignItems: "center", gap: 6 },
   textLinkText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 13 },
+  textLinkTextPhone: { fontSize: 12 },
   field: {
     minHeight: 46,
     color: colors.ink,

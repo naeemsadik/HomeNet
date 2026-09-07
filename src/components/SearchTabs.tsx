@@ -39,7 +39,11 @@ export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsP
             >
               {tab.label}
             </Text>
-            {isActive ? <View style={styles.activeIndicator} /> : null}
+            {isActive ? (
+              <View
+                style={[styles.activeIndicator, compact && styles.activeIndicatorCompact]}
+              />
+            ) : null}
           </Pressable>
         );
       })}
@@ -52,6 +56,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     height: 44,
+    flexShrink: 1,
   },
   containerCompact: {
     height: 40,
@@ -64,6 +69,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 44,
     backgroundColor: "transparent",
+    flexShrink: 0,
+  },
+  tabButtonCompact: {
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   tabButtonCompact: {
     paddingHorizontal: 10,
@@ -97,5 +107,9 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: "#0F6D55",
     borderRadius: 999,
+  },
+  activeIndicatorCompact: {
+    left: 6,
+    right: 6,
   },
 });

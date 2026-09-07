@@ -176,7 +176,8 @@ export function RightmoveFilterCard({
   const { isPhone, isTablet, width } = useResponsive();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [customLocation, setCustomLocation] = useState(filters.query || locationName);
-  const isDesktop = !isPhone && !isTablet;
+  const isMobile = isPhone || width < 680;
+  const isDesktop = !isMobile && !isTablet;
 
   const handleUpdate = (patch: Partial<RightmoveFilters>) => {
     const updated = { ...filters, ...patch };
@@ -203,7 +204,7 @@ export function RightmoveFilterCard({
   };
 
   return (
-    <View style={[styles.card, isPhone && styles.cardPhone]}>
+    <View style={[styles.card, isMobile && styles.cardMobile]}>
       {/* ─── Header: Find property for sale in [Location] ───────────────── */}
       <View style={styles.headerRow}>
         {isEditingTitle ? (
@@ -231,20 +232,73 @@ export function RightmoveFilterCard({
             accessibilityRole="button"
             accessibilityLabel="Click to edit location"
           >
-            <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>
-              {getHeading()}
-            </Text>
+            <Text style={[styles.headingText, isMobile && styles.headingTextMobile]}>{getHeading()}</Text>
             <Edit3 color="#5C6B66" size={16} style={styles.editIcon} />
           </Pressable>
         )}
       </View>
 
-      {/* ─── Grid Controls (Desktop: 3 cols, Tablet: 2 cols, Mobile: 1 col) ─────────────── */}
-      {isPhone ? (
-        /* Mobile Layout: 1 Column Stack */
-        <View style={styles.gridPhone}>
-          <View style={styles.colFull}>
-            <Text style={styles.fieldLabel}>Search radius</Text>
+      {/* ─── Grid Controls (3 columns x 2 rows on desktop) ─────────────── */}
+      <View style={[styles.grid, isDesktop && styles.gridDesktop, isMobile && styles.gridMobile]}>
+        {/* ROW 1, COL 1: Search radius */}
+        <View style={[styles.col, isMobile && styles.colMobile]}>
+          <Text style={styles.fieldLabel}>Search radius</Text>
+          <NativeSelect
+            value={filters.radius}
+            options={RADIUS_OPTIONS}
+            onChange={(val) => handleUpdate({ radius: val })}
+          />
+        </View>
+
+        {/* ROW 1, COL 2: Property types */}
+        <View style={[styles.col, isMobile && styles.colMobile]}>
+          <Text style={styles.fieldLabel}>Property types</Text>
+          <NativeSelect
+            value={filters.propertyType}
+            options={PROPERTY_TYPE_OPTIONS}
+            onChange={(val) => handleUpdate({ propertyType: val })}
+          />
+        </View>
+
+        {/* ROW 1, COL 3: Added to site & Checkbox */}
+        <View style={[styles.col, isMobile && styles.colMobile]}>
+          <Text style={styles.fieldLabel}>Added to site</Text>
+          <NativeSelect
+            value={filters.addedToSite}
+            options={ADDED_TO_SITE_OPTIONS}
+            onChange={(val) => handleUpdate({ addedToSite: val })}
+          />
+
+          {/* Include Under Offer, Sold STC Checkbox */}
+          <View style={styles.checkboxRowContainer}>
+            <Pressable
+              onPress={() => handleUpdate({ includeSold: !filters.includeSold })}
+              style={[styles.checkboxRow, webPointer]}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: filters.includeSold }}
+            >
+              <View
+                style={[
+                  styles.checkboxBox,
+                  filters.includeSold && styles.checkboxBoxChecked,
+                ]}
+              >
+                {filters.includeSold ? (
+                  <Check color="#FFFFFF" size={13} strokeWidth={3} />
+                ) : null}
+              </View>
+              <Text style={styles.checkboxLabel}>
+                Include Under Offer, Sold STC
+              </Text>
+              <Text style={styles.helpBadge}>(?)</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* ROW 2, COL 1: Price range (৳) */}
+        <View style={[styles.col, isMobile && styles.colMobile]}>
+          <Text style={styles.fieldLabel}>Price range (৳)</Text>
+          <View style={styles.rangeRow}>
             <NativeSelect
               value={filters.radius}
               options={RADIUS_OPTIONS}
@@ -252,8 +306,10 @@ export function RightmoveFilterCard({
             />
           </View>
 
-          <View style={styles.colFull}>
-            <Text style={styles.fieldLabel}>Property types</Text>
+        {/* ROW 2, COL 2: No. of bedrooms */}
+        <View style={[styles.col, isMobile && styles.colMobile]}>
+          <Text style={styles.fieldLabel}>No. of bedrooms</Text>
+          <View style={styles.rangeRow}>
             <NativeSelect
               value={filters.propertyType}
               options={PROPERTY_TYPE_OPTIONS}
@@ -315,26 +371,8 @@ export function RightmoveFilterCard({
             </View>
           </View>
 
-          <View style={styles.colFull}>
-            <Text style={styles.fieldLabel}>No. of bedrooms</Text>
-            <View style={styles.rangeRow}>
-              <NativeSelect
-                value={filters.minBedrooms}
-                options={MIN_BED_OPTIONS}
-                onChange={(val) => handleUpdate({ minBedrooms: val })}
-                style={styles.rangeSelect}
-              />
-              <Text style={styles.rangeDash}>-</Text>
-              <NativeSelect
-                value={filters.maxBedrooms}
-                options={MAX_BED_OPTIONS}
-                onChange={(val) => handleUpdate({ maxBedrooms: val })}
-                style={styles.rangeSelect}
-              />
-            </View>
-          </View>
-
-          {/* Search Button */}
+        {/* ROW 2, COL 3: Search properties button */}
+        <View style={[styles.col, styles.actionCol, isMobile && styles.colMobile, isMobile && styles.actionColMobile]}>
           <Pressable
             onPress={() => onSearch(filters)}
             style={({ pressed }) => [
@@ -588,7 +626,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: "100%",
   },
-  cardPhone: {
+  cardMobile: {
     paddingHorizontal: 16,
     paddingVertical: 18,
     borderRadius: 14,
@@ -610,9 +648,8 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
     letterSpacing: -0.3,
   },
-  headingTextPhone: {
-    fontSize: 18,
-    lineHeight: 24,
+  headingTextMobile: {
+    fontSize: 20,
   },
   editIcon: {
     opacity: 0.6,
@@ -663,10 +700,10 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
-  gridTablet: {
+  gridMobile: {
     flexDirection: "column",
+    flexWrap: "nowrap",
     gap: 16,
-    width: "100%",
   },
   rowTablet: {
     flexDirection: "row",
@@ -685,8 +722,20 @@ const styles = StyleSheet.create({
   colFull: {
     width: "100%",
   },
+  colMobile: {
+    flex: 0,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+    minWidth: "100%",
+    width: "100%",
+  },
   actionCol: {
     justifyContent: "flex-end",
+  },
+  actionColMobile: {
+    justifyContent: "center",
+    marginTop: 4,
   },
   fieldLabel: {
     fontFamily: fonts.medium,
@@ -743,9 +792,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   checkboxRowContainer: {
-    marginTop: 4,
-    minHeight: 24,
-    justifyContent: "center",
+    marginTop: 10,
+    marginBottom: 4,
   },
   checkboxRow: {
     flexDirection: "row",
@@ -772,6 +820,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     color: "#2C3E38",
     fontWeight: "500",
+    flexShrink: 1,
   },
   helpBadge: {
     fontSize: 12,

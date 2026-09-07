@@ -70,7 +70,7 @@ export function HeroSearchWidget({
       <View style={[styles.card, isPhone && styles.cardPhone]}>
         {/* Top Header Row with Tabs (Figma node 214:4735) and AI-powered Badge */}
         <View style={[styles.tabsHeader, isPhone && styles.tabsHeaderPhone]}>
-          <SearchTabs activeTab={activeTab} onChange={setActiveTab} compact={isPhone} />
+          <SearchTabs activeTab={activeTab} compact={isPhone} onChange={setActiveTab} />
 
           {/* AI-powered Pill Badge */}
           <View style={[styles.aiBadge, isPhone && styles.aiBadgePhone]}>
@@ -173,9 +173,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "rgba(11, 26, 23, 0.08)",
   },
   tabsHeaderPhone: {
-    paddingLeft: 8,
-    paddingRight: 10,
-    paddingTop: 4,
+    paddingLeft: 6,
+    paddingRight: 14,
   },
   aiBadge: {
     flexDirection: "row",
@@ -191,8 +190,9 @@ const styles = StyleSheet.create({
   },
   aiBadgePhone: {
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    marginRight: 2,
+    paddingVertical: 3.5,
+    marginRight: 0,
+    marginTop: 0,
   },
   aiBadgeText: {
     color: "#0F6D55",
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   aiBadgeTextPhone: {
-    fontSize: 11,
+    fontSize: 11.5,
   },
   searchBody: {
     padding: 12,
