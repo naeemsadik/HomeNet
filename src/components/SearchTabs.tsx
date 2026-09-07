@@ -73,10 +73,6 @@ const styles = StyleSheet.create({
   },
   tabButtonCompact: {
     paddingHorizontal: 10,
-    paddingVertical: 10,
-  },
-  tabButtonCompact: {
-    paddingHorizontal: 10,
     paddingVertical: 9,
     height: 40,
   },

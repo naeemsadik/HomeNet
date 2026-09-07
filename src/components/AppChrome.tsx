@@ -958,9 +958,6 @@ const styles = StyleSheet.create({
   topbarLeftPhone: {
     gap: 6,
   },
-  topbarLeftPhone: {
-    gap: 6,
-  },
   topNavCenter: {
     flexDirection: "row",
     alignItems: "center",
@@ -1019,9 +1016,6 @@ const styles = StyleSheet.create({
   },
   topRightActionsPhone: {
     gap: 6,
-  },
-  topRightActionsPhone: {
-    gap: 5,
     flexShrink: 0,
   },
   rightmoveSignInBtn: {
@@ -1036,13 +1030,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: 38,
     flexShrink: 0,
-  },
-  rightmoveSignInBtnPhone: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    gap: 4,
-    height: 34,
-    borderWidth: 1.5,
   },
   rightmoveSignInBtnPhone: {
     paddingHorizontal: 10,
