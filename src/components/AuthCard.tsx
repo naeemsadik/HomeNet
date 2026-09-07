@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  ImageBackground,
   Pressable,
   ScrollView,
   StyleProp,
@@ -12,20 +13,20 @@ import {
   ViewStyle,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Svg, { Path } from "react-native-svg";
+import Svg, { ClipPath, Defs, Path, Rect } from "react-native-svg";
 import {
   ArrowRight,
   Eye,
   EyeOff,
-  Home,
   Lock,
   Mail,
-  Sparkles,
   User,
   X,
 } from "lucide-react-native";
 import { useAuthStore } from "@/stores/authStore";
 import { fonts, webPointer } from "@/theme";
+
+const authBuildingImage = require("../../assets/auth-hero-building.png");
 
 export type AuthMode = "signin" | "signup";
 
@@ -38,6 +39,33 @@ export interface AuthCardProps {
   style?: StyleProp<ViewStyle>;
 }
 
+/**
+ * Figma Node 282:7 House Icon (size: 37.427px)
+ */
+function HomenetHouseIcon() {
+  return (
+    <Svg width={38} height={38} viewBox="0 0 38 38" fill="none">
+      <Path
+        d="M23.3916 32.7482V20.2727C23.3916 19.8591 23.2273 19.4625 22.9348 19.17C22.6424 18.8776 22.2457 18.7133 21.8321 18.7133H15.5944C15.1808 18.7133 14.7841 18.8776 14.4917 19.17C14.1992 19.4625 14.0349 19.8591 14.0349 20.2727V32.7482"
+        stroke="#FFFFFF"
+        strokeWidth={3.11888}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M4.67831 15.5944C4.6782 15.1407 4.77708 14.6924 4.96804 14.2809C5.159 13.8693 5.43744 13.5044 5.78395 13.2116L16.7 3.85649C17.263 3.38071 17.9762 3.11968 18.7133 3.11968C19.4503 3.11968 20.1636 3.38071 20.7265 3.85649L31.6426 13.2116C31.9891 13.5044 32.2675 13.8693 32.4585 14.2809C32.6494 14.6924 32.7483 15.1407 32.7482 15.5944V29.6293C32.7482 30.4565 32.4196 31.2498 31.8347 31.8347C31.2498 32.4196 30.4565 32.7482 29.6293 32.7482H7.79719C6.97001 32.7482 6.17671 32.4196 5.59181 31.8347C5.00691 32.4196 4.67831 30.4565 4.67831 29.6293V15.5944Z"
+        stroke="#FFFFFF"
+        strokeWidth={3.11888}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/**
+ * Figma Node 282:21 Google Icon
+ */
 function GoogleIcon() {
   return (
     <Svg width={20} height={20} viewBox="0 0 24 24">
@@ -61,12 +89,65 @@ function GoogleIcon() {
   );
 }
 
+/**
+ * Figma Node 282:28 Facebook Icon
+ */
 function FacebookIcon() {
   return (
     <Svg width={20} height={20} viewBox="0 0 24 24">
       <Path
         d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
         fill="#FFFFFF"
+      />
+    </Svg>
+  );
+}
+
+/**
+ * Figma Node 282:73 Sparkle Icon
+ */
+function FigmaSparkleIcon() {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 16 16" fill="none">
+      <Defs>
+        <ClipPath id="authSparkleClip">
+          <Rect width={16} height={16} fill="white" />
+        </ClipPath>
+      </Defs>
+      <Path
+        d="M6.62467 10.3333C6.56515 10.1026 6.44489 9.89207 6.27641 9.72359C6.10793 9.55511 5.89738 9.43485 5.66667 9.37533L1.57667 8.32067C1.50689 8.30086 1.44547 8.25883 1.40174 8.20096C1.35801 8.14309 1.33435 8.07254 1.33435 8C1.33435 7.92746 1.35801 7.85691 1.40174 7.79904C1.44547 7.74117 1.50689 7.69914 1.57667 7.67933L5.66667 6.624C5.8973 6.56454 6.10779 6.44438 6.27627 6.27603C6.44474 6.10767 6.56504 5.89726 6.62467 5.66667L7.67933 1.57667C7.69894 1.50661 7.74092 1.44489 7.79888 1.40093C7.85684 1.35696 7.92759 1.33317 8.00033 1.33317C8.07308 1.33317 8.14383 1.35696 8.20179 1.40093C8.25974 1.44489 8.30173 1.50661 8.32133 1.57667L9.37533 5.66667C9.43485 5.89738 9.55511 6.10793 9.72359 6.27641C9.89207 6.44489 10.1026 6.56515 10.3333 6.62467L14.4233 7.67867C14.4937 7.69807 14.5557 7.74001 14.5999 7.79805C14.6441 7.8561 14.668 7.92704 14.668 8C14.668 8.07296 14.6441 8.1439 14.5999 8.20195C14.5557 8.25999 14.4937 8.30193 14.4233 8.32133L10.3333 9.37533C10.1026 9.43485 9.89207 9.55511 9.72359 9.72359C9.55511 9.89207 9.43485 10.1026 9.37533 10.3333L8.32067 14.4233C8.30106 14.4934 8.25908 14.5551 8.20112 14.5991C8.14316 14.643 8.07241 14.6668 7.99967 14.6668C7.92692 14.6668 7.85617 14.643 7.79821 14.5991C7.74026 14.5551 7.69827 14.4934 7.67867 14.4233L6.62467 10.3333Z"
+        stroke="#0F6D55"
+        strokeWidth={1.33333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M13.3333 2V4.66667"
+        stroke="#0F6D55"
+        strokeWidth={1.33333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M14.6667 3.33333H12"
+        stroke="#0F6D55"
+        strokeWidth={1.33333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M2.66667 11.3333V12.6667"
+        stroke="#0F6D55"
+        strokeWidth={1.33333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M3.33333 12H2"
+        stroke="#0F6D55"
+        strokeWidth={1.33333}
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </Svg>
   );
@@ -165,40 +246,50 @@ export function AuthCard({
       };
 
   return (
-    <View style={[styles.card, isModal && styles.modalCard, style]}>
-      {/* Top Gradient Header (Figma node 220:8567) */}
-      <LinearGradient
-        colors={["#0F6D55", "rgba(15, 109, 85, 0.72)", "rgba(191, 255, 239, 0.36)"]}
-        end={{ x: 1, y: 1 }}
-        start={{ x: 0, y: 0 }}
-        style={styles.gradientHeader}
-      >
-        {/* Optional Close Button */}
-        {showClose && onClose ? (
-          <Pressable
-            accessibilityLabel="Close"
-            onPress={onClose}
-            style={[styles.closeButton, webPointer]}
+    <View style={[styles.card, isModal && styles.modalCard, style]} testID="auth-card-container">
+      {/* ─── Top Header with Building Image and Figma Gradient (Node 282:5) ─── */}
+      <View style={styles.headerContainer}>
+        <ImageBackground
+          source={authBuildingImage}
+          style={styles.headerImageBg}
+          resizeMode="cover"
+        >
+          {/* Exact Figma Gradient Overlay (linear-gradient: 158.18deg) */}
+          <LinearGradient
+            colors={["rgb(15, 109, 85)", "rgba(15, 109, 85, 0.535)", "rgba(191, 255, 239, 0.36)"]}
+            locations={[0, 0.572, 1]}
+            start={{ x: 0.18, y: 0 }}
+            end={{ x: 0.82, y: 1 }}
+            style={styles.headerGradient}
           >
-            <X color="#0B1A17" size={18} />
-          </Pressable>
-        ) : null}
+            {/* Optional Close Button (Node 282:81) */}
+            {showClose && onClose ? (
+              <Pressable
+                accessibilityLabel="Close"
+                onPress={onClose}
+                style={[styles.closeButton, webPointer]}
+              >
+                <X color="#0B1A17" size={18} strokeWidth={2.2} />
+              </Pressable>
+            ) : null}
 
-        {/* Center Logo Icon Box (Figma node 220:8659) */}
-        <View style={styles.logoIconBox}>
-          <Home color="#FFFFFF" size={24} strokeWidth={2.2} />
-        </View>
+            {/* Center Logo Icon Tile (Node 282:6 - 67.37px x 67.37px) */}
+            <View style={styles.logoIconTile}>
+              <HomenetHouseIcon />
+            </View>
 
-        {/* App Title (Figma node 220:8573) */}
-        <Text style={styles.brandTitle}>Homenet</Text>
+            {/* App Title (Node 282:10) */}
+            <Text style={styles.brandTitle}>Homenet</Text>
 
-        {/* Subtitle (Figma node 220:8576) */}
-        <Text style={styles.brandSubtitle}>
-          Bangladesh's AI property marketplace
-        </Text>
-      </LinearGradient>
+            {/* Subtitle (Node 282:12) */}
+            <Text style={styles.brandSubtitle}>
+              Bangladesh's AI property marketplace
+            </Text>
+          </LinearGradient>
+        </ImageBackground>
+      </View>
 
-      {/* Mode Switcher Tabs (Sign In / Create Account) */}
+      {/* ─── Mode Switcher Tabs (Node 282:13 - 50.4px height) ─── */}
       <View style={styles.tabSwitcher}>
         <Pressable
           onPress={() => handleTabSwitch("signin")}
@@ -237,9 +328,9 @@ export function AuthCard({
         </Pressable>
       </View>
 
-      {/* Form Content */}
+      {/* ─── Form Body (Node 282:18 - px: 32px, py: 24px) ─── */}
       <ContentWrapper {...(contentWrapperProps as any)}>
-        {/* Social Logins */}
+        {/* Social Buttons (Node 282:19 - 42.4px height, gap: 12px) */}
         <View style={styles.socialButtonsRow}>
           <Pressable
             onPress={() => handleSocialClick("Google")}
@@ -258,7 +349,7 @@ export function AuthCard({
           </Pressable>
         </View>
 
-        {/* Divider */}
+        {/* Divider (Node 282:31) */}
         <View style={styles.dividerRow}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>or continue with email</Text>
@@ -274,7 +365,7 @@ export function AuthCard({
           </View>
         ) : null}
 
-        {/* Form Inputs */}
+        {/* Form Inputs (Node 282:37) */}
         <View style={styles.formContainer}>
           {mode === "signup" ? (
             <View style={styles.inputWrap}>
@@ -329,6 +420,7 @@ export function AuthCard({
             <Pressable
               onPress={() => setShowPassword((prev) => !prev)}
               style={styles.inputRightAction}
+              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
                 <EyeOff color="#5C6B66" size={16} />
@@ -348,7 +440,7 @@ export function AuthCard({
             </View>
           ) : null}
 
-          {/* Submit Button */}
+          {/* Submit Button (Node 282:60 - 44px height, rounded 20px) */}
           <Pressable
             disabled={loading}
             onPress={handleSubmit}
@@ -361,13 +453,13 @@ export function AuthCard({
                 <Text style={styles.submitButtonText}>
                   {mode === "signin" ? "Sign In" : "Create Account"}
                 </Text>
-                <ArrowRight color="#FFFFFF" size={16} />
+                <ArrowRight color="#FFFFFF" size={16} strokeWidth={2.2} />
               </>
             )}
           </Pressable>
         </View>
 
-        {/* Bottom Switch Link */}
+        {/* Bottom Switch Link (Node 282:65) */}
         <View style={styles.bottomSwitchRow}>
           <Text style={styles.switchPromptText}>
             {mode === "signin"
@@ -386,9 +478,11 @@ export function AuthCard({
           </Pressable>
         </View>
 
-        {/* Green Promotion Value Card */}
+        {/* AI Promotional Insights Card (Node 282:70) */}
         <View style={styles.promoCard}>
-          <Sparkles color="#0F6D55" size={14} />
+          <View style={styles.promoIconWrap}>
+            <FigmaSparkleIcon />
+          </View>
           <Text style={styles.promoText}>
             Join 240,000+ users getting AI-powered property insights tailored
             to your searches.
@@ -402,75 +496,80 @@ export function AuthCard({
 const styles = StyleSheet.create({
   card: {
     width: "100%",
-    maxWidth: 440,
+    maxWidth: 448,
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
+    borderRadius: 28,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.12,
-    shadowRadius: 30,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-  },
-  modalCard: {
-    maxHeight: "96%",
     shadowOffset: { width: 0, height: 25 },
     shadowOpacity: 0.25,
     shadowRadius: 50,
     elevation: 12,
+    borderWidth: 1.2,
+    borderColor: "rgba(11, 26, 23, 0.08)",
   },
-  gradientHeader: {
+  modalCard: {
+    maxHeight: "96%",
+  },
+  headerContainer: {
     width: "100%",
-    paddingTop: 16,
-    paddingBottom: 12,
-    paddingHorizontal: 24,
+    position: "relative",
+    overflow: "hidden",
+  },
+  headerImageBg: {
+    width: "100%",
+  },
+  headerGradient: {
+    width: "100%",
+    paddingTop: 32,
+    paddingBottom: 24,
+    paddingHorizontal: 32,
     alignItems: "center",
     position: "relative",
   },
   closeButton: {
     position: "absolute",
-    top: 12,
-    right: 12,
-    width: 32,
-    height: 32,
+    top: 16,
+    right: 16,
+    width: 36,
+    height: 36,
     borderRadius: 999,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.08)",
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 10,
   },
-  logoIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+  logoIconTile: {
+    width: 67.37,
+    height: 67.37,
+    borderRadius: 14,
     backgroundColor: "rgba(15, 109, 85, 0.59)",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 4,
+    marginBottom: 8,
   },
   brandTitle: {
     color: "#FFFFFF",
     fontFamily: fonts.headingExtraBold,
-    fontSize: 19,
+    fontSize: 24,
     fontWeight: "800",
-    lineHeight: 24,
+    lineHeight: 32,
     textAlign: "center",
   },
   brandSubtitle: {
-    marginTop: 2,
-    color: "rgba(255, 255, 255, 0.82)",
+    marginTop: 4,
+    color: "rgba(255, 255, 255, 0.8)",
     fontFamily: fonts.regular,
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 14,
+    lineHeight: 20,
     textAlign: "center",
   },
   tabSwitcher: {
     flexDirection: "row",
     alignItems: "center",
-    height: 38,
+    height: 50.4,
     borderBottomWidth: 1.2,
     borderBottomColor: "rgba(11, 26, 23, 0.08)",
   },
@@ -488,8 +587,9 @@ const styles = StyleSheet.create({
   tabText: {
     color: "#5C6B66",
     fontFamily: fonts.medium,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "500",
+    lineHeight: 20,
   },
   tabTextActive: {
     color: "#0F6D55",
@@ -497,21 +597,22 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 14,
-    gap: 10,
+    paddingHorizontal: 32,
+    paddingTop: 24,
+    paddingBottom: 24,
+    gap: 0,
   },
   socialButtonsRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 12,
+    height: 42.4,
     width: "100%",
   },
   googleButton: {
     flex: 1,
-    height: 36,
-    borderRadius: 18,
+    height: "100%",
+    borderRadius: 20,
     backgroundColor: "#FFFFFF",
     borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.08)",
@@ -523,13 +624,14 @@ const styles = StyleSheet.create({
   googleButtonText: {
     color: "#0B1A17",
     fontFamily: fonts.semiBold,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
+    lineHeight: 20,
   },
   facebookButton: {
     flex: 1,
-    height: 36,
-    borderRadius: 18,
+    height: "100%",
+    borderRadius: 20,
     backgroundColor: "#1877F2",
     flexDirection: "row",
     alignItems: "center",
@@ -539,14 +641,16 @@ const styles = StyleSheet.create({
   facebookButtonText: {
     color: "#FFFFFF",
     fontFamily: fonts.semiBold,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600",
+    lineHeight: 20,
   },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginVertical: 0,
+    gap: 12,
+    marginTop: 20,
+    width: "100%",
   },
   dividerLine: {
     flex: 1,
@@ -556,13 +660,15 @@ const styles = StyleSheet.create({
   dividerText: {
     color: "#5C6B66",
     fontFamily: fonts.regular,
-    fontSize: 11,
+    fontSize: 12,
+    lineHeight: 16,
   },
   errorAlert: {
     backgroundColor: "#FEE2E2",
-    borderRadius: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginTop: 14,
   },
   errorText: {
     color: "#DC2626",
@@ -571,92 +677,100 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   formContainer: {
-    gap: 8,
+    gap: 16,
     width: "100%",
+    marginTop: 20,
   },
   inputWrap: {
     backgroundColor: "#F4F6F5",
     borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.08)",
-    borderRadius: 18,
-    height: 38,
+    borderRadius: 20,
+    height: 46.4,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
   },
   inputLeftIcon: {
-    marginRight: 8,
+    marginRight: 10,
   },
   inputRightAction: {
-    padding: 4,
+    padding: 6,
   },
   textInput: {
     flex: 1,
     height: "100%",
     color: "#0B1A17",
     fontFamily: fonts.regular,
-    fontSize: 13,
+    fontSize: 14,
     paddingVertical: 0,
     outlineStyle: "none",
   } as any,
   forgotPasswordRow: {
     alignItems: "flex-end",
-    marginTop: -2,
+    marginTop: -4,
   },
   forgotPasswordText: {
     color: "#0F6D55",
     fontFamily: fonts.semiBold,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "600",
+    lineHeight: 20,
   },
   submitButton: {
     backgroundColor: "#0F6D55",
-    height: 38,
-    borderRadius: 18,
+    height: 44,
+    borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
+    marginTop: 4,
   },
   submitButtonText: {
     color: "#FFFFFF",
     fontFamily: fonts.bold,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
+    lineHeight: 20,
   },
   bottomSwitchRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 0,
+    marginTop: 20,
   },
   switchPromptText: {
     color: "#5C6B66",
     fontFamily: fonts.regular,
-    fontSize: 12,
+    fontSize: 14,
+    lineHeight: 20,
   },
   switchActionText: {
     color: "#0F6D55",
     fontFamily: fonts.semiBold,
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: "600",
+    lineHeight: 24,
   },
   promoCard: {
     backgroundColor: "#E7F2EE",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: 8,
-    marginTop: 0,
-    marginBottom: 0,
+    marginTop: 20,
+  },
+  promoIconWrap: {
+    paddingTop: 2,
   },
   promoText: {
     flex: 1,
-    color: "#0F6D55",
-    fontFamily: fonts.medium,
-    fontSize: 11,
-    lineHeight: 15,
+    color: "rgba(15, 109, 85, 0.8)",
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

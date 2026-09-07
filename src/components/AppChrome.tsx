@@ -34,7 +34,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { router } from "expo-router";
 import { Brand } from "./Brand";
-import { AreaPicker } from "./AreaPicker";
 import { LoginModal } from "./LoginModal";
 import { AppLink } from "./ui";
 
@@ -177,8 +176,6 @@ function TopBar({
 }) {
   const { isTablet, isPhone } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [areaPickerOpen, setAreaPickerOpen] = useState(false);
-  const [selectedCity, setSelectedCity] = useState("Dhaka");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user } = useAuthStore();
 
@@ -265,23 +262,6 @@ function TopBar({
         ) : null}
 
         <View style={[styles.topRightActions, isPhone && styles.topRightActionsPhone]}>
-          {/* Location Selector Pill */}
-          <Pressable
-            onPress={() => setAreaPickerOpen(true)}
-            style={[styles.locationPill, isPhone && styles.locationPillPhone, webPointer]}
-            accessibilityRole="button"
-            accessibilityLabel={`Select location, current: ${selectedCity}`}
-          >
-            <MapPin color="#0F6D55" size={isPhone ? 13 : 15} />
-            <Text
-              numberOfLines={1}
-              style={[styles.locationPillText, isPhone && styles.locationPillTextPhone]}
-            >
-              {selectedCity}
-            </Text>
-            <ChevronDown color="#0B1A17" size={isPhone ? 12 : 14} />
-          </Pressable>
-
           {user ? (
             <>
               {/* Notification Button */}
@@ -348,16 +328,6 @@ function TopBar({
           )}
         </View>
       </View>
-
-      <AreaPicker
-        visible={areaPickerOpen}
-        onClose={() => setAreaPickerOpen(false)}
-        onSelect={(area) => {
-          setSelectedCity(area?.city || area?.name || "Dhaka");
-          setAreaPickerOpen(false);
-        }}
-        selectedArea={null}
-      />
 
       <LoginModal
         visible={authModalOpen}
