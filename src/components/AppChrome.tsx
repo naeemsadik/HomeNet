@@ -371,16 +371,22 @@ function Footer() {
   const { isPhone, isTablet, width } = useResponsive();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const isMobile = isPhone || width < 768;
+  const isTabletView = (isTablet || width < 1024) && !isMobile;
 
   return (
-    <View style={[styles.footer, isTablet && { width, maxWidth: width }]}>
-      <View style={styles.footerInner}>
-        {/* Main 5-column section */}
+    <View style={styles.footer}>
+      <View style={[styles.footerInner, isMobile && styles.footerInnerMobile]}>
+        {/* Main section: Brand + Navigation Columns */}
         <View
-          style={[styles.footerColumns, isPhone && styles.footerColumnsPhone]}
+          style={[
+            styles.footerColumns,
+            isTabletView && styles.footerColumnsTablet,
+            isMobile && styles.footerColumnsMobile,
+          ]}
         >
           {/* Column 1: Brand & Contact Info */}
-          <View style={[styles.footerCol1, isPhone && styles.footerColFull]}>
+          <View style={[styles.footerCol1, (isMobile || isTabletView) && styles.footerColFull]}>
             <Brand size="large" />
             <Text style={styles.footerTagline}>
               Bangladesh's AI-powered property marketplace. Verified listings,
@@ -479,64 +485,73 @@ function Footer() {
             </View>
           </View>
 
-          {/* Column 2: Explore */}
-          <View style={styles.footerCol}>
-            <Text style={styles.footerColHeading}>Explore</Text>
-            {[
-              "Apartments",
-              "Houses",
-              "Commercial",
-              "Land",
-              "For Rent",
-              "For Sale",
-            ].map((item) => (
-              <AppLink href="/buy" key={item}>
-                <Text style={styles.footerLinkText}>{item}</Text>
-              </AppLink>
-            ))}
-          </View>
+          {/* Links Grid: 4 columns on desktop, 4 in row on tablet, 2x2 on mobile */}
+          <View
+            style={[
+              styles.footerLinksWrap,
+              isTabletView && styles.footerLinksWrapTablet,
+              isMobile && styles.footerLinksWrapMobile,
+            ]}
+          >
+            {/* Column 2: Explore */}
+            <View style={[styles.footerCol, isMobile && styles.footerColMobile]}>
+              <Text style={styles.footerColHeading}>Explore</Text>
+              {[
+                "Apartments",
+                "Houses",
+                "Commercial",
+                "Land",
+                "For Rent",
+                "For Sale",
+              ].map((item) => (
+                <AppLink href="/buy" key={item}>
+                  <Text style={styles.footerLinkText}>{item}</Text>
+                </AppLink>
+              ))}
+            </View>
 
-          {/* Column 3: Company */}
-          <View style={styles.footerCol}>
-            <Text style={styles.footerColHeading}>Company</Text>
-            {[
-              "About Homenet",
-              "Careers",
-              "Press",
-              "Trusted Partners",
-              "Blog",
-            ].map((item) => (
-              <AppLink href="/about" key={item}>
-                <Text style={styles.footerLinkText}>{item}</Text>
-              </AppLink>
-            ))}
-          </View>
-
-          {/* Column 4: Support */}
-          <View style={styles.footerCol}>
-            <Text style={styles.footerColHeading}>Support</Text>
-            {[
-              "Help Center",
-              "Contact Us",
-              "Safety & Trust",
-              "Report a Listing",
-            ].map((item) => (
-              <AppLink href="/about" key={item}>
-                <Text style={styles.footerLinkText}>{item}</Text>
-              </AppLink>
-            ))}
-          </View>
-
-          {/* Column 5: Legal */}
-          <View style={styles.footerCol}>
-            <Text style={styles.footerColHeading}>Legal</Text>
-            {["Terms of Service", "Privacy Policy", "Cookie Policy"].map(
-              (item) => (
+            {/* Column 3: Company */}
+            <View style={[styles.footerCol, isMobile && styles.footerColMobile]}>
+              <Text style={styles.footerColHeading}>Company</Text>
+              {[
+                "About Homenet",
+                "Careers",
+                "Press",
+                "Trusted Partners",
+                "Blog",
+              ].map((item) => (
                 <AppLink href="/about" key={item}>
                   <Text style={styles.footerLinkText}>{item}</Text>
                 </AppLink>
-              ),
-            )}
+              ))}
+            </View>
+
+            {/* Column 4: Support */}
+            <View style={[styles.footerCol, isMobile && styles.footerColMobile]}>
+              <Text style={styles.footerColHeading}>Support</Text>
+              {[
+                "Help Center",
+                "Contact Us",
+                "Safety & Trust",
+                "Report a Listing",
+              ].map((item) => (
+                <AppLink href="/about" key={item}>
+                  <Text style={styles.footerLinkText}>{item}</Text>
+                </AppLink>
+              ))}
+            </View>
+
+            {/* Column 5: Legal */}
+            <View style={[styles.footerCol, isMobile && styles.footerColMobile]}>
+              <Text style={styles.footerColHeading}>Legal</Text>
+              {["Terms of Service", "Privacy Policy", "Cookie Policy"].map(
+                (item) => (
+                  <AppLink href="/about" key={item}>
+                    <Text style={styles.footerLinkText}>{item}</Text>
+                  </AppLink>
+                ),
+              )}
+            </View>
           </View>
         </View>
 
@@ -1182,69 +1197,65 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 52,
   },
+  footerInnerMobile: {
+    paddingHorizontal: 18,
+    paddingVertical: 36,
+  },
   footerColumns: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
     gap: 36,
+    width: "100%",
   },
-  footerColumnsPhone: {
-    flexWrap: "wrap",
+  footerColumnsTablet: {
+    flexDirection: "column",
+    gap: 32,
+  },
+  footerColumnsMobile: {
+    flexDirection: "column",
     gap: 28,
   },
   footerCol1: {
-    flex: 2.2,
+    flex: 2,
     minWidth: 240,
+    maxWidth: 380,
   },
   footerColFull: {
-    flexBasis: "100%",
+    minWidth: "100%",
+    maxWidth: "100%",
+    flex: 0,
   },
-  footerTagline: {
-    marginTop: 18,
-    marginBottom: 20,
-    color: "#52635E",
-    fontFamily: fonts.regular,
-    fontSize: 15,
-    lineHeight: 23,
-    maxWidth: 310,
-  },
-  contactItem: {
+  footerLinksWrap: {
+    flex: 3,
     flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 8,
+    justifyContent: "space-between",
+    gap: 24,
   },
-  contactIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(15, 109, 85, 0.08)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  contactText: {
-    color: "#31443F",
-    fontFamily: fonts.medium,
-    fontSize: 14.5,
-  },
-  socialRow: {
+  footerLinksWrapTablet: {
+    width: "100%",
     flexDirection: "row",
-    gap: 10,
-    marginTop: 20,
+    justifyContent: "space-between",
+    gap: 16,
   },
-  socialCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+  footerLinksWrapMobile: {
+    width: "100%",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    rowGap: 24,
+    columnGap: 16,
+    justifyContent: "space-between",
   },
   footerCol: {
     flex: 1,
-    minWidth: 125,
+    minWidth: 110,
     gap: 11,
+  },
+  footerColMobile: {
+    width: "47%",
+    minWidth: 120,
+    flexGrow: 0,
+    flexShrink: 0,
   },
   footerColHeading: {
     color: "#081613",
