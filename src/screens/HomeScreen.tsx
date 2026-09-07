@@ -1,52 +1,37 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ArrowRight,
-  ArrowUpRight,
-  ChevronDown,
   ChevronRight,
-  Compass,
-  Home,
   LandPlot,
-  MapPin,
   RotateCcw,
-  Search,
   ShieldCheck,
   Sparkles,
   TrendingUp,
-  type LucideIcon,
 } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import {
   ActivityIndicator,
   Image,
   ImageBackground,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from "react-native-svg";
 import { AppChrome } from "@/components/AppChrome";
-import { AreaPicker } from "@/components/AreaPicker";
-import { PropertyCard } from "@/components/PropertyCard";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
 import { AppButton, AppLink } from "@/components/ui";
 import {
   latestNews,
-  popularLocations,
   trustedPartners,
 } from "@/data/properties";
-import { toPropertyCard } from "@/features/property/adapters/toPropertyCard";
 import type { Property as ApiProperty } from "@/features/property/types/property";
 import { useResponsive } from "@/hooks/useResponsive";
 import { toApiError } from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
-import { useSavedStore } from "@/stores/savedStore";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colors, fonts } from "@/theme";
 
 
 
@@ -154,47 +139,15 @@ function FeaturedPropertyCard({ property, width }: { property: ApiProperty; widt
 
 export function HomeScreen() {
   const { isPhone, isTablet, width } = useResponsive();
-  const { savedIds: favorites, toggleSaved: toggleFavorite } = useSavedStore();
-  const [heroSearch, setHeroSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("Apartment");
-  const [areaPickerOpen, setAreaPickerOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("Dhaka");
-
   const popularQuery = useQuery({
     queryKey: ["properties", "home", "popular"],
     queryFn: () =>
-      getProperties({ status: "active", sort_by: "view_count_desc", page: 1, limit: 20 }),
-  });
-  const recentQuery = useQuery({
-    queryKey: ["properties", "home", "recent"],
-    queryFn: () =>
-      getProperties({ status: "active", sort_by: "created_at_desc", page: 1, limit: 3 }),
+      getProperties({ status: "active", sort_by: "view_count_desc", page: 1, limit: 10 }),
   });
 
   const popularProperties = popularQuery.data?.data?.items ?? [];
   const featuredProperties = popularProperties.slice(0, 4);
-  const recommendedProperties = useMemo(
-    () => popularProperties.slice(4, 7).map(toPropertyCard),
-    [popularProperties],
-  );
-  const verifiedProperties = useMemo(
-    () => popularProperties.filter((property) => property.is_verified),
-    [popularProperties],
-  );
-  const verifiedCards = useMemo(
-    () => verifiedProperties.slice(0, 3).map(toPropertyCard),
-    [verifiedProperties],
-  );
-  const moreVerifiedCards = useMemo(
-    () => verifiedProperties.slice(3, 6).map(toPropertyCard),
-    [verifiedProperties],
-  );
-  const recentlyAddedProperties = useMemo(
-    () => (recentQuery.data?.data?.items ?? []).map(toPropertyCard),
-    [recentQuery.data],
-  );
   const popularError = popularQuery.error ? toApiError(popularQuery.error).message : null;
-  const recentError = recentQuery.error ? toApiError(recentQuery.error).message : null;
 
   return (
     <AppChrome active="home">
@@ -281,236 +234,7 @@ export function HomeScreen() {
         </PropertyResult>
       </View>
 
-      {/* ─────────────────────────────────────────────────────────────
-          4. AI INVESTMENT PICKS BANNER CARD (Figma data-node-id="1:276")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <LinearGradient
-          colors={["#E7F2EE", "#E8EEFC"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0.3, y: 1 }}
-          style={styles.aiInsightCard}
-        >
-          <View style={styles.aiInsightHeader}>
-            <View style={styles.aiInsightIconCircle}>
-              <Sparkles color="#FFFFFF" size={16} />
-            </View>
-            <Text style={styles.aiInsightTitle}>AI Investment Picks</Text>
-          </View>
 
-          <Text style={styles.aiInsightBody}>
-            Based on price trends and rental yield,{" "}
-            <Text style={styles.aiInsightBodyBold}>Banani &amp; Bashundhara</Text> show
-            the strongest growth this quarter — up to{" "}
-            <Text style={styles.aiInsightBodyBold}>+11%</Text>. Explore AI-scored
-            listings with the highest projected returns.
-          </Text>
-
-          <AppLink href="/ai-finder" style={styles.aiInsightLink}>
-            <Text style={styles.aiInsightLinkText}>Explore picks</Text>
-            <ArrowUpRight color="#0F6D55" size={16} />
-          </AppLink>
-        </LinearGradient>
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          5. RECOMMENDED FOR YOU (Figma data-node-id="1:295")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <View>
-            <Text style={styles.sectionTitle}>Popular properties</Text>
-            <Text style={styles.sectionSubtitle}>Trending with home seekers</Text>
-          </View>
-          <AppLink href="/buy" style={styles.seeAllLink}>
-            <Text style={styles.seeAllText}>See all</Text>
-            <ChevronRight color="#0F6D55" size={16} />
-          </AppLink>
-        </View>
-
-        <PropertyResult
-          empty={!recommendedProperties.length}
-          error={popularError}
-          loading={popularQuery.isLoading}
-          onRetry={() => void popularQuery.refetch()}
-        >
-          <View style={[styles.propertiesGrid, isTablet && styles.propertiesGridTablet, isPhone && styles.propertiesGridPhone]}>
-            {recommendedProperties.map((prop) => (
-              <PropertyCard
-                key={prop.id}
-                property={prop}
-                saved={favorites.includes(prop.id)}
-                onSave={() => toggleFavorite(prop.id)}
-                style={[styles.propertyCardItem, isTablet && styles.propertyCardItemTablet, isPhone && styles.propertyCardItemPhone]}
-              />
-            ))}
-          </View>
-        </PropertyResult>
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          6. RECENTLY ADDED (Figma data-node-id="1:496")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recently added</Text>
-          <AppLink href="/buy" style={styles.seeAllLink}>
-            <Text style={styles.seeAllText}>See all</Text>
-            <ChevronRight color="#0F6D55" size={16} />
-          </AppLink>
-        </View>
-
-        <PropertyResult
-          empty={!recentlyAddedProperties.length}
-          error={recentError}
-          loading={recentQuery.isLoading}
-          onRetry={() => void recentQuery.refetch()}
-        >
-          <View style={[styles.propertiesGrid, isTablet && styles.propertiesGridTablet, isPhone && styles.propertiesGridPhone]}>
-            {recentlyAddedProperties.map((prop) => (
-              <PropertyCard
-                key={prop.id}
-                property={prop}
-                saved={favorites.includes(prop.id)}
-                onSave={() => toggleFavorite(prop.id)}
-                style={[styles.propertyCardItem, isTablet && styles.propertyCardItemTablet, isPhone && styles.propertyCardItemPhone]}
-              />
-            ))}
-          </View>
-        </PropertyResult>
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          7. VERIFIED PROPERTIES (Figma data-node-id="1:698")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <View>
-            <View style={styles.titleWithIconRow}>
-              <ShieldCheck color="#0B1A17" size={20} />
-              <Text style={styles.sectionTitle}>Verified properties</Text>
-            </View>
-            <Text style={styles.sectionSubtitle}>Documents checked by Homenet</Text>
-          </View>
-          <AppLink href="/buy" style={styles.seeAllLink}>
-            <Text style={styles.seeAllText}>See all</Text>
-            <ChevronRight color="#0F6D55" size={16} />
-          </AppLink>
-        </View>
-
-        <PropertyResult
-          empty={!verifiedCards.length}
-          error={popularError}
-          loading={popularQuery.isLoading}
-          onRetry={() => void popularQuery.refetch()}
-        >
-          <View style={[styles.propertiesGrid, isTablet && styles.propertiesGridTablet, isPhone && styles.propertiesGridPhone]}>
-            {verifiedCards.map((prop) => (
-              <PropertyCard
-                key={prop.id}
-                property={prop}
-                saved={favorites.includes(prop.id)}
-                onSave={() => toggleFavorite(prop.id)}
-                style={[styles.propertyCardItem, isTablet && styles.propertyCardItemTablet, isPhone && styles.propertyCardItemPhone]}
-              />
-            ))}
-          </View>
-        </PropertyResult>
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          8. AI INVESTMENT PICKS (Figma data-node-id="1:902")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <View>
-            <View style={styles.titleWithIconRow}>
-              <ShieldCheck color="#0B1A17" size={20} />
-              <Text style={styles.sectionTitle}>More verified homes</Text>
-            </View>
-            <Text style={styles.sectionSubtitle}>More active listings checked by Homenet</Text>
-          </View>
-          <AppLink href="/buy" style={styles.seeAllLink}>
-            <Text style={styles.seeAllText}>See all</Text>
-            <ChevronRight color="#0F6D55" size={16} />
-          </AppLink>
-        </View>
-
-        <PropertyResult
-          empty={!moreVerifiedCards.length}
-          error={popularError}
-          loading={popularQuery.isLoading}
-          onRetry={() => void popularQuery.refetch()}
-        >
-          <View style={[styles.propertiesGrid, isTablet && styles.propertiesGridTablet, isPhone && styles.propertiesGridPhone]}>
-            {moreVerifiedCards.map((prop) => (
-              <PropertyCard
-                key={prop.id}
-                property={prop}
-                saved={favorites.includes(prop.id)}
-                onSave={() => toggleFavorite(prop.id)}
-                style={[styles.propertyCardItem, isTablet && styles.propertyCardItemTablet, isPhone && styles.propertyCardItemPhone]}
-              />
-            ))}
-          </View>
-        </PropertyResult>
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          9. MAJOR CITIES ACROSS BANGLADESH (Figma data-node-id="1:1098")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <View>
-            <Text style={styles.sectionTitle}>Explore major cities</Text>
-            <Text style={styles.sectionSubtitle}>Browse verified properties across Bangladesh</Text>
-          </View>
-          <Pressable
-            onPress={() => setAreaPickerOpen(true)}
-            style={[styles.seeAllLink, webPointer]}
-          >
-            <Text style={styles.seeAllText}>All areas</Text>
-            <ChevronRight color="#0F6D55" size={16} />
-          </Pressable>
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.locationsRow}
-        >
-          {popularLocations.map((loc) => (
-            <Pressable
-              key={loc.name}
-              onPress={() => {
-                setSelectedLocation(loc.name);
-                setAreaPickerOpen(true);
-              }}
-              style={[styles.locationCard, webPointer]}
-            >
-              <ImageBackground
-                source={{ uri: loc.image }}
-                style={styles.locationCardBg}
-                resizeMode="cover"
-              >
-                <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.3)", "rgba(0,0,0,0.85)"]}
-                  style={StyleSheet.absoluteFill}
-                />
-                <View style={styles.locationCardCaption}>
-                  <Text style={styles.locationCardName}>{loc.name}</Text>
-                  <Text style={styles.locationCardCount}>{loc.count}</Text>
-                  {"subtext" in loc && (
-                    <Text numberOfLines={1} style={styles.locationCardSubtext}>
-                      {(loc as any).subtext}
-                    </Text>
-                  )}
-                </View>
-              </ImageBackground>
-            </Pressable>
-          ))}
-        </ScrollView>
-      </View>
 
       {/* ─────────────────────────────────────────────────────────────
           10. MARKET INSIGHTS & TRUSTED PARTNERS (Figma data-node-id="1:1156")
@@ -644,14 +368,7 @@ export function HomeScreen() {
         </View>
       </View>
 
-      <AreaPicker
-        visible={areaPickerOpen}
-        onClose={() => setAreaPickerOpen(false)}
-        onSelect={(area) => {
-          setSelectedLocation(area?.name || area?.city || "Dhaka");
-        }}
-        selectedArea={null}
-      />
+
     </AppChrome>
   );
 }
@@ -688,11 +405,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginTop: 2,
   },
-  titleWithIconRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
+
   seeAllLink: {
     flexDirection: "row",
     alignItems: "center",
@@ -790,110 +503,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: "center",
   },
-  heroSearchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 999,
-    borderWidth: 0.8,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    paddingLeft: 20.8,
-    paddingRight: 6.8,
-    paddingVertical: 6.8,
-    minHeight: 56,
-    gap: 8,
-    maxWidth: 672,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1.5,
-    elevation: 2,
-  },
-  heroSearchBoxPhone: {
-    width: "100%",
-    minHeight: 48,
-    paddingLeft: 14,
-    paddingRight: 4,
-    paddingVertical: 4,
-    gap: 6,
-  },
-  heroSearchInput: {
-    flex: 1,
-    minWidth: 0,
-    height: 42,
-    color: "#0B1A17",
-    fontFamily: fonts.regular,
-    fontSize: 16,
-    paddingVertical: 8,
-    outlineStyle: "none",
-  } as any,
-  heroSearchInputPhone: {
-    fontSize: 14,
-    height: 38,
-    paddingVertical: 6,
-  },
-  heroAiSearchBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#0F6D55",
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexShrink: 0,
-  },
-  heroAiSearchBtnPhone: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    gap: 4,
-  },
-  heroAiSearchBtnText: {
-    color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  heroAiSearchBtnTextPhone: {
-    fontSize: 12,
-  },
-  heroMetaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    marginTop: 12,
-    flexWrap: "wrap",
-  },
-  heroMetaRowPhone: {
-    gap: 10,
-  },
-  heroLocationPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 999,
-    borderWidth: 0.8,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    paddingHorizontal: 12.8,
-    paddingVertical: 8.8,
-  },
-  heroLocationPillText: {
-    color: "#0B1A17",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  heroMetaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  heroMetaText: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    lineHeight: 20,
-  },
+
 
 
 
@@ -986,94 +596,7 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
   },
 
-  /* 4. AI Insight Banner Card */
-  aiInsightCard: {
-    borderRadius: 20,
-    borderWidth: 0.8,
-    borderColor: "rgba(15, 109, 85, 0.15)",
-    padding: 20.8,
-    gap: 8,
-  },
-  aiInsightHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  aiInsightIconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#0F6D55",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  aiInsightTitle: {
-    color: "#0F6D55",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  aiInsightBody: {
-    color: "rgba(11, 26, 23, 0.8)",
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  aiInsightBodyBold: {
-    fontFamily: fonts.bold,
-    fontWeight: "700",
-    color: "#0B1A17",
-  },
-  aiInsightLink: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginTop: 4,
-  },
-  aiInsightLinkText: {
-    color: "#0F6D55",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-  },
 
-  /* 5, 6, 7, 8: Property Grid */
-  propertiesGrid: {
-    flexDirection: "row",
-    gap: 16,
-    width: "100%",
-    alignItems: "flex-start",
-  },
-  propertiesGridTablet: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 16,
-    alignItems: "flex-start",
-  },
-  propertiesGridPhone: {
-    flexDirection: "column",
-    gap: 14,
-    alignItems: "stretch",
-  },
-  propertyCardItem: {
-    flex: 1,
-    minWidth: 0,
-  },
-  propertyCardItemTablet: {
-    flex: 0,
-    flexBasis: "48.5%",
-    minWidth: "48.5%",
-    maxWidth: "48.5%",
-  },
-  propertyCardItemPhone: {
-    flex: 0,
-    flexGrow: 0,
-    flexShrink: 0,
-    flexBasis: "auto",
-    width: "100%",
-    minWidth: "100%",
-    maxWidth: "100%",
-  },
   requestState: {
     minHeight: 180,
     alignItems: "center",
@@ -1099,52 +622,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  /* 9. Popular Locations / Major Cities */
-  locationsRow: {
-    flexDirection: "row",
-    gap: 14,
-    paddingRight: 16,
-  },
-  locationCard: {
-    width: 172,
-    height: 154,
-    borderRadius: 20,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  locationCardBg: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "flex-end",
-    padding: 14,
-  },
-  locationCardCaption: {
-    gap: 2,
-  },
-  locationCardName: {
-    color: "#FFFFFF",
-    fontFamily: fonts.bold,
-    fontSize: 16,
-    fontWeight: "700",
-    lineHeight: 22,
-  },
-  locationCardCount: {
-    color: "#4AE8B0",
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  locationCardSubtext: {
-    color: "rgba(255, 255, 255, 0.75)",
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    lineHeight: 14,
-    marginTop: 1,
-  },
+
 
   /* 10. Market Insights & Trusted Partners */
   twoColSection: {

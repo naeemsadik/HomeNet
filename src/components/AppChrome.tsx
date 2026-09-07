@@ -21,6 +21,7 @@ import {
 } from "lucide-react-native";
 import { useState, type ReactNode } from "react";
 import {
+  Alert,
   Image,
   Modal,
   Pressable,
@@ -31,7 +32,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Line, Path, Rect } from "react-native-svg";
 import { router } from "expo-router";
 import { Brand } from "./Brand";
 import { LoginModal } from "./LoginModal";
@@ -337,10 +338,46 @@ function TopBar({
   );
 }
 
+function GooglePlayButton() {
+  return (
+    <Pressable
+      accessibilityLabel="Get it on Google Play"
+      style={[styles.playStoreBtn, webPointer]}
+      onPress={() => {
+        Alert.alert(
+          "Download Homenet",
+          "Homenet for Android is launching soon on the Google Play Store!"
+        );
+      }}
+    >
+      <Svg width="22" height="24" viewBox="0 0 512 512">
+        <Path
+          fill="#4285F4"
+          d="M32.5 48.3v415.4c0 10.9 5.8 20.9 15.1 26.4l230.9-234.1L47.6 21.9c-9.3 5.5-15.1 15.5-15.1 26.4z"
+        />
+        <Path
+          fill="#FBBC04"
+          d="M380.2 329.8l-101.7-73.8 101.7-73.8 54.3 31.3c15.4 8.9 25 25.3 25 42.5s-9.6 33.6-25 42.5l-54.3 31.3z"
+        />
+        <Path
+          fill="#EA4335"
+          d="M278.5 256L47.6 489.1c11.9 6.8 26.6 6.8 38.5 0l294.1-159.3-101.7-73.8z"
+        />
+        <Path
+          fill="#34A853"
+          d="M380.2 182.2L86.1 22.9C74.2 16 59.5 16 47.6 22.9L278.5 256l101.7-73.8z"
+        />
+      </Svg>
+      <View style={styles.playStoreTextWrap}>
+        <Text style={styles.playStoreSub}>GET IT ON</Text>
+        <Text style={styles.playStoreTitle}>Google Play</Text>
+      </View>
+    </Pressable>
+  );
+}
+
 function Footer() {
   const { isPhone, isTablet } = useResponsive();
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
 
   return (
     <View style={styles.footer}>
@@ -351,7 +388,7 @@ function Footer() {
           isPhone && styles.footerInnerPhone,
         ]}
       >
-        {/* Main 5-column section */}
+        {/* Main Columns */}
         <View
           style={[
             styles.footerColumns,
@@ -359,269 +396,185 @@ function Footer() {
             isPhone && styles.footerColumnsPhone,
           ]}
         >
-          {/* Column 1: Brand & Contact Info */}
-          <View
-            style={[
-              styles.footerCol1,
-              isTablet && styles.footerCol1Tablet,
-              isPhone && styles.footerColFull,
-            ]}
-          >
-            <Brand size={isPhone ? "default" : "large"} />
-            <Text
-              style={[
-                styles.footerTagline,
-                isTablet && styles.footerTaglineTablet,
-                isPhone && styles.footerTaglinePhone,
-              ]}
-            >
-              Bangladesh's AI-powered property marketplace. Verified listings,
-              smart valuation and trusted partners — all in one place.
+          {/* Column 1: Download the Homenet app */}
+          <View style={[styles.footerDownloadCol, isPhone && styles.footerColFull]}>
+            <Text style={styles.footerDownloadHeading}>
+              Download the{"\n"}Homenet app
             </Text>
-            <View style={styles.contactItem}>
-              <View style={styles.contactIconWrap}>
-                <Mail color="#0F6D55" size={14} />
-              </View>
-              <Text style={styles.contactText}>hello@homenet.com.bd</Text>
-            </View>
-            <View style={styles.contactItem}>
-              <View style={styles.contactIconWrap}>
-                <Phone color="#0F6D55" size={14} />
-              </View>
-              <Text style={styles.contactText}>+880 1700-000000</Text>
-            </View>
-            <View style={styles.socialRow}>
-              {/* Facebook */}
-              <Pressable
-                accessibilityLabel="Facebook"
-                style={[styles.socialCircle, webPointer]}
-              >
-                <Svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#0B1A17"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <Path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-                </Svg>
-              </Pressable>
-              {/* Twitter / X */}
-              <Pressable
-                accessibilityLabel="Twitter"
-                style={[styles.socialCircle, webPointer]}
-              >
-                <Svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#0B1A17"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <Path d="M4 4l11.733 16h4.267l-11.733 -16z" />
-                  <Path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
-                </Svg>
-              </Pressable>
-              {/* Instagram */}
-              <Pressable
-                accessibilityLabel="Instagram"
-                style={[styles.socialCircle, webPointer]}
-              >
-                <Svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#0B1A17"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <Path d="M17 2H7a5 5 0 0 0-5 5v10a5 5 0 0 0 5 5h10a5 5 0 0 0 5-5V7a5 5 0 0 0-5-5z" />
-                  <Path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                  <Path d="M17.5 6.5h.01" />
-                </Svg>
-              </Pressable>
-              {/* LinkedIn */}
-              <Pressable
-                accessibilityLabel="LinkedIn"
-                style={[styles.socialCircle, webPointer]}
-              >
-                <Svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#0B1A17"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <Path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                  <Path d="M2 9h4v12H2z" />
-                  <Path d="M4 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
-                </Svg>
-              </Pressable>
-            </View>
+            <GooglePlayButton />
           </View>
 
-          {/* Column 2: Explore */}
-          <View
-            style={[
-              styles.footerCol,
-              isTablet && styles.footerColTablet,
-              isPhone && styles.footerColPhone,
-            ]}
-          >
-            <Text style={styles.footerColHeading}>Explore</Text>
+          {/* Column 2: Resources */}
+          <View style={[styles.footerCol, isPhone && styles.footerColPhone]}>
+            <Text style={styles.footerColHeading}>Resources</Text>
             {[
-              "Apartments",
-              "Houses",
-              "Commercial",
-              "Land",
-              "For Rent",
-              "For Sale",
+              { label: "Stamp Duty & Tax Guide", href: "/about" },
+              { label: "Property Price Index", href: "/market" },
+              { label: "Property Valuation Guide", href: "/about" },
+              { label: "Property News & Trends", href: "/about" },
+              { label: "Buyer Guides", href: "/about" },
+              { label: "Seller Guides", href: "/sell" },
+              { label: "Renter Guides", href: "/rent" },
+              { label: "Landlord Guides", href: "/seller" },
+              { label: "Mortgage Calculator", href: "/market" },
             ].map((item) => (
-              <AppLink href="/buy" key={item}>
+              <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
+                <Text style={styles.footerLinkText}>{item.label}</Text>
+              </AppLink>
+            ))}
+          </View>
+
+          {/* Column 3: Search */}
+          <View style={[styles.footerCol, isPhone && styles.footerColPhone]}>
+            <Text style={styles.footerColHeading}>Search</Text>
+            {[
+              { label: "Search homes for sale", href: "/buy" },
+              { label: "Search homes for rent", href: "/rent" },
+              { label: "Commercial for sale", href: "/buy" },
+              { label: "Commercial to rent", href: "/rent" },
+              { label: "Short-let & Serviced", href: "/rent?subtype=short-let" },
+              { label: "Verified listings only", href: "/buy?is_verified=true" },
+              { label: "Find an agent", href: "/users" },
+              { label: "Student accommodation", href: "/rent" },
+              { label: "New developments", href: "/buy" },
+            ].map((item) => (
+              <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
+                <Text style={styles.footerLinkText}>{item.label}</Text>
+              </AppLink>
+            ))}
+          </View>
+
+          {/* Column 4: Locations */}
+          <View style={[styles.footerCol, isPhone && styles.footerColPhone]}>
+            <Text style={styles.footerColHeading}>Locations</Text>
+            {[
+              "Major areas in Dhaka",
+              "Gulshan",
+              "Banani",
+              "Dhanmondi",
+              "Uttara",
+              "Bashundhara R/A",
+              "Mirpur",
+              "Chittagong",
+              "Sylhet",
+            ].map((item) => (
+              <AppLink href="/buy" key={item} style={styles.footerLinkWrap}>
                 <Text style={styles.footerLinkText}>{item}</Text>
               </AppLink>
             ))}
           </View>
 
-          {/* Column 3: Company */}
-          <View
-            style={[
-              styles.footerCol,
-              isTablet && styles.footerColTablet,
-              isPhone && styles.footerColPhone,
-            ]}
-          >
-            <Text style={styles.footerColHeading}>Company</Text>
+          {/* Column 5: Homenet */}
+          <View style={[styles.footerCol, isPhone && styles.footerColPhone]}>
+            <Text style={styles.footerColHeading}>Homenet</Text>
             {[
-              "About Homenet",
-              "Careers",
-              "Press",
-              "Trusted Partners",
-              "Blog",
+              { label: "About Homenet", href: "/about" },
+              { label: "Tech blog & AI models", href: "/about" },
+              { label: "Press centre", href: "/about" },
+              { label: "Investor relations", href: "/about" },
+              { label: "Careers", href: "/about" },
+              { label: "Contact us", href: "/about" },
+              { label: "Verified agencies", href: "/users" },
             ].map((item) => (
-              <AppLink href="/about" key={item}>
-                <Text style={styles.footerLinkText}>{item}</Text>
+              <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
+                <Text style={styles.footerLinkText}>{item.label}</Text>
               </AppLink>
             ))}
           </View>
 
-          {/* Column 4: Support */}
-          <View
-            style={[
-              styles.footerCol,
-              isTablet && styles.footerColTablet,
-              isPhone && styles.footerColPhone,
-            ]}
-          >
-            <Text style={styles.footerColHeading}>Support</Text>
+          {/* Column 6: Professional / Pro Plan Benefits */}
+          <View style={[styles.footerCol, styles.footerProCol, isPhone && styles.footerColFull]}>
+            <Text style={styles.footerColHeading}>Professional</Text>
+            <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
+              <Text style={styles.proBadgeText}>Homenet Pro</Text>
+              <Sparkles color="#A7F3D0" size={13} />
+            </AppLink>
             {[
-              "Help Center",
-              "Contact Us",
-              "Safety & Trust",
-              "Report a Listing",
+              "Property Boosting (5x leads)",
+              "Priority Notice & Alerts",
+              "AI Valuation & Analytics",
+              "Verified Agency Badge",
+              "Direct WhatsApp Inquiries",
+              "Dedicated Account Support",
+              "Advertise on Homenet",
             ].map((item) => (
-              <AppLink href="/about" key={item}>
-                <Text style={styles.footerLinkText}>{item}</Text>
+              <AppLink href="/seller" key={item} style={styles.footerLinkWrap}>
+                <Text style={styles.footerProBenefitText}>{item}</Text>
               </AppLink>
             ))}
-          </View>
-
-          {/* Column 5: Legal */}
-          <View
-            style={[
-              styles.footerCol,
-              isTablet && styles.footerColTablet,
-              isPhone && styles.footerColPhone,
-            ]}
-          >
-            <Text style={styles.footerColHeading}>Legal</Text>
-            {["Terms of Service", "Privacy Policy", "Cookie Policy"].map(
-              (item) => (
-                <AppLink href="/about" key={item}>
-                  <Text style={styles.footerLinkText}>{item}</Text>
-                </AppLink>
-              ),
-            )}
           </View>
         </View>
 
-        {/* Newsletter Box */}
-        <View
-          style={[styles.newsletterCard, isPhone && styles.newsletterCardPhone]}
-        >
-          <View style={styles.newsletterLeft}>
-            <View style={styles.newsletterBadge}>
-              <Sparkles color="#0F6D55" size={13} />
-              <Text style={styles.newsletterBadgeText}>MARKET DIGEST</Text>
-            </View>
-            <Text style={styles.newsletterTitle}>
-              Get market insights in your inbox
-            </Text>
-            <Text style={styles.newsletterSubtitle}>
-              AI price trends & new verified listings, weekly.
-            </Text>
+        {/* Footer Bottom Divider */}
+        <View style={styles.footerDividerLine} />
+
+        <View style={[styles.footerBottomRow, isPhone && styles.footerBottomRowPhone]}>
+          {/* Legal / Utility Links */}
+          <View style={[styles.footerLegalLinks, isPhone && styles.footerLegalLinksPhone]}>
+            {[
+              { label: "Site map", href: "/about" },
+              { label: "Help", href: "/about" },
+              { label: "Safety and Security", href: "/about" },
+              { label: "Terms of Use", href: "/about" },
+              { label: "Accessibility", href: "/about" },
+              { label: "Privacy Policy", href: "/about" },
+            ].map((link, idx, arr) => (
+              <View key={link.label} style={styles.footerLegalItem}>
+                <AppLink href={link.href}>
+                  <Text style={styles.footerLegalLinkText}>{link.label}</Text>
+                </AppLink>
+                {idx < arr.length - 1 ? (
+                  <Text style={styles.footerLegalPipe}>|</Text>
+                ) : null}
+              </View>
+            ))}
           </View>
-          <View
-            style={[
-              styles.newsletterInputWrap,
-              isPhone && styles.newsletterInputWrapPhone,
-            ]}
-          >
-            <TextInput
-              onChangeText={setEmail}
-              placeholder="Your email address"
-              placeholderTextColor="rgba(11, 26, 23, 0.45)"
-              style={[
-                styles.newsletterInput,
-                isPhone && styles.newsletterInputPhone,
-              ]}
-              value={email}
-            />
-            <Pressable
-              onPress={() => setSubscribed(true)}
-              style={[
-                styles.subscribeButton,
-                isPhone && styles.subscribeButtonPhone,
-                webPointer,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.subscribeButtonText,
-                  isPhone && styles.subscribeButtonTextPhone,
-                ]}
-              >
-                {subscribed ? "Subscribed!" : "Subscribe"}
-              </Text>
+
+          {/* Social Icons */}
+          <View style={styles.footerSocialIcons}>
+            {/* Facebook */}
+            <Pressable accessibilityLabel="Facebook" style={[styles.socialIconBtn, webPointer]}>
+              <Svg width="16" height="16" viewBox="0 0 24 24" fill="#0B1A17">
+                <Path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </Svg>
+            </Pressable>
+
+            {/* X / Twitter */}
+            <Pressable accessibilityLabel="X" style={[styles.socialIconBtn, webPointer]}>
+              <Svg width="15" height="15" viewBox="0 0 24 24" fill="#0B1A17">
+                <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </Svg>
+            </Pressable>
+
+            {/* Instagram */}
+            <Pressable accessibilityLabel="Instagram" style={[styles.socialIconBtn, webPointer]}>
+              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1A17" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <Rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                <Path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                <Line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+              </Svg>
+            </Pressable>
+
+            {/* TikTok */}
+            <Pressable accessibilityLabel="TikTok" style={[styles.socialIconBtn, webPointer]}>
+              <Svg width="16" height="16" viewBox="0 0 24 24" fill="#0B1A17">
+                <Path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68 6.34 6.34 0 0 0 9.33 22a6.33 6.33 0 0 0 6.33-6.32V8.75a8.28 8.28 0 0 0 3.93 1.07V6.69z" />
+              </Svg>
+            </Pressable>
+
+            {/* YouTube */}
+            <Pressable accessibilityLabel="YouTube" style={[styles.socialIconBtn, webPointer]}>
+              <Svg width="17" height="17" viewBox="0 0 24 24" fill="#0B1A17">
+                <Path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+              </Svg>
             </Pressable>
           </View>
         </View>
 
-        {/* Footer Bottom Bar */}
-        <View
-          style={[styles.footerBottom, isPhone && styles.footerBottomPhone]}
-        >
-          <Text style={styles.footerBottomText}>
-            © 2026 HomeNet Ltd. All rights reserved.
-          </Text>
-          <View style={styles.verifiedListingsTag}>
-            <ShieldCheck color="#0F6D55" size={15} />
-            <Text style={styles.verifiedListingsTagText}>
-              12,400+ verified listings across Bangladesh
-            </Text>
-          </View>
-        </View>
+        {/* Copyright notice */}
+        <Text style={styles.footerCopyrightText}>
+          Copyright © 2026 HomeNet Group Limited. All rights reserved. Bangladesh's AI property marketplace.
+        </Text>
       </View>
     </View>
   );
@@ -1196,286 +1149,196 @@ const styles = StyleSheet.create({
   /* Footer Styles */
   footer: {
     width: "100%",
-    backgroundColor: "#FAFCFA",
-    borderTopWidth: 1.2,
-    borderTopColor: "rgba(11, 26, 23, 0.14)",
+    backgroundColor: "#F4F6F5",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(11, 26, 23, 0.08)",
     alignItems: "center",
   },
   footerInner: {
     width: "100%",
-    maxWidth: 1665,
+    maxWidth: 1400,
     paddingHorizontal: 40,
-    paddingVertical: 52,
+    paddingTop: 48,
+    paddingBottom: 36,
   },
   footerInnerTablet: {
     paddingHorizontal: 24,
-    paddingVertical: 40,
+    paddingTop: 36,
+    paddingBottom: 28,
   },
   footerInnerPhone: {
     paddingHorizontal: 16,
-    paddingVertical: 32,
+    paddingTop: 28,
+    paddingBottom: 24,
   },
   footerColumns: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 36,
+    gap: 24,
+    flexWrap: "wrap",
   },
   footerColumnsTablet: {
-    flexWrap: "wrap",
-    rowGap: 32,
-    columnGap: 20,
+    columnGap: 24,
+    rowGap: 28,
   },
   footerColumnsPhone: {
-    flexWrap: "wrap",
+    flexDirection: "column",
     gap: 24,
   },
-  footerCol1: {
-    flex: 2.2,
-    minWidth: 240,
+  footerDownloadCol: {
+    minWidth: 170,
+    flex: 1.1,
   },
-  footerCol1Tablet: {
-    width: "100%",
-    flexBasis: "100%",
-    minWidth: "100%",
-    marginBottom: 8,
-  },
-  footerColFull: {
-    flexBasis: "100%",
-  },
-  footerTagline: {
-    marginTop: 18,
-    marginBottom: 20,
-    color: "#52635E",
-    fontFamily: fonts.regular,
-    fontSize: 15,
-    lineHeight: 23,
-    maxWidth: 310,
-  },
-  footerTaglineTablet: {
-    maxWidth: 550,
-  },
-  footerTaglinePhone: {
-    marginTop: 12,
+  footerDownloadHeading: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontFamily: fonts.headingBold,
+    fontWeight: "700",
+    color: "#0B1A17",
     marginBottom: 16,
-    fontSize: 13.5,
-    lineHeight: 20,
+    letterSpacing: -0.3,
   },
-  contactItem: {
+  playStoreBtn: {
+    backgroundColor: "#000000",
+    borderRadius: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginBottom: 8,
+    gap: 9,
+    alignSelf: "flex-start",
   },
-  contactIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(15, 109, 85, 0.08)",
-    alignItems: "center",
+  playStoreTextWrap: {
     justifyContent: "center",
   },
-  contactText: {
-    color: "#31443F",
+  playStoreSub: {
+    color: "#FFFFFF",
+    fontSize: 8.5,
     fontFamily: fonts.medium,
-    fontSize: 14.5,
+    letterSpacing: 0.5,
+    lineHeight: 11,
   },
-  socialRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 20,
-  },
-  socialCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+  playStoreTitle: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontFamily: fonts.bold,
+    fontWeight: "700",
+    lineHeight: 17,
   },
   footerCol: {
     flex: 1,
-    minWidth: 125,
-    gap: 11,
-  },
-  footerColTablet: {
-    minWidth: 130,
-    flexBasis: "21%",
-    flexGrow: 1,
-    gap: 9,
+    minWidth: 140,
+    gap: 6,
   },
   footerColPhone: {
-    minWidth: "40%",
-    flexGrow: 1,
-    gap: 8,
+    width: "100%",
+    minWidth: "100%",
+    gap: 6,
+  },
+  footerColFull: {
+    width: "100%",
+    flexBasis: "100%",
+  },
+  footerProCol: {
+    minWidth: 180,
+    flex: 1.2,
   },
   footerColHeading: {
-    color: "#081613",
+    color: "#0B1A17",
     fontFamily: fonts.headingBold,
     fontSize: 15,
     fontWeight: "700",
     letterSpacing: -0.2,
-    marginBottom: 14,
+    marginBottom: 12,
+  },
+  footerLinkWrap: {
+    paddingVertical: 2,
   },
   footerLinkText: {
-    color: "#4A5D57",
+    color: "#5C6B66",
     fontFamily: fonts.regular,
-    fontSize: 14.5,
-    lineHeight: 22,
-  },
-
-  newsletterCard: {
-    marginTop: 44,
-    backgroundColor: "#F2F7F4",
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(15, 109, 85, 0.1)",
-    padding: 26,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 20,
-  },
-  newsletterCardPhone: {
-    flexDirection: "column",
-    alignItems: "stretch",
-    padding: 16,
-    gap: 14,
-    marginTop: 28,
-  },
-  newsletterLeft: {
-    flex: 1,
-  },
-  newsletterBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "rgba(15, 109, 85, 0.08)",
-    alignSelf: "flex-start",
-    paddingHorizontal: 9,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginBottom: 8,
-  },
-  newsletterBadgeText: {
-    color: "#0F6D55",
-    fontFamily: fonts.bold,
-    fontSize: 10.5,
-    letterSpacing: 0.6,
-    fontWeight: "700",
-  },
-  newsletterTitle: {
-    color: "#081613",
-    fontFamily: fonts.headingBold,
-    fontSize: 17,
-    fontWeight: "700",
-    letterSpacing: -0.3,
-  },
-  newsletterSubtitle: {
-    marginTop: 3,
-    color: "#52635E",
-    fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 20,
   },
-  newsletterInputWrap: {
+  proBadgeButton: {
+    backgroundColor: "#0B1A17",
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6.5,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(15, 109, 85, 0.16)",
-    paddingLeft: 16,
-    paddingRight: 4.5,
-    paddingVertical: 4,
-    minHeight: 50,
-    width: 330,
-    maxWidth: "100%",
-  },
-  newsletterInputWrapPhone: {
-    width: "100%",
-    minHeight: 44,
-    paddingLeft: 14,
-    paddingRight: 4,
-    paddingVertical: 4,
     gap: 6,
+    alignSelf: "flex-start",
+    marginBottom: 12,
   },
-  newsletterInput: {
-    flex: 1,
-    minWidth: 0,
-    height: 40,
-    color: "#0B1A17",
-    fontFamily: fonts.regular,
-    fontSize: 14.5,
-    paddingVertical: 6,
-    outlineStyle: "none",
-  } as any,
-  newsletterInputPhone: {
-    fontSize: 13.5,
-    height: 36,
-    paddingVertical: 4,
-  },
-  subscribeButton: {
-    paddingHorizontal: 18,
-    paddingVertical: 9,
-    backgroundColor: "#0F6D55",
-    borderRadius: 999,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  subscribeButtonPhone: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-  },
-  subscribeButtonText: {
+  proBadgeText: {
     color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
+    fontFamily: fonts.bold,
+    fontSize: 13,
+    fontWeight: "700",
   },
-  subscribeButtonTextPhone: {
-    fontSize: 12,
+  footerProBenefitText: {
+    color: "#2C3E38",
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    lineHeight: 20,
   },
-
-  footerBottom: {
-    marginTop: 36,
-    paddingTop: 24,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(11, 26, 23, 0.07)",
+  footerDividerLine: {
+    height: 1,
+    backgroundColor: "rgba(11, 26, 23, 0.08)",
+    marginTop: 40,
+    marginBottom: 20,
+    width: "100%",
+  },
+  footerBottomRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 16,
+    flexWrap: "wrap",
   },
-  footerBottomPhone: {
+  footerBottomRowPhone: {
     flexDirection: "column",
-    gap: 12,
     alignItems: "flex-start",
-    marginTop: 24,
-    paddingTop: 18,
+    gap: 14,
   },
-  footerBottomText: {
-    color: "#60716B",
-    fontFamily: fonts.regular,
-    fontSize: 13.5,
-  },
-  verifiedListingsTag: {
+  footerLegalLinks: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(15, 109, 85, 0.06)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(15, 109, 85, 0.1)",
+    gap: 8,
+    flexWrap: "wrap",
   },
-  verifiedListingsTagText: {
-    color: "#0F6D55",
-    fontFamily: fonts.semiBold,
-    fontSize: 13,
-    fontWeight: "600",
+  footerLegalLinksPhone: {
+    gap: 6,
+  },
+  footerLegalItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  footerLegalLinkText: {
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 12.5,
+  },
+  footerLegalPipe: {
+    color: "rgba(11, 26, 23, 0.22)",
+    fontSize: 12,
+  },
+  footerSocialIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  socialIconBtn: {
+    padding: 3,
+  },
+  footerCopyrightText: {
+    color: "#8C9A95",
+    fontFamily: fonts.regular,
+    fontSize: 11.5,
+    lineHeight: 16,
+    marginTop: 14,
   },
 
   /* Mobile bottom bar */
