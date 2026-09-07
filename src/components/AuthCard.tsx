@@ -166,9 +166,9 @@ export function AuthCard({
 
   return (
     <View style={[styles.card, isModal && styles.modalCard, style]}>
-      {/* Top Gradient Header */}
+      {/* Top Gradient Header (Figma node 220:8567) */}
       <LinearGradient
-        colors={["#0F6D55", "#2251D6"]}
+        colors={["#0F6D55", "rgba(15, 109, 85, 0.72)", "rgba(191, 255, 239, 0.36)"]}
         end={{ x: 1, y: 1 }}
         start={{ x: 0, y: 0 }}
         style={styles.gradientHeader}
@@ -184,15 +184,15 @@ export function AuthCard({
           </Pressable>
         ) : null}
 
-        {/* Center Logo Icon Box */}
+        {/* Center Logo Icon Box (Figma node 220:8659) */}
         <View style={styles.logoIconBox}>
-          <Home color="#FFFFFF" size={22} strokeWidth={2} />
+          <Home color="#FFFFFF" size={24} strokeWidth={2.2} />
         </View>
 
-        {/* App Title */}
+        {/* App Title (Figma node 220:8573) */}
         <Text style={styles.brandTitle}>Homenet</Text>
 
-        {/* Subtitle */}
+        {/* Subtitle (Figma node 220:8576) */}
         <Text style={styles.brandSubtitle}>
           Bangladesh's AI property marketplace
         </Text>
