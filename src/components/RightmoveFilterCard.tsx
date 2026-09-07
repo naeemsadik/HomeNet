@@ -174,7 +174,8 @@ export function RightmoveFilterCard({
   const { isPhone, isTablet, width } = useResponsive();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [customLocation, setCustomLocation] = useState(filters.query || locationName);
-  const isDesktop = !isPhone && !isTablet;
+  const isMobile = isPhone || width < 680;
+  const isDesktop = !isMobile && !isTablet;
 
   const handleUpdate = (patch: Partial<RightmoveFilters>) => {
     const updated = { ...filters, ...patch };
@@ -201,7 +202,7 @@ export function RightmoveFilterCard({
   };
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, isMobile && styles.cardMobile]}>
       {/* ─── Header: Find property for sale in [Location] ───────────────── */}
       <View style={styles.headerRow}>
         {isEditingTitle ? (
@@ -229,16 +230,16 @@ export function RightmoveFilterCard({
             accessibilityRole="button"
             accessibilityLabel="Click to edit location"
           >
-            <Text style={styles.headingText}>{getHeading()}</Text>
+            <Text style={[styles.headingText, isMobile && styles.headingTextMobile]}>{getHeading()}</Text>
             <Edit3 color="#5C6B66" size={16} style={styles.editIcon} />
           </Pressable>
         )}
       </View>
 
       {/* ─── Grid Controls (3 columns x 2 rows on desktop) ─────────────── */}
-      <View style={[styles.grid, isDesktop && styles.gridDesktop, isPhone && styles.gridPhone]}>
+      <View style={[styles.grid, isDesktop && styles.gridDesktop, isMobile && styles.gridMobile]}>
         {/* ROW 1, COL 1: Search radius */}
-        <View style={styles.col}>
+        <View style={[styles.col, isMobile && styles.colMobile]}>
           <Text style={styles.fieldLabel}>Search radius</Text>
           <NativeSelect
             value={filters.radius}
@@ -248,7 +249,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 1, COL 2: Property types */}
-        <View style={styles.col}>
+        <View style={[styles.col, isMobile && styles.colMobile]}>
           <Text style={styles.fieldLabel}>Property types</Text>
           <NativeSelect
             value={filters.propertyType}
@@ -258,7 +259,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 1, COL 3: Added to site & Checkbox */}
-        <View style={styles.col}>
+        <View style={[styles.col, isMobile && styles.colMobile]}>
           <Text style={styles.fieldLabel}>Added to site</Text>
           <NativeSelect
             value={filters.addedToSite}
@@ -293,7 +294,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 2, COL 1: Price range (৳) */}
-        <View style={styles.col}>
+        <View style={[styles.col, isMobile && styles.colMobile]}>
           <Text style={styles.fieldLabel}>Price range (৳)</Text>
           <View style={styles.rangeRow}>
             <NativeSelect
@@ -313,7 +314,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 2, COL 2: No. of bedrooms */}
-        <View style={styles.col}>
+        <View style={[styles.col, isMobile && styles.colMobile]}>
           <Text style={styles.fieldLabel}>No. of bedrooms</Text>
           <View style={styles.rangeRow}>
             <NativeSelect
@@ -333,7 +334,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 2, COL 3: Search properties button */}
-        <View style={[styles.col, styles.actionCol]}>
+        <View style={[styles.col, styles.actionCol, isMobile && styles.colMobile, isMobile && styles.actionColMobile]}>
           <Pressable
             onPress={() => onSearch(filters)}
             style={({ pressed }) => [
@@ -363,6 +364,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: "100%",
   },
+  cardMobile: {
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    borderRadius: 14,
+    marginBottom: 16,
+  },
   headerRow: {
     marginBottom: 20,
   },
@@ -378,6 +385,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#0B1A17",
     letterSpacing: -0.3,
+  },
+  headingTextMobile: {
+    fontSize: 20,
   },
   editIcon: {
     opacity: 0.6,
@@ -423,17 +433,30 @@ const styles = StyleSheet.create({
   gridDesktop: {
     display: "flex",
   },
-  gridPhone: {
+  gridMobile: {
     flexDirection: "column",
-    gap: 14,
+    flexWrap: "nowrap",
+    gap: 16,
   },
   col: {
     flex: 1,
     minWidth: 260,
     maxWidth: "100%",
   },
+  colMobile: {
+    flex: 0,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+    minWidth: "100%",
+    width: "100%",
+  },
   actionCol: {
     justifyContent: "flex-end",
+  },
+  actionColMobile: {
+    justifyContent: "center",
+    marginTop: 4,
   },
   fieldLabel: {
     fontFamily: fonts.medium,
@@ -484,6 +507,7 @@ const styles = StyleSheet.create({
   },
   checkboxRowContainer: {
     marginTop: 10,
+    marginBottom: 4,
   },
   checkboxRow: {
     flexDirection: "row",
@@ -509,6 +533,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     color: "#2C3E38",
     fontWeight: "500",
+    flexShrink: 1,
   },
   helpBadge: {
     fontSize: 12,

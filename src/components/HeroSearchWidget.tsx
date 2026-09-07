@@ -69,13 +69,15 @@ export function HeroSearchWidget({
       {/* ─── HeroSearchWidget Card ─────────────────────────────────────── */}
       <View style={styles.card}>
         {/* Top Header Row with Tabs (Figma node 214:4735) and AI-powered Badge */}
-        <View style={styles.tabsHeader}>
-          <SearchTabs activeTab={activeTab} onChange={setActiveTab} />
+        <View style={[styles.tabsHeader, isPhone && styles.tabsHeaderPhone]}>
+          <SearchTabs activeTab={activeTab} compact={isPhone} onChange={setActiveTab} />
 
           {/* AI-powered Pill Badge */}
-          <View style={styles.aiBadge}>
-            <Sparkles color="#0F6D55" size={12} />
-            <Text style={styles.aiBadgeText}>AI-powered</Text>
+          <View style={[styles.aiBadge, isPhone && styles.aiBadgePhone]}>
+            <Sparkles color="#0F6D55" size={isPhone ? 11 : 12} />
+            <Text style={[styles.aiBadgeText, isPhone && styles.aiBadgeTextPhone]}>
+              AI-powered
+            </Text>
           </View>
         </View>
 
@@ -155,6 +157,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1.2,
     borderBottomColor: "rgba(11, 26, 23, 0.08)",
   },
+  tabsHeaderPhone: {
+    paddingLeft: 6,
+    paddingRight: 14,
+  },
   aiBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -165,12 +171,22 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     marginRight: 6,
     marginTop: 2,
+    flexShrink: 0,
+  },
+  aiBadgePhone: {
+    paddingHorizontal: 8,
+    paddingVertical: 3.5,
+    marginRight: 0,
+    marginTop: 0,
   },
   aiBadgeText: {
     color: "#0F6D55",
     fontFamily: fonts.semiBold,
     fontSize: 12,
     fontWeight: "600",
+  },
+  aiBadgeTextPhone: {
+    fontSize: 11.5,
   },
   searchBody: {
     padding: 12,

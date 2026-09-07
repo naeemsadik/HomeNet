@@ -14,7 +14,11 @@ export function Brand({
   const isCompact = compact || size === "compact";
 
   return (
-    <AppLink href="/" accessibilityLabel="HomeNet home" style={styles.link}>
+    <AppLink
+      href="/"
+      accessibilityLabel="HomeNet home"
+      style={[styles.link, isCompact && styles.linkCompact]}
+    >
       <View
         style={[
           styles.mark,
@@ -43,6 +47,7 @@ export function Brand({
 
 const styles = StyleSheet.create({
   link: { flexDirection: "row", alignItems: "center", gap: 9 },
+  linkCompact: { gap: 6 },
   mark: {
     width: 36,
     height: 36,
@@ -60,6 +65,6 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
     fontWeight: "800",
   },
-  textCompact: { fontSize: 15 },
+  textCompact: { fontSize: 14.5 },
   textLarge: { fontSize: 20.5, letterSpacing: -0.4 },
 });

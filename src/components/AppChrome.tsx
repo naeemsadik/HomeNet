@@ -175,7 +175,7 @@ function TopBar({
   active?: ActivePage;
   onOpenMenu?: () => void;
 }) {
-  const { isTablet, width } = useResponsive();
+  const { isTablet, isPhone } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState("Dhaka");
@@ -199,21 +199,27 @@ function TopBar({
   return (
     <SafeAreaView
       edges={["top"]}
-      style={[styles.topbarSafe, isTablet && { width, maxWidth: width }]}
+      style={styles.topbarSafe}
     >
-      <View style={[styles.topbar, isTablet && styles.topbarTablet]}>
+      <View
+        style={[
+          styles.topbar,
+          isTablet && styles.topbarTablet,
+          isPhone && styles.topbarPhone,
+        ]}
+      >
         {/* Left: Brand + Hamburger (mobile) */}
-        <View style={styles.topbarLeft}>
+        <View style={[styles.topbarLeft, isPhone && styles.topbarLeftPhone]}>
           {isTablet ? (
             <Pressable
               onPress={onOpenMenu}
-              style={[styles.menuButton, webPointer]}
+              style={[styles.menuButton, isPhone && styles.menuButtonPhone, webPointer]}
               accessibilityLabel="Open navigation menu"
             >
-              <Menu color="#0B1A17" size={20} />
+              <Menu color="#0B1A17" size={isPhone ? 18 : 20} />
             </Pressable>
           ) : null}
-          <Brand />
+          <Brand compact={isTablet} />
         </View>
 
         {/* Center: Rightmove Desktop Nav Links */}
@@ -258,17 +264,22 @@ function TopBar({
           </View>
         ) : null}
 
-        <View style={styles.topRightActions}>
+        <View style={[styles.topRightActions, isPhone && styles.topRightActionsPhone]}>
           {/* Location Selector Pill */}
           <Pressable
             onPress={() => setAreaPickerOpen(true)}
-            style={[styles.locationPill, webPointer]}
+            style={[styles.locationPill, isPhone && styles.locationPillPhone, webPointer]}
             accessibilityRole="button"
             accessibilityLabel={`Select location, current: ${selectedCity}`}
           >
-            <MapPin color="#0F6D55" size={15} />
-            <Text style={styles.locationPillText}>{selectedCity}</Text>
-            <ChevronDown color="#0B1A17" size={14} />
+            <MapPin color="#0F6D55" size={isPhone ? 13 : 15} />
+            <Text
+              numberOfLines={1}
+              style={[styles.locationPillText, isPhone && styles.locationPillTextPhone]}
+            >
+              {selectedCity}
+            </Text>
+            <ChevronDown color="#0B1A17" size={isPhone ? 12 : 14} />
           </Pressable>
 
           {user ? (
@@ -278,9 +289,9 @@ function TopBar({
                 <Pressable
                   accessibilityLabel="Open notifications"
                   onPress={() => setNotificationsOpen((open) => !open)}
-                  style={[styles.iconCircleButton, webPointer]}
+                  style={[styles.iconCircleButton, isPhone && styles.iconCircleButtonPhone, webPointer]}
                 >
-                  <Bell color="#0B1A17" size={19} />
+                  <Bell color="#0B1A17" size={isPhone ? 16 : 19} />
                 </Pressable>
                 {notificationsOpen ? (
                   <View style={styles.notificationPopover}>
@@ -296,7 +307,7 @@ function TopBar({
               <AppLink
                 href="/profile"
                 accessibilityLabel="Open profile"
-                style={styles.avatarButton}
+                style={[styles.avatarButton, isPhone && styles.avatarButtonPhone]}
               >
                 <Image
                   source={{
@@ -304,23 +315,35 @@ function TopBar({
                       user.avatar_url ||
                       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
                   }}
-                  style={styles.avatarImage}
+                  style={[styles.avatarImage, isPhone && styles.avatarImagePhone]}
                 />
               </AppLink>
             </>
           ) : (
-            /* Rightmove Sign In Pill Button (Image 2) */
+            /* Previous Sign In Button Design (White background, emerald border, User icon) */
             <Pressable
               onPress={() => setAuthModalOpen(true)}
               accessibilityLabel="Sign in"
               style={({ pressed }) => [
                 styles.rightmoveSignInBtn,
+                isPhone && styles.rightmoveSignInBtnPhone,
                 webPointer,
-                pressed && { opacity: 0.88, backgroundColor: "rgba(0, 207, 146, 0.08)" },
+                pressed && { opacity: 0.85, backgroundColor: "rgba(0, 207, 146, 0.08)" },
               ]}
             >
-              <User color="#00CF92" size={18} strokeWidth={2.2} />
-              <Text style={styles.rightmoveSignInText}>Sign in</Text>
+              <User
+                color="#00CF92"
+                size={isPhone ? 15 : 17}
+                strokeWidth={2.2}
+              />
+              <Text
+                style={[
+                  styles.rightmoveSignInText,
+                  isPhone && styles.rightmoveSignInTextPhone,
+                ]}
+              >
+                Sign in
+              </Text>
             </Pressable>
           )}
         </View>
@@ -876,10 +899,18 @@ const styles = StyleSheet.create({
     minHeight: 64,
     paddingHorizontal: 16,
   },
+  topbarPhone: {
+    minHeight: 56,
+    paddingHorizontal: 8,
+    gap: 4,
+  },
   topbarLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+  },
+  topbarLeftPhone: {
+    gap: 6,
   },
   topNavCenter: {
     flexDirection: "row",
@@ -926,10 +957,19 @@ const styles = StyleSheet.create({
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
+  menuButtonPhone: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
   topRightActions: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+  },
+  topRightActionsPhone: {
+    gap: 5,
+    flexShrink: 0,
   },
   rightmoveSignInBtn: {
     flexDirection: "row",
@@ -942,12 +982,23 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 8,
     height: 38,
+    flexShrink: 0,
+  },
+  rightmoveSignInBtnPhone: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    gap: 4,
+    height: 34,
+    borderWidth: 1.5,
   },
   rightmoveSignInText: {
     color: "#0B1A17",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "700",
+  },
+  rightmoveSignInTextPhone: {
+    fontSize: 12.5,
   },
   locationPill: {
     flexDirection: "row",
@@ -960,11 +1011,21 @@ const styles = StyleSheet.create({
     borderWidth: 1.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
+  locationPillPhone: {
+    paddingHorizontal: 7,
+    paddingVertical: 5,
+    gap: 3,
+    borderWidth: 1.2,
+  },
   locationPillText: {
     color: "#0B1A17",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
+  },
+  locationPillTextPhone: {
+    fontSize: 11.5,
+    maxWidth: 52,
   },
   logInPill: {
     flexDirection: "row",
@@ -988,17 +1049,28 @@ const styles = StyleSheet.create({
   signInButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 7,
     backgroundColor: "#0F6D55",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 999,
-    height: 38.4,
+    height: 38,
+    flexShrink: 0,
+  },
+  signInButtonPhone: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    gap: 4,
+    height: 32,
   },
   signInButtonText: {
     color: "#FFFFFF",
     fontFamily: fonts.semiBold,
     fontSize: 14,
+    fontWeight: "600",
+  },
+  signInButtonTextPhone: {
+    fontSize: 12,
     fontWeight: "600",
   },
   notificationWrap: {
@@ -1013,6 +1085,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  iconCircleButtonPhone: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   orangeDot: {
     position: "absolute",
@@ -1057,9 +1134,19 @@ const styles = StyleSheet.create({
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
+  avatarButtonPhone: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
   avatarImage: {
     width: "100%",
     height: "100%",
+  },
+  avatarImagePhone: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
 
   pageScrollContent: {
