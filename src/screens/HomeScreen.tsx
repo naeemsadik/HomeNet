@@ -274,7 +274,7 @@ export function HomeScreen() {
               <FeaturedPropertyCard
                 key={property.id}
                 property={property}
-                width={isPhone ? Math.min(width - 48, 380) : undefined}
+                width={isPhone ? Math.min(width - 32, 340) : undefined}
               />
             ))}
           </ScrollView>
@@ -334,14 +334,14 @@ export function HomeScreen() {
           loading={popularQuery.isLoading}
           onRetry={() => void popularQuery.refetch()}
         >
-          <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+          <View style={[styles.propertiesGrid, isTablet && styles.propertiesGridTablet, isPhone && styles.propertiesGridPhone]}>
             {recommendedProperties.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}
                 saved={favorites.includes(prop.id)}
                 onSave={() => toggleFavorite(prop.id)}
-                style={styles.propertyCardItem}
+                style={[styles.propertyCardItem, isTablet && styles.propertyCardItemTablet, isPhone && styles.propertyCardItemPhone]}
               />
             ))}
           </View>
@@ -366,14 +366,14 @@ export function HomeScreen() {
           loading={recentQuery.isLoading}
           onRetry={() => void recentQuery.refetch()}
         >
-          <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+          <View style={[styles.propertiesGrid, isTablet && styles.propertiesGridTablet, isPhone && styles.propertiesGridPhone]}>
             {recentlyAddedProperties.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}
                 saved={favorites.includes(prop.id)}
                 onSave={() => toggleFavorite(prop.id)}
-                style={styles.propertyCardItem}
+                style={[styles.propertyCardItem, isTablet && styles.propertyCardItemTablet, isPhone && styles.propertyCardItemPhone]}
               />
             ))}
           </View>
@@ -404,14 +404,14 @@ export function HomeScreen() {
           loading={popularQuery.isLoading}
           onRetry={() => void popularQuery.refetch()}
         >
-          <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+          <View style={[styles.propertiesGrid, isTablet && styles.propertiesGridTablet, isPhone && styles.propertiesGridPhone]}>
             {verifiedCards.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}
                 saved={favorites.includes(prop.id)}
                 onSave={() => toggleFavorite(prop.id)}
-                style={styles.propertyCardItem}
+                style={[styles.propertyCardItem, isTablet && styles.propertyCardItemTablet, isPhone && styles.propertyCardItemPhone]}
               />
             ))}
           </View>
@@ -442,14 +442,14 @@ export function HomeScreen() {
           loading={popularQuery.isLoading}
           onRetry={() => void popularQuery.refetch()}
         >
-          <View style={[styles.propertiesGrid, isPhone && styles.propertiesGridPhone]}>
+          <View style={[styles.propertiesGrid, isTablet && styles.propertiesGridTablet, isPhone && styles.propertiesGridPhone]}>
             {moreVerifiedCards.map((prop) => (
               <PropertyCard
                 key={prop.id}
                 property={prop}
                 saved={favorites.includes(prop.id)}
                 onSave={() => toggleFavorite(prop.id)}
-                style={styles.propertyCardItem}
+                style={[styles.propertyCardItem, isTablet && styles.propertyCardItemTablet, isPhone && styles.propertyCardItemPhone]}
               />
             ))}
           </View>
@@ -614,9 +614,13 @@ export function HomeScreen() {
           </AppLink>
         </View>
 
-        <View style={[styles.newsGrid, isPhone && styles.newsGridPhone]}>
+        <View style={[styles.newsGrid, isTablet && styles.newsGridTablet, isPhone && styles.newsGridPhone]}>
           {latestNews.map((article) => (
-            <AppLink href="/about" key={article.id} style={styles.newsCard}>
+            <AppLink
+              href="/about"
+              key={article.id}
+              style={[styles.newsCard, isTablet && styles.newsCardTablet, isPhone && styles.newsCardPhone]}
+            >
               <View style={styles.newsImageWrap}>
                 <Image
                   source={{ uri: article.image }}
@@ -711,7 +715,8 @@ const styles = StyleSheet.create({
     minHeight: 495,
   },
   heroContainerPhone: {
-    minHeight: 460,
+    borderRadius: 18,
+    minHeight: 420,
   },
   heroBg: {
     width: "100%",
@@ -724,8 +729,8 @@ const styles = StyleSheet.create({
     maxWidth: 760,
   },
   heroContentPhone: {
-    paddingHorizontal: 20,
-    paddingVertical: 36,
+    paddingHorizontal: 14,
+    paddingVertical: 24,
   },
   heroTagPill: {
     flexDirection: "row",
@@ -754,9 +759,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   heroHeadingPhone: {
-    fontSize: 32,
-    lineHeight: 36,
-    letterSpacing: -0.6,
+    fontSize: 27,
+    lineHeight: 33,
+    letterSpacing: -0.5,
+    marginBottom: 10,
   },
   heroSubtitle: {
     color: "rgba(255, 255, 255, 0.85)",
@@ -767,8 +773,9 @@ const styles = StyleSheet.create({
     maxWidth: 576,
   },
   heroSubtitlePhone: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13.5,
+    lineHeight: 19,
+    marginBottom: 16,
   },
   heroSearchBox: {
     flexDirection: "row",
@@ -1022,13 +1029,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 16,
     width: "100%",
+    alignItems: "flex-start",
+  },
+  propertiesGridTablet: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
+    alignItems: "flex-start",
   },
   propertiesGridPhone: {
     flexDirection: "column",
+    gap: 14,
+    alignItems: "stretch",
   },
   propertyCardItem: {
     flex: 1,
-    minWidth: 260,
+    minWidth: 0,
+  },
+  propertyCardItemTablet: {
+    flex: 0,
+    flexBasis: "48.5%",
+    minWidth: "48.5%",
+    maxWidth: "48.5%",
+  },
+  propertyCardItemPhone: {
+    flex: 0,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+    width: "100%",
+    minWidth: "100%",
+    maxWidth: "100%",
   },
   requestState: {
     minHeight: 180,
@@ -1225,19 +1256,44 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 16,
     width: "100%",
+    alignItems: "flex-start",
+  },
+  newsGridTablet: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
+    alignItems: "flex-start",
   },
   newsGridPhone: {
     flexDirection: "column",
+    gap: 14,
+    alignItems: "stretch",
   },
   newsCard: {
     flex: 1,
-    minWidth: 260,
+    minWidth: 0,
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
     overflow: "hidden",
     padding: 0.8,
+  },
+  newsCardTablet: {
+    flex: 0,
+    flexBasis: "48.5%",
+    minWidth: "48.5%",
+    maxWidth: "48.5%",
+  },
+  newsCardPhone: {
+    flex: 0,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
+    width: "100%",
+    minWidth: "100%",
+    maxWidth: "100%",
+    borderRadius: 16,
   },
   newsImageWrap: {
     height: 157,

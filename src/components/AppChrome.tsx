@@ -368,21 +368,43 @@ function TopBar({
 }
 
 function Footer() {
-  const { isPhone, isTablet, width } = useResponsive();
+  const { isPhone, isTablet } = useResponsive();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
   return (
-    <View style={[styles.footer, isTablet && { width, maxWidth: width }]}>
-      <View style={styles.footerInner}>
+    <View style={styles.footer}>
+      <View
+        style={[
+          styles.footerInner,
+          isTablet && styles.footerInnerTablet,
+          isPhone && styles.footerInnerPhone,
+        ]}
+      >
         {/* Main 5-column section */}
         <View
-          style={[styles.footerColumns, isPhone && styles.footerColumnsPhone]}
+          style={[
+            styles.footerColumns,
+            isTablet && styles.footerColumnsTablet,
+            isPhone && styles.footerColumnsPhone,
+          ]}
         >
           {/* Column 1: Brand & Contact Info */}
-          <View style={[styles.footerCol1, isPhone && styles.footerColFull]}>
-            <Brand size="large" />
-            <Text style={styles.footerTagline}>
+          <View
+            style={[
+              styles.footerCol1,
+              isTablet && styles.footerCol1Tablet,
+              isPhone && styles.footerColFull,
+            ]}
+          >
+            <Brand size={isPhone ? "default" : "large"} />
+            <Text
+              style={[
+                styles.footerTagline,
+                isTablet && styles.footerTaglineTablet,
+                isPhone && styles.footerTaglinePhone,
+              ]}
+            >
               Bangladesh's AI-powered property marketplace. Verified listings,
               smart valuation and trusted partners — all in one place.
             </Text>
@@ -480,7 +502,13 @@ function Footer() {
           </View>
 
           {/* Column 2: Explore */}
-          <View style={styles.footerCol}>
+          <View
+            style={[
+              styles.footerCol,
+              isTablet && styles.footerColTablet,
+              isPhone && styles.footerColPhone,
+            ]}
+          >
             <Text style={styles.footerColHeading}>Explore</Text>
             {[
               "Apartments",
@@ -497,7 +525,13 @@ function Footer() {
           </View>
 
           {/* Column 3: Company */}
-          <View style={styles.footerCol}>
+          <View
+            style={[
+              styles.footerCol,
+              isTablet && styles.footerColTablet,
+              isPhone && styles.footerColPhone,
+            ]}
+          >
             <Text style={styles.footerColHeading}>Company</Text>
             {[
               "About Homenet",
@@ -513,7 +547,13 @@ function Footer() {
           </View>
 
           {/* Column 4: Support */}
-          <View style={styles.footerCol}>
+          <View
+            style={[
+              styles.footerCol,
+              isTablet && styles.footerColTablet,
+              isPhone && styles.footerColPhone,
+            ]}
+          >
             <Text style={styles.footerColHeading}>Support</Text>
             {[
               "Help Center",
@@ -528,7 +568,13 @@ function Footer() {
           </View>
 
           {/* Column 5: Legal */}
-          <View style={styles.footerCol}>
+          <View
+            style={[
+              styles.footerCol,
+              isTablet && styles.footerColTablet,
+              isPhone && styles.footerColPhone,
+            ]}
+          >
             <Text style={styles.footerColHeading}>Legal</Text>
             {["Terms of Service", "Privacy Policy", "Cookie Policy"].map(
               (item) => (
@@ -612,7 +658,6 @@ function Footer() {
 }
 
 function MobileNav({ active }: { active: ActivePage }) {
-  const { width } = useResponsive();
   const user = useAuthStore((s) => s.user);
   const links = [
     { label: "Home", href: "/", icon: Home, selected: active === "home", authGated: false },
@@ -642,7 +687,7 @@ function MobileNav({ active }: { active: ActivePage }) {
   return (
     <SafeAreaView
       edges={["bottom"]}
-      style={[styles.mobileNavSafe, { width, maxWidth: width }]}
+      style={styles.mobileNavSafe}
     >
       <View style={styles.mobileNav}>
         {links.map(({ label, href, icon: Icon, selected, authGated }) => {
@@ -693,7 +738,7 @@ export function AppChrome({
   children: ReactNode;
   active: ActivePage;
 }) {
-  const { isTablet, width } = useResponsive();
+  const { isTablet, isPhone } = useResponsive();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -706,8 +751,8 @@ export function AppChrome({
           showsVerticalScrollIndicator={false}
           style={{ width: "100%" }}
         >
-          <View style={styles.mainGutter}>
-            <View style={styles.main}>{children}</View>
+          <View style={[styles.mainGutter, isPhone && styles.mainGutterPhone]}>
+            <View style={[styles.main, isPhone && styles.mainPhone]}>{children}</View>
           </View>
           <Footer />
         </ScrollView>
@@ -908,6 +953,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    flexShrink: 0,
+  },
+  topbarLeftPhone: {
+    gap: 6,
   },
   topbarLeftPhone: {
     gap: 6,
@@ -966,6 +1015,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    flexShrink: 0,
+  },
+  topRightActionsPhone: {
+    gap: 6,
   },
   topRightActionsPhone: {
     gap: 5,
@@ -989,6 +1042,14 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     gap: 4,
     height: 34,
+    borderWidth: 1.5,
+  },
+  rightmoveSignInBtnPhone: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    height: 32,
+    gap: 4,
+    borderRadius: 6,
     borderWidth: 1.5,
   },
   rightmoveSignInText: {
@@ -1162,10 +1223,17 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 48,
   },
+  mainGutterPhone: {
+    paddingTop: 10,
+    paddingBottom: 24,
+  },
 
   main: {
     width: "100%",
     paddingHorizontal: 24,
+  },
+  mainPhone: {
+    paddingHorizontal: 12,
   },
 
   /* Footer Styles */
@@ -1182,18 +1250,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 52,
   },
+  footerInnerTablet: {
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+  },
+  footerInnerPhone: {
+    paddingHorizontal: 16,
+    paddingVertical: 32,
+  },
   footerColumns: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 36,
   },
+  footerColumnsTablet: {
+    flexWrap: "wrap",
+    rowGap: 32,
+    columnGap: 20,
+  },
   footerColumnsPhone: {
     flexWrap: "wrap",
-    gap: 28,
+    gap: 24,
   },
   footerCol1: {
     flex: 2.2,
     minWidth: 240,
+  },
+  footerCol1Tablet: {
+    width: "100%",
+    flexBasis: "100%",
+    minWidth: "100%",
+    marginBottom: 8,
   },
   footerColFull: {
     flexBasis: "100%",
@@ -1206,6 +1293,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 23,
     maxWidth: 310,
+  },
+  footerTaglineTablet: {
+    maxWidth: 550,
+  },
+  footerTaglinePhone: {
+    marginTop: 12,
+    marginBottom: 16,
+    fontSize: 13.5,
+    lineHeight: 20,
   },
   contactItem: {
     flexDirection: "row",
@@ -1246,6 +1342,17 @@ const styles = StyleSheet.create({
     minWidth: 125,
     gap: 11,
   },
+  footerColTablet: {
+    minWidth: 130,
+    flexBasis: "21%",
+    flexGrow: 1,
+    gap: 9,
+  },
+  footerColPhone: {
+    minWidth: "40%",
+    flexGrow: 1,
+    gap: 8,
+  },
   footerColHeading: {
     color: "#081613",
     fontFamily: fonts.headingBold,
@@ -1276,8 +1383,9 @@ const styles = StyleSheet.create({
   newsletterCardPhone: {
     flexDirection: "column",
     alignItems: "stretch",
-    padding: 20,
-    gap: 16,
+    padding: 16,
+    gap: 14,
+    marginTop: 28,
   },
   newsletterLeft: {
     flex: 1,
@@ -1330,7 +1438,7 @@ const styles = StyleSheet.create({
   },
   newsletterInputWrapPhone: {
     width: "100%",
-    minHeight: 48,
+    minHeight: 44,
     paddingLeft: 14,
     paddingRight: 4,
     paddingVertical: 4,
@@ -1347,9 +1455,9 @@ const styles = StyleSheet.create({
     outlineStyle: "none",
   } as any,
   newsletterInputPhone: {
-    fontSize: 14,
-    height: 38,
-    paddingVertical: 6,
+    fontSize: 13.5,
+    height: 36,
+    paddingVertical: 4,
   },
   subscribeButton: {
     paddingHorizontal: 18,
@@ -1387,6 +1495,8 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 12,
     alignItems: "flex-start",
+    marginTop: 24,
+    paddingTop: 18,
   },
   footerBottomText: {
     color: "#60716B",

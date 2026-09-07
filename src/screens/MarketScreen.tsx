@@ -157,11 +157,15 @@ export function MarketScreen() {
 
   return (
     <AppChrome active="market">
-      <View style={[styles.pageIntro, isPhone && styles.pageIntroPhone]}>
+      <View style={[styles.pageIntro, isTablet && styles.pageIntroTablet, isPhone && styles.pageIntroPhone]}>
         <View style={styles.introCopy}>
           <Eyebrow style={styles.introEyebrow}>HomeNet intelligence</Eyebrow>
-          <Text style={[styles.pageTitle, isPhone && styles.pageTitlePhone]}>Dhaka market pulse</Text>
-          <Text style={styles.pageDescription}>Current pricing, demand, and neighborhood movement, made easier to read.</Text>
+          <Text style={[styles.pageTitle, isTablet && styles.pageTitleTablet, isPhone && styles.pageTitlePhone]}>
+            Dhaka market pulse
+          </Text>
+          <Text style={[styles.pageDescription, isPhone && styles.pageDescriptionPhone]}>
+            Current pricing, demand, and neighborhood movement, made easier to read.
+          </Text>
         </View>
         <Pressable
           onPress={() => {
@@ -278,13 +282,39 @@ export function MarketScreen() {
             </View>
           </View>
           <View style={[styles.lineChart, isPhone && styles.lineChartPhone]}>
-            <View style={styles.yLabels}>{["14k", "12k", "10k", "8k"].map((label) => <Text key={label} style={styles.axisLabel}>{label}</Text>)}</View>
+            <View style={styles.yLabels}>
+              {["14k", "12k", "10k", "8k"].map((label) => (
+                <Text key={label} style={styles.axisLabel}>
+                  {label}
+                </Text>
+              ))}
+            </View>
             <Svg height="100%" style={styles.svg} viewBox="0 0 700 230" width="100%">
-              <Defs><SvgGradient id="areaFill" x1="0" x2="0" y1="0" y2="1"><Stop offset="0" stopColor={colors.green} stopOpacity="0.25" /><Stop offset="1" stopColor={colors.green} stopOpacity="0" /></SvgGradient></Defs>
-              <Path d="M0,190 C65,176 92,188 145,150 C195,116 235,142 286,115 C338,87 382,100 430,73 C475,49 515,69 558,42 C610,17 648,32 700,15 L700,230 L0,230 Z" fill="url(#areaFill)" />
-              <Path d="M0,190 C65,176 92,188 145,150 C195,116 235,142 286,115 C338,87 382,100 430,73 C475,49 515,69 558,42 C610,17 648,32 700,15" fill="none" stroke={colors.green} strokeLinecap="round" strokeWidth={5} />
+              <Defs>
+                <SvgGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="0%" stopColor={colors.green} stopOpacity="0.25" />
+                  <Stop offset="100%" stopColor={colors.green} stopOpacity="0" />
+                </SvgGradient>
+              </Defs>
+              <Path
+                d="M0,190 C65,176 92,188 145,150 C195,116 235,142 286,115 C338,87 382,100 430,73 C475,49 515,69 558,42 C610,17 648,32 700,15 L700,230 L0,230 Z"
+                fill="url(#areaFill)"
+              />
+              <Path
+                d="M0,190 C65,176 92,188 145,150 C195,116 235,142 286,115 C338,87 382,100 430,73 C475,49 515,69 558,42 C610,17 648,32 700,15"
+                fill="none"
+                stroke={colors.green}
+                strokeLinecap="round"
+                strokeWidth={5}
+              />
             </Svg>
-            <View style={styles.xLabels}>{["Feb", "Mar", "Apr", "May", "Jun", "Jul"].map((label) => <Text key={label} style={styles.axisLabel}>{label}</Text>)}</View>
+            <View style={styles.xLabels}>
+              {["Feb", "Mar", "Apr", "May", "Jun", "Jul"].map((label) => (
+                <Text key={label} style={styles.axisLabel}>
+                  {label}
+                </Text>
+              ))}
+            </View>
           </View>
         </View>
 
@@ -655,8 +685,26 @@ export function MarketScreen() {
 }
 
 const styles = StyleSheet.create({
-  pageIntro: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 28, paddingTop: 22, paddingBottom: 25 },
-  pageIntroPhone: { flexDirection: "column", alignItems: "flex-start", gap: 18, paddingTop: 13 },
+  pageIntro: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: 24,
+    paddingTop: 16,
+    paddingBottom: 22,
+  },
+  pageIntroTablet: {
+    paddingTop: 12,
+    paddingBottom: 18,
+    gap: 16,
+  },
+  pageIntroPhone: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 14,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },
   introCopy: { flex: 1 },
   introEyebrow: { marginBottom: 7 },
   pageTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 46, lineHeight: 49, letterSpacing: -2.5 },

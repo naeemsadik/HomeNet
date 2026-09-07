@@ -65,9 +65,9 @@ export function HeroSearchWidget({
   };
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, isPhone && styles.wrapperPhone]}>
       {/* ─── HeroSearchWidget Card ─────────────────────────────────────── */}
-      <View style={styles.card}>
+      <View style={[styles.card, isPhone && styles.cardPhone]}>
         {/* Top Header Row with Tabs (Figma node 214:4735) and AI-powered Badge */}
         <View style={[styles.tabsHeader, isPhone && styles.tabsHeaderPhone]}>
           <SearchTabs activeTab={activeTab} compact={isPhone} onChange={setActiveTab} />
@@ -82,8 +82,10 @@ export function HeroSearchWidget({
         </View>
 
         {/* Bottom Search Section */}
-        <View style={styles.searchBody}>
-          <Text style={styles.promptLabel}>{getPromptText()}</Text>
+        <View style={[styles.searchBody, isPhone && styles.searchBodyPhone]}>
+          <Text style={[styles.promptLabel, isPhone && styles.promptLabelPhone]}>
+            {getPromptText()}
+          </Text>
 
           <View style={[styles.inputActionRow, isPhone && styles.inputActionRowPhone]}>
             <View style={[styles.inputContainer, isPhone && styles.inputContainerPhone]}>
@@ -104,7 +106,9 @@ export function HeroSearchWidget({
               style={[styles.searchButton, isPhone && styles.searchButtonPhone, webPointer]}
             >
               {isPhone ? <Search color="#FFFFFF" size={16} /> : null}
-              <Text style={styles.searchButtonText}>Search</Text>
+              <Text style={[styles.searchButtonText, isPhone && styles.searchButtonTextPhone]}>
+                Search
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -112,15 +116,19 @@ export function HeroSearchWidget({
 
       {/* ─── Bottom Meta Stats Row ───────────────────────────────────────── */}
       {showMetaStats ? (
-        <View style={styles.metaStatsRow}>
+        <View style={[styles.metaStatsRow, isPhone && styles.metaStatsRowPhone]}>
           <View style={styles.metaStatItem}>
-            <ShieldCheck color="rgba(255, 255, 255, 0.85)" size={16} />
-            <Text style={styles.metaStatText}>12,400+ verified</Text>
+            <ShieldCheck color="rgba(255, 255, 255, 0.85)" size={15} />
+            <Text style={[styles.metaStatText, isPhone && styles.metaStatTextPhone]}>
+              12,400+ verified
+            </Text>
           </View>
 
           <View style={styles.metaStatItem}>
-            <TrendingUp color="rgba(255, 255, 255, 0.85)" size={16} />
-            <Text style={styles.metaStatText}>Live market data</Text>
+            <TrendingUp color="rgba(255, 255, 255, 0.85)" size={15} />
+            <Text style={[styles.metaStatText, isPhone && styles.metaStatTextPhone]}>
+              Live market data
+            </Text>
           </View>
         </View>
       ) : null}
@@ -135,6 +143,10 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     gap: 12,
   },
+  wrapperPhone: {
+    paddingTop: 16,
+    gap: 10,
+  },
   card: {
     width: "100%",
     backgroundColor: "#FFFFFF",
@@ -145,6 +157,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 18,
     elevation: 8,
+  },
+  cardPhone: {
+    borderRadius: 16,
   },
   tabsHeader: {
     flexDirection: "row",
@@ -192,12 +207,19 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 8,
   },
+  searchBodyPhone: {
+    padding: 10,
+    gap: 6,
+  },
   promptLabel: {
     paddingHorizontal: 4,
     color: "#5C6B66",
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 16,
+  },
+  promptLabelPhone: {
+    fontSize: 11.5,
   },
   inputActionRow: {
     flexDirection: "row",
@@ -209,7 +231,7 @@ const styles = StyleSheet.create({
   inputActionRowPhone: {
     flexDirection: "column",
     alignItems: "stretch",
-    gap: 10,
+    gap: 8,
   },
   inputContainer: {
     flex: 1,
@@ -227,8 +249,9 @@ const styles = StyleSheet.create({
   },
   inputContainerPhone: {
     width: "100%",
-    height: 46,
-    paddingHorizontal: 14,
+    height: 44,
+    paddingHorizontal: 12,
+    borderRadius: 14,
   },
   textInput: {
     flex: 1,
@@ -257,7 +280,8 @@ const styles = StyleSheet.create({
   },
   searchButtonPhone: {
     width: "100%",
-    height: 46,
+    height: 42,
+    borderRadius: 14,
   },
   searchButtonText: {
     color: "#FFFFFF",
@@ -265,12 +289,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
+  searchButtonTextPhone: {
+    fontSize: 13.5,
+  },
   metaStatsRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
     paddingHorizontal: 4,
-    height: 32,
+    minHeight: 28,
+  },
+  metaStatsRowPhone: {
+    gap: 12,
+    flexWrap: "wrap",
+    minHeight: 24,
   },
   metaStatItem: {
     flexDirection: "row",
@@ -282,5 +314,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 20,
+  },
+  metaStatTextPhone: {
+    fontSize: 12.5,
   },
 });
