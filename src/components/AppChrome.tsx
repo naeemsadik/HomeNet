@@ -96,7 +96,9 @@ function SideBar({
       </View>
 
       <View style={styles.sideNav}>
-        {sidebarNav.map(({ label, href, icon: Icon, key, badge, authGated }) => {
+        {sidebarNav
+          .filter((item) => item.key !== "saved" || Boolean(user))
+          .map(({ label, href, icon: Icon, key, badge, authGated }) => {
           const selected =
             active === key ||
             ((key === "search" || key === "buy") &&
@@ -180,19 +182,14 @@ function TopBar({
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const { user } = useAuthStore();
 
-  const topNavLinks: {
-    label: string;
-    href: string;
-    key: string;
-    authGated?: boolean;
-  }[] = [
-    { label: "Buy", href: "/buy", key: "buy" },
-    { label: "Rent", href: "/rent", key: "rent" },
-    { label: "Commercial", href: "/buy?type=commercial", key: "commercial" },
-    { label: "Short-let", href: "/rent?subtype=short-let", key: "short-let" },
-    { label: "Insights", href: "/market", key: "market" },
-    { label: "Saved", href: "/saved", key: "saved", authGated: true },
-  ];
+    const topNavLinks: {
+      label: string;
+      href: string;
+      key: string;
+      authGated?: boolean;
+    }[] = [
+      ...(user ? [{ label: "Saved", href: "/saved", key: "saved", authGated: true }] : []),
+    ];
 
   return (
     <SafeAreaView
@@ -220,8 +217,8 @@ function TopBar({
           <Brand compact={isTablet} />
         </View>
 
-        {/* Center: Rightmove Desktop Nav Links */}
-        {!isTablet ? (
+        {/* Center: Desktop Nav Links (only when links exist) */}
+        {!isTablet && topNavLinks.length > 0 ? (
           <View style={styles.topNavCenter}>
             {topNavLinks.map((link) => {
               const isSelected =
@@ -709,13 +706,17 @@ function MobileNav({ active }: { active: ActivePage }) {
       selected: active === "market",
       authGated: false,
     },
-    {
-      label: "Saved",
-      href: "/saved",
-      icon: Heart,
-      selected: active === "saved",
-      authGated: true,
-    },
+    ...(user
+      ? [
+          {
+            label: "Saved",
+            href: "/saved",
+            icon: Heart,
+            selected: active === "saved",
+            authGated: true,
+          },
+        ]
+      : []),
     {
       label: "Profile",
       href: "/profile",
