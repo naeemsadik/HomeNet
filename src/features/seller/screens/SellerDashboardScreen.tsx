@@ -124,8 +124,8 @@ export function SellerDashboardScreen() {
       value: String(totalCount),
       trend: totalCount > 0 ? "+1" : undefined,
       icon: Building2,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
+      iconBg: "#E6FAF4",
+      iconColor: "#04cf92",
     },
     {
       id: "active",
@@ -133,8 +133,8 @@ export function SellerDashboardScreen() {
       value: String(activeCount),
       trend: activeCount > 0 ? "+1" : undefined,
       icon: CheckCircle2,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
+      iconBg: "#E6FAF4",
+      iconColor: "#04cf92",
     },
     {
       id: "draft",
@@ -157,8 +157,8 @@ export function SellerDashboardScreen() {
       label: "Verified Properties",
       value: String(verifiedCount),
       icon: ShieldCheck,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
+      iconBg: "#E6FAF4",
+      iconColor: "#04cf92",
     },
     {
       id: "boosted",
@@ -189,8 +189,8 @@ export function SellerDashboardScreen() {
       label: "Saved by Buyers",
       value: "0",
       icon: Heart,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
+      iconBg: "#E6FAF4",
+      iconColor: "#04cf92",
     },
   ];
 
@@ -200,8 +200,8 @@ export function SellerDashboardScreen() {
     description: `${p.title} · ${p.area?.name || "Dhaka"}`,
     time: "Recently updated",
     icon: p.status === "active" ? BadgeCheck : FileText,
-    iconBg: "#E7F2EE",
-    iconColor: "#0F6D55",
+    iconBg: "#E6FAF4",
+    iconColor: "#04cf92",
     hasUnreadDot: false,
   }));
 
@@ -276,7 +276,7 @@ export function SellerDashboardScreen() {
                       item.danger
                         ? "#D4183D"
                         : isActive
-                        ? "#0F6D55"
+                        ? "#04cf92"
                         : "#5C6B66"
                     }
                     size={20}
@@ -366,7 +366,7 @@ export function SellerDashboardScreen() {
 
                     {item.trend ? (
                       <View style={styles.trendPill}>
-                        <TrendingUp color="#0F6D55" size={12} />
+                        <TrendingUp color="#04cf92" size={12} />
                         <Text style={styles.trendPillText}>{item.trend}</Text>
                       </View>
                     ) : null}
@@ -394,7 +394,7 @@ export function SellerDashboardScreen() {
 
                 <AppLink href="/market" style={styles.analyticsLink}>
                   <Text style={styles.analyticsLinkText}>Analytics</Text>
-                  <ArrowUpRight color="#0F6D55" size={16} />
+                  <ArrowUpRight color="#04cf92" size={16} />
                 </AppLink>
               </View>
 
@@ -403,8 +403,8 @@ export function SellerDashboardScreen() {
                 <Svg height={220} width="100%" viewBox="0 0 500 200">
                   <Defs>
                     <SvgGradient id="chartTealGrad" x1="0" y1="0" x2="0" y2="1">
-                      <Stop offset="0%" stopColor="#0F6D55" stopOpacity="0.3" />
-                      <Stop offset="100%" stopColor="#0F6D55" stopOpacity="0.0" />
+                      <Stop offset="0%" stopColor="#04cf92" stopOpacity="0.3" />
+                      <Stop offset="100%" stopColor="#04cf92" stopOpacity="0.0" />
                     </SvgGradient>
                   </Defs>
 
@@ -418,18 +418,18 @@ export function SellerDashboardScreen() {
                   <Path
                     d="M 20 160 Q 90 130 160 140 T 300 90 T 440 50"
                     fill="none"
-                    stroke="#0F6D55"
+                    stroke="#04cf92"
                     strokeWidth="3.5"
                   />
 
                   {/* Data Points */}
-                  <Circle cx="20" cy="160" r="4.5" fill="#0F6D55" />
-                  <Circle cx="90" cy="130" r="4.5" fill="#0F6D55" />
-                  <Circle cx="160" cy="140" r="4.5" fill="#0F6D55" />
-                  <Circle cx="230" cy="110" r="4.5" fill="#0F6D55" />
-                  <Circle cx="300" cy="90" r="4.5" fill="#0F6D55" />
-                  <Circle cx="370" cy="65" r="4.5" fill="#0F6D55" />
-                  <Circle cx="440" cy="50" r="4.5" fill="#0F6D55" />
+                  <Circle cx="20" cy="160" r="4.5" fill="#04cf92" />
+                  <Circle cx="90" cy="130" r="4.5" fill="#04cf92" />
+                  <Circle cx="160" cy="140" r="4.5" fill="#04cf92" />
+                  <Circle cx="230" cy="110" r="4.5" fill="#04cf92" />
+                  <Circle cx="300" cy="90" r="4.5" fill="#04cf92" />
+                  <Circle cx="370" cy="65" r="4.5" fill="#04cf92" />
+                  <Circle cx="440" cy="50" r="4.5" fill="#04cf92" />
 
                   {/* Days X Axis */}
                   <SvgText x="20" y="195" fill="#5C6B66" fontSize="12" textAnchor="middle">Mon</SvgText>
@@ -508,7 +508,7 @@ export function SellerDashboardScreen() {
           <View style={styles.boostModalCard}>
             <View style={styles.boostModalHeader}>
               <View style={styles.boostHeaderIconWrap}>
-                <Rocket color="#0F6D55" size={20} />
+                <Rocket color="#04cf92" size={20} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.boostModalTitle}>Boost a listing</Text>
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
   },
   brandTextAccent: {
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   sellerRolePill: {
     backgroundColor: "#E8EEFC",
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   navItemActive: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
   },
   navItemDanger: {
     marginTop: 8,
@@ -689,7 +689,7 @@ const styles = StyleSheet.create({
     color: "#5C6B66",
   },
   navItemTextActive: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
@@ -846,7 +846,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   heroBtnPrimaryText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },
@@ -906,7 +906,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -914,7 +914,7 @@ const styles = StyleSheet.create({
   trendPillText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   statValue: {
     fontSize: 24,
@@ -979,7 +979,7 @@ const styles = StyleSheet.create({
   analyticsLinkText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   chartSvgWrap: {
     marginTop: 10,
@@ -1070,7 +1070,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1108,7 +1108,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   pkgCardSelected: {
-    borderColor: "#0F6D55",
+    borderColor: "#04cf92",
     backgroundColor: "#F4F9F7",
   },
   pkgRadio: {
@@ -1122,8 +1122,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   pkgRadioSelected: {
-    backgroundColor: "#0F6D55",
-    borderColor: "#0F6D55",
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   pkgTitleRow: {
     flexDirection: "row",
@@ -1137,7 +1137,7 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
   },
   pkgBadge: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,
@@ -1145,7 +1145,7 @@ const styles = StyleSheet.create({
   pkgBadgeText: {
     fontSize: 11,
     fontFamily: fonts.bold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   pkgDesc: {
     fontSize: 13,
@@ -1156,7 +1156,7 @@ const styles = StyleSheet.create({
   pkgPrice: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
     marginTop: 4,
   },
   boostModalActions: {
@@ -1183,12 +1183,12 @@ const styles = StyleSheet.create({
     flex: 2,
     height: 44,
     borderRadius: 999,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    shadowColor: "#0F6D55",
+    shadowColor: "#04cf92",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,

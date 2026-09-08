@@ -39,7 +39,7 @@ export function Brand({
           isLarge && styles.textLarge,
         ]}
       >
-        Home<Text style={{ color: "#0F6D55" }}>net</Text>
+        Home<Text style={{ color: "#04cf92" }}>net</Text>
       </Text>
     </AppLink>
   );
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
   },
   markCompact: { width: 28, height: 28, borderRadius: 14 },
   markLarge: { width: 40, height: 40, borderRadius: 20 },

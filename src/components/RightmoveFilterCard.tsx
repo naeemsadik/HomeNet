@@ -124,6 +124,8 @@ function NativeSelect({
           style={{
             width: "100%",
             height: 42,
+            minHeight: 42,
+            display: "block",
             padding: "0 34px 0 14px",
             backgroundColor: "#FFFFFF",
             border: "1.5px solid #D0D5DD",
@@ -171,10 +173,11 @@ export function RightmoveFilterCard({
   locationName = "Dhaka",
   totalResults,
 }: RightmoveFilterCardProps) {
-  const { isPhone, isTablet, width } = useResponsive();
+  const { isPhone, isTablet } = useResponsive();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [customLocation, setCustomLocation] = useState(filters.query || locationName);
   const isDesktop = !isPhone && !isTablet;
+  const isSmallScreen = isPhone || isTablet;
 
   const handleUpdate = (patch: Partial<RightmoveFilters>) => {
     const updated = { ...filters, ...patch };
@@ -201,7 +204,7 @@ export function RightmoveFilterCard({
   };
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, isPhone && styles.cardPhone]}>
       {/* ─── Header: Find property for sale in [Location] ───────────────── */}
       <View style={styles.headerRow}>
         {isEditingTitle ? (
@@ -229,16 +232,18 @@ export function RightmoveFilterCard({
             accessibilityRole="button"
             accessibilityLabel="Click to edit location"
           >
-            <Text style={styles.headingText}>{getHeading()}</Text>
+            <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>
+              {getHeading()}
+            </Text>
             <Edit3 color="#5C6B66" size={16} style={styles.editIcon} />
           </Pressable>
         )}
       </View>
 
       {/* ─── Grid Controls (3 columns x 2 rows on desktop) ─────────────── */}
-      <View style={[styles.grid, isDesktop && styles.gridDesktop, isPhone && styles.gridPhone]}>
+      <View style={[styles.grid, isDesktop && styles.gridDesktop, !isDesktop && styles.gridResponsive]}>
         {/* ROW 1, COL 1: Search radius */}
-        <View style={styles.col}>
+        <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
           <Text style={styles.fieldLabel}>Search radius</Text>
           <NativeSelect
             value={filters.radius}
@@ -248,7 +253,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 1, COL 2: Property types */}
-        <View style={styles.col}>
+        <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
           <Text style={styles.fieldLabel}>Property types</Text>
           <NativeSelect
             value={filters.propertyType}
@@ -258,7 +263,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 1, COL 3: Added to site & Checkbox */}
-        <View style={styles.col}>
+        <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
           <Text style={styles.fieldLabel}>Added to site</Text>
           <NativeSelect
             value={filters.addedToSite}
@@ -293,7 +298,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 2, COL 1: Price range (৳) */}
-        <View style={styles.col}>
+        <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
           <Text style={styles.fieldLabel}>Price range (৳)</Text>
           <View style={styles.rangeRow}>
             <NativeSelect
@@ -313,7 +318,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 2, COL 2: No. of bedrooms */}
-        <View style={styles.col}>
+        <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
           <Text style={styles.fieldLabel}>No. of bedrooms</Text>
           <View style={styles.rangeRow}>
             <NativeSelect
@@ -333,7 +338,7 @@ export function RightmoveFilterCard({
         </View>
 
         {/* ROW 2, COL 3: Search properties button */}
-        <View style={[styles.col, styles.actionCol]}>
+        <View style={[styles.col, isDesktop ? [styles.colDesktop, styles.actionCol] : [styles.colResponsive, styles.actionColResponsive]]}>
           <Pressable
             onPress={() => onSearch(filters)}
             style={({ pressed }) => [
@@ -363,6 +368,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: "100%",
   },
+  cardPhone: {
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
   headerRow: {
     marginBottom: 20,
   },
@@ -379,6 +390,10 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
     letterSpacing: -0.3,
   },
+  headingTextPhone: {
+    fontSize: 19,
+    lineHeight: 25,
+  },
   editIcon: {
     opacity: 0.6,
   },
@@ -394,14 +409,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     borderWidth: 1.5,
-    borderColor: "#0F6D55",
+    borderColor: "#04cf92",
     paddingHorizontal: 14,
     fontSize: 16,
     fontFamily: fonts.medium,
     color: "#0B1A17",
   },
   saveTitleBtn: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     paddingHorizontal: 16,
     height: 42,
     borderRadius: 8,
@@ -423,17 +438,28 @@ const styles = StyleSheet.create({
   gridDesktop: {
     display: "flex",
   },
-  gridPhone: {
+  gridResponsive: {
     flexDirection: "column",
-    gap: 14,
+    gap: 16,
   },
   col: {
+    width: "100%",
+  },
+  colDesktop: {
     flex: 1,
     minWidth: 260,
     maxWidth: "100%",
   },
+  colResponsive: {
+    width: "100%",
+    minWidth: "100%",
+  },
   actionCol: {
     justifyContent: "flex-end",
+  },
+  actionColResponsive: {
+    justifyContent: "flex-start",
+    marginTop: 4,
   },
   fieldLabel: {
     fontFamily: fonts.medium,
@@ -445,6 +471,7 @@ const styles = StyleSheet.create({
   selectWrapper: {
     position: "relative",
     width: "100%",
+    height: 42,
   },
   chevronOverlay: {
     position: "absolute",
@@ -472,9 +499,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     width: "100%",
+    height: 42,
   },
   rangeSelect: {
     flex: 1,
+    minWidth: 0,
+    height: 42,
   },
   rangeDash: {
     fontSize: 15,
@@ -484,6 +514,8 @@ const styles = StyleSheet.create({
   },
   checkboxRowContainer: {
     marginTop: 10,
+    paddingTop: 2,
+    minHeight: 22,
   },
   checkboxRow: {
     flexDirection: "row",
@@ -495,14 +527,14 @@ const styles = StyleSheet.create({
     height: 19,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: "#0F6D55",
+    borderColor: "#04cf92",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
   checkboxBoxChecked: {
-    backgroundColor: "#0F6D55",
-    borderColor: "#0F6D55",
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   checkboxLabel: {
     fontSize: 13,
@@ -512,17 +544,17 @@ const styles = StyleSheet.create({
   },
   helpBadge: {
     fontSize: 12,
-    color: "#0F6D55",
+    color: "#04cf92",
     fontWeight: "600",
   },
   searchBtn: {
     height: 44,
-    backgroundColor: "#00CF92", // Rightmove vibrant emerald green
+    backgroundColor: "#04cf92",
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    shadowColor: "rgba(0, 207, 146, 0.4)",
+    shadowColor: "rgba(4, 207, 146, 0.4)",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,

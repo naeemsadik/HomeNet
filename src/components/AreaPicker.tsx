@@ -242,7 +242,7 @@ export function AreaPicker({
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
               <View style={styles.headerIconCircle}>
-                <MapPin size={16} color="#0F6D55" strokeWidth={2.2} />
+                <MapPin size={16} color="#04cf92" strokeWidth={2.2} />
               </View>
               <Text style={styles.headerTitle}>Select Location</Text>
             </View>
@@ -493,7 +493,7 @@ export function AreaPicker({
                         <View style={[styles.pinCircle, isSelected && styles.pinCircleSelected]}>
                           <MapPin
                             size={15}
-                            color={isSelected ? "#0F6D55" : "#60716B"}
+                            color={isSelected ? "#04cf92" : "#60716B"}
                             strokeWidth={isSelected ? 2.2 : 1.8}
                           />
                         </View>
@@ -536,7 +536,7 @@ export function AreaPicker({
                           </Pressable>
                         ) : isSelected ? (
                           <View style={styles.selectedCheckBadge}>
-                            <Check size={13} color="#0F6D55" strokeWidth={2.5} />
+                            <Check size={13} color="#04cf92" strokeWidth={2.5} />
                           </View>
                         ) : null}
 
@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -692,8 +692,8 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   chipActive: {
-    backgroundColor: "#0F6D55",
-    borderColor: "#0F6D55",
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   chipText: {
     fontSize: 13,
@@ -881,7 +881,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   areaNameSelected: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontWeight: "700",
   },
   areaCity: {
@@ -900,26 +900,26 @@ const styles = StyleSheet.create({
     paddingVertical: 5.5,
     borderRadius: 7,
     borderWidth: 1,
-    borderColor: "rgba(15, 109, 85, 0.25)",
+    borderColor: "rgba(4, 207, 146, 0.25)",
     backgroundColor: "#FFFFFF",
     minWidth: 54,
     alignItems: "center",
     justifyContent: "center",
   },
   directSelectBtnActive: {
-    backgroundColor: "#0F6D55",
-    borderColor: "#0F6D55",
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   directSelectText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   selectedCheckBadge: {
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: "#DCEEE8",
+    backgroundColor: "#E6FAF4",
     alignItems: "center",
     justifyContent: "center",
   },

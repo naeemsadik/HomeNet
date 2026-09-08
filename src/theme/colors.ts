@@ -19,10 +19,10 @@ export const colorTokens = {
   textMuted: "#5C6B66",
   textBlack: "#0B1A17",
 
-  // ─── Primary Accent (Figma Green) ───────────────────────────────────────
-  primary: "#0F6D55",
-  primaryDark: "#0B5743",
-  primaryLight: "#E7F2EE",
+  // ─── Primary Accent ─────────────────────────────────────────────────────
+  primary: "#04cf92",
+  primaryDark: "#03b57f",
+  primaryLight: "#E6FAF4",
   primaryText: "#FFFFFF",
 
   // ─── Verified / Blue Badge ──────────────────────────────────────────────

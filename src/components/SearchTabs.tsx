@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   tabTextActiveLight: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.bold,
     fontWeight: "700",
   },
@@ -136,10 +136,10 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   activeIndicatorDark: {
-    backgroundColor: "#00CF92",
+    backgroundColor: "#04cf92",
   },
   activeIndicatorLight: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
   },
   activeIndicatorCompact: {
     left: 8,
