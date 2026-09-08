@@ -32,6 +32,7 @@ import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from "react-nati
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink, Eyebrow, SectionHeader } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
 import { colors, fonts, webPointer } from "@/theme";
 
 const MONTH_NAMES = [
@@ -60,6 +61,7 @@ const areaRows = [
 
 export function MarketScreen() {
   const { isPhone, isTablet, width } = useResponsive();
+  const openAiModal = useAiFinderModalStore((state) => state.open);
   const isStackedNote = isPhone || isTablet || width < 860;
   const isTableHorizontal = isPhone || isTablet || width < 760;
   const [period, setPeriod] = useState("6 months");
@@ -477,7 +479,12 @@ export function MarketScreen() {
 
             {/* Action Link cleanly positioned below paragraph */}
             <AppLink
-              href="/ai-finder"
+              href={isPhone ? "/ai-finder" : "#"}
+              onPress={() => {
+                if (!isPhone) {
+                  openAiModal();
+                }
+              }}
               style={styles.aiNoteLinkStacked}
             >
               <Text style={styles.aiNoteLinkText}>Find my best area</Text>
@@ -498,7 +505,12 @@ export function MarketScreen() {
             </View>
 
             <AppLink
-              href="/ai-finder"
+              href={isPhone ? "/ai-finder" : "#"}
+              onPress={() => {
+                if (!isPhone) {
+                  openAiModal();
+                }
+              }}
               style={styles.aiNoteLink}
             >
               <Text style={styles.aiNoteLinkText}>Find my best area</Text>

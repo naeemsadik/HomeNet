@@ -36,6 +36,7 @@ import Svg, { Line, Path, Rect } from "react-native-svg";
 import { router } from "expo-router";
 import { Brand } from "./Brand";
 import { LoginModal } from "./LoginModal";
+import { AiFinderModal } from "./AiFinderModal";
 import { AppLink } from "./ui";
 
 export type ActivePage =
@@ -819,6 +820,7 @@ export function AppChrome({
           />
         </View>
       </Modal>
+      <AiFinderModal />
     </View>
   );
 }

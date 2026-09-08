@@ -18,6 +18,7 @@ import {
 } from "lucide-react-native";
 import { fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
 import { AreaPicker } from "./AreaPicker";
 import type { Area } from "@/types/api";
@@ -43,16 +44,31 @@ export function HeroSearchWidget({
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState<Area | null>(null);
 
+  const isAiModalOpen = useAiFinderModalStore((state) => state.visible);
+  const openAiModal = useAiFinderModalStore((state) => state.open);
+
+  const handleAiSearchClick = () => {
+    if (isPhone) {
+      router.push("/ai-finder" as any);
+    } else {
+      openAiModal();
+    }
+  };
+
   const handleSearch = () => {
     if (searchMode === "ai") {
-      const params = new URLSearchParams();
-      if (query.trim()) params.set("prompt", query.trim());
-      if (selectedArea) {
-        if (selectedArea.city) params.set("city", selectedArea.city);
-        params.set("location", selectedArea.name);
+      if (isPhone) {
+        const params = new URLSearchParams();
+        if (query.trim()) params.set("prompt", query.trim());
+        if (selectedArea) {
+          if (selectedArea.city) params.set("city", selectedArea.city);
+          params.set("location", selectedArea.name);
+        }
+        const qs = params.toString();
+        router.push((qs ? `/ai-finder?${qs}` : "/ai-finder") as any);
+      } else {
+        openAiModal();
       }
-      const qs = params.toString();
-      router.push((qs ? `/ai-finder?${qs}` : "/ai-finder") as any);
       return;
     }
 
@@ -134,24 +150,24 @@ export function HeroSearchWidget({
             </Pressable>
 
             <Pressable
-              onPress={() => setSearchMode("ai")}
+              onPress={handleAiSearchClick}
               style={[
                 styles.modeOption,
-                searchMode === "ai" && styles.modeOptionActive,
+                isAiModalOpen && styles.modeOptionActive,
                 webPointer,
               ]}
               accessibilityRole="button"
               accessibilityLabel="AI search mode"
             >
               <Sparkles
-                color={searchMode === "ai" ? "#FFFFFF" : "#04cf92"}
+                color={isAiModalOpen ? "#FFFFFF" : "#04cf92"}
                 size={13}
                 strokeWidth={2.4}
               />
               <Text
                 style={[
                   styles.modeOptionText,
-                  searchMode === "ai" && styles.modeOptionTextActive,
+                  isAiModalOpen && styles.modeOptionTextActive,
                 ]}
               >
                 AI Search
