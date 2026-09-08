@@ -102,7 +102,7 @@ function FeaturedPropertyCard({ property, width }: { property: ApiProperty; widt
       <View style={styles.featuredTopBadges}>
         {property.is_verified ? (
           <View style={styles.featuredVerifiedBadge}>
-            <ShieldCheck color="#0F6D55" size={14} />
+            <ShieldCheck color="#04cf92" size={14} />
             <Text style={styles.featuredVerifiedText}>Verified</Text>
           </View>
         ) : <View />}
@@ -207,7 +207,7 @@ export function HomeScreen() {
           </View>
           <AppLink href="/buy" style={styles.seeAllLink}>
             <Text style={styles.seeAllText}>See all</Text>
-            <ChevronRight color="#0F6D55" size={16} />
+            <ChevronRight color="#04cf92" size={16} />
           </AppLink>
         </View>
 
@@ -250,7 +250,7 @@ export function HomeScreen() {
                 </Text>
               </View>
               <View style={styles.trendPill}>
-                <TrendingUp color="#0F6D55" size={12} />
+                <TrendingUp color="#04cf92" size={12} />
                 <Text style={styles.trendPillText}>+8.4%</Text>
               </View>
             </View>
@@ -260,8 +260,8 @@ export function HomeScreen() {
               <Svg height="160" width="100%" viewBox="0 0 360 160">
                 <Defs>
                   <SvgGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0%" stopColor="#0F6D55" stopOpacity="0.35" />
-                    <Stop offset="100%" stopColor="#0F6D55" stopOpacity="0.0" />
+                    <Stop offset="0%" stopColor="#04cf92" stopOpacity="0.35" />
+                    <Stop offset="100%" stopColor="#04cf92" stopOpacity="0.0" />
                   </SvgGradient>
                 </Defs>
 
@@ -275,7 +275,7 @@ export function HomeScreen() {
                 <Path
                   d="M 10 120 C 60 110, 110 95, 160 85 C 210 75, 260 55, 310 40 C 330 35, 345 32, 350 30"
                   fill="none"
-                  stroke="#0F6D55"
+                  stroke="#04cf92"
                   strokeWidth="2.5"
                 />
               </Svg>
@@ -310,7 +310,7 @@ export function HomeScreen() {
                     <View>
                       <View style={styles.partnerNameRow}>
                         <Text style={styles.partnerNameText}>{partner.name}</Text>
-                        <ShieldCheck color="#0F6D55" size={16} />
+                        <ShieldCheck color="#04cf92" size={16} />
                       </View>
                       <Text style={styles.partnerDealsText}>{partner.deals}</Text>
                     </View>
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   seeAllText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
@@ -544,13 +544,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
   },
   featuredVerifiedText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.semiBold,
     fontSize: 12,
     fontWeight: "600",
@@ -644,13 +644,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,
   },
   trendPillText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.semiBold,
     fontSize: 12,
     fontWeight: "600",

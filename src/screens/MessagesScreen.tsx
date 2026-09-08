@@ -87,7 +87,7 @@ export function MessagesScreen() {
       <AppChrome active="messages">
         <View style={styles.emptyContainer}>
           <View style={styles.emptyIconCircle}>
-            <Send color="#0F6D55" size={32} />
+            <Send color="#04cf92" size={32} />
           </View>
           <Text style={styles.emptyTitle}>No messages yet</Text>
           <Text style={styles.emptySubtitle}>
@@ -190,7 +190,7 @@ export function MessagesScreen() {
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                   <Text style={styles.chatHeaderName}>{activeConv.name}</Text>
                   {activeConv.isVerified && (
-                    <CheckCircle2 color="#0F6D55" size={16} />
+                    <CheckCircle2 color="#04cf92" size={16} />
                   )}
                 </View>
                 <Text style={styles.chatHeaderStatus}>
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   convItemActive: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
   },
   avatarWrap: {
     width: 44,
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderWidth: 1.5,
     borderColor: "#FFFFFF",
   },
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   propertyBadgeText: {
     fontSize: 11,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   convPreview: {
     fontSize: 12,
@@ -484,7 +484,7 @@ const styles = StyleSheet.create({
   chatHeaderStatus: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   chatHeaderIcons: {
     flexDirection: "row",
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   messageBubbleUser: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderBottomRightRadius: 4,
   },
   messageBubbleAgent: {
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   emptyBtn: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 999,

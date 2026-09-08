@@ -370,7 +370,7 @@ export function PropertyCreateWizard() {
                   ]}
                 >
                   <IconComp
-                    color={item.danger ? "#D4183D" : item.active ? "#0F6D55" : "#5C6B66"}
+                    color={item.danger ? "#D4183D" : item.active ? "#04cf92" : "#5C6B66"}
                     size={20}
                   />
                   <Text
@@ -670,7 +670,7 @@ export function PropertyCreateWizard() {
                             webPointer,
                           ]}
                         >
-                          {isSelected ? <Check color="#0F6D55" size={14} /> : null}
+                          {isSelected ? <Check color="#04cf92" size={14} /> : null}
                           <Text style={[styles.amenityPillText, isSelected && styles.amenityPillTextSelected]}>
                             {item}
                           </Text>
@@ -703,7 +703,7 @@ export function PropertyCreateWizard() {
                       onPress={() => setAreaPickerVisible(true)}
                       style={({ pressed }) => [styles.formInput, styles.areaPickerButton, pressed && styles.pressed]}
                     >
-                      <MapPin color="#0F6D55" size={17} />
+                      <MapPin color="#04cf92" size={17} />
                       <Text style={[styles.areaPickerText, !store.areaId && styles.areaPickerPlaceholder]}>
                         {store.areaId
                           ? [store.areaName, store.district].filter(Boolean).join(", ")
@@ -769,7 +769,7 @@ export function PropertyCreateWizard() {
                     style={({ pressed }) => [styles.addMediaCard, webPointer, pressed && styles.pressed]}
                   >
                     {uploadMediaMutation.isPending ? (
-                      <ActivityIndicator color="#0F6D55" />
+                      <ActivityIndicator color="#04cf92" />
                     ) : (
                       <Camera color="#5C6B66" size={28} />
                     )}
@@ -782,7 +782,7 @@ export function PropertyCreateWizard() {
                   <Text style={styles.formLabel}>Property video (optional)</Text>
                   {store.media.filter((media) => media.mediaType === "video").map((media) => (
                     <View key={media.id} style={styles.uploadedVideoRow}>
-                      <Video color="#0F6D55" size={20} />
+                      <Video color="#04cf92" size={20} />
                       <Text numberOfLines={1} style={styles.uploadedVideoText}>{media.url}</Text>
                       <Pressable onPress={() => void handleDeleteMedia(media.id)}>
                         <Trash2 color="#D4183D" size={17} />
@@ -821,7 +821,7 @@ export function PropertyCreateWizard() {
                 {/* Ready to Publish Alert Banner */}
                 <View style={styles.readyAlertBanner}>
                   <View style={styles.readyAlertTitleRow}>
-                    <CheckCircle2 color="#0F6D55" size={18} />
+                    <CheckCircle2 color="#04cf92" size={18} />
                     <Text style={styles.readyAlertTitle}>Ready for verification</Text>
                   </View>
                   <Text style={styles.readyAlertDesc}>
@@ -985,7 +985,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -995,7 +995,7 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
   },
   brandTextAccent: {
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   sellerRolePill: {
     backgroundColor: "#E8EEFC",
@@ -1023,7 +1023,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   navItemActive: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
   },
   navItemDanger: {
     marginTop: 8,
@@ -1035,7 +1035,7 @@ const styles = StyleSheet.create({
     color: "#5C6B66",
   },
   navItemTextActive: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
@@ -1168,12 +1168,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   stepCircleCurrent: {
-    borderColor: "#0F6D55",
+    borderColor: "#04cf92",
     backgroundColor: "#FFFFFF",
   },
   stepCircleDone: {
-    backgroundColor: "#0F6D55",
-    borderColor: "#0F6D55",
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   stepCircleText: {
     fontSize: 14,
@@ -1181,7 +1181,7 @@ const styles = StyleSheet.create({
     color: "#5C6B66",
   },
   stepCircleTextCurrent: {
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   stepLabelText: {
     fontSize: 12,
@@ -1200,7 +1200,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   stepConnectorLineDone: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
   },
   stepCard: {
     backgroundColor: "#FFFFFF",
@@ -1270,7 +1270,7 @@ const styles = StyleSheet.create({
     color: "#5C6B66",
   },
   toggleBtnTextActive: {
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   amenitiesWrap: {
     flexDirection: "row",
@@ -1289,8 +1289,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.12)",
   },
   amenityPillSelected: {
-    borderColor: "#0F6D55",
-    backgroundColor: "#E7F2EE",
+    borderColor: "#04cf92",
+    backgroundColor: "#E6FAF4",
   },
   amenityPillText: {
     fontSize: 14,
@@ -1299,7 +1299,7 @@ const styles = StyleSheet.create({
   },
   amenityPillTextSelected: {
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   mapContainer: {
     height: 320,
@@ -1333,7 +1333,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     alignItems: "center",
     justifyContent: "center",
     elevation: 4,
@@ -1372,7 +1372,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 8,
     left: 8,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 2,
@@ -1429,7 +1429,7 @@ const styles = StyleSheet.create({
   uploadHint: { color: "#6B7D78", fontFamily: fonts.regular, fontSize: 12, marginTop: 8 },
   uploadedVideoRow: {
     alignItems: "center",
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     borderRadius: 10,
     flexDirection: "row",
     gap: 10,
@@ -1438,7 +1438,7 @@ const styles = StyleSheet.create({
   },
   uploadedVideoText: { color: "#0B1A17", flex: 1, fontFamily: fonts.regular, fontSize: 13 },
   readyAlertBanner: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     borderRadius: 16,
     padding: 18,
     gap: 6,
@@ -1451,7 +1451,7 @@ const styles = StyleSheet.create({
   readyAlertTitle: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   readyAlertDesc: {
     fontSize: 14,
@@ -1528,7 +1528,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderRadius: 999,
     paddingHorizontal: 22,
   },
@@ -1542,7 +1542,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderRadius: 999,
     paddingHorizontal: 22,
   },

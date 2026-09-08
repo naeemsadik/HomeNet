@@ -177,7 +177,7 @@ export function MarketScreen() {
           accessibilityRole="button"
           accessibilityLabel={`Updated date: ${formattedDate}. Click to choose report date`}
         >
-          <CalendarDays color="#0F6D55" size={16} />
+          <CalendarDays color="#04cf92" size={16} />
           <Text style={styles.marketUpdateText}>Updated {formattedDate}</Text>
           <ChevronDown color="#5C6B66" size={14} />
         </Pressable>
@@ -525,7 +525,7 @@ export function MarketScreen() {
             <View style={styles.calModalHeader}>
               <View style={styles.calHeaderTitleWrap}>
                 <View style={styles.calIconWrap}>
-                  <CalendarDays color="#0F6D55" size={18} />
+                  <CalendarDays color="#04cf92" size={18} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.calModalTitle}>Market Report Date</Text>
@@ -667,7 +667,7 @@ export function MarketScreen() {
                 }}
                 style={[styles.calTodayBtn, webPointer]}
               >
-                <Sparkles color="#0F6D55" size={14} />
+                <Sparkles color="#04cf92" size={14} />
                 <Text style={styles.calTodayBtnText}>Reset to Live Pulse</Text>
               </Pressable>
               <Pressable
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -937,8 +937,8 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   calPresetChipActive: {
-    backgroundColor: "#E7F2EE",
-    borderColor: "#0F6D55",
+    backgroundColor: "#E6FAF4",
+    borderColor: "#04cf92",
   },
   calPresetText: {
     color: "#5C6B66",
@@ -946,7 +946,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   calPresetTextActive: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.bold,
   },
   monthNavRow: {
@@ -994,11 +994,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dayCellActive: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
   },
   dayCellToday: {
     borderWidth: 1.5,
-    borderColor: "#0F6D55",
+    borderColor: "#04cf92",
   },
   dayCellMuted: {
     width: 36,
@@ -1017,7 +1017,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
   },
   dayTextToday: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.bold,
   },
   dayTextMuted: {
@@ -1041,15 +1041,15 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 8,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
   },
   calTodayBtnText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.bold,
     fontSize: 12,
   },
   calDoneBtn: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     paddingHorizontal: 16,
     paddingVertical: 7,
     borderRadius: 8,

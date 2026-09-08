@@ -263,7 +263,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
         {/* ─── 5. Properties Grid / List ──────────────────────────────────── */}
         {loading && (!results || results.length === 0) ? (
           <View style={styles.centerContainer}>
-            <ActivityIndicator color="#0F6D55" size="large" />
+            <ActivityIndicator color="#04cf92" size="large" />
             <Text style={styles.loadingText}>Searching verified listings...</Text>
           </View>
         ) : error && results.length === 0 ? (
@@ -321,7 +321,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
           </View>
         ) : (
           <View style={styles.emptyContainer}>
-            <Search color="#0F6D55" size={32} />
+            <Search color="#04cf92" size={32} />
             <Text style={styles.emptyTitle}>No matching properties</Text>
             <Text style={styles.emptySubtitle}>
               Try broadening your search query, adjusting your budget, or clearing some filters.
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   viewToggleBtnActive: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
   },
 
   /* 5. Properties Grid */
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
   },
   clearAllBtn: {
     marginTop: 8,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderRadius: 999,
     paddingHorizontal: 20,
     paddingVertical: 10,

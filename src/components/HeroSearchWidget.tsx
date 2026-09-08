@@ -143,7 +143,7 @@ export function HeroSearchWidget({
               accessibilityLabel="AI search mode"
             >
               <Sparkles
-                color={searchMode === "ai" ? "#FFFFFF" : "#0F6D55"}
+                color={searchMode === "ai" ? "#FFFFFF" : "#04cf92"}
                 size={13}
                 strokeWidth={2.4}
               />
@@ -208,7 +208,7 @@ export function HeroSearchWidget({
             accessibilityLabel={`Filter by area, current: ${locationLabel}`}
           >
             <MapPin
-              color={selectedArea ? "#0F6D55" : "#5C6B66"}
+              color={selectedArea ? "#04cf92" : "#5C6B66"}
               size={isPhone ? 14 : 15}
               strokeWidth={2}
             />
@@ -231,12 +231,12 @@ export function HeroSearchWidget({
                 style={styles.areaClearIcon}
                 accessibilityLabel="Clear location filter"
               >
-                <X color="#0F6D55" size={13} />
+                <X color="#04cf92" size={13} />
               </Pressable>
             ) : null}
           </Pressable>
 
-          {/* Search Button (Our signature primary green #0F6D55) */}
+          {/* Search Button (Our signature primary color #04cf92) */}
           <Pressable
             onPress={handleSearch}
             style={[styles.searchButton, isPhone && styles.searchButtonPhone, webPointer]}
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   modeOptionActive: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
   },
   modeOptionText: {
     color: "#5C6B66",
@@ -452,8 +452,8 @@ const styles = StyleSheet.create({
     maxWidth: 200,
   },
   areaButtonSelected: {
-    backgroundColor: "#E7F2EE",
-    borderColor: "rgba(15, 109, 85, 0.25)",
+    backgroundColor: "#E6FAF4",
+    borderColor: "rgba(4, 207, 146, 0.25)",
   },
   areaButtonPhone: {
     maxWidth: "100%",
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
     maxWidth: 130,
   },
   areaButtonTextSelected: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.semiBold,
     fontWeight: "600",
   },
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   searchButton: {
     flexShrink: 0,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     paddingHorizontal: 26,
     height: 52,
     borderRadius: 14,
@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: 8,
-    shadowColor: "#0F6D55",
+    shadowColor: "#04cf92",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 10,

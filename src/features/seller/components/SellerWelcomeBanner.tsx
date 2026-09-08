@@ -70,7 +70,7 @@ export function SellerWelcomeBanner({
               onPress={onAddNewProperty}
               style={[styles.primaryBtn, webPointer]}
             >
-              <PlusCircle color="#0F6D55" size={16} strokeWidth={2} />
+              <PlusCircle color="#04cf92" size={16} strokeWidth={2} />
               <Text style={styles.primaryBtnText}>Add new property</Text>
             </AppLink>
           ) : (
@@ -82,7 +82,7 @@ export function SellerWelcomeBanner({
                 webPointer,
               ]}
             >
-              <PlusCircle color="#0F6D55" size={16} strokeWidth={2} />
+              <PlusCircle color="#04cf92" size={16} strokeWidth={2} />
               <Text style={styles.primaryBtnText}>Add new property</Text>
             </Pressable>
           )}
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   primaryBtnText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontSize: 14,
     fontWeight: "600",
     fontFamily: fonts.semiBold,
