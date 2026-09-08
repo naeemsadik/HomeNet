@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import {
+  ChevronDown,
   MapPin,
   Search,
   ShieldCheck,
@@ -195,7 +196,7 @@ export function HeroSearchWidget({
             ) : null}
           </View>
 
-          {/* Blended Area Picker Button (left of search button, right of search bar) */}
+          {/* Blended Area Picker Dropdown Button (left of search button, right of search bar) */}
           <Pressable
             onPress={() => setAreaPickerOpen(true)}
             style={[
@@ -233,7 +234,13 @@ export function HeroSearchWidget({
               >
                 <X color="#04cf92" size={13} />
               </Pressable>
-            ) : null}
+            ) : (
+              <ChevronDown
+                color="#899790"
+                size={14}
+                strokeWidth={2.2}
+              />
+            )}
           </Pressable>
 
           {/* Search Button (Our signature primary color #04cf92) */}
