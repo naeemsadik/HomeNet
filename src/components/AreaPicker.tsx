@@ -146,10 +146,10 @@ export function AreaPicker({
     }
   };
 
-  // Reset focus index when items list changes
+  // Reset focus index when items list changes or modal visibility changes
   useEffect(() => {
-    setFocusedIndex(areas.length > 0 ? 0 : -1);
-  }, [areas]);
+    setFocusedIndex(-1);
+  }, [areas, visible]);
 
   // Scroll to focused item on keyboard navigation
   useEffect(() => {
@@ -241,7 +241,9 @@ export function AreaPicker({
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
-              <MapPin size={20} color={colors.green} />
+              <View style={styles.headerIconCircle}>
+                <MapPin size={16} color="#04cf92" strokeWidth={2.2} />
+              </View>
               <Text style={styles.headerTitle}>Select Location</Text>
             </View>
             <View style={styles.headerActions}>
@@ -258,7 +260,7 @@ export function AreaPicker({
                 style={[styles.closeButton, webPointer]}
                 accessibilityLabel="Close location picker"
               >
-                <X size={18} color={colors.muted} />
+                <X size={17} color="#5C6B66" strokeWidth={2} />
               </Pressable>
             </View>
           </View>
@@ -473,7 +475,11 @@ export function AreaPicker({
                     >
                       {/* Left: Tapping name/row selects it if leaf, or drills down if parent */}
                       <Pressable
-                        style={[styles.areaInfoPressable, webPointer]}
+                        style={({ pressed }) => [
+                          styles.areaInfoPressable,
+                          webPointer,
+                          pressed && { opacity: 0.8 },
+                        ]}
                         onPress={() => {
                           if (searchQuery || isLeaf) {
                             // Leaf node or search result: direct select
@@ -484,11 +490,13 @@ export function AreaPicker({
                           }
                         }}
                       >
-                        <MapPin
-                          size={16}
-                          color={isSelected ? colors.green : colors.muted}
-                          style={styles.areaRowIcon}
-                        />
+                        <View style={[styles.pinCircle, isSelected && styles.pinCircleSelected]}>
+                          <MapPin
+                            size={15}
+                            color={isSelected ? "#04cf92" : "#60716B"}
+                            strokeWidth={isSelected ? 2.2 : 1.8}
+                          />
+                        </View>
                         <View style={styles.areaTextContainer}>
                           <Text
                             style={[
@@ -499,7 +507,9 @@ export function AreaPicker({
                             {item.name}
                           </Text>
                           <Text style={styles.areaCity}>
-                            {item.city || "Area"}
+                            {item.city
+                              ? item.city.charAt(0).toUpperCase() + item.city.slice(1).toLowerCase()
+                              : "Area"}
                           </Text>
                         </View>
                       </Pressable>
@@ -510,29 +520,38 @@ export function AreaPicker({
                         {!isLeaf ? (
                           <Pressable
                             onPress={() => handleSelectArea(item)}
-                            style={[
+                            style={({ pressed }) => [
                               styles.directSelectBtn,
                               isSelected && styles.directSelectBtnActive,
                               webPointer,
+                              pressed && { opacity: 0.8 },
                             ]}
                             accessibilityLabel={`Select ${item.name}`}
                           >
                             {isSelected ? (
-                              <Check size={14} color="#FFFFFF" />
+                              <Check size={13} color="#FFFFFF" strokeWidth={2.5} />
                             ) : (
                               <Text style={styles.directSelectText}>Select</Text>
                             )}
                           </Pressable>
+                        ) : isSelected ? (
+                          <View style={styles.selectedCheckBadge}>
+                            <Check size={13} color="#04cf92" strokeWidth={2.5} />
+                          </View>
                         ) : null}
 
                         {/* Drill Down arrow (if parent and not searching) */}
                         {!isLeaf && !searchQuery ? (
                           <Pressable
                             onPress={() => drillDown(item)}
-                            style={[styles.drillBtn, webPointer]}
+                            style={({ pressed }) => [
+                              styles.drillBtn,
+                              webPointer,
+                              pressed && { opacity: 0.7 },
+                            ]}
                             accessibilityLabel={`View child locations in ${item.name}`}
                           >
-                            <ChevronRight size={16} color={colors.muted} />
+                            <ChevronRight size={16} color="#7E8F89" />
                           </Pressable>
                         ) : null}
                       </View>
@@ -581,11 +600,12 @@ const styles = StyleSheet.create({
     height: "85%",
   },
   sheetTablet: {
-    height: 520,
+    height: 560,
     width: 480,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    overflow: "hidden",
   },
   dragHandleContainer: {
     width: "100%",
@@ -605,25 +625,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 18,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: colors.line,
+    borderBottomColor: "rgba(11, 26, 23, 0.06)",
   },
   headerTitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 9,
+  },
+  headerIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#E6FAF4",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
     fontSize: 17,
     fontFamily: fonts.bold,
-    color: colors.ink,
+    color: "#0B1A17",
+    letterSpacing: -0.3,
   },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 10,
   },
   clearSelectBtn: {
     paddingVertical: 4,
@@ -635,68 +664,74 @@ const styles = StyleSheet.create({
     color: colors.coral,
   },
   closeButton: {
-    padding: 6,
-    borderRadius: 99,
-    backgroundColor: colors.soft,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F3F5F4",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // City selection chips
   chipsSection: {
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.line,
+    borderBottomColor: "rgba(11, 26, 23, 0.06)",
+    backgroundColor: "#FFFFFF",
   },
   chipsScroll: {
     paddingHorizontal: 20,
     gap: 8,
   },
   chip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 99,
-    backgroundColor: colors.soft,
+    paddingHorizontal: 15,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: "#F3F5F4",
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: "transparent",
   },
   chipActive: {
-    backgroundColor: colors.greenLight,
-    borderColor: colors.green,
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   chipText: {
     fontSize: 13,
-    fontFamily: fonts.semiBold,
-    color: colors.muted,
+    fontFamily: fonts.medium,
+    color: "#4A5B55",
   },
   chipTextActive: {
-    color: colors.greenDark,
-    fontFamily: fonts.bold,
+    color: "#FFFFFF",
+    fontFamily: fonts.semiBold,
+    fontWeight: "600",
   },
 
   // Search input
   searchSection: {
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 12,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.soft,
-    borderWidth: 1.5,
-    borderColor: colors.line,
+    backgroundColor: "#F8FAF9",
+    borderWidth: 1.2,
+    borderColor: "rgba(11, 26, 23, 0.1)",
     borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 46,
+    paddingHorizontal: 14,
+    height: 44,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: 10,
   },
   searchInput: {
     flex: 1,
     height: "100%",
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: colors.ink,
-  },
+    color: "#0B1A17",
+    outlineStyle: "none",
+  } as any,
   clearSearchBtn: {
     padding: 4,
   },
@@ -792,33 +827,46 @@ const styles = StyleSheet.create({
   // Main List Layout
   listContainer: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   areaRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.line,
-    borderLeftWidth: 3,
-    borderLeftColor: "transparent",
-    paddingLeft: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginVertical: 2,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "transparent",
   },
   areaRowSelected: {
-    borderBottomColor: colors.green,
-    backgroundColor: colors.greenLight + "30",
+    backgroundColor: "#F0F7F4",
+    borderColor: "rgba(15, 109, 85, 0.2)",
   },
   areaRowFocused: {
-    backgroundColor: colors.soft,
-    borderLeftColor: colors.green,
+    backgroundColor: "#F4F7F5",
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  pinCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F0F4F2",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  pinCircleSelected: {
+    backgroundColor: "#DCEEE8",
   },
   areaInfoPressable: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
     paddingRight: 10,
-    paddingVertical: 4,
+    paddingVertical: 3,
   },
   areaRowIcon: {
     marginRight: 12,
@@ -827,48 +875,57 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   areaName: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontFamily: fonts.semiBold,
-    color: colors.ink,
+    color: "#0B1A17",
+    letterSpacing: -0.2,
   },
   areaNameSelected: {
-    color: colors.green,
-    fontFamily: fonts.bold,
+    color: "#04cf92",
+    fontWeight: "700",
   },
   areaCity: {
-    fontSize: 11,
-    fontFamily: fonts.medium,
-    color: colors.muted,
-    marginTop: 2,
-    textTransform: "lowercase",
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: "#6D7E78",
+    marginTop: 1.5,
   },
   actionCol: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
   },
   directSelectBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    paddingHorizontal: 11,
+    paddingVertical: 5.5,
+    borderRadius: 7,
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: "rgba(4, 207, 146, 0.25)",
     backgroundColor: "#FFFFFF",
-    minWidth: 60,
+    minWidth: 54,
     alignItems: "center",
     justifyContent: "center",
   },
   directSelectBtnActive: {
-    backgroundColor: colors.green,
-    borderColor: colors.green,
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   directSelectText: {
-    fontSize: 11,
-    fontFamily: fonts.bold,
-    color: colors.green,
+    fontSize: 12,
+    fontFamily: fonts.semiBold,
+    color: "#04cf92",
+  },
+  selectedCheckBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "#E6FAF4",
+    alignItems: "center",
+    justifyContent: "center",
   },
   drillBtn: {
-    padding: 4,
+    padding: 6,
+    borderRadius: 6,
   },
 
   // Skeletons

@@ -82,7 +82,7 @@ export function SavedScreen() {
 
         {isLoading ? (
           <View style={{ padding: 48, alignItems: "center" }}>
-            <ActivityIndicator size="large" color="#0F6D55" />
+            <ActivityIndicator size="large" color="#04cf92" />
             <Text style={{ marginTop: 12, color: "#5C6B66", fontFamily: fonts.medium }}>
               Loading saved properties...
             </Text>
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 999,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
   },
   compareBtnText: {
     color: "#FFFFFF",
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   folderCardActive: {
-    borderColor: "#0F6D55",
+    borderColor: "#04cf92",
   },
   folderBg: {
     width: "100%",
@@ -325,10 +325,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
   },
   exploreLinkText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.semiBold,
     fontSize: 13,
   },
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 999,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
   },
   browseButtonText: {
     color: "#FFFFFF",

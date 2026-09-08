@@ -187,7 +187,7 @@ export function MyPropertiesScreen() {
                   ]}
                 >
                   <IconComp
-                    color={item.danger ? "#D4183D" : item.active ? "#0F6D55" : "#5C6B66"}
+                    color={item.danger ? "#D4183D" : item.active ? "#04cf92" : "#5C6B66"}
                     size={20}
                   />
                   <Text
@@ -297,7 +297,7 @@ export function MyPropertiesScreen() {
           <View style={styles.tableCard}>
             {isLoading ? (
               <View style={styles.emptyContainer}>
-                <ActivityIndicator color="#0F6D55" size="large" />
+                <ActivityIndicator color="#04cf92" size="large" />
                 <Text style={styles.emptySub}>Loading your listings...</Text>
               </View>
             ) : error ? (
@@ -344,7 +344,7 @@ export function MyPropertiesScreen() {
                         <View style={{ flex: 1, gap: 2 }}>
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                             <Text style={styles.propTitle} numberOfLines={1}>{item.title}</Text>
-                            {item.isVerified ? <CheckCircle2 color="#0F6D55" size={16} /> : null}
+                            {item.isVerified ? <CheckCircle2 color="#04cf92" size={16} /> : null}
                             {item.isBoosted ? <Zap color="#F4823A" size={14} /> : null}
                           </View>
                           <Text style={styles.propLocation}>{item.location}</Text>
@@ -378,7 +378,7 @@ export function MyPropertiesScreen() {
 
                       {/* AI Value Column */}
                       <View style={[styles.tdCell, { flex: 1, flexDirection: "row", alignItems: "center", gap: 4 }]}>
-                        <Sparkles color="#0F6D55" size={14} />
+                        <Sparkles color="#04cf92" size={14} />
                         <Text style={styles.aiValueText}>{item.aiValue}</Text>
                       </View>
 
@@ -451,7 +451,7 @@ export function MyPropertiesScreen() {
                       <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
                         <Text style={styles.priceText}>{item.price}</Text>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                          <Sparkles color="#0F6D55" size={14} />
+                          <Sparkles color="#04cf92" size={14} />
                           <Text style={styles.aiValueText}>{item.aiValue}</Text>
                         </View>
                       </View>
@@ -477,8 +477,8 @@ export function MyPropertiesScreen() {
                           <Text style={styles.mobileActionText}>View</Text>
                         </AppLink>
                         <AppLink href={`/property/edit?id=${item.id}`} style={styles.mobileActionBtn}>
-                          <Edit color="#0F6D55" size={14} />
-                          <Text style={[styles.mobileActionText, { color: "#0F6D55" }]}>Edit</Text>
+                          <Edit color="#04cf92" size={14} />
+                          <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>Edit</Text>
                         </AppLink>
                         <Pressable onPress={() => handleDelete(item.id, item.title)} style={styles.mobileActionBtn}>
                           <Trash2 color="#D4183D" size={14} />
@@ -496,7 +496,7 @@ export function MyPropertiesScreen() {
                 onPress={() => void fetchNextPage()}
                 style={styles.loadMoreButton}
               >
-                {isFetchingNextPage ? <ActivityIndicator color="#0F6D55" size="small" /> : null}
+                {isFetchingNextPage ? <ActivityIndicator color="#04cf92" size="small" /> : null}
                 <Text style={styles.loadMoreText}>{isFetchingNextPage ? "Loading..." : "Load more"}</Text>
               </Pressable>
             ) : null}
@@ -511,7 +511,7 @@ export function MyPropertiesScreen() {
 function getStatusStyle(status: string) {
   switch (status) {
     case "active":
-      return { bgStyle: { backgroundColor: "#E7F2EE" }, textStyle: { color: "#0F6D55" } };
+      return { bgStyle: { backgroundColor: "#E6FAF4" }, textStyle: { color: "#04cf92" } };
     case "pending":
       return { bgStyle: { backgroundColor: "#FDEEE2" }, textStyle: { color: "#F4823A" } };
     case "sold":
@@ -521,7 +521,7 @@ function getStatusStyle(status: string) {
     case "archived":
       return { bgStyle: { backgroundColor: "#F4F6F5" }, textStyle: { color: "#899790" } };
     default:
-      return { bgStyle: { backgroundColor: "#E7F2EE" }, textStyle: { color: "#0F6D55" } };
+      return { bgStyle: { backgroundColor: "#E6FAF4" }, textStyle: { color: "#04cf92" } };
   }
 }
 
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
   },
   brandTextAccent: {
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   sellerRolePill: {
     backgroundColor: "#E8EEFC",
@@ -593,7 +593,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   navItemActive: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
   },
   navItemDanger: {
     marginTop: 8,
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     color: "#5C6B66",
   },
   navItemTextActive: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
@@ -737,8 +737,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.08)",
   },
   filterPillActive: {
-    backgroundColor: "#0F6D55",
-    borderColor: "#0F6D55",
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   pillLabel: {
     fontSize: 14,
@@ -765,7 +765,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderRadius: 999,
     paddingHorizontal: 18,
   },
@@ -787,38 +787,43 @@ const styles = StyleSheet.create({
   tableHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
     backgroundColor: "#F8FAF9",
     borderBottomWidth: 0.8,
     borderBottomColor: "rgba(11,26,23,0.08)",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
   },
   thCell: {
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    fontFamily: fonts.bold,
     color: "#5C6B66",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   tableDataRow: {
     flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: 0.8,
-    borderBottomColor: "rgba(11,26,23,0.08)",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderBottomColor: "rgba(11,26,23,0.06)",
   },
   tdCell: {
     justifyContent: "center",
   },
   propThumb: {
-    width: 48,
+    width: 60,
     height: 48,
-    borderRadius: 12,
+    borderRadius: 8,
     backgroundColor: "#F4F6F5",
   },
-  imagePlaceholder: { alignItems: "center", justifyContent: "center" },
+  imagePlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
   propTitle: {
     fontSize: 14,
-    fontFamily: fonts.semiBold,
+    fontFamily: fonts.bold,
     color: "#0B1A17",
   },
   propLocation: {
@@ -828,35 +833,35 @@ const styles = StyleSheet.create({
   },
   typeText: {
     fontSize: 14,
-    fontFamily: fonts.regular,
+    fontFamily: fonts.semiBold,
     color: "#0B1A17",
   },
   forSaleBadge: {
     alignSelf: "flex-start",
     backgroundColor: "#E8EEFC",
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   forSaleBadgeText: {
-    fontSize: 12,
-    fontFamily: fonts.regular,
+    fontSize: 11,
+    fontFamily: fonts.semiBold,
     color: "#2251D6",
   },
   priceText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fonts.bold,
     color: "#0B1A17",
   },
   statusBadge: {
     alignSelf: "flex-start",
-    borderRadius: 999,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 3,
+    borderRadius: 6,
   },
   statusBadgeText: {
     fontSize: 12,
-    fontFamily: fonts.regular,
+    fontFamily: fonts.semiBold,
   },
   boostCountdown: {
     fontSize: 12,
@@ -866,7 +871,7 @@ const styles = StyleSheet.create({
   aiValueText: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   metricItem: {
     flexDirection: "row",
@@ -907,7 +912,7 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     alignItems: "center",
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderRadius: 10,
     flexDirection: "row",
     gap: 8,
@@ -924,7 +929,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
-  loadMoreText: { color: "#0F6D55", fontFamily: fonts.semiBold, fontSize: 13 },
+  loadMoreText: { color: "#04cf92", fontFamily: fonts.semiBold, fontSize: 13 },
   mobileCardList: {
     padding: 16,
     gap: 16,

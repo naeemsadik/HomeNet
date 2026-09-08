@@ -295,7 +295,7 @@ export function AdvancedFiltersModal({
               style={[styles.verifiedRowCard, webPointer]}
             >
               <View style={styles.verifiedRowLeft}>
-                <Sparkles color="#0F6D55" size={16} />
+                <Sparkles color="#04cf92" size={16} />
                 <Text style={styles.verifiedRowLabel}>
                   Verified listings only
                 </Text>
@@ -461,8 +461,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   pillOptionButtonActive: {
-    backgroundColor: "#0F6D55",
-    borderColor: "#0F6D55",
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   pillOptionText: {
     color: "#0B1A17",
@@ -487,8 +487,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   amenityChipActive: {
-    backgroundColor: "#E7F2EE",
-    borderColor: "#0F6D55",
+    backgroundColor: "#E6FAF4",
+    borderColor: "#04cf92",
   },
   amenityChipText: {
     color: "#0B1A17",
@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   amenityChipTextActive: {
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   verifiedRowCard: {
     flexDirection: "row",
@@ -529,8 +529,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   checkboxBoxChecked: {
-    backgroundColor: "#0F6D55",
-    borderColor: "#0F6D55",
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
   },
   footer: {
     flexDirection: "row",
@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
     flex: 2,
     height: 46.4,
     borderRadius: 999,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     alignItems: "center",
     justifyContent: "center",
   },

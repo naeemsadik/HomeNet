@@ -149,7 +149,7 @@ export function PropertyCard({
           <View style={styles.badgeCluster}>
             {isVerified ? (
               <View style={styles.verifiedBadge}>
-                <ShieldCheck color="#0F6D55" size={14} />
+                <ShieldCheck color="#04cf92" size={14} />
                 <Text style={styles.verifiedText}>Verified</Text>
               </View>
             ) : null}
@@ -197,11 +197,11 @@ export function PropertyCard({
           </View>
           {score !== undefined ? (
             <View style={styles.scoreContainer}>
-              <Sparkles color={isHighTierScore ? "#0F6D55" : "#2251D6"} size={14} />
+              <Sparkles color={isHighTierScore ? "#04cf92" : "#2251D6"} size={14} />
               <Text
                 style={[
                   styles.scoreText,
-                  { color: isHighTierScore ? "#0F6D55" : "#2251D6" },
+                  { color: isHighTierScore ? "#04cf92" : "#2251D6" },
                 ]}
               >
                 {score}
@@ -297,13 +297,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
   },
   verifiedText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.semiBold,
     fontSize: 12,
     fontWeight: "600",
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   scoreText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",

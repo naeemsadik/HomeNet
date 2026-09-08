@@ -8,6 +8,7 @@ interface SearchTabsProps {
   activeTab: SearchTabType;
   onChange: (tab: SearchTabType) => void;
   compact?: boolean;
+  variant?: "light" | "dark";
 }
 
 const TABS: { key: SearchTabType; label: string }[] = [
@@ -16,7 +17,14 @@ const TABS: { key: SearchTabType; label: string }[] = [
   { key: "short-let", label: "Short-let" },
 ];
 
-export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {
+export function SearchTabs({
+  activeTab,
+  onChange,
+  compact = false,
+  variant = "dark",
+}: SearchTabsProps) {
+  const isDark = variant === "dark";
+
   return (
     <View style={[styles.container, compact && styles.containerCompact]}>
       {TABS.map((tab) => {
@@ -28,20 +36,34 @@ export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsP
             accessibilityState={{ selected: isActive }}
             accessibilityLabel={`${tab.label} tab`}
             onPress={() => onChange(tab.key)}
-            style={[styles.tabButton, compact && styles.tabButtonCompact, webPointer]}
+            style={[
+              styles.tabButton,
+              compact && styles.tabButtonCompact,
+              webPointer,
+            ]}
           >
             <Text
               style={[
                 styles.tabText,
                 compact && styles.tabTextCompact,
-                isActive ? styles.tabTextActive : styles.tabTextInactive,
+                isDark
+                  ? isActive
+                    ? styles.tabTextActiveDark
+                    : styles.tabTextInactiveDark
+                  : isActive
+                  ? styles.tabTextActiveLight
+                  : styles.tabTextInactiveLight,
               ]}
             >
               {tab.label}
             </Text>
             {isActive ? (
               <View
-                style={[styles.activeIndicator, compact && styles.activeIndicatorCompact]}
+                style={[
+                  styles.activeIndicator,
+                  isDark ? styles.activeIndicatorDark : styles.activeIndicatorLight,
+                  compact && styles.activeIndicatorCompact,
+                ]}
               />
             ) : null}
           </Pressable>
@@ -55,7 +77,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    height: 44,
+    height: 48,
     flexShrink: 1,
   },
   containerCompact: {
@@ -63,49 +85,65 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     position: "relative",
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 12,
     alignItems: "center",
     justifyContent: "center",
-    height: 44,
+    height: "100%",
     backgroundColor: "transparent",
     flexShrink: 0,
   },
   tabButtonCompact: {
-    paddingHorizontal: 10,
-    paddingVertical: 9,
-    height: 40,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   tabText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 22,
     textAlign: "center",
+    fontFamily: fonts.medium,
   },
   tabTextCompact: {
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 18,
   },
-  tabTextActive: {
-    color: "#0F6D55",
+  tabTextActiveDark: {
+    color: "#FFFFFF",
     fontFamily: fonts.bold,
     fontWeight: "700",
   },
-  tabTextInactive: {
+  tabTextInactiveDark: {
+    color: "rgba(255, 255, 255, 0.7)",
+    fontFamily: fonts.medium,
+    fontWeight: "500",
+  },
+  tabTextActiveLight: {
+    color: "#04cf92",
+    fontFamily: fonts.bold,
+    fontWeight: "700",
+  },
+  tabTextInactiveLight: {
     color: "#5C6B66",
     fontFamily: fonts.medium,
     fontWeight: "500",
   },
   activeIndicator: {
     position: "absolute",
-    bottom: -1,
-    left: 8,
-    right: 8,
-    height: 2,
-    backgroundColor: "#0F6D55",
+    bottom: 0,
+    left: 12,
+    right: 12,
+    height: 3,
     borderRadius: 999,
   },
+  activeIndicatorDark: {
+    backgroundColor: "#04cf92",
+  },
+  activeIndicatorLight: {
+    backgroundColor: "#04cf92",
+  },
   activeIndicatorCompact: {
-    left: 6,
-    right: 6,
+    left: 8,
+    right: 8,
+    height: 2.5,
   },
 });

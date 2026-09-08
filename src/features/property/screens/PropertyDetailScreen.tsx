@@ -211,7 +211,7 @@ export function PropertyDetailScreen() {
     return (
       <AppChrome active="property">
         <View style={styles.requestState}>
-          <ActivityIndicator color="#0F6D55" size="large" />
+          <ActivityIndicator color="#04cf92" size="large" />
           <Text style={styles.requestError}>Loading property details...</Text>
         </View>
       </AppChrome>
@@ -295,7 +295,7 @@ export function PropertyDetailScreen() {
                 <View style={styles.galleryBadgesRow}>
                   {property.isVerified ? (
                     <View style={styles.verifiedTag}>
-                      <ShieldCheck color="#0F6D55" size={14} />
+                      <ShieldCheck color="#04cf92" size={14} />
                       <Text style={styles.verifiedTagText}>Verified</Text>
                     </View>
                   ) : null}
@@ -332,7 +332,7 @@ export function PropertyDetailScreen() {
                 </View>
                 {property.isVerified ? (
                   <View style={styles.verifiedSmallBadge}>
-                    <ShieldCheck color="#0F6D55" size={14} />
+                    <ShieldCheck color="#04cf92" size={14} />
                     <Text style={styles.verifiedSmallText}>Verified</Text>
                   </View>
                 ) : null}
@@ -341,28 +341,28 @@ export function PropertyDetailScreen() {
               <Text style={styles.propertyTitle}>{property.title}</Text>
 
               <View style={styles.locationSubRow}>
-                <MapPin color="#0F6D55" size={16} />
+                <MapPin color="#04cf92" size={16} />
                 <Text style={styles.locationSubText}>{property.location}</Text>
               </View>
 
               {/* Key Specs Bar */}
               <View style={styles.keySpecsRow}>
                 <View style={styles.specItem}>
-                  <BedDouble color="#0F6D55" size={18} />
+                  <BedDouble color="#04cf92" size={18} />
                   <Text style={styles.specText}>{property.bedrooms} Beds</Text>
                 </View>
 
                 <View style={styles.specDivider} />
 
                 <View style={styles.specItem}>
-                  <Bath color="#0F6D55" size={18} />
+                  <Bath color="#04cf92" size={18} />
                   <Text style={styles.specText}>{property.bathrooms} Baths</Text>
                 </View>
 
                 <View style={styles.specDivider} />
 
                 <View style={styles.specItem}>
-                  <Maximize2 color="#0F6D55" size={18} />
+                  <Maximize2 color="#04cf92" size={18} />
                   <Text style={styles.specText}>{property.areaSqft} sqft</Text>
                 </View>
               </View>
@@ -372,7 +372,7 @@ export function PropertyDetailScreen() {
             {property.aiValuation ? (
             <View style={styles.aiValuationCard}>
               <View style={styles.aiValuationHeader}>
-                <Sparkles color="#0F6D55" size={20} />
+                <Sparkles color="#04cf92" size={20} />
                 <Text style={styles.aiValuationTitle}>AI Property Valuation</Text>
               </View>
 
@@ -382,7 +382,7 @@ export function PropertyDetailScreen() {
               </Text>
 
               <View style={styles.aiTrendBadge}>
-                <TrendingUp color="#0F6D55" size={14} />
+                <TrendingUp color="#04cf92" size={14} />
                 <Text style={styles.aiTrendText}>{property.aiValuation.trend}</Text>
               </View>
             </View>
@@ -397,7 +397,7 @@ export function PropertyDetailScreen() {
               <View style={styles.amenitiesCheckGrid}>
                 {property.amenities.map((am) => (
                   <View key={am} style={styles.amenityCheckItem}>
-                    <Check color="#0F6D55" size={16} />
+                    <Check color="#04cf92" size={16} />
                     <Text style={styles.amenityCheckText}>{am}</Text>
                   </View>
                 ))}
@@ -413,7 +413,7 @@ export function PropertyDetailScreen() {
                   onPress={() => void Linking.openURL(googleMapsExternalUrl)}
                   style={({ pressed }) => [styles.openMapsBtn, webPointer, pressed && styles.pressed]}
                 >
-                  <ExternalLink color="#0F6D55" size={14} />
+                  <ExternalLink color="#04cf92" size={14} />
                   <Text style={styles.openMapsBtnText}>Open Google Maps</Text>
                 </Pressable>
               </View>
@@ -454,7 +454,7 @@ export function PropertyDetailScreen() {
                 )}
 
                 <View style={styles.mapAddressPill}>
-                  <MapPin color="#0F6D55" size={14} />
+                  <MapPin color="#04cf92" size={14} />
                   <Text numberOfLines={1} style={styles.mapAddressPillText}>
                     {property.address || property.location}
                   </Text>
@@ -493,10 +493,10 @@ export function PropertyDetailScreen() {
               </View>
 
               {similarLoading ? (
-                <ActivityIndicator color="#0F6D55" size="small" />
+                <ActivityIndicator color="#04cf92" size="small" />
               ) : similarError ? (
                 <Pressable onPress={() => void refetchSimilar()} style={styles.similarRequestState}>
-                  <RotateCcw color="#0F6D55" size={15} />
+                  <RotateCcw color="#04cf92" size={15} />
                   <Text style={styles.similarLoc}>
                     {similarError instanceof Error ? similarError.message : "Could not load similar listings."} Press to retry.
                   </Text>
@@ -518,7 +518,7 @@ export function PropertyDetailScreen() {
                             <Text style={styles.similarPrice}>{sim.price}</Text>
                             {sim.score ? (
                               <View style={styles.similarScoreBadge}>
-                                <Sparkles color="#0F6D55" size={12} />
+                                <Sparkles color="#04cf92" size={12} />
                                 <Text style={styles.similarScoreText}>{sim.score}</Text>
                               </View>
                             ) : null}
@@ -569,7 +569,7 @@ export function PropertyDetailScreen() {
                   <Text style={styles.priceCalloutLabel}>Asking price</Text>
                   {property.score ? (
                     <View style={styles.scoreBadge}>
-                      <Sparkles color="#0F6D55" size={14} />
+                      <Sparkles color="#04cf92" size={14} />
                       <Text style={styles.scoreBadgeText}>{property.score}</Text>
                     </View>
                   ) : null}
@@ -614,7 +614,7 @@ export function PropertyDetailScreen() {
             {/* AI Recommendation Box */}
             <View style={styles.aiRecCard}>
               <View style={styles.aiRecHeader}>
-                <Sparkles color="#0F6D55" size={18} />
+                <Sparkles color="#04cf92" size={18} />
                 <Text style={styles.aiRecTitle}>AI Recommendation</Text>
               </View>
 
@@ -690,7 +690,7 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     alignItems: "center",
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderRadius: 10,
     flexDirection: "row",
     gap: 8,
@@ -801,7 +801,7 @@ const styles = StyleSheet.create({
   verifiedTagText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   forRentTag: {
     backgroundColor: "#E8EEFC",
@@ -827,7 +827,7 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   thumbnailCardActive: {
-    borderColor: "#0F6D55",
+    borderColor: "#04cf92",
   },
   thumbnailImg: {
     width: "100%",
@@ -848,7 +848,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   categoryBadge: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -856,7 +856,7 @@ const styles = StyleSheet.create({
   categoryBadgeText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   verifiedSmallBadge: {
     flexDirection: "row",
@@ -866,7 +866,7 @@ const styles = StyleSheet.create({
   verifiedSmallText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   propertyTitle: {
     fontSize: 24,
@@ -909,7 +909,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(11,26,23,0.15)",
   },
   aiValuationCard: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     borderRadius: 24,
     padding: 24,
     gap: 10,
@@ -922,7 +922,7 @@ const styles = StyleSheet.create({
   aiValuationTitle: {
     fontSize: 16,
     fontFamily: fonts.bold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   aiValuationDesc: {
     fontSize: 14,
@@ -947,7 +947,7 @@ const styles = StyleSheet.create({
   aiTrendText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   sectionCard: {
     backgroundColor: "#FFFFFF",
@@ -970,7 +970,7 @@ const styles = StyleSheet.create({
   seeAllLink: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   descriptionParagraph: {
     fontSize: 14,
@@ -1008,13 +1008,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
   },
   openMapsBtnText: {
-    color: "#0F6D55",
+    color: "#04cf92",
     fontSize: 13,
     fontFamily: fonts.semiBold,
   },
@@ -1069,7 +1069,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1135,7 +1135,7 @@ const styles = StyleSheet.create({
   similarPrice: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   similarScoreBadge: {
     flexDirection: "row",
@@ -1145,7 +1145,7 @@ const styles = StyleSheet.create({
   similarScoreText: {
     fontSize: 12,
     fontFamily: fonts.bold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   similarTitle: {
     fontSize: 13,
@@ -1232,7 +1232,7 @@ const styles = StyleSheet.create({
   scoreBadgeText: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   priceCalloutValue: {
     fontSize: 22,
@@ -1302,7 +1302,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
   },
   aiRecCard: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
     borderRadius: 24,
     padding: 24,
     gap: 10,
@@ -1315,7 +1315,7 @@ const styles = StyleSheet.create({
   aiRecTitle: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#0F6D55",
+    color: "#04cf92",
   },
   aiRecBody: {
     fontSize: 13,
@@ -1362,7 +1362,7 @@ const styles = StyleSheet.create({
   },
   confirmVisitBtn: {
     height: 44,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",

@@ -9,6 +9,8 @@ export default function Root({ children }: PropsWithChildren) {
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <meta content="AI-assisted property discovery and market insights in Bangladesh." name="description" />
         <title>HomeNet | Find a home you can trust, priced by AI</title>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <ScrollViewStyleReset />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
