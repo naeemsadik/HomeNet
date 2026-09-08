@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { router, type Href } from "expo-router";
 import { fonts, webPointer } from "@/theme";
 
 export type SearchTabType = "buy" | "rent" | "short-let";
@@ -69,6 +70,28 @@ export function SearchTabs({
           </Pressable>
         );
       })}
+
+      {/* Insights — navigates to /market instead of changing search tab */}
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel="Insights page"
+        onPress={() => router.push("/market" as Href)}
+        style={[
+          styles.tabButton,
+          compact && styles.tabButtonCompact,
+          webPointer,
+        ]}
+      >
+        <Text
+          style={[
+            styles.tabText,
+            compact && styles.tabTextCompact,
+            isDark ? styles.tabTextInactiveDark : styles.tabTextInactiveLight,
+          ]}
+        >
+          Insights
+        </Text>
+      </Pressable>
     </View>
   );
 }
