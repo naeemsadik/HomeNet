@@ -2,6 +2,7 @@ import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck, Sparkles } from 
 import { router } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle, View, Platform } from "react-native";
 import type { Property } from "@/data/properties";
+import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 
 type PropertyCardData = Omit<Property, "id"> & { id: string | number };
@@ -91,6 +92,7 @@ export function PropertyCard({
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
 }) {
+  const { isPhone } = useResponsive();
   const property = ("media" in rawProp || "area_size" in rawProp || "listing_type" in rawProp || !rawProp.monthlyPrice)
     ? formatApiPropertyToCardModel(rawProp)
     : rawProp;
@@ -115,6 +117,9 @@ export function PropertyCard({
     }
   };
 
+  const defaultHeight = isPhone ? 180 : 210;
+  const finalImageHeight = imageHeight ?? defaultHeight;
+
   return (
     <Pressable
       accessibilityLabel={`Property ${property.title}`}
@@ -122,13 +127,14 @@ export function PropertyCard({
       onPress={handleCardPress}
       style={({ pressed }) => [
         styles.card,
+        isPhone && styles.cardPhone,
         webPointer,
         style,
         pressed && styles.cardPressed,
       ]}
     >
       {/* Image Container */}
-      <View style={[styles.imageWrap, imageHeight ? { height: imageHeight } : null]}>
+      <View style={[styles.imageWrap, { height: finalImageHeight }]}>
         {property.image ? (
           <Image source={{ uri: property.image }} style={styles.image} resizeMode="cover" />
         ) : (
@@ -182,11 +188,11 @@ export function PropertyCard({
       </View>
 
       {/* Card Body */}
-      <View style={styles.body}>
+      <View style={[styles.body, isPhone && styles.bodyPhone]}>
         {/* Price & Investment Score */}
         <View style={styles.priceRow}>
           <View style={styles.priceContainer}>
-            <Text style={styles.priceText}>{mainPrice}</Text>
+            <Text style={[styles.priceText, isPhone && styles.priceTextPhone]}>{mainPrice}</Text>
             {hasMo ? <Text style={styles.moText}> /mo</Text> : null}
           </View>
           {score !== undefined ? (
@@ -206,7 +212,7 @@ export function PropertyCard({
 
         {/* Title */}
         <View style={styles.titleLink}>
-          <Text numberOfLines={1} style={styles.titleText}>
+          <Text numberOfLines={1} style={[styles.titleText, isPhone && styles.titleTextPhone]}>
             {property.title}
           </Text>
         </View>
@@ -214,13 +220,13 @@ export function PropertyCard({
         {/* Location */}
         <View style={styles.locationRow}>
           <MapPin color="#5C6B66" size={14} />
-          <Text numberOfLines={1} style={styles.locationText}>
+          <Text numberOfLines={1} style={[styles.locationText, isPhone && styles.locationTextPhone]}>
             {property.location}
           </Text>
         </View>
 
         {/* Specs Row */}
-        <View style={styles.specsRow}>
+        <View style={[styles.specsRow, isPhone && styles.specsRowPhone]}>
           {property.beds !== undefined && property.beds > 0 ? (
             <View style={styles.specItem}>
               <BedDouble color="#5C6B66" size={16} />
@@ -253,13 +259,15 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11, 26, 23, 0.08)",
     overflow: "hidden",
   },
+  cardPhone: {
+    borderRadius: 16,
+  },
   cardPressed: {
     opacity: 0.96,
   },
   imageWrap: {
     position: "relative",
     width: "100%",
-    height: 209.4,
     backgroundColor: "#F4F6F5",
     overflow: "hidden",
     borderTopLeftRadius: 20,
@@ -341,6 +349,10 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 6,
   },
+  bodyPhone: {
+    padding: 12,
+    gap: 4,
+  },
   priceRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -356,6 +368,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     lineHeight: 28,
+  },
+  priceTextPhone: {
+    fontSize: 18,
+    lineHeight: 24,
   },
   moText: {
     color: "#5C6B66",
@@ -384,6 +400,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 24,
   },
+  titleTextPhone: {
+    fontSize: 14.5,
+    lineHeight: 20,
+  },
   locationRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -396,6 +416,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 20,
   },
+  locationTextPhone: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
   specsRow: {
     marginTop: 6,
     paddingTop: 12.8,
@@ -406,6 +430,12 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12,
     rowGap: 6,
+  },
+  specsRowPhone: {
+    marginTop: 4,
+    paddingTop: 8,
+    gap: 10,
+    rowGap: 4,
   },
   specItem: {
     flexDirection: "row",

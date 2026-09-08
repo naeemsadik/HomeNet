@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   container: { gap: 18, paddingBottom: 30 },
   containerPhone: { gap: 14 },
   headerSection: { gap: 6 },
-  title: { fontSize: 28, fontFamily: fonts.extraBold, color: colorTokens.textPrimary, letterSpacing: -1 },
+  title: { fontSize: 28, fontFamily: fonts.extraBold, color: colorTokens.textPrimary, letterSpacing: -0.4 },
   subtitle: { fontSize: 13, fontFamily: fonts.regular, color: colorTokens.textSecondary, lineHeight: 18 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32 },
   statsGrid: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: fonts.extraBold,
     color: colorTokens.textPrimary,
-    letterSpacing: -1,
+    letterSpacing: -0.4,
   },
   statLabel: {
     fontSize: 12,

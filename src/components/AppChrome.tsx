@@ -376,19 +376,37 @@ function Footer() {
 
   return (
     <View style={styles.footer}>
-      <View style={[styles.footerInner, isMobile && styles.footerInnerMobile]}>
+      <View
+        style={[
+          styles.footerInner,
+          isTabletView && styles.footerInnerTablet,
+          isMobile && styles.footerInnerPhone,
+        ]}
+      >
         {/* Main section: Brand + Navigation Columns */}
         <View
           style={[
             styles.footerColumns,
             isTabletView && styles.footerColumnsTablet,
-            isMobile && styles.footerColumnsMobile,
+            isMobile && styles.footerColumnsPhone,
           ]}
         >
           {/* Column 1: Brand & Contact Info */}
-          <View style={[styles.footerCol1, (isMobile || isTabletView) && styles.footerColFull]}>
-            <Brand size="large" />
-            <Text style={styles.footerTagline}>
+          <View
+            style={[
+              styles.footerCol1,
+              isTabletView && styles.footerCol1Tablet,
+              isMobile && styles.footerColFull,
+            ]}
+          >
+            <Brand size={isMobile ? "default" : "large"} />
+            <Text
+              style={[
+                styles.footerTagline,
+                isTabletView && styles.footerTaglineTablet,
+                isMobile && styles.footerTaglinePhone,
+              ]}
+            >
               Bangladesh's AI-powered property marketplace. Verified listings,
               smart valuation and trusted partners — all in one place.
             </Text>
@@ -488,13 +506,19 @@ function Footer() {
           {/* Links Grid: 4 columns on desktop, 4 in row on tablet, 2x2 on mobile */}
           <View
             style={[
-              styles.footerLinksWrap,
-              isTabletView && styles.footerLinksWrapTablet,
-              isMobile && styles.footerLinksWrapMobile,
+              styles.footerLinksGrid,
+              isTabletView && styles.footerLinksGridTablet,
+              isMobile && styles.footerLinksGridMobile,
             ]}
           >
             {/* Column 2: Explore */}
-            <View style={[styles.footerCol, isMobile && styles.footerColMobile]}>
+            <View
+              style={[
+                styles.footerCol,
+                isTabletView && styles.footerColTablet,
+                isMobile && styles.footerColMobile,
+              ]}
+            >
               <Text style={styles.footerColHeading}>Explore</Text>
               {[
                 "Apartments",
@@ -511,7 +535,13 @@ function Footer() {
             </View>
 
             {/* Column 3: Company */}
-            <View style={[styles.footerCol, isMobile && styles.footerColMobile]}>
+            <View
+              style={[
+                styles.footerCol,
+                isTabletView && styles.footerColTablet,
+                isMobile && styles.footerColMobile,
+              ]}
+            >
               <Text style={styles.footerColHeading}>Company</Text>
               {[
                 "About Homenet",
@@ -527,7 +557,13 @@ function Footer() {
             </View>
 
             {/* Column 4: Support */}
-            <View style={[styles.footerCol, isMobile && styles.footerColMobile]}>
+            <View
+              style={[
+                styles.footerCol,
+                isTabletView && styles.footerColTablet,
+                isMobile && styles.footerColMobile,
+              ]}
+            >
               <Text style={styles.footerColHeading}>Support</Text>
               {[
                 "Help Center",
@@ -542,7 +578,13 @@ function Footer() {
             </View>
 
             {/* Column 5: Legal */}
-            <View style={[styles.footerCol, isMobile && styles.footerColMobile]}>
+            <View
+              style={[
+                styles.footerCol,
+                isTabletView && styles.footerColTablet,
+                isMobile && styles.footerColMobile,
+              ]}
+            >
               <Text style={styles.footerColHeading}>Legal</Text>
               {["Terms of Service", "Privacy Policy", "Cookie Policy"].map(
                 (item) => (
@@ -627,7 +669,6 @@ function Footer() {
 }
 
 function MobileNav({ active }: { active: ActivePage }) {
-  const { width } = useResponsive();
   const user = useAuthStore((s) => s.user);
   const links = [
     { label: "Home", href: "/", icon: Home, selected: active === "home", authGated: false },
@@ -657,7 +698,7 @@ function MobileNav({ active }: { active: ActivePage }) {
   return (
     <SafeAreaView
       edges={["bottom"]}
-      style={[styles.mobileNavSafe, { width, maxWidth: width }]}
+      style={styles.mobileNavSafe}
     >
       <View style={styles.mobileNav}>
         {links.map(({ label, href, icon: Icon, selected, authGated }) => {
@@ -708,7 +749,7 @@ export function AppChrome({
   children: ReactNode;
   active: ActivePage;
 }) {
-  const { isTablet, width } = useResponsive();
+  const { isTablet, isPhone } = useResponsive();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -721,8 +762,8 @@ export function AppChrome({
           showsVerticalScrollIndicator={false}
           style={{ width: "100%" }}
         >
-          <View style={styles.mainGutter}>
-            <View style={styles.main}>{children}</View>
+          <View style={[styles.mainGutter, isPhone && styles.mainGutterPhone]}>
+            <View style={[styles.main, isPhone && styles.mainPhone]}>{children}</View>
           </View>
           <Footer />
         </ScrollView>
@@ -923,6 +964,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    flexShrink: 0,
   },
   topbarLeftPhone: {
     gap: 6,
@@ -981,9 +1023,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    flexShrink: 0,
   },
   topRightActionsPhone: {
-    gap: 5,
+    gap: 6,
     flexShrink: 0,
   },
   rightmoveSignInBtn: {
@@ -1177,10 +1220,17 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 48,
   },
+  mainGutterPhone: {
+    paddingTop: 10,
+    paddingBottom: 24,
+  },
 
   main: {
     width: "100%",
     paddingHorizontal: 24,
+  },
+  mainPhone: {
+    paddingHorizontal: 12,
   },
 
   /* Footer Styles */
@@ -1197,22 +1247,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 52,
   },
-  footerInnerMobile: {
-    paddingHorizontal: 18,
-    paddingVertical: 36,
+  footerInnerTablet: {
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+  },
+  footerInnerPhone: {
+    paddingHorizontal: 16,
+    paddingVertical: 32,
   },
   footerColumns: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: 36,
+    gap: 40,
     width: "100%",
   },
   footerColumnsTablet: {
     flexDirection: "column",
-    gap: 32,
+    gap: 36,
   },
-  footerColumnsMobile: {
+  footerColumnsPhone: {
     flexDirection: "column",
     gap: 28,
   },
@@ -1221,41 +1275,105 @@ const styles = StyleSheet.create({
     minWidth: 240,
     maxWidth: 380,
   },
-  footerColFull: {
-    minWidth: "100%",
+  footerCol1Tablet: {
+    width: "100%",
     maxWidth: "100%",
-    flex: 0,
   },
-  footerLinksWrap: {
+  footerColFull: {
+    width: "100%",
+    maxWidth: "100%",
+  },
+  footerTagline: {
+    marginTop: 18,
+    marginBottom: 20,
+    color: "#52635E",
+    fontFamily: fonts.regular,
+    fontSize: 15,
+    lineHeight: 23,
+    maxWidth: 310,
+  },
+  footerTaglineTablet: {
+    maxWidth: 550,
+  },
+  footerTaglinePhone: {
+    marginTop: 12,
+    marginBottom: 16,
+    fontSize: 13.5,
+    lineHeight: 20,
+    maxWidth: "100%",
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 8,
+  },
+  contactIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(15, 109, 85, 0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  contactText: {
+    color: "#31443F",
+    fontFamily: fonts.medium,
+    fontSize: 14.5,
+  },
+  socialRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 20,
+  },
+  socialCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+  },
+  footerLinksGrid: {
     flex: 3,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
     gap: 24,
   },
-  footerLinksWrapTablet: {
+  footerLinksGridTablet: {
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 16,
+    gap: 20,
   },
-  footerLinksWrapMobile: {
+  footerLinksGridMobile: {
     width: "100%",
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "space-between",
     rowGap: 24,
     columnGap: 16,
-    justifyContent: "space-between",
   },
   footerCol: {
     flex: 1,
     minWidth: 110,
     gap: 11,
   },
-  footerColMobile: {
-    width: "47%",
+  footerColTablet: {
+    flex: 1,
     minWidth: 120,
+    gap: 10,
+  },
+  footerColMobile: {
+    width: "46%",
+    maxWidth: "48%",
+    flexBasis: "46%",
     flexGrow: 0,
     flexShrink: 0,
+    gap: 9,
   },
   footerColHeading: {
     color: "#081613",
@@ -1287,8 +1405,9 @@ const styles = StyleSheet.create({
   newsletterCardPhone: {
     flexDirection: "column",
     alignItems: "stretch",
-    padding: 20,
-    gap: 16,
+    padding: 16,
+    gap: 14,
+    marginTop: 28,
   },
   newsletterLeft: {
     flex: 1,
@@ -1341,7 +1460,7 @@ const styles = StyleSheet.create({
   },
   newsletterInputWrapPhone: {
     width: "100%",
-    minHeight: 48,
+    minHeight: 44,
     paddingLeft: 14,
     paddingRight: 4,
     paddingVertical: 4,
@@ -1358,9 +1477,9 @@ const styles = StyleSheet.create({
     outlineStyle: "none",
   } as any,
   newsletterInputPhone: {
-    fontSize: 14,
-    height: 38,
-    paddingVertical: 6,
+    fontSize: 13.5,
+    height: 36,
+    paddingVertical: 4,
   },
   subscribeButton: {
     paddingHorizontal: 18,
@@ -1398,6 +1517,8 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 12,
     alignItems: "flex-start",
+    marginTop: 24,
+    paddingTop: 18,
   },
   footerBottomText: {
     color: "#60716B",

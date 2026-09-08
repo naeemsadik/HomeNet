@@ -124,6 +124,7 @@ function NativeSelect({
           style={{
             width: "100%",
             height: 42,
+            minHeight: 42,
             padding: "0 34px 0 14px",
             backgroundColor: "#FFFFFF",
             border: "1.5px solid #D0D5DD",
@@ -137,6 +138,7 @@ function NativeSelect({
             outline: "none",
             cursor: "pointer",
             boxSizing: "border-box",
+            display: "block",
           }}
         >
           {options.map((opt) => (
@@ -236,119 +238,345 @@ export function RightmoveFilterCard({
         )}
       </View>
 
-      {/* ─── Grid Controls (3 columns x 2 rows on desktop) ─────────────── */}
-      <View style={[styles.grid, isDesktop && styles.gridDesktop, isMobile && styles.gridMobile]}>
-        {/* ROW 1, COL 1: Search radius */}
-        <View style={[styles.col, isMobile && styles.colMobile]}>
-          <Text style={styles.fieldLabel}>Search radius</Text>
-          <NativeSelect
-            value={filters.radius}
-            options={RADIUS_OPTIONS}
-            onChange={(val) => handleUpdate({ radius: val })}
-          />
-        </View>
+      {isPhone ? (
+        /* Mobile Layout: 1 Column Vertical Stack */
+        <View style={styles.gridPhone}>
+          {/* Field 1: Search radius */}
+          <View style={styles.colFull}>
+            <Text style={styles.fieldLabel}>Search radius</Text>
+            <NativeSelect
+              value={filters.radius}
+              options={RADIUS_OPTIONS}
+              onChange={(val) => handleUpdate({ radius: val })}
+            />
+          </View>
 
-        {/* ROW 1, COL 2: Property types */}
-        <View style={[styles.col, isMobile && styles.colMobile]}>
-          <Text style={styles.fieldLabel}>Property types</Text>
-          <NativeSelect
-            value={filters.propertyType}
-            options={PROPERTY_TYPE_OPTIONS}
-            onChange={(val) => handleUpdate({ propertyType: val })}
-          />
-        </View>
+          {/* Field 2: Property types */}
+          <View style={styles.colFull}>
+            <Text style={styles.fieldLabel}>Property types</Text>
+            <NativeSelect
+              value={filters.propertyType}
+              options={PROPERTY_TYPE_OPTIONS}
+              onChange={(val) => handleUpdate({ propertyType: val })}
+            />
+          </View>
 
-        {/* ROW 1, COL 3: Added to site & Checkbox */}
-        <View style={[styles.col, isMobile && styles.colMobile]}>
-          <Text style={styles.fieldLabel}>Added to site</Text>
-          <NativeSelect
-            value={filters.addedToSite}
-            options={ADDED_TO_SITE_OPTIONS}
-            onChange={(val) => handleUpdate({ addedToSite: val })}
-          />
+          {/* Field 3: Added to site */}
+          <View style={styles.colFull}>
+            <Text style={styles.fieldLabel}>Added to site</Text>
+            <NativeSelect
+              value={filters.addedToSite}
+              options={ADDED_TO_SITE_OPTIONS}
+              onChange={(val) => handleUpdate({ addedToSite: val })}
+            />
 
-          {/* Include Under Offer, Sold STC Checkbox */}
-          <View style={styles.checkboxRowContainer}>
-            <Pressable
-              onPress={() => handleUpdate({ includeSold: !filters.includeSold })}
-              style={[styles.checkboxRow, webPointer]}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: filters.includeSold }}
-            >
-              <View
-                style={[
-                  styles.checkboxBox,
-                  filters.includeSold && styles.checkboxBoxChecked,
-                ]}
+            {/* Include Under Offer, Sold STC Checkbox */}
+            <View style={styles.checkboxRowContainer}>
+              <Pressable
+                onPress={() => handleUpdate({ includeSold: !filters.includeSold })}
+                style={[styles.checkboxRow, webPointer]}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: filters.includeSold }}
               >
-                {filters.includeSold ? (
-                  <Check color="#FFFFFF" size={13} strokeWidth={3} />
-                ) : null}
-              </View>
-              <Text style={styles.checkboxLabel}>
-                Include Under Offer, Sold STC
-              </Text>
-              <Text style={styles.helpBadge}>(?)</Text>
+                <View
+                  style={[
+                    styles.checkboxBox,
+                    filters.includeSold && styles.checkboxBoxChecked,
+                  ]}
+                >
+                  {filters.includeSold ? (
+                    <Check color="#FFFFFF" size={13} strokeWidth={3} />
+                  ) : null}
+                </View>
+                <Text style={styles.checkboxLabel}>
+                  Include Under Offer, Sold STC
+                </Text>
+                <Text style={styles.helpBadge}>(?)</Text>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Field 4: Price range */}
+          <View style={styles.colFull}>
+            <Text style={styles.fieldLabel}>Price range (৳)</Text>
+            <View style={styles.rangeRow}>
+              <NativeSelect
+                value={filters.minPrice}
+                options={MIN_PRICE_OPTIONS}
+                onChange={(val) => handleUpdate({ minPrice: val })}
+                style={styles.rangeSelect}
+              />
+              <Text style={styles.rangeDash}>-</Text>
+              <NativeSelect
+                value={filters.maxPrice}
+                options={MAX_PRICE_OPTIONS}
+                onChange={(val) => handleUpdate({ maxPrice: val })}
+                style={styles.rangeSelect}
+              />
+            </View>
+          </View>
+
+          {/* Field 5: No. of bedrooms */}
+          <View style={styles.colFull}>
+            <Text style={styles.fieldLabel}>No. of bedrooms</Text>
+            <View style={styles.rangeRow}>
+              <NativeSelect
+                value={filters.minBedrooms}
+                options={MIN_BED_OPTIONS}
+                onChange={(val) => handleUpdate({ minBedrooms: val })}
+                style={styles.rangeSelect}
+              />
+              <Text style={styles.rangeDash}>-</Text>
+              <NativeSelect
+                value={filters.maxBedrooms}
+                options={MAX_BED_OPTIONS}
+                onChange={(val) => handleUpdate({ maxBedrooms: val })}
+                style={styles.rangeSelect}
+              />
+            </View>
+          </View>
+
+          {/* Field 6: Search Button */}
+          <View style={[styles.colFull, styles.actionColMobile]}>
+            <Pressable
+              onPress={() => onSearch(filters)}
+              style={({ pressed }) => [
+                styles.searchBtn,
+                webPointer,
+                pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Search properties"
+            >
+              <Text style={styles.searchBtnText}>Search properties</Text>
             </Pressable>
           </View>
         </View>
+      ) : isTablet ? (
+        /* Tablet Layout: 2 Columns × 3 Rows */
+        <View style={styles.gridTablet}>
+          {/* Row 1 */}
+          <View style={styles.rowTablet}>
+            <View style={styles.colTabletHalf}>
+              <Text style={styles.fieldLabel}>Search radius</Text>
+              <NativeSelect
+                value={filters.radius}
+                options={RADIUS_OPTIONS}
+                onChange={(val) => handleUpdate({ radius: val })}
+              />
+            </View>
+            <View style={styles.colTabletHalf}>
+              <Text style={styles.fieldLabel}>Property types</Text>
+              <NativeSelect
+                value={filters.propertyType}
+                options={PROPERTY_TYPE_OPTIONS}
+                onChange={(val) => handleUpdate({ propertyType: val })}
+              />
+            </View>
+          </View>
 
-        {/* ROW 2, COL 1: Price range (৳) */}
-        <View style={[styles.col, isMobile && styles.colMobile]}>
-          <Text style={styles.fieldLabel}>Price range (৳)</Text>
-          <View style={styles.rangeRow}>
-            <NativeSelect
-              value={filters.minPrice}
-              options={MIN_PRICE_OPTIONS}
-              onChange={(val) => handleUpdate({ minPrice: val })}
-              style={styles.rangeSelect}
-            />
-            <Text style={styles.rangeDash}>-</Text>
-            <NativeSelect
-              value={filters.maxPrice}
-              options={MAX_PRICE_OPTIONS}
-              onChange={(val) => handleUpdate({ maxPrice: val })}
-              style={styles.rangeSelect}
-            />
+          {/* Row 2 */}
+          <View style={styles.rowTablet}>
+            <View style={styles.colTabletHalf}>
+              <Text style={styles.fieldLabel}>Added to site</Text>
+              <NativeSelect
+                value={filters.addedToSite}
+                options={ADDED_TO_SITE_OPTIONS}
+                onChange={(val) => handleUpdate({ addedToSite: val })}
+              />
+
+              {/* Include Under Offer, Sold STC Checkbox */}
+              <View style={styles.checkboxRowContainer}>
+                <Pressable
+                  onPress={() => handleUpdate({ includeSold: !filters.includeSold })}
+                  style={[styles.checkboxRow, webPointer]}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: filters.includeSold }}
+                >
+                  <View
+                    style={[
+                      styles.checkboxBox,
+                      filters.includeSold && styles.checkboxBoxChecked,
+                    ]}
+                  >
+                    {filters.includeSold ? (
+                      <Check color="#FFFFFF" size={13} strokeWidth={3} />
+                    ) : null}
+                  </View>
+                  <Text style={styles.checkboxLabel}>
+                    Include Under Offer, Sold STC
+                  </Text>
+                  <Text style={styles.helpBadge}>(?)</Text>
+                </Pressable>
+              </View>
+            </View>
+            <View style={styles.colTabletHalf}>
+              <Text style={styles.fieldLabel}>Price range (৳)</Text>
+              <View style={styles.rangeRow}>
+                <NativeSelect
+                  value={filters.minPrice}
+                  options={MIN_PRICE_OPTIONS}
+                  onChange={(val) => handleUpdate({ minPrice: val })}
+                  style={styles.rangeSelect}
+                />
+                <Text style={styles.rangeDash}>-</Text>
+                <NativeSelect
+                  value={filters.maxPrice}
+                  options={MAX_PRICE_OPTIONS}
+                  onChange={(val) => handleUpdate({ maxPrice: val })}
+                  style={styles.rangeSelect}
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* Row 3 */}
+          <View style={styles.rowTablet}>
+            <View style={styles.colTabletHalf}>
+              <Text style={styles.fieldLabel}>No. of bedrooms</Text>
+              <View style={styles.rangeRow}>
+                <NativeSelect
+                  value={filters.minBedrooms}
+                  options={MIN_BED_OPTIONS}
+                  onChange={(val) => handleUpdate({ minBedrooms: val })}
+                  style={styles.rangeSelect}
+                />
+                <Text style={styles.rangeDash}>-</Text>
+                <NativeSelect
+                  value={filters.maxBedrooms}
+                  options={MAX_BED_OPTIONS}
+                  onChange={(val) => handleUpdate({ maxBedrooms: val })}
+                  style={styles.rangeSelect}
+                />
+              </View>
+            </View>
+            <View style={[styles.colTabletHalf, styles.actionCol]}>
+              <Pressable
+                onPress={() => onSearch(filters)}
+                style={({ pressed }) => [
+                  styles.searchBtn,
+                  webPointer,
+                  pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Search properties"
+              >
+                <Text style={styles.searchBtnText}>Search properties</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
+      ) : (
+        /* Desktop Layout: 3 Columns × 2 Rows */
+        <View style={styles.gridDesktop}>
+          {/* Row 1 */}
+          <View style={styles.rowDesktop}>
+            <View style={styles.colDesktopThird}>
+              <Text style={styles.fieldLabel}>Search radius</Text>
+              <NativeSelect
+                value={filters.radius}
+                options={RADIUS_OPTIONS}
+                onChange={(val) => handleUpdate({ radius: val })}
+              />
+            </View>
+            <View style={styles.colDesktopThird}>
+              <Text style={styles.fieldLabel}>Property types</Text>
+              <NativeSelect
+                value={filters.propertyType}
+                options={PROPERTY_TYPE_OPTIONS}
+                onChange={(val) => handleUpdate({ propertyType: val })}
+              />
+            </View>
+            <View style={styles.colDesktopThird}>
+              <Text style={styles.fieldLabel}>Added to site</Text>
+              <NativeSelect
+                value={filters.addedToSite}
+                options={ADDED_TO_SITE_OPTIONS}
+                onChange={(val) => handleUpdate({ addedToSite: val })}
+              />
 
-        {/* ROW 2, COL 2: No. of bedrooms */}
-        <View style={[styles.col, isMobile && styles.colMobile]}>
-          <Text style={styles.fieldLabel}>No. of bedrooms</Text>
-          <View style={styles.rangeRow}>
-            <NativeSelect
-              value={filters.minBedrooms}
-              options={MIN_BED_OPTIONS}
-              onChange={(val) => handleUpdate({ minBedrooms: val })}
-              style={styles.rangeSelect}
-            />
-            <Text style={styles.rangeDash}>-</Text>
-            <NativeSelect
-              value={filters.maxBedrooms}
-              options={MAX_BED_OPTIONS}
-              onChange={(val) => handleUpdate({ maxBedrooms: val })}
-              style={styles.rangeSelect}
-            />
+              {/* Include Under Offer, Sold STC Checkbox */}
+              <View style={styles.checkboxRowContainer}>
+                <Pressable
+                  onPress={() => handleUpdate({ includeSold: !filters.includeSold })}
+                  style={[styles.checkboxRow, webPointer]}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: filters.includeSold }}
+                >
+                  <View
+                    style={[
+                      styles.checkboxBox,
+                      filters.includeSold && styles.checkboxBoxChecked,
+                    ]}
+                  >
+                    {filters.includeSold ? (
+                      <Check color="#FFFFFF" size={13} strokeWidth={3} />
+                    ) : null}
+                  </View>
+                  <Text style={styles.checkboxLabel}>
+                    Include Under Offer, Sold STC
+                  </Text>
+                  <Text style={styles.helpBadge}>(?)</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+
+          {/* Row 2 */}
+          <View style={styles.rowDesktop}>
+            <View style={styles.colDesktopThird}>
+              <Text style={styles.fieldLabel}>Price range (৳)</Text>
+              <View style={styles.rangeRow}>
+                <NativeSelect
+                  value={filters.minPrice}
+                  options={MIN_PRICE_OPTIONS}
+                  onChange={(val) => handleUpdate({ minPrice: val })}
+                  style={styles.rangeSelect}
+                />
+                <Text style={styles.rangeDash}>-</Text>
+                <NativeSelect
+                  value={filters.maxPrice}
+                  options={MAX_PRICE_OPTIONS}
+                  onChange={(val) => handleUpdate({ maxPrice: val })}
+                  style={styles.rangeSelect}
+                />
+              </View>
+            </View>
+            <View style={styles.colDesktopThird}>
+              <Text style={styles.fieldLabel}>No. of bedrooms</Text>
+              <View style={styles.rangeRow}>
+                <NativeSelect
+                  value={filters.minBedrooms}
+                  options={MIN_BED_OPTIONS}
+                  onChange={(val) => handleUpdate({ minBedrooms: val })}
+                  style={styles.rangeSelect}
+                />
+                <Text style={styles.rangeDash}>-</Text>
+                <NativeSelect
+                  value={filters.maxBedrooms}
+                  options={MAX_BED_OPTIONS}
+                  onChange={(val) => handleUpdate({ maxBedrooms: val })}
+                  style={styles.rangeSelect}
+                />
+              </View>
+            </View>
+            <View style={[styles.colDesktopThird, styles.actionCol]}>
+              <Pressable
+                onPress={() => onSearch(filters)}
+                style={({ pressed }) => [
+                  styles.searchBtn,
+                  webPointer,
+                  pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Search properties"
+              >
+                <Text style={styles.searchBtnText}>Search properties</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
-
-        {/* ROW 2, COL 3: Search properties button */}
-        <View style={[styles.col, styles.actionCol, isMobile && styles.colMobile, isMobile && styles.actionColMobile]}>
-          <Pressable
-            onPress={() => onSearch(filters)}
-            style={({ pressed }) => [
-              styles.searchBtn,
-              webPointer,
-              pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Search properties"
-          >
-            <Text style={styles.searchBtnText}>Search properties</Text>
-          </Pressable>
-        </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -424,24 +652,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    rowGap: 16,
-    columnGap: 24,
-  },
   gridDesktop: {
-    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    width: "100%",
+  },
+  rowDesktop: {
+    flexDirection: "row",
+    gap: 20,
+    width: "100%",
+  },
+  colDesktopThird: {
+    flex: 1,
+    minWidth: 0,
   },
   gridMobile: {
     flexDirection: "column",
     flexWrap: "nowrap",
     gap: 16,
   },
-  col: {
+  gridTablet: {
+    flexDirection: "column",
+    gap: 16,
+    width: "100%",
+  },
+  rowTablet: {
+    flexDirection: "row",
+    gap: 16,
+    width: "100%",
+  },
+  colTabletHalf: {
     flex: 1,
-    minWidth: 260,
-    maxWidth: "100%",
+    minWidth: 0,
+  },
+  gridPhone: {
+    flexDirection: "column",
+    gap: 16,
+    width: "100%",
+  },
+  colFull: {
+    width: "100%",
   },
   colMobile: {
     flex: 0,
@@ -468,11 +718,17 @@ const styles = StyleSheet.create({
   selectWrapper: {
     position: "relative",
     width: "100%",
+    height: 42,
+    minHeight: 42,
   },
   chevronOverlay: {
     position: "absolute",
     right: 12,
     top: 13,
+    height: 16,
+    width: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   nativeSelectWrap: {
     flexDirection: "row",
@@ -498,6 +754,7 @@ const styles = StyleSheet.create({
   },
   rangeSelect: {
     flex: 1,
+    minWidth: 0,
   },
   rangeDash: {
     fontSize: 15,
@@ -513,6 +770,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    paddingVertical: 2,
   },
   checkboxBox: {
     width: 19,
@@ -541,7 +799,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   searchBtn: {
-    height: 44,
+    height: 42,
     backgroundColor: "#00CF92", // Rightmove vibrant emerald green
     borderRadius: 8,
     alignItems: "center",

@@ -18,7 +18,7 @@ const TABS: { key: SearchTabType; label: string }[] = [
 
 export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, compact && styles.containerCompact]}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab.key;
         return (
@@ -58,6 +58,9 @@ const styles = StyleSheet.create({
     height: 44,
     flexShrink: 1,
   },
+  containerCompact: {
+    height: 40,
+  },
   tabButton: {
     position: "relative",
     paddingHorizontal: 16,
@@ -70,7 +73,8 @@ const styles = StyleSheet.create({
   },
   tabButtonCompact: {
     paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingVertical: 9,
+    height: 40,
   },
   tabText: {
     fontSize: 14,

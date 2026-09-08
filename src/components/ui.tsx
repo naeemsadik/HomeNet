@@ -257,8 +257,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
-    gap: 20,
-    marginBottom: 18,
+    gap: 12,
+    flexWrap: "wrap",
+    marginBottom: 16,
   },
   sectionHeadingPhone: {
     gap: 12,
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
     color: colors.ink,
     fontFamily: fonts.extraBold,
     fontSize: 24,
-    letterSpacing: -1,
+    letterSpacing: -0.4,
   },
   sectionTitlePhone: {
     fontSize: 19,
