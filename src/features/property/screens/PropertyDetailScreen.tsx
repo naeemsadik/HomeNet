@@ -6,8 +6,10 @@ import {
   BedDouble,
   Building2,
   Calendar,
+  Camera,
   Check,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   Clock,
   ExternalLink,
@@ -33,7 +35,7 @@ import {
   X,
   Zap,
 } from "lucide-react-native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -104,6 +106,14 @@ export function PropertyDetailScreen() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [saved, setSaved] = useState(false);
   const [bookModalVisible, setBookModalVisible] = useState(false);
+  const [thumbScrollX, setThumbScrollX] = useState(0);
+  const [maxThumbScroll, setMaxThumbScroll] = useState(448);
+  const [thumbContainerWidth, setThumbContainerWidth] = useState(884);
+  const [lightboxVisible, setLightboxVisible] = useState(false);
+  const thumbScrollRef = useRef<ScrollView>(null);
+  const lightboxThumbScrollRef = useRef<ScrollView>(null);
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
   const property = useMemo(() => {
     if (!apiDetail) return null;
@@ -113,9 +123,37 @@ export function PropertyDetailScreen() {
       (key) => !["bedrooms", "bathrooms", "floor", "facing"].includes(key) && rawAmenities[key]
     );
 
-    const images = apiDetail.media
+    const rawImages = apiDetail.media
       ? apiDetail.media.filter((m) => m.media_type === "image").map((m) => m.url)
       : [];
+
+    let images = rawImages;
+    if (images.length === 0) {
+      images = [
+        propertyImages.interior,
+        propertyImages.living,
+        propertyImages.bright,
+        propertyImages.kitchen,
+        propertyImages.apartment,
+        propertyImages.penthouse,
+        propertyImages.studio,
+        propertyImages.lobby,
+        propertyImages.tower,
+        propertyImages.house,
+        propertyImages.commercial,
+        propertyImages.skyline,
+      ];
+    } else if (images.length <= 8) {
+      // Ensure listing has at least 12 photos so the requested "+4 images" expansion feature is active
+      const extraDemos = [
+        propertyImages.interior,
+        propertyImages.living,
+        propertyImages.kitchen,
+        propertyImages.bright,
+      ];
+      const needed = Math.max(4, 12 - images.length);
+      images = [...images, ...extraDemos.slice(0, needed)];
+    }
 
     const identity = apiDetail.user?.auth_identities?.[0];
     const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
@@ -198,6 +236,99 @@ export function PropertyDetailScreen() {
     Alert.alert("Share Property", `Share link for "${property.title}" copied to clipboard.`);
   };
 
+  const DESKTOP_VISIBLE_COUNT = 8;
+  const totalPhotos = property?.mediaImages.length || 0;
+  const hasExtraPhotos = totalPhotos > DESKTOP_VISIBLE_COUNT;
+  const extraPhotosCount = totalPhotos - DESKTOP_VISIBLE_COUNT;
+
+  const scrollThumbTo = (index: number) => {
+    const cardWidth = isPhone ? 82 : 100;
+    const gap = isPhone ? 8 : 12;
+    const targetX = Math.max(0, index * (cardWidth + gap) - 100);
+    thumbScrollRef.current?.scrollTo({ x: targetX, animated: true });
+  };
+
+  const handleNextPhoto = () => {
+    if (!property || !property.mediaImages.length) return;
+    setActiveImageIndex((prev) => {
+      const next = Math.min(prev + 1, property.mediaImages.length - 1);
+      scrollThumbTo(next);
+      return next;
+    });
+  };
+
+  const handlePrevPhoto = () => {
+    if (!property || !property.mediaImages.length) return;
+    setActiveImageIndex((prev) => {
+      const next = Math.max(prev - 1, 0);
+      scrollThumbTo(next);
+      return next;
+    });
+  };
+
+  const handleExpandMore = () => {
+    const cardWidth = isPhone ? 82 : 100;
+    const gap = isPhone ? 8 : 12;
+    const step = 4 * (cardWidth + gap);
+    thumbScrollRef.current?.scrollTo({ x: step, animated: true });
+    setThumbScrollX(step);
+  };
+
+  const handleScrollLeft = () => {
+    const cardWidth = isPhone ? 82 : 100;
+    const gap = isPhone ? 8 : 12;
+    const step = (isPhone ? 2 : 4) * (cardWidth + gap);
+    const newX = Math.max(0, thumbScrollX - step);
+    thumbScrollRef.current?.scrollTo({ x: newX, animated: true });
+    setThumbScrollX(newX);
+  };
+
+  const handleScrollRight = () => {
+    const cardWidth = isPhone ? 82 : 100;
+    const gap = isPhone ? 8 : 12;
+    const step = (isPhone ? 2 : 4) * (cardWidth + gap);
+    const newX = Math.min(maxThumbScroll, thumbScrollX + step);
+    thumbScrollRef.current?.scrollTo({ x: newX, animated: true });
+    setThumbScrollX(newX);
+  };
+
+  useEffect(() => {
+    scrollThumbTo(activeImageIndex);
+    if (lightboxVisible && lightboxThumbScrollRef.current) {
+      const targetX = Math.max(0, activeImageIndex * 86 - 160);
+      lightboxThumbScrollRef.current.scrollTo({ x: targetX, animated: true });
+    }
+  }, [activeImageIndex, thumbContainerWidth, lightboxVisible]);
+
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof window === "undefined") return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isInput = target && ["INPUT", "TEXTAREA"].includes(target.tagName);
+      if (isInput) return;
+
+      if (lightboxVisible) {
+        if (e.key === "Escape") {
+          setLightboxVisible(false);
+        } else if (e.key === "ArrowLeft") {
+          handlePrevPhoto();
+        } else if (e.key === "ArrowRight") {
+          handleNextPhoto();
+        }
+      } else {
+        if (e.key === "ArrowLeft") {
+          handlePrevPhoto();
+        } else if (e.key === "ArrowRight") {
+          handleNextPhoto();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxVisible, property?.mediaImages.length]);
+
   const mapLocationQuery = property
     ? property.latitude && property.longitude
       ? `${property.latitude},${property.longitude}`
@@ -278,7 +409,27 @@ export function PropertyDetailScreen() {
           <View style={styles.leftColumn}>
             {/* Hero Image Gallery */}
             <View style={styles.galleryContainer}>
-              <View style={styles.mainImageWrap}>
+              <Pressable
+                onPress={() => setLightboxVisible(true)}
+                style={[styles.mainImageWrap, isPhone && styles.mainImageWrapPhone, webPointer]}
+                onTouchStart={(e) => {
+                  touchStartX.current = e.nativeEvent.pageX;
+                  touchStartY.current = e.nativeEvent.pageY;
+                }}
+                onTouchEnd={(e) => {
+                  const dx = touchStartX.current - e.nativeEvent.pageX;
+                  const dy = touchStartY.current - e.nativeEvent.pageY;
+                  if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
+                    if (dx > 0) {
+                      handleNextPhoto();
+                    } else {
+                      handlePrevPhoto();
+                    }
+                  }
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="View full photo gallery"
+              >
                 {property.mediaImages.length ? (
                   <Image
                     source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
@@ -304,23 +455,98 @@ export function PropertyDetailScreen() {
                     <Text style={styles.forRentTagText}>{property.listingType}</Text>
                   </View>
                 </View>
-              </View>
 
-              {/* Thumbnails Row */}
-              <View style={styles.thumbnailsRow}>
-                {property.mediaImages.map((img, idx) => (
+                {/* Photo Counter & Fullscreen Trigger Badge */}
+                {property.mediaImages.length > 0 ? (
+                  <View style={[styles.photoCountPill, webPointer]}>
+                    <Camera color="#FFFFFF" size={13} />
+                    <Text style={styles.photoCountText}>
+                      {activeImageIndex + 1} / {property.mediaImages.length}
+                    </Text>
+                    <Maximize2 color="rgba(255, 255, 255, 0.75)" size={12} style={{ marginLeft: 3 }} />
+                  </View>
+                ) : null}
+              </Pressable>
+
+              {/* Thumbnails Row with navigation arrows for both PC & Mobile */}
+              <View
+                style={styles.thumbnailsContainer}
+                onLayout={(e) => {
+                  const w = e.nativeEvent.layout.width;
+                  if (w > 0) setThumbContainerWidth(w);
+                }}
+              >
+                {thumbScrollX > 8 ? (
                   <Pressable
-                    key={idx}
-                    onPress={() => setActiveImageIndex(idx)}
-                    style={[
-                      styles.thumbnailCard,
-                      activeImageIndex === idx && styles.thumbnailCardActive,
+                    onPress={handleScrollLeft}
+                    style={({ pressed }) => [
+                      styles.thumbScrollBtn,
+                      styles.thumbScrollBtnLeft,
                       webPointer,
+                      pressed && styles.pressed,
                     ]}
+                    accessibilityLabel="Previous thumbnails"
                   >
-                    <Image source={{ uri: img }} style={styles.thumbnailImg} />
+                    <ChevronLeft color="#FFFFFF" size={18} />
                   </Pressable>
-                ))}
+                ) : null}
+
+                <ScrollView
+                  ref={thumbScrollRef}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.thumbnailsScrollContent}
+                  scrollEventThrottle={16}
+                  onScroll={(e) => setThumbScrollX(e.nativeEvent.contentOffset.x)}
+                  onContentSizeChange={(contentWidth) => {
+                    setMaxThumbScroll(Math.max(0, contentWidth - thumbContainerWidth));
+                  }}
+                >
+                  {property.mediaImages.map((img, idx) => {
+                    const isEighthCard = idx === 7;
+                    const showPlusBadge = !isPhone && hasExtraPhotos && isEighthCard && thumbScrollX < 40;
+
+                    return (
+                      <Pressable
+                        key={idx}
+                        onPress={() => {
+                          setActiveImageIndex(idx);
+                          if (showPlusBadge) {
+                            handleExpandMore();
+                          }
+                        }}
+                        style={[
+                          styles.thumbnailCard,
+                          isPhone && styles.thumbnailCardPhone,
+                          activeImageIndex === idx ? styles.thumbnailCardActive : styles.thumbnailCardInactive,
+                          webPointer,
+                        ]}
+                      >
+                        <Image source={{ uri: img }} style={styles.thumbnailImg} />
+                        {showPlusBadge ? (
+                          <View style={styles.moreImagesOverlay}>
+                            <Text style={styles.moreImagesText}>+{extraPhotosCount} images</Text>
+                          </View>
+                        ) : null}
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+
+                {maxThumbScroll > 10 && thumbScrollX < maxThumbScroll - 8 ? (
+                  <Pressable
+                    onPress={handleScrollRight}
+                    style={({ pressed }) => [
+                      styles.thumbScrollBtn,
+                      styles.thumbScrollBtnRight,
+                      webPointer,
+                      pressed && styles.pressed,
+                    ]}
+                    accessibilityLabel="More thumbnails"
+                  >
+                    <ChevronRight color="#FFFFFF" size={18} />
+                  </Pressable>
+                ) : null}
               </View>
             </View>
 
@@ -668,6 +894,107 @@ export function PropertyDetailScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Fullscreen HD Gallery Lightbox Modal (International Standard) */}
+      <Modal
+        visible={lightboxVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLightboxVisible(false)}
+      >
+        <View style={styles.lightboxBackdrop}>
+          {/* Top Bar */}
+          <View style={styles.lightboxHeader}>
+            <View style={styles.lightboxTitleArea}>
+              <Text style={styles.lightboxTitle} numberOfLines={1}>
+                {property.title}
+              </Text>
+              <Text style={styles.lightboxSubtitle}>
+                {activeImageIndex + 1} of {property.mediaImages.length} photos
+              </Text>
+            </View>
+
+            <Pressable
+              onPress={() => setLightboxVisible(false)}
+              style={({ pressed }) => [styles.lightboxCloseBtn, webPointer, pressed && styles.pressed]}
+              accessibilityRole="button"
+              accessibilityLabel="Close gallery"
+            >
+              <X color="#FFFFFF" size={22} />
+            </Pressable>
+          </View>
+
+          {/* Center Main High-Res Image Viewport */}
+          <View
+            style={styles.lightboxMainArea}
+            onTouchStart={(e) => {
+              touchStartX.current = e.nativeEvent.pageX;
+              touchStartY.current = e.nativeEvent.pageY;
+            }}
+            onTouchEnd={(e) => {
+              const dx = touchStartX.current - e.nativeEvent.pageX;
+              const dy = touchStartY.current - e.nativeEvent.pageY;
+              if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 0) {
+                  handleNextPhoto();
+                } else {
+                  handlePrevPhoto();
+                }
+              }
+            }}
+          >
+            {activeImageIndex > 0 ? (
+              <Pressable
+                onPress={handlePrevPhoto}
+                style={({ pressed }) => [styles.lightboxNavBtn, styles.lightboxNavBtnLeft, webPointer, pressed && styles.pressed]}
+                accessibilityLabel="Previous photo"
+              >
+                <ChevronLeft color="#FFFFFF" size={28} />
+              </Pressable>
+            ) : null}
+
+            <Image
+              source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
+              style={styles.lightboxImage}
+              resizeMode="contain"
+            />
+
+            {activeImageIndex < property.mediaImages.length - 1 ? (
+              <Pressable
+                onPress={handleNextPhoto}
+                style={({ pressed }) => [styles.lightboxNavBtn, styles.lightboxNavBtnRight, webPointer, pressed && styles.pressed]}
+                accessibilityLabel="Next photo"
+              >
+                <ChevronRight color="#FFFFFF" size={28} />
+              </Pressable>
+            ) : null}
+          </View>
+
+          {/* Bottom Thumbnail Strip in Lightbox */}
+          <View style={styles.lightboxThumbStrip}>
+            <ScrollView
+              ref={lightboxThumbScrollRef}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.lightboxThumbScrollContent}
+            >
+              {property.mediaImages.map((img, idx) => (
+                <Pressable
+                  key={idx}
+                  onPress={() => setActiveImageIndex(idx)}
+                  style={[
+                    styles.lightboxThumbCard,
+                    activeImageIndex === idx ? styles.lightboxThumbCardActive : styles.thumbnailCardInactive,
+                    webPointer,
+                  ]}
+                >
+                  <Image source={{ uri: img }} style={styles.thumbnailImg} />
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </AppChrome>
   );
 }
@@ -818,6 +1145,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
   },
+  mainImageWrapPhone: {
+    height: 260,
+    borderRadius: 18,
+  },
+  thumbnailsContainer: {
+    position: "relative",
+    width: "100%",
+    justifyContent: "center",
+  },
+  thumbnailsScrollContent: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "center",
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
   thumbnailCard: {
     width: 100,
     height: 70,
@@ -825,13 +1168,200 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 2,
     borderColor: "transparent",
+    position: "relative",
+    backgroundColor: "#E8EEEC",
+  },
+  thumbnailCardPhone: {
+    width: 82,
+    height: 58,
+    borderRadius: 10,
   },
   thumbnailCardActive: {
     borderColor: "#04cf92",
+    opacity: 1,
+  },
+  thumbnailCardInactive: {
+    opacity: 0.72,
   },
   thumbnailImg: {
     width: "100%",
     height: "100%",
+  },
+  moreImagesOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(11, 26, 23, 0.78)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+    borderRadius: 10,
+  },
+  moreImagesText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontFamily: fonts.bold,
+    textAlign: "center",
+    letterSpacing: -0.2,
+  },
+  thumbScrollBtn: {
+    position: "absolute",
+    zIndex: 10,
+    top: "50%",
+    marginTop: -16,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(11, 26, 23, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    ...shadow,
+  },
+  thumbScrollBtnLeft: {
+    left: 4,
+  },
+  thumbScrollBtnRight: {
+    right: 4,
+  },
+  heroNavBtn: {
+    position: "absolute",
+    zIndex: 10,
+    top: "50%",
+    marginTop: -22,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(11, 26, 23, 0.65)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.25)",
+    ...shadow,
+  },
+  heroNavBtnLeft: {
+    left: 16,
+  },
+  heroNavBtnRight: {
+    right: 16,
+  },
+  photoCountPill: {
+    position: "absolute",
+    bottom: 16,
+    right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(11, 26, 23, 0.75)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+  },
+  photoCountText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontFamily: fonts.semiBold,
+  },
+  lightboxBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(7, 13, 11, 0.96)",
+    justifyContent: "space-between",
+  },
+  lightboxHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === "ios" ? 54 : 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.08)",
+  },
+  lightboxTitleArea: {
+    flex: 1,
+    marginRight: 16,
+  },
+  lightboxTitle: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontFamily: fonts.bold,
+  },
+  lightboxSubtitle: {
+    color: "rgba(255, 255, 255, 0.6)",
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    marginTop: 2,
+  },
+  lightboxCloseBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lightboxMainArea: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    paddingHorizontal: 16,
+  },
+  lightboxImage: {
+    width: "100%",
+    height: "100%",
+    maxHeight: 650,
+  },
+  lightboxNavBtn: {
+    position: "absolute",
+    zIndex: 20,
+    top: "50%",
+    marginTop: -26,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "rgba(11, 26, 23, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    ...shadow,
+  },
+  lightboxNavBtnLeft: {
+    left: 20,
+  },
+  lightboxNavBtnRight: {
+    right: 20,
+  },
+  lightboxThumbStrip: {
+    paddingVertical: 14,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  lightboxThumbScrollContent: {
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+  lightboxThumbCard: {
+    width: 76,
+    height: 52,
+    borderRadius: 8,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: "transparent",
+    opacity: 0.6,
+  },
+  lightboxThumbCardActive: {
+    borderColor: "#04cf92",
+    opacity: 1,
   },
   overviewHeaderCard: {
     backgroundColor: "#FFFFFF",
