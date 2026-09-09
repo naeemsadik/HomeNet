@@ -59,6 +59,9 @@ import { useAuthStore } from "@/stores/authStore";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 import { useMyProperties } from "@/features/property/hooks/useMyProperties";
 import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
+import { SellerTopHeader } from "../components/SellerTopHeader";
+import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
+import { SellerStatCard, type StatItem } from "../components/SellerStatCard";
 
 // Types
 export type SellerNavKey =
@@ -76,16 +79,6 @@ export type SellerNavKey =
   | "settings"
   | "help"
   | "logout";
-
-interface StatItem {
-  id: string;
-  label: string;
-  value: string;
-  trend?: string;
-  icon: any;
-  iconBg: string;
-  iconColor: string;
-}
 
 interface ActivityItem {
   id: string;
@@ -105,6 +98,7 @@ export function SellerDashboardScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [boostModalVisible, setBoostModalVisible] = useState(false);
   const [selectedBoostPkg, setSelectedBoostPkg] = useState<string>("featured");
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   const { data: myPropertiesData } = useMyProperties();
   const allMyListings =
@@ -117,7 +111,8 @@ export function SellerDashboardScreen() {
   const soldCount = allMyListings.filter((p) => p.status === "sold").length;
   const verifiedCount = allMyListings.filter((p) => Boolean(p.is_verified)).length;
 
-  const stats: StatItem[] = [
+  // Original desktop stats (untouched for PC/laptop viewports)
+  const desktopStats: StatItem[] = [
     {
       id: "total",
       label: "Total Listings",
@@ -191,6 +186,88 @@ export function SellerDashboardScreen() {
       icon: Heart,
       iconBg: "#E6FAF4",
       iconColor: "#04cf92",
+    },
+  ];
+
+  // Mobile 2-by-2 stats (Figma Node 207:2837 design)
+  const mobileStats: StatItem[] = [
+    {
+      id: "total",
+      label: "Total Listings",
+      value: String(totalCount),
+      trend: "+4%",
+      icon: Building2,
+      iconBg: "#E7F2EE",
+      iconColor: "#0F6D55",
+    },
+    {
+      id: "active",
+      label: "Active Listings",
+      value: String(activeCount),
+      trend: "+2%",
+      icon: CheckCircle2,
+      iconBg: "#E7F2EE",
+      iconColor: "#0F6D55",
+    },
+    {
+      id: "draft",
+      label: "Draft Listings",
+      value: String(draftCount),
+      icon: FileText,
+      iconBg: "#F4F6F5",
+      iconColor: "#5C6B66",
+    },
+    {
+      id: "sold",
+      label: "Sold / Rented",
+      value: String(soldCount),
+      trend: "+1%",
+      icon: Handshake,
+      iconBg: "#E8EEFC",
+      iconColor: "#2251D6",
+    },
+    {
+      id: "verified",
+      label: "Verified Properties",
+      value: String(verifiedCount),
+      icon: ShieldCheck,
+      iconBg: "#E7F2EE",
+      iconColor: "#0F6D55",
+    },
+    {
+      id: "boosted",
+      label: "Boosted Listings",
+      value: "0",
+      icon: Rocket,
+      iconBg: "#FDEEE2",
+      iconColor: "#F4823A",
+    },
+    {
+      id: "views",
+      label: "Total Views",
+      value: totalCount > 0 ? `${totalCount * 14}` : "0",
+      trend: "+12%",
+      icon: Eye,
+      iconBg: "#E8EEFC",
+      iconColor: "#2251D6",
+    },
+    {
+      id: "inquiries",
+      label: "Buyer Inquiries",
+      value: "0",
+      trend: "+8%",
+      icon: MessageSquare,
+      iconBg: "#FDEEE2",
+      iconColor: "#F4823A",
+    },
+    {
+      id: "saved",
+      label: "Saved by Buyers",
+      value: "0",
+      trend: "+6%",
+      icon: Heart,
+      iconBg: "#E7F2EE",
+      iconColor: "#0F6D55",
     },
   ];
 
@@ -305,12 +382,20 @@ export function SellerDashboardScreen() {
       {/* Main Content Workspace */}
       <View style={styles.mainContent}>
         {/* Top Header Bar */}
-        <View style={styles.topHeader}>
-          <Text style={styles.headerTitle}>Dashboard</Text>
+        {isTablet ? (
+          /* Mobile Header (Figma Node 207:2478 with 3-bar button and View site) */
+          <SellerTopHeader
+            hasUnreadNotifications
+            onPressMenu={() => setMobileDrawerOpen(true)}
+            title="Dashboard"
+          />
+        ) : (
+          /* Original Untouched Desktop Header Bar */
+          <View style={styles.topHeader}>
+            <Text style={styles.headerTitle}>Dashboard</Text>
 
-          <View style={styles.headerActions}>
-            {/* Search Input */}
-            {!isPhone && (
+            <View style={styles.headerActions}>
+              {/* Search Input */}
               <View style={styles.searchContainer}>
                 <Search color="rgba(11,26,23,0.5)" size={16} />
                 <TextInput
@@ -321,21 +406,21 @@ export function SellerDashboardScreen() {
                   value={searchQuery}
                 />
               </View>
-            )}
 
-            {/* Notification Button */}
-            <AppLink href="/notifications" style={styles.iconCircleBtn}>
-              <Bell color="#0B1A17" size={19} />
-              <View style={styles.headerDotIndicator} />
-            </AppLink>
+              {/* Notification Button */}
+              <AppLink href="/notifications" style={styles.iconCircleBtn}>
+                <Bell color="#0B1A17" size={19} />
+                <View style={styles.headerDotIndicator} />
+              </AppLink>
 
-            {/* View site button */}
-            <AppLink href="/" style={styles.viewSiteBtn}>
-              <Globe color="#0B1A17" size={16} />
-              <Text style={styles.viewSiteText}>View site</Text>
-            </AppLink>
+              {/* View site button */}
+              <AppLink href="/" style={styles.viewSiteBtn}>
+                <Globe color="#0B1A17" size={16} />
+                <Text style={styles.viewSiteText}>View site</Text>
+              </AppLink>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Scrollable Dashboard Body */}
         <ScrollView
@@ -353,31 +438,41 @@ export function SellerDashboardScreen() {
             onBoostListing={() => setBoostModalVisible(true)}
           />
 
-          {/* Stats Grid (3x3 Cards) */}
-          <View style={[styles.statsGrid, isPhone && styles.statsGridPhone]}>
-            {stats.map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <View key={item.id} style={[styles.statCard, isPhone && styles.statCardPhone]}>
-                  <View style={styles.statCardHeader}>
-                    <View style={[styles.statIconWrap, { backgroundColor: item.iconBg }]}>
-                      <IconComponent color={item.iconColor} size={20} />
+          {/* Stats Grid: Responsive */}
+          {isTablet ? (
+            /* Mobile / Small Screens: Figma 2-by-2 card design (Node 207:2837) */
+            <View style={styles.statsGridMobile}>
+              {mobileStats.map((item) => (
+                <SellerStatCard item={item} key={item.id} />
+              ))}
+            </View>
+          ) : (
+            /* PC / Laptop / Big Screens: Untouched original 3x3 layout */
+            <View style={styles.statsGridDesktop}>
+              {desktopStats.map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <View key={item.id} style={styles.statCardDesktop}>
+                    <View style={styles.statCardHeaderDesktop}>
+                      <View style={[styles.statIconWrapDesktop, { backgroundColor: item.iconBg }]}>
+                        <IconComponent color={item.iconColor} size={20} />
+                      </View>
+
+                      {item.trend ? (
+                        <View style={styles.trendPillDesktop}>
+                          <TrendingUp color="#04cf92" size={12} />
+                          <Text style={styles.trendPillTextDesktop}>{item.trend}</Text>
+                        </View>
+                      ) : null}
                     </View>
 
-                    {item.trend ? (
-                      <View style={styles.trendPill}>
-                        <TrendingUp color="#04cf92" size={12} />
-                        <Text style={styles.trendPillText}>{item.trend}</Text>
-                      </View>
-                    ) : null}
+                    <Text style={styles.statValueDesktop}>{item.value}</Text>
+                    <Text style={styles.statLabelDesktop}>{item.label}</Text>
                   </View>
-
-                  <Text style={styles.statValue}>{item.value}</Text>
-                  <Text style={styles.statLabel}>{item.label}</Text>
-                </View>
-              );
-            })}
-          </View>
+                );
+              })}
+            </View>
+          )}
 
           {/* Bottom Section (Chart + Recent Activity Grid) */}
           <View style={[styles.bottomGrid, isTablet && styles.bottomGridTablet]}>
@@ -605,6 +700,15 @@ export function SellerDashboardScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Mobile / Tablet Navigation Drawer triggered by 3-bar button */}
+      <SellerMobileDrawer
+        activeNav={activeNav}
+        items={sidebarNavItems}
+        onClose={() => setMobileDrawerOpen(false)}
+        onSelectNav={(key) => setActiveNav(key)}
+        visible={isTablet && mobileDrawerOpen}
+      />
     </View>
   );
 }
@@ -868,15 +972,17 @@ const styles = StyleSheet.create({
     marginRight: 10,
     opacity: 0.85,
   },
-  statsGrid: {
+  statsGridDesktop: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
   },
-  statsGridPhone: {
-    flexDirection: "column",
+  statsGridMobile: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
   },
-  statCard: {
+  statCardDesktop: {
     width: "32.3%",
     minWidth: 220,
     flexGrow: 1,
@@ -887,22 +993,19 @@ const styles = StyleSheet.create({
     padding: 18,
     gap: 10,
   },
-  statCardPhone: {
-    width: "100%",
-  },
-  statCardHeader: {
+  statCardHeaderDesktop: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  statIconWrap: {
+  statIconWrapDesktop: {
     width: 36,
     height: 36,
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
-  trendPill: {
+  trendPillDesktop: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -911,18 +1014,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
-  trendPillText: {
+  trendPillTextDesktop: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
     color: "#04cf92",
   },
-  statValue: {
+  statValueDesktop: {
     fontSize: 24,
     fontFamily: fonts.extraBold,
     color: "#0B1A17",
     marginTop: 4,
   },
-  statLabel: {
+  statLabelDesktop: {
     fontSize: 14,
     fontFamily: fonts.regular,
     color: "#5C6B66",
