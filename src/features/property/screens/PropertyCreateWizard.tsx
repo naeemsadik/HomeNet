@@ -8,6 +8,8 @@ import {
   Camera,
   Check,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   CircleHelp,
   Compass,
   CreditCard,
@@ -22,6 +24,7 @@ import {
   Plus,
   PlusCircle,
   Rocket,
+  Save,
   Search,
   Send,
   Settings,
@@ -38,6 +41,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -48,6 +52,8 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { AreaPicker } from "@/components/AreaPicker";
 import { AppLink } from "@/components/ui";
+import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
+import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { useResponsive } from "@/hooks/useResponsive";
 import { toApiError } from "@/services/apiClient";
 import type { UploadInput } from "@/services/upload";
@@ -63,7 +69,8 @@ import {
 import { usePropertyWizardStore } from "../stores/propertyWizardStore";
 
 export function PropertyCreateWizard() {
-  const { isPhone, isTablet } = useResponsive();
+  const { isPhone, isTablet, width } = useResponsive();
+  const isNarrowPhone = isPhone && width <= 360;
   const store = usePropertyWizardStore();
   const createPropertyMutation = useCreateProperty();
   const updatePropertyMutation = useUpdateProperty();
@@ -73,14 +80,16 @@ export function PropertyCreateWizard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [descFocused, setDescFocused] = useState(false);
 
   const selectedArea: Area | null = store.areaId
     ? {
-        id: store.areaId,
-        name: store.areaName,
-        city: store.district || null,
-        parent_area_id: null,
-      }
+      id: store.areaId,
+      name: store.areaName,
+      city: store.district || null,
+      parent_area_id: null,
+    }
     : null;
 
   const steps = [
@@ -193,6 +202,18 @@ export function PropertyCreateWizard() {
   const handleBack = () => {
     if (store.currentStep > 1) {
       store.setCurrentStep((store.currentStep - 1) as any);
+    }
+  };
+
+  const handleMobileBack = () => {
+    if (store.currentStep > 1) {
+      store.setCurrentStep((store.currentStep - 1) as any);
+    } else {
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.push("/seller" as never);
+      }
     }
   };
 
@@ -397,11 +418,19 @@ export function PropertyCreateWizard() {
       {/* Main Workspace Content */}
       <View style={styles.mainContent}>
         {/* Top Header Bar */}
-        <View style={styles.topHeader}>
-          <Text style={styles.headerTitle}>Create Property</Text>
+        {isTablet ? (
+          <SellerTopHeader
+            hasUnreadNotifications
+            onPressMenu={() => setMobileDrawerOpen(true)}
+            onSearchQueryChange={setSearchQuery}
+            searchQuery={searchQuery}
+            title="Create Property"
+          />
+        ) : (
+          <View style={styles.topHeader}>
+            <Text style={styles.headerTitle}>Create Property</Text>
 
-          <View style={styles.headerActions}>
-            {!isPhone && (
+            <View style={styles.headerActions}>
               <View style={styles.searchContainer}>
                 <Search color="rgba(11,26,23,0.5)" size={16} />
                 <TextInput
@@ -412,22 +441,22 @@ export function PropertyCreateWizard() {
                   value={searchQuery}
                 />
               </View>
-            )}
 
-            <AppLink href="/notifications" style={styles.iconCircleBtn}>
-              <Bell color="#0B1A17" size={19} />
-              <View style={styles.headerDotIndicator} />
-            </AppLink>
+              <AppLink href="/notifications" style={styles.iconCircleBtn}>
+                <Bell color="#0B1A17" size={19} />
+                <View style={styles.headerDotIndicator} />
+              </AppLink>
 
-            <AppLink href="/" style={styles.viewSiteBtn}>
-              <Globe color="#0B1A17" size={16} />
-              <Text style={styles.viewSiteText}>View site</Text>
-            </AppLink>
+              <AppLink href="/" style={styles.viewSiteBtn}>
+                <Globe color="#0B1A17" size={16} />
+                <Text style={styles.viewSiteText}>View site</Text>
+              </AppLink>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Scrollable Wizard Body */}
-        <ScrollView contentContainerStyle={styles.scrollBody} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.scrollBody, isPhone && styles.scrollBodyPhone, isNarrowPhone && styles.scrollBodyNarrow]} showsVerticalScrollIndicator={false}>
           {/* 5-Step Progress Stepper Bar */}
           <View style={styles.stepperContainer}>
             <View style={styles.stepperRow}>
@@ -473,7 +502,7 @@ export function PropertyCreateWizard() {
           </View>
 
           {/* Wizard Step Main Card */}
-          <View style={styles.stepCard}>
+          <View style={[styles.stepCard, isPhone && styles.stepCardPhone, isNarrowPhone && styles.stepCardNarrow]}>
             {localError ? (
               <View style={styles.errorBanner}>
                 <Text style={styles.errorBannerText}>{localError}</Text>
@@ -495,27 +524,59 @@ export function PropertyCreateWizard() {
 
                 <View style={styles.formGroup}>
                   <Text style={styles.formLabel}>Property category</Text>
-                  <View style={styles.toggleRow}>
-                    {propertyTypes.map((propertyType) => (
-                      <Pressable
-                        key={propertyType.value}
-                        onPress={() => store.setBasics({ type: propertyType.value })}
-                        style={[
-                          styles.toggleBtn,
-                          store.type === propertyType.value && styles.toggleBtnActive,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.toggleBtnText,
-                            store.type === propertyType.value && styles.toggleBtnTextActive,
-                          ]}
-                        >
-                          {propertyType.label}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
+                  {isPhone ? (
+                    <View style={styles.toggleGridMobile}>
+                      {propertyTypes.map((propertyType) => {
+                        const isSelected = store.type === propertyType.value;
+                        return (
+                          <Pressable
+                            key={propertyType.value}
+                            onPress={() => store.setBasics({ type: propertyType.value })}
+                            style={[
+                              styles.toggleGridBtnMobile,
+                              isSelected && styles.toggleBtnActive,
+                            ]}
+                          >
+                            <Text
+                              numberOfLines={1}
+                              style={[
+                                styles.toggleBtnText,
+                                isSelected && styles.toggleBtnTextActive,
+                              ]}
+                            >
+                              {propertyType.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  ) : (
+                    <View style={styles.toggleRow}>
+                      {propertyTypes.map((propertyType) => {
+                        const isSelected = store.type === propertyType.value;
+                        return (
+                          <Pressable
+                            key={propertyType.value}
+                            onPress={() => store.setBasics({ type: propertyType.value })}
+                            style={[
+                              styles.toggleBtn,
+                              isSelected && styles.toggleBtnActive,
+                            ]}
+                          >
+                            <Text
+                              numberOfLines={1}
+                              style={[
+                                styles.toggleBtnText,
+                                isSelected && styles.toggleBtnTextActive,
+                              ]}
+                            >
+                              {propertyType.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  )}
                 </View>
 
                 <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
@@ -540,7 +601,7 @@ export function PropertyCreateWizard() {
                           store.listingType === "sale" && styles.toggleBtnActive,
                         ]}
                       >
-                        <Text style={[styles.toggleBtnText, store.listingType === "sale" && styles.toggleBtnTextActive]}>
+                        <Text numberOfLines={1} style={[styles.toggleBtnText, store.listingType === "sale" && styles.toggleBtnTextActive]}>
                           For Sale
                         </Text>
                       </Pressable>
@@ -551,7 +612,7 @@ export function PropertyCreateWizard() {
                           store.listingType === "rent" && styles.toggleBtnActive,
                         ]}
                       >
-                        <Text style={[styles.toggleBtnText, store.listingType === "rent" && styles.toggleBtnTextActive]}>
+                        <Text numberOfLines={1} style={[styles.toggleBtnText, store.listingType === "rent" && styles.toggleBtnTextActive]}>
                           For Rent
                         </Text>
                       </Pressable>
@@ -560,14 +621,23 @@ export function PropertyCreateWizard() {
                 </View>
 
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>Description</Text>
+                  <View style={styles.formLabelRow}>
+                    <Text style={styles.formLabel}>Description</Text>
+                    {store.description.trim().length > 0 && (
+                      <Text style={styles.formHelperCharCount}>
+                        {store.description.length} {store.description.length === 1 ? "char" : "chars"}
+                      </Text>
+                    )}
+                  </View>
                   <TextInput
                     multiline
                     numberOfLines={4}
+                    onBlur={() => setDescFocused(false)}
+                    onFocus={() => setDescFocused(true)}
                     onChangeText={(v) => store.setBasics({ description: v })}
                     placeholder="Describe your property details, condition, and key features..."
                     placeholderTextColor="#899790"
-                    style={[styles.formInput, { height: 100, textAlignVertical: "top" }]}
+                    style={[styles.formTextarea, descFocused && styles.formTextareaFocused]}
                     value={store.description}
                   />
                 </View>
@@ -888,8 +958,24 @@ export function PropertyCreateWizard() {
             )}
 
             {/* Bottom Wizard Actions Navigation Bar */}
-            <View style={styles.wizardActionBar}>
-              {store.currentStep > 1 ? (
+            <View style={[styles.wizardActionBar, isPhone && styles.wizardActionBarMobile]}>
+              {/* On Desktop: Show Back only if step > 1 (desktop design preserved 100%) */}
+              {/* On Mobile: Always show Back button (navigates back to previous step, or exits to dashboard on step 1) */}
+              {isPhone ? (
+                <Pressable
+                  onPress={handleMobileBack}
+                  style={({ pressed }) => [
+                    styles.backBtn,
+                    styles.backBtnMobile,
+                    isNarrowPhone && styles.backBtnNarrow,
+                    webPointer,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <ChevronLeft color="#5C6B66" size={16} strokeWidth={2} />
+                  <Text style={[styles.backBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>Back</Text>
+                </Pressable>
+              ) : store.currentStep > 1 ? (
                 <Pressable
                   onPress={handleBack}
                   style={({ pressed }) => [styles.backBtn, webPointer, pressed && styles.pressed]}
@@ -901,37 +987,59 @@ export function PropertyCreateWizard() {
                 <View />
               )}
 
-              <View style={styles.wizardRightActions}>
+              <View style={[styles.wizardRightActions, isPhone && styles.wizardRightActionsMobile, isNarrowPhone && styles.wizardRightActionsNarrow]}>
                 <Pressable
                   disabled={store.isSubmitting}
                   onPress={() => void handleSaveDraft()}
-                  style={({ pressed }) => [styles.saveDraftBtn, webPointer, pressed && styles.pressed]}
+                  style={({ pressed }) => [
+                    styles.saveDraftBtn,
+                    isPhone && styles.saveDraftBtnMobile,
+                    isNarrowPhone && styles.saveDraftBtnNarrow,
+                    webPointer,
+                    pressed && styles.pressed,
+                  ]}
                 >
-                  <Building2 color="#0B1A17" size={16} />
-                  <Text style={styles.saveDraftText}>Save draft</Text>
+                  <Save color="#0B1A17" size={14} />
+                  <Text style={[styles.saveDraftText, isPhone && styles.saveDraftTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
+                    {isNarrowPhone ? "Save" : "Save draft"}
+                  </Text>
                 </Pressable>
 
                 {store.currentStep < 5 ? (
                   <Pressable
                     disabled={store.isSubmitting}
                     onPress={() => void handleNext()}
-                    style={({ pressed }) => [styles.nextBtn, webPointer, pressed && styles.pressed]}
+                    style={({ pressed }) => [
+                      styles.nextBtn,
+                      isPhone && styles.nextBtnMobile,
+                      isNarrowPhone && styles.nextBtnNarrow,
+                      webPointer,
+                      pressed && styles.pressed,
+                    ]}
                   >
-                    <Text style={styles.nextBtnText}>Next</Text>
-                    <ArrowLeft color="#FFFFFF" size={16} style={{ transform: [{ rotate: "180deg" }] }} />
+                    <Text style={[styles.nextBtnText, isPhone && styles.nextBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>Next</Text>
+                    <ChevronRight color="#FFFFFF" size={15} strokeWidth={2} />
                   </Pressable>
                 ) : (
                   <Pressable
                     disabled={store.isSubmitting}
                     onPress={() => void handleSubmit()}
-                    style={({ pressed }) => [styles.publishBtn, webPointer, pressed && styles.pressed]}
+                    style={({ pressed }) => [
+                      styles.publishBtn,
+                      isPhone && styles.publishBtnMobile,
+                      isNarrowPhone && styles.publishBtnNarrow,
+                      webPointer,
+                      pressed && styles.pressed,
+                    ]}
                   >
                     {store.isSubmitting ? (
                       <ActivityIndicator color="#FFFFFF" size="small" />
                     ) : (
-                      <Send color="#FFFFFF" size={16} />
+                      <Send color="#FFFFFF" size={14} />
                     )}
-                    <Text style={styles.publishBtnText}>Submit for verification</Text>
+                    <Text style={[styles.publishBtnText, isPhone && styles.publishBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
+                      {isPhone ? "Submit" : "Submit for verification"}
+                    </Text>
                   </Pressable>
                 )}
               </View>
@@ -950,6 +1058,17 @@ export function PropertyCreateWizard() {
           setAreaPickerVisible(false);
           setLocalError(null);
         }}
+      />
+      <SellerMobileDrawer
+        activeNav="create"
+        items={sidebarNavItems as any}
+        onClose={() => setMobileDrawerOpen(false)}
+        onSelectNav={(key) => {
+          setMobileDrawerOpen(false);
+          const found = sidebarNavItems.find((i) => i.key === key);
+          if (found?.href) router.push(found.href as any);
+        }}
+        visible={isTablet && mobileDrawerOpen}
       />
     </View>
   );
@@ -1137,6 +1256,14 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 20,
   },
+  scrollBodyPhone: {
+    padding: 12,
+    gap: 16,
+  },
+  scrollBodyNarrow: {
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+  },
   stepperContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -1205,10 +1332,25 @@ const styles = StyleSheet.create({
   stepCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(11,26,23,0.11)",
+    shadowColor: "#0B1A17",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 2,
     padding: 32,
     gap: 24,
+  },
+  stepCardPhone: {
+    padding: 16,
+    borderRadius: 18,
+    gap: 16,
+  },
+  stepCardNarrow: {
+    paddingHorizontal: 10,
+    paddingVertical: 14,
+    borderRadius: 14,
   },
   errorBanner: {
     backgroundColor: "#FDEBEC",
@@ -1229,14 +1371,52 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     color: "#0B1A17",
   },
+  formLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  formHelperCharCount: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: "#899790",
+  },
   formInput: {
     height: 48,
-    borderRadius: 12,
+    borderRadius: 16,
     backgroundColor: "#F4F6F5",
+    borderWidth: 1.2,
+    borderColor: "rgba(11,26,23,0.12)",
     paddingHorizontal: 16,
     fontSize: 14,
     fontFamily: fonts.regular,
     color: "#0B1A17",
+    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
+  },
+  formTextarea: {
+    minHeight: 116,
+    borderRadius: 16,
+    backgroundColor: "#F4F6F5",
+    borderWidth: 1.2,
+    borderColor: "rgba(11,26,23,0.12)",
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 14,
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    color: "#0B1A17",
+    textAlignVertical: "top",
+    lineHeight: 22,
+    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
+  },
+  formTextareaFocused: {
+    borderColor: "#00C885",
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#00C885",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 2,
   },
   areaPickerButton: { alignItems: "center", flexDirection: "row", gap: 10 },
   areaPickerText: { color: "#0B1A17", flex: 1, fontFamily: fonts.regular, fontSize: 14 },
@@ -1252,17 +1432,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     height: 48,
     backgroundColor: "#F4F6F5",
-    borderRadius: 12,
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: "rgba(11,26,23,0.12)",
     padding: 4,
   },
   toggleBtn: {
     flex: 1,
+    minWidth: 0,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
+    borderRadius: 12,
   },
   toggleBtnActive: {
     backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(11,26,23,0.08)",
+    shadowColor: "rgba(11,26,23,0.06)",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    elevation: 1,
   },
   toggleBtnText: {
     fontSize: 14,
@@ -1271,6 +1462,25 @@ const styles = StyleSheet.create({
   },
   toggleBtnTextActive: {
     color: "#04cf92",
+  },
+  toggleGridMobile: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    backgroundColor: "#F4F6F5",
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: "rgba(11,26,23,0.12)",
+    padding: 4,
+    gap: 6,
+  },
+  toggleGridBtnMobile: {
+    width: "48.5%",
+    flexGrow: 1,
+    minWidth: 0,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
   },
   amenitiesWrap: {
     flexDirection: "row",
@@ -1466,7 +1676,9 @@ const styles = StyleSheet.create({
   reviewCard: {
     width: "48%",
     backgroundColor: "#F4F6F5",
-    borderRadius: 12,
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: "rgba(11,26,23,0.12)",
     padding: 14,
     gap: 4,
   },
@@ -1550,5 +1762,92 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 14,
     fontFamily: fonts.semiBold,
+  },
+  wizardActionBarMobile: {
+    paddingTop: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 6,
+    borderTopWidth: 1.5,
+    borderTopColor: "rgba(11,26,23,0.1)",
+  },
+  wizardRightActionsMobile: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  wizardRightActionsNarrow: {
+    gap: 5,
+  },
+  backBtnMobile: {
+    height: 38,
+    paddingHorizontal: 12,
+    gap: 4,
+    borderRadius: 999,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.12)",
+    backgroundColor: "#FFFFFF",
+  },
+  backBtnNarrow: {
+    paddingHorizontal: 9,
+    height: 36,
+  },
+  backBtnTextMobile: {
+    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    color: "#5C6B66",
+  },
+  saveDraftBtnMobile: {
+    height: 38,
+    paddingHorizontal: 11,
+    gap: 4,
+    borderRadius: 999,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.12)",
+    backgroundColor: "#FFFFFF",
+  },
+  saveDraftBtnNarrow: {
+    paddingHorizontal: 8,
+    height: 36,
+  },
+  saveDraftTextMobile: {
+    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    color: "#0B1A17",
+  },
+  nextBtnMobile: {
+    height: 38,
+    paddingHorizontal: 14,
+    gap: 4,
+    borderRadius: 999,
+    backgroundColor: "#04cf92",
+  },
+  nextBtnNarrow: {
+    paddingHorizontal: 10,
+    height: 36,
+  },
+  nextBtnTextMobile: {
+    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    color: "#FFFFFF",
+  },
+  publishBtnMobile: {
+    height: 38,
+    paddingHorizontal: 14,
+    gap: 4,
+    borderRadius: 999,
+  },
+  publishBtnNarrow: {
+    paddingHorizontal: 10,
+    height: 36,
+  },
+  publishBtnTextMobile: {
+    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    color: "#FFFFFF",
+  },
+  btnTextNarrow: {
+    fontSize: 12,
   },
 });

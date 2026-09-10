@@ -42,6 +42,8 @@ import {
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
+import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
+import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
 import type { Property } from "../types/property";
@@ -70,6 +72,7 @@ export function MyPropertiesScreen() {
   const { isPhone, isTablet } = useResponsive();
   const [activeFilter, setActiveFilter] = useState<ListingFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const deleteMutation = useDeleteProperty();
 
   const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useMyProperties();
@@ -213,35 +216,14 @@ export function MyPropertiesScreen() {
 
       {/* Main Workspace */}
       <View style={styles.mainContent}>
-        {/* Header Bar */}
-        <View style={styles.topHeader}>
-          <Text style={styles.headerTitle}>My Listings</Text>
-
-          <View style={styles.headerActions}>
-            {!isPhone && (
-              <View style={styles.searchContainer}>
-                <Search color="rgba(11,26,23,0.5)" size={16} />
-                <TextInput
-                  onChangeText={setSearchQuery}
-                  placeholder="Search listings…"
-                  placeholderTextColor="rgba(11,26,23,0.5)"
-                  style={styles.searchInput}
-                  value={searchQuery}
-                />
-              </View>
-            )}
-
-            <AppLink href="/notifications" style={styles.iconCircleBtn}>
-              <Bell color="#0B1A17" size={19} />
-              <View style={styles.headerDotIndicator} />
-            </AppLink>
-
-            <AppLink href="/" style={styles.viewSiteBtn}>
-              <Globe color="#0B1A17" size={16} />
-              <Text style={styles.viewSiteText}>View site</Text>
-            </AppLink>
-          </View>
-        </View>
+        {/* Header Bar (Figma Node 207:2478 for mobile) */}
+        <SellerTopHeader
+          hasUnreadNotifications
+          onPressMenu={() => setMobileDrawerOpen(true)}
+          onSearchQueryChange={setSearchQuery}
+          searchQuery={searchQuery}
+          title="My Listings"
+        />
 
         {/* Listings Body */}
         <ScrollView contentContainerStyle={styles.scrollBody} showsVerticalScrollIndicator={false}>
@@ -503,6 +485,15 @@ export function MyPropertiesScreen() {
           </View>
         </ScrollView>
       </View>
+
+      {/* Mobile / Tablet Navigation Drawer */}
+      <SellerMobileDrawer
+        activeNav="listings"
+        items={sidebarNavItems as any}
+        onClose={() => setMobileDrawerOpen(false)}
+        onSelectNav={() => {}}
+        visible={isTablet && mobileDrawerOpen}
+      />
     </View>
   );
 }
@@ -628,80 +619,6 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     flexDirection: "column",
-  },
-  topHeader: {
-    minHeight: 64,
-    backgroundColor: "rgba(255,255,255,0.92)",
-    borderBottomWidth: 0.8,
-    borderBottomColor: "rgba(11,26,23,0.08)",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-  },
-  headerTitle: {
-    fontSize: 19,
-    fontFamily: fonts.extraBold,
-    color: "#0B1A17",
-    letterSpacing: -0.38,
-  },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  searchContainer: {
-    width: 256,
-    height: 38,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#F4F6F5",
-    borderRadius: 999,
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.08)",
-    paddingHorizontal: 13,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: fonts.regular,
-    color: "#0B1A17",
-  },
-  iconCircleBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.08)",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  headerDotIndicator: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#F4823A",
-  },
-  viewSiteBtn: {
-    height: 38,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.08)",
-    borderRadius: 999,
-    paddingHorizontal: 14,
-  },
-  viewSiteText: {
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-    color: "#0B1A17",
   },
   scrollBody: {
     padding: 24,
