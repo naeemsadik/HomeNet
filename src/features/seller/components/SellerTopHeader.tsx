@@ -1,4 +1,4 @@
-import { Bell, Globe, Menu, Search } from "lucide-react-native";
+import { Bell, Globe, Menu, Search, X } from "lucide-react-native";
 import {
   Platform,
   Pressable,
@@ -79,9 +79,21 @@ export function SellerTopHeader({
               onChangeText={onSearchQueryChange}
               placeholder="Search listings…"
               placeholderTextColor="rgba(11,26,23,0.5)"
+              selectTextOnFocus
               style={styles.searchInput}
               value={searchQuery ?? ""}
             />
+            {Boolean(searchQuery && searchQuery.length > 0) && (
+              <Pressable
+                accessibilityLabel="Clear search query"
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={() => onSearchQueryChange("")}
+                style={[styles.clearBtn, webPointer]}
+              >
+                <X color="rgba(11,26,23,0.4)" size={14} />
+              </Pressable>
+            )}
           </View>
         )}
 
@@ -183,9 +195,15 @@ const styles = StyleSheet.create({
     height: "100%",
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    fontWeight: "300",
+    color: "rgba(11, 26, 23, 0.45)",
     paddingVertical: 0,
     ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
+  },
+  clearBtn: {
+    padding: 3,
+    justifyContent: "center",
+    alignItems: "center",
   },
   viewSiteBtn: {
     height: 38,
