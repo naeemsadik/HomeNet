@@ -300,7 +300,6 @@ export function SellerDashboardScreen() {
     { key: "messages", label: "Messages", icon: MessageSquareText },
     { key: "analytics", label: "Analytics", icon: BarChart2, href: "/market" },
     { key: "payments", label: "Payments", icon: CreditCard },
-    { key: "notifications", label: "Notifications", icon: Bell, badgeCount: 3, href: "/notifications" },
     { key: "profile", label: "Profile", icon: User, href: "/seller/profile" },
     { key: "settings", label: "Settings", icon: Settings, href: "/settings" },
     { key: "help", label: "Help Center", icon: CircleHelp, href: "/about" },

@@ -26,6 +26,7 @@ import {
 import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from "react-native-svg";
 import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
+import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
 import { AppButton, AppLink } from "@/components/ui";
 import {
   latestNews,
@@ -332,6 +333,11 @@ export function HomeScreen() {
       </View>
 
 
+
+      {/* ─────────────────────────────────────────────────────────────
+          2. OWNER ON-RAMP: LIST YOUR PROPERTY
+      ───────────────────────────────────────────────────────────── */}
+      <OwnerListPropertySection />
 
       {/* ─────────────────────────────────────────────────────────────
           3. FEATURED PROPERTIES (Figma data-node-id="1:194")

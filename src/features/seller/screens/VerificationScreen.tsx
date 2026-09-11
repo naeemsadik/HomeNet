@@ -127,7 +127,6 @@ export function VerificationScreen() {
     { key: "insights" as SellerNavKey, label: "AI Insights", icon: Sparkles, href: "/ai-finder" },
     { key: "analytics" as SellerNavKey, label: "Analytics", icon: BarChart2, href: "/market" },
     { key: "payments" as SellerNavKey, label: "Payments", icon: CreditCard },
-    { key: "notifications" as SellerNavKey, label: "Notifications", icon: Bell, badgeCount: 3, href: "/notifications" },
     { key: "profile" as SellerNavKey, label: "Profile", icon: User, href: "/seller/profile" },
     { key: "settings" as SellerNavKey, label: "Settings", icon: Settings, href: "/settings" },
     { key: "help" as SellerNavKey, label: "Help Center", icon: CircleHelp, href: "/about" },

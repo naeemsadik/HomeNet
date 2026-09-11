@@ -124,7 +124,15 @@ export function MyPropertiesScreen() {
   }, [allListings]);
 
   // Sidebar items
-  const sidebarNavItems = [
+  const sidebarNavItems: {
+    key: string;
+    label: string;
+    icon: any;
+    href?: string;
+    active?: boolean;
+    danger?: boolean;
+    badgeCount?: number;
+  }[] = [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
     { key: "listings", label: "My Listings", icon: Building2, href: "/my-properties", active: true },
     { key: "create", label: "Create Property", icon: PlusCircle, href: "/property/create" },
@@ -133,7 +141,6 @@ export function MyPropertiesScreen() {
     { key: "insights", label: "AI Insights", icon: Sparkles, href: "/ai-finder" },
     { key: "analytics", label: "Analytics", icon: BarChart2, href: "/market" },
     { key: "payments", label: "Payments", icon: CreditCard },
-    { key: "notifications", label: "Notifications", icon: Bell, badgeCount: 3, href: "/notifications" },
     { key: "profile", label: "Profile", icon: User, href: "/seller/profile" },
     { key: "settings", label: "Settings", icon: Settings, href: "/settings" },
     { key: "help", label: "Help Center", icon: CircleHelp, href: "/about" },
