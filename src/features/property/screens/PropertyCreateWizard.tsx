@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -36,7 +36,7 @@ import {
   Video,
   Zap,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -51,7 +51,14 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { AreaPicker } from "@/components/AreaPicker";
+import { Brand } from "@/components/Brand";
 import { AppLink } from "@/components/ui";
+import { NotificationItem } from "@/features/notification/components/NotificationItem";
+import {
+  useMarkAllRead,
+  useNotifications,
+  useUnreadCount,
+} from "@/features/notification/hooks/useNotifications";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -59,6 +66,10 @@ import { toApiError } from "@/services/apiClient";
 import type { UploadInput } from "@/services/upload";
 import { colors, fonts, webPointer } from "@/theme";
 import type { Area, PropertyType, UpsertPropertyDto } from "@/types/api";
+import {
+  PROPERTY_TYPE_CONFIGS,
+  type PropertyTypeConfig,
+} from "../constants/propertyCategories";
 import {
   useCreateProperty,
   useDeleteMedia,
@@ -72,6 +83,12 @@ export function PropertyCreateWizard() {
   const { isPhone, isTablet, width } = useResponsive();
   const isNarrowPhone = isPhone && width <= 360;
   const store = usePropertyWizardStore();
+  const params = useLocalSearchParams<{
+    listing_type?: string;
+    type?: string;
+    subtype?: string;
+  }>();
+
   const createPropertyMutation = useCreateProperty();
   const updatePropertyMutation = useUpdateProperty();
   const uploadMediaMutation = useUploadMedia();
@@ -82,6 +99,33 @@ export function PropertyCreateWizard() {
   const [localError, setLocalError] = useState<string | null>(null);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [descFocused, setDescFocused] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  // Live Notifications functionalities
+  const { data: unreadCountData } = useUnreadCount();
+  const unreadCount = unreadCountData?.data?.count ?? 0;
+  const { data: notificationsData, isLoading: notificationsLoading } = useNotifications();
+  const markAllReadMutation = useMarkAllRead();
+  const notificationsList =
+    notificationsData?.pages.flatMap((page) => page.data?.items ?? []) ?? [];
+
+  // Sync initial query params from URL if present (e.g. from homepage OwnerListPropertySection)
+  useEffect(() => {
+    if (params.type && (params.type in PROPERTY_TYPE_CONFIGS)) {
+      const typeKey = params.type as PropertyType;
+      const cfg = PROPERTY_TYPE_CONFIGS[typeKey];
+      store.setBasics({
+        type: typeKey,
+        ...(params.listing_type === "sale" || params.listing_type === "rent"
+          ? { listingType: params.listing_type }
+          : {}),
+        subtype: params.subtype || cfg.defaultSubtype,
+        areaUnit: cfg.defaultUnit,
+      });
+    }
+  }, [params.type, params.listing_type, params.subtype]);
+
+  const activeTypeConfig = PROPERTY_TYPE_CONFIGS[store.type] || PROPERTY_TYPE_CONFIGS.residential;
 
   const selectedArea: Area | null = store.areaId
     ? {
@@ -100,28 +144,6 @@ export function PropertyCreateWizard() {
     { num: 5, title: "Review" },
   ];
 
-  const amenityOptions = [
-    "Lift",
-    "Parking",
-    "Generator",
-    "Gym",
-    "Pool",
-    "Security",
-    "Garden",
-    "Smart Home",
-    "CCTV",
-    "Rooftop",
-    "Servant Quarter",
-    "Mosque",
-  ];
-
-  const propertyTypes: { value: PropertyType; label: string }[] = [
-    { value: "residential", label: "Residential" },
-    { value: "commercial", label: "Commercial" },
-    { value: "land", label: "Land" },
-    { value: "parking", label: "Parking" },
-  ];
-
   const buildDto = (): UpsertPropertyDto => ({
     area_id: store.areaId || undefined,
     title: store.title.trim() || undefined,
@@ -132,15 +154,15 @@ export function PropertyCreateWizard() {
     price: store.price ? Number(store.price) : undefined,
     price_currency: "BDT",
     area_size: store.areaSize ? Number(store.areaSize) : undefined,
-    area_unit: "sqft",
+    area_unit: store.areaUnit || activeTypeConfig.defaultUnit,
     location_lat: store.locationLat ?? undefined,
     location_lng: store.locationLng ?? undefined,
     address: store.address.trim() || undefined,
     amenities: {
-      bedrooms: store.bedrooms ? Number(store.bedrooms) : undefined,
-      bathrooms: store.bathrooms ? Number(store.bathrooms) : undefined,
-      floor: store.floor ? Number(store.floor) : undefined,
-      facing: store.facing.trim() || undefined,
+      ...(activeTypeConfig.hasBedrooms && store.bedrooms ? { bedrooms: Number(store.bedrooms) } : {}),
+      ...(activeTypeConfig.hasBathrooms && store.bathrooms ? { bathrooms: Number(store.bathrooms) } : {}),
+      ...(activeTypeConfig.hasFloor && store.floor ? { floor: Number(store.floor) } : {}),
+      ...(activeTypeConfig.hasFacing && store.facing ? { facing: store.facing.trim() } : {}),
       ...Object.fromEntries(
         Object.entries(store.amenities).map(([key, value]) => [key.toLowerCase().replaceAll(" ", "_"), value]),
       ),
@@ -341,17 +363,22 @@ export function PropertyCreateWizard() {
     }
   };
 
-  // Sidebar items
-  const sidebarNavItems = [
+  // Sidebar items - aligned with HomeNet standards (Notification removed as requested)
+  const sidebarNavItems: {
+    key: string;
+    label: string;
+    icon: any;
+    href?: string;
+    active?: boolean;
+    danger?: boolean;
+    badgeCount?: number;
+  }[] = [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
     { key: "listings", label: "My Listings", icon: Building2, href: "/my-properties" },
     { key: "create", label: "Create Property", icon: PlusCircle, href: "/property/create", active: true },
     { key: "verification", label: "Verification", icon: ShieldCheck, href: "/verification" },
-    { key: "boost", label: "Boost Listings", icon: Rocket },
     { key: "insights", label: "AI Insights", icon: Sparkles, href: "/ai-finder" },
     { key: "analytics", label: "Analytics", icon: BarChart2, href: "/market" },
-    { key: "payments", label: "Payments", icon: CreditCard },
-    { key: "notifications", label: "Notifications", icon: Bell, badgeCount: 3, href: "/notifications" },
     { key: "profile", label: "Profile", icon: User, href: "/seller/profile" },
     { key: "settings", label: "Settings", icon: Settings, href: "/settings" },
     { key: "help", label: "Help Center", icon: CircleHelp, href: "/about" },
@@ -360,20 +387,22 @@ export function PropertyCreateWizard() {
 
   return (
     <View style={styles.outerContainer}>
+      {/* Mobile navigation drawer */}
+      <SellerMobileDrawer
+        activeNav="create"
+        items={sidebarNavItems as any}
+        onClose={() => setMobileDrawerOpen(false)}
+        onSelectNav={() => {}}
+        visible={mobileDrawerOpen}
+      />
+
       {/* Sidebar (Desktop View) */}
       {!isTablet && (
         <View style={styles.sidebar}>
           <View style={styles.sidebarHeader}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIconBg}>
-                <Building2 color="#FFFFFF" size={20} />
-              </View>
-              <Text style={styles.brandText}>
-                Home<Text style={styles.brandTextAccent}>net</Text>
-              </Text>
-            </View>
+            <Brand />
             <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
+              <Text style={styles.sellerRoleText}>Seller Portal</Text>
             </View>
           </View>
 
@@ -420,7 +449,7 @@ export function PropertyCreateWizard() {
         {/* Top Header Bar */}
         {isTablet ? (
           <SellerTopHeader
-            hasUnreadNotifications
+            hasUnreadNotifications={unreadCount > 0}
             onPressMenu={() => setMobileDrawerOpen(true)}
             onSearchQueryChange={setSearchQuery}
             searchQuery={searchQuery}
@@ -428,7 +457,12 @@ export function PropertyCreateWizard() {
           />
         ) : (
           <View style={styles.topHeader}>
-            <Text style={styles.headerTitle}>Create Property</Text>
+            <View>
+              <Text style={styles.headerTitle}>Create Property</Text>
+              <Text style={styles.headerSubtitle}>
+                Follow the 5 steps to list your property across Bangladesh
+              </Text>
+            </View>
 
             <View style={styles.headerActions}>
               <View style={styles.searchContainer}>
@@ -442,13 +476,107 @@ export function PropertyCreateWizard() {
                 />
               </View>
 
-              <AppLink href="/notifications" style={styles.iconCircleBtn}>
-                <Bell color="#0B1A17" size={19} />
-                <View style={styles.headerDotIndicator} />
-              </AppLink>
+              {/* Notification Bell with live functionalities & popover */}
+              <View style={styles.notificationWrap}>
+                <Pressable
+                  accessibilityLabel="Notifications"
+                  accessibilityRole="button"
+                  onPress={() => setNotificationsOpen((prev) => !prev)}
+                  style={({ pressed }) => [
+                    styles.iconCircleBtn,
+                    notificationsOpen && styles.iconCircleBtnActive,
+                    webPointer,
+                    pressed && styles.iconCircleBtnPressed,
+                  ]}
+                >
+                  <Bell
+                    color={notificationsOpen ? "#04cf92" : "#0B1A17"}
+                    size={20}
+                    strokeWidth={1.8}
+                  />
+                  {unreadCount > 0 ? (
+                    <View style={styles.notificationBadgePill}>
+                      <Text style={styles.notificationBadgeText}>
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </Text>
+                    </View>
+                  ) : null}
+                </Pressable>
+
+                {/* Notifications dropdown popover */}
+                {notificationsOpen && (
+                  <View style={styles.notificationDropdown}>
+                    <View style={styles.dropdownHeader}>
+                      <View style={styles.dropdownHeaderLeft}>
+                        <Text style={styles.dropdownTitle}>Notifications</Text>
+                        {unreadCount > 0 && (
+                          <View style={styles.unreadCountPill}>
+                            <Text style={styles.unreadCountPillText}>
+                              {unreadCount} new
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      {unreadCount > 0 && (
+                        <Pressable
+                          accessibilityRole="button"
+                          disabled={markAllReadMutation.isPending}
+                          onPress={() => markAllReadMutation.mutate()}
+                          style={({ pressed }) => [
+                            styles.markAllReadBtn,
+                            webPointer,
+                            pressed && { opacity: 0.7 },
+                          ]}
+                        >
+                          <Text style={styles.markAllReadText}>
+                            {markAllReadMutation.isPending ? "Marking..." : "Mark all read"}
+                          </Text>
+                        </Pressable>
+                      )}
+                    </View>
+
+                    <ScrollView
+                      contentContainerStyle={styles.dropdownScrollContent}
+                      nestedScrollEnabled
+                      style={styles.dropdownScroll}
+                    >
+                      {notificationsLoading ? (
+                        <View style={styles.dropdownEmpty}>
+                          <Text style={styles.dropdownEmptyText}>Loading notifications...</Text>
+                        </View>
+                      ) : notificationsList.length === 0 ? (
+                        <View style={styles.dropdownEmpty}>
+                          <Bell color="rgba(11,26,23,0.3)" size={32} />
+                          <Text style={styles.dropdownEmptyText}>No notifications yet</Text>
+                        </View>
+                      ) : (
+                        notificationsList.slice(0, 8).map((notification) => (
+                          <NotificationItem
+                            key={notification.id}
+                            notification={notification}
+                            onPress={() => setNotificationsOpen(false)}
+                          />
+                        ))
+                      )}
+                    </ScrollView>
+
+                    <View style={styles.dropdownFooter}>
+                      <AppLink
+                        href="/notifications"
+                        onPress={() => setNotificationsOpen(false)}
+                        style={styles.viewAllNotificationsBtn}
+                      >
+                        <Text style={styles.viewAllNotificationsText}>
+                          View all notifications →
+                        </Text>
+                      </AppLink>
+                    </View>
+                  </View>
+                )}
+              </View>
 
               <AppLink href="/" style={styles.viewSiteBtn}>
-                <Globe color="#0B1A17" size={16} />
+                <Globe color="#04cf92" size={16} />
                 <Text style={styles.viewSiteText}>View site</Text>
               </AppLink>
             </View>
@@ -511,118 +639,204 @@ export function PropertyCreateWizard() {
             {/* STEP 1: BASICS */}
             {store.currentStep === 1 && (
               <View style={styles.stepFormBody}>
+                {/* Property Title */}
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>Property Title</Text>
+                  <Text style={styles.formLabel}>Property Title *</Text>
                   <TextInput
                     onChangeText={(v) => store.setBasics({ title: v })}
-                    placeholder="e.g. Premium 3 Bedroom Apartment"
+                    placeholder="e.g. Modern 3-Bedroom Apartment in Gulshan 2"
                     placeholderTextColor="#899790"
                     style={styles.formInput}
                     value={store.title}
                   />
+                  <Text style={styles.formHelperText}>
+                    A clear, descriptive title attracts more serious buyers.
+                  </Text>
                 </View>
 
+                {/* Primary Category (Residential, Commercial, Land, Parking) */}
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>Property category</Text>
-                  {isPhone ? (
-                    <View style={styles.toggleGridMobile}>
-                      {propertyTypes.map((propertyType) => {
-                        const isSelected = store.type === propertyType.value;
-                        return (
-                          <Pressable
-                            key={propertyType.value}
-                            onPress={() => store.setBasics({ type: propertyType.value })}
+                  <Text style={styles.formLabel}>Property Category *</Text>
+                  <View style={[styles.categoryGrid, isPhone && styles.categoryGridMobile]}>
+                    {(Object.keys(PROPERTY_TYPE_CONFIGS) as PropertyType[]).map((typeKey) => {
+                      const cfg = PROPERTY_TYPE_CONFIGS[typeKey];
+                      const isSelected = store.type === typeKey;
+                      const TypeIcon = cfg.icon;
+
+                      return (
+                        <Pressable
+                          key={typeKey}
+                          accessibilityLabel={cfg.label}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: isSelected }}
+                          onPress={() => {
+                            store.setBasics({
+                              type: typeKey,
+                              subtype: cfg.defaultSubtype,
+                              areaUnit: cfg.defaultUnit,
+                            });
+                          }}
+                          style={[
+                            styles.categoryCard,
+                            isSelected && styles.categoryCardSelected,
+                            webPointer,
+                          ]}
+                        >
+                          <View
                             style={[
-                              styles.toggleGridBtnMobile,
-                              isSelected && styles.toggleBtnActive,
+                              styles.categoryIconWrap,
+                              isSelected && styles.categoryIconWrapSelected,
                             ]}
                           >
-                            <Text
-                              numberOfLines={1}
-                              style={[
-                                styles.toggleBtnText,
-                                isSelected && styles.toggleBtnTextActive,
-                              ]}
-                            >
-                              {propertyType.label}
-                            </Text>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  ) : (
-                    <View style={styles.toggleRow}>
-                      {propertyTypes.map((propertyType) => {
-                        const isSelected = store.type === propertyType.value;
-                        return (
-                          <Pressable
-                            key={propertyType.value}
-                            onPress={() => store.setBasics({ type: propertyType.value })}
+                            <TypeIcon
+                              color={isSelected ? "#04cf92" : "#5C6B66"}
+                              size={20}
+                            />
+                          </View>
+                          <Text
                             style={[
-                              styles.toggleBtn,
-                              isSelected && styles.toggleBtnActive,
+                              styles.categoryLabel,
+                              isSelected && styles.categoryLabelSelected,
                             ]}
                           >
-                            <Text
-                              numberOfLines={1}
-                              style={[
-                                styles.toggleBtnText,
-                                isSelected && styles.toggleBtnTextActive,
-                              ]}
-                            >
-                              {propertyType.label}
-                            </Text>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  )}
+                            {cfg.label}
+                          </Text>
+                          <Text
+                            numberOfLines={2}
+                            style={[
+                              styles.categoryDesc,
+                              isSelected && styles.categoryDescSelected,
+                            ]}
+                          >
+                            {cfg.description}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
                 </View>
 
+                {/* Property Subtypes (Specific to Category) */}
+                <View style={styles.formGroup}>
+                  <View style={styles.formLabelRow}>
+                    <Text style={styles.formLabel}>
+                      {activeTypeConfig.label} Subtype *
+                    </Text>
+                    <Text style={styles.formHint}>Select specific unit classification</Text>
+                  </View>
+                  <View style={styles.subtypeWrap}>
+                    {activeTypeConfig.subtypes.map((sub) => {
+                      const isSelected = store.subtype === sub.value;
+                      return (
+                        <Pressable
+                          key={sub.value}
+                          accessibilityLabel={sub.label}
+                          accessibilityRole="button"
+                          onPress={() => store.setBasics({ subtype: sub.value })}
+                          style={[
+                            styles.subtypePill,
+                            isSelected && styles.subtypePillSelected,
+                            webPointer,
+                          ]}
+                        >
+                          {isSelected ? <Check color="#04cf92" size={14} /> : null}
+                          <Text
+                            style={[
+                              styles.subtypePillText,
+                              isSelected && styles.subtypePillTextSelected,
+                            ]}
+                          >
+                            {sub.label}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+
+                {/* Listing Purpose */}
                 <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
                   <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Subtype</Text>
-                    <TextInput
-                      onChangeText={(v) => store.setBasics({ subtype: v })}
-                      placeholder="e.g. Apartment / House / Commercial"
-                      placeholderTextColor="#899790"
-                      style={styles.formInput}
-                      value={store.subtype}
-                    />
-                  </View>
-
-                  <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Listing Purpose</Text>
+                    <Text style={styles.formLabel}>Listing Purpose *</Text>
                     <View style={styles.toggleRow}>
                       <Pressable
-                        onPress={() => store.setBasics({ listingType: "sale" })}
+                        onPress={() => {
+                          store.setBasics({
+                            listingType: "sale",
+                            ...(store.subtype === "short-let" ? { subtype: "apartment" } : {}),
+                          });
+                        }}
                         style={[
                           styles.toggleBtn,
-                          store.listingType === "sale" && styles.toggleBtnActive,
+                          store.listingType === "sale" && store.subtype !== "short-let" && styles.toggleBtnActive,
+                          webPointer,
                         ]}
                       >
-                        <Text numberOfLines={1} style={[styles.toggleBtnText, store.listingType === "sale" && styles.toggleBtnTextActive]}>
+                        <Text
+                          numberOfLines={1}
+                          style={[
+                            styles.toggleBtnText,
+                            store.listingType === "sale" && store.subtype !== "short-let" && styles.toggleBtnTextActive,
+                          ]}
+                        >
                           For Sale
                         </Text>
                       </Pressable>
                       <Pressable
-                        onPress={() => store.setBasics({ listingType: "rent" })}
+                        onPress={() => {
+                          store.setBasics({
+                            listingType: "rent",
+                            ...(store.subtype === "short-let" ? { subtype: "apartment" } : {}),
+                          });
+                        }}
                         style={[
                           styles.toggleBtn,
-                          store.listingType === "rent" && styles.toggleBtnActive,
+                          store.listingType === "rent" && store.subtype !== "short-let" && styles.toggleBtnActive,
+                          webPointer,
                         ]}
                       >
-                        <Text numberOfLines={1} style={[styles.toggleBtnText, store.listingType === "rent" && styles.toggleBtnTextActive]}>
+                        <Text
+                          numberOfLines={1}
+                          style={[
+                            styles.toggleBtnText,
+                            store.listingType === "rent" && store.subtype !== "short-let" && styles.toggleBtnTextActive,
+                          ]}
+                        >
                           For Rent
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => {
+                          store.setBasics({
+                            listingType: "rent",
+                            type: "residential",
+                            subtype: "short-let",
+                          });
+                        }}
+                        style={[
+                          styles.toggleBtn,
+                          store.subtype === "short-let" && styles.toggleBtnActive,
+                          webPointer,
+                        ]}
+                      >
+                        <Text
+                          numberOfLines={1}
+                          style={[
+                            styles.toggleBtnText,
+                            store.subtype === "short-let" && styles.toggleBtnTextActive,
+                          ]}
+                        >
+                          Short-let
                         </Text>
                       </Pressable>
                     </View>
                   </View>
                 </View>
 
+                {/* Description */}
                 <View style={styles.formGroup}>
                   <View style={styles.formLabelRow}>
-                    <Text style={styles.formLabel}>Description</Text>
+                    <Text style={styles.formLabel}>Description *</Text>
                     {store.description.trim().length > 0 && (
                       <Text style={styles.formHelperCharCount}>
                         {store.description.length} {store.description.length === 1 ? "char" : "chars"}
@@ -635,7 +849,7 @@ export function PropertyCreateWizard() {
                     onBlur={() => setDescFocused(false)}
                     onFocus={() => setDescFocused(true)}
                     onChangeText={(v) => store.setBasics({ description: v })}
-                    placeholder="Describe your property details, condition, and key features..."
+                    placeholder="Describe key features, nearby landmarks, orientation, and building condition..."
                     placeholderTextColor="#899790"
                     style={[styles.formTextarea, descFocused && styles.formTextareaFocused]}
                     value={store.description}
@@ -644,17 +858,19 @@ export function PropertyCreateWizard() {
               </View>
             )}
 
-            {/* STEP 2: DETAILS (Figma Node 37:4988) */}
+            {/* STEP 2: DETAILS */}
             {store.currentStep === 2 && (
               <View style={styles.stepFormBody}>
                 {/* Price & Area Size Row */}
                 <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
                   <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Price (BDT)</Text>
+                    <Text style={styles.formLabel}>
+                      Price (BDT) {store.subtype === "short-let" ? "/ night or / mo" : store.listingType === "rent" ? "/ month" : ""} *
+                    </Text>
                     <TextInput
                       keyboardType="numeric"
                       onChangeText={(v) => store.setDetails({ price: v })}
-                      placeholder="e.g. 18,500,000"
+                      placeholder={store.subtype === "short-let" ? "e.g. 5,000" : "e.g. 18,500,000"}
                       placeholderTextColor="#899790"
                       style={styles.formInput}
                       value={store.price}
@@ -662,11 +878,43 @@ export function PropertyCreateWizard() {
                   </View>
 
                   <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Area (sqft)</Text>
+                    <View style={styles.formLabelRow}>
+                      <Text style={styles.formLabel}>Area Size *</Text>
+                      {/* Area unit selector */}
+                      <View style={styles.unitSelectorRow}>
+                        {activeTypeConfig.allowedUnits.map((u) => {
+                          const isUnitSelected = (store.areaUnit || activeTypeConfig.defaultUnit) === u;
+                          return (
+                            <Pressable
+                              key={u}
+                              onPress={() => store.setDetails({ areaUnit: u })}
+                              style={[
+                                styles.unitPill,
+                                isUnitSelected && styles.unitPillActive,
+                                webPointer,
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.unitPillText,
+                                  isUnitSelected && styles.unitPillTextActive,
+                                ]}
+                              >
+                                {u}
+                              </Text>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    </View>
                     <TextInput
                       keyboardType="numeric"
                       onChangeText={(v) => store.setDetails({ areaSize: v })}
-                      placeholder="e.g. 2150"
+                      placeholder={
+                        (store.areaUnit || activeTypeConfig.defaultUnit) === "katha"
+                          ? "e.g. 5"
+                          : "e.g. 2150"
+                      }
                       placeholderTextColor="#899790"
                       style={styles.formInput}
                       value={store.areaSize}
@@ -674,66 +922,87 @@ export function PropertyCreateWizard() {
                   </View>
                 </View>
 
-                {/* Bedrooms, Bathrooms, Floor, Facing Row */}
-                <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
-                  <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Bedrooms</Text>
-                    <TextInput
-                      keyboardType="numeric"
-                      onChangeText={(v) => store.setDetails({ bedrooms: v })}
-                      placeholder="3"
-                      placeholderTextColor="#899790"
-                      style={styles.formInput}
-                      value={store.bedrooms}
-                    />
-                  </View>
+                {/* Conditional fields based on PROPERTY_TYPES_SPECIFICATION */}
+                {(activeTypeConfig.hasBedrooms ||
+                  activeTypeConfig.hasBathrooms ||
+                  activeTypeConfig.hasFloor ||
+                  activeTypeConfig.hasFacing) && (
+                  <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
+                    {activeTypeConfig.hasBedrooms && (
+                      <View style={[styles.formGroup, { flex: 1 }]}>
+                        <Text style={styles.formLabel}>Bedrooms</Text>
+                        <TextInput
+                          keyboardType="numeric"
+                          onChangeText={(v) => store.setDetails({ bedrooms: v })}
+                          placeholder="3"
+                          placeholderTextColor="#899790"
+                          style={styles.formInput}
+                          value={store.bedrooms}
+                        />
+                      </View>
+                    )}
 
-                  <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Bathrooms</Text>
-                    <TextInput
-                      keyboardType="numeric"
-                      onChangeText={(v) => store.setDetails({ bathrooms: v })}
-                      placeholder="3"
-                      placeholderTextColor="#899790"
-                      style={styles.formInput}
-                      value={store.bathrooms}
-                    />
-                  </View>
+                    {activeTypeConfig.hasBathrooms && (
+                      <View style={[styles.formGroup, { flex: 1 }]}>
+                        <Text style={styles.formLabel}>Bathrooms</Text>
+                        <TextInput
+                          keyboardType="numeric"
+                          onChangeText={(v) => store.setDetails({ bathrooms: v })}
+                          placeholder="3"
+                          placeholderTextColor="#899790"
+                          style={styles.formInput}
+                          value={store.bathrooms}
+                        />
+                      </View>
+                    )}
 
-                  <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Floor</Text>
-                    <TextInput
-                      keyboardType="numeric"
-                      onChangeText={(v) => store.setDetails({ floor: v })}
-                      placeholder="7"
-                      placeholderTextColor="#899790"
-                      style={styles.formInput}
-                      value={store.floor}
-                    />
-                  </View>
+                    {activeTypeConfig.hasFloor && (
+                      <View style={[styles.formGroup, { flex: 1 }]}>
+                        <Text style={styles.formLabel}>Floor Level</Text>
+                        <TextInput
+                          keyboardType="numeric"
+                          onChangeText={(v) => store.setDetails({ floor: v })}
+                          placeholder="7"
+                          placeholderTextColor="#899790"
+                          style={styles.formInput}
+                          value={store.floor}
+                        />
+                      </View>
+                    )}
 
-                  <View style={[styles.formGroup, { flex: 1 }]}>
-                    <Text style={styles.formLabel}>Facing</Text>
-                    <TextInput
-                      onChangeText={(v) => store.setDetails({ facing: v })}
-                      placeholder="South / East"
-                      placeholderTextColor="#899790"
-                      style={styles.formInput}
-                      value={store.facing}
-                    />
+                    {activeTypeConfig.hasFacing && (
+                      <View style={[styles.formGroup, { flex: 1 }]}>
+                        <Text style={styles.formLabel}>Facing Direction</Text>
+                        <TextInput
+                          onChangeText={(v) => store.setDetails({ facing: v })}
+                          placeholder="South / East"
+                          placeholderTextColor="#899790"
+                          style={styles.formInput}
+                          value={store.facing}
+                        />
+                      </View>
+                    )}
                   </View>
-                </View>
+                )}
 
-                {/* Amenities Pill Checklist */}
+                {/* Type-Specific Amenities Checklist */}
                 <View style={styles.formGroup}>
-                  <Text style={styles.formLabel}>Amenities</Text>
+                  <View style={styles.formLabelRow}>
+                    <Text style={styles.formLabel}>
+                      {activeTypeConfig.label} Amenities & Features
+                    </Text>
+                    <Text style={styles.formHint}>Select all that apply</Text>
+                  </View>
                   <View style={styles.amenitiesWrap}>
-                    {amenityOptions.map((item) => {
-                      const isSelected = !!store.amenities[item];
+                    {activeTypeConfig.amenities.map((item) => {
+                      const isSelected = !!store.amenities[item.key];
                       return (
                         <Pressable
-                          key={item}
-                          onPress={() => store.toggleAmenity(item)}
+                          key={item.key}
+                          accessibilityLabel={item.label}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: isSelected }}
+                          onPress={() => store.toggleAmenity(item.key)}
                           style={[
                             styles.amenityPill,
                             isSelected && styles.amenityPillSelected,
@@ -741,8 +1010,13 @@ export function PropertyCreateWizard() {
                           ]}
                         >
                           {isSelected ? <Check color="#04cf92" size={14} /> : null}
-                          <Text style={[styles.amenityPillText, isSelected && styles.amenityPillTextSelected]}>
-                            {item}
+                          <Text
+                            style={[
+                              styles.amenityPillText,
+                              isSelected && styles.amenityPillTextSelected,
+                            ]}
+                          >
+                            {item.label}
                           </Text>
                         </Pressable>
                       );
@@ -907,9 +1181,10 @@ export function PropertyCreateWizard() {
                   </View>
 
                   <View style={styles.reviewCard}>
-                    <Text style={styles.reviewCardLabel}>Type</Text>
+                    <Text style={styles.reviewCardLabel}>Category & Subtype</Text>
                     <Text style={styles.reviewCardValue}>
-                      {store.subtype || store.type} · {store.listingType === "sale" ? "For Sale" : "For Rent"}
+                      {activeTypeConfig.label} ({activeTypeConfig.subtypes.find((s) => s.value === store.subtype)?.label || store.subtype}) ·{" "}
+                      {store.listingType === "sale" ? "For Sale" : "For Rent"}
                     </Text>
                   </View>
 
@@ -917,41 +1192,60 @@ export function PropertyCreateWizard() {
                     <Text style={styles.reviewCardLabel}>Price</Text>
                     <Text style={styles.reviewCardValue}>
                       BDT {Number(store.price).toLocaleString()}
+                      {store.subtype === "short-let" ? " (Short-let rate)" : store.listingType === "rent" ? "/mo" : ""}
                     </Text>
                   </View>
 
                   <View style={styles.reviewCard}>
-                    <Text style={styles.reviewCardLabel}>Area</Text>
-                    <Text style={styles.reviewCardValue}>{store.areaSize || "Not specified"} sqft</Text>
-                  </View>
-
-                  <View style={styles.reviewCard}>
-                    <Text style={styles.reviewCardLabel}>Beds / Baths</Text>
+                    <Text style={styles.reviewCardLabel}>Area Size</Text>
                     <Text style={styles.reviewCardValue}>
-                      {store.bedrooms || "Not specified"} / {store.bathrooms || "Not specified"}
+                      {store.areaSize || "Not specified"} {store.areaUnit || activeTypeConfig.defaultUnit}
                     </Text>
                   </View>
 
-                  <View style={styles.reviewCard}>
-                    <Text style={styles.reviewCardLabel}>Facing</Text>
-                    <Text style={styles.reviewCardValue}>{store.facing || "Not specified"}</Text>
-                  </View>
+                  {activeTypeConfig.hasBedrooms && (
+                    <View style={styles.reviewCard}>
+                      <Text style={styles.reviewCardLabel}>Beds / Baths</Text>
+                      <Text style={styles.reviewCardValue}>
+                        {store.bedrooms || "0"} Beds / {store.bathrooms || "0"} Baths
+                      </Text>
+                    </View>
+                  )}
+
+                  {activeTypeConfig.hasFloor && (
+                    <View style={styles.reviewCard}>
+                      <Text style={styles.reviewCardLabel}>Floor Level</Text>
+                      <Text style={styles.reviewCardValue}>{store.floor || "Not specified"}</Text>
+                    </View>
+                  )}
+
+                  {activeTypeConfig.hasFacing && (
+                    <View style={styles.reviewCard}>
+                      <Text style={styles.reviewCardLabel}>Facing</Text>
+                      <Text style={styles.reviewCardValue}>{store.facing || "Not specified"}</Text>
+                    </View>
+                  )}
 
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Location</Text>
-                    <Text style={styles.reviewCardValue}>{store.address || "Not specified"}</Text>
+                    <Text style={styles.reviewCardValue}>
+                      {[store.address, store.areaName, store.district].filter(Boolean).join(", ") || "Not specified"}
+                    </Text>
                   </View>
 
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Amenities</Text>
                     <Text style={styles.reviewCardValue}>
-                      {Object.values(store.amenities).filter(Boolean).length} selected
+                      {Object.values(store.amenities).filter(Boolean).length} features selected
                     </Text>
                   </View>
 
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Media</Text>
-                    <Text style={styles.reviewCardValue}>{store.media.length} uploaded</Text>
+                    <Text style={styles.reviewCardValue}>
+                      {store.media.filter((m) => m.mediaType === "image").length} photos
+                      {store.media.some((m) => m.mediaType === "video") ? " · 1 video" : ""}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -1177,6 +1471,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     flexDirection: "column",
+    zIndex: 10,
   },
   topHeader: {
     minHeight: 64,
@@ -1188,12 +1483,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 24,
     paddingVertical: 12,
+    zIndex: 1000,
   },
   headerTitle: {
     fontSize: 19,
     fontFamily: fonts.extraBold,
     color: "#0B1A17",
     letterSpacing: -0.38,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+    marginTop: 2,
   },
   headerActions: {
     flexDirection: "row",
@@ -1227,6 +1529,132 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
+    backgroundColor: "#FFFFFF",
+  },
+  iconCircleBtnActive: {
+    borderColor: "#04cf92",
+    backgroundColor: "#E6FAF4",
+  },
+  iconCircleBtnPressed: {
+    transform: [{ scale: 0.96 }],
+    backgroundColor: "rgba(11,26,23,0.04)",
+  },
+  notificationWrap: {
+    position: "relative",
+    zIndex: 10000,
+  },
+  notificationBadgePill: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#F4823A",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+  },
+  notificationBadgeText: {
+    fontSize: 10,
+    fontFamily: fonts.bold,
+    color: "#FFFFFF",
+    lineHeight: 12,
+  },
+  notificationDropdown: {
+    position: "absolute",
+    top: 48,
+    right: 0,
+    width: 360,
+    maxHeight: 460,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(11,26,23,0.08)",
+    shadowColor: "#0B1A17",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.12,
+    shadowRadius: 28,
+    elevation: 8,
+    zIndex: 999,
+    overflow: "hidden",
+  },
+  dropdownHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(11,26,23,0.06)",
+    backgroundColor: "#FAFBFB",
+  },
+  dropdownHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  dropdownTitle: {
+    fontSize: 15,
+    fontFamily: fonts.bold,
+    color: "#0B1A17",
+  },
+  unreadCountPill: {
+    backgroundColor: "#E6FAF4",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  unreadCountPillText: {
+    fontSize: 11,
+    fontFamily: fonts.bold,
+    color: "#04cf92",
+  },
+  markAllReadBtn: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  markAllReadText: {
+    fontSize: 12,
+    fontFamily: fonts.semiBold,
+    color: "#04cf92",
+  },
+  dropdownScroll: {
+    maxHeight: 320,
+  },
+  dropdownScrollContent: {
+    padding: 12,
+    gap: 8,
+  },
+  dropdownEmpty: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 36,
+    gap: 10,
+  },
+  dropdownEmptyText: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: "rgba(11,26,23,0.5)",
+  },
+  dropdownFooter: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(11,26,23,0.06)",
+    backgroundColor: "#FAFBFB",
+    alignItems: "center",
+  },
+  viewAllNotificationsBtn: {
+    paddingVertical: 4,
+  },
+  viewAllNotificationsText: {
+    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    color: "#04cf92",
   },
   headerDotIndicator: {
     position: "absolute",
@@ -1246,6 +1674,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.08)",
     borderRadius: 999,
     paddingHorizontal: 14,
+    backgroundColor: "#FFFFFF",
   },
   viewSiteText: {
     fontSize: 14,
@@ -1510,6 +1939,135 @@ const styles = StyleSheet.create({
   amenityPillTextSelected: {
     fontFamily: fonts.semiBold,
     color: "#04cf92",
+  },
+  categoryGrid: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  categoryGridMobile: {
+    flexDirection: "column",
+  },
+  categoryCard: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: "#F8FAF9",
+    borderWidth: 1.5,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    gap: 6,
+    ...(Platform.select({
+      web: {
+        transition: "all 0.18s ease-in-out",
+        cursor: "pointer",
+      },
+      default: {},
+    }) as any),
+  },
+  categoryCardSelected: {
+    borderColor: "#04cf92",
+    backgroundColor: "#E6FAF4",
+    ...(Platform.select({
+      web: {
+        boxShadow: "0 2px 10px rgba(4, 207, 146, 0.18)",
+      },
+      default: {},
+    }) as any),
+  },
+  categoryIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  categoryIconWrapSelected: {
+    backgroundColor: "rgba(4, 207, 146, 0.15)",
+  },
+  categoryLabel: {
+    fontSize: 15,
+    fontFamily: fonts.bold,
+    color: "#0B1A17",
+  },
+  categoryLabelSelected: {
+    color: "#04cf92",
+  },
+  categoryDesc: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+    lineHeight: 16,
+  },
+  categoryDescSelected: {
+    color: "#0B1A17",
+  },
+  subtypeWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  subtypePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.12)",
+  },
+  subtypePillSelected: {
+    borderColor: "#04cf92",
+    backgroundColor: "#E6FAF4",
+  },
+  subtypePillText: {
+    fontSize: 13,
+    fontFamily: fonts.medium,
+    color: "#5C6B66",
+  },
+  subtypePillTextSelected: {
+    fontFamily: fonts.semiBold,
+    color: "#04cf92",
+  },
+  unitSelectorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#F4F6F5",
+    padding: 3,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  unitPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 7,
+  },
+  unitPillActive: {
+    backgroundColor: "#04cf92",
+  },
+  unitPillText: {
+    fontSize: 11,
+    fontFamily: fonts.semiBold,
+    color: "#5C6B66",
+    textTransform: "uppercase",
+  },
+  unitPillTextActive: {
+    color: "#FFFFFF",
+  },
+  formHint: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+  },
+  formHelperText: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+    marginTop: 2,
   },
   mapContainer: {
     height: 320,

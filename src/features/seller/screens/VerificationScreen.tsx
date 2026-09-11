@@ -36,6 +36,7 @@ import {
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { AppLink } from "@/components/ui";
+import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
@@ -127,7 +128,6 @@ export function VerificationScreen() {
     { key: "insights" as SellerNavKey, label: "AI Insights", icon: Sparkles, href: "/ai-finder" },
     { key: "analytics" as SellerNavKey, label: "Analytics", icon: BarChart2, href: "/market" },
     { key: "payments" as SellerNavKey, label: "Payments", icon: CreditCard },
-    { key: "notifications" as SellerNavKey, label: "Notifications", icon: Bell, badgeCount: 3, href: "/notifications" },
     { key: "profile" as SellerNavKey, label: "Profile", icon: User, href: "/seller/profile" },
     { key: "settings" as SellerNavKey, label: "Settings", icon: Settings, href: "/settings" },
     { key: "help" as SellerNavKey, label: "Help Center", icon: CircleHelp, href: "/about" },
@@ -165,14 +165,7 @@ export function VerificationScreen() {
       {!isTablet && (
         <View style={styles.sidebar}>
           <View style={styles.sidebarHeader}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIconBg}>
-                <Building2 color="#FFFFFF" size={20} />
-              </View>
-              <Text style={styles.brandText}>
-                Home<Text style={styles.brandTextAccent}>net</Text>
-              </Text>
-            </View>
+            <Brand />
 
             <View style={styles.sellerRolePill}>
               <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
