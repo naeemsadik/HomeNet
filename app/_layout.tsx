@@ -66,6 +66,20 @@ export default function RootLayout() {
         `;
         document.head.appendChild(style);
       }
+
+      // Self-XSS console warning (Facebook-style)
+      console.log(
+        "%cStop!",
+        "color: red; font-size: 60px; font-weight: bold; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);",
+      );
+      console.log(
+        "%cThis is a browser feature intended for developers. If someone told you to copy and paste something here to enable a HomeNet feature or \"hack\" someone's account, it's a scam and will give them access to your HomeNet account.",
+        "font-size: 16px; color: #FFFFFF;",
+      );
+      console.log(
+        "%cSee https://homenetbd.com/self-xss for more information.",
+        "font-size: 16px; color: #3b82f6;",
+      );
     }
 
     setUnauthorizedHandler(() => {
