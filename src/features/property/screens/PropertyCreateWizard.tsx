@@ -1471,6 +1471,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     flexDirection: "column",
+    zIndex: 10,
   },
   topHeader: {
     minHeight: 64,
@@ -1482,6 +1483,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 24,
     paddingVertical: 12,
+    zIndex: 1000,
   },
   headerTitle: {
     fontSize: 19,
@@ -1539,7 +1541,7 @@ const styles = StyleSheet.create({
   },
   notificationWrap: {
     position: "relative",
-    zIndex: 100,
+    zIndex: 10000,
   },
   notificationBadgePill: {
     position: "absolute",
