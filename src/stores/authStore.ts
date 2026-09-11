@@ -102,6 +102,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           full_name: me.full_name,
           email: me.email,
           avatar_url: me.avatar_url,
+          email_verified: me.email_verified,
         },
         loading: false,
       });
@@ -158,3 +159,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       userRoles: [],
     }),
 }));
+
+if (typeof window !== "undefined") {
+  (window as any).__authStore = useAuthStore;
+}
