@@ -51,6 +51,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { AreaPicker } from "@/components/AreaPicker";
+import { Brand } from "@/components/Brand";
 import { AppLink } from "@/components/ui";
 import { NotificationItem } from "@/features/notification/components/NotificationItem";
 import {
@@ -399,14 +400,7 @@ export function PropertyCreateWizard() {
       {!isTablet && (
         <View style={styles.sidebar}>
           <View style={styles.sidebarHeader}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIconBg}>
-                <Building2 color="#FFFFFF" size={20} />
-              </View>
-              <Text style={styles.brandText}>
-                Home<Text style={styles.brandTextAccent}>net</Text>
-              </Text>
-            </View>
+            <Brand />
             <View style={styles.sellerRolePill}>
               <Text style={styles.sellerRoleText}>Seller Portal</Text>
             </View>
@@ -766,10 +760,15 @@ export function PropertyCreateWizard() {
                     <Text style={styles.formLabel}>Listing Purpose *</Text>
                     <View style={styles.toggleRow}>
                       <Pressable
-                        onPress={() => store.setBasics({ listingType: "sale" })}
+                        onPress={() => {
+                          store.setBasics({
+                            listingType: "sale",
+                            ...(store.subtype === "short-let" ? { subtype: "apartment" } : {}),
+                          });
+                        }}
                         style={[
                           styles.toggleBtn,
-                          store.listingType === "sale" && styles.toggleBtnActive,
+                          store.listingType === "sale" && store.subtype !== "short-let" && styles.toggleBtnActive,
                           webPointer,
                         ]}
                       >
@@ -777,17 +776,22 @@ export function PropertyCreateWizard() {
                           numberOfLines={1}
                           style={[
                             styles.toggleBtnText,
-                            store.listingType === "sale" && styles.toggleBtnTextActive,
+                            store.listingType === "sale" && store.subtype !== "short-let" && styles.toggleBtnTextActive,
                           ]}
                         >
                           For Sale
                         </Text>
                       </Pressable>
                       <Pressable
-                        onPress={() => store.setBasics({ listingType: "rent" })}
+                        onPress={() => {
+                          store.setBasics({
+                            listingType: "rent",
+                            ...(store.subtype === "short-let" ? { subtype: "apartment" } : {}),
+                          });
+                        }}
                         style={[
                           styles.toggleBtn,
-                          store.listingType === "rent" && styles.toggleBtnActive,
+                          store.listingType === "rent" && store.subtype !== "short-let" && styles.toggleBtnActive,
                           webPointer,
                         ]}
                       >
@@ -795,10 +799,34 @@ export function PropertyCreateWizard() {
                           numberOfLines={1}
                           style={[
                             styles.toggleBtnText,
-                            store.listingType === "rent" && styles.toggleBtnTextActive,
+                            store.listingType === "rent" && store.subtype !== "short-let" && styles.toggleBtnTextActive,
                           ]}
                         >
                           For Rent
+                        </Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={() => {
+                          store.setBasics({
+                            listingType: "rent",
+                            type: "residential",
+                            subtype: "short-let",
+                          });
+                        }}
+                        style={[
+                          styles.toggleBtn,
+                          store.subtype === "short-let" && styles.toggleBtnActive,
+                          webPointer,
+                        ]}
+                      >
+                        <Text
+                          numberOfLines={1}
+                          style={[
+                            styles.toggleBtnText,
+                            store.subtype === "short-let" && styles.toggleBtnTextActive,
+                          ]}
+                        >
+                          Short-let
                         </Text>
                       </Pressable>
                     </View>
@@ -837,12 +865,12 @@ export function PropertyCreateWizard() {
                 <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
                   <View style={[styles.formGroup, { flex: 1 }]}>
                     <Text style={styles.formLabel}>
-                      Price (BDT) {store.listingType === "rent" ? "/ month" : ""} *
+                      Price (BDT) {store.subtype === "short-let" ? "/ night or / mo" : store.listingType === "rent" ? "/ month" : ""} *
                     </Text>
                     <TextInput
                       keyboardType="numeric"
                       onChangeText={(v) => store.setDetails({ price: v })}
-                      placeholder="e.g. 18,500,000"
+                      placeholder={store.subtype === "short-let" ? "e.g. 5,000" : "e.g. 18,500,000"}
                       placeholderTextColor="#899790"
                       style={styles.formInput}
                       value={store.price}
@@ -1163,7 +1191,8 @@ export function PropertyCreateWizard() {
                   <View style={styles.reviewCard}>
                     <Text style={styles.reviewCardLabel}>Price</Text>
                     <Text style={styles.reviewCardValue}>
-                      BDT {Number(store.price).toLocaleString()}{store.listingType === "rent" ? "/mo" : ""}
+                      BDT {Number(store.price).toLocaleString()}
+                      {store.subtype === "short-let" ? " (Short-let rate)" : store.listingType === "rent" ? "/mo" : ""}
                     </Text>
                   </View>
 

@@ -54,6 +54,7 @@ import Svg, {
   Text as SvgText,
 } from "react-native-svg";
 import { AppLink } from "@/components/ui";
+import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { colors, fonts, shadow, webPointer } from "@/theme";
@@ -313,14 +314,7 @@ export function SellerDashboardScreen() {
         <View style={styles.sidebar}>
           {/* Logo & Brand Header */}
           <View style={styles.sidebarHeader}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIconBg}>
-                <Building2 color="#FFFFFF" size={20} />
-              </View>
-              <Text style={styles.brandText}>
-                Home<Text style={styles.brandTextAccent}>net</Text>
-              </Text>
-            </View>
+            <Brand />
 
             <View style={styles.sellerRolePill}>
               <Text style={styles.sellerRoleText}>Seller Dashboard</Text>

@@ -40,6 +40,7 @@ import {
   View,
 } from "react-native";
 import { AppLink } from "@/components/ui";
+import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
@@ -170,14 +171,7 @@ export function MyPropertiesScreen() {
       {!isTablet && (
         <View style={styles.sidebar}>
           <View style={styles.sidebarHeader}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIconBg}>
-                <Building2 color="#FFFFFF" size={20} />
-              </View>
-              <Text style={styles.brandText}>
-                Home<Text style={styles.brandTextAccent}>net</Text>
-              </Text>
-            </View>
+            <Brand />
             <View style={styles.sellerRolePill}>
               <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
             </View>
