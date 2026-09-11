@@ -35,6 +35,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { AppLink } from "@/components/ui";
+import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
@@ -227,14 +228,7 @@ export function SellerProfileScreen() {
       {!isTablet && (
         <View style={styles.sidebar}>
           <View style={styles.sidebarHeader}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIconBg}>
-                <Building2 color="#FFFFFF" size={20} />
-              </View>
-              <Text style={styles.brandText}>
-                Home<Text style={styles.brandTextAccent}>net</Text>
-              </Text>
-            </View>
+            <Brand />
 
             <View style={styles.sellerRolePill}>
               <Text style={styles.sellerRoleText}>Seller Dashboard</Text>

@@ -36,6 +36,7 @@ import {
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { AppLink } from "@/components/ui";
+import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
@@ -164,14 +165,7 @@ export function VerificationScreen() {
       {!isTablet && (
         <View style={styles.sidebar}>
           <View style={styles.sidebarHeader}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIconBg}>
-                <Building2 color="#FFFFFF" size={20} />
-              </View>
-              <Text style={styles.brandText}>
-                Home<Text style={styles.brandTextAccent}>net</Text>
-              </Text>
-            </View>
+            <Brand />
 
             <View style={styles.sellerRolePill}>
               <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
