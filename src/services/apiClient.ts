@@ -57,7 +57,7 @@ export function toApiError(error: unknown): ApiError {
 }
 
 export const VERCEL_API_BASE_URL = "https://homenet-api.vercel.app";
-export const LOCAL_API_BASE_URL = "http://localhost:3000";
+export const LOCAL_API_BASE_URL = "http://localhost:3000/api";
 
 let apiBaseUrl = (
   process.env.EXPO_PUBLIC_API_BASE_URL || VERCEL_API_BASE_URL
