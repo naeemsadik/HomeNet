@@ -8,6 +8,7 @@ import {
   Heart,
   Home,
   LogIn,
+  LogOut,
   Mail,
   MapPin,
   Menu,
@@ -24,6 +25,7 @@ import {
   Alert,
   Image,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -181,16 +183,15 @@ function TopBar({
   const { isTablet, isPhone } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const { user } = useAuthStore();
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const { user, logout } = useAuthStore();
 
     const topNavLinks: {
       label: string;
       href: string;
       key: string;
       authGated?: boolean;
-    }[] = [
-      ...(user ? [{ label: "Saved", href: "/saved", key: "saved", authGated: true }] : []),
-    ];
+    }[] = [];
 
   return (
     <SafeAreaView
@@ -267,7 +268,10 @@ function TopBar({
               <View style={styles.notificationWrap}>
                 <Pressable
                   accessibilityLabel="Open notifications"
-                  onPress={() => setNotificationsOpen((open) => !open)}
+                  onPress={() => {
+                    setUserDropdownOpen(false);
+                    setNotificationsOpen((open) => !open);
+                  }}
                   style={[styles.iconCircleButton, isPhone && styles.iconCircleButtonPhone, webPointer]}
                 >
                   <Bell color="#0B1A17" size={isPhone ? 16 : 19} />
@@ -282,48 +286,279 @@ function TopBar({
                 ) : null}
               </View>
 
-              {/* Avatar */}
-              <AppLink
-                href="/profile"
-                accessibilityLabel="Open profile"
-                style={[styles.avatarButton, isPhone && styles.avatarButtonPhone]}
-              >
-                <Image
-                  source={{
-                    uri:
-                      user.avatar_url ||
-                      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
+              {/* User Avatar + Triangle Dropdown Trigger */}
+              <View style={styles.userDropdownWrap}>
+                <Pressable
+                  accessibilityLabel="Open user menu"
+                  onPress={() => {
+                    setNotificationsOpen(false);
+                    setUserDropdownOpen((open) => !open);
                   }}
-                  style={[styles.avatarImage, isPhone && styles.avatarImagePhone]}
-                />
-              </AppLink>
+                  style={({ pressed }) => [
+                    styles.userDropdownTrigger,
+                    userDropdownOpen && styles.userDropdownTriggerActive,
+                    pressed && { opacity: 0.85 },
+                    webPointer,
+                  ]}
+                >
+                  <View style={[styles.avatarButton, isPhone && styles.avatarButtonPhone]}>
+                    <Image
+                      source={{
+                        uri:
+                          user.avatar_url ||
+                          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
+                      }}
+                      style={[styles.avatarImage, isPhone && styles.avatarImagePhone]}
+                    />
+                  </View>
+
+                  {/* Triangle dropdown icon */}
+                  <View
+                    style={[
+                      styles.triangleIconBox,
+                      userDropdownOpen && styles.triangleIconBoxOpen,
+                    ]}
+                  >
+                    <Svg width={8} height={5} viewBox="0 0 8 5">
+                      <Path d="M0 0L8 0L4 5Z" fill="#5C6B66" />
+                    </Svg>
+                  </View>
+                </Pressable>
+
+                {userDropdownOpen && (
+                  <>
+                    {Platform.OS === "web" && (
+                      <Pressable
+                        style={styles.dropdownBackdrop}
+                        onPress={() => setUserDropdownOpen(false)}
+                      />
+                    )}
+                    <View style={[styles.userDropdownMenu, isPhone && styles.userDropdownMenuPhone]}>
+                      {/* User Info Header */}
+                      <View style={styles.userDropdownProfile}>
+                        <Image
+                          source={{
+                            uri:
+                              user.avatar_url ||
+                              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
+                          }}
+                          style={styles.dropdownAvatar}
+                        />
+                        <View style={styles.dropdownProfileInfo}>
+                          <Text numberOfLines={1} style={styles.userDropdownName}>
+                            {user.full_name || "Account"}
+                          </Text>
+                          {user.email ? (
+                            <Text numberOfLines={1} style={styles.userDropdownEmail}>
+                              {user.email}
+                            </Text>
+                          ) : null}
+                        </View>
+                      </View>
+
+                      <View style={styles.dropdownDivider} />
+
+                      {/* Saved Button */}
+                      <Pressable
+                        accessibilityLabel="Saved properties"
+                        accessibilityRole="button"
+                        onPress={() => {
+                          setUserDropdownOpen(false);
+                          router.push("/saved");
+                        }}
+                        style={({ pressed, hovered }: any) => [
+                          styles.dropdownItem,
+                          (pressed || hovered) && styles.dropdownItemPressed,
+                          webPointer,
+                        ]}
+                      >
+                        <View style={[styles.dropdownIconBox, { backgroundColor: "rgba(4, 207, 146, 0.10)" }]}>
+                          <Heart color="#04cf92" size={16} strokeWidth={2} />
+                        </View>
+                        <Text style={styles.dropdownItemText}>Saved</Text>
+                      </Pressable>
+
+                      {/* Profile Button */}
+                      <Pressable
+                        accessibilityLabel="Profile settings"
+                        accessibilityRole="button"
+                        onPress={() => {
+                          setUserDropdownOpen(false);
+                          router.push("/profile");
+                        }}
+                        style={({ pressed, hovered }: any) => [
+                          styles.dropdownItem,
+                          (pressed || hovered) && styles.dropdownItemPressed,
+                          webPointer,
+                        ]}
+                      >
+                        <View style={styles.dropdownIconBox}>
+                          <User color="#0B1A17" size={16} strokeWidth={1.8} />
+                        </View>
+                        <Text style={styles.dropdownItemText}>Profile</Text>
+                      </Pressable>
+
+                      <View style={styles.dropdownDivider} />
+
+                      {/* Log out Button */}
+                      <Pressable
+                        accessibilityLabel="Log out"
+                        accessibilityRole="button"
+                        onPress={async () => {
+                          setUserDropdownOpen(false);
+                          if (Platform.OS === "web") {
+                            const confirmed = window.confirm("Are you sure you want to log out?");
+                            if (confirmed) {
+                              await logout();
+                              router.push("/");
+                            }
+                          } else {
+                            Alert.alert("Log Out", "Are you sure you want to log out?", [
+                              { text: "Cancel", style: "cancel" },
+                              {
+                                text: "Log Out",
+                                style: "destructive",
+                                onPress: async () => {
+                                  await logout();
+                                  router.push("/");
+                                },
+                              },
+                            ]);
+                          }
+                        }}
+                        style={({ pressed, hovered }: any) => [
+                          styles.dropdownItem,
+                          (pressed || hovered) && { backgroundColor: "rgba(239, 68, 68, 0.06)" },
+                          webPointer,
+                        ]}
+                      >
+                        <View style={[styles.dropdownIconBox, { backgroundColor: "rgba(239, 68, 68, 0.08)" }]}>
+                          <LogOut color="#EF4444" size={16} strokeWidth={1.8} />
+                        </View>
+                        <Text style={[styles.dropdownItemText, { color: "#EF4444" }]}>
+                          Log out
+                        </Text>
+                      </Pressable>
+                    </View>
+                  </>
+                )}
+              </View>
             </>
           ) : (
-            /* Previous Sign In Button Design (White background, emerald border, User icon) */
-            <Pressable
-              onPress={() => setAuthModalOpen(true)}
-              accessibilityLabel="Sign in"
-              style={({ pressed }) => [
-                styles.rightmoveSignInBtn,
-                isPhone && styles.rightmoveSignInBtnPhone,
-                webPointer,
-                pressed && { opacity: 0.85, backgroundColor: "rgba(0, 207, 146, 0.08)" },
-              ]}
-            >
-              <User
-                color="#04cf92"
-                size={isPhone ? 15 : 17}
-                strokeWidth={2.2}
-              />
-              <Text
-                style={[
-                  styles.rightmoveSignInText,
-                  isPhone && styles.rightmoveSignInTextPhone,
-                ]}
-              >
-                Sign in
-              </Text>
-            </Pressable>
+            <View style={styles.guestDropdownWrap}>
+              <View style={[styles.guestPillGroup, isPhone && styles.guestPillGroupPhone]}>
+                <Pressable
+                  onPress={() => setAuthModalOpen(true)}
+                  accessibilityLabel="Sign in"
+                  style={({ pressed }) => [
+                    styles.guestSignInBtn,
+                    isPhone && styles.guestSignInBtnPhone,
+                    webPointer,
+                    pressed && { opacity: 0.85, backgroundColor: "rgba(0, 207, 146, 0.08)" },
+                  ]}
+                >
+                  <User
+                    color="#04cf92"
+                    size={isPhone ? 15 : 17}
+                    strokeWidth={2.2}
+                  />
+                  <Text
+                    style={[
+                      styles.rightmoveSignInText,
+                      isPhone && styles.rightmoveSignInTextPhone,
+                    ]}
+                  >
+                    Sign in
+                  </Text>
+                </Pressable>
+
+                <View style={styles.guestPillDivider} />
+
+                {/* Triangle dropdown trigger for guests */}
+                <Pressable
+                  accessibilityLabel="Open menu"
+                  onPress={() => {
+                    setNotificationsOpen(false);
+                    setUserDropdownOpen((open) => !open);
+                  }}
+                  style={({ pressed }) => [
+                    styles.guestTriangleBtn,
+                    isPhone && styles.guestTriangleBtnPhone,
+                    (pressed || userDropdownOpen) && styles.guestTriangleBtnActive,
+                    webPointer,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.triangleIconBox,
+                      userDropdownOpen && styles.triangleIconBoxOpen,
+                    ]}
+                  >
+                    <Svg width={8} height={5} viewBox="0 0 8 5">
+                      <Path d="M0 0L8 0L4 5Z" fill="#0B1A17" />
+                    </Svg>
+                  </View>
+                </Pressable>
+              </View>
+
+              {userDropdownOpen && (
+                <>
+                  {Platform.OS === "web" && (
+                    <Pressable
+                      style={styles.dropdownBackdrop}
+                      onPress={() => setUserDropdownOpen(false)}
+                    />
+                  )}
+                  <View style={[styles.userDropdownMenu, isPhone && styles.userDropdownMenuPhone]}>
+                    <View style={styles.guestMenuHeader}>
+                      <Text style={styles.guestMenuTitle}>Account</Text>
+                    </View>
+
+                    {/* Saved Button */}
+                    <Pressable
+                      accessibilityLabel="Saved properties"
+                      accessibilityRole="button"
+                      onPress={() => {
+                        setUserDropdownOpen(false);
+                        useAuthModalStore.getState().open(() => router.push("/saved" as any));
+                      }}
+                      style={({ pressed, hovered }: any) => [
+                        styles.dropdownItem,
+                        (pressed || hovered) && styles.dropdownItemPressed,
+                        webPointer,
+                      ]}
+                    >
+                      <View style={[styles.dropdownIconBox, { backgroundColor: "rgba(4, 207, 146, 0.10)" }]}>
+                        <Heart color="#04cf92" size={16} strokeWidth={2} />
+                      </View>
+                      <Text style={styles.dropdownItemText}>Saved</Text>
+                    </Pressable>
+
+                    <View style={styles.dropdownDivider} />
+
+                    {/* Sign in Button */}
+                    <Pressable
+                      accessibilityLabel="Sign in"
+                      accessibilityRole="button"
+                      onPress={() => {
+                        setUserDropdownOpen(false);
+                        setAuthModalOpen(true);
+                      }}
+                      style={({ pressed, hovered }: any) => [
+                        styles.dropdownItem,
+                        (pressed || hovered) && styles.dropdownItemPressed,
+                        webPointer,
+                      ]}
+                    >
+                      <View style={styles.dropdownIconBox}>
+                        <LogIn color="#0B1A17" size={16} strokeWidth={1.8} />
+                      </View>
+                      <Text style={styles.dropdownItemText}>Sign in</Text>
+                    </Pressable>
+                  </View>
+                </>
+              )}
+            </View>
           )}
         </View>
       </View>
@@ -1156,6 +1391,191 @@ const styles = StyleSheet.create({
   rightmoveSignInTextPhone: {
     fontSize: 12.5,
   },
+  userDropdownWrap: {
+    position: "relative",
+    zIndex: 60,
+  },
+  guestDropdownWrap: {
+    position: "relative",
+    zIndex: 60,
+  },
+  guestPillGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#04cf92",
+    borderWidth: 1.5,
+    borderRadius: 8,
+    height: 38,
+    overflow: "hidden",
+  },
+  guestPillGroupPhone: {
+    height: 32,
+    borderRadius: 6,
+  },
+  guestSignInBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    paddingHorizontal: 12,
+    height: "100%",
+  },
+  guestSignInBtnPhone: {
+    paddingHorizontal: 8,
+    gap: 4,
+  },
+  guestPillDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: "rgba(4, 207, 146, 0.3)",
+  },
+  guestTriangleBtn: {
+    height: "100%",
+    paddingHorizontal: 9,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  guestTriangleBtnPhone: {
+    paddingHorizontal: 6,
+  },
+  guestTriangleBtnActive: {
+    backgroundColor: "rgba(4, 207, 146, 0.12)",
+  },
+  userDropdownTrigger: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    paddingVertical: 3,
+    paddingLeft: 3,
+    paddingRight: 9,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.10)",
+    backgroundColor: "#FFFFFF",
+  },
+  userDropdownTriggerActive: {
+    borderColor: "#04cf92",
+    backgroundColor: "rgba(4, 207, 146, 0.04)",
+  },
+  triangleIconBox: {
+    width: 12,
+    height: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  triangleIconBoxOpen: {
+    transform: [{ rotate: "180deg" }],
+  },
+  dropdownBackdrop: {
+    position: (Platform.OS === "web" ? "fixed" : "absolute") as any,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 80,
+  },
+  userDropdownMenu: {
+    position: "absolute",
+    top: 48,
+    right: 0,
+    width: 240,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    padding: 6,
+    zIndex: 90,
+    ...Platform.select({
+      web: {
+        boxShadow: "0 16px 36px -4px rgba(11, 26, 23, 0.12), 0 2px 8px -2px rgba(11, 26, 23, 0.04), 0 0 0 1px rgba(11, 26, 23, 0.04)",
+      } as any,
+      default: {
+        shadowColor: "#0B1A17",
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.12,
+        shadowRadius: 18,
+        elevation: 10,
+      },
+    }),
+  },
+  userDropdownMenuPhone: {
+    width: 220,
+  },
+  userDropdownProfile: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  dropdownAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  dropdownProfileInfo: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  userDropdownName: {
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#0B1A17",
+    letterSpacing: -0.2,
+  },
+  userDropdownEmail: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: "#707E78",
+    marginTop: 1,
+  },
+  guestMenuHeader: {
+    paddingHorizontal: 10,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  guestMenuTitle: {
+    fontFamily: fonts.semiBold,
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#8A9993",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  dropdownDivider: {
+    height: 1,
+    backgroundColor: "rgba(11, 26, 23, 0.06)",
+    marginVertical: 4,
+    marginHorizontal: 4,
+  },
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  dropdownItemPressed: {
+    backgroundColor: "rgba(11, 26, 23, 0.05)",
+  },
+  dropdownIconBox: {
+    width: 30,
+    height: 30,
+    borderRadius: 7,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(11, 26, 23, 0.04)",
+  },
+  dropdownItemText: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#0B1A17",
+  },
   locationPill: {
     flexDirection: "row",
     alignItems: "center",
@@ -1283,26 +1703,24 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   avatarButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    overflow: "hidden",
-    borderWidth: 0.8,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-  },
-  avatarButtonPhone: {
     width: 32,
     height: 32,
     borderRadius: 16,
+    overflow: "hidden",
+  },
+  avatarButtonPhone: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
   },
   avatarImage: {
     width: "100%",
     height: "100%",
   },
   avatarImagePhone: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
   },
 
   pageScrollContent: {

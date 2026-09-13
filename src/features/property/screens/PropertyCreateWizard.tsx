@@ -27,7 +27,6 @@ import {
   Save,
   Search,
   Send,
-  Settings,
   ShieldCheck,
   Sparkles,
   Trash2,
@@ -62,6 +61,7 @@ import {
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
 import type { UploadInput } from "@/services/upload";
 import { colors, fonts, webPointer } from "@/theme";
@@ -363,7 +363,30 @@ export function PropertyCreateWizard() {
     }
   };
 
-  // Sidebar items - aligned with HomeNet standards (Notification removed as requested)
+  const logout = useAuthStore((s) => s.logout);
+  const handleLogout = () => {
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("Are you sure you want to log out?");
+      if (confirmed) {
+        logout();
+        router.replace("/");
+      }
+      return;
+    }
+    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: () => {
+          logout();
+          router.replace("/");
+        },
+      },
+    ]);
+  };
+
+  // Sidebar items - aligned with HomeNet standards (all seller tabs present)
   const sidebarNavItems: {
     key: string;
     label: string;
@@ -377,24 +400,17 @@ export function PropertyCreateWizard() {
     { key: "listings", label: "My Listings", icon: Building2, href: "/my-properties" },
     { key: "create", label: "Create Property", icon: PlusCircle, href: "/property/create", active: true },
     { key: "verification", label: "Verification", icon: ShieldCheck, href: "/verification" },
-    { key: "insights", label: "AI Insights", icon: Sparkles, href: "/ai-finder" },
-    { key: "analytics", label: "Analytics", icon: BarChart2, href: "/market" },
+    { key: "boost", label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
+    { key: "insights", label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "analytics", label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
+    { key: "payments", label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
     { key: "profile", label: "Profile", icon: User, href: "/seller/profile" },
-    { key: "settings", label: "Settings", icon: Settings, href: "/settings" },
-    { key: "help", label: "Help Center", icon: CircleHelp, href: "/about" },
+    { key: "help", label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
     { key: "logout", label: "Logout", icon: LogOut, danger: true, href: "/" },
   ];
 
   return (
     <View style={styles.outerContainer}>
-      {/* Mobile navigation drawer */}
-      <SellerMobileDrawer
-        activeNav="create"
-        items={sidebarNavItems as any}
-        onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={() => {}}
-        visible={mobileDrawerOpen}
-      />
 
       {/* Sidebar (Desktop View) */}
       {!isTablet && (
@@ -413,6 +429,11 @@ export function PropertyCreateWizard() {
                 <AppLink
                   href={item.href || "#"}
                   key={item.key}
+                  onPress={() => {
+                    if (item.key === "logout") {
+                      handleLogout();
+                    }
+                  }}
                   style={[
                     styles.navItem,
                     item.active && styles.navItemActive,
@@ -1359,6 +1380,10 @@ export function PropertyCreateWizard() {
         onClose={() => setMobileDrawerOpen(false)}
         onSelectNav={(key) => {
           setMobileDrawerOpen(false);
+          if (key === "logout") {
+            handleLogout();
+            return;
+          }
           const found = sidebarNavItems.find((i) => i.key === key);
           if (found?.href) router.push(found.href as any);
         }}
