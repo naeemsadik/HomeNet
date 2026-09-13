@@ -1,22 +1,27 @@
-import React, { useState } from "react";
+import React from "react";
 import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { Mail, Lock, UserPlus } from "lucide-react-native";
 import { router } from "expo-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from "@/stores/authStore";
-import { FloatingInput, ErrorBanner, AuthButton, Divider } from "@/components/AuthFormFields";
+import { loginSchema, type LoginFormData } from "@/lib/schemas/auth";
+import { FormFloatingInput } from "@/components/FormFloatingInput";
+import { ErrorBanner, AuthButton, Divider } from "@/components/AuthFormFields";
 import { AppChrome } from "@/components/AppChrome";
 import { colors, fonts } from "@/theme";
 
 export function LoginScreen() {
   const { login, loading, error, clearError } = useAuthStore();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      return;
-    }
-    const success = await login({ email: email.trim(), password });
+  const { control, handleSubmit, formState: { isValid } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+    mode: "onChange",
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    const success = await login({ email: data.email.trim(), password: data.password });
     if (success) {
       router.replace("/profile" as never);
     }
@@ -31,26 +36,20 @@ export function LoginScreen() {
 
           <ErrorBanner message={error} />
 
-          <FloatingInput
+          <FormFloatingInput
+            control={control}
+            name="email"
             label="Email Address"
-            value={email}
-            onChangeText={(val) => {
-              setEmail(val);
-              if (error) clearError();
-            }}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
             icon={Mail}
           />
 
-          <FloatingInput
+          <FormFloatingInput
+            control={control}
+            name="password"
             label="Password"
-            value={password}
-            onChangeText={(val) => {
-              setPassword(val);
-              if (error) clearError();
-            }}
             secureTextEntry
             autoCapitalize="none"
             autoCorrect={false}
@@ -59,9 +58,9 @@ export function LoginScreen() {
 
           <AuthButton
             label="Log In"
-            onPress={handleLogin}
+            onPress={handleSubmit(onSubmit)}
             loading={loading}
-            disabled={!email || !password}
+            disabled={!isValid}
             style={styles.submitBtn}
           />
 
@@ -71,7 +70,7 @@ export function LoginScreen() {
             label="Create an Account"
             onPress={() => {
               clearError();
-              router.push("/users?register=true" as any); // fallback mapping or register tab
+              router.push("/users?register=true" as any);
             }}
             variant="secondary"
             icon={UserPlus}
