@@ -11,12 +11,10 @@ import {
   LayoutDashboard,
   LogOut,
   MapPin,
-  MessageSquareText,
   PlusCircle,
   Receipt,
   Rocket,
   Search,
-  Settings,
   ShieldCheck,
   Sparkles,
   Upload,
@@ -35,9 +33,11 @@ import {
   View,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
+import { router } from "expo-router";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useAuthStore } from "@/stores/authStore";
 import { fonts, webPointer } from "@/theme";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
@@ -119,18 +119,40 @@ export function VerificationScreen() {
   const circumference = 2 * Math.PI * circleRadius;
   const strokeDashoffset = circumference * (1 - progressPercent / 100);
 
+  const logout = useAuthStore((s) => s.logout);
+  const handleLogout = () => {
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("Are you sure you want to log out?");
+      if (confirmed) {
+        logout();
+        router.replace("/");
+      }
+      return;
+    }
+    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: () => {
+          logout();
+          router.replace("/");
+        },
+      },
+    ]);
+  };
+
   const sidebarNavItems = [
     { key: "dashboard" as SellerNavKey, label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
     { key: "listings" as SellerNavKey, label: "My Listings", icon: Building2, href: "/my-properties" },
     { key: "create" as SellerNavKey, label: "Create Property", icon: PlusCircle, href: "/property/create" },
     { key: "verification" as SellerNavKey, label: "Verification", icon: ShieldCheck, href: "/verification", active: true },
-    { key: "boost" as SellerNavKey, label: "Boost Listings", icon: Rocket },
-    { key: "insights" as SellerNavKey, label: "AI Insights", icon: Sparkles, href: "/ai-finder" },
-    { key: "analytics" as SellerNavKey, label: "Analytics", icon: BarChart2, href: "/market" },
-    { key: "payments" as SellerNavKey, label: "Payments", icon: CreditCard },
+    { key: "boost" as SellerNavKey, label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
+    { key: "insights" as SellerNavKey, label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "analytics" as SellerNavKey, label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
+    { key: "payments" as SellerNavKey, label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
     { key: "profile" as SellerNavKey, label: "Profile", icon: User, href: "/seller/profile" },
-    { key: "settings" as SellerNavKey, label: "Settings", icon: Settings, href: "/settings" },
-    { key: "help" as SellerNavKey, label: "Help Center", icon: CircleHelp, href: "/about" },
+    { key: "help" as SellerNavKey, label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
     { key: "logout" as SellerNavKey, label: "Logout", icon: LogOut, danger: true, href: "/" },
   ];
 
@@ -181,6 +203,11 @@ export function VerificationScreen() {
                 <AppLink
                   href={item.href || "#"}
                   key={item.key}
+                  onPress={() => {
+                    if (item.key === "logout") {
+                      handleLogout();
+                    }
+                  }}
                   style={[
                     styles.navItem,
                     isActive && styles.navItemActive,
@@ -212,7 +239,15 @@ export function VerificationScreen() {
         activeNav="verification"
         items={sidebarNavItems}
         onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={() => { }}
+        onSelectNav={(key) => {
+          setMobileDrawerOpen(false);
+          if (key === "logout") {
+            handleLogout();
+            return;
+          }
+          const found = sidebarNavItems.find((i) => i.key === key);
+          if (found?.href) router.push(found.href as any);
+        }}
         visible={isTablet && mobileDrawerOpen}
       />
 

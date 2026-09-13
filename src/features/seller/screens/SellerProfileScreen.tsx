@@ -6,17 +6,21 @@ import {
   CheckCircle2,
   CircleHelp,
   CreditCard,
+  Eye,
+  EyeOff,
   Globe,
+  Heart,
+  KeyRound,
   LayoutDashboard,
   LogOut,
-  MessageSquareText,
   PlusCircle,
   Rocket,
   Search,
-  Settings,
+  Shield,
   ShieldAlert,
   ShieldCheck,
   Sparkles,
+  Trash2,
   User,
   X,
 } from "lucide-react-native";
@@ -25,6 +29,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -33,13 +38,13 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
-import { updateUser, uploadAvatar } from "@/services/userApi";
+import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
 import type { UploadInput } from "@/services/upload";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
@@ -47,29 +52,41 @@ import type { SellerNavKey } from "./SellerDashboardScreen";
 
 const DEFAULT_AVATAR =
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop";
-const DEFAULT_NAME = "Ayesha Rahman";
+const DEFAULT_NAME = "Fuad Abrar";
 const DEFAULT_AGENCY = "Homenet Verified Partner";
-const DEFAULT_EMAIL = "ayesha@homenet.com.bd";
+const DEFAULT_BUYER_PREF = "Apartments & Houses in Dhaka";
+const DEFAULT_EMAIL = "fowadabrar10112002@icloud.com";
 const DEFAULT_PHONE = "+880 1700-000000";
 
 export function SellerProfileScreen() {
-  const { isTablet } = useResponsive();
-  const { user, logout, fetchMe } = useAuthStore();
-
+  const { isPhone, isTablet } = useResponsive();
+  const { user, logout, fetchMe, changePassword } = useAuthStore();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Form State
-  const [fullName, setFullName] = useState(user?.full_name || "Ayesha Rahman");
-  const [agency, setAgency] = useState("Homenet Verified Partner");
-  const [email, setEmail] = useState(user?.email || "ayesha@homenet.com.bd");
-  const [phone, setPhone] = useState("+880 1700-000000");
+  const [fullName, setFullName] = useState(user?.full_name || DEFAULT_NAME);
+  const [agency, setAgency] = useState(DEFAULT_AGENCY);
+  const [email, setEmail] = useState(user?.email || DEFAULT_EMAIL);
+  const [phone, setPhone] = useState(DEFAULT_PHONE);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     user?.avatar_url || DEFAULT_AVATAR
   );
 
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  // Change Password Modal State
+  const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -87,8 +104,8 @@ export function SellerProfileScreen() {
   const handleBadgePress = () => {
     if (isVerified) {
       Alert.alert(
-        "Verified Seller",
-        "Your identity and seller credentials have been verified by HomeNet.",
+        "Verified Account",
+        "Your identity and credentials have been verified by HomeNet.",
         [
           { text: "View Verification", onPress: () => router.push("/verification" as any) },
           { text: "OK", style: "cancel" },
@@ -97,7 +114,7 @@ export function SellerProfileScreen() {
     } else if (!user) {
       Alert.alert(
         "Sign In Required",
-        "You are currently viewing a preview profile. Please sign in or complete verification to get your verified seller badge.",
+        "You are currently viewing a preview profile. Please sign in or complete verification to get your verified badge.",
         [
           { text: "Sign In", onPress: () => router.push("/profile" as any) },
           { text: "Get Verified", onPress: () => router.push("/verification" as any) },
@@ -121,13 +138,12 @@ export function SellerProfileScreen() {
     { key: "listings" as SellerNavKey, label: "My Listings", icon: Building2, href: "/my-properties" },
     { key: "create" as SellerNavKey, label: "Create Property", icon: PlusCircle, href: "/property/create" },
     { key: "verification" as SellerNavKey, label: "Verification", icon: ShieldCheck, href: "/verification" },
-    { key: "boost" as SellerNavKey, label: "Boost Listings", icon: Rocket },
-    { key: "insights" as SellerNavKey, label: "AI Insights", icon: Sparkles, href: "/ai-finder" },
-    { key: "analytics" as SellerNavKey, label: "Analytics", icon: BarChart2, href: "/market" },
-    { key: "payments" as SellerNavKey, label: "Payments", icon: CreditCard },
+    { key: "boost" as SellerNavKey, label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
+    { key: "insights" as SellerNavKey, label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "analytics" as SellerNavKey, label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
+    { key: "payments" as SellerNavKey, label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
     { key: "profile" as SellerNavKey, label: "Profile", icon: User, href: "/seller/profile", active: true },
-    { key: "settings" as SellerNavKey, label: "Settings", icon: Settings, href: "/settings" },
-    { key: "help" as SellerNavKey, label: "Help Center", icon: CircleHelp, href: "/about" },
+    { key: "help" as SellerNavKey, label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
     { key: "logout" as SellerNavKey, label: "Logout", icon: LogOut, danger: true, href: "/" },
   ];
 
@@ -192,6 +208,84 @@ export function SellerProfileScreen() {
     }
   };
 
+  const handleChangePasswordSubmit = async () => {
+    setPasswordError(null);
+    if (!currentPassword) {
+      setPasswordError("Please enter your current password.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+
+    try {
+      setIsChangingPassword(true);
+      const success = await changePassword({
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+
+      if (success) {
+        setChangePasswordModalOpen(false);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        Alert.alert("Success", "Your password has been changed successfully.");
+      } else {
+        setPasswordError("Failed to change password. Please check your current password.");
+      }
+    } catch (err: any) {
+      setPasswordError(err?.message || "Failed to update password.");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const doDelete = async () => {
+      try {
+        setIsDeletingAccount(true);
+        if (user) {
+          await deleteUser(user.id);
+          await logout();
+        }
+        if (Platform.OS === "web") {
+          window.alert("Your account has been permanently deleted.");
+        } else {
+          Alert.alert("Account Deleted", "Your account has been permanently deleted.");
+        }
+        router.replace("/");
+      } catch (err: any) {
+        Alert.alert("Error", err?.message || "Failed to delete account. Please try again.");
+      } finally {
+        setIsDeletingAccount(false);
+      }
+    };
+
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(
+        "Permanently Delete Account?\n\nWarning: This action cannot be undone. All your listings, saved properties, and profile data will be permanently wiped.\n\nAre you sure you want to proceed?"
+      );
+      if (!confirmed) return;
+      await doDelete();
+      return;
+    }
+
+    Alert.alert(
+      "Permanently Delete Account",
+      "Warning: This action cannot be undone. All your listings, saved properties, and account data will be permanently deleted.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete Permanently", style: "destructive", onPress: doDelete },
+      ]
+    );
+  };
+
   const handleLogout = async () => {
     const doLogout = async () => {
       try {
@@ -224,7 +318,7 @@ export function SellerProfileScreen() {
 
   return (
     <View style={styles.outerContainer}>
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar - screen > tablet */}
       {!isTablet && (
         <View style={styles.sidebar}>
           <View style={styles.sidebarHeader}>
@@ -274,21 +368,26 @@ export function SellerProfileScreen() {
         </View>
       )}
 
-      {/* Mobile Navigation Drawer */}
+      {/* Mobile Navigation Drawer for Seller */}
       <SellerMobileDrawer
         activeNav="profile"
         items={sidebarNavItems}
         onClose={() => setMobileDrawerOpen(false)}
         onSelectNav={(key) => {
+          setMobileDrawerOpen(false);
           if (key === "logout") {
             handleLogout();
+            return;
           }
+          const found = sidebarNavItems.find((i) => i.key === key);
+          if (found?.href) router.push(found.href as any);
         }}
         visible={isTablet && mobileDrawerOpen}
       />
 
       {/* Main Workspace Area */}
       <View style={styles.mainContent}>
+        {/* Top Header */}
         {isTablet ? (
           /* Mobile Top Header (Figma 288:2759) */
           <SellerTopHeader
@@ -324,40 +423,50 @@ export function SellerProfileScreen() {
                     onPress={() => setSearchQuery("")}
                     style={[styles.clearBtn, webPointer]}
                   >
-                    <X color="rgba(11,26,23,0.4)" size={14} />
+                    <X color="rgba(11,26,23,0.4)" size={15} />
                   </Pressable>
                 )}
               </View>
 
-              <AppLink href="/notifications" style={styles.iconCircleBtn}>
+              <Pressable
+                accessibilityLabel="Notifications"
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.iconCircleBtn,
+                  webPointer,
+                  pressed && styles.pressed,
+                ]}
+              >
                 <Bell color="#0B1A17" size={19} />
-                <View style={styles.headerDotIndicator} />
-              </AppLink>
+              </Pressable>
 
               <AppLink href="/" style={styles.viewSiteBtn}>
-                <Globe color="#0B1A17" size={16} />
+                <Globe color="#0B1A17" size={15} />
                 <Text style={styles.viewSiteText}>View site</Text>
               </AppLink>
             </View>
           </View>
         )}
 
-        {/* Scrollable Content Container */}
+        {/* Scrollable Form Body */}
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            isPhone && styles.scrollContentPhone,
+          ]}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.contentWrap}>
             {/* Section 1: Personal Information */}
-            <View style={styles.card}>
+            <View style={[styles.card, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
                 <User color="#0B1A17" size={20} />
                 <Text style={styles.cardTitle}>Personal information</Text>
               </View>
 
               {/* Avatar and Name Row */}
-              <View style={styles.profileRow}>
-                <View style={styles.avatarWrap}>
+              <View style={[styles.profileRow, isPhone && styles.profileRowPhone]}>
+                <View style={[styles.avatarWrap, isPhone && styles.avatarWrapPhone]}>
                   <Image
                     source={{ uri: avatarUrl || DEFAULT_AVATAR }}
                     style={styles.avatarImage}
@@ -372,7 +481,7 @@ export function SellerProfileScreen() {
                 <View style={styles.profileInfoCol}>
                   <View style={styles.nameBadgeRow}>
                     <Text numberOfLines={1} style={styles.profileName}>
-                      {fullName || "Ayesha Rahman"}
+                      {fullName || DEFAULT_NAME}
                     </Text>
 
                     <Pressable
@@ -416,10 +525,10 @@ export function SellerProfileScreen() {
                 </View>
               </View>
 
-              {/* Form Fields: Full Name & Agency */}
+              {/* Form Field: Full Name */}
               <View style={styles.formGroup}>
                 <Text style={styles.fieldLabel}>Full name</Text>
-                <View style={styles.inputWrap}>
+                <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                   <TextInput
                     onChangeText={setFullName}
                     onFocus={() => {
@@ -450,9 +559,10 @@ export function SellerProfileScreen() {
                 </View>
               </View>
 
+              {/* Form Field: Agency */}
               <View style={[styles.formGroup, styles.formGroupSpacing]}>
                 <Text style={styles.fieldLabel}>Agency</Text>
-                <View style={styles.inputWrap}>
+                <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                   <TextInput
                     onChangeText={setAgency}
                     onFocus={() => {
@@ -485,14 +595,14 @@ export function SellerProfileScreen() {
             </View>
 
             {/* Section 2: Contact Information */}
-            <View style={[styles.card, styles.sectionSpacing]}>
+            <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
                 <Text style={styles.cardTitle}>Contact information</Text>
               </View>
 
               <View style={styles.formGroup}>
                 <Text style={styles.fieldLabel}>Email</Text>
-                <View style={styles.inputWrap}>
+                <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                   <TextInput
                     autoCapitalize="none"
                     keyboardType="email-address"
@@ -527,7 +637,7 @@ export function SellerProfileScreen() {
 
               <View style={[styles.formGroup, styles.formGroupSpacing]}>
                 <Text style={styles.fieldLabel}>Phone</Text>
-                <View style={styles.inputWrap}>
+                <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                   <TextInput
                     keyboardType="phone-pad"
                     onChangeText={setPhone}
@@ -560,23 +670,81 @@ export function SellerProfileScreen() {
               </View>
             </View>
 
-            {/* Bottom Actions Row */}
-            <View style={styles.actionRow}>
-              {/* Logout Button */}
-              <Pressable
-                accessibilityLabel="Logout"
-                accessibilityRole="button"
-                onPress={handleLogout}
-                style={({ pressed }) => [
-                  styles.logoutBtn,
-                  webPointer,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <LogOut color="#D4183D" size={16} />
-                <Text style={styles.logoutBtnText}>Logout</Text>
-              </Pressable>
+            {/* Section 3: Account Security (Change Password & Permanently Delete Account) */}
+            <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
+              <View style={styles.cardHeaderRow}>
+                <Shield color="#0B1A17" size={20} />
+                <Text style={styles.cardTitle}>Account security</Text>
+              </View>
 
+              {/* Change Password Option */}
+              <View style={[styles.securityRow, isPhone && styles.securityRowPhone]}>
+                <View style={styles.securityInfoCol}>
+                  <Text style={styles.securityTitle}>Password</Text>
+                  <Text style={styles.securityDesc}>
+                    •••••••••••• &nbsp;·&nbsp; Keep your account protected with a strong password
+                  </Text>
+                </View>
+
+                <Pressable
+                  accessibilityLabel="Change password"
+                  accessibilityRole="button"
+                  onPress={() => {
+                    setPasswordError(null);
+                    setChangePasswordModalOpen(true);
+                  }}
+                  style={({ pressed }) => [
+                    styles.changePasswordBtn,
+                    isPhone && styles.fullWidthBtnPhone,
+                    webPointer,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <KeyRound color="#03a675" size={15} />
+                  <Text style={styles.changePasswordBtnText}>Change password</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.securityDivider} />
+
+              {/* Permanently Delete Account Option */}
+              <View style={[styles.securityRow, isPhone && styles.securityRowPhone]}>
+                <View style={styles.securityInfoCol}>
+                  <Text style={[styles.securityTitle, { color: "#D4183D" }]}>
+                    Permanently delete account
+                  </Text>
+                  <Text style={styles.securityDesc}>
+                    Once deleted, your profile, listings, saved properties, and account data will be permanently removed.
+                  </Text>
+                </View>
+
+                <Pressable
+                  accessibilityLabel="Permanently delete account"
+                  accessibilityRole="button"
+                  disabled={isDeletingAccount}
+                  onPress={handleDeleteAccount}
+                  style={({ pressed }) => [
+                    styles.deleteAccountBtn,
+                    isPhone && styles.fullWidthBtnPhone,
+                    webPointer,
+                    pressed && styles.pressed,
+                    isDeletingAccount && styles.btnDisabled,
+                  ]}
+                >
+                  {isDeletingAccount ? (
+                    <ActivityIndicator color="#D4183D" size="small" />
+                  ) : (
+                    <>
+                      <Trash2 color="#D4183D" size={15} />
+                      <Text style={styles.deleteAccountBtnText}>Permanently delete account</Text>
+                    </>
+                  )}
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Bottom Actions Row */}
+            <View style={[styles.actionRow, isPhone && styles.actionRowPhone]}>
               {/* Save changes Button */}
               <Pressable
                 accessibilityLabel="Save changes"
@@ -585,6 +753,7 @@ export function SellerProfileScreen() {
                 onPress={handleSaveChanges}
                 style={({ pressed }) => [
                   styles.saveBtn,
+                  isPhone && styles.saveBtnPhone,
                   webPointer,
                   isSaving && styles.btnDisabled,
                   pressed && styles.pressed,
@@ -600,6 +769,171 @@ export function SellerProfileScreen() {
           </View>
         </ScrollView>
       </View>
+
+      {/* Change Password Modal */}
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setChangePasswordModalOpen(false)}
+        transparent
+        visible={changePasswordModalOpen}
+      >
+        <Pressable
+          onPress={() => setChangePasswordModalOpen(false)}
+          style={styles.modalBackdrop}
+        >
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={[styles.modalCard, isPhone && styles.modalCardPhone]}
+          >
+            <View style={styles.modalHeader}>
+              <View style={styles.modalIconWrap}>
+                <KeyRound color="#03a675" size={20} />
+              </View>
+              <View style={styles.modalTitleWrap}>
+                <Text style={styles.modalTitle}>Change Password</Text>
+                <Text style={styles.modalSubtitle}>
+                  Enter your current password and a new secure password.
+                </Text>
+              </View>
+              <Pressable
+                accessibilityLabel="Close"
+                hitSlop={10}
+                onPress={() => setChangePasswordModalOpen(false)}
+                style={[styles.modalCloseBtn, webPointer]}
+              >
+                <X color="#0B1A17" size={18} />
+              </Pressable>
+            </View>
+
+            {passwordError ? (
+              <View style={styles.modalErrorBanner}>
+                <Text style={styles.modalErrorText}>{passwordError}</Text>
+              </View>
+            ) : null}
+
+            {/* Current Password */}
+            <View style={styles.modalInputGroup}>
+              <Text style={styles.modalFieldLabel}>Current password</Text>
+              <View style={styles.modalInputWrap}>
+                <TextInput
+                  autoCapitalize="none"
+                  onChangeText={(val) => {
+                    setCurrentPassword(val);
+                    setPasswordError(null);
+                  }}
+                  placeholder="Enter current password"
+                  placeholderTextColor="rgba(11,26,23,0.35)"
+                  secureTextEntry={!showCurrentPassword}
+                  style={styles.modalTextInput}
+                  value={currentPassword}
+                />
+                <Pressable
+                  accessibilityLabel="Toggle show password"
+                  onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                  style={[styles.eyeBtn, webPointer]}
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff color="rgba(11,26,23,0.5)" size={16} />
+                  ) : (
+                    <Eye color="rgba(11,26,23,0.5)" size={16} />
+                  )}
+                </Pressable>
+              </View>
+            </View>
+
+            {/* New Password */}
+            <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
+              <Text style={styles.modalFieldLabel}>New password</Text>
+              <View style={styles.modalInputWrap}>
+                <TextInput
+                  autoCapitalize="none"
+                  onChangeText={(val) => {
+                    setNewPassword(val);
+                    setPasswordError(null);
+                  }}
+                  placeholder="At least 6 characters"
+                  placeholderTextColor="rgba(11,26,23,0.35)"
+                  secureTextEntry={!showNewPassword}
+                  style={styles.modalTextInput}
+                  value={newPassword}
+                />
+                <Pressable
+                  accessibilityLabel="Toggle show password"
+                  onPress={() => setShowNewPassword(!showNewPassword)}
+                  style={[styles.eyeBtn, webPointer]}
+                >
+                  {showNewPassword ? (
+                    <EyeOff color="rgba(11,26,23,0.5)" size={16} />
+                  ) : (
+                    <Eye color="rgba(11,26,23,0.5)" size={16} />
+                  )}
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Confirm New Password */}
+            <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
+              <Text style={styles.modalFieldLabel}>Confirm new password</Text>
+              <View style={styles.modalInputWrap}>
+                <TextInput
+                  autoCapitalize="none"
+                  onChangeText={(val) => {
+                    setConfirmPassword(val);
+                    setPasswordError(null);
+                  }}
+                  placeholder="Re-enter new password"
+                  placeholderTextColor="rgba(11,26,23,0.35)"
+                  secureTextEntry={!showConfirmPassword}
+                  style={styles.modalTextInput}
+                  value={confirmPassword}
+                />
+                <Pressable
+                  accessibilityLabel="Toggle show password"
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={[styles.eyeBtn, webPointer]}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff color="rgba(11,26,23,0.5)" size={16} />
+                  ) : (
+                    <Eye color="rgba(11,26,23,0.5)" size={16} />
+                  )}
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Modal Actions */}
+            <View style={styles.modalActionRow}>
+              <Pressable
+                onPress={() => setChangePasswordModalOpen(false)}
+                style={({ pressed }) => [
+                  styles.modalCancelBtn,
+                  webPointer,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+              </Pressable>
+
+              <Pressable
+                disabled={isChangingPassword}
+                onPress={handleChangePasswordSubmit}
+                style={({ pressed }) => [
+                  styles.modalSubmitBtn,
+                  webPointer,
+                  pressed && styles.pressed,
+                  isChangingPassword && styles.btnDisabled,
+                ]}
+              >
+                {isChangingPassword ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text style={styles.modalSubmitBtnText}>Update password</Text>
+                )}
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -626,28 +960,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "rgba(11,26,23,0.06)",
     gap: 12,
-  },
-  brandRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  brandIconBg: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#0F6D55",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  brandText: {
-    fontSize: 20,
-    fontFamily: fonts.headingBold,
-    fontWeight: "700",
-    color: "#0B1A17",
-  },
-  brandTextAccent: {
-    color: "#04cf92",
   },
   sellerRolePill: {
     alignSelf: "flex-start",
@@ -705,7 +1017,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8FAF9",
   },
   topHeader: {
-    height: 70,
+    minHeight: 68,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
     borderBottomColor: "rgba(11,26,23,0.06)",
@@ -713,6 +1025,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 24,
+    paddingVertical: 12,
+    gap: 16,
+  },
+  headerTitleGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 18,
+    flex: 1,
+    minWidth: 0,
+  },
+  desktopBrandLink: {
+    flexShrink: 0,
   },
   headerTitle: {
     fontSize: 20,
@@ -724,57 +1048,67 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    flexShrink: 0,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     backgroundColor: "#F4F6F5",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 40,
+    borderRadius: 999,
+    paddingHorizontal: 14,
     width: 220,
+    height: 38,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.08)",
   },
   searchInput: {
     flex: 1,
+    height: "100%",
     fontSize: 13,
-    color: "rgba(11, 26, 23, 0.45)",
     fontFamily: fonts.regular,
     fontWeight: "300",
+    color: "rgba(11, 26, 23, 0.45)",
     paddingVertical: 0,
     ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
   },
+  textInputNormal: {
+    fontWeight: "400",
+    color: "#0B1A17",
+  },
   iconCircleBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "rgba(11,26,23,0.08)",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
     position: "relative",
     ...webPointer,
   },
   headerDotIndicator: {
     position: "absolute",
-    top: 9,
-    right: 9,
-    width: 7,
-    height: 7,
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
     borderRadius: 4,
     backgroundColor: "#F4823A",
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
   },
   viewSiteBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 10,
-    backgroundColor: "#F4F6F5",
+    height: 38,
+    borderRadius: 999,
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "rgba(11,26,23,0.06)",
+    borderColor: "rgba(11,26,23,0.08)",
     ...webPointer,
   },
   viewSiteText: {
@@ -785,13 +1119,61 @@ const styles = StyleSheet.create({
   },
   // Scrollable Content
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingVertical: 24,
     alignItems: "center",
+  },
+  scrollContentPhone: {
+    paddingHorizontal: 12,
+    paddingVertical: 16,
   },
   contentWrap: {
     width: "100%",
     maxWidth: 768,
+  },
+  // Segmented Tab Switcher (Buyer & Seller)
+  tabBar: {
+    flexDirection: "row",
+    backgroundColor: "#EBEFEA",
+    borderRadius: 14,
+    padding: 4,
+    marginBottom: 20,
+    width: "100%",
+    gap: 6,
+  },
+  tabBarPhone: {
+    marginBottom: 16,
+  },
+  tabBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  tabBtnActive: {
+    backgroundColor: "#0F6D55",
+    ...(Platform.OS === "web"
+      ? {
+          boxShadow: "0 2px 8px rgba(15, 109, 85, 0.25)",
+        }
+      : {
+          elevation: 2,
+        }),
+  },
+  tabBtnText: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    fontWeight: "600",
+    color: "#5C6B66",
+  },
+  tabBtnTextPhone: {
+    fontSize: 13,
+  },
+  tabBtnTextActive: {
+    color: "#FFFFFF",
   },
   // Cards
   card: {
@@ -802,7 +1184,7 @@ const styles = StyleSheet.create({
     padding: 24,
     ...(Platform.OS === "web"
       ? {
-          boxShadow: "0px 1px 3px rgba(11, 26, 23, 0.03)",
+          boxShadow: "0px 2px 8px rgba(11, 26, 23, 0.04)",
         }
       : {
           elevation: 1,
@@ -812,8 +1194,12 @@ const styles = StyleSheet.create({
           shadowRadius: 3,
         }),
   },
+  cardPhone: {
+    padding: 16,
+    borderRadius: 18,
+  },
   sectionSpacing: {
-    marginTop: 24,
+    marginTop: 20,
   },
   cardHeaderRow: {
     flexDirection: "row",
@@ -835,6 +1221,9 @@ const styles = StyleSheet.create({
     gap: 16,
     marginBottom: 20,
   },
+  profileRowPhone: {
+    gap: 12,
+  },
   avatarWrap: {
     width: 80,
     height: 80,
@@ -842,6 +1231,11 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#E2E8F0",
     position: "relative",
+  },
+  avatarWrapPhone: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
   },
   avatarImage: {
     width: "100%",
@@ -906,6 +1300,21 @@ const styles = StyleSheet.create({
     color: "#D97706",
     fontWeight: "500",
   },
+  buyerBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#E7F2EE",
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  buyerBadgeText: {
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    color: "#0F6D55",
+    fontWeight: "600",
+  },
   changePhotoBtn: {
     alignSelf: "flex-start",
     marginTop: 6,
@@ -925,49 +1334,155 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 14,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
+    fontFamily: fonts.medium,
+    fontWeight: "500",
     color: "#0B1A17",
-    marginBottom: 6,
+    marginBottom: 8,
   },
   inputWrap: {
-    backgroundColor: "#F4F6F5",
-    borderRadius: 16,
-    borderWidth: 1.13,
-    borderColor: "rgba(11,26,23,0.08)",
-    height: 46,
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#F4F6F5",
+    borderRadius: 16,
+    height: 48,
     paddingHorizontal: 16,
-    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(11,26,23,0.06)",
+  },
+  inputWrapPhone: {
+    height: 44,
+    paddingHorizontal: 12,
   },
   textInput: {
     flex: 1,
-    fontSize: 15,
+    height: "100%",
+    fontSize: 14,
     fontFamily: fonts.regular,
     fontWeight: "300",
     color: "rgba(11, 26, 23, 0.45)",
     paddingVertical: 0,
     ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
   },
-  textInputNormal: {
-    fontWeight: "400",
-    color: "#0B1A17",
-  },
   clearBtn: {
-    padding: 4,
+    padding: 6,
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 8,
+  },
+  // Quick Chips
+  quickChipsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap",
+    marginTop: 18,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(11,26,23,0.06)",
+  },
+  quickChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: "#F4F6F5",
+    borderWidth: 1,
+    borderColor: "rgba(11,26,23,0.08)",
+  },
+  quickChipText: {
+    fontSize: 12.5,
+    fontFamily: fonts.medium,
+    color: "#0B1A17",
+    fontWeight: "500",
+  },
+  // Account Security
+  securityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 16,
+    paddingVertical: 4,
+  },
+  securityRowPhone: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  securityInfoCol: {
+    flex: 1,
+    minWidth: 0,
+  },
+  securityTitle: {
+    fontSize: 15,
+    fontFamily: fonts.semiBold,
+    fontWeight: "600",
+    color: "#0B1A17",
+  },
+  securityDesc: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+    marginTop: 3,
+    lineHeight: 18,
+  },
+  securityDivider: {
+    height: 1,
+    backgroundColor: "rgba(11,26,23,0.06)",
+    marginVertical: 14,
+  },
+  changePasswordBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 999,
+    borderWidth: 1.2,
+    borderColor: "rgba(4, 207, 146, 0.35)",
+    backgroundColor: "rgba(4, 207, 146, 0.12)",
+  },
+  changePasswordBtnText: {
+    fontSize: 13.5,
+    fontFamily: fonts.semiBold,
+    fontWeight: "600",
+    color: "#03a675",
+  },
+  deleteAccountBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 999,
+    borderWidth: 1.2,
+    borderColor: "rgba(212, 24, 61, 0.3)",
+    backgroundColor: "#FFF5F6",
+  },
+  deleteAccountBtnText: {
+    fontSize: 13.5,
+    fontFamily: fonts.semiBold,
+    fontWeight: "600",
+    color: "#D4183D",
+  },
+  fullWidthBtnPhone: {
+    alignSelf: "stretch",
+    justifyContent: "center",
   },
   // Bottom Action Row
   actionRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     paddingTop: 24,
     paddingBottom: 40,
     width: "100%",
+    gap: 12,
+  },
+  actionRowPhone: {
+    paddingTop: 20,
+    paddingBottom: 32,
   },
   logoutBtn: {
     flexDirection: "row",
@@ -980,6 +1495,10 @@ const styles = StyleSheet.create({
     borderColor: "rgba(212,24,61,0.3)",
     backgroundColor: "#FFFFFF",
   },
+  logoutBtnPhone: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
   logoutBtnText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
@@ -987,13 +1506,18 @@ const styles = StyleSheet.create({
     color: "#D4183D",
   },
   saveBtn: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#04cf92",
     paddingHorizontal: 24,
     paddingVertical: 11,
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
     minWidth: 130,
+  },
+  saveBtnPhone: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    minWidth: 110,
   },
   btnDisabled: {
     opacity: 0.7,
@@ -1003,6 +1527,144 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontWeight: "600",
     color: "#FFFFFF",
+  },
+  // Change Password Modal
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(11, 26, 23, 0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+    zIndex: 100,
+  },
+  modalCard: {
+    width: "100%",
+    maxWidth: 440,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    ...(Platform.OS === "web"
+      ? {
+          boxShadow: "0 20px 45px -10px rgba(11, 26, 23, 0.25)",
+        }
+      : {
+          elevation: 10,
+        }),
+  },
+  modalCardPhone: {
+    padding: 18,
+    borderRadius: 20,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+    marginBottom: 18,
+  },
+  modalIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(4, 207, 146, 0.14)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitleWrap: {
+    flex: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: fonts.headingBold,
+    fontWeight: "700",
+    color: "#0B1A17",
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: "#5C6B66",
+    marginTop: 2,
+    lineHeight: 18,
+  },
+  modalCloseBtn: {
+    padding: 4,
+  },
+  modalErrorBanner: {
+    backgroundColor: "#FFF5F6",
+    borderWidth: 1,
+    borderColor: "rgba(212, 24, 61, 0.2)",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 14,
+  },
+  modalErrorText: {
+    fontSize: 13,
+    fontFamily: fonts.medium,
+    color: "#D4183D",
+  },
+  modalInputGroup: {
+    width: "100%",
+  },
+  modalFieldLabel: {
+    fontSize: 13,
+    fontFamily: fonts.medium,
+    fontWeight: "500",
+    color: "#0B1A17",
+    marginBottom: 6,
+  },
+  modalInputWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F4F6F5",
+    borderRadius: 12,
+    height: 44,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: "rgba(11,26,23,0.06)",
+  },
+  modalTextInput: {
+    flex: 1,
+    height: "100%",
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    color: "#0B1A17",
+    paddingVertical: 0,
+    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
+  },
+  eyeBtn: {
+    padding: 6,
+  },
+  modalActionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 22,
+  },
+  modalCancelBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: "#F4F6F5",
+  },
+  modalCancelBtnText: {
+    fontSize: 13.5,
+    fontFamily: fonts.medium,
+    color: "#5C6B66",
+  },
+  modalSubmitBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 9,
+    borderRadius: 999,
+    backgroundColor: "#04cf92",
+  },
+  modalSubmitBtnText: {
+    fontSize: 13.5,
+    fontFamily: fonts.semiBold,
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
   pressed: {
     opacity: 0.85,
