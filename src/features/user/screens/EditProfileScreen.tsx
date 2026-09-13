@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { View, Text, Image, Pressable, ScrollView, StyleSheet, Alert, ActivityIndicator } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, Trash2, UserRound } from "lucide-react-native";
 import { router } from "expo-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AppChrome } from "@/components/AppChrome";
-import { FloatingInput, ErrorBanner, AuthButton } from "@/components/AuthFormFields";
+import { FormFloatingInput } from "@/components/FormFloatingInput";
+import { ErrorBanner, AuthButton } from "@/components/AuthFormFields";
 import { Eyebrow } from "@/components/ui";
 import { useAuthStore } from "@/stores/authStore";
 import { useUpdateUserProfile, useUploadAvatar, useDeleteAvatar } from "../hooks/useUserMutations";
+import { editProfileSchema, type EditProfileFormData } from "@/lib/schemas/user";
 import { colorTokens, fonts, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import type { UploadInput } from "@/services/upload";
@@ -19,22 +23,30 @@ export function EditProfileScreen() {
   const uploadAvatar = useUploadAvatar();
   const deleteAvatar = useDeleteAvatar();
 
-  const [fullName, setFullName] = useState(user?.full_name ?? "");
-  const [localError, setLocalError] = useState<string | null>(null);
+  const { control, handleSubmit, reset, watch, formState: { isValid, isDirty, errors } } = useForm<EditProfileFormData>({
+    resolver: zodResolver(editProfileSchema),
+    defaultValues: { full_name: user?.full_name ?? "" },
+    mode: "onChange",
+  });
 
+  const [serverError, setServerError] = React.useState<string | null>(null);
+
+  // Sync form when user data loads/changes
   useEffect(() => {
-    if (user) setFullName(user.full_name);
-  }, [user]);
+    if (user) {
+      reset({ full_name: user.full_name });
+    }
+  }, [user, reset]);
 
-  const handleSave = async () => {
-    if (!user || !fullName.trim()) return;
-    setLocalError(null);
+  const onSubmit = async (data: EditProfileFormData) => {
+    if (!user) return;
+    setServerError(null);
     try {
-      await updateProfile.mutateAsync({ id: user.id, data: { full_name: fullName.trim() } });
+      await updateProfile.mutateAsync({ id: user.id, data: { full_name: data.full_name } });
       await fetchMe();
       Alert.alert("Success", "Profile updated.", [{ text: "OK", onPress: () => router.back() }]);
     } catch (err: any) {
-      setLocalError(err?.message || "Failed to update profile");
+      setServerError(err?.message || "Failed to update profile");
     }
   };
 
@@ -63,7 +75,7 @@ export function EditProfileScreen() {
       await fetchMe();
       Alert.alert("Success", "Avatar updated.");
     } catch (err: any) {
-      setLocalError(err?.message || "Failed to upload avatar");
+      setServerError(err?.message || "Failed to upload avatar");
     }
   };
 
@@ -73,7 +85,7 @@ export function EditProfileScreen() {
       await fetchMe();
       Alert.alert("Success", "Avatar removed.");
     } catch (err: any) {
-      setLocalError(err?.message || "Failed to remove avatar");
+      setServerError(err?.message || "Failed to remove avatar");
     }
   };
 
@@ -85,7 +97,7 @@ export function EditProfileScreen() {
           <Text style={styles.title}>Your profile</Text>
         </View>
 
-        <ErrorBanner message={localError} />
+        <ErrorBanner message={serverError} />
 
         <View style={styles.card}>
           <View style={styles.avatarSection}>
@@ -121,13 +133,10 @@ export function EditProfileScreen() {
             ) : null}
           </View>
 
-          <FloatingInput
+          <FormFloatingInput
+            control={control}
+            name="full_name"
             label="Full Name"
-            value={fullName}
-            onChangeText={(val) => {
-              setFullName(val);
-              setLocalError(null);
-            }}
             autoCapitalize="words"
           />
 
@@ -135,9 +144,9 @@ export function EditProfileScreen() {
 
           <AuthButton
             label="Save changes"
-            onPress={handleSave}
+            onPress={handleSubmit(onSubmit)}
             loading={updateProfile.isPending}
-            disabled={!fullName.trim() || fullName === user?.full_name}
+            disabled={!isValid || !isDirty}
             style={styles.saveBtn}
           />
         </View>

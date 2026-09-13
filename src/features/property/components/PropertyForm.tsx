@@ -1,11 +1,19 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { Send, ArrowRight, ArrowLeft, Check, MapPin } from "lucide-react-native";
+import { useForm, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import { FloatingInput, ErrorBanner, AuthButton } from "@/components/AuthFormFields";
-import { SelectField } from "@/components/ui";
+import { FormFloatingInput } from "@/components/FormFloatingInput";
+import { FormSelectField } from "@/components/FormSelectField";
+import { ErrorBanner, AuthButton } from "@/components/AuthFormFields";
 import { AreaPicker } from "@/components/AreaPicker";
 import { ImageUploader } from "./ImageUploader";
+import {
+  propertyFormSchema,
+  PROPERTY_STEP_FIELDS,
+  type PropertyFormData,
+} from "@/lib/schemas/property";
 import type { Area, UpsertPropertyDto } from "@/types/api";
 
 interface PropertyFormProps {
@@ -33,58 +41,54 @@ export function PropertyForm({
 }: PropertyFormProps) {
   const [step, setStep] = useState(0);
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
-
-  const [title, setTitle] = useState(initialData?.title ?? "");
-  const [description, setDescription] = useState(initialData?.description ?? "");
-  const [type, setType] = useState<string>(initialData?.type ?? "residential");
-  const [listingType, setListingType] = useState<string>(initialData?.listing_type ?? "sale");
-  const [price, setPrice] = useState(initialData?.price ? String(initialData.price) : "");
   const [area, setArea] = useState<Area | null>(initialArea);
-  const areaId = area?.id ?? initialData?.area_id ?? "";
-  const [address, setAddress] = useState(initialData?.address ?? "");
-  const [bedrooms, setBedrooms] = useState(initialData?.amenities?.bedrooms ? String(initialData.amenities.bedrooms) : "");
-  const [bathrooms, setBathrooms] = useState(initialData?.amenities?.bathrooms ? String(initialData.amenities.bathrooms) : "");
-  const [areaSize, setAreaSize] = useState(initialData?.area_size ? String(initialData.area_size) : "");
   const [images, setImages] = useState<Array<{ uri: string; file?: Blob | File }>>(initialImages);
 
-  const canNext = () => {
-    if (step === 0) return title.trim().length > 0 && price.trim().length > 0;
-    if (step === 1) return areaId.trim().length > 0;
-    return true;
+  const { control, handleSubmit, trigger, setValue, watch, formState: { errors } } = useForm<PropertyFormData>({
+    resolver: zodResolver(propertyFormSchema) as Resolver<PropertyFormData>,
+    defaultValues: {
+      title: initialData?.title ?? "",
+      description: initialData?.description ?? "",
+      type: (initialData?.type as PropertyFormData["type"]) ?? "residential",
+      listing_type: (initialData?.listing_type as PropertyFormData["listing_type"]) ?? "sale",
+      price: initialData?.price ? String(initialData.price) : "",
+      area_id: area?.id ?? initialData?.area_id ?? "",
+      address: initialData?.address ?? "",
+      bedrooms: initialData?.amenities?.bedrooms ? String(initialData.amenities.bedrooms) : "",
+      bathrooms: initialData?.amenities?.bathrooms ? String(initialData.amenities.bathrooms) : "",
+      area_size: initialData?.area_size ? String(initialData.area_size) : "",
+    },
+    mode: "onChange",
+  });
+
+  const handleNext = async () => {
+    const stepFields = PROPERTY_STEP_FIELDS[step];
+    if (stepFields) {
+      const valid = await trigger(stepFields);
+      if (!valid) return;
+    }
+    setStep((s) => s + 1);
   };
 
-  const handleSubmit = () => {
-    if (!title.trim()) {
-      Alert.alert("Validation", "Title is required");
-      return;
-    }
-    if (!price.trim() || isNaN(Number(price))) {
-      Alert.alert("Validation", "Valid price is required");
-      return;
-    }
-    if (!areaId.trim()) {
-      Alert.alert("Validation", "Area is required");
-      return;
-    }
-
+  const onFormSubmit = (data: PropertyFormData) => {
     const dto: UpsertPropertyDto = {
-      title: title.trim(),
-      description: description.trim() || undefined,
-      type: type as UpsertPropertyDto["type"],
+      title: data.title.trim(),
+      description: data.description?.trim() || undefined,
+      type: data.type as UpsertPropertyDto["type"],
       subtype: initialData?.subtype,
-      listing_type: listingType as UpsertPropertyDto["listing_type"],
-      price: Number(price),
+      listing_type: data.listing_type as UpsertPropertyDto["listing_type"],
+      price: Number(data.price),
       price_currency: initialData?.price_currency || "BDT",
-      area_id: areaId.trim(),
-      address: address.trim() || undefined,
-      area_size: areaSize ? Number(areaSize) : undefined,
+      area_id: data.area_id.trim(),
+      address: data.address?.trim() || undefined,
+      area_size: data.area_size ? Number(data.area_size) : undefined,
       area_unit: initialData?.area_unit || "sqft",
       location_lat: initialData?.location_lat,
       location_lng: initialData?.location_lng,
       amenities: {
         ...initialData?.amenities,
-        bedrooms: bedrooms ? Number(bedrooms) : undefined,
-        bathrooms: bathrooms ? Number(bathrooms) : undefined,
+        bedrooms: data.bedrooms ? Number(data.bedrooms) : undefined,
+        bathrooms: data.bathrooms ? Number(data.bathrooms) : undefined,
       },
       virtual_tour_url: initialData?.virtual_tour_url,
     };
@@ -118,39 +122,39 @@ export function PropertyForm({
         {step === 0 && (
           <View style={styles.stepContent}>
             <Text style={styles.sectionTitle}>Property Details</Text>
-            <FloatingInput
+            <FormFloatingInput
+              control={control}
+              name="title"
               label="Title"
-              value={title}
-              onChangeText={setTitle}
               autoCapitalize="words"
             />
-            <FloatingInput
+            <FormFloatingInput
+              control={control}
+              name="description"
               label="Description (optional)"
-              value={description}
-              onChangeText={setDescription}
             />
             <View style={styles.row}>
               <View style={styles.halfField}>
                 <Text style={styles.fieldLabel}>Type</Text>
-                <SelectField
-                  value={type}
+                <FormSelectField
+                  control={control}
+                  name="type"
                   options={["residential", "commercial", "land", "parking"]}
-                  onChange={setType}
                 />
               </View>
               <View style={styles.halfField}>
                 <Text style={styles.fieldLabel}>Listing</Text>
-                <SelectField
-                  value={listingType}
+                <FormSelectField
+                  control={control}
+                  name="listing_type"
                   options={["sale", "rent"]}
-                  onChange={setListingType}
                 />
               </View>
             </View>
-            <FloatingInput
+            <FormFloatingInput
+              control={control}
+              name="price"
               label="Price"
-              value={price}
-              onChangeText={setPrice}
               keyboardType="numeric"
             />
           </View>
@@ -164,10 +168,13 @@ export function PropertyForm({
               <MapPin color={colorTokens.primary} size={18} />
               <Text style={styles.areaButtonText}>{area?.name || initialArea?.name || "Select an API area"}</Text>
             </Pressable>
-            <FloatingInput
+            {errors.area_id && (
+              <Text style={styles.fieldError}>{errors.area_id.message}</Text>
+            )}
+            <FormFloatingInput
+              control={control}
+              name="address"
               label="Address (optional)"
-              value={address}
-              onChangeText={setAddress}
               autoCapitalize="words"
             />
           </View>
@@ -178,26 +185,26 @@ export function PropertyForm({
             <Text style={styles.sectionTitle}>Features</Text>
             <View style={styles.row}>
               <View style={styles.halfField}>
-                <FloatingInput
+                <FormFloatingInput
+                  control={control}
+                  name="bedrooms"
                   label="Bedrooms"
-                  value={bedrooms}
-                  onChangeText={setBedrooms}
                   keyboardType="numeric"
                 />
               </View>
               <View style={styles.halfField}>
-                <FloatingInput
+                <FormFloatingInput
+                  control={control}
+                  name="bathrooms"
                   label="Bathrooms"
-                  value={bathrooms}
-                  onChangeText={setBathrooms}
                   keyboardType="numeric"
                 />
               </View>
             </View>
-            <FloatingInput
+            <FormFloatingInput
+              control={control}
+              name="area_size"
               label="Area size (sqft)"
-              value={areaSize}
-              onChangeText={setAreaSize}
               keyboardType="numeric"
             />
           </View>
@@ -239,15 +246,14 @@ export function PropertyForm({
           {step < STEPS.length - 1 ? (
             <AuthButton
               label="Next"
-              onPress={() => setStep((s) => s + 1)}
-              disabled={!canNext()}
+              onPress={handleNext}
               icon={ArrowRight}
               style={styles.navBtn}
             />
           ) : (
             <AuthButton
               label={mode === "create" ? "Create Property" : "Save Changes"}
-              onPress={handleSubmit}
+              onPress={handleSubmit(onFormSubmit as any)}
               loading={loading}
               disabled={loading}
               icon={Send}
@@ -262,6 +268,7 @@ export function PropertyForm({
         onSelect={(selected) => {
           if (!selected) return;
           setArea(selected);
+          setValue("area_id", selected.id, { shouldValidate: true });
           setAreaPickerVisible(false);
         }}
         selectedArea={area ?? initialArea}
@@ -344,6 +351,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     color: colorTokens.textPrimary,
     marginBottom: 6,
+  },
+  fieldError: {
+    fontSize: 11,
+    fontFamily: fonts.medium,
+    color: colorTokens.error,
+    marginTop: 4,
   },
   areaButton: {
     alignItems: "center",

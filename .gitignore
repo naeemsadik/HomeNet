@@ -62,3 +62,5 @@ Desktop.ini
 
 # Local API reference material
 /docs/
+AGENTS.md
+.agents/rules/state-management.md
