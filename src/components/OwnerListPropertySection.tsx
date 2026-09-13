@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Modal,
   Platform,
   Pressable,
@@ -29,6 +30,8 @@ import {
 import { useResponsive } from "@/hooks/useResponsive";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { usePropertyWizardStore } from "@/features/property/stores/propertyWizardStore";
+import { AiListingSheet } from "@/features/property/components/AiListingSheet";
+import type { AiParsedProperty } from "@/features/property/types/aiListing";
 import { colors, fonts, webPointer } from "@/theme";
 
 export type OwnerIntentId =
@@ -117,6 +120,73 @@ export function OwnerListPropertySection() {
   const [selectedIntentId, setSelectedIntentId] = useState<OwnerIntentId>("sell_residential");
   const [hoveredIntentId, setHoveredIntentId] = useState<OwnerIntentId | null>(null);
   const [hoveredCta, setHoveredCta] = useState<"primary" | "secondary" | "tertiary" | null>(null);
+  const [aiSheetVisible, setAiSheetVisible] = useState(false);
+
+  // Animated glowing green pulse for AI icon
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.08,
+          duration: 1200,
+          useNativeDriver: Platform.OS !== "web",
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1.0,
+          duration: 1200,
+          useNativeDriver: Platform.OS !== "web",
+        }),
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [pulseAnim]);
+
+  const handleAiApply = (data: AiParsedProperty) => {
+    // Hydrate zustand wizard store
+    const store = usePropertyWizardStore.getState();
+    store.setBasics({
+      ...(data.title !== undefined ? { title: data.title } : {}),
+      ...(data.description !== undefined ? { description: data.description } : {}),
+      ...(data.type !== undefined ? { type: data.type } : {}),
+      ...(data.subtype !== undefined ? { subtype: data.subtype } : {}),
+      ...(data.listingType !== undefined ? { listingType: data.listingType } : {}),
+      ...(data.price !== undefined ? { price: data.price } : {}),
+      ...(data.areaSize !== undefined ? { areaSize: data.areaSize } : {}),
+      ...(data.areaUnit !== undefined ? { areaUnit: data.areaUnit } : {}),
+      ...(data.address !== undefined ? { address: data.address } : {}),
+    });
+    store.setDetails({
+      ...(data.price !== undefined ? { price: data.price } : {}),
+      ...(data.areaSize !== undefined ? { areaSize: data.areaSize } : {}),
+      ...(data.areaUnit !== undefined ? { areaUnit: data.areaUnit } : {}),
+      ...(data.bedrooms !== undefined ? { bedrooms: data.bedrooms } : {}),
+      ...(data.bathrooms !== undefined ? { bathrooms: data.bathrooms } : {}),
+      ...(data.floor !== undefined ? { floor: data.floor } : {}),
+      ...(data.facing !== undefined ? { facing: data.facing } : {}),
+    });
+    store.setLocation({
+      ...(data.address !== undefined ? { address: data.address } : {}),
+    });
+    if (data.amenities) {
+      store.setAmenities({ ...store.amenities, ...data.amenities });
+    }
+
+    setAiSheetVisible(false);
+    setIsModalOpen(false);
+
+    // Navigate to wizard gated behind requireAuth
+    requireAuth(() => {
+      const queryParams = new URLSearchParams();
+      if (data.listingType) queryParams.set("listing_type", data.listingType);
+      if (data.type) queryParams.set("type", data.type);
+      if (data.subtype) queryParams.set("subtype", data.subtype);
+      const queryString = queryParams.toString();
+      const targetUrl = `/property/create${queryString ? `?${queryString}` : ""}`;
+      router.push(targetUrl as any);
+    });
+  };
 
   const selectedIntent =
     OWNER_INTENT_OPTIONS.find((item) => item.id === selectedIntentId) ?? OWNER_INTENT_OPTIONS[0];
@@ -361,7 +431,7 @@ export function OwnerListPropertySection() {
           <View style={[styles.modalCard, isPhone && styles.modalCardPhone]}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <View>
+              <View style={{ flex: 1 }}>
                 <View style={styles.modalEyebrowRow}>
                   <Sparkles color="#04cf92" size={14} />
                   <Text style={styles.modalEyebrow}>Owner Studio</Text>
@@ -386,11 +456,66 @@ export function OwnerListPropertySection() {
               </Pressable>
             </View>
 
+            {/* AI Entry Card — directly under Select what you want to list / Choose your property type */}
+            <Pressable
+              accessibilityHint="Opens the AI listing assistant to describe your property in plain text"
+              accessibilityLabel="Skip the form, describe it with AI"
+              accessibilityRole="button"
+              onPress={() => setAiSheetVisible(true)}
+              style={({ pressed }) => [
+                styles.aiEntryCard,
+                isPhone && styles.aiEntryCardPhone,
+                pressed && styles.buttonPressed,
+                webPointer,
+              ]}
+            >
+              <View style={[styles.aiCardLeft, isPhone && styles.aiCardLeftPhone]}>
+                <Animated.View
+                  style={[
+                    styles.aiIconGlowingWrap,
+                    { transform: [{ scale: pulseAnim }] },
+                  ]}
+                >
+                  <Sparkles color="#04cf92" size={20} strokeWidth={2.2} />
+                </Animated.View>
+                <View style={styles.aiTextContainer}>
+                  <View style={styles.aiHeadlineRow}>
+                    <Text style={styles.aiHeadline}>
+                      Skip the form — describe it
+                    </Text>
+                    <View style={styles.aiBetaBadge}>
+                      <Text style={styles.aiBetaText}>BETA</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.aiSubtext}>
+                    Type what you're listing and AI fills the details for you
+                  </Text>
+                </View>
+              </View>
+
+              <Pressable
+                accessibilityHint="Opens the AI listing assistant"
+                accessibilityLabel="List with AI"
+                accessibilityRole="button"
+                onPress={() => setAiSheetVisible(true)}
+                style={({ pressed }) => [
+                  styles.aiCtaButton,
+                  isPhone && styles.aiCtaButtonPhone,
+                  pressed && styles.buttonPressed,
+                  webPointer,
+                ]}
+              >
+                <Sparkles color="#FFFFFF" size={15} strokeWidth={2.2} />
+                <Text style={styles.aiCtaButtonText}>List with AI</Text>
+                <ArrowRight color="#FFFFFF" size={15} strokeWidth={2.2} />
+              </Pressable>
+            </Pressable>
+
             {/* Modal Content: 6 Intent Cards */}
             <ScrollView
               contentContainerStyle={styles.modalScrollContent}
               showsVerticalScrollIndicator={false}
-              style={{ maxHeight: 440 }}
+              style={{ maxHeight: isPhone ? 300 : 340 }}
             >
               <View style={styles.modalGrid}>
                 {OWNER_INTENT_OPTIONS.map((intent) => {
@@ -502,6 +627,12 @@ export function OwnerListPropertySection() {
           </View>
         </View>
       </Modal>
+
+      <AiListingSheet
+        visible={aiSheetVisible}
+        onClose={() => setAiSheetVisible(false)}
+        onApply={handleAiApply}
+      />
     </>
   );
 }
@@ -1067,5 +1198,115 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontFamily: fonts.semiBold,
     fontSize: 14,
+  },
+  aiEntryCard: {
+    marginTop: 4,
+    marginBottom: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#04cf92",
+    paddingVertical: 13,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 16,
+    ...(Platform.select({
+      web: {
+        transition: "all 0.16s ease",
+        boxShadow: "0 4px 18px rgba(4, 207, 146, 0.10)",
+      },
+      default: {
+        shadowColor: "#04cf92",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 2,
+      },
+    }) as any),
+  },
+  aiEntryCardPhone: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 14,
+  },
+  aiCardLeft: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  aiCardLeftPhone: {
+    alignItems: "flex-start",
+  },
+  aiIconGlowingWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#E6FAF4",
+    borderWidth: 1,
+    borderColor: "rgba(4, 207, 146, 0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  aiTextContainer: {
+    flex: 1,
+    gap: 3,
+  },
+  aiHeadlineRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  aiHeadline: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: colors.ink,
+  },
+  aiBetaBadge: {
+    backgroundColor: "#E6FAF4",
+    borderWidth: 1,
+    borderColor: "rgba(4, 207, 146, 0.4)",
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  aiBetaText: {
+    fontFamily: fonts.bold,
+    fontSize: 9.5,
+    color: "#03986A",
+    letterSpacing: 0.5,
+  },
+  aiSubtext: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: "#5C6B66",
+    lineHeight: 18,
+  },
+  aiCtaButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    backgroundColor: "#04cf92",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 14,
+    ...(Platform.select({
+      web: {
+        boxShadow: "0 3px 12px rgba(4, 207, 146, 0.35)",
+      },
+      default: {},
+    }) as any),
+  },
+  aiCtaButtonPhone: {
+    width: "100%",
+    justifyContent: "center",
+    paddingVertical: 12,
+  },
+  aiCtaButtonText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    color: "#FFFFFF",
   },
 });
