@@ -21,6 +21,7 @@ export interface WizardState {
   // Step 2 — Details
   price: string;
   areaSize: string;
+  areaUnit: "sqft" | "katha" | "bigha" | "sqm";
   bedrooms: string;
   bathrooms: string;
   floor: string;
@@ -46,8 +47,8 @@ export interface WizardState {
   isSubmitting: boolean;
 
   // Actions
-  setBasics: (data: Partial<Pick<WizardState, "title" | "type" | "subtype" | "listingType" | "description" | "price" | "areaSize" | "areaId" | "areaName" | "address">>) => void;
-  setDetails: (data: Partial<Pick<WizardState, "price" | "areaSize" | "bedrooms" | "bathrooms" | "floor" | "facing">>) => void;
+  setBasics: (data: Partial<Pick<WizardState, "title" | "type" | "subtype" | "listingType" | "description" | "price" | "areaSize" | "areaUnit" | "areaId" | "areaName" | "address">>) => void;
+  setDetails: (data: Partial<Pick<WizardState, "price" | "areaSize" | "areaUnit" | "bedrooms" | "bathrooms" | "floor" | "facing">>) => void;
   setLocation: (data: Partial<Pick<WizardState, "district" | "areaId" | "areaName" | "address" | "locationLat" | "locationLng">>) => void;
   setMedia: (media: WizardMediaItem[]) => void;
   addMedia: (item: WizardMediaItem) => void;
@@ -65,12 +66,13 @@ export interface WizardState {
 const initialState = {
   title: "",
   type: "residential" as PropertyType,
-  subtype: "",
+  subtype: "apartment",
   listingType: "sale" as ListingType,
   description: "",
 
   price: "",
   areaSize: "",
+  areaUnit: "sqft" as const,
   bedrooms: "",
   bathrooms: "",
   floor: "",

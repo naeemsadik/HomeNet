@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { AppLink } from "@/components/ui";
+import { Brand } from "@/components/Brand";
 import { fonts, webPointer } from "@/theme";
 import type { SellerNavKey } from "../screens/SellerDashboardScreen";
 
@@ -54,14 +55,7 @@ export function SellerMobileDrawer({
         <View style={styles.drawerCard}>
           {/* Header */}
           <View style={styles.drawerHeader}>
-            <View style={styles.brandRow}>
-              <View style={styles.brandIconBg}>
-                <Building2 color="#FFFFFF" size={18} />
-              </View>
-              <Text style={styles.brandText}>
-                Home<Text style={styles.brandTextAccent}>net</Text>
-              </Text>
-            </View>
+            <Brand compact onPress={onClose} />
 
             <Pressable
               accessibilityLabel="Close navigation menu"

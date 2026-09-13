@@ -6,9 +6,11 @@ import { AppLink } from "./ui";
 export function Brand({
   compact = false,
   size = "default",
+  onPress,
 }: {
   compact?: boolean;
   size?: "compact" | "default" | "large";
+  onPress?: () => void;
 }) {
   const isLarge = size === "large";
   const isCompact = compact || size === "compact";
@@ -17,6 +19,7 @@ export function Brand({
     <AppLink
       href="/"
       accessibilityLabel="HomeNet home"
+      onPress={onPress}
       style={[styles.link, isCompact && styles.linkCompact]}
     >
       <View
