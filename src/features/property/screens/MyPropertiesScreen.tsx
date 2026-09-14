@@ -20,7 +20,6 @@ import {
   Rocket,
   RotateCcw,
   Search,
-  Settings,
   ShieldCheck,
   Sparkles,
   Trash2,
@@ -32,6 +31,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -42,6 +42,7 @@ import {
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useAuthStore } from "@/stores/authStore";
 import { colors, fonts, webPointer } from "@/theme";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
@@ -125,6 +126,29 @@ export function MyPropertiesScreen() {
   }, [allListings]);
 
   // Sidebar items
+  const logout = useAuthStore((s) => s.logout);
+  const handleLogout = () => {
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("Are you sure you want to log out?");
+      if (confirmed) {
+        logout();
+        router.replace("/");
+      }
+      return;
+    }
+    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: () => {
+          logout();
+          router.replace("/");
+        },
+      },
+    ]);
+  };
+
   const sidebarNavItems: {
     key: string;
     label: string;
@@ -138,13 +162,12 @@ export function MyPropertiesScreen() {
     { key: "listings", label: "My Listings", icon: Building2, href: "/my-properties", active: true },
     { key: "create", label: "Create Property", icon: PlusCircle, href: "/property/create" },
     { key: "verification", label: "Verification", icon: ShieldCheck, href: "/verification" },
-    { key: "boost", label: "Boost Listings", icon: Rocket },
-    { key: "insights", label: "AI Insights", icon: Sparkles, href: "/ai-finder" },
-    { key: "analytics", label: "Analytics", icon: BarChart2, href: "/market" },
-    { key: "payments", label: "Payments", icon: CreditCard },
+    { key: "boost", label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
+    { key: "insights", label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "analytics", label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
+    { key: "payments", label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
     { key: "profile", label: "Profile", icon: User, href: "/seller/profile" },
-    { key: "settings", label: "Settings", icon: Settings, href: "/settings" },
-    { key: "help", label: "Help Center", icon: CircleHelp, href: "/about" },
+    { key: "help", label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
     { key: "logout", label: "Logout", icon: LogOut, danger: true, href: "/" },
   ];
 
@@ -184,6 +207,11 @@ export function MyPropertiesScreen() {
                 <AppLink
                   href={item.href || "#"}
                   key={item.key}
+                  onPress={() => {
+                    if (item.key === "logout") {
+                      handleLogout();
+                    }
+                  }}
                   style={[
                     styles.navItem,
                     item.active && styles.navItemActive,
@@ -492,7 +520,15 @@ export function MyPropertiesScreen() {
         activeNav="listings"
         items={sidebarNavItems as any}
         onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={() => {}}
+        onSelectNav={(key) => {
+          setMobileDrawerOpen(false);
+          if (key === "logout") {
+            handleLogout();
+            return;
+          }
+          const found = sidebarNavItems.find((i) => i.key === key);
+          if (found?.href) router.push(found.href as any);
+        }}
         visible={isTablet && mobileDrawerOpen}
       />
     </View>
