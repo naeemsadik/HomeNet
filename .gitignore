@@ -60,7 +60,11 @@ pnpm-debug.log*
 Thumbs.db
 Desktop.ini
 
-# Local API reference material
+# Local API reference material and agent configurations
 /docs/
 AGENTS.md
-.agents/rules/state-management.md
+.agents/
+.claude/
+claude/
+DESIGN.md
+skills-lock.json
