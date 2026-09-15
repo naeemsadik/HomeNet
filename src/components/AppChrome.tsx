@@ -445,120 +445,31 @@ function TopBar({
               </View>
             </>
           ) : (
-            <View style={styles.guestDropdownWrap}>
-              <View style={[styles.guestPillGroup, isPhone && styles.guestPillGroupPhone]}>
-                <Pressable
-                  onPress={() => setAuthModalOpen(true)}
-                  accessibilityLabel="Sign in"
-                  style={({ pressed }) => [
-                    styles.guestSignInBtn,
-                    isPhone && styles.guestSignInBtnPhone,
-                    webPointer,
-                    pressed && { opacity: 0.85, backgroundColor: "rgba(0, 207, 146, 0.08)" },
-                  ]}
-                >
-                  <User
-                    color="#04cf92"
-                    size={isPhone ? 15 : 17}
-                    strokeWidth={2.2}
-                  />
-                  <Text
-                    style={[
-                      styles.rightmoveSignInText,
-                      isPhone && styles.rightmoveSignInTextPhone,
-                    ]}
-                  >
-                    Sign in
-                  </Text>
-                </Pressable>
-
-                <View style={styles.guestPillDivider} />
-
-                {/* Triangle dropdown trigger for guests */}
-                <Pressable
-                  accessibilityLabel="Open menu"
-                  onPress={() => {
-                    setNotificationsOpen(false);
-                    setUserDropdownOpen((open) => !open);
-                  }}
-                  style={({ pressed }) => [
-                    styles.guestTriangleBtn,
-                    isPhone && styles.guestTriangleBtnPhone,
-                    (pressed || userDropdownOpen) && styles.guestTriangleBtnActive,
-                    webPointer,
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.triangleIconBox,
-                      userDropdownOpen && styles.triangleIconBoxOpen,
-                    ]}
-                  >
-                    <Svg width={8} height={5} viewBox="0 0 8 5">
-                      <Path d="M0 0L8 0L4 5Z" fill="#0B1A17" />
-                    </Svg>
-                  </View>
-                </Pressable>
-              </View>
-
-              {userDropdownOpen && (
-                <>
-                  {Platform.OS === "web" && (
-                    <Pressable
-                      style={styles.dropdownBackdrop}
-                      onPress={() => setUserDropdownOpen(false)}
-                    />
-                  )}
-                  <View style={[styles.userDropdownMenu, isPhone && styles.userDropdownMenuPhone]}>
-                    <View style={styles.guestMenuHeader}>
-                      <Text style={styles.guestMenuTitle}>Account</Text>
-                    </View>
-
-                    {/* Saved Button */}
-                    <Pressable
-                      accessibilityLabel="Saved properties"
-                      accessibilityRole="button"
-                      onPress={() => {
-                        setUserDropdownOpen(false);
-                        useAuthModalStore.getState().open(() => router.push("/saved" as any));
-                      }}
-                      style={({ pressed, hovered }: any) => [
-                        styles.dropdownItem,
-                        (pressed || hovered) && styles.dropdownItemPressed,
-                        webPointer,
-                      ]}
-                    >
-                      <View style={[styles.dropdownIconBox, { backgroundColor: "rgba(4, 207, 146, 0.10)" }]}>
-                        <Heart color="#04cf92" size={16} strokeWidth={2} />
-                      </View>
-                      <Text style={styles.dropdownItemText}>Saved</Text>
-                    </Pressable>
-
-                    <View style={styles.dropdownDivider} />
-
-                    {/* Sign in Button */}
-                    <Pressable
-                      accessibilityLabel="Sign in"
-                      accessibilityRole="button"
-                      onPress={() => {
-                        setUserDropdownOpen(false);
-                        setAuthModalOpen(true);
-                      }}
-                      style={({ pressed, hovered }: any) => [
-                        styles.dropdownItem,
-                        (pressed || hovered) && styles.dropdownItemPressed,
-                        webPointer,
-                      ]}
-                    >
-                      <View style={styles.dropdownIconBox}>
-                        <LogIn color="#0B1A17" size={16} strokeWidth={1.8} />
-                      </View>
-                      <Text style={styles.dropdownItemText}>Sign in</Text>
-                    </Pressable>
-                  </View>
-                </>
-              )}
-            </View>
+            <Pressable
+              onPress={() => setAuthModalOpen(true)}
+              accessibilityLabel="Sign in"
+              accessibilityRole="button"
+              style={({ pressed }) => [
+                styles.rightmoveSignInBtn,
+                isPhone && styles.rightmoveSignInBtnPhone,
+                webPointer,
+                pressed && { opacity: 0.85, backgroundColor: "rgba(0, 207, 146, 0.08)" },
+              ]}
+            >
+              <User
+                color="#04cf92"
+                size={isPhone ? 15 : 17}
+                strokeWidth={2.2}
+              />
+              <Text
+                style={[
+                  styles.rightmoveSignInText,
+                  isPhone && styles.rightmoveSignInTextPhone,
+                ]}
+              >
+                Sign in
+              </Text>
+            </Pressable>
           )}
         </View>
       </View>
