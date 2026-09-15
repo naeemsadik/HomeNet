@@ -48,6 +48,7 @@ import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
 import type { UploadInput } from "@/services/upload";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
+import { Footer } from "@/components/Footer";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 
 const DEFAULT_AVATAR =
@@ -450,13 +451,17 @@ export function SellerProfileScreen() {
 
         {/* Scrollable Form Body */}
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            isPhone && styles.scrollContentPhone,
-          ]}
+          contentContainerStyle={styles.workspaceScroll}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.contentWrap}>
+          <View
+            style={[
+              styles.scrollContent,
+              isPhone && styles.scrollContentPhone,
+            ]}
+          >
+            <View style={styles.contentWrap}>
             {/* Section 1: Personal Information */}
             <View style={[styles.card, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
@@ -767,7 +772,9 @@ export function SellerProfileScreen() {
               </Pressable>
             </View>
           </View>
-        </ScrollView>
+        </View>
+        <Footer />
+      </ScrollView>
       </View>
 
       {/* Change Password Modal */}
@@ -943,6 +950,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     backgroundColor: "#F8FAF9",
+  },
+  workspaceScroll: {
+    flexGrow: 1,
+    justifyContent: "space-between",
   },
   // Desktop Sidebar
   sidebar: {

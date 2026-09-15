@@ -66,6 +66,7 @@ import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
 import { SellerTopHeader } from "../components/SellerTopHeader";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerStatCard, type StatItem } from "../components/SellerStatCard";
+import { Footer } from "@/components/Footer";
 
 // Types
 export type SellerNavKey =
@@ -472,14 +473,14 @@ export function SellerDashboardScreen() {
         )}
 
         {/* Scrollable Workspace Body */}
-        {activeNav === "dashboard" && (
-          <ScrollView
-            contentContainerStyle={[
-              styles.scrollBody,
-              isPhone && styles.scrollBodyPhone,
-            ]}
-            showsVerticalScrollIndicator={false}
-          >
+        <ScrollView
+          contentContainerStyle={styles.workspaceScroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
+            {activeNav === "dashboard" && (
+              <>
             {/* Welcome Banner (Figma Node 220:8881) */}
             <SellerWelcomeBanner
               name={sellerName}
@@ -635,14 +636,17 @@ export function SellerDashboardScreen() {
               </View>
             </View>
           </View>
-        </ScrollView>
-        )}
+        </>
+      )}
 
-        {activeNav === "boost" && renderBoostWorkspace()}
-        {activeNav === "insights" && renderInsightsWorkspace()}
-        {activeNav === "analytics" && renderAnalyticsWorkspace()}
-        {activeNav === "payments" && renderPaymentsWorkspace()}
-        {activeNav === "help" && renderHelpWorkspace()}
+            {activeNav === "boost" && renderBoostWorkspace()}
+            {activeNav === "insights" && renderInsightsWorkspace()}
+            {activeNav === "analytics" && renderAnalyticsWorkspace()}
+            {activeNav === "payments" && renderPaymentsWorkspace()}
+            {activeNav === "help" && renderHelpWorkspace()}
+          </View>
+          <Footer />
+        </ScrollView>
       </View>
 
       {/* Boost Listings Modal */}
@@ -784,28 +788,33 @@ export function SellerDashboardScreen() {
 
   function renderBoostWorkspace() {
     return (
-      <ScrollView
-        contentContainerStyle={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}
-        showsVerticalScrollIndicator={false}
-      >
+      <>
         <LinearGradient
           colors={["#0F6D55", "#1B4D89"]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
-          style={styles.tabHeroBanner}
+          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
-          <View style={styles.tabHeroIconWrap}>
-            <Rocket color="#04cf92" size={24} />
-          </View>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.tabHeroTitle}>Boost Listings & Maximize Reach</Text>
-            <Text style={styles.tabHeroSubtitle}>
-              Promote your properties to reach up to 10x more verified buyers across Dhaka with top search placement.
-            </Text>
+          <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
+            <View style={styles.tabHeroIconWrap}>
+              <Rocket color="#04cf92" size={24} />
+            </View>
+            <View style={styles.tabHeroTextWrap}>
+              <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
+                Boost Listings & Maximize Reach
+              </Text>
+              <Text style={[styles.tabHeroSubtitle, isPhone && styles.tabHeroSubtitlePhone]}>
+                Promote your properties to reach up to 10x more verified buyers across Dhaka with top search placement.
+              </Text>
+            </View>
           </View>
           <Pressable
             onPress={() => setBoostModalVisible(true)}
-            style={[styles.tabHeroActionBtn, webPointer]}
+            style={[
+              styles.tabHeroActionBtn,
+              isPhone && styles.tabHeroActionBtnPhone,
+              webPointer,
+            ]}
           >
             <Rocket color="#0B1A17" size={16} />
             <Text style={styles.tabHeroActionText}>Boost a Property</Text>
@@ -819,7 +828,7 @@ export function SellerDashboardScreen() {
             { label: "Inquiry Multiplier", value: "8.5x", sub: "Faster buyer calls", color: "#F4823A" },
             { label: "Avg Closing Time", value: "14 Days", sub: "For boosted units", color: "#0F6D55" },
           ].map((kpi, idx) => (
-            <View key={idx} style={styles.kpiCard}>
+            <View key={idx} style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
               <Text style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</Text>
               <Text style={styles.kpiLabel}>{kpi.label}</Text>
               <Text style={styles.kpiSub}>{kpi.sub}</Text>
@@ -827,7 +836,7 @@ export function SellerDashboardScreen() {
           ))}
         </View>
 
-        <View style={styles.tabCard}>
+        <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Available Boost Packages</Text>
             <Text style={styles.tabCardSub}>Choose a tailored tier to supercharge visibility for your listings</Text>
@@ -927,7 +936,7 @@ export function SellerDashboardScreen() {
           </View>
         </View>
 
-        <View style={styles.tabCard}>
+        <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Your Boosted Properties</Text>
             <Text style={styles.tabCardSub}>Track live promotions, impressions, and expiry schedules</Text>
@@ -946,34 +955,35 @@ export function SellerDashboardScreen() {
             </AppLink>
           </View>
         </View>
-      </ScrollView>
+      </>
     );
   }
 
   function renderInsightsWorkspace() {
     return (
-      <ScrollView
-        contentContainerStyle={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}
-        showsVerticalScrollIndicator={false}
-      >
+      <>
         <LinearGradient
           colors={["#0F6D55", "#0E5A73"]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
-          style={styles.tabHeroBanner}
+          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
-          <View style={styles.tabHeroIconWrap}>
-            <Sparkles color="#04cf92" size={24} />
-          </View>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.tabHeroTitle}>AI Market & Property Match Insights</Text>
-            <Text style={styles.tabHeroSubtitle}>
-              Intelligent AI algorithms connecting your listings with high-intent buyers, optimizing pricing, and suggesting listing improvements.
-            </Text>
+          <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
+            <View style={styles.tabHeroIconWrap}>
+              <Sparkles color="#04cf92" size={24} />
+            </View>
+            <View style={styles.tabHeroTextWrap}>
+              <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
+                AI Market & Property Match Insights
+              </Text>
+              <Text style={[styles.tabHeroSubtitle, isPhone && styles.tabHeroSubtitlePhone]}>
+                Intelligent AI algorithms connecting your listings with high-intent buyers, optimizing pricing, and suggesting listing improvements.
+              </Text>
+            </View>
           </View>
         </LinearGradient>
 
-        <View style={styles.tabCard}>
+        <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Live Portfolio Intelligence</Text>
             <Text style={styles.tabCardSub}>Real-time analysis powered by HomeNet AI matching engine</Text>
@@ -1021,37 +1031,38 @@ export function SellerDashboardScreen() {
           </View>
         </View>
 
-        <View style={styles.tabCard}>
+        <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Interactive AI Property Matcher</Text>
             <Text style={styles.tabCardSub}>Explore buyer preferences or match properties live</Text>
           </View>
           <AiFinderWorkflow />
         </View>
-      </ScrollView>
+      </>
     );
   }
 
   function renderAnalyticsWorkspace() {
     return (
-      <ScrollView
-        contentContainerStyle={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}
-        showsVerticalScrollIndicator={false}
-      >
+      <>
         <LinearGradient
           colors={["#1B4D89", "#0F6D55"]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
-          style={styles.tabHeroBanner}
+          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
-          <View style={styles.tabHeroIconWrap}>
-            <BarChart2 color="#04cf92" size={24} />
-          </View>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.tabHeroTitle}>Dhaka Real Estate Market Analytics</Text>
-            <Text style={styles.tabHeroSubtitle}>
-              Live property valuations, historical price per square foot trends, and buyer demand indexing across Dhaka.
-            </Text>
+          <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
+            <View style={styles.tabHeroIconWrap}>
+              <BarChart2 color="#04cf92" size={24} />
+            </View>
+            <View style={styles.tabHeroTextWrap}>
+              <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
+                Dhaka Real Estate Market Analytics
+              </Text>
+              <Text style={[styles.tabHeroSubtitle, isPhone && styles.tabHeroSubtitlePhone]}>
+                Live property valuations, historical price per square foot trends, and buyer demand indexing across Dhaka.
+              </Text>
+            </View>
           </View>
         </LinearGradient>
 
@@ -1062,7 +1073,7 @@ export function SellerDashboardScreen() {
             { label: "Avg Rental Yield", value: "5.6%", sub: "Annualized gross", color: "#F4823A" },
             { label: "Market Health Score", value: "88 / 100", sub: "Strong seller market", color: "#0F6D55" },
           ].map((kpi, idx) => (
-            <View key={idx} style={styles.kpiCard}>
+            <View key={idx} style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
               <Text style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</Text>
               <Text style={styles.kpiLabel}>{kpi.label}</Text>
               <Text style={styles.kpiSub}>{kpi.sub}</Text>
@@ -1070,7 +1081,7 @@ export function SellerDashboardScreen() {
           ))}
         </View>
 
-        <View style={styles.tabCard}>
+        <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Area Price Trends & Demand Index</Text>
             <Text style={styles.tabCardSub}>Comparative benchmarks for residential properties in prime Dhaka zones</Text>
@@ -1109,52 +1120,53 @@ export function SellerDashboardScreen() {
             ))}
           </View>
         </View>
-      </ScrollView>
+      </>
     );
   }
 
   function renderPaymentsWorkspace() {
     return (
-      <ScrollView
-        contentContainerStyle={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}
-        showsVerticalScrollIndicator={false}
-      >
+      <>
         <LinearGradient
           colors={["#0F6D55", "#2C3E50"]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
-          style={styles.tabHeroBanner}
+          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
-          <View style={styles.tabHeroIconWrap}>
-            <CreditCard color="#04cf92" size={24} />
-          </View>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.tabHeroTitle}>Seller Payments, Invoices & Payouts</Text>
-            <Text style={styles.tabHeroSubtitle}>
-              Manage your payout accounts, download receipts for boosting packages, and view transaction history.
-            </Text>
+          <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
+            <View style={styles.tabHeroIconWrap}>
+              <CreditCard color="#04cf92" size={24} />
+            </View>
+            <View style={styles.tabHeroTextWrap}>
+              <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
+                Seller Payments, Invoices & Payouts
+              </Text>
+              <Text style={[styles.tabHeroSubtitle, isPhone && styles.tabHeroSubtitlePhone]}>
+                Manage your payout accounts, download receipts for boosting packages, and view transaction history.
+              </Text>
+            </View>
           </View>
         </LinearGradient>
 
         <View style={styles.kpiRow}>
-          <View style={styles.kpiCard}>
+          <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
             <Text style={[styles.kpiValue, { color: "#04cf92" }]}>৳ 0.00</Text>
             <Text style={styles.kpiLabel}>Available Balance</Text>
             <Text style={styles.kpiSub}>Ready for withdrawal</Text>
           </View>
-          <View style={styles.kpiCard}>
+          <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
             <Text style={[styles.kpiValue, { color: "#2251D6" }]}>৳ 0.00</Text>
             <Text style={styles.kpiLabel}>Pending Clearance</Text>
             <Text style={styles.kpiSub}>Processing settlements</Text>
           </View>
-          <View style={styles.kpiCard}>
+          <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
             <Text style={[styles.kpiValue, { color: "#0F6D55" }]}>৳ 0.00</Text>
             <Text style={styles.kpiLabel}>Lifetime Earnings</Text>
             <Text style={styles.kpiSub}>Total volume processed</Text>
           </View>
         </View>
 
-        <View style={styles.tabCard}>
+        <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Payout Methods</Text>
             <Text style={styles.tabCardSub}>Configure automated or manual payouts directly to your local bank or MFS account</Text>
@@ -1185,7 +1197,7 @@ export function SellerDashboardScreen() {
           </View>
         </View>
 
-        <View style={styles.tabCard}>
+        <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Billing History & Invoices</Text>
             <Text style={styles.tabCardSub}>Receipts for boost packages, listing verifications, and subscriptions</Text>
@@ -1201,30 +1213,31 @@ export function SellerDashboardScreen() {
             </Text>
           </View>
         </View>
-      </ScrollView>
+      </>
     );
   }
 
   function renderHelpWorkspace() {
     return (
-      <ScrollView
-        contentContainerStyle={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}
-        showsVerticalScrollIndicator={false}
-      >
+      <>
         <LinearGradient
           colors={["#0F6D55", "#0F766E"]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
-          style={styles.tabHeroBanner}
+          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
-          <View style={styles.tabHeroIconWrap}>
-            <CircleHelp color="#04cf92" size={24} />
-          </View>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text style={styles.tabHeroTitle}>Seller Help Center & Support Desk</Text>
-            <Text style={styles.tabHeroSubtitle}>
-              Have questions about listing, verification, or boosting? We're here to help you close deals faster.
-            </Text>
+          <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
+            <View style={styles.tabHeroIconWrap}>
+              <CircleHelp color="#04cf92" size={24} />
+            </View>
+            <View style={styles.tabHeroTextWrap}>
+              <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
+                Seller Help Center & Support Desk
+              </Text>
+              <Text style={[styles.tabHeroSubtitle, isPhone && styles.tabHeroSubtitlePhone]}>
+                Have questions about listing, verification, or boosting? We're here to help you close deals faster.
+              </Text>
+            </View>
           </View>
         </LinearGradient>
 
@@ -1257,7 +1270,7 @@ export function SellerDashboardScreen() {
           </View>
         </View>
 
-        <View style={styles.tabCard}>
+        <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Frequently Asked Questions</Text>
             <Text style={styles.tabCardSub}>Everything you need to know about selling properties on HomeNet</Text>
@@ -1289,13 +1302,17 @@ export function SellerDashboardScreen() {
             ))}
           </View>
         </View>
-      </ScrollView>
+      </>
     );
   }
 }
 
 const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
+  workspaceScroll: {
+    flexGrow: 1,
+    justifyContent: "space-between",
+  },
   outerContainer: {
     width: "100%",
     flex: 1,
@@ -1888,9 +1905,31 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     gap: 16,
-    flexWrap: "wrap",
     marginBottom: 4,
+  },
+  tabHeroBannerPhone: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    padding: 16,
+    borderRadius: 18,
+    gap: 14,
+  },
+  tabHeroHeader: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  tabHeroHeaderPhone: {
+    flex: 0,
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  tabHeroTextWrap: {
+    flex: 1,
+    gap: 4,
   },
   tabHeroIconWrap: {
     width: 48,
@@ -1906,12 +1945,20 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     letterSpacing: -0.3,
   },
+  tabHeroTitlePhone: {
+    fontSize: 18,
+    lineHeight: 24,
+  },
   tabHeroSubtitle: {
     fontSize: 13,
     fontFamily: fonts.regular,
     color: "rgba(255, 255, 255, 0.88)",
     lineHeight: 19,
     maxWidth: 680,
+  },
+  tabHeroSubtitlePhone: {
+    fontSize: 12.5,
+    lineHeight: 18,
   },
   tabHeroActionBtn: {
     height: 40,
@@ -1921,6 +1968,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+  },
+  tabHeroActionBtnPhone: {
+    alignSelf: "flex-start",
   },
   tabHeroActionText: {
     fontSize: 13,
@@ -1940,6 +1990,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  kpiCardPhone: {
+    minWidth: "46%",
+    padding: 14,
   },
   kpiValue: {
     fontSize: 22,
@@ -1963,6 +2017,10 @@ const styles = StyleSheet.create({
     padding: 22,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  tabCardPhone: {
+    padding: 16,
+    borderRadius: 16,
   },
   tabCardHeader: {
     marginBottom: 16,

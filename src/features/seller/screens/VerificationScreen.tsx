@@ -41,6 +41,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { fonts, webPointer } from "@/theme";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
+import { Footer } from "@/components/Footer";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 
 interface VerificationDoc {
@@ -292,13 +293,12 @@ export function VerificationScreen() {
 
         {/* Scrollable Center Body */}
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollBody,
-            isPhone && styles.scrollBodyPhone,
-          ]}
+          contentContainerStyle={styles.workspaceScroll}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.contentGrid, isTablet && styles.contentGridMobile]}>
+          <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
+            <View style={[styles.contentGrid, isTablet && styles.contentGridMobile]}>
             {/* Left Column: Banner + Documents List */}
             <View style={styles.leftColumn}>
               {/* Verified Badge Banner (Figma Node 288:2167) */}
@@ -487,7 +487,9 @@ export function VerificationScreen() {
               </View>
             </View>
           </View>
-        </ScrollView>
+        </View>
+        <Footer />
+      </ScrollView>
       </View>
     </View>
   );
@@ -499,6 +501,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: "#F8FAF9",
     minHeight: "100%",
+  },
+  workspaceScroll: {
+    flexGrow: 1,
+    justifyContent: "space-between",
   },
 
   /* Sidebar Styles */
