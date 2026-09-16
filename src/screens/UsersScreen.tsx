@@ -35,7 +35,7 @@ import {
 } from "@/services/userApi";
 import { UserRoleBadges } from "@/features/admin/components/UserRoleBadges";
 import { RoleAssignmentModal } from "@/features/admin/components/RoleAssignmentModal";
-import { DeleteUserDialog } from "@/features/admin/components/DeleteUserDialog";
+import { ConfirmDialog } from "@/features/admin/components/ConfirmDialog";
 import { useUserRoles } from "@/features/admin/hooks/useUserRoles";
 import type { UserRole } from "@/features/admin/types/admin";
 
@@ -276,9 +276,13 @@ export function UsersScreen() {
         onClose={() => setRoleModalUser(null)}
       />
 
-      <DeleteUserDialog
+      <ConfirmDialog
         visible={!!deleteTarget}
-        userName={deleteTarget?.full_name ?? ""}
+        title="Delete User"
+        message={`Are you sure you want to delete ${deleteTarget?.full_name ?? "this user"}? This will permanently remove the user and all associated data. This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        icon={Trash2}
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteTarget(null)}
         loading={deleting}

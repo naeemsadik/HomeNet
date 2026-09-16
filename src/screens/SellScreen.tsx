@@ -12,11 +12,11 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { AppLink, Eyebrow, SectionHeader, SelectField } from "@/components/ui";
+import { AppButton, AppLink, Eyebrow, FeatureCard, SectionHeader, SelectField } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colors, fonts, shadow } from "@/theme";
 
 export function SellScreen() {
   const { isPhone, isTablet, isCompact } = useResponsive();
@@ -49,9 +49,12 @@ export function SellScreen() {
             <Text style={styles.formLabel}>Property type</Text>
             <View style={styles.inputShell}><Building2 color={colors.green} size={16} /><SelectField onChange={setPropertyType} options={["Apartment", "House", "Condo", "Commercial"]} style={styles.propertySelect} value={propertyType} /></View>
           </View>
-          <Pressable onPress={() => setSubmitted(true)} style={({ pressed }) => [styles.submitButton, webPointer, pressed && styles.pressed]}>
-            <Text style={styles.submitText}>Get my estimate</Text><ArrowRight color={colors.white} size={15} />
-          </Pressable>
+          <AppButton
+            label="Get my estimate"
+            onPress={() => setSubmitted(true)}
+            trailingIcon={ArrowRight}
+            style={styles.submitButton}
+          />
           {submitted ? <View style={styles.valuationResult}><CheckCircle2 color={colors.greenDark} size={15} /><Text style={styles.valuationResultText}>We found recent matches near {address || "your property"}. Your valuation is ready for review.</Text></View> : null}
         </View>
       </LinearGradient>
@@ -63,17 +66,21 @@ export function SellScreen() {
             [BarChart3, "Price with evidence", "Compare recent sales, location demand, and property condition."],
             [BadgeCheck, "Publish a verified listing", "Present complete details that serious buyers can rely on."],
             [ShieldCheck, "Meet qualified buyers", "Organize viewings and offers from identity-checked prospects."],
-          ].map(([Icon, title, copy], index) => {
-            const StepIcon = Icon as LucideIcon;
-            return (
-              <View key={title as string} style={styles.stepCard}>
-                <Text style={styles.stepNumber}>0{index + 1}</Text>
-                <View style={styles.stepIcon}><StepIcon color={colors.green} size={21} /></View>
-                <Text style={styles.stepTitle}>{title as string}</Text>
-                <Text style={styles.stepCopy}>{copy as string}</Text>
-              </View>
-            );
-          })}
+          ].map(([Icon, title, copy], index) => (
+            <FeatureCard
+              key={title as string}
+              icon={Icon as LucideIcon}
+              title={title as string}
+              description={copy as string}
+              step={`0${index + 1}`}
+              iconSize={21}
+              style={styles.stepCard}
+              iconWrapStyle={styles.stepIcon}
+              titleStyle={styles.stepTitle}
+              descriptionStyle={styles.stepCopy}
+              stepStyle={styles.stepNumber}
+            />
+          ))}
         </View>
       </View>
 
@@ -97,7 +104,6 @@ export function SellScreen() {
 }
 
 const styles = StyleSheet.create({
-  pressed: { opacity: 0.82 },
   hero: { minHeight: 480, flexDirection: "row", alignItems: "center", gap: 70, overflow: "hidden", padding: 72, borderRadius: 24 },
   heroTablet: { flexDirection: "column", alignItems: "stretch", gap: 30 },
   heroPhone: { minHeight: 0, paddingHorizontal: 20, paddingVertical: 30, borderRadius: 19 },
@@ -120,8 +126,7 @@ const styles = StyleSheet.create({
   inputShell: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.line },
   input: { minWidth: 0, flex: 1, height: 42, color: colors.ink, fontFamily: fonts.regular, fontSize: 14 },
   propertySelect: { minWidth: 0, flex: 1 },
-  submitButton: { width: "100%", minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, borderRadius: 999, backgroundColor: colors.green },
-  submitText: { color: colors.white, fontFamily: fonts.extraBold, fontSize: 14 },
+  submitButton: { width: "100%", minHeight: 48 },
   valuationResult: { flexDirection: "row", alignItems: "flex-start", gap: 6, padding: 12, borderRadius: 10, backgroundColor: colors.greenLight },
   valuationResultText: { flex: 1, color: colors.greenDark, fontFamily: fonts.regular, fontSize: 13, lineHeight: 18 },
   processSection: { marginTop: 54 },

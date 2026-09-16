@@ -60,7 +60,7 @@ import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useMyProperties } from "@/features/property/hooks/useMyProperties";
 import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
 import { SellerTopHeader } from "../components/SellerTopHeader";
@@ -149,17 +149,21 @@ export function SellerDashboardScreen() {
   const draftCount = allMyListings.filter((p) => p.status === "draft").length;
   const soldCount = allMyListings.filter((p) => p.status === "sold").length;
   const verifiedCount = allMyListings.filter((p) => Boolean(p.is_verified)).length;
+  const totalViews = allMyListings.reduce((sum, p) => sum + (p.view_count || 0), 0);
 
-  // Original desktop stats (untouched for PC/laptop viewports)
-  const desktopStats: StatItem[] = [
+  // Desktop stats grid (3x3 layout for laptop/PC viewports)
+  // Single source of truth for the stats grid — same data and colors on
+  // every breakpoint, only the layout (3x3 vs 2x2) differs. Trends are only
+  // shown when there is a real underlying change to report.
+  const sellerStats: StatItem[] = [
     {
       id: "total",
       label: "Total Listings",
       value: String(totalCount),
       trend: totalCount > 0 ? "+1" : undefined,
       icon: Building2,
-      iconBg: "#E6FAF4",
-      iconColor: "#04cf92",
+      iconBg: colors.greenLight,
+      iconColor: colors.green,
     },
     {
       id: "active",
@@ -167,8 +171,8 @@ export function SellerDashboardScreen() {
       value: String(activeCount),
       trend: activeCount > 0 ? "+1" : undefined,
       icon: CheckCircle2,
-      iconBg: "#E6FAF4",
-      iconColor: "#04cf92",
+      iconBg: colors.greenLight,
+      iconColor: colors.green,
     },
     {
       id: "draft",
@@ -176,137 +180,55 @@ export function SellerDashboardScreen() {
       value: String(draftCount),
       icon: FileText,
       iconBg: "#F4F6F5",
-      iconColor: "#5C6B66",
+      iconColor: colors.muted,
     },
     {
       id: "sold",
       label: "Sold / Rented",
       value: String(soldCount),
       icon: Handshake,
-      iconBg: "#E8EEFC",
-      iconColor: "#2251D6",
+      iconBg: colors.blueLight,
+      iconColor: colors.blue,
     },
     {
       id: "verified",
       label: "Verified Properties",
       value: String(verifiedCount),
       icon: ShieldCheck,
-      iconBg: "#E6FAF4",
-      iconColor: "#04cf92",
+      iconBg: colors.greenLight,
+      iconColor: colors.green,
     },
     {
       id: "boosted",
       label: "Boosted Listings",
       value: "0",
       icon: Zap,
-      iconBg: "#FDEEE2",
-      iconColor: "#F4823A",
+      iconBg: colors.orangeLight,
+      iconColor: colors.orange,
     },
     {
       id: "views",
       label: "Total Views",
-      value: totalCount > 0 ? `${totalCount * 14}` : "0",
+      value: String(totalViews),
       icon: Eye,
-      iconBg: "#E8EEFC",
-      iconColor: "#2251D6",
+      iconBg: colors.blueLight,
+      iconColor: colors.blue,
     },
     {
       id: "inquiries",
       label: "Buyer Inquiries",
       value: "0",
       icon: MessageSquare,
-      iconBg: "#FDEEE2",
-      iconColor: "#F4823A",
+      iconBg: colors.orangeLight,
+      iconColor: colors.orange,
     },
     {
       id: "saved",
       label: "Saved by Buyers",
       value: "0",
       icon: Heart,
-      iconBg: "#E6FAF4",
-      iconColor: "#04cf92",
-    },
-  ];
-
-  // Mobile 2-by-2 stats (Figma Node 207:2837 design)
-  const mobileStats: StatItem[] = [
-    {
-      id: "total",
-      label: "Total Listings",
-      value: String(totalCount),
-      trend: "+4%",
-      icon: Building2,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
-    },
-    {
-      id: "active",
-      label: "Active Listings",
-      value: String(activeCount),
-      trend: "+2%",
-      icon: CheckCircle2,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
-    },
-    {
-      id: "draft",
-      label: "Draft Listings",
-      value: String(draftCount),
-      icon: FileText,
-      iconBg: "#F4F6F5",
-      iconColor: "#5C6B66",
-    },
-    {
-      id: "sold",
-      label: "Sold / Rented",
-      value: String(soldCount),
-      trend: "+1%",
-      icon: Handshake,
-      iconBg: "#E8EEFC",
-      iconColor: "#2251D6",
-    },
-    {
-      id: "verified",
-      label: "Verified Properties",
-      value: String(verifiedCount),
-      icon: ShieldCheck,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
-    },
-    {
-      id: "boosted",
-      label: "Boosted Listings",
-      value: "0",
-      icon: Rocket,
-      iconBg: "#FDEEE2",
-      iconColor: "#F4823A",
-    },
-    {
-      id: "views",
-      label: "Total Views",
-      value: totalCount > 0 ? `${totalCount * 14}` : "0",
-      trend: "+12%",
-      icon: Eye,
-      iconBg: "#E8EEFC",
-      iconColor: "#2251D6",
-    },
-    {
-      id: "inquiries",
-      label: "Buyer Inquiries",
-      value: "0",
-      trend: "+8%",
-      icon: MessageSquare,
-      iconBg: "#FDEEE2",
-      iconColor: "#F4823A",
-    },
-    {
-      id: "saved",
-      label: "Saved by Buyers",
-      value: "0",
-      trend: "+6%",
-      icon: Heart,
-      iconBg: "#E7F2EE",
-      iconColor: "#0F6D55",
+      iconBg: colors.greenLight,
+      iconColor: colors.green,
     },
   ];
 
@@ -316,8 +238,8 @@ export function SellerDashboardScreen() {
     description: `${p.title} · ${p.area?.name || "Dhaka"}`,
     time: "Recently updated",
     icon: p.status === "active" ? BadgeCheck : FileText,
-    iconBg: "#E6FAF4",
-    iconColor: "#04cf92",
+    iconBg: colors.greenLight,
+    iconColor: colors.green,
     hasUnreadDot: false,
   }));
 
@@ -401,8 +323,8 @@ export function SellerDashboardScreen() {
                       item.danger
                         ? "#D4183D"
                         : isActive
-                        ? "#04cf92"
-                        : "#5C6B66"
+                        ? colors.green
+                        : colors.muted
                     }
                     size={20}
                   />
@@ -459,13 +381,13 @@ export function SellerDashboardScreen() {
 
               {/* Notification Button */}
               <AppLink href="/notifications" style={styles.iconCircleBtn}>
-                <Bell color="#0B1A17" size={19} />
+                <Bell color={colors.ink} size={19} />
                 <View style={styles.headerDotIndicator} />
               </AppLink>
 
               {/* View site button */}
               <AppLink href="/" style={styles.viewSiteBtn}>
-                <Globe color="#0B1A17" size={16} />
+                <Globe color={colors.ink} size={16} />
                 <Text style={styles.viewSiteText}>View site</Text>
               </AppLink>
             </View>
@@ -484,23 +406,23 @@ export function SellerDashboardScreen() {
             {/* Welcome Banner (Figma Node 220:8881) */}
             <SellerWelcomeBanner
               name={sellerName}
-            viewsThisWeek={totalCount > 0 ? totalCount * 14 : 0}
+            viewsThisWeek={totalViews}
             inquiriesThisWeek={0}
             onBoostListing={() => setBoostModalVisible(true)}
           />
 
           {/* Stats Grid: Responsive */}
           {isTablet ? (
-            /* Mobile / Small Screens: Figma 2-by-2 card design (Node 207:2837) */
+            /* Mobile / Small Screens: 2-by-2 card layout */
             <View style={styles.statsGridMobile}>
-              {mobileStats.map((item) => (
+              {sellerStats.map((item) => (
                 <SellerStatCard item={item} key={item.id} />
               ))}
             </View>
           ) : (
-            /* PC / Laptop / Big Screens: Untouched original 3x3 layout */
+            /* PC / Laptop / Big Screens: 3x3 layout */
             <View style={styles.statsGridDesktop}>
-              {desktopStats.map((item) => {
+              {sellerStats.map((item) => {
                 const IconComponent = item.icon;
                 return (
                   <View key={item.id} style={styles.statCardDesktop}>
@@ -511,7 +433,7 @@ export function SellerDashboardScreen() {
 
                       {item.trend ? (
                         <View style={styles.trendPillDesktop}>
-                          <TrendingUp color="#04cf92" size={12} />
+                          <TrendingUp color={colors.green} size={12} />
                           <Text style={styles.trendPillTextDesktop}>{item.trend}</Text>
                         </View>
                       ) : null}
@@ -531,7 +453,7 @@ export function SellerDashboardScreen() {
             <View style={styles.chartCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderTitleRow}>
-                  <LineChartIcon color="#0B1A17" size={20} />
+                  <LineChartIcon color={colors.ink} size={20} />
                   <View>
                     <Text style={styles.cardTitle}>Listing views</Text>
                     <Text style={styles.cardSubtext}>Last 7 days</Text>
@@ -540,7 +462,7 @@ export function SellerDashboardScreen() {
 
                 <AppLink href="/market" style={styles.analyticsLink}>
                   <Text style={styles.analyticsLinkText}>Analytics</Text>
-                  <ArrowUpRight color="#04cf92" size={16} />
+                  <ArrowUpRight color={colors.green} size={16} />
                 </AppLink>
               </View>
 
@@ -549,8 +471,8 @@ export function SellerDashboardScreen() {
                 <Svg height={220} width="100%" viewBox="0 0 500 200">
                   <Defs>
                     <SvgGradient id="chartTealGrad" x1="0" y1="0" x2="0" y2="1">
-                      <Stop offset="0%" stopColor="#04cf92" stopOpacity="0.3" />
-                      <Stop offset="100%" stopColor="#04cf92" stopOpacity="0.0" />
+                      <Stop offset="0%" stopColor={colors.green} stopOpacity="0.3" />
+                      <Stop offset="100%" stopColor={colors.green} stopOpacity="0.0" />
                     </SvgGradient>
                   </Defs>
 
@@ -564,27 +486,27 @@ export function SellerDashboardScreen() {
                   <Path
                     d="M 20 160 Q 90 130 160 140 T 300 90 T 440 50"
                     fill="none"
-                    stroke="#04cf92"
+                    stroke={colors.green}
                     strokeWidth="3.5"
                   />
 
                   {/* Data Points */}
-                  <Circle cx="20" cy="160" r="4.5" fill="#04cf92" />
-                  <Circle cx="90" cy="130" r="4.5" fill="#04cf92" />
-                  <Circle cx="160" cy="140" r="4.5" fill="#04cf92" />
-                  <Circle cx="230" cy="110" r="4.5" fill="#04cf92" />
-                  <Circle cx="300" cy="90" r="4.5" fill="#04cf92" />
-                  <Circle cx="370" cy="65" r="4.5" fill="#04cf92" />
-                  <Circle cx="440" cy="50" r="4.5" fill="#04cf92" />
+                  <Circle cx="20" cy="160" r="4.5" fill={colors.green} />
+                  <Circle cx="90" cy="130" r="4.5" fill={colors.green} />
+                  <Circle cx="160" cy="140" r="4.5" fill={colors.green} />
+                  <Circle cx="230" cy="110" r="4.5" fill={colors.green} />
+                  <Circle cx="300" cy="90" r="4.5" fill={colors.green} />
+                  <Circle cx="370" cy="65" r="4.5" fill={colors.green} />
+                  <Circle cx="440" cy="50" r="4.5" fill={colors.green} />
 
                   {/* Days X Axis */}
-                  <SvgText x="20" y="195" fill="#5C6B66" fontSize="12" textAnchor="middle">Mon</SvgText>
-                  <SvgText x="90" y="195" fill="#5C6B66" fontSize="12" textAnchor="middle">Tue</SvgText>
-                  <SvgText x="160" y="195" fill="#5C6B66" fontSize="12" textAnchor="middle">Wed</SvgText>
-                  <SvgText x="230" y="195" fill="#5C6B66" fontSize="12" textAnchor="middle">Thu</SvgText>
-                  <SvgText x="300" y="195" fill="#5C6B66" fontSize="12" textAnchor="middle">Fri</SvgText>
-                  <SvgText x="370" y="195" fill="#5C6B66" fontSize="12" textAnchor="middle">Sat</SvgText>
-                  <SvgText x="440" y="195" fill="#5C6B66" fontSize="12" textAnchor="middle">Sun</SvgText>
+                  <SvgText x="20" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Mon</SvgText>
+                  <SvgText x="90" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Tue</SvgText>
+                  <SvgText x="160" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Wed</SvgText>
+                  <SvgText x="230" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Thu</SvgText>
+                  <SvgText x="300" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Fri</SvgText>
+                  <SvgText x="370" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Sat</SvgText>
+                  <SvgText x="440" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Sun</SvgText>
                 </Svg>
               </View>
             </View>
@@ -593,7 +515,7 @@ export function SellerDashboardScreen() {
             <View style={styles.activityCard}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderTitleRow}>
-                  <Bell color="#0B1A17" size={20} />
+                  <Bell color={colors.ink} size={20} />
                   <Text style={styles.cardTitle}>Recent activity</Text>
                 </View>
 
@@ -628,7 +550,7 @@ export function SellerDashboardScreen() {
                   })
                 ) : (
                   <View style={{ paddingVertical: 24, alignItems: "center" }}>
-                    <Text style={{ fontSize: 13, color: "#5C6B66", textAlign: "center" }}>
+                    <Text style={{ fontSize: 13, color: colors.muted, textAlign: "center" }}>
                       No recent activity. Inquiries and updates on your listings will appear here.
                     </Text>
                   </View>
@@ -664,7 +586,7 @@ export function SellerDashboardScreen() {
           <View style={styles.boostModalCard}>
             <View style={styles.boostModalHeader}>
               <View style={styles.boostHeaderIconWrap}>
-                <Rocket color="#04cf92" size={20} />
+                <Rocket color={colors.green} size={20} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.boostModalTitle}>Boost a listing</Text>
@@ -677,7 +599,7 @@ export function SellerDashboardScreen() {
                 onPress={() => setBoostModalVisible(false)}
                 style={[styles.modalCloseBtn, webPointer]}
               >
-                <X color="#5C6B66" size={18} />
+                <X color={colors.muted} size={18} />
               </Pressable>
             </View>
 
@@ -724,7 +646,7 @@ export function SellerDashboardScreen() {
                       ]}
                     >
                       {isSelected ? (
-                        <Check color="#FFFFFF" size={12} strokeWidth={3} />
+                        <Check color={colors.white} size={12} strokeWidth={3} />
                       ) : null}
                     </View>
                     <View style={{ flex: 1, gap: 2 }}>
@@ -754,7 +676,7 @@ export function SellerDashboardScreen() {
                 onPress={() => setBoostModalVisible(false)}
                 style={[styles.boostConfirmBtn, webPointer]}
               >
-                <Rocket color="#FFFFFF" size={16} />
+                <Rocket color={colors.white} size={16} />
                 <Text style={styles.boostConfirmBtnText}>Activate Boost</Text>
               </Pressable>
             </View>
@@ -790,14 +712,14 @@ export function SellerDashboardScreen() {
     return (
       <>
         <LinearGradient
-          colors={["#0F6D55", "#1B4D89"]}
+          colors={[colors.green, colors.blue]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
           style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
             <View style={styles.tabHeroIconWrap}>
-              <Rocket color="#04cf92" size={24} />
+              <Rocket color={colors.green} size={24} />
             </View>
             <View style={styles.tabHeroTextWrap}>
               <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
@@ -816,22 +738,29 @@ export function SellerDashboardScreen() {
               webPointer,
             ]}
           >
-            <Rocket color="#0B1A17" size={16} />
+            <Rocket color={colors.ink} size={16} />
             <Text style={styles.tabHeroActionText}>Boost a Property</Text>
           </Pressable>
         </LinearGradient>
 
         <View style={styles.kpiRow}>
+          <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
+            <Text style={[styles.kpiValue, { color: colors.green }]}>0</Text>
+            <Text style={styles.kpiLabel}>Active Boosts</Text>
+            <Text style={styles.kpiSub}>Currently promoted</Text>
+          </View>
+        </View>
+
+        <View style={styles.boostBenchmarkRow}>
           {[
-            { label: "Active Boosts", value: "0", sub: "Currently promoted", color: "#04cf92" },
-            { label: "Impression Lift", value: "+340%", sub: "Above standard", color: "#2251D6" },
-            { label: "Inquiry Multiplier", value: "8.5x", sub: "Faster buyer calls", color: "#F4823A" },
-            { label: "Avg Closing Time", value: "14 Days", sub: "For boosted units", color: "#0F6D55" },
-          ].map((kpi, idx) => (
-            <View key={idx} style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
-              <Text style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</Text>
-              <Text style={styles.kpiLabel}>{kpi.label}</Text>
-              <Text style={styles.kpiSub}>{kpi.sub}</Text>
+            { label: "Typical impression lift", value: "up to 3x", icon: TrendingUp },
+            { label: "Typical inquiry lift", value: "up to 5x", icon: MessageSquare },
+          ].map((item) => (
+            <View key={item.label} style={styles.boostBenchmarkItem}>
+              <item.icon color={colors.muted} size={14} />
+              <Text style={styles.boostBenchmarkText}>
+                <Text style={styles.boostBenchmarkValue}>{item.value}</Text> {item.label} reported across boosted listings
+              </Text>
             </View>
           ))}
         </View>
@@ -890,7 +819,7 @@ export function SellerDashboardScreen() {
               >
                 {pkg.popular ? (
                   <View style={styles.popularTag}>
-                    <Sparkles color="#0B1A17" size={12} />
+                    <Sparkles color={colors.ink} size={12} />
                     <Text style={styles.popularTagText}>{pkg.badge}</Text>
                   </View>
                 ) : (
@@ -904,7 +833,7 @@ export function SellerDashboardScreen() {
                 <View style={styles.pkgBulletsList}>
                   {pkg.bullets.map((b, i) => (
                     <View key={i} style={styles.pkgBulletRow}>
-                      <CheckCircle2 color="#04cf92" size={15} />
+                      <CheckCircle2 color={colors.green} size={15} />
                       <Text style={styles.pkgBulletText}>{b}</Text>
                     </View>
                   ))}
@@ -921,7 +850,7 @@ export function SellerDashboardScreen() {
                     webPointer,
                   ]}
                 >
-                  <Rocket color={pkg.popular ? "#0B1A17" : "#04cf92"} size={15} />
+                  <Rocket color={pkg.popular ? colors.ink : colors.green} size={15} />
                   <Text
                     style={[
                       styles.selectPkgBtnText,
@@ -944,7 +873,7 @@ export function SellerDashboardScreen() {
 
           <View style={styles.emptyStateContainer}>
             <View style={styles.emptyIconWrap}>
-              <Rocket color="#04cf92" size={26} />
+              <Rocket color={colors.green} size={26} />
             </View>
             <Text style={styles.emptyTitle}>No Active Boosts</Text>
             <Text style={styles.emptyDesc}>
@@ -963,14 +892,14 @@ export function SellerDashboardScreen() {
     return (
       <>
         <LinearGradient
-          colors={["#0F6D55", "#0E5A73"]}
+          colors={[colors.green, colors.blue]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
           style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
             <View style={styles.tabHeroIconWrap}>
-              <Sparkles color="#04cf92" size={24} />
+              <Sparkles color={colors.green} size={24} />
             </View>
             <View style={styles.tabHeroTextWrap}>
               <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
@@ -986,13 +915,13 @@ export function SellerDashboardScreen() {
         <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Live Portfolio Intelligence</Text>
-            <Text style={styles.tabCardSub}>Real-time analysis powered by HomeNet AI matching engine</Text>
+            <Text style={styles.tabCardSub}>Sample insights illustrating what HomeNet's AI matching engine surfaces once it has enough activity on your listings</Text>
           </View>
 
           <View style={styles.insightsCardsGrid}>
             <View style={styles.insightCard}>
-              <View style={[styles.insightCardIcon, { backgroundColor: "#E6FAF4" }]}>
-                <TrendingUp color="#04cf92" size={20} />
+              <View style={[styles.insightCardIcon, { backgroundColor: colors.greenLight }]}>
+                <TrendingUp color={colors.green} size={20} />
               </View>
               <Text style={styles.insightCardTitle}>High Buyer Demand in Gulshan</Text>
               <Text style={styles.insightCardDesc}>
@@ -1004,28 +933,28 @@ export function SellerDashboardScreen() {
             </View>
 
             <View style={styles.insightCard}>
-              <View style={[styles.insightCardIcon, { backgroundColor: "#E8EEFC" }]}>
-                <BarChart2 color="#2251D6" size={20} />
+              <View style={[styles.insightCardIcon, { backgroundColor: colors.blueLight }]}>
+                <BarChart2 color={colors.blue} size={20} />
               </View>
               <Text style={styles.insightCardTitle}>Competitive Price Guidance</Text>
               <Text style={styles.insightCardDesc}>
                 Properties priced between BDT 1.6 Cr – 2.2 Cr in central Dhaka have closed 2.4x faster than above-market peers this quarter. Review your listing pricing.
               </Text>
-              <View style={[styles.insightPill, { backgroundColor: "#E8EEFC" }]}>
-                <Text style={[styles.insightPillText, { color: "#2251D6" }]}>Optimal Closing Range</Text>
+              <View style={[styles.insightPill, { backgroundColor: colors.blueLight }]}>
+                <Text style={[styles.insightPillText, { color: colors.blue }]}>Optimal Closing Range</Text>
               </View>
             </View>
 
             <View style={styles.insightCard}>
-              <View style={[styles.insightCardIcon, { backgroundColor: "#FDEEE2" }]}>
-                <CheckCircle2 color="#F4823A" size={20} />
+              <View style={[styles.insightCardIcon, { backgroundColor: colors.orangeLight }]}>
+                <CheckCircle2 color={colors.orange} size={20} />
               </View>
               <Text style={styles.insightCardTitle}>Listing Quality Score</Text>
               <Text style={styles.insightCardDesc}>
                 Listings with verified floorplans, high-res photos, and complete amenity tags retain buyers 42% longer on page. Submit documents in Verification Center.
               </Text>
-              <View style={[styles.insightPill, { backgroundColor: "#FDEEE2" }]}>
-                <Text style={[styles.insightPillText, { color: "#F4823A" }]}>Verification Priority</Text>
+              <View style={[styles.insightPill, { backgroundColor: colors.orangeLight }]}>
+                <Text style={[styles.insightPillText, { color: colors.orange }]}>Verification Priority</Text>
               </View>
             </View>
           </View>
@@ -1046,21 +975,21 @@ export function SellerDashboardScreen() {
     return (
       <>
         <LinearGradient
-          colors={["#1B4D89", "#0F6D55"]}
+          colors={[colors.green, colors.blue]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
           style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
             <View style={styles.tabHeroIconWrap}>
-              <BarChart2 color="#04cf92" size={24} />
+              <BarChart2 color={colors.green} size={24} />
             </View>
             <View style={styles.tabHeroTextWrap}>
               <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
                 Dhaka Real Estate Market Analytics
               </Text>
               <Text style={[styles.tabHeroSubtitle, isPhone && styles.tabHeroSubtitlePhone]}>
-                Live property valuations, historical price per square foot trends, and buyer demand indexing across Dhaka.
+                Illustrative price-per-square-foot trends and buyer demand indexing to help you price and time your listing.
               </Text>
             </View>
           </View>
@@ -1068,9 +997,9 @@ export function SellerDashboardScreen() {
 
         <View style={styles.kpiRow}>
           {[
-            { label: "Dhaka Avg Sq Ft", value: "৳ 16,840", sub: "+4.8% YoY", color: "#04cf92" },
-            { label: "Avg Days on Market", value: "32 Days", sub: "3 days faster than '25", color: "#2251D6" },
-            { label: "Avg Rental Yield", value: "5.6%", sub: "Annualized gross", color: "#F4823A" },
+            { label: "Dhaka Avg Sq Ft", value: "৳ 16,840", sub: "+4.8% YoY", color: colors.green },
+            { label: "Avg Days on Market", value: "32 Days", sub: "3 days faster than '25", color: colors.blue },
+            { label: "Avg Rental Yield", value: "5.6%", sub: "Annualized gross", color: colors.orange },
             { label: "Market Health Score", value: "88 / 100", sub: "Strong seller market", color: "#0F6D55" },
           ].map((kpi, idx) => (
             <View key={idx} style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
@@ -1084,7 +1013,7 @@ export function SellerDashboardScreen() {
         <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
             <Text style={styles.tabCardTitle}>Area Price Trends & Demand Index</Text>
-            <Text style={styles.tabCardSub}>Comparative benchmarks for residential properties in prime Dhaka zones</Text>
+            <Text style={styles.tabCardSub}>Illustrative Dhaka market benchmarks — connect a live market-data feed for figures specific to today</Text>
           </View>
 
           <View style={styles.tableContainer}>
@@ -1108,8 +1037,8 @@ export function SellerDashboardScreen() {
                 <Text style={[styles.tableCellTextBold, { flex: 2 }]}>{row.area}</Text>
                 <Text style={[styles.tableCellText, { flex: 2 }]}>{row.price}</Text>
                 <View style={{ flex: 1.5, flexDirection: "row", alignItems: "center", gap: 4 }}>
-                  <TrendingUp color="#04cf92" size={14} />
-                  <Text style={{ fontSize: 13, fontFamily: fonts.semiBold, color: "#04cf92" }}>{row.trend}</Text>
+                  <TrendingUp color={colors.green} size={14} />
+                  <Text style={{ fontSize: 13, fontFamily: fonts.semiBold, color: colors.green }}>{row.trend}</Text>
                 </View>
                 <View style={{ flex: 1.5 }}>
                   <View style={styles.demandBadge}>
@@ -1128,14 +1057,14 @@ export function SellerDashboardScreen() {
     return (
       <>
         <LinearGradient
-          colors={["#0F6D55", "#2C3E50"]}
+          colors={[colors.green, colors.blue]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
           style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
             <View style={styles.tabHeroIconWrap}>
-              <CreditCard color="#04cf92" size={24} />
+              <CreditCard color={colors.green} size={24} />
             </View>
             <View style={styles.tabHeroTextWrap}>
               <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
@@ -1150,12 +1079,12 @@ export function SellerDashboardScreen() {
 
         <View style={styles.kpiRow}>
           <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
-            <Text style={[styles.kpiValue, { color: "#04cf92" }]}>৳ 0.00</Text>
+            <Text style={[styles.kpiValue, { color: colors.green }]}>৳ 0.00</Text>
             <Text style={styles.kpiLabel}>Available Balance</Text>
             <Text style={styles.kpiSub}>Ready for withdrawal</Text>
           </View>
           <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
-            <Text style={[styles.kpiValue, { color: "#2251D6" }]}>৳ 0.00</Text>
+            <Text style={[styles.kpiValue, { color: colors.blue }]}>৳ 0.00</Text>
             <Text style={styles.kpiLabel}>Pending Clearance</Text>
             <Text style={styles.kpiSub}>Processing settlements</Text>
           </View>
@@ -1173,26 +1102,30 @@ export function SellerDashboardScreen() {
           </View>
 
           <View style={styles.payoutMethodsRow}>
-            <View style={styles.payoutMethodCard}>
+            <View style={[styles.payoutMethodCard, { borderStyle: "dashed" }]}>
               <View style={styles.payoutCardTop}>
                 <Text style={styles.payoutMethodName}>bKash Commercial</Text>
-                <View style={styles.connectedBadge}>
-                  <Text style={styles.connectedBadgeText}>Connected</Text>
+                <View style={styles.availableBadge}>
+                  <Text style={styles.availableBadgeText}>Not connected</Text>
                 </View>
               </View>
-              <Text style={styles.payoutAccountNo}>+880 1700-***000</Text>
-              <Text style={styles.payoutSchedule}>Auto-payout on 1st and 15th</Text>
+              <Text style={styles.payoutAccountNo}>Link a bKash merchant account</Text>
+              <Pressable style={styles.connectPayoutBtn}>
+                <Text style={styles.connectPayoutBtnText}>Connect</Text>
+              </Pressable>
             </View>
 
             <View style={[styles.payoutMethodCard, { borderStyle: "dashed" }]}>
               <View style={styles.payoutCardTop}>
                 <Text style={styles.payoutMethodName}>Bank Transfer (EFTN)</Text>
                 <View style={styles.availableBadge}>
-                  <Text style={styles.availableBadgeText}>Available</Text>
+                  <Text style={styles.availableBadgeText}>Not connected</Text>
                 </View>
               </View>
-              <Text style={styles.payoutAccountNo}>Local Bank Account in Bangladesh</Text>
-              <Text style={styles.payoutSchedule}>2 business days settlement</Text>
+              <Text style={styles.payoutAccountNo}>Local bank account in Bangladesh</Text>
+              <Pressable style={styles.connectPayoutBtn}>
+                <Text style={styles.connectPayoutBtnText}>Connect</Text>
+              </Pressable>
             </View>
           </View>
         </View>
@@ -1205,7 +1138,7 @@ export function SellerDashboardScreen() {
 
           <View style={styles.emptyStateContainer}>
             <View style={styles.emptyIconWrap}>
-              <CreditCard color="#04cf92" size={26} />
+              <CreditCard color={colors.green} size={26} />
             </View>
             <Text style={styles.emptyTitle}>No Invoices Generated Yet</Text>
             <Text style={styles.emptyDesc}>
@@ -1221,14 +1154,14 @@ export function SellerDashboardScreen() {
     return (
       <>
         <LinearGradient
-          colors={["#0F6D55", "#0F766E"]}
+          colors={[colors.green, colors.blue]}
           end={{ x: 0.95, y: 0.95 }}
           start={{ x: 0.05, y: 0.05 }}
           style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
         >
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
             <View style={styles.tabHeroIconWrap}>
-              <CircleHelp color="#04cf92" size={24} />
+              <CircleHelp color={colors.green} size={24} />
             </View>
             <View style={styles.tabHeroTextWrap}>
               <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
@@ -1243,8 +1176,8 @@ export function SellerDashboardScreen() {
 
         <View style={styles.supportChannelsGrid}>
           <View style={styles.supportChannelCard}>
-            <View style={[styles.supportChannelIcon, { backgroundColor: "#E6FAF4" }]}>
-              <Phone color="#04cf92" size={20} />
+            <View style={[styles.supportChannelIcon, { backgroundColor: colors.greenLight }]}>
+              <Phone color={colors.green} size={20} />
             </View>
             <Text style={styles.supportChannelTitle}>Phone Support</Text>
             <Text style={styles.supportChannelValue}>+880 1700-000000</Text>
@@ -1252,8 +1185,8 @@ export function SellerDashboardScreen() {
           </View>
 
           <View style={styles.supportChannelCard}>
-            <View style={[styles.supportChannelIcon, { backgroundColor: "#E8EEFC" }]}>
-              <Mail color="#2251D6" size={20} />
+            <View style={[styles.supportChannelIcon, { backgroundColor: colors.blueLight }]}>
+              <Mail color={colors.blue} size={20} />
             </View>
             <Text style={styles.supportChannelTitle}>Partner Desk Email</Text>
             <Text style={styles.supportChannelValue}>partner@homenet.com.bd</Text>
@@ -1261,8 +1194,8 @@ export function SellerDashboardScreen() {
           </View>
 
           <View style={styles.supportChannelCard}>
-            <View style={[styles.supportChannelIcon, { backgroundColor: "#E6FAF4" }]}>
-              <MessageSquare color="#04cf92" size={20} />
+            <View style={[styles.supportChannelIcon, { backgroundColor: colors.greenLight }]}>
+              <MessageSquare color={colors.green} size={20} />
             </View>
             <Text style={styles.supportChannelTitle}>WhatsApp Desk</Text>
             <Text style={styles.supportChannelValue}>+880 1700-000000</Text>
@@ -1321,7 +1254,7 @@ const styles = StyleSheet.create({
   },
   sidebar: {
     width: 256,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRightWidth: 0.8,
     borderRightColor: "rgba(11,26,23,0.08)",
     paddingVertical: 20,
@@ -1341,27 +1274,27 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#04cf92",
+    backgroundColor: colors.green,
     alignItems: "center",
     justifyContent: "center",
   },
   brandText: {
     fontSize: 18,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   brandTextAccent: {
-    color: "#04cf92",
+    color: colors.green,
   },
   sellerRolePill: {
-    backgroundColor: "#E8EEFC",
+    backgroundColor: colors.blueLight,
     borderRadius: 999,
     paddingVertical: 4,
     paddingHorizontal: 12,
     alignItems: "center",
   },
   sellerRoleText: {
-    color: "#2251D6",
+    color: colors.blue,
     fontSize: 12,
     fontFamily: fonts.semiBold,
   },
@@ -1379,7 +1312,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   navItemActive: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: colors.greenLight,
   },
   navItemDanger: {
     marginTop: 8,
@@ -1388,17 +1321,17 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: colors.muted,
   },
   navItemTextActive: {
-    color: "#04cf92",
+    color: colors.green,
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
     color: "#D4183D",
   },
   badgeCountPill: {
-    backgroundColor: "#F4823A",
+    backgroundColor: colors.orange,
     width: 20,
     height: 20,
     borderRadius: 10,
@@ -1406,7 +1339,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badgeCountText: {
-    color: "#FFFFFF",
+    color: colors.white,
     fontSize: 12,
     fontFamily: fonts.bold,
   },
@@ -1429,7 +1362,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 19,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: colors.ink,
     letterSpacing: -0.38,
   },
   headerActions: {
@@ -1453,7 +1386,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   iconCircleBtn: {
     width: 40,
@@ -1472,7 +1405,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#F4823A",
+    backgroundColor: colors.orange,
   },
   viewSiteBtn: {
     height: 38,
@@ -1487,7 +1420,7 @@ const styles = StyleSheet.create({
   viewSiteText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   scrollBody: {
     padding: 24,
@@ -1518,7 +1451,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 26,
-    color: "#FFFFFF",
+    color: colors.white,
     fontFamily: fonts.extraBold,
     letterSpacing: -0.5,
   },
@@ -1543,12 +1476,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 999,
     paddingHorizontal: 18,
   },
   heroBtnPrimaryText: {
-    color: "#04cf92",
+    color: colors.green,
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },
@@ -1562,7 +1495,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   heroBtnSecondaryText: {
-    color: "#FFFFFF",
+    color: colors.white,
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },
@@ -1584,7 +1517,7 @@ const styles = StyleSheet.create({
     width: "32.3%",
     minWidth: 220,
     flexGrow: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 20,
     borderWidth: 0.8,
     borderColor: "rgba(11,26,23,0.08)",
@@ -1607,7 +1540,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: colors.greenLight,
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -1615,18 +1548,18 @@ const styles = StyleSheet.create({
   trendPillTextDesktop: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colors.green,
   },
   statValueDesktop: {
     fontSize: 24,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: colors.ink,
     marginTop: 4,
   },
   statLabelDesktop: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
   },
   bottomGrid: {
     flexDirection: "row",
@@ -1637,7 +1570,7 @@ const styles = StyleSheet.create({
   },
   chartCard: {
     flex: 1.5,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 24,
     borderWidth: 0.8,
     borderColor: "rgba(11,26,23,0.08)",
@@ -1645,7 +1578,7 @@ const styles = StyleSheet.create({
   },
   activityCard: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 24,
     borderWidth: 0.8,
     borderColor: "rgba(11,26,23,0.08)",
@@ -1665,12 +1598,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   cardSubtext: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
   },
   analyticsLink: {
     flexDirection: "row",
@@ -1680,7 +1613,7 @@ const styles = StyleSheet.create({
   analyticsLinkText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colors.green,
   },
   chartSvgWrap: {
     marginTop: 10,
@@ -1717,23 +1650,23 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   unreadOrangeDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#F4823A",
+    backgroundColor: colors.orange,
   },
   activityDesc: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
   },
   activityTime: {
     fontSize: 11,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: colors.muted,
   },
   modalBackdrop: {
     flex: 1,
@@ -1752,7 +1685,7 @@ const styles = StyleSheet.create({
   boostModalCard: {
     width: "100%",
     maxWidth: 520,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 24,
     padding: 24,
     gap: 20,
@@ -1771,7 +1704,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: colors.greenLight,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1779,11 +1712,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: colors.ink,
   },
   boostModalSub: {
     fontSize: 13,
-    color: "#5C6B66",
+    color: colors.muted,
     fontFamily: fonts.regular,
     marginTop: 2,
   },
@@ -1806,10 +1739,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.08)",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
   },
   pkgCardSelected: {
-    borderColor: "#04cf92",
+    borderColor: colors.green,
     backgroundColor: "#F4F9F7",
   },
   pkgRadio: {
@@ -1823,8 +1756,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   pkgRadioSelected: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
+    backgroundColor: colors.green,
+    borderColor: colors.green,
   },
   pkgTitleRow: {
     flexDirection: "row",
@@ -1835,10 +1768,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#0B1A17",
+    color: colors.ink,
   },
   pkgBadge: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: colors.greenLight,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,
@@ -1846,18 +1779,18 @@ const styles = StyleSheet.create({
   pkgBadgeText: {
     fontSize: 11,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: colors.green,
   },
   pkgDesc: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
     lineHeight: 18,
   },
   pkgPrice: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colors.green,
     marginTop: 4,
   },
   boostModalActions: {
@@ -1878,18 +1811,18 @@ const styles = StyleSheet.create({
   boostCancelBtnText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: colors.muted,
   },
   boostConfirmBtn: {
     flex: 2,
     height: 44,
     borderRadius: 999,
-    backgroundColor: "#04cf92",
+    backgroundColor: colors.green,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    shadowColor: "#04cf92",
+    shadowColor: colors.green,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -1898,7 +1831,7 @@ const styles = StyleSheet.create({
   boostConfirmBtnText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#FFFFFF",
+    color: colors.white,
   },
   tabHeroBanner: {
     padding: 22,
@@ -1942,7 +1875,7 @@ const styles = StyleSheet.create({
   tabHeroTitle: {
     fontSize: 20,
     fontFamily: fonts.extraBold,
-    color: "#FFFFFF",
+    color: colors.white,
     letterSpacing: -0.3,
   },
   tabHeroTitlePhone: {
@@ -1964,7 +1897,7 @@ const styles = StyleSheet.create({
     height: 40,
     paddingHorizontal: 18,
     borderRadius: 999,
-    backgroundColor: "#04cf92",
+    backgroundColor: colors.green,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
@@ -1975,7 +1908,7 @@ const styles = StyleSheet.create({
   tabHeroActionText: {
     fontSize: 13,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   kpiRow: {
     flexDirection: "row",
@@ -1985,7 +1918,7 @@ const styles = StyleSheet.create({
   kpiCard: {
     flex: 1,
     minWidth: 150,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -2002,17 +1935,35 @@ const styles = StyleSheet.create({
   kpiLabel: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: colors.ink,
     marginTop: 4,
   },
   kpiSub: {
     fontSize: 11,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
     marginTop: 2,
   },
+  boostBenchmarkRow: {
+    gap: 8,
+  },
+  boostBenchmarkItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  boostBenchmarkText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: colors.muted,
+  },
+  boostBenchmarkValue: {
+    fontFamily: fonts.bold,
+    color: colors.ink,
+  },
   tabCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 20,
     padding: 22,
     borderWidth: 1,
@@ -2028,12 +1979,12 @@ const styles = StyleSheet.create({
   tabCardTitle: {
     fontSize: 17,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   tabCardSub: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
     marginTop: 2,
   },
   boostPackagesGrid: {
@@ -2052,9 +2003,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   boostPkgCardPopular: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#04cf92",
-    shadowColor: "#04cf92",
+    backgroundColor: colors.white,
+    borderColor: colors.green,
+    shadowColor: colors.green,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 12,
@@ -2062,7 +2013,7 @@ const styles = StyleSheet.create({
   },
   popularTag: {
     alignSelf: "flex-start",
-    backgroundColor: "#04cf92",
+    backgroundColor: colors.green,
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 3,
@@ -2074,11 +2025,11 @@ const styles = StyleSheet.create({
   popularTagText: {
     fontSize: 11,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   standardTag: {
     alignSelf: "flex-start",
-    backgroundColor: "#E8EEFC",
+    backgroundColor: colors.blueLight,
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 3,
@@ -2087,17 +2038,17 @@ const styles = StyleSheet.create({
   standardTagText: {
     fontSize: 11,
     fontFamily: fonts.semiBold,
-    color: "#2251D6",
+    color: colors.blue,
   },
   boostPkgName: {
     fontSize: 16,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   boostPkgPrice: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colors.green,
     marginTop: 4,
     marginBottom: 14,
   },
@@ -2113,29 +2064,29 @@ const styles = StyleSheet.create({
   pkgBulletText: {
     fontSize: 12.5,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
     flex: 1,
   },
   selectPkgBtn: {
     height: 40,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#04cf92",
+    borderColor: colors.green,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
   },
   selectPkgBtnPopular: {
-    backgroundColor: "#04cf92",
+    backgroundColor: colors.green,
   },
   selectPkgBtnText: {
     fontSize: 13,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: colors.green,
   },
   selectPkgBtnTextPopular: {
-    color: "#0B1A17",
+    color: colors.ink,
   },
   emptyStateContainer: {
     alignItems: "center",
@@ -2147,7 +2098,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: colors.greenLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 6,
@@ -2155,19 +2106,19 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 16,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   emptyDesc: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
     textAlign: "center",
     maxWidth: 420,
     lineHeight: 19,
   },
   emptyActionBtn: {
     marginTop: 8,
-    backgroundColor: "#04cf92",
+    backgroundColor: colors.green,
     paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: 999,
@@ -2175,7 +2126,7 @@ const styles = StyleSheet.create({
   emptyActionBtnText: {
     fontSize: 13,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   insightsCardsGrid: {
     flexDirection: "row",
@@ -2185,7 +2136,7 @@ const styles = StyleSheet.create({
   insightCard: {
     flex: 1,
     minWidth: 250,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
@@ -2203,17 +2154,17 @@ const styles = StyleSheet.create({
   insightCardTitle: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   insightCardDesc: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
     lineHeight: 18,
   },
   insightPill: {
     alignSelf: "flex-start",
-    backgroundColor: "#E6FAF4",
+    backgroundColor: colors.greenLight,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 999,
@@ -2222,7 +2173,7 @@ const styles = StyleSheet.create({
   insightPillText: {
     fontSize: 11,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colors.green,
   },
   tableContainer: {
     borderRadius: 12,
@@ -2239,7 +2190,7 @@ const styles = StyleSheet.create({
   tableColHeader: {
     fontSize: 12,
     fontFamily: fonts.bold,
-    color: "#5C6B66",
+    color: colors.muted,
     textTransform: "uppercase",
   },
   tableRow: {
@@ -2249,7 +2200,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: "rgba(11, 26, 23, 0.06)",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
   },
   tableRowEven: {
     backgroundColor: "#FBFDFB",
@@ -2257,16 +2208,16 @@ const styles = StyleSheet.create({
   tableCellTextBold: {
     fontSize: 13.5,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   tableCellText: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   demandBadge: {
     alignSelf: "flex-start",
-    backgroundColor: "#E6FAF4",
+    backgroundColor: colors.greenLight,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,
@@ -2274,7 +2225,7 @@ const styles = StyleSheet.create({
   demandBadgeText: {
     fontSize: 11,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colors.green,
   },
   payoutMethodsRow: {
     flexDirection: "row",
@@ -2284,7 +2235,7 @@ const styles = StyleSheet.create({
   payoutMethodCard: {
     flex: 1,
     minWidth: 250,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
@@ -2299,18 +2250,7 @@ const styles = StyleSheet.create({
   payoutMethodName: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
-  },
-  connectedBadge: {
-    backgroundColor: "#E6FAF4",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-  },
-  connectedBadgeText: {
-    fontSize: 11,
-    fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colors.ink,
   },
   availableBadge: {
     backgroundColor: "#F4F6F5",
@@ -2321,17 +2261,30 @@ const styles = StyleSheet.create({
   availableBadgeText: {
     fontSize: 11,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: colors.muted,
+  },
+  connectPayoutBtn: {
+    alignSelf: "flex-start",
+    marginTop: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+    backgroundColor: colors.greenLight,
+  },
+  connectPayoutBtnText: {
+    fontSize: 12,
+    fontFamily: fonts.bold,
+    color: colors.green,
   },
   payoutAccountNo: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   payoutSchedule: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
   },
   supportChannelsGrid: {
     flexDirection: "row",
@@ -2341,7 +2294,7 @@ const styles = StyleSheet.create({
   supportChannelCard: {
     flex: 1,
     minWidth: 230,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
@@ -2359,17 +2312,17 @@ const styles = StyleSheet.create({
   supportChannelTitle: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   supportChannelValue: {
     fontSize: 13.5,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colors.green,
   },
   supportChannelSub: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
   },
   faqList: {
     gap: 14,
@@ -2383,12 +2336,12 @@ const styles = StyleSheet.create({
   faqQuestion: {
     fontSize: 14.5,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colors.ink,
   },
   faqAnswer: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: colors.muted,
     lineHeight: 19,
   },
 });

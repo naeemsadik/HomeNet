@@ -8,7 +8,7 @@ import {
 } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { AppLink, Eyebrow } from "@/components/ui";
+import { AppLink, Eyebrow, FeatureCard } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 
@@ -44,18 +44,18 @@ export function AboutScreen() {
             "Human help stays close",
             "Local support from first shortlist through viewing and negotiation.",
           ],
-        ].map(([Icon, title, copy]) => {
-          const ValueIcon = Icon as LucideIcon;
-          return (
-            <View key={title as string} style={[styles.valueCard, isPhone && styles.valueCardPhone]}>
-              <View style={styles.valueIcon}>
-                <ValueIcon color={colors.green} size={22} />
-              </View>
-              <Text style={styles.valueTitle}>{title as string}</Text>
-              <Text style={styles.valueCopy}>{copy as string}</Text>
-            </View>
-          );
-        })}
+        ].map(([Icon, title, copy]) => (
+          <FeatureCard
+            key={title as string}
+            icon={Icon as LucideIcon}
+            title={title as string}
+            description={copy as string}
+            style={[styles.valueCard, isPhone && styles.valueCardPhone]}
+            iconWrapStyle={styles.valueIcon}
+            titleStyle={styles.valueTitle}
+            descriptionStyle={styles.valueCopy}
+          />
+        ))}
       </View>
 
       <LinearGradient
@@ -76,7 +76,7 @@ export function AboutScreen() {
         </View>
 
         <AppLink
-          href="mailto:hello@homenet.example"
+          href="mailto:hello@homenet.com.bd"
           style={[styles.contactLink, isPhone && styles.contactLinkPhone, webPointer]}
         >
           <Text style={styles.contactLinkText}>Contact HomeNet</Text>

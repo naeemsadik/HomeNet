@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { AlertTriangle, Trash2, type LucideIcon } from "lucide-react-native";
-import { colorTokens, fontTokens } from "@/theme";
+import { colorTokens, fontTokens, radiusTokens } from "@/theme";
 
 interface ConfirmDialogProps {
   visible: boolean;
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     maxWidth: 360,
     alignItems: "center",
     padding: 28,
-    borderRadius: 20,
+    borderRadius: radiusTokens.xl,
     backgroundColor: colorTokens.background,
     borderWidth: 1,
     borderColor: colorTokens.divider,
