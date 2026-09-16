@@ -419,7 +419,7 @@ export function PropertyCreateWizard() {
           <View style={styles.sidebarHeader}>
             <Brand />
             <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Portal</Text>
+              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
             </View>
           </View>
 
