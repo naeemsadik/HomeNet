@@ -1,4 +1,4 @@
-import { Bell, Globe, Menu, Search, X } from "lucide-react-native";
+import { Bell, Menu, Search, X } from "lucide-react-native";
 import {
   Platform,
   Pressable,
@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { AppLink } from "@/components/ui";
+import { ToggleViewButton } from "./ToggleViewButton";
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
 
@@ -107,16 +108,9 @@ export function SellerTopHeader({
           {hasUnreadNotifications && <View style={styles.notificationDot} />}
         </AppLink>
 
-        {/* View Site Button (kept visible on both PC and mobile) */}
+        {/* Toggle view button (kept visible on both PC and mobile) */}
         {showViewSite && (
-          <AppLink
-            accessibilityLabel="View live site"
-            href="/"
-            style={[styles.viewSiteBtn, webPointer]}
-          >
-            <Globe color="#0B1A17" size={16} strokeWidth={1.8} />
-            <Text style={styles.viewSiteText}>View site</Text>
-          </AppLink>
+          <ToggleViewButton size={isTablet ? "sm" : "md"} />
         )}
       </View>
     </View>
@@ -205,22 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  viewSiteBtn: {
-    height: 38,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "rgba(11,26,23,0.08)",
-  },
-  viewSiteText: {
-    fontSize: 13,
-    fontFamily: fonts.semiBold,
-    color: "#0B1A17",
-  },
+
   notificationDot: {
     position: "absolute",
     top: 8,
