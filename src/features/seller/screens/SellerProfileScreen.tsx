@@ -48,6 +48,7 @@ import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
 import type { UploadInput } from "@/services/upload";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
+import { ToggleViewButton } from "../components/ToggleViewButton";
 import { Footer } from "@/components/Footer";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 
@@ -441,10 +442,7 @@ export function SellerProfileScreen() {
                 <Bell color="#0B1A17" size={19} />
               </Pressable>
 
-              <AppLink href="/" style={styles.viewSiteBtn}>
-                <Globe color="#0B1A17" size={15} />
-                <Text style={styles.viewSiteText}>View site</Text>
-              </AppLink>
+              <ToggleViewButton />
             </View>
           </View>
         )}

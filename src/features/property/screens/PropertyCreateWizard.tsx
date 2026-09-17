@@ -60,6 +60,7 @@ import {
 } from "@/features/notification/hooks/useNotifications";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
+import { ToggleViewButton } from "@/features/seller/components/ToggleViewButton";
 import { Footer } from "@/components/Footer";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
@@ -597,10 +598,7 @@ export function PropertyCreateWizard() {
                 )}
               </View>
 
-              <AppLink href="/" style={styles.viewSiteBtn}>
-                <Globe color="#04cf92" size={16} />
-                <Text style={styles.viewSiteText}>View site</Text>
-              </AppLink>
+              <ToggleViewButton />
             </View>
           </View>
         )}

@@ -41,6 +41,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { fonts, webPointer } from "@/theme";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
+import { ToggleViewButton } from "../components/ToggleViewButton";
 import { Footer } from "@/components/Footer";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 
@@ -283,10 +284,7 @@ export function VerificationScreen() {
                 <View style={styles.headerDotIndicator} />
               </AppLink>
 
-              <AppLink href="/" style={styles.viewSiteBtn}>
-                <Globe color="#0B1A17" size={16} />
-                <Text style={styles.viewSiteText}>View site</Text>
-              </AppLink>
+              <ToggleViewButton />
             </View>
           </View>
         )}
