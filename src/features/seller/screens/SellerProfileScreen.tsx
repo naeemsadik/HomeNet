@@ -48,6 +48,7 @@ import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
 import type { UploadInput } from "@/services/upload";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
+import { Footer } from "@/components/Footer";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 
 const DEFAULT_AVATAR =
@@ -450,13 +451,17 @@ export function SellerProfileScreen() {
 
         {/* Scrollable Form Body */}
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            isPhone && styles.scrollContentPhone,
-          ]}
+          contentContainerStyle={styles.workspaceScroll}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.contentWrap}>
+          <View
+            style={[
+              styles.scrollContent,
+              isPhone && styles.scrollContentPhone,
+            ]}
+          >
+            <View style={styles.contentWrap}>
             {/* Section 1: Personal Information */}
             <View style={[styles.card, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
@@ -767,7 +772,9 @@ export function SellerProfileScreen() {
               </Pressable>
             </View>
           </View>
-        </ScrollView>
+        </View>
+        <Footer />
+      </ScrollView>
       </View>
 
       {/* Change Password Modal */}
@@ -944,66 +951,65 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: "#F8FAF9",
   },
+  workspaceScroll: {
+    flexGrow: 1,
+    justifyContent: "space-between",
+  },
   // Desktop Sidebar
   sidebar: {
-    width: 260,
+    width: 256,
     backgroundColor: "#FFFFFF",
-    borderRightWidth: 1,
-    borderRightColor: "rgba(11,26,23,0.06)",
-    display: "flex",
-    flexDirection: "column",
+    borderRightWidth: 0.8,
+    borderRightColor: "rgba(11,26,23,0.08)",
+    paddingVertical: 20,
+    paddingHorizontal: 16,
   },
   sidebarHeader: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(11,26,23,0.06)",
-    gap: 12,
+    gap: 16,
+    marginBottom: 16,
+    paddingHorizontal: 8,
   },
   sellerRolePill: {
-    alignSelf: "flex-start",
-    backgroundColor: "#E6FAF4",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    backgroundColor: "#E8EEFC",
+    borderRadius: 999,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    alignItems: "center",
   },
   sellerRoleText: {
-    fontSize: 11,
+    color: "#2251D6",
+    fontSize: 12,
     fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: "#04cf92",
   },
   sidebarNavScroll: {
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    gap: 4,
+    gap: 2,
+    paddingVertical: 8,
   },
   navItem: {
+    minHeight: 42,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     ...webPointer,
   },
   navItemActive: {
     backgroundColor: "#E6FAF4",
   },
   navItemDanger: {
-    marginTop: 10,
+    marginTop: 8,
   },
   navItemText: {
+    flex: 1,
     fontSize: 14,
-    fontFamily: fonts.medium,
-    fontWeight: "500",
+    fontFamily: fonts.semiBold,
     color: "#5C6B66",
   },
   navItemTextActive: {
     color: "#04cf92",
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
+    fontFamily: fonts.bold,
   },
   navItemTextDanger: {
     color: "#D4183D",

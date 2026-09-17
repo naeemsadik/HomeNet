@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
-  Animated,
   Modal,
   Platform,
   Pressable,
@@ -32,6 +31,7 @@ import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { usePropertyWizardStore } from "@/features/property/stores/propertyWizardStore";
 import { AiListingSheet } from "@/features/property/components/AiListingSheet";
 import type { AiParsedProperty } from "@/features/property/types/aiListing";
+import { AppButton } from "@/components/ui";
 import { colors, fonts, webPointer } from "@/theme";
 
 export type OwnerIntentId =
@@ -119,29 +119,7 @@ export function OwnerListPropertySection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIntentId, setSelectedIntentId] = useState<OwnerIntentId>("sell_residential");
   const [hoveredIntentId, setHoveredIntentId] = useState<OwnerIntentId | null>(null);
-  const [hoveredCta, setHoveredCta] = useState<"primary" | "secondary" | "tertiary" | null>(null);
   const [aiSheetVisible, setAiSheetVisible] = useState(false);
-
-  // Animated glowing green pulse for AI icon
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.08,
-          duration: 1200,
-          useNativeDriver: Platform.OS !== "web",
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1.0,
-          duration: 1200,
-          useNativeDriver: Platform.OS !== "web",
-        }),
-      ])
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, [pulseAnim]);
 
   const handleAiApply = (data: AiParsedProperty) => {
     // Hydrate zustand wizard store
@@ -240,9 +218,6 @@ export function OwnerListPropertySection() {
       >
         <View style={styles.maxWidthWrapper}>
           <View style={[styles.cleanCard, isPhone && styles.cleanCardPhone]}>
-            {/* Subtle aesthetic backdrop glow */}
-            <View pointerEvents="none" style={styles.glowTopRight} />
-
             <View
               style={[
                 styles.cardLayout,
@@ -254,11 +229,7 @@ export function OwnerListPropertySection() {
                 {/* Eyebrow */}
                 <View style={styles.eyebrowContainer}>
                   <View style={styles.eyebrowBadge}>
-                    <Sparkles color="#04cf92" size={13} />
-                    <Text style={styles.eyebrowText}>For owners</Text>
-                  </View>
-                  <View style={styles.freeBadge}>
-                    <Text style={styles.freeBadgeText}>Free to start</Text>
+                    <Text style={styles.eyebrowText}>For owners · Free to start</Text>
                   </View>
                 </View>
 
@@ -280,68 +251,27 @@ export function OwnerListPropertySection() {
 
                 {/* Clean CTAs Row */}
                 <View style={[styles.ctaRow, isPhone && styles.ctaRowPhone]}>
-                  <Pressable
-                    accessibilityHint="Opens the property type selection studio to start listing"
-                    accessibilityLabel="Start listing"
-                    accessibilityRole="button"
+                  <AppButton
+                    label="Start listing"
                     onPress={handleOpenStudio}
-                    // @ts-ignore web hover
-                    onMouseEnter={() => setHoveredCta("primary")}
-                    // @ts-ignore web hover
-                    onMouseLeave={() => setHoveredCta(null)}
-                    style={({ pressed }) => [
-                      styles.primaryButton,
-                      hoveredCta === "primary" && styles.primaryButtonHovered,
-                      pressed && styles.buttonPressed,
-                      isPhone && styles.fullWidthButton,
-                      webPointer,
-                    ]}
-                  >
-                    <Text style={styles.primaryButtonText}>Start listing</Text>
-                    <ArrowRight color="#FFFFFF" size={16} />
-                  </Pressable>
+                    trailingIcon={ArrowRight}
+                    style={isPhone && styles.fullWidthButton}
+                  />
 
-                  <Pressable
-                    accessibilityHint="Opens your seller dashboard"
-                    accessibilityLabel="Seller dashboard"
-                    accessibilityRole="button"
+                  <AppButton
+                    label="Seller dashboard"
                     onPress={handleSecondarySellerDashboard}
-                    // @ts-ignore web hover
-                    onMouseEnter={() => setHoveredCta("secondary")}
-                    // @ts-ignore web hover
-                    onMouseLeave={() => setHoveredCta(null)}
-                    style={({ pressed }) => [
-                      styles.secondaryButton,
-                      hoveredCta === "secondary" && styles.secondaryButtonHovered,
-                      pressed && styles.buttonPressed,
-                      isPhone && styles.fullWidthButton,
-                      webPointer,
-                    ]}
-                  >
-                    <LayoutDashboard color={colors.ink} size={16} />
-                    <Text style={styles.secondaryButtonText}>Seller dashboard</Text>
-                  </Pressable>
+                    icon={LayoutDashboard}
+                    variant="secondary"
+                    style={isPhone && styles.fullWidthButton}
+                  />
 
-                  <Pressable
-                    accessibilityHint="Get a free property valuation"
-                    accessibilityLabel="Get a free estimate"
-                    accessibilityRole="link"
+                  <AppButton
+                    label="Get a free estimate"
                     onPress={handleTertiaryEstimate}
-                    // @ts-ignore web hover
-                    onMouseEnter={() => setHoveredCta("tertiary")}
-                    // @ts-ignore web hover
-                    onMouseLeave={() => setHoveredCta(null)}
-                    style={({ pressed }) => [
-                      styles.tertiaryLink,
-                      hoveredCta === "tertiary" && styles.tertiaryLinkHovered,
-                      pressed && styles.buttonPressed,
-                      isPhone && styles.tertiaryLinkPhone,
-                      webPointer,
-                    ]}
-                  >
-                    <TrendingUp color="#2251D6" size={15} />
-                    <Text style={styles.tertiaryLinkText}>Get a free estimate</Text>
-                  </Pressable>
+                    icon={TrendingUp}
+                    variant="ghost"
+                  />
                 </View>
 
                 {/* Clean Micro-Trust Points */}
@@ -378,8 +308,8 @@ export function OwnerListPropertySection() {
 
                   <View style={styles.plaqueStatsRow}>
                     <View style={styles.plaqueStatItem}>
-                      <Text style={styles.plaqueStatNum}>12.4k+</Text>
-                      <Text style={styles.plaqueStatLabel}>Active Seekers</Text>
+                      <Text style={styles.plaqueStatNum}>Verified</Text>
+                      <Text style={styles.plaqueStatLabel}>Buyer Network</Text>
                     </View>
                     <View style={styles.plaqueDivider} />
                     <View style={styles.plaqueStatItem}>
@@ -470,14 +400,9 @@ export function OwnerListPropertySection() {
               ]}
             >
               <View style={[styles.aiCardLeft, isPhone && styles.aiCardLeftPhone]}>
-                <Animated.View
-                  style={[
-                    styles.aiIconGlowingWrap,
-                    { transform: [{ scale: pulseAnim }] },
-                  ]}
-                >
+                <View style={styles.aiIconGlowingWrap}>
                   <Sparkles color="#04cf92" size={20} strokeWidth={2.2} />
-                </Animated.View>
+                </View>
                 <View style={styles.aiTextContainer}>
                   <View style={styles.aiHeadlineRow}>
                     <Text style={styles.aiHeadline}>
@@ -677,16 +602,6 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     borderRadius: 20,
   },
-  glowTopRight: {
-    position: "absolute",
-    top: -90,
-    right: -90,
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    backgroundColor: "#E6FAF4",
-    opacity: 0.6,
-  },
   cardLayout: {
     flexDirection: "row",
     alignItems: "center",
@@ -729,17 +644,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
     textTransform: "uppercase",
   },
-  freeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 100,
-    backgroundColor: "rgba(11, 26, 23, 0.05)",
-  },
-  freeBadgeText: {
-    color: colors.muted,
-    fontFamily: fonts.medium,
-    fontSize: 11,
-  },
   headline: {
     color: "#0B1A17",
     fontFamily: fonts.bold,
@@ -781,82 +685,6 @@ const styles = StyleSheet.create({
   fullWidthButton: {
     width: "100%",
     justifyContent: "center",
-  },
-  primaryButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 13,
-    paddingHorizontal: 22,
-    borderRadius: 14,
-    backgroundColor: "#04cf92",
-    ...(Platform.select({
-      web: {
-        boxShadow: "0 4px 14px rgba(4, 207, 146, 0.3)",
-        transition: "all 0.18s ease",
-      },
-      default: {},
-    }) as any),
-  },
-  primaryButtonHovered: {
-    backgroundColor: "#03b57f",
-    ...(Platform.select({
-      web: {
-        boxShadow: "0 6px 18px rgba(4, 207, 146, 0.4)",
-      },
-      default: {},
-    }) as any),
-  },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontSize: 15,
-  },
-  secondaryButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 13,
-    paddingHorizontal: 18,
-    borderRadius: 14,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.12)",
-    ...(Platform.select({
-      web: {
-        transition: "all 0.18s ease",
-      },
-      default: {},
-    }) as any),
-  },
-  secondaryButtonHovered: {
-    backgroundColor: "#F0F4F2",
-    borderColor: "rgba(11, 26, 23, 0.22)",
-  },
-  secondaryButtonText: {
-    color: "#0B1A17",
-    fontFamily: fonts.medium,
-    fontSize: 14,
-  },
-  tertiaryLink: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  tertiaryLinkPhone: {
-    justifyContent: "center",
-  },
-  tertiaryLinkHovered: {
-    opacity: 0.8,
-  },
-  tertiaryLinkText: {
-    color: "#2251D6",
-    fontFamily: fonts.semiBold,
-    fontSize: 13,
   },
   buttonPressed: {
     opacity: 0.88,

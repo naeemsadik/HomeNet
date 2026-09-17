@@ -15,7 +15,7 @@ import {
   type ViewStyle,
   View,
 } from "react-native";
-import { colors, fonts, webPointer } from "@/theme";
+import { colors, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 
 export function AppLink({
@@ -99,6 +99,41 @@ export function AppButton({
         <TrailingIcon size={15} color={variant === "primary" ? colors.white : colors.green} />
       ) : null}
     </Pressable>
+  );
+}
+
+export function FeatureCard({
+  icon: Icon,
+  title,
+  description,
+  step,
+  style,
+  iconWrapStyle,
+  iconSize = 22,
+  titleStyle,
+  descriptionStyle,
+  stepStyle,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  step?: string;
+  style?: StyleProp<ViewStyle>;
+  iconWrapStyle?: StyleProp<ViewStyle>;
+  iconSize?: number;
+  titleStyle?: StyleProp<TextStyle>;
+  descriptionStyle?: StyleProp<TextStyle>;
+  stepStyle?: StyleProp<TextStyle>;
+}) {
+  return (
+    <View style={[styles.featureCard, style]}>
+      {step ? <Text style={[styles.featureCardStep, stepStyle]}>{step}</Text> : null}
+      <View style={[styles.featureCardIconWrap, iconWrapStyle]}>
+        <Icon color={colors.green} size={iconSize} />
+      </View>
+      <Text style={[styles.featureCardTitle, titleStyle]}>{title}</Text>
+      <Text style={[styles.featureCardDescription, descriptionStyle]}>{description}</Text>
+    </View>
   );
 }
 
@@ -227,10 +262,48 @@ export function SelectField({
 
 const styles = StyleSheet.create({
   pressed: { opacity: 0.78 },
+  featureCard: {
+    position: "relative",
+    flex: 1,
+    padding: 20,
+    borderRadius: radius.lg,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  featureCardStep: {
+    position: "absolute",
+    top: 13,
+    right: 16,
+    color: colors.line,
+    fontFamily: fonts.extraBold,
+    fontSize: 20,
+  },
+  featureCardIconWrap: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.sm,
+    backgroundColor: colors.greenLight,
+  },
+  featureCardTitle: {
+    marginTop: 16,
+    marginBottom: 8,
+    color: colors.ink,
+    fontFamily: fonts.bold,
+    fontSize: 16,
+  },
+  featureCardDescription: {
+    color: colors.muted,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 20,
+  },
   button: {
     minHeight: 41,
     paddingHorizontal: 17,
-    borderRadius: 999,
+    borderRadius: radius.pill,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -297,7 +370,7 @@ const styles = StyleSheet.create({
   selectValue: { minWidth: 0, flex: 1, color: colors.ink, fontFamily: fonts.semiBold, fontSize: 14 },
   selectModalLayer: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
   selectModalOverlay: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, backgroundColor: "rgba(6,28,20,0.28)" },
-  selectMenu: { width: "100%", maxWidth: 320, overflow: "hidden", padding: 6, borderRadius: 14, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
+  selectMenu: { width: "100%", maxWidth: 320, overflow: "hidden", padding: 6, borderRadius: radius.md, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
   selectOption: { minHeight: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10, paddingHorizontal: 14, borderRadius: 9 },
   selectOptionActive: { backgroundColor: colors.greenLight },
   selectOptionText: { color: colors.ink, fontFamily: fonts.semiBold, fontSize: 14 },

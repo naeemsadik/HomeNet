@@ -60,6 +60,7 @@ import {
 } from "@/features/notification/hooks/useNotifications";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
+import { Footer } from "@/components/Footer";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
@@ -418,7 +419,7 @@ export function PropertyCreateWizard() {
           <View style={styles.sidebarHeader}>
             <Brand />
             <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Portal</Text>
+              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
             </View>
           </View>
 
@@ -605,8 +606,13 @@ export function PropertyCreateWizard() {
         )}
 
         {/* Scrollable Wizard Body */}
-        <ScrollView contentContainerStyle={[styles.scrollBody, isPhone && styles.scrollBodyPhone, isNarrowPhone && styles.scrollBodyNarrow]} showsVerticalScrollIndicator={false}>
-          {/* 5-Step Progress Stepper Bar */}
+        <ScrollView
+          contentContainerStyle={styles.workspaceScroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone, isNarrowPhone && styles.scrollBodyNarrow]}>
+            {/* 5-Step Progress Stepper Bar */}
           <View style={styles.stepperContainer}>
             <View style={styles.stepperRow}>
               {steps.map((st, idx) => {
@@ -1360,7 +1366,9 @@ export function PropertyCreateWizard() {
               </View>
             </View>
           </View>
-        </ScrollView>
+        </View>
+        <Footer />
+      </ScrollView>
       </View>
       <AreaPicker
         visible={areaPickerVisible}
@@ -1705,6 +1713,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.semiBold,
     color: "#0B1A17",
+  },
+  workspaceScroll: {
+    flexGrow: 1,
+    justifyContent: "space-between",
   },
   scrollBody: {
     padding: 24,

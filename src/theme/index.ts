@@ -4,10 +4,12 @@
 
 export { colorTokens, type ColorTokens } from "./colors";
 export { fontTokens, type FontTokens } from "./fonts";
+export { radiusTokens, type RadiusTokens } from "./radius";
 export { ThemeProvider, useTheme, type Theme, type ThemeProviderProps } from "./ThemeProvider";
 
 import { colorTokens } from "./colors";
 import { fontTokens } from "./fonts";
+import { radiusTokens } from "./radius";
 import { Platform, type TextStyle, type ViewStyle } from "react-native";
 
 export const colors = {
@@ -30,6 +32,8 @@ export const colors = {
 } as const;
 
 export const fonts = fontTokens;
+
+export const radius = radiusTokens;
 
 export const shadow: ViewStyle = Platform.select({
   web: {

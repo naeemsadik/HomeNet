@@ -41,6 +41,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { fonts, webPointer } from "@/theme";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
+import { Footer } from "@/components/Footer";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 
 interface VerificationDoc {
@@ -292,13 +293,12 @@ export function VerificationScreen() {
 
         {/* Scrollable Center Body */}
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollBody,
-            isPhone && styles.scrollBodyPhone,
-          ]}
+          contentContainerStyle={styles.workspaceScroll}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.contentGrid, isTablet && styles.contentGridMobile]}>
+          <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
+            <View style={[styles.contentGrid, isTablet && styles.contentGridMobile]}>
             {/* Left Column: Banner + Documents List */}
             <View style={styles.leftColumn}>
               {/* Verified Badge Banner (Figma Node 288:2167) */}
@@ -487,7 +487,9 @@ export function VerificationScreen() {
               </View>
             </View>
           </View>
-        </ScrollView>
+        </View>
+        <Footer />
+      </ScrollView>
       </View>
     </View>
   );
@@ -500,60 +502,64 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8FAF9",
     minHeight: "100%",
   },
+  workspaceScroll: {
+    flexGrow: 1,
+    justifyContent: "space-between",
+  },
 
   /* Sidebar Styles */
   sidebar: {
-    width: 226,
+    width: 256,
     backgroundColor: "#FFFFFF",
-    borderRightWidth: 1,
+    borderRightWidth: 0.8,
     borderRightColor: "rgba(11,26,23,0.08)",
-    paddingVertical: 24,
+    paddingVertical: 20,
     paddingHorizontal: 16,
-    justifyContent: "space-between",
   },
   sidebarHeader: {
-    gap: 12,
-    marginBottom: 20,
+    gap: 16,
+    marginBottom: 16,
+    paddingHorizontal: 8,
   },
   brandRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 8,
+    gap: 8,
   },
   brandIconBg: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: "#0F6D55",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#04cf92",
     alignItems: "center",
     justifyContent: "center",
   },
   brandText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: fonts.extraBold,
     color: "#0B1A17",
-    letterSpacing: -0.4,
   },
   brandTextAccent: {
     color: "#04cf92",
   },
   sellerRolePill: {
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#E8EEFC",
+    borderRadius: 999,
+    paddingVertical: 4,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    alignSelf: "flex-start",
+    alignItems: "center",
   },
   sellerRoleText: {
+    color: "#2251D6",
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
   },
   sidebarNavScroll: {
-    gap: 4,
+    gap: 2,
+    paddingVertical: 8,
   },
   navItem: {
+    minHeight: 42,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -563,19 +569,20 @@ const styles = StyleSheet.create({
     ...(webPointer as any),
   },
   navItemActive: {
-    backgroundColor: "#E7F2EE",
+    backgroundColor: "#E6FAF4",
   },
   navItemDanger: {
-    marginTop: 12,
+    marginTop: 8,
   },
   navItemText: {
+    flex: 1,
     fontSize: 14,
-    fontFamily: fonts.medium,
+    fontFamily: fonts.semiBold,
     color: "#5C6B66",
   },
   navItemTextActive: {
-    fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#04cf92",
+    fontFamily: fonts.bold,
   },
   navItemTextDanger: {
     color: "#D4183D",

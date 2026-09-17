@@ -24,9 +24,9 @@ export interface SellerWelcomeBannerProps {
 }
 
 export function SellerWelcomeBanner({
-  name = "Ayesha Rahman",
-  viewsThisWeek = "3,240",
-  inquiriesThisWeek = "18",
+  name = "Partner",
+  viewsThisWeek = 0,
+  inquiriesThisWeek = 0,
   onAddNewProperty,
   onBoostListing,
   addPropertyHref = "/property/create",
@@ -48,18 +48,18 @@ export function SellerWelcomeBanner({
 
         {/* Description */}
         <Text style={styles.description}>
-          Your listings got{" "}
+          Your listings have{" "}
           <Text style={styles.boldText}>
             {typeof viewsThisWeek === "number"
               ? viewsThisWeek.toLocaleString()
               : viewsThisWeek}{" "}
-            views
+            total views
           </Text>{" "}
-          this week and{" "}
+          and{" "}
           <Text style={styles.boldText}>
-            {inquiriesThisWeek} new inquiries
-          </Text>
-          . Keep the momentum going.
+            {inquiriesThisWeek} buyer inquiries
+          </Text>{" "}
+          so far. Keep the momentum going.
         </Text>
 
         {/* Action Buttons Row */}

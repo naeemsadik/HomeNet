@@ -124,14 +124,14 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
   const choiceWidth: DimensionValue = isPhone
     ? "100%"
     : isTablet
-    ? "48.5%"
-    : isModal
-    ? step === 0
       ? "48.5%"
-      : "31.5%"
-    : step === 0
-    ? "48.5%"
-    : "23.8%";
+      : isModal
+        ? step === 0
+          ? "48.5%"
+          : "31.5%"
+        : step === 0
+          ? "48.5%"
+          : "23.8%";
 
   return (
     <View style={[styles.container, isModal && styles.containerModal]}>
@@ -234,6 +234,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
         {/* Step Questions */}
         {step < 3 ? (
           <ScrollView
+            style={styles.questionScroll}
             contentContainerStyle={[styles.question, isPhone && styles.questionPhone]}
             showsVerticalScrollIndicator={false}
           >
@@ -250,15 +251,15 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
                   {step === 0
                     ? "Step 1: The big decision"
                     : step === 1
-                    ? "Step 2: Your preferred location"
-                    : "Step 3: A comfortable budget"}
+                      ? "Step 2: Your preferred location"
+                      : "Step 3: A comfortable budget"}
                 </Text>
                 <Text style={styles.questionHeading}>
                   {step === 0
                     ? "What are you looking to do?"
                     : step === 1
-                    ? "Where would you like to live?"
-                    : "What budget should we work within?"}
+                      ? "Where would you like to live?"
+                      : "What budget should we work within?"}
                 </Text>
               </View>
             </View>
@@ -323,6 +324,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
         ) : (
           /* Step 3: Matches */
           <ScrollView
+            style={styles.resultsScroll}
             contentContainerStyle={[styles.results, isPhone && styles.resultsPhone]}
             showsVerticalScrollIndicator={false}
           >
@@ -601,14 +603,17 @@ const styles = StyleSheet.create({
     color: colors.greenDark,
   },
 
+  questionScroll: {
+    maxHeight: 480,
+  },
   question: {
     paddingHorizontal: 24,
     paddingVertical: 22,
-    maxHeight: 460,
   },
   questionPhone: {
     paddingHorizontal: 14,
-    paddingVertical: 18,
+    paddingTop: 18,
+    paddingBottom: 12,
   },
   questionTitle: {
     flexDirection: "row",
@@ -708,12 +713,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
 
+  resultsScroll: {
+    maxHeight: 520,
+  },
   results: {
     padding: 20,
-    maxHeight: 520,
   },
   resultsPhone: {
     padding: 14,
+    paddingBottom: 20,
   },
   resultSummary: {
     flexDirection: "row",

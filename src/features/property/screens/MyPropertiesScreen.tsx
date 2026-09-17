@@ -46,6 +46,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { colors, fonts, webPointer } from "@/theme";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
+import { Footer } from "@/components/Footer";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
 import type { Property } from "../types/property";
@@ -255,9 +256,14 @@ export function MyPropertiesScreen() {
         />
 
         {/* Listings Body */}
-        <ScrollView contentContainerStyle={styles.scrollBody} showsVerticalScrollIndicator={false}>
-          {/* Top Filter Bar + Add New Property */}
-          <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
+        <ScrollView
+          contentContainerStyle={styles.workspaceScroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
+            {/* Top Filter Bar + Add New Property */}
+            <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
             {/* Filter Pills */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
               <View style={styles.pillsRow}>
@@ -512,7 +518,9 @@ export function MyPropertiesScreen() {
               </Pressable>
             ) : null}
           </View>
-        </ScrollView>
+        </View>
+        <Footer />
+      </ScrollView>
       </View>
 
       {/* Mobile / Tablet Navigation Drawer */}
@@ -657,9 +665,16 @@ const styles = StyleSheet.create({
     minWidth: 0,
     flexDirection: "column",
   },
+  workspaceScroll: {
+    flexGrow: 1,
+    justifyContent: "space-between",
+  },
   scrollBody: {
     padding: 24,
     gap: 20,
+  },
+  scrollBodyPhone: {
+    padding: 16,
   },
   filterBarRow: {
     flexDirection: "row",
