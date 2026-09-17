@@ -35,7 +35,7 @@ import {
   Video,
   Zap,
 } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -65,6 +65,7 @@ import { Footer } from "@/components/Footer";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
+import { notify } from "@/lib/alert";
 import type { UploadInput } from "@/services/upload";
 import { colors, fonts, webPointer } from "@/theme";
 import type { Area, PropertyType, UpsertPropertyDto } from "@/types/api";
@@ -99,6 +100,7 @@ export function PropertyCreateWizard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [descFocused, setDescFocused] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -126,6 +128,12 @@ export function PropertyCreateWizard() {
       });
     }
   }, [params.type, params.listing_type, params.subtype]);
+
+  // The error banner sits at the top of the step card, so a user who has
+  // scrolled down a long step would never see it otherwise.
+  useEffect(() => {
+    if (localError) scrollRef.current?.scrollTo({ y: 0, animated: true });
+  }, [localError]);
 
   const activeTypeConfig = PROPERTY_TYPE_CONFIGS[store.type] || PROPERTY_TYPE_CONFIGS.residential;
 
@@ -246,15 +254,13 @@ export function PropertyCreateWizard() {
       store.setIsSubmitting(true);
       setLocalError(null);
       await upsertDraft();
-      Alert.alert("Draft saved", "Your latest property details were saved.", [
-        {
-          text: "View my listings",
-          onPress: () => {
-            store.reset();
-            router.replace("/my-properties" as never);
-          },
+      notify("Draft saved", "Your latest property details were saved.", {
+        confirmLabel: "View my listings",
+        onConfirm: () => {
+          store.reset();
+          router.replace("/my-properties" as never);
         },
-      ]);
+      });
     } catch (error) {
       setLocalError(toApiError(error).message);
     } finally {
@@ -349,15 +355,13 @@ export function PropertyCreateWizard() {
       setLocalError(null);
       const propertyId = await upsertDraft();
       await submitMutation.mutateAsync(propertyId);
-      Alert.alert("Submitted for verification", "Your listing is pending review.", [
-        {
-          text: "View my listings",
-          onPress: () => {
-            store.reset();
-            router.replace("/my-properties" as never);
-          },
+      notify("Submitted for verification", "Your listing is pending review.", {
+        confirmLabel: "View my listings",
+        onConfirm: () => {
+          store.reset();
+          router.replace("/my-properties" as never);
         },
-      ]);
+      });
     } catch (error) {
       setLocalError(toApiError(error).message);
     } finally {
@@ -605,6 +609,7 @@ export function PropertyCreateWizard() {
 
         {/* Scrollable Wizard Body */}
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={styles.workspaceScroll}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -1855,7 +1860,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.regular,
     color: "#0B1A17",
-    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
   },
   formTextarea: {
     minHeight: 116,
@@ -1871,7 +1875,6 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
     textAlignVertical: "top",
     lineHeight: 22,
-    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
   },
   formTextareaFocused: {
     borderColor: "#00C885",
