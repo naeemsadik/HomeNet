@@ -44,10 +44,10 @@ export function HeroSearchWidget({
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState<Area | null>(null);
 
-  const isAiModalOpen = useAiFinderModalStore((state) => state.visible);
   const openAiModal = useAiFinderModalStore((state) => state.open);
 
   const handleAiSearchClick = () => {
+    setSearchMode("ai");
     if (isPhone) {
       router.push("/ai-finder" as any);
     } else {
@@ -153,21 +153,21 @@ export function HeroSearchWidget({
               onPress={handleAiSearchClick}
               style={[
                 styles.modeOption,
-                isAiModalOpen && styles.modeOptionActive,
+                searchMode === "ai" && styles.modeOptionActive,
                 webPointer,
               ]}
               accessibilityRole="button"
               accessibilityLabel="AI search mode"
             >
               <Sparkles
-                color={isAiModalOpen ? "#FFFFFF" : "#04cf92"}
+                color={searchMode === "ai" ? "#FFFFFF" : "#04cf92"}
                 size={13}
                 strokeWidth={2.4}
               />
               <Text
                 style={[
                   styles.modeOptionText,
-                  isAiModalOpen && styles.modeOptionTextActive,
+                  searchMode === "ai" && styles.modeOptionTextActive,
                 ]}
               >
                 AI Search
