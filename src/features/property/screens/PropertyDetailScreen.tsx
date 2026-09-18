@@ -16,9 +16,7 @@ import {
   Eye,
   Flame,
   Globe,
-  GraduationCap,
   Heart,
-  Hospital,
   Info,
   Layers,
   MapPin,
@@ -28,12 +26,11 @@ import {
   Share2,
   ShieldCheck,
   Sparkles,
-  Star,
-  Train,
   TrendingUp,
   UserRound,
   X,
   Zap,
+  type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -53,6 +50,7 @@ import { AppChrome } from "@/components/AppChrome";
 import { AppLink } from "@/components/ui";
 import { allProperties, propertyImages, searchPageListings } from "@/data/properties";
 import { useResponsive } from "@/hooks/useResponsive";
+import { notify } from "@/lib/alert";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 import Svg, { Path } from "react-native-svg";
 import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
@@ -72,20 +70,16 @@ function WhatsAppIcon({ size = 18, color = "#25D366" }: { size?: number; color?:
   );
 }
 
-const unsupportedDetailContent = {
-  aiValuation: {
-    estimatedValue: "47,000",
-    differencePercent: "4%",
-    comparisonText: "Estimated fair value 47,000 ৳. This listing is priced below AI estimate by 4%.",
-    trend: "+4.5% area appreciation YoY",
-  },
-  aiRecommendation:
-    "Buyers who viewed this also considered penthouses in Gulshan 1 and 2 bedroom apartments in Dhanmondi. Based on your budget, this property offers 12% better value per sqft than similar verified listings.",
-  nearbyPlaces: [
-    { name: "Darun Ihsan University", distance: "0.6 km", icon: GraduationCap },
-    { name: "Eden Hospital", distance: "1.2 km", icon: Hospital },
-    { name: "Metro Station", distance: "0.9 km", icon: Train },
-  ],
+type AiValuation = {
+  estimatedValue: string;
+  comparisonText: string;
+  trend: string;
+};
+
+type NearbyPlace = {
+  name: string;
+  distance: string;
+  icon: LucideIcon;
 };
 
 export function PropertyDetailScreen() {
@@ -176,23 +170,20 @@ export function PropertyDetailScreen() {
       bedrooms: Number((apiDetail as any).bedrooms ?? rawAmenities.bedrooms ?? 0),
       bathrooms: Number((apiDetail as any).bathrooms ?? rawAmenities.bathrooms ?? 0),
       areaSqft: apiDetail.area_size ? apiDetail.area_size.toLocaleString("en-BD") : null,
-      aiValuation: unsupportedDetailContent.aiValuation,
+      aiValuation: null as AiValuation | null,
       description: apiDetail.description || "No description provided.",
       amenities: amenityList,
       mediaImages: images,
       seller: {
         name: apiDetail.user?.full_name || "Verified Seller",
-        agency: "HomeNet Verified Partner",
-        rating: "4.8",
-        reviewsCount: 12,
-        repliesTime: "Replies ~1 hr",
+        agency: null as string | null,
         isVerified: Boolean(apiDetail.is_verified),
-        avatarUrl: apiDetail.user?.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-        phone: identity?.phone || "+8801700000000",
+        avatarUrl: apiDetail.user?.avatar_url || null,
+        phone: identity?.phone || null,
         email: identity?.email || "",
       },
-      aiRecommendation: unsupportedDetailContent.aiRecommendation,
-      nearbyPlaces: unsupportedDetailContent.nearbyPlaces,
+      aiRecommendation: null as string | null,
+      nearbyPlaces: [] as NearbyPlace[],
       similarProperties: similarProperties.map((sim) => {
         const simAmenities = (sim.amenities as Record<string, any>) || {};
         return {
@@ -219,7 +210,11 @@ export function PropertyDetailScreen() {
   };
 
   const handleWhatsApp = () => {
-    const rawPhone = property?.seller.phone || "+8801700000000";
+    const rawPhone = property?.seller.phone;
+    if (!rawPhone) {
+      notify("Phone unavailable", "The property owner has not shared a phone number.");
+      return;
+    }
     const cleanPhone = rawPhone.replace(/[^\d]/g, "");
     const message = `Hello ${property?.seller.name || "Seller"}, I'm interested in your property "${property?.title || "Property"}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) on Homenet. Is this property currently available?`;
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
@@ -779,13 +774,9 @@ export function PropertyDetailScreen() {
                 )}
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.sellerName}>{property.seller.name}</Text>
-                  <Text style={styles.sellerAgency}>{property.seller.agency}</Text>
-                  <View style={styles.sellerRatingRow}>
-                    <Star color="#F4823A" fill="#F4823A" size={14} />
-                    <Text style={styles.ratingText}>
-                      {property.seller.rating} ({property.seller.reviewsCount}) · {property.seller.repliesTime || "Replies ~1 hr"}
-                    </Text>
-                  </View>
+                  {property.seller.agency ? (
+                    <Text style={styles.sellerAgency}>{property.seller.agency}</Text>
+                  ) : null}
                 </View>
               </View>
 
@@ -810,8 +801,14 @@ export function PropertyDetailScreen() {
               <View style={styles.sellerActionsRow}>
                 <Pressable
                   accessibilityLabel="Call Seller"
+                  disabled={!property.seller.phone}
                   onPress={handleCall}
-                  style={({ pressed }) => [styles.sellerActionBtn, webPointer, pressed && styles.pressed]}
+                  style={({ pressed }) => [
+                    styles.sellerActionBtn,
+                    webPointer,
+                    pressed && styles.pressed,
+                    !property.seller.phone && styles.actionBtnDisabled,
+                  ]}
                 >
                   <Phone color="#0B1A17" size={16} />
                   <Text style={styles.sellerActionText}>Call</Text>
@@ -819,8 +816,14 @@ export function PropertyDetailScreen() {
 
                 <Pressable
                   accessibilityLabel="WhatsApp Message"
+                  disabled={!property.seller.phone}
                   onPress={handleWhatsApp}
-                  style={({ pressed }) => [styles.whatsAppActionBtn, webPointer, pressed && styles.pressed]}
+                  style={({ pressed }) => [
+                    styles.whatsAppActionBtn,
+                    webPointer,
+                    pressed && styles.pressed,
+                    !property.seller.phone && styles.actionBtnDisabled,
+                  ]}
                 >
                   <WhatsAppIcon size={18} color="#25D366" />
                   <Text style={styles.whatsAppActionText}>WhatsApp</Text>
@@ -838,6 +841,7 @@ export function PropertyDetailScreen() {
             </View>
 
             {/* AI Recommendation Box */}
+            {property.aiRecommendation ? (
             <View style={styles.aiRecCard}>
               <View style={styles.aiRecHeader}>
                 <Sparkles color="#04cf92" size={18} />
@@ -846,6 +850,7 @@ export function PropertyDetailScreen() {
 
               <Text style={styles.aiRecBody}>{property.aiRecommendation}</Text>
             </View>
+            ) : null}
           </View>
         </View>
       </ScrollView>
@@ -882,11 +887,16 @@ export function PropertyDetailScreen() {
             </View>
 
             <Pressable
+              disabled={!property.seller.phone}
               onPress={() => {
                 setBookModalVisible(false);
                 handleWhatsApp();
               }}
-              style={[styles.modalWhatsAppBtn, webPointer]}
+              style={[
+                styles.modalWhatsAppBtn,
+                webPointer,
+                !property.seller.phone && styles.actionBtnDisabled,
+              ]}
             >
               <WhatsAppIcon size={18} color="#FFFFFF" />
               <Text style={styles.modalWhatsAppBtnText}>Chat on WhatsApp with Agent</Text>
@@ -1727,17 +1737,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     color: "#5C6B66",
   },
-  sellerRatingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginTop: 2,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontFamily: fonts.semiBold,
-    color: "#0B1A17",
-  },
   priceCalloutWrap: {
     backgroundColor: "#F4F6F5",
     borderRadius: 16,
@@ -1789,6 +1788,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(11,26,23,0.12)",
     backgroundColor: "#FFFFFF",
+  },
+  actionBtnDisabled: {
+    opacity: 0.45,
   },
   sellerActionText: {
     fontSize: 14,

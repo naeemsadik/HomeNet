@@ -18,9 +18,12 @@ export function usePropertyFeed(filters: PropertyFilters) {
 
   return {
     properties: query.data?.pages.flatMap((page) => page.data?.items ?? []) ?? [],
-    loading: query.isLoading,
+    // isPending stays true from mount until the first settle, including between
+    // retry attempts, so an unresolved feed can never look like an empty one.
+    loading: query.isPending,
     refreshing: query.isRefetching && !query.isFetchingNextPage,
     fetchingNextPage: query.isFetchingNextPage,
+    isError: query.isError,
     error: query.error ? toApiError(query.error).message : null,
     hasMore: query.hasNextPage,
     loadMore: query.fetchNextPage,

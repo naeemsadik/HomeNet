@@ -19,6 +19,11 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthModal } from "@/components/AuthModal";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
+import { colorTokens } from "@/theme";
+
+// Keyboard focus ring. Not colorTokens.primary (#04cf92), which sits at 2.03:1
+// on white and fails the 3:1 WCAG 1.4.11 minimum for a focus indicator.
+const FOCUS_RING_COLOR = colorTokens.primaryOnLight;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,11 +62,15 @@ export default function RootLayout() {
             box-shadow: none !important;
             -webkit-tap-highlight-color: transparent !important;
           }
-          input:focus, textarea:focus, select:focus, [contenteditable]:focus,
-          input:focus-visible, textarea:focus-visible, select:focus-visible {
+          input:focus, textarea:focus, select:focus, [contenteditable]:focus {
             outline: none !important;
             outline-style: none !important;
             box-shadow: none !important;
+          }
+          input:focus-visible, textarea:focus-visible, select:focus-visible,
+          [contenteditable]:focus-visible {
+            outline: 2px solid ${FOCUS_RING_COLOR} !important;
+            outline-offset: 2px !important;
           }
         `;
         document.head.appendChild(style);
