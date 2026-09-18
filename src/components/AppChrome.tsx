@@ -65,7 +65,7 @@ const sidebarNav: {
   badge?: number;
   authGated?: boolean;
 }[] = [
-    { label: "Home", href: "/", icon: Home, key: "home" },
+    { label: "Home", href: "/home", icon: Home, key: "home" },
     { label: "Insights", href: "/market", icon: TrendingUp, key: "market" },
     { label: "Saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
     { label: "Profile", href: "/profile", icon: User, key: "profile", authGated: true },
@@ -410,7 +410,7 @@ function TopBar({
                             const confirmed = window.confirm("Are you sure you want to log out?");
                             if (confirmed) {
                               await logout();
-                              router.push("/");
+                              router.push("/home");
                             }
                           } else {
                             Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -420,7 +420,7 @@ function TopBar({
                                 style: "destructive",
                                 onPress: async () => {
                                   await logout();
-                                  router.push("/");
+                                  router.push("/home");
                                 },
                               },
                             ]);
@@ -485,7 +485,7 @@ function TopBar({
 function MobileNav({ active }: { active: ActivePage }) {
   const user = useAuthStore((s) => s.user);
   const links = [
-    { label: "Home", href: "/", icon: Home, selected: active === "home", authGated: false },
+    { label: "Home", href: "/home", icon: Home, selected: active === "home", authGated: false },
     {
       label: "Insights",
       href: "/market",
