@@ -340,8 +340,8 @@ export function OwnerListPropertySection() {
                     </View>
                     <View style={styles.plaqueDivider} />
                     <View style={styles.plaqueStatItem}>
-                      <Text style={styles.plaqueStatNum}>24h</Text>
-                      <Text style={styles.plaqueStatLabel}>Verification</Text>
+                      <Text style={styles.plaqueStatNum}>Direct</Text>
+                      <Text style={styles.plaqueStatLabel}>Owner Contact</Text>
                     </View>
                   </View>
 

@@ -271,36 +271,29 @@ export const popularLocations = [
   { name: "Gazipur", count: "1,640 listings", subtext: "Joydebpur, Tongi, Chowrasta...", image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=600&q=80" },
 ];
 
-export const trustedPartners = [
-  { initial: "S", name: "Skyline Realty", deals: "3.2k deals" },
-  { initial: "M", name: "Sunveely", deals: "2.8k deals" },
-  { initial: "D", name: "Bashundhara", deals: "1.9k deals" },
-  { initial: "P", name: "Prime Living", deals: "1.4k deals" },
-];
+export interface TrustedPartner {
+  initial: string;
+  name: string;
+  deals: string;
+}
 
-export const latestNews = [
-  {
-    id: 1,
-    tag: "Market",
-    time: "2h ago",
-    title: "Dhaka apartment prices rise 8% as metro expands",
-    image: propertyImages.skyline,
-  },
-  {
-    id: 2,
-    tag: "Technology",
-    time: "1d ago",
-    title: "How AI valuation is changing home buying in Bangladesh",
-    image: propertyImages.living,
-  },
-  {
-    id: 3,
-    tag: "Guide",
-    time: "3d ago",
-    title: "Best neighbourhoods for first-time buyers in 2026",
-    image: propertyImages.bright,
-  },
-];
+/** Fill once partner agreements exist — HomeScreen hides the card while empty. */
+export const trustedPartners: TrustedPartner[] = [];
+
+export interface PropertyGuide {
+  id: number;
+  tag: string;
+  readTime: string;
+  title: string;
+  image: string;
+  href: string;
+}
+
+/**
+ * Bangladesh property guides — registration, buying and renting explainers.
+ * HomeScreen hides the section while empty.
+ */
+export const propertyGuides: PropertyGuide[] = [];
 
 export const savedCollections = [
   {

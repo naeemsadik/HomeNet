@@ -14,7 +14,7 @@ import { ArrowRight, PlusCircle, ChevronRight, Sparkles } from 'lucide-react-nat
 import { colors, radius, fonts } from '../theme';
 import { useResponsive } from '../hooks/useResponsive';
 import { landingCopy, HERO_HEADLINE } from '../content/landingCopy';
-import { useAuthStore } from '../stores/authStore';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 import { useLandingMetrics } from '../hooks/useLandingMetrics';
 
 // Landing Components
@@ -32,12 +32,11 @@ import { TechBlock } from '../components/landing/TechBlock';
 import { EcosystemDiagram } from '../components/landing/EcosystemDiagram';
 import { FinalCta } from '../components/landing/FinalCta';
 import { AiFlagshipSection } from '../components/landing/AiFlagshipSection';
-import { AuthModal } from '../components/AuthModal';
 
 export const LandingScreen: React.FC = () => {
   const router = useRouter();
   const { isTablet, isPhone } = useResponsive();
-  const user = useAuthStore((s) => s.user);
+  const requireAuth = useRequireAuth();
   const metrics = useLandingMetrics();
   const [scrolled, setScrolled] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
@@ -68,16 +67,11 @@ export const LandingScreen: React.FC = () => {
   };
 
   const handleListProperty = () => {
-    if (user) {
-      router.push('/property/create');
-    } else {
-      router.push('/login' as any);
-    }
+    requireAuth(() => router.push('/property/create'));
   };
 
   return (
     <View style={styles.rootContainer}>
-      <AuthModal />
       <LandingHeader scrolled={scrolled} onNavigateSection={handleNavigateSection} />
 
       <ScrollView
@@ -287,7 +281,7 @@ export const LandingScreen: React.FC = () => {
           background="tint"
           eyebrow="Ecosystem"
           title="The Connected Real Estate Network"
-          subtitle="Connecting property seekers, validated owners, and trusted service partners directly."
+          subtitle="Connecting property seekers and verified owners directly, with no broker in between."
         >
           <EcosystemDiagram />
         </LandingSection>

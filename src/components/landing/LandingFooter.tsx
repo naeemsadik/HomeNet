@@ -5,6 +5,7 @@ import { Cpu } from 'lucide-react-native';
 import { colors, radius, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { Brand } from '../Brand';
+import { useAuthModalStore } from '../../stores/useAuthModalStore';
 
 export const LandingFooter: React.FC = () => {
   const router = useRouter();
@@ -23,10 +24,13 @@ export const LandingFooter: React.FC = () => {
     { label: 'Verification Process', href: '/verification' },
   ];
 
-  const platformLinks = [
+  const platformLinks: { label: string; href?: string; onPress?: () => void }[] = [
     { label: 'Open HomeNet App', href: '/home' },
     { label: 'Account Profile', href: '/profile' },
-    { label: 'Sign In / Register', href: '/login' },
+    {
+      label: 'Sign In / Register',
+      onPress: () => useAuthModalStore.getState().open(),
+    },
   ];
 
   return (
@@ -92,7 +96,9 @@ export const LandingFooter: React.FC = () => {
                     styles.linkItem,
                     hovered && styles.linkItemHovered,
                   ]}
-                  onPress={() => router.push(link.href as any)}
+                  onPress={() =>
+                    link.onPress ? link.onPress() : router.push(link.href as any)
+                  }
                 >
                   <Text style={styles.linkText}>{link.label}</Text>
                 </Pressable>

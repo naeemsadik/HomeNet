@@ -163,7 +163,7 @@ function SideBar({
         </View>
         <Text style={styles.sidebarCardTitle}>List your property</Text>
         <Text style={styles.sidebarCardSubtitle}>
-          Get AI pricing & reach 2M+ buyers.
+          Free to list. Describe it in a sentence.
         </Text>
         <AppLink href="/sell" style={styles.postAdButton} onPress={onNavigate}>
           <Text style={styles.postAdButtonText}>Post an ad</Text>
@@ -186,12 +186,18 @@ function TopBar({
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
 
+    // Seekers-first: the two search intents lead, Saved follows. Everything
+    // else lives in the drawer (tablet/phone) or the footer.
     const topNavLinks: {
       label: string;
       href: string;
       key: string;
       authGated?: boolean;
-    }[] = [];
+    }[] = [
+      { label: "Buy", href: "/buy", key: "buy" },
+      { label: "Rent", href: "/rent", key: "rent" },
+      { label: "Saved", href: "/saved", key: "saved", authGated: true },
+    ];
 
   return (
     <SafeAreaView
@@ -262,6 +268,28 @@ function TopBar({
         ) : null}
 
         <View style={[styles.topRightActions, isPhone && styles.topRightActionsPhone]}>
+          {/* Owner path: present on every page, visually subordinate to search. */}
+          {!isPhone ? (
+            <Pressable
+              accessibilityLabel="List your property"
+              accessibilityRole="button"
+              onPress={() => {
+                if (user) router.push("/property/create" as any);
+                else
+                  useAuthModalStore
+                    .getState()
+                    .open(() => router.push("/property/create" as any));
+              }}
+              style={({ pressed }) => [
+                styles.listPropertyBtn,
+                webPointer,
+                pressed && { opacity: 0.85 },
+              ]}
+            >
+              <Text style={styles.listPropertyText}>List your property</Text>
+            </Pressable>
+          ) : null}
+
           {user ? (
             <>
               {/* Notification Button */}
@@ -907,6 +935,21 @@ const styles = StyleSheet.create({
   topRightActionsPhone: {
     gap: 6,
     flexShrink: 0,
+  },
+  listPropertyBtn: {
+    flexShrink: 0,
+    height: 38,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "#04cf92",
+  },
+  listPropertyText: {
+    color: "#FFFFFF",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "700",
   },
   rightmoveSignInBtn: {
     flexDirection: "row",

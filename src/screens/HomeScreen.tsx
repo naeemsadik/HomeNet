@@ -28,7 +28,7 @@ import { HeroSearchWidget } from "@/components/HeroSearchWidget";
 import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
 import { AppButton, AppLink } from "@/components/ui";
 import {
-  latestNews,
+  propertyGuides,
   trustedPartners,
 } from "@/data/properties";
 import type { Property as ApiProperty } from "@/features/property/types/property";
@@ -311,18 +311,18 @@ export function HomeScreen() {
             <View style={styles.heroTagPill}>
               <Sparkles color="#FFFFFF" size={14} />
               <Text style={styles.heroTagText}>
-                Bangladesh's AI property marketplace
+                Property marketplace · Bangladesh
               </Text>
             </View>
 
             {/* Heading 1 */}
             <Text style={[styles.heroHeading, isPhone && styles.heroHeadingPhone]}>
-              Find a home you can trust, priced by AI.
+              Find a home you can trust, direct from the owner.
             </Text>
 
             {/* Subtitle Paragraph */}
             <Text style={[styles.heroSubtitle, isPhone && styles.heroSubtitlePhone]}>
-              Verified listings, AI valuation and investment scores for apartments, houses, land and commercial spaces across Bangladesh.
+              Every listing verified before it goes live. Apartments, houses, land and commercial space across Bangladesh — with no broker in between.
             </Text>
 
             {/* Hero Search Widget (Figma node 214:4655) */}
@@ -462,6 +462,7 @@ export function HomeScreen() {
           </View>
 
           {/* Right: Trusted partners */}
+          {trustedPartners.length > 0 ? (
           <View style={styles.trustedPartnersCard}>
             <View style={styles.sectionHeaderInner}>
               <View>
@@ -493,30 +494,32 @@ export function HomeScreen() {
               ))}
             </View>
           </View>
+          ) : null}
         </View>
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
           11. LATEST PROPERTY NEWS (Figma data-node-id="1:1262")
       ───────────────────────────────────────────────────────────── */}
+      {propertyGuides.length > 0 ? (
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Latest property news</Text>
+          <Text style={styles.sectionTitle}>Property guides</Text>
           <AppLink href="/about" style={styles.seeAllLink}>
             <Text style={styles.seeAllText}>See all</Text>
           </AppLink>
         </View>
 
         <View style={[styles.newsGrid, isTablet && styles.newsGridTablet, isPhone && styles.newsGridPhone]}>
-          {latestNews.map((article) => (
+          {propertyGuides.map((guide) => (
             <AppLink
-              href="/about"
-              key={article.id}
+              href={guide.href}
+              key={guide.id}
               style={[styles.newsCard, isTablet && styles.newsCardTablet, isPhone && styles.newsCardPhone]}
             >
               <View style={styles.newsImageWrap}>
                 <Image
-                  source={{ uri: article.image }}
+                  source={{ uri: guide.image }}
                   style={styles.newsImage}
                   resizeMode="cover"
                 />
@@ -524,18 +527,19 @@ export function HomeScreen() {
               <View style={styles.newsBody}>
                 <View style={styles.newsTagRow}>
                   <View style={styles.newsTagPill}>
-                    <Text style={styles.newsTagPillText}>{article.tag}</Text>
+                    <Text style={styles.newsTagPillText}>{guide.tag}</Text>
                   </View>
-                  <Text style={styles.newsTimeText}>{article.time}</Text>
+                  <Text style={styles.newsTimeText}>{guide.readTime}</Text>
                 </View>
                 <Text numberOfLines={2} style={styles.newsTitle}>
-                  {article.title}
+                  {guide.title}
                 </Text>
               </View>
             </AppLink>
           ))}
         </View>
       </View>
+      ) : null}
 
 
     </AppChrome>

@@ -280,21 +280,21 @@ export function HeroSearchWidget({
           <View style={styles.metaStatItem}>
             <ShieldCheck color="rgba(255, 255, 255, 0.9)" size={15} />
             <Text style={[styles.metaStatText, isPhone && styles.metaStatTextPhone]}>
-              12,400+ verified listings
+              Verified before publication
             </Text>
           </View>
 
           <View style={styles.metaStatItem}>
             <TrendingUp color="rgba(255, 255, 255, 0.9)" size={15} />
             <Text style={[styles.metaStatText, isPhone && styles.metaStatTextPhone]}>
-              Live market intelligence
+              Direct owner contact
             </Text>
           </View>
 
           <View style={styles.metaStatItem}>
             <Sparkles color="rgba(255, 255, 255, 0.9)" size={15} />
             <Text style={[styles.metaStatText, isPhone && styles.metaStatTextPhone]}>
-              AI valuation & scores
+              Free to browse & list
             </Text>
           </View>
         </View>

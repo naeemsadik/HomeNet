@@ -5,6 +5,7 @@ import { User, ArrowRight, Menu, X, ExternalLink, ChevronRight } from 'lucide-re
 import { colors, radius, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useAuthStore } from '../../stores/authStore';
+import { useAuthModalStore } from '../../stores/useAuthModalStore';
 import { Brand } from '../Brand';
 
 interface LandingHeaderProps {
@@ -89,7 +90,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ scrolled = false, 
                 styles.ghostBtn,
                 hovered && styles.ghostBtnHovered,
               ]}
-              onPress={() => router.push('/login' as any)}
+              onPress={() => useAuthModalStore.getState().open()}
             >
               <Text style={styles.ghostBtnText}>Sign in</Text>
             </Pressable>

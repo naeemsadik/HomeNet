@@ -21,8 +21,8 @@ interface EcosystemDiagramProps {
 }
 
 export function EcosystemDiagram({
-  activeCount = 14,
-  areasCount = 26,
+  activeCount = 0,
+  areasCount = 0,
 }: EcosystemDiagramProps) {
   const { isTablet, isPhone } = useResponsive();
 
@@ -72,7 +72,9 @@ export function EcosystemDiagram({
             {activeCount > 0 ? `${activeCount} Verified Listings` : "Verified Marketplace"}
           </Text>
           <Text style={styles.coreSub}>
-            Completeness checks · 2-level {areasCount} Dhaka areas
+            {areasCount > 0
+              ? `Completeness checks · 2-level ${areasCount} Dhaka areas`
+              : "Completeness checks · Two-level Dhaka area hierarchy"}
           </Text>
         </LinearGradient>
 
@@ -93,7 +95,7 @@ export function EcosystemDiagram({
             <Users color="#0F6D55" size={24} strokeWidth={2.2} />
           </View>
           <Text style={styles.nodeTitle}>Property Seekers</Text>
-          <Text style={styles.nodeSub}>Buyers & tenants across BD</Text>
+          <Text style={styles.nodeSub}>Buyers & tenants across Bangladesh</Text>
           <View style={styles.nodePill}>
             <Text style={styles.nodePillText}>0% broker commission</Text>
           </View>

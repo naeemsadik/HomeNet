@@ -5,20 +5,16 @@ import { Sparkles, ArrowRight, PlusCircle, ChevronRight } from 'lucide-react-nat
 import { colors, radius, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { landingCopy } from '../../content/landingCopy';
-import { useAuthStore } from '../../stores/authStore';
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 export const FinalCta: React.FC = () => {
   const router = useRouter();
   const { isTablet, isPhone } = useResponsive();
-  const user = useAuthStore((s) => s.user);
+  const requireAuth = useRequireAuth();
   const copy = landingCopy.finalCta;
 
   const handleCreateListing = () => {
-    if (user) {
-      router.push('/property/create');
-    } else {
-      router.push('/login' as any);
-    }
+    requireAuth(() => router.push('/property/create'));
   };
 
   return (

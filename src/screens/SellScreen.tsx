@@ -93,9 +93,9 @@ export function SellScreen() {
         </View>
         <View style={[styles.stats, isPhone && styles.statsPhone]}>
           {[
-            ["Average sale window", "34 days", "Dhaka prime areas"],
-            ["Verified buyer reach", "12.4k", "Active this month"],
-            ["AI valuation accuracy", "94%", "Within final sale range"],
+            ["Listing fee", "0 BDT", "No commission, ever"],
+            ["Verification", "Required", "Before any listing goes live"],
+            ["Owner contact", "Direct", "No broker in between"],
           ].map(([label, value, detail]) => <View key={label} style={[styles.statCard, isPhone && styles.statCardPhone]}><Text style={styles.statLabel}>{label}</Text><Text style={styles.statValue}>{value}</Text><Text style={styles.statDetail}>{detail}</Text></View>)}
         </View>
       </LinearGradient>

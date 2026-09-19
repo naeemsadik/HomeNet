@@ -1,7 +1,10 @@
+import { RequireAuth } from "@/components/RequireAuth";
 import { BuyerProfileScreen } from "@/features/user/screens/BuyerProfileScreen";
 
 export default function ProfileRoute() {
-  return <BuyerProfileScreen />;
+  return (
+    <RequireAuth active="profile">
+      <BuyerProfileScreen />
+    </RequireAuth>
+  );
 }
-
-
