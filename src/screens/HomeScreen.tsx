@@ -38,7 +38,7 @@ import type { Property as ApiProperty } from "@/features/property/types/property
 import { useResponsive } from "@/hooks/useResponsive";
 import { toApiError } from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
-import { colors, fonts, webPointer } from "@/theme";
+import { colors, fonts, layout, webPointer } from "@/theme";
 
 
 
@@ -176,7 +176,22 @@ function FeaturedPropertyCard({ property, width }: { property: ApiProperty; widt
 }
 
 export function HomeScreen() {
-  const { isPhone, isTablet, width } = useResponsive();
+  const { isPhone, isTablet, isCompact, width } = useResponsive();
+
+  // Hero scales in steps rather than snapping from 34px straight to 64px.
+  const heroType = isPhone
+    ? { fontSize: 34, lineHeight: 39, letterSpacing: -0.7 }
+    : isTablet
+      ? { fontSize: 42, lineHeight: 47, letterSpacing: -1.0 }
+      : isCompact
+        ? { fontSize: 52, lineHeight: 58, letterSpacing: -1.3 }
+        : { fontSize: 64, lineHeight: 70, letterSpacing: -1.6 };
+
+  const heroMetrics = isPhone
+    ? { minHeight: 360, dockOffset: -56, copyPad: 64 }
+    : isTablet
+      ? { minHeight: 430, dockOffset: -64, copyPad: 78 }
+      : { minHeight: 520, dockOffset: -88, copyPad: 96 };
   const popularQuery = useQuery({
     queryKey: ["properties", "home", "popular"],
     queryFn: () =>
@@ -299,14 +314,14 @@ export function HomeScreen() {
     };
   }, [cardStep, featuredProperties.length]);
 
-  return (
-    <AppChrome active="home">
-      {/* ─────────────────────────────────────────────────────────────
-          1. HERO SECTION (Figma data-node-id="1:92")
-      ───────────────────────────────────────────────────────────── */}
+  const hero = (
       <View style={styles.heroBlock}>
-        <View style={[styles.heroPhoto, isPhone && styles.heroPhotoPhone]}>
-          <ImageBackground source={HERO_IMAGE} style={styles.heroBg} resizeMode="cover">
+        <View style={[styles.heroPhoto, { minHeight: heroMetrics.minHeight }]}>
+          <ImageBackground
+            source={HERO_IMAGE}
+            style={[styles.heroBg, { minHeight: heroMetrics.minHeight }]}
+            resizeMode="cover"
+          >
             {/* Scrim only deep enough to carry white type — the room stays visible. */}
             <LinearGradient
               colors={[
@@ -318,15 +333,28 @@ export function HomeScreen() {
               style={StyleSheet.absoluteFill}
             />
 
-            <View style={[styles.heroCopy, isPhone && styles.heroCopyPhone]}>
-              <Text style={[styles.heroHeading, isPhone && styles.heroHeadingPhone]}>
+            <View
+              style={[
+                styles.heroCopy,
+                isPhone && styles.heroCopyPhone,
+                { paddingBottom: heroMetrics.copyPad },
+              ]}
+            >
+              <Text style={[styles.heroHeading, heroType]}>
                 Find a home you can trust
               </Text>
             </View>
           </ImageBackground>
         </View>
 
-        <View style={[styles.searchDock, isPhone && styles.searchDockPhone]}>
+        <View style={[styles.dockGutter, isPhone && styles.dockGutterPhone]}>
+        <View
+          style={[
+            styles.searchDock,
+            isPhone && styles.searchDockPhone,
+            { marginTop: heroMetrics.dockOffset },
+          ]}
+        >
           <HeroSearchWidget docked />
 
           <View style={[styles.ownerBand, isPhone && styles.ownerBandPhone]}>
@@ -352,10 +380,14 @@ export function HomeScreen() {
             </Pressable>
           </View>
         </View>
+        </View>
       </View>
 
 
+  );
 
+  return (
+    <AppChrome active="home" bleed={hero}>
       {/* ─────────────────────────────────────────────────────────────
           2. PRODUCT VISUAL — browser + phone preview of real listings
       ───────────────────────────────────────────────────────────── */}
@@ -554,19 +586,15 @@ const styles = StyleSheet.create({
   heroBlock: {
     width: "100%",
   },
+  // Full-bleed: the photograph runs edge to edge, outside the page container.
   heroPhoto: {
     width: "100%",
-    borderRadius: 20,
     overflow: "hidden",
-    minHeight: 460,
-  },
-  heroPhotoPhone: {
-    borderRadius: 14,
-    minHeight: 340,
+    minHeight: 520,
   },
   heroBg: {
     width: "100%",
-    minHeight: 460,
+    minHeight: 520,
     justifyContent: "center",
   },
   heroCopy: {
@@ -590,17 +618,21 @@ const styles = StyleSheet.create({
     letterSpacing: -1.6,
     textAlign: "center",
   },
-  heroHeadingPhone: {
-    fontSize: 34,
-    lineHeight: 39,
-    letterSpacing: -0.7,
+
+  // The dock sits back inside the page gutter even though the photo does not.
+  dockGutter: {
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: layout.gutter,
+  },
+  dockGutterPhone: {
+    paddingHorizontal: layout.gutterPhone,
   },
 
   // The dock owns radius + shadow; the widget inside runs flush.
   searchDock: {
     width: "100%",
     maxWidth: 940,
-    alignSelf: "center",
     marginTop: -88,
     borderRadius: 16,
     overflow: "hidden",

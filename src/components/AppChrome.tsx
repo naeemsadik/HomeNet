@@ -589,9 +589,15 @@ function MobileNav({ active }: { active: ActivePage }) {
 export function AppChrome({
   children,
   active,
+  bleed,
 }: {
   children: ReactNode;
   active: ActivePage;
+  /**
+   * Edge-to-edge content rendered above `children`, outside the page container.
+   * For full-bleed hero bands that must not inherit the 1240px gutter.
+   */
+  bleed?: ReactNode;
 }) {
   const { isTablet, isPhone } = useResponsive();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -606,6 +612,7 @@ export function AppChrome({
           showsVerticalScrollIndicator={false}
           style={{ width: "100%" }}
         >
+          {bleed ? <View style={styles.bleed}>{bleed}</View> : null}
           <View style={[styles.mainGutter, isPhone && styles.mainGutterPhone]}>
             <View style={[styles.main, isPhone && styles.mainPhone]}>{children}</View>
           </View>
@@ -1337,6 +1344,10 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     backgroundColor: "#F8FAF9",
+  },
+
+  bleed: {
+    width: "100%",
   },
 
   // Same container as the navbar — alignment is structural, not tuned.
