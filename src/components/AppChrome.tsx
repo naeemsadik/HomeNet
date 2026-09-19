@@ -65,7 +65,7 @@ const sidebarNav: {
   badge?: number;
   authGated?: boolean;
 }[] = [
-    { label: "Home", href: "/", icon: Home, key: "home" },
+    { label: "Home", href: "/home", icon: Home, key: "home" },
     { label: "Insights", href: "/market", icon: TrendingUp, key: "market" },
     { label: "Saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
     { label: "Profile", href: "/profile", icon: User, key: "profile", authGated: true },
@@ -101,7 +101,6 @@ function SideBar({
 
       <View style={styles.sideNav}>
         {sidebarNav
-          .filter((item) => item.key !== "saved" || Boolean(user))
           .map(({ label, href, icon: Icon, key, badge, authGated }) => {
           const selected =
             active === key ||
@@ -133,7 +132,7 @@ function SideBar({
               accessibilityRole="link"
             >
               <Icon
-                color={selected ? "#04cf92" : "#5C6B66"}
+                color={selected ? colors.greenOnLight : "#5C6B66"}
                 size={20}
                 strokeWidth={selected ? 2.2 : 1.8}
               />
@@ -411,7 +410,7 @@ function TopBar({
                             const confirmed = window.confirm("Are you sure you want to log out?");
                             if (confirmed) {
                               await logout();
-                              router.push("/");
+                              router.push("/home");
                             }
                           } else {
                             Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -421,7 +420,7 @@ function TopBar({
                                 style: "destructive",
                                 onPress: async () => {
                                   await logout();
-                                  router.push("/");
+                                  router.push("/home");
                                 },
                               },
                             ]);
@@ -486,7 +485,7 @@ function TopBar({
 function MobileNav({ active }: { active: ActivePage }) {
   const user = useAuthStore((s) => s.user);
   const links = [
-    { label: "Home", href: "/", icon: Home, selected: active === "home", authGated: false },
+    { label: "Home", href: "/home", icon: Home, selected: active === "home", authGated: false },
     {
       label: "Insights",
       href: "/market",
@@ -494,17 +493,13 @@ function MobileNav({ active }: { active: ActivePage }) {
       selected: active === "market",
       authGated: false,
     },
-    ...(user
-      ? [
-          {
-            label: "Saved",
-            href: "/saved",
-            icon: Heart,
-            selected: active === "saved",
-            authGated: true,
-          },
-        ]
-      : []),
+    {
+      label: "Saved",
+      href: "/saved",
+      icon: Heart,
+      selected: active === "saved",
+      authGated: true,
+    },
     {
       label: "Profile",
       href: "/profile",
@@ -541,7 +536,7 @@ function MobileNav({ active }: { active: ActivePage }) {
               accessibilityRole="link"
             >
               <Icon
-                color={selected ? "#04cf92" : "#7B8983"}
+                color={selected ? colors.greenOnLight : "#7B8983"}
                 size={20}
                 strokeWidth={selected ? 2.2 : 1.8}
               />
@@ -671,7 +666,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   sideLinkTextActive: {
-    color: "#04cf92",
+    color: colors.greenOnLight,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
   },
@@ -1327,7 +1322,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   mobileNavTextActive: {
-    color: "#04cf92",
+    color: colors.greenOnLight,
     fontFamily: fonts.semiBold,
   },
   drawerLayer: {

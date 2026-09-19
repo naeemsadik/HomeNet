@@ -1,4 +1,3 @@
-import { LinearGradient } from "expo-linear-gradient";
 import {
   ArrowUpRight,
   BadgeCheck,
@@ -66,6 +65,7 @@ import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
 import { SellerTopHeader } from "../components/SellerTopHeader";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerStatCard, type StatItem } from "../components/SellerStatCard";
+import { ToggleViewButton } from "../components/ToggleViewButton";
 import { Footer } from "@/components/Footer";
 
 // Types
@@ -121,7 +121,7 @@ export function SellerDashboardScreen() {
       const confirmed = window.confirm("Are you sure you want to log out?");
       if (confirmed) {
         logout();
-        router.replace("/");
+        router.replace("/home");
       }
       return;
     }
@@ -133,7 +133,7 @@ export function SellerDashboardScreen() {
         style: "destructive",
         onPress: () => {
           logout();
-          router.replace("/");
+          router.replace("/home");
         },
       },
     ]);
@@ -385,11 +385,8 @@ export function SellerDashboardScreen() {
                 <View style={styles.headerDotIndicator} />
               </AppLink>
 
-              {/* View site button */}
-              <AppLink href="/" style={styles.viewSiteBtn}>
-                <Globe color={colors.ink} size={16} />
-                <Text style={styles.viewSiteText}>View site</Text>
-              </AppLink>
+              {/* Toggle view button */}
+              <ToggleViewButton />
             </View>
           </View>
         )}
@@ -711,12 +708,7 @@ export function SellerDashboardScreen() {
   function renderBoostWorkspace() {
     return (
       <>
-        <LinearGradient
-          colors={[colors.green, colors.blue]}
-          end={{ x: 0.95, y: 0.95 }}
-          start={{ x: 0.05, y: 0.05 }}
-          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
-        >
+        <View style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}>
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
             <View style={styles.tabHeroIconWrap}>
               <Rocket color={colors.green} size={24} />
@@ -741,7 +733,7 @@ export function SellerDashboardScreen() {
             <Rocket color={colors.ink} size={16} />
             <Text style={styles.tabHeroActionText}>Boost a Property</Text>
           </Pressable>
-        </LinearGradient>
+        </View>
 
         <View style={styles.kpiRow}>
           <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
@@ -891,15 +883,10 @@ export function SellerDashboardScreen() {
   function renderInsightsWorkspace() {
     return (
       <>
-        <LinearGradient
-          colors={[colors.green, colors.blue]}
-          end={{ x: 0.95, y: 0.95 }}
-          start={{ x: 0.05, y: 0.05 }}
-          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
-        >
+        <View style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}>
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
-            <View style={styles.tabHeroIconWrap}>
-              <Sparkles color={colors.green} size={24} />
+            <View style={[styles.tabHeroIconWrap, { backgroundColor: colors.blueLight }]}>
+              <Sparkles color={colors.blue} size={24} />
             </View>
             <View style={styles.tabHeroTextWrap}>
               <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
@@ -910,7 +897,7 @@ export function SellerDashboardScreen() {
               </Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
         <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
           <View style={styles.tabCardHeader}>
@@ -974,12 +961,7 @@ export function SellerDashboardScreen() {
   function renderAnalyticsWorkspace() {
     return (
       <>
-        <LinearGradient
-          colors={[colors.green, colors.blue]}
-          end={{ x: 0.95, y: 0.95 }}
-          start={{ x: 0.05, y: 0.05 }}
-          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
-        >
+        <View style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}>
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
             <View style={styles.tabHeroIconWrap}>
               <BarChart2 color={colors.green} size={24} />
@@ -993,7 +975,7 @@ export function SellerDashboardScreen() {
               </Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
         <View style={styles.kpiRow}>
           {[
@@ -1056,15 +1038,10 @@ export function SellerDashboardScreen() {
   function renderPaymentsWorkspace() {
     return (
       <>
-        <LinearGradient
-          colors={[colors.green, colors.blue]}
-          end={{ x: 0.95, y: 0.95 }}
-          start={{ x: 0.05, y: 0.05 }}
-          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
-        >
+        <View style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}>
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
-            <View style={styles.tabHeroIconWrap}>
-              <CreditCard color={colors.green} size={24} />
+            <View style={[styles.tabHeroIconWrap, { backgroundColor: colors.blueLight }]}>
+              <CreditCard color={colors.blue} size={24} />
             </View>
             <View style={styles.tabHeroTextWrap}>
               <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
@@ -1075,7 +1052,7 @@ export function SellerDashboardScreen() {
               </Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
         <View style={styles.kpiRow}>
           <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
@@ -1153,15 +1130,10 @@ export function SellerDashboardScreen() {
   function renderHelpWorkspace() {
     return (
       <>
-        <LinearGradient
-          colors={[colors.green, colors.blue]}
-          end={{ x: 0.95, y: 0.95 }}
-          start={{ x: 0.05, y: 0.05 }}
-          style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}
-        >
+        <View style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}>
           <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
-            <View style={styles.tabHeroIconWrap}>
-              <CircleHelp color={colors.green} size={24} />
+            <View style={[styles.tabHeroIconWrap, { backgroundColor: colors.orangeLight }]}>
+              <CircleHelp color={colors.orange} size={24} />
             </View>
             <View style={styles.tabHeroTextWrap}>
               <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
@@ -1172,7 +1144,7 @@ export function SellerDashboardScreen() {
               </Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
         <View style={styles.supportChannelsGrid}>
           <View style={styles.supportChannelCard}>
@@ -1407,21 +1379,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors.orange,
   },
-  viewSiteBtn: {
-    height: 38,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.08)",
-    borderRadius: 999,
-    paddingHorizontal: 14,
-  },
-  viewSiteText: {
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-    color: colors.ink,
-  },
+
   scrollBody: {
     padding: 24,
     gap: 24,
@@ -1836,11 +1794,19 @@ const styles = StyleSheet.create({
   tabHeroBanner: {
     padding: 22,
     borderRadius: 20,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 16,
     marginBottom: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   tabHeroBannerPhone: {
     flexDirection: "column",
@@ -1867,15 +1833,15 @@ const styles = StyleSheet.create({
   tabHeroIconWrap: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.18)",
+    borderRadius: 14,
+    backgroundColor: colors.greenLight,
     alignItems: "center",
     justifyContent: "center",
   },
   tabHeroTitle: {
     fontSize: 20,
     fontFamily: fonts.extraBold,
-    color: colors.white,
+    color: colors.ink,
     letterSpacing: -0.3,
   },
   tabHeroTitlePhone: {
@@ -1883,10 +1849,10 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   tabHeroSubtitle: {
-    fontSize: 13,
+    fontSize: 13.5,
     fontFamily: fonts.regular,
-    color: "rgba(255, 255, 255, 0.88)",
-    lineHeight: 19,
+    color: colors.muted,
+    lineHeight: 20,
     maxWidth: 680,
   },
   tabHeroSubtitlePhone: {
@@ -1901,6 +1867,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    shadowColor: colors.green,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   tabHeroActionBtnPhone: {
     alignSelf: "flex-start",

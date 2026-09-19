@@ -23,7 +23,6 @@ import {
   Text,
   View,
 } from "react-native";
-import Svg, { Defs, LinearGradient as SvgGradient, Path, Stop } from "react-native-svg";
 import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
 import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
@@ -66,7 +65,7 @@ function PropertyResult({
     return (
       <View style={styles.requestState}>
         <Text style={styles.requestStateTitle}>Could not load properties</Text>
-        <Text style={styles.requestStateCopy}>{error}</Text>
+        <Text style={styles.requestStateCopy}>Something went wrong while loading listings. Please try again.</Text>
         <AppButton icon={RotateCcw} label="Retry" onPress={onRetry} />
       </View>
     );
@@ -109,7 +108,7 @@ function FeaturedPropertyCard({ property, width }: { property: ApiProperty; widt
       <View style={styles.featuredTopBadges}>
         {property.is_verified ? (
           <View style={styles.featuredVerifiedBadge}>
-            <ShieldCheck color="#04cf92" size={14} />
+            <ShieldCheck color={colors.greenOnLight} size={14} />
             <Text style={styles.featuredVerifiedText}>Verified</Text>
           </View>
         ) : <View />}
@@ -350,7 +349,7 @@ export function HomeScreen() {
           </View>
           <AppLink href="/buy" style={styles.seeAllLink}>
             <Text style={styles.seeAllText}>See all</Text>
-            <ChevronRight color="#04cf92" size={16} />
+            <ChevronRight color={colors.greenOnLight} size={16} />
           </AppLink>
         </View>
 
@@ -446,48 +445,18 @@ export function HomeScreen() {
             <View style={styles.sectionHeaderInner}>
               <View>
                 <Text style={styles.sectionTitle}>Market insights</Text>
-                <Text style={styles.sectionSubtitle}>
-                  Avg. price per sqft (in ৳ thousands)
-                </Text>
-              </View>
-              <View style={styles.trendPill}>
-                <TrendingUp color="#04cf92" size={12} />
-                <Text style={styles.trendPillText}>+8.4%</Text>
               </View>
             </View>
 
-            {/* SVG Area Chart */}
+            {/* No market-data source exists yet, so nothing is charted. */}
             <View style={styles.chartWrapper}>
-              <Svg height="160" width="100%" viewBox="0 0 360 160">
-                <Defs>
-                  <SvgGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <Stop offset="0%" stopColor="#04cf92" stopOpacity="0.35" />
-                    <Stop offset="100%" stopColor="#04cf92" stopOpacity="0.0" />
-                  </SvgGradient>
-                </Defs>
-
-                {/* Filled Area */}
-                <Path
-                  d="M 10 120 C 60 110, 110 95, 160 85 C 210 75, 260 55, 310 40 C 330 35, 345 32, 350 30 L 350 150 L 10 150 Z"
-                  fill="url(#chartGradient)"
-                />
-
-                {/* Smooth Curve Line */}
-                <Path
-                  d="M 10 120 C 60 110, 110 95, 160 85 C 210 75, 260 55, 310 40 C 330 35, 345 32, 350 30"
-                  fill="none"
-                  stroke="#04cf92"
-                  strokeWidth="2.5"
-                />
-              </Svg>
-
-              {/* Month Labels */}
-              <View style={styles.chartMonthsRow}>
-                {["Feb", "Mar", "Apr", "May", "Jun", "Jul"].map((month) => (
-                  <Text key={month} style={styles.chartMonthText}>
-                    {month}
-                  </Text>
-                ))}
+              <View style={styles.requestState}>
+                <TrendingUp color={colors.greenOnLight} size={26} />
+                <Text style={styles.requestStateTitle}>Market data coming soon</Text>
+                <Text style={styles.requestStateCopy}>
+                  Price trends for Bangladesh will appear here once market data is
+                  available.
+                </Text>
               </View>
             </View>
           </View>
@@ -612,7 +581,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   seeAllText: {
-    color: "#04cf92",
+    color: colors.greenOnLight,
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
@@ -780,7 +749,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   featuredVerifiedText: {
-    color: "#04cf92",
+    color: colors.greenOnLight,
     fontFamily: fonts.semiBold,
     fontSize: 12,
     fontWeight: "600",
@@ -924,35 +893,9 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11, 26, 23, 0.08)",
     padding: 24.8,
   },
-  trendPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#E6FAF4",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-  },
-  trendPillText: {
-    color: "#04cf92",
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    fontWeight: "600",
-  },
   chartWrapper: {
     marginTop: 16,
     width: "100%",
-  },
-  chartMonthsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 8,
-    marginTop: 8,
-  },
-  chartMonthText: {
-    color: "#5C6B66",
-    fontFamily: fonts.regular,
-    fontSize: 12,
   },
 
   trustedPartnersCard: {

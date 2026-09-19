@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -26,6 +25,7 @@ import {
 } from "@/components/AdvancedFiltersModal";
 import { RightmoveFilterCard, type RightmoveFilters } from "@/components/RightmoveFilterCard";
 import { toPropertyCard } from "@/features/property/adapters/toPropertyCard";
+import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
 import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
@@ -175,7 +175,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
   const {
     properties: apiProperties,
     loading,
-    error,
+    isError,
     hasMore,
     fetchingNextPage,
     loadMore,
@@ -261,15 +261,12 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
         </View>
 
         {/* ─── 5. Properties Grid / List ──────────────────────────────────── */}
-        {loading && (!results || results.length === 0) ? (
-          <View style={styles.centerContainer}>
-            <ActivityIndicator color="#04cf92" size="large" />
-            <Text style={styles.loadingText}>Searching verified listings...</Text>
-          </View>
-        ) : error && results.length === 0 ? (
+        {loading ? (
+          <PropertySkeletonFeed />
+        ) : isError && results.length === 0 ? (
           <View style={styles.centerContainer}>
             <Text style={styles.emptyTitle}>Could not load live properties</Text>
-            <Text style={styles.emptySubtitle}>{error}</Text>
+            <Text style={styles.emptySubtitle}>Something went wrong while loading listings. Please try again.</Text>
             <AppButton icon={RotateCcw} label="Retry" onPress={() => void refresh()} />
           </View>
         ) : results.length > 0 ? (
@@ -413,11 +410,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 12,
     padding: 24,
-  },
-  loadingText: {
-    color: "#5C6B66",
-    fontFamily: fonts.regular,
-    fontSize: 14,
   },
   emptyContainer: {
     minHeight: 340,

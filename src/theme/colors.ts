@@ -24,6 +24,13 @@ export const colorTokens = {
   primaryDark: "#03b57f",
   primaryLight: "#E6FAF4",
   primaryText: "#FFFFFF",
+  /**
+   * Accessible green for text and small icons on light surfaces.
+   * `primary` measures 2.03:1 on white and 1.87:1 on `primaryLight`, both far
+   * below the WCAG AA 4.5:1 minimum. This measures 6.29:1 on white and 5.79:1
+   * on `primaryLight`. Keep using `primary` for fills, borders and large art.
+   */
+  primaryOnLight: "#0F6D55",
 
   // ─── Verified / Blue Badge ──────────────────────────────────────────────
   verified: "#2251D6",

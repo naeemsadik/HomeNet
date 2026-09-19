@@ -22,6 +22,7 @@ export const colors = {
   green: colorTokens.primary,
   greenDark: colorTokens.primary,
   greenLight: colorTokens.primaryLight,
+  greenOnLight: colorTokens.primaryOnLight,
   blue: colorTokens.verified,
   blueLight: colorTokens.verifiedLight,
   orange: colorTokens.orange,

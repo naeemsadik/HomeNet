@@ -7,7 +7,6 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { PlusCircle, Rocket } from "lucide-react-native";
 import Svg, { Path } from "react-native-svg";
 import { AppLink } from "@/components/ui";
@@ -33,12 +32,7 @@ export function SellerWelcomeBanner({
   style,
 }: SellerWelcomeBannerProps) {
   return (
-    <LinearGradient
-      colors={["rgb(15, 109, 85)", "rgb(34, 81, 214)"]}
-      end={{ x: 0.92, y: 0.92 }}
-      start={{ x: 0.08, y: 0.08 }}
-      style={[styles.container, style]}
-    >
+    <View style={[styles.container, style]}>
       <View style={styles.contentLeft}>
         {/* Subtitle */}
         <Text style={styles.subtitle}>Welcome back,</Text>
@@ -144,12 +138,13 @@ export function SellerWelcomeBanner({
           />
         </Svg>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#0B2B23",
     borderRadius: 24,
     padding: 24,
     position: "relative",

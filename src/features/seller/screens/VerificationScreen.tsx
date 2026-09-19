@@ -41,6 +41,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { fonts, webPointer } from "@/theme";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
+import { ToggleViewButton } from "../components/ToggleViewButton";
 import { Footer } from "@/components/Footer";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 
@@ -58,14 +59,14 @@ const REQUIRED_DOCUMENTS: VerificationDoc[] = [
     title: "National ID",
     subtitle: "Front & back of your NID card",
     icon: IdCard,
-    status: "uploaded",
+    status: "pending",
   },
   {
     id: "deed",
     title: "Property Deed",
     subtitle: "Registered ownership document",
     icon: FileCheck,
-    status: "uploaded",
+    status: "pending",
   },
   {
     id: "tax",
@@ -83,24 +84,31 @@ const REQUIRED_DOCUMENTS: VerificationDoc[] = [
   },
 ];
 
-const TIMELINE_STEPS = [
+type TimelineStatus = "completed" | "in_progress" | "pending";
+
+const TIMELINE_STEPS: {
+  id: string;
+  title: string;
+  date: string;
+  status: TimelineStatus;
+}[] = [
   {
     id: "submitted",
     title: "Submitted",
-    date: "Jul 02, 2026",
-    status: "completed" as const,
+    date: "Not yet submitted",
+    status: "pending",
   },
   {
     id: "review",
     title: "Under Review",
-    date: "In progress",
-    status: "in_progress" as const,
+    date: "Not started",
+    status: "pending",
   },
   {
     id: "approved",
     title: "Approved",
-    date: "Pending",
-    status: "pending" as const,
+    date: "Not started",
+    status: "pending",
   },
 ];
 
@@ -108,7 +116,9 @@ export function VerificationScreen() {
   const { isTablet, isPhone } = useResponsive();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [documents, setDocuments] = useState<VerificationDoc[]>(REQUIRED_DOCUMENTS);
+  // Seller KYC document upload has no backend endpoint yet, so this list is
+  // read-only until one exists.
+  const documents: VerificationDoc[] = REQUIRED_DOCUMENTS;
 
   const uploadedCount = documents.filter((d) => d.status === "uploaded").length;
   const totalDocs = documents.length;
@@ -126,7 +136,7 @@ export function VerificationScreen() {
       const confirmed = window.confirm("Are you sure you want to log out?");
       if (confirmed) {
         logout();
-        router.replace("/");
+        router.replace("/home");
       }
       return;
     }
@@ -137,7 +147,7 @@ export function VerificationScreen() {
         style: "destructive",
         onPress: () => {
           logout();
-          router.replace("/");
+          router.replace("/home");
         },
       },
     ]);
@@ -156,31 +166,6 @@ export function VerificationScreen() {
     { key: "help" as SellerNavKey, label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
     { key: "logout" as SellerNavKey, label: "Logout", icon: LogOut, danger: true, href: "/" },
   ];
-
-  const handleUpload = (docId: string, docTitle: string) => {
-    Alert.alert("Upload Document", `Select file to upload for ${docTitle}.`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Upload",
-        onPress: () => {
-          setDocuments((prev) =>
-            prev.map((d) => (d.id === docId ? { ...d, status: "uploaded" } : d))
-          );
-        },
-      },
-    ]);
-  };
-
-  const handleSubmit = () => {
-    if (uploadedCount < totalDocs) {
-      Alert.alert(
-        "Incomplete Documents",
-        `Please upload all required documents (${uploadedCount}/${totalDocs} completed).`
-      );
-      return;
-    }
-    Alert.alert("Documents Submitted", "Your verification documents are under review.");
-  };
 
   return (
     <View style={styles.outerContainer}>
@@ -283,10 +268,7 @@ export function VerificationScreen() {
                 <View style={styles.headerDotIndicator} />
               </AppLink>
 
-              <AppLink href="/" style={styles.viewSiteBtn}>
-                <Globe color="#0B1A17" size={16} />
-                <Text style={styles.viewSiteText}>View site</Text>
-              </AppLink>
+              <ToggleViewButton />
             </View>
           </View>
         )}
@@ -317,6 +299,14 @@ export function VerificationScreen() {
               {/* Required Documents Section (Figma Node 288:2180) */}
               <View style={styles.documentsSection}>
                 <Text style={styles.sectionTitle}>Required documents</Text>
+
+                <View style={styles.calloutBox}>
+                  <Clock color="#2251D6" size={16} strokeWidth={2} />
+                  <Text style={styles.calloutText}>
+                    Document upload is not available yet. You will be able to submit
+                    these documents once seller verification goes live.
+                  </Text>
+                </View>
 
                 <View style={styles.documentsList}>
                   {documents.map((doc) => {
@@ -349,17 +339,14 @@ export function VerificationScreen() {
                           </View>
                         ) : (
                           <Pressable
-                            accessibilityLabel={`Upload ${doc.title}`}
+                            accessibilityLabel={`Upload ${doc.title} — coming soon`}
                             accessibilityRole="button"
-                            onPress={() => handleUpload(doc.id, doc.title)}
-                            style={({ pressed }) => [
-                              styles.uploadBtn,
-                              webPointer,
-                              pressed && styles.pressed,
-                            ]}
+                            accessibilityState={{ disabled: true }}
+                            disabled
+                            style={[styles.uploadBtn, styles.uploadBtnDisabled]}
                           >
                             <Upload color="#FFFFFF" size={15} strokeWidth={2} />
-                            <Text style={styles.uploadBtnText}>Upload</Text>
+                            <Text style={styles.uploadBtnText}>Coming soon</Text>
                           </Pressable>
                         )}
                       </View>
@@ -369,20 +356,14 @@ export function VerificationScreen() {
 
                 {/* Submit Button (Figma Node 288:2268) */}
                 <Pressable
-                  accessibilityLabel="Upload all documents to submit"
+                  accessibilityLabel="Submit documents for verification — not available yet"
                   accessibilityRole="button"
-                  onPress={handleSubmit}
-                  style={({ pressed }) => [
-                    styles.submitBtn,
-                    uploadedCount < totalDocs && styles.submitBtnDisabled,
-                    webPointer,
-                    pressed && styles.pressed,
-                  ]}
+                  accessibilityState={{ disabled: true }}
+                  disabled
+                  style={[styles.submitBtn, styles.submitBtnDisabled]}
                 >
                   <Text style={styles.submitBtnText}>
-                    {uploadedCount === totalDocs
-                      ? "Submit documents for verification"
-                      : `Upload all documents to submit (${uploadedCount}/${totalDocs})`}
+                    Submitting for verification is not available yet
                   </Text>
                 </Pressable>
               </View>
@@ -637,7 +618,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     color: "#0B1A17",
     paddingVertical: 0,
-    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
   },
   iconCircleBtn: {
     width: 40,
@@ -826,6 +806,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
+  uploadBtnDisabled: {
+    opacity: 0.5,
+  },
   uploadBtnText: {
     fontSize: 14,
     lineHeight: 20,
@@ -1000,9 +983,5 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontFamily: fonts.regular,
     color: "#2251D6",
-  },
-  pressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
   },
 });
