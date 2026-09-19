@@ -1,5 +1,5 @@
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colors, fonts, layout, shadow, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
@@ -245,12 +245,14 @@ function TopBar({
                 <Pressable
                   key={link.label}
                   onPress={handlePress}
-                  style={({ pressed }) => [
+                  style={({ pressed, hovered }: any) => [
                     styles.topNavLink,
+                    hovered && styles.topNavLinkHovered,
                     webPointer,
                     pressed && { opacity: 0.8 },
                   ]}
                   accessibilityRole="link"
+                  accessibilityState={{ selected: isSelected }}
                 >
                   <Text
                     style={[
@@ -778,41 +780,49 @@ const styles = StyleSheet.create({
   topbarSafe: {
     zIndex: 20,
     backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1.2,
+    borderBottomWidth: 1,
     borderBottomColor: "rgba(11, 26, 23, 0.08)",
     width: "100%",
+    ...(Platform.select({
+      web: { position: "sticky", top: 0 },
+      default: {},
+    }) as any),
   },
   topbar: {
     width: "100%",
-    maxWidth: 1600,
+    maxWidth: layout.containerMaxWidth,
     marginHorizontal: "auto",
-    minHeight: 74,
+    minHeight: layout.navHeight,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 32,
+    paddingHorizontal: layout.gutter,
     paddingVertical: 12,
     gap: 16,
   },
   topbarTablet: {
-    minHeight: 64,
-    paddingHorizontal: 16,
+    minHeight: layout.navHeightTablet,
+    paddingHorizontal: layout.gutterTablet,
   },
   topbarPhone: {
-    minHeight: 56,
-    paddingHorizontal: 8,
+    minHeight: layout.navHeightPhone,
+    paddingHorizontal: layout.gutterPhone,
     gap: 4,
   },
+  // Left and right flex equally so the centre block is optically centred
+  // regardless of how wide the brand or the action cluster becomes.
   topbarLeft: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "flex-start",
     gap: 12,
-    flexShrink: 0,
+    minWidth: 0,
   },
   topbarLeftPhone: {
     gap: 6,
   },
   topNavCenter: {
+    flexShrink: 0,
     flexDirection: "row",
     alignItems: "center",
     gap: 28,
@@ -820,7 +830,15 @@ const styles = StyleSheet.create({
   topNavLink: {
     position: "relative",
     paddingVertical: 10,
-    paddingHorizontal: 4,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    ...(Platform.select({
+      web: { transition: "background-color 0.15s ease" },
+      default: {},
+    }) as any),
+  },
+  topNavLinkHovered: {
+    backgroundColor: "rgba(11, 26, 23, 0.04)",
   },
   topNavLinkText: {
     fontFamily: fonts.semiBold,
@@ -927,14 +945,15 @@ const styles = StyleSheet.create({
     lineHeight: 11,
   },
   topRightActions: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "flex-end",
     gap: 12,
-    flexShrink: 0,
+    minWidth: 0,
   },
   topRightActionsPhone: {
     gap: 6,
-    flexShrink: 0,
   },
   listPropertyBtn: {
     flexShrink: 0,
@@ -1320,9 +1339,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8FAF9",
   },
 
+  // Same container as the navbar — alignment is structural, not tuned.
   mainGutter: {
     width: "100%",
-    maxWidth: 1665,
+    maxWidth: layout.containerMaxWidth,
     paddingTop: 16,
     paddingBottom: 48,
   },
@@ -1333,10 +1353,10 @@ const styles = StyleSheet.create({
 
   main: {
     width: "100%",
-    paddingHorizontal: 24,
+    paddingHorizontal: layout.gutter,
   },
   mainPhone: {
-    paddingHorizontal: 12,
+    paddingHorizontal: layout.gutterPhone,
   },
 
   /* Mobile bottom bar */

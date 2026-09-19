@@ -1,3 +1,3 @@
-import { LandingScreen } from "@/screens/LandingScreen";
+import { HomeScreen } from "@/screens/HomeScreen";
 
-export default LandingScreen;
+export default HomeScreen;

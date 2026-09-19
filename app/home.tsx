@@ -1,3 +1,6 @@
-import { HomeScreen } from "@/screens/HomeScreen";
+import { Redirect } from "expo-router";
 
-export default HomeScreen;
+/** Landing and homepage are one surface; `/` is canonical. */
+export default function HomeRoute() {
+  return <Redirect href="/" />;
+}
