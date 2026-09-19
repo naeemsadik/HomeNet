@@ -275,22 +275,44 @@ export function OwnerListPropertySection() {
                 </View>
 
                 {/* Clean Micro-Trust Points */}
-                <View style={styles.trustPillsRow}>
-                  <View style={styles.trustPillItem}>
-                    <ShieldCheck color="#04cf92" size={15} />
-                    <Text style={styles.trustPillText}>Verified buyers & tenants</Text>
+                {isPhone ? (
+                  <View style={styles.trustPillsPhoneWrap}>
+                    <View style={styles.trustPillsTopRowPhone}>
+                      <View style={styles.trustPillItem}>
+                        <ShieldCheck color="#04cf92" size={14} />
+                        <Text style={styles.trustPillText}>Verified buyers & tenants</Text>
+                      </View>
+                      <View style={styles.trustDot} />
+                      <View style={styles.trustPillItem}>
+                        <FileCheck2 color="#04cf92" size={14} />
+                        <Text style={styles.trustPillText}>Guided 5-step listing</Text>
+                      </View>
+                    </View>
+                    <View style={styles.trustPillCenterPhone}>
+                      <View style={styles.trustPillItem}>
+                        <Sparkles color="#F4823A" size={14} />
+                        <Text style={styles.trustPillText}>0 BDT listing fee</Text>
+                      </View>
+                    </View>
                   </View>
-                  <View style={styles.trustDot} />
-                  <View style={styles.trustPillItem}>
-                    <FileCheck2 color="#04cf92" size={15} />
-                    <Text style={styles.trustPillText}>Guided 5-step listing</Text>
+                ) : (
+                  <View style={styles.trustPillsRow}>
+                    <View style={styles.trustPillItem}>
+                      <ShieldCheck color="#04cf92" size={15} />
+                      <Text style={styles.trustPillText}>Verified buyers & tenants</Text>
+                    </View>
+                    <View style={styles.trustDot} />
+                    <View style={styles.trustPillItem}>
+                      <FileCheck2 color="#04cf92" size={15} />
+                      <Text style={styles.trustPillText}>Guided 5-step listing</Text>
+                    </View>
+                    <View style={styles.trustDot} />
+                    <View style={styles.trustPillItem}>
+                      <Sparkles color="#F4823A" size={14} />
+                      <Text style={styles.trustPillText}>0 BDT listing fee</Text>
+                    </View>
                   </View>
-                  <View style={styles.trustDot} />
-                  <View style={styles.trustPillItem}>
-                    <Sparkles color="#F4823A" size={14} />
-                    <Text style={styles.trustPillText}>0 BDT listing fee</Text>
-                  </View>
-                </View>
+                )}
               </View>
 
               {/* Minimalist Graphic Panel (Clean Brand Art / Stat Highlights) */}
@@ -418,22 +440,16 @@ export function OwnerListPropertySection() {
                 </View>
               </View>
 
-              <Pressable
-                accessibilityHint="Opens the AI listing assistant"
-                accessibilityLabel="List with AI"
-                accessibilityRole="button"
-                onPress={() => setAiSheetVisible(true)}
-                style={({ pressed }) => [
+              <View
+                style={[
                   styles.aiCtaButton,
                   isPhone && styles.aiCtaButtonPhone,
-                  pressed && styles.buttonPressed,
-                  webPointer,
                 ]}
               >
                 <Sparkles color="#FFFFFF" size={15} strokeWidth={2.2} />
                 <Text style={styles.aiCtaButtonText}>List with AI</Text>
                 <ArrowRight color="#FFFFFF" size={15} strokeWidth={2.2} />
-              </Pressable>
+              </View>
             </Pressable>
 
             {/* Modal Content: 6 Intent Cards */}
@@ -698,6 +714,26 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: "rgba(11, 26, 23, 0.06)",
+  },
+  trustPillsPhoneWrap: {
+    paddingTop: 16,
+    paddingBottom: 8,
+    marginBottom: 6,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(11, 26, 23, 0.06)",
+    gap: 10,
+  },
+  trustPillsTopRowPhone: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flexWrap: "nowrap",
+    gap: 8,
+  },
+  trustPillCenterPhone: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   trustPillItem: {
     flexDirection: "row",
