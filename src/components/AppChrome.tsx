@@ -39,6 +39,7 @@ import { router } from "expo-router";
 import { Brand } from "./Brand";
 import { LoginModal } from "./LoginModal";
 import { AiFinderModal } from "./AiFinderModal";
+import { LanguageToggle } from "./LanguageToggle";
 import { AppLink } from "./ui";
 import { Footer } from "./Footer";
 
@@ -270,6 +271,9 @@ function TopBar({
         ) : null}
 
         <View style={[styles.topRightActions, isPhone && styles.topRightActionsPhone]}>
+          {/* Language Toggle (ENG / BN) */}
+          <LanguageToggle compact={isPhone} />
+
           {/* Owner path: present on every page, visually subordinate to search. */}
           {!isPhone ? (
             <Pressable
