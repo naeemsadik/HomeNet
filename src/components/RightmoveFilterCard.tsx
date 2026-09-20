@@ -22,7 +22,7 @@ export interface RightmoveFilters {
   minBedrooms: string;
   maxBedrooms: string;
   query: string;
-  purpose: "all" | "sale" | "rent" | "short-let";
+  purpose: "all" | "sale" | "rent" | "short-let" | "sold";
   subtype?: string;
 }
 
@@ -191,6 +191,9 @@ export function RightmoveFilterCard({
   };
 
   const getHeading = () => {
+    const place = filters.query?.trim() || locationName || "Bangladesh";
+    // Sold is a lookup, not a search — the verb changes with it.
+    if (filters.purpose === "sold") return `Recently sold in ${place}`;
     const purposeText =
       filters.purpose === "short-let"
         ? "for short-let"
@@ -199,7 +202,6 @@ export function RightmoveFilterCard({
         : filters.purpose === "sale"
         ? "for sale"
         : "for sale & rent";
-    const place = filters.query?.trim() || locationName || "Bangladesh";
     return `Find property ${purposeText} in ${place}`;
   };
 

@@ -48,6 +48,7 @@ export type ActivePage =
   | "search"
   | "buy"
   | "rent"
+  | "sold"
   | "saved"
   | "sell"
   | "ai"
@@ -199,6 +200,7 @@ function TopBar({
     }[] = [
       { label: "Buy", href: "/buy", key: "buy" },
       { label: "Rent", href: "/rent", key: "rent" },
+      { label: "Sold", href: "/sold", key: "sold" },
       { label: "Saved", href: "/saved", key: "saved", authGated: true },
     ];
 
@@ -219,10 +221,19 @@ function TopBar({
           {isTablet ? (
             <Pressable
               onPress={onOpenMenu}
-              style={[styles.menuButton, isPhone && styles.menuButtonPhone, webPointer]}
+              style={[
+                styles.menuButton,
+                isPhone && styles.menuButtonPhone,
+                isCrystal && styles.menuButtonCrystal,
+                webPointer,
+              ]}
               accessibilityLabel="Open navigation menu"
             >
-              <Menu color={isCrystal ? "#FFFFFF" : "#0B1A17"} size={isPhone ? 18 : 20} />
+              <Menu
+                color={isCrystal ? "#FFFFFF" : "#0B1A17"}
+                size={isPhone ? 18 : 20}
+                strokeWidth={2.4}
+              />
             </Pressable>
           ) : null}
           <Brand compact={isTablet} variant={isCrystal ? "light" : "dark"} />
@@ -306,9 +317,18 @@ function TopBar({
                     setUserDropdownOpen(false);
                     setNotificationsOpen((open) => !open);
                   }}
-                  style={[styles.iconCircleButton, isPhone && styles.iconCircleButtonPhone, webPointer]}
+                  style={[
+                    styles.notificationButton,
+                    isPhone && styles.notificationButtonPhone,
+                    isCrystal && styles.notificationButtonCrystal,
+                    webPointer,
+                  ]}
                 >
-                  <Bell color="#0B1A17" size={isPhone ? 16 : 19} />
+                  <Bell
+                    color={isCrystal ? "#FFFFFF" : "#0B1A17"}
+                    size={isPhone ? 16 : 19}
+                    strokeWidth={2}
+                  />
                 </Pressable>
                 {notificationsOpen ? (
                   <View style={styles.notificationPopover}>
@@ -330,6 +350,7 @@ function TopBar({
                   }}
                   style={({ pressed }) => [
                     styles.userDropdownTrigger,
+                    isCrystal && styles.userDropdownTriggerCrystal,
                     userDropdownOpen && styles.userDropdownTriggerActive,
                     pressed && { opacity: 0.85 },
                     webPointer,
@@ -354,7 +375,7 @@ function TopBar({
                     ]}
                   >
                     <Svg width={8} height={5} viewBox="0 0 8 5">
-                      <Path d="M0 0L8 0L4 5Z" fill="#5C6B66" />
+                      <Path d="M0 0L8 0L4 5Z" fill={isCrystal ? "#FFFFFF" : "#5C6B66"} />
                     </Svg>
                   </View>
                 </Pressable>
@@ -987,6 +1008,18 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 16,
   },
+  menuButtonCrystal: {
+    backgroundColor: "rgba(255, 255, 255, 0.16)",
+    borderColor: "rgba(255, 255, 255, 0.32)",
+    borderWidth: 1,
+    ...(Platform.select({
+      web: {
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+      },
+      default: {},
+    }) as any),
+  },
   actionsRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -1029,6 +1062,18 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
+  },
+  notificationButtonCrystal: {
+    backgroundColor: "rgba(255, 255, 255, 0.16)",
+    borderColor: "rgba(255, 255, 255, 0.32)",
+    borderWidth: 1,
+    ...(Platform.select({
+      web: {
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+      },
+      default: {},
+    }) as any),
   },
   notificationBadge: {
     position: "absolute",
@@ -1184,6 +1229,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.10)",
     backgroundColor: "#FFFFFF",
+  },
+  userDropdownTriggerCrystal: {
+    backgroundColor: "rgba(255, 255, 255, 0.16)",
+    borderColor: "rgba(255, 255, 255, 0.32)",
+    borderWidth: 1,
+    ...(Platform.select({
+      web: {
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+      },
+      default: {},
+    }) as any),
   },
   userDropdownTriggerActive: {
     borderColor: "#04cf92",

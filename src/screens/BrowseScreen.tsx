@@ -31,7 +31,7 @@ import { useSavedStore } from "@/stores/savedStore";
 import { fonts, webPointer } from "@/theme";
 import type { PropertyType } from "@/types/api";
 
-export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
+export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
   const { isPhone, isTablet } = useResponsive();
   const params = useLocalSearchParams<{
     query?: string;
@@ -52,7 +52,9 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
   }>();
 
   const initialPurpose =
-    params.subtype === "short-let"
+    mode === "sold" || params.status === "sold"
+      ? "sold"
+      : params.subtype === "short-let"
       ? "short-let"
       : params.listing_type === "rent" || mode === "rent"
       ? "rent"
@@ -105,7 +107,12 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
         query: q,
       }));
     }
-    if (params.subtype === "short-let") {
+    if (mode === "sold" || params.status === "sold") {
+      setRightmoveFilters((prev) => ({
+        ...prev,
+        purpose: "sold",
+      }));
+    } else if (params.subtype === "short-let") {
       setRightmoveFilters((prev) => ({
         ...prev,
         purpose: "short-let",
@@ -121,7 +128,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
             : "all",
       }));
     }
-  }, [params.query, params.search, params.listing_type, params.subtype, mode]);
+  }, [params.query, params.search, params.listing_type, params.subtype, params.status, mode]);
 
   // Helper to parse price string to number
   const parsePriceToNumber = (val: string): number | undefined => {
@@ -145,10 +152,11 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
     const maxP = parsePriceToNumber(rightmoveFilters.maxPrice);
     const bedrooms = rightmoveFilters.minBedrooms ? parseInt(rightmoveFilters.minBedrooms, 10) : undefined;
     const isShortLet = rightmoveFilters.purpose === "short-let";
+    const isSold = rightmoveFilters.purpose === "sold";
 
     return {
       listing_type:
-        rightmoveFilters.purpose === "sale"
+        rightmoveFilters.purpose === "sale" || isSold
           ? ("sale" as const)
           : rightmoveFilters.purpose === "rent" || isShortLet
           ? ("rent" as const)
@@ -165,7 +173,13 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
         params.city || params.location
           ? (params.city || params.location)
           : undefined,
-      status: rightmoveFilters.includeSold ? undefined : ("active" as const),
+      // The Sold section is sold-only; elsewhere "include sold" merely widens
+      // an otherwise active-only list.
+      status: isSold
+        ? ("sold" as const)
+        : rightmoveFilters.includeSold
+        ? undefined
+        : ("active" as const),
       is_verified: rightmoveFilters.verifiedOnly ? true : undefined,
       limit: 20,
     };

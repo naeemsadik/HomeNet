@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, fonts, webPointer } from "@/theme";
 
-export type SearchTabType = "buy" | "rent" | "short-let";
+export type SearchTabType = "buy" | "rent" | "short-let" | "sold";
 
 interface SearchTabsProps {
   activeTab: SearchTabType;
@@ -14,6 +14,8 @@ const TABS: { key: SearchTabType; label: string }[] = [
   { key: "buy", label: "Buy" },
   { key: "rent", label: "Rent" },
   { key: "short-let", label: "Short-let" },
+  // Sold is a research intent, not a buying one — it trails the live tabs.
+  { key: "sold", label: "Sold" },
 ];
 
 export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {
