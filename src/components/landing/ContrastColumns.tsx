@@ -1,7 +1,7 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { Check, X } from "lucide-react-native";
-import { fonts } from "@/theme";
+import { colorTokens, fonts } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { landingCopy } from "@/content/landingCopy";
 
@@ -14,10 +14,6 @@ export function ContrastColumns() {
       {/* Left Column: Without HomeNet */}
       <View style={[styles.column, styles.columnWithout]}>
         <View style={styles.colHeader}>
-          <View style={styles.badgeWithout}>
-            <X color="#D96A24" size={14} strokeWidth={2.5} />
-            <Text style={styles.badgeTextWithout}>The Status Quo</Text>
-          </View>
           <Text style={styles.colTitleWithout}>{withoutTitle}</Text>
         </View>
 
@@ -36,10 +32,6 @@ export function ContrastColumns() {
       {/* Right Column: With HomeNet */}
       <View style={[styles.column, styles.columnWith]}>
         <View style={styles.colHeader}>
-          <View style={styles.badgeWith}>
-            <Check color="#0F6D55" size={14} strokeWidth={2.5} />
-            <Text style={styles.badgeTextWith}>The HomeNet Standard</Text>
-          </View>
           <Text style={styles.colTitleWith}>{withTitle}</Text>
         </View>
 
@@ -73,57 +65,27 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 28,
   },
+  // Recessed: sits back on the canvas. Elevation via surface tone, no shadow.
   columnWithout: {
-    backgroundColor: "#F4F6F5",
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
+    backgroundColor: colorTokens.surfaceSunken,
   },
+  // Raised: elevation declared ONCE, as shadow. No border, no colour bar.
   columnWith: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1.5,
-    borderColor: "#04cf92",
-    borderLeftWidth: 5,
-    shadowColor: "rgba(11, 26, 23, 0.06)",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 1,
-    shadowRadius: 20,
-    elevation: 4,
+    backgroundColor: colorTokens.surface,
+    ...(Platform.select({
+      web: { boxShadow: "0 12px 32px -12px rgba(11, 26, 23, 0.18)" },
+      default: {
+        shadowColor: colorTokens.ink,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.12,
+        shadowRadius: 24,
+        elevation: 5,
+      },
+    }) as any),
   },
   colHeader: {
     marginBottom: 20,
     gap: 8,
-  },
-  badgeWithout: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#FDEEE2",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    alignSelf: "flex-start",
-  },
-  badgeTextWithout: {
-    color: "#D96A24",
-    fontFamily: fonts.semiBold,
-    fontSize: 11.5,
-    fontWeight: "600",
-  },
-  badgeWith: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#E6FAF4",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    alignSelf: "flex-start",
-  },
-  badgeTextWith: {
-    color: "#0F6D55",
-    fontFamily: fonts.semiBold,
-    fontSize: 11.5,
-    fontWeight: "600",
   },
   colTitleWithout: {
     color: "#0B1A17",

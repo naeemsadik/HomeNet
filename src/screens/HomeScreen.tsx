@@ -32,7 +32,6 @@ import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
 import { ContrastColumns } from "@/components/landing/ContrastColumns";
 import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
 import { JourneyTrack } from "@/components/landing/JourneyTrack";
-import { VerificationPipeline } from "@/components/landing/VerificationPipeline";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
 import type { Property as ApiProperty } from "@/features/property/types/property";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -501,15 +500,13 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          5. TRUST — the problem, then the verification pipeline
+          5. TRUST — the problem (Why HomeNet listings are different)
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Why HomeNet listings are different</Text>
         </View>
         <ContrastColumns />
-        <View style={styles.sectionGap} />
-        <VerificationPipeline />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────

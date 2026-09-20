@@ -271,9 +271,6 @@ function TopBar({
         ) : null}
 
         <View style={[styles.topRightActions, isPhone && styles.topRightActionsPhone]}>
-          {/* Language Toggle (ENG / BN) */}
-          <LanguageToggle compact={isPhone} />
-
           {/* Owner path: present on every page, visually subordinate to search. */}
           {!isPhone ? (
             <Pressable
@@ -505,6 +502,9 @@ function TopBar({
               </Text>
             </Pressable>
           )}
+
+          {/* Language Toggle (ENG / BN) */}
+          <LanguageToggle compact={isPhone} />
         </View>
       </View>
 
@@ -806,6 +806,7 @@ const styles = StyleSheet.create({
     minHeight: layout.navHeight,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: layout.gutter,
     paddingVertical: 12,
     gap: 16,
@@ -819,30 +820,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.gutterPhone,
     gap: 4,
   },
-  // Left and right flex equally so the centre block is optically centred
-  // regardless of how wide the brand or the action cluster becomes.
   topbarLeft: {
-    flex: 1,
+    flexShrink: 0,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
     gap: 12,
-    minWidth: 0,
   },
   topbarLeftPhone: {
     gap: 6,
   },
   topNavCenter: {
-    flexShrink: 0,
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 28,
+    justifyContent: "center",
+    gap: 20,
+    minWidth: 0,
+    paddingHorizontal: 8,
   },
   topNavLink: {
     position: "relative",
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderRadius: 8,
+    flexShrink: 0,
     ...(Platform.select({
       web: { transition: "background-color 0.15s ease" },
       default: {},
@@ -857,6 +859,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#0B1A17",
     letterSpacing: -0.2,
+    ...(Platform.select({
+      web: { whiteSpace: "nowrap" },
+      default: {},
+    }) as any),
   },
   topNavLinkTextActive: {
     color: "#04cf92",
@@ -956,22 +962,23 @@ const styles = StyleSheet.create({
     lineHeight: 11,
   },
   topRightActions: {
-    flex: 1,
+    flexShrink: 0,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
     gap: 12,
-    minWidth: 0,
+    marginLeft: "auto",
   },
   topRightActionsPhone: {
     gap: 6,
+    marginLeft: "auto",
   },
   listPropertyBtn: {
     flexShrink: 0,
     height: 38,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     borderRadius: 8,
     backgroundColor: "#04cf92",
   },
@@ -980,6 +987,10 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "700",
+    ...(Platform.select({
+      web: { whiteSpace: "nowrap" },
+      default: {},
+    }) as any),
   },
   rightmoveSignInBtn: {
     flexDirection: "row",
@@ -988,7 +999,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderWidth: 1.8,
     borderColor: "#04cf92",
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 8,
     height: 38,
@@ -1007,6 +1018,10 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "700",
+    ...(Platform.select({
+      web: { whiteSpace: "nowrap" },
+      default: {},
+    }) as any),
   },
   rightmoveSignInTextPhone: {
     fontSize: 12.5,

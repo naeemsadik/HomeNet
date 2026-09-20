@@ -2,6 +2,7 @@ import { router, type Href } from "expo-router";
 import { ArrowRight, Check, ChevronDown, type LucideIcon } from "lucide-react-native";
 import { useState, type ReactNode } from "react";
 import {
+  ActivityIndicator,
   Linking,
   Modal,
   Pressable,
@@ -15,7 +16,7 @@ import {
   type ViewStyle,
   View,
 } from "react-native";
-import { colors, fonts, radius, webPointer } from "@/theme";
+import { colors, colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 
 export function AppLink({
@@ -52,6 +53,26 @@ export function AppLink({
   );
 }
 
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
+
+/**
+ * The four button roles. There is no fifth.
+ *
+ * primary     — the one action this view exists for
+ * secondary   — a real alternative, equal weight, lower emphasis
+ * ghost       — tertiary / inline, no container until hovered
+ * destructive — deletes or cannot be undone
+ *
+ * Foreground colours are brand-TEXT (#0F6D55), never brand-fill (#04cf92),
+ * which measures 2.03:1 on white.
+ */
+const VARIANT_FG: Record<ButtonVariant, string> = {
+  primary: colorTokens.onBrand,
+  secondary: colorTokens.ink,
+  ghost: colorTokens.brandText,
+  destructive: colorTokens.onBrand,
+};
+
 export function AppButton({
   label,
   onPress,
@@ -59,45 +80,52 @@ export function AppButton({
   trailingIcon: TrailingIcon,
   variant = "primary",
   disabled,
+  loading = false,
   style,
 }: {
   label: string;
   onPress?: () => void;
   icon?: LucideIcon;
   trailingIcon?: LucideIcon;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: ButtonVariant;
   disabled?: boolean;
+  loading?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
+  const isInert = disabled || loading;
+  const fg = isInert ? colorTokens.subtle : VARIANT_FG[variant];
+
   return (
     <Pressable
       accessibilityRole="button"
-      disabled={disabled}
+      accessibilityState={{ disabled: isInert, busy: loading }}
+      disabled={isInert}
       onPress={onPress}
-      style={({ pressed }) => [
+      style={({ pressed, hovered }: any) => [
         styles.button,
         variant === "primary" && styles.buttonPrimary,
         variant === "secondary" && styles.buttonSecondary,
         variant === "ghost" && styles.buttonGhost,
-        disabled && styles.buttonDisabled,
+        variant === "destructive" && styles.buttonDestructive,
+        hovered && !isInert && variant === "primary" && styles.buttonPrimaryHovered,
+        hovered && !isInert && variant === "secondary" && styles.buttonSecondaryHovered,
+        hovered && !isInert && variant === "ghost" && styles.buttonGhostHovered,
+        hovered && !isInert && variant === "destructive" && styles.buttonDestructiveHovered,
+        isInert && styles.buttonDisabled,
         style,
         webPointer,
-        pressed && styles.pressed,
+        pressed && !isInert && styles.pressed,
       ]}
     >
-      {Icon ? <Icon size={15} color={variant === "primary" ? colors.white : colors.green} /> : null}
-      <Text
-        style={[
-          styles.buttonLabel,
-          variant === "primary" ? styles.buttonLabelPrimary : styles.buttonLabelSecondary,
-          disabled && styles.buttonLabelDisabled,
-        ]}
-      >
-        {label}
-      </Text>
-      {TrailingIcon ? (
-        <TrailingIcon size={15} color={variant === "primary" ? colors.white : colors.green} />
-      ) : null}
+      {loading ? (
+        <ActivityIndicator color={fg} size="small" />
+      ) : (
+        <>
+          {Icon ? <Icon size={15} color={fg} /> : null}
+          <Text style={[styles.buttonLabel, { color: fg }]}>{label}</Text>
+          {TrailingIcon ? <TrailingIcon size={15} color={fg} /> : null}
+        </>
+      )}
     </Pressable>
   );
 }
@@ -300,24 +328,34 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  // One radius for every button: radius.sm (10). Pills are for chips and badges.
   button: {
-    minHeight: 41,
-    paddingHorizontal: 17,
-    borderRadius: radius.pill,
+    minHeight: 44,
+    paddingHorizontal: 20,
+    borderRadius: radius.sm,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 7,
+    gap: 8,
     borderWidth: 1,
+    borderColor: "transparent",
   },
-  buttonPrimary: { backgroundColor: colors.green, borderColor: colors.green },
-  buttonSecondary: { backgroundColor: colors.white, borderColor: colors.line },
-  buttonGhost: { backgroundColor: "transparent", borderColor: "transparent", paddingHorizontal: 0 },
-  buttonDisabled: { backgroundColor: colors.soft, borderColor: colors.line },
-  buttonLabel: { fontFamily: fonts.extraBold, fontSize: 13 },
-  buttonLabelPrimary: { color: colors.white },
-  buttonLabelSecondary: { color: colors.green },
-  buttonLabelDisabled: { color: "#A0ACA6" },
+  buttonPrimary: { backgroundColor: colorTokens.brand },
+  buttonPrimaryHovered: { backgroundColor: colorTokens.brandHover },
+  buttonSecondary: {
+    backgroundColor: colorTokens.surface,
+    borderColor: colorTokens.divider,
+  },
+  buttonSecondaryHovered: { backgroundColor: colorTokens.surfaceSunken },
+  buttonGhost: { backgroundColor: "transparent", paddingHorizontal: 12 },
+  buttonGhostHovered: { backgroundColor: colorTokens.brandSurface },
+  buttonDestructive: { backgroundColor: colorTokens.errorText },
+  buttonDestructiveHovered: { backgroundColor: colorTokens.errorDark },
+  buttonDisabled: {
+    backgroundColor: colorTokens.surfaceSunken,
+    borderColor: "transparent",
+  },
+  buttonLabel: { fontFamily: fonts.bold, fontSize: 14 },
   eyebrow: {
     color: colors.green,
     fontFamily: fonts.extraBold,

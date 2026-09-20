@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Globe } from "lucide-react-native";
 import { useLanguageStore } from "@/utils/language";
 import { fonts, webPointer } from "@/theme";
@@ -15,6 +15,7 @@ export function LanguageToggle({ compact = false }: LanguageToggleProps) {
   return (
     <Pressable
       onPress={toggleLanguage}
+      {...(Platform.OS === "web" ? ({ className: "notranslate", translate: "no" } as any) : {})}
       style={({ pressed, hovered }: any) => [
         styles.button,
         compact && styles.buttonCompact,
@@ -23,7 +24,11 @@ export function LanguageToggle({ compact = false }: LanguageToggleProps) {
         webPointer,
       ]}
       accessibilityRole="button"
-      accessibilityLabel={`Current language is ${isBangla ? "BN" : "ENG"}. Click to switch.`}
+      accessibilityLabel={
+        isBangla
+          ? "বর্তমান ভাষা বাংলা। ইংরেজি করতে ক্লিক করুন।"
+          : "Current language is English. Click for Bangla."
+      }
     >
       <View style={styles.iconWrap}>
         <Globe
@@ -33,8 +38,11 @@ export function LanguageToggle({ compact = false }: LanguageToggleProps) {
         />
       </View>
 
-      <Text style={[styles.label, compact && styles.labelCompact]}>
-        {isBangla ? "BN" : "ENG"}
+      <Text
+        style={[styles.label, compact && styles.labelCompact]}
+        {...(Platform.OS === "web" ? ({ className: "notranslate", translate: "no" } as any) : {})}
+      >
+        {isBangla ? "বাংলা" : "English"}
       </Text>
     </Pressable>
   );
