@@ -20,7 +20,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react-native";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Alert,
   Image,
@@ -177,9 +177,11 @@ function SideBar({
 function TopBar({
   active,
   onOpenMenu,
+  isCrystal = false,
 }: {
   active?: ActivePage;
   onOpenMenu?: () => void;
+  isCrystal?: boolean;
 }) {
   const { isTablet, isPhone } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -203,7 +205,7 @@ function TopBar({
   return (
     <SafeAreaView
       edges={["top"]}
-      style={styles.topbarSafe}
+      style={[styles.topbarSafe, isCrystal && styles.topbarSafeCrystal]}
     >
       <View
         style={[
@@ -220,10 +222,10 @@ function TopBar({
               style={[styles.menuButton, isPhone && styles.menuButtonPhone, webPointer]}
               accessibilityLabel="Open navigation menu"
             >
-              <Menu color="#0B1A17" size={isPhone ? 18 : 20} />
+              <Menu color={isCrystal ? "#FFFFFF" : "#0B1A17"} size={isPhone ? 18 : 20} />
             </Pressable>
           ) : null}
-          <Brand compact={isTablet} />
+          <Brand compact={isTablet} variant={isCrystal ? "light" : "dark"} />
         </View>
 
         {/* Center: Desktop Nav Links (only when links exist) */}
@@ -259,6 +261,7 @@ function TopBar({
                     style={[
                       styles.topNavLinkText,
                       isSelected && styles.topNavLinkTextActive,
+                      isCrystal && styles.topNavLinkTextCrystal,
                     ]}
                   >
                     {link.label}
@@ -483,12 +486,16 @@ function TopBar({
               style={({ pressed }) => [
                 styles.rightmoveSignInBtn,
                 isPhone && styles.rightmoveSignInBtnPhone,
+                isCrystal && styles.rightmoveSignInBtnCrystal,
                 webPointer,
-                pressed && { opacity: 0.85, backgroundColor: "rgba(0, 207, 146, 0.08)" },
+                pressed && {
+                  opacity: 0.85,
+                  backgroundColor: isCrystal ? "rgba(255, 255, 255, 0.25)" : "rgba(0, 207, 146, 0.08)",
+                },
               ]}
             >
               <User
-                color="#04cf92"
+                color={isCrystal ? "#FFFFFF" : "#04cf92"}
                 size={isPhone ? 15 : 17}
                 strokeWidth={2.2}
               />
@@ -496,6 +503,7 @@ function TopBar({
                 style={[
                   styles.rightmoveSignInText,
                   isPhone && styles.rightmoveSignInTextPhone,
+                  isCrystal && styles.rightmoveSignInTextCrystal,
                 ]}
               >
                 Sign in
@@ -504,7 +512,7 @@ function TopBar({
           )}
 
           {/* Language Toggle (ENG / BN) */}
-          <LanguageToggle compact={isPhone} />
+          <LanguageToggle compact={isPhone} variant={isCrystal ? "crystal" : "default"} />
         </View>
       </View>
 
@@ -597,21 +605,46 @@ export function AppChrome({
 }: {
   children: ReactNode;
   active: ActivePage;
-  /**
-   * Edge-to-edge content rendered above `children`, outside the page container.
-   * For full-bleed hero bands that must not inherit the 1240px gutter.
-   */
   bleed?: ReactNode;
 }) {
   const { isTablet, isPhone } = useResponsive();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const isCrystal = Boolean(bleed) && !isScrolled;
+
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof window === "undefined") return;
+    const onScroll = () => {
+      const top = window.scrollY || document.documentElement.scrollTop || 0;
+      setIsScrolled(top > 40);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const handleScroll = (e: any) => {
+    const top = e?.nativeEvent?.contentOffset?.y ?? 0;
+    setIsScrolled(top > 40);
+  };
 
   return (
     <View style={styles.shell}>
       <View style={styles.pageColumn}>
-        <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} />
+        <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} isCrystal={isCrystal} />
         <ScrollView
-          contentContainerStyle={styles.pageScrollContent}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          contentContainerStyle={[
+            styles.pageScrollContent,
+            !bleed && {
+              paddingTop: isPhone
+                ? layout.navHeightPhone
+                : isTablet
+                ? layout.navHeightTablet
+                : layout.navHeight,
+            },
+          ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           style={{ width: "100%" }}
@@ -789,15 +822,72 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   topbarSafe: {
-    zIndex: 20,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(11, 26, 23, 0.08)",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.76)",
+    borderBottomWidth: 0,
     width: "100%",
     ...(Platform.select({
-      web: { position: "sticky", top: 0 },
+      web: {
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        backdropFilter: "blur(16px) saturate(180%)",
+        WebkitBackdropFilter: "blur(16px) saturate(180%)",
+        boxShadow: "0 4px 20px -2px rgba(11, 26, 23, 0.05)",
+        transition: "background-color 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease",
+      },
+      default: {
+        shadowColor: "#0B1A17",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.03,
+        shadowRadius: 10,
+        elevation: 2,
+      },
+    }) as any),
+  },
+  topbarSafeCrystal: {
+    backgroundColor: "transparent",
+    borderBottomWidth: 0,
+    borderBottomColor: "transparent",
+    ...(Platform.select({
+      web: {
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+        boxShadow: "none",
+      },
+      default: {
+        elevation: 0,
+        shadowOpacity: 0,
+      },
+    }) as any),
+  },
+  topNavLinkTextCrystal: {
+    color: "#FFFFFF",
+    ...(Platform.select({
+      web: {
+        textShadow: "0 1px 4px rgba(0, 0, 0, 0.45)",
+      },
       default: {},
     }) as any),
+  },
+  rightmoveSignInBtnCrystal: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderColor: "rgba(255, 255, 255, 0.4)",
+    ...(Platform.select({
+      web: {
+        backdropFilter: "blur(4px)",
+        WebkitBackdropFilter: "blur(4px)",
+      },
+      default: {},
+    }) as any),
+  },
+  rightmoveSignInTextCrystal: {
+    color: "#FFFFFF",
   },
   topbar: {
     width: "100%",
@@ -996,14 +1086,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1.8,
-    borderColor: "#04cf92",
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    borderWidth: 1.5,
+    borderColor: "rgba(4, 207, 146, 0.8)",
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 8,
     height: 38,
     flexShrink: 0,
+    ...(Platform.select({
+      web: {
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+      },
+      default: {},
+    }) as any),
   },
   rightmoveSignInBtnPhone: {
     paddingHorizontal: 10,
@@ -1114,7 +1211,7 @@ const styles = StyleSheet.create({
     top: 48,
     right: 0,
     width: 240,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.92)",
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
@@ -1122,6 +1219,8 @@ const styles = StyleSheet.create({
     zIndex: 90,
     ...Platform.select({
       web: {
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
         boxShadow: "0 16px 36px -4px rgba(11, 26, 23, 0.12), 0 2px 8px -2px rgba(11, 26, 23, 0.04), 0 0 0 1px rgba(11, 26, 23, 0.04)",
       } as any,
       default: {
@@ -1318,11 +1417,18 @@ const styles = StyleSheet.create({
     width: 240,
     padding: 14,
     borderRadius: 14,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.92)",
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
-    zIndex: 50,
+    zIndex: 90,
     ...shadow,
+    ...(Platform.select({
+      web: {
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+      },
+      default: {},
+    }) as any),
   },
   notificationTitle: {
     color: "#0B1A17",

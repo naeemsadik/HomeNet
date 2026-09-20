@@ -8,14 +8,17 @@ export function Brand({
   size = "default",
   href = "/home",
   onPress,
+  variant = "dark",
 }: {
   compact?: boolean;
   size?: "compact" | "default" | "large";
   href?: string;
   onPress?: () => void;
+  variant?: "dark" | "light";
 }) {
   const isLarge = size === "large";
   const isCompact = compact || size === "compact";
+  const isLight = variant === "light";
 
   return (
     <AppLink
@@ -42,6 +45,7 @@ export function Brand({
           styles.text,
           isCompact && styles.textCompact,
           isLarge && styles.textLarge,
+          isLight && { color: "#FFFFFF" },
         ]}
       >
         Home<Text style={{ color: "#04cf92" }}>net</Text>

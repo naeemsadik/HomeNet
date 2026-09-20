@@ -1,0 +1,74 @@
+{
+  "$comment": "Authored by hand on 2026-09-21. The 21st CLI is not installed in this environment and no 21st MCP server was available, so this file was NOT produced by `21st init --design-context` and contains no 21st library references. If the CLI is installed later, re-run init and merge.",
+  "version": 1,
+  "project": "HomeNet",
+  "updatedAt": "2026-09-21",
+  "stack": {
+    "framework": "Expo Router",
+    "runtime": "React Native 0.86 / React 19 via react-native-web",
+    "styling": "StyleSheet.create with theme tokens — no Tailwind, no CSS-in-JS",
+    "serverState": "TanStack Query",
+    "clientState": "Zustand",
+    "forms": "React Hook Form + Zod",
+    "icons": "lucide-react-native",
+    "constraints": [
+      "React Native primitives only — no clip-path, no CSS grid, no pseudo-elements",
+      "Web-only effects must sit behind Platform.select",
+      "Static web export via expo export --platform web"
+    ]
+  },
+  "tokens": {
+    "colors": "src/theme/colors.ts",
+    "radius": "src/theme/radius.ts",
+    "layout": "src/theme/layout.ts",
+    "fonts": "src/theme/fonts.ts",
+    "rules": "docs/COLOR_SYSTEM.md"
+  },
+  "decisions": [
+    {
+      "id": "container-width",
+      "date": "2026-09-20",
+      "status": "settled",
+      "decision": "Single page container: 1240px, gutters 24/20/16. Navbar and page content consume the same token so alignment is structural."
+    },
+    {
+      "id": "button-system",
+      "date": "2026-09-21",
+      "status": "settled",
+      "decision": "Four variants (primary, secondary, ghost, destructive). One radius: 10px. Pills reserved for chips and badges."
+    },
+    {
+      "id": "semantic-colors",
+      "date": "2026-09-21",
+      "status": "settled",
+      "decision": "error #D4183D, warning #B45309, notification #F4823A, info #2251D6. Previously error/warning/notification were all #F4823A."
+    },
+    {
+      "id": "property-card-direction",
+      "date": "2026-09-21",
+      "status": "pending-review",
+      "problem": "Three property card implementations render the same listing three ways across surfaces, one of them on a third colour palette (feedColors, #0a8a2a).",
+      "implementations": [
+        {
+          "path": "src/components/PropertyCard.tsx",
+          "usedBy": ["BrowseScreen", "SavedScreen", "AiFinderWorkflow"],
+          "treatment": "photo on top, white body below"
+        },
+        {
+          "path": "src/features/property/components/PropertyCard.tsx",
+          "usedBy": ["PropertyFeed (orphaned)"],
+          "treatment": "uses feedColors — third palette"
+        },
+        {
+          "path": "src/screens/HomeScreen.tsx (FeaturedPropertyCard)",
+          "usedBy": ["home rail"],
+          "treatment": "full-bleed photo, text overlaid on gradient"
+        }
+      ],
+      "directions": ["ledger", "plate", "frame"],
+      "recommendation": "plate-with-frame-variant",
+      "spec": "docs/PROPERTY_CARD_DIRECTIONS.md",
+      "awaiting": "user review of the spec before any component work"
+    }
+  ]
+}

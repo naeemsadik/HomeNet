@@ -26,6 +26,7 @@ import {
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
+import { PropertyCard } from "@/components/PropertyCard";
 import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
 import { AppButton, AppLink } from "@/components/ui";
 import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
@@ -97,83 +98,6 @@ function PropertyResult({
   return <>{children}</>;
 }
 
-function FeaturedPropertyCard({ property, width }: { property: ApiProperty; width?: number }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const imageMedia = property.media?.find((media) => media.media_type === "image") ?? property.media?.[0];
-  const image = imageMedia?.url;
-  const location =
-    [property.area?.name, property.area?.city].filter(Boolean).join(", ") ||
-    property.address ||
-    "Location unavailable";
-  const contents = (
-    <>
-      {image ? (
-        <LinearGradient
-          colors={["rgba(0, 0, 0, 0.0)", "rgba(0, 0, 0, 0.1)", "rgba(0, 0, 0, 0.7)"]}
-          locations={[0, 0.5, 1]}
-          style={StyleSheet.absoluteFill}
-        />
-      ) : (
-        <View style={styles.featuredPlaceholderIcon}>
-          <LandPlot color="#6B7D78" size={40} />
-        </View>
-      )}
-      <View style={styles.featuredTopBadges}>
-        {property.is_verified ? (
-          <View style={styles.featuredVerifiedBadge}>
-            <ShieldCheck color={colors.greenOnLight} size={14} />
-            <Text style={styles.featuredVerifiedText}>Verified</Text>
-          </View>
-        ) : <View />}
-        {property.view_count > 0 ? (
-          <View style={styles.featuredInvestmentBadge}>
-            <Text style={styles.featuredInvestmentText}>{property.view_count} views</Text>
-          </View>
-        ) : null}
-      </View>
-      <View style={styles.featuredBottomDetails}>
-        <Text style={[styles.featuredLocation, !image && styles.featuredTextDark]}>{location}</Text>
-        <Text style={[styles.featuredTitle, !image && styles.featuredTextDark]}>{property.title}</Text>
-        <Text style={[styles.featuredPrice, !image && styles.featuredTextDark]}>
-          {property.price_currency || "BDT"} {property.price.toLocaleString()}
-          {property.listing_type === "rent" ? "/mo" : ""}
-        </Text>
-      </View>
-    </>
-  );
-
-  return (
-    <AppLink
-      href={`/property/${property.id}`}
-      style={[
-        styles.featuredCard,
-        width ? { width } : null,
-        isHovered && styles.featuredCardHovered,
-      ]}
-    >
-      <View
-        style={styles.featuredCardInner}
-        // @ts-ignore
-        onMouseEnter={() => setIsHovered(true)}
-        // @ts-ignore
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {image ? (
-          <ImageBackground
-            source={{ uri: image }}
-            style={[styles.featuredCardBg, isHovered && styles.featuredCardBgHovered]}
-            resizeMode="cover"
-          >
-            {contents}
-          </ImageBackground>
-        ) : (
-          <View style={[styles.featuredCardBg, styles.featuredCardPlaceholder]}>{contents}</View>
-        )}
-      </View>
-    </AppLink>
-  );
-}
-
 export function HomeScreen() {
   const { isPhone, isTablet, isCompact, width } = useResponsive();
 
@@ -187,10 +111,10 @@ export function HomeScreen() {
         : { fontSize: 64, lineHeight: 70, letterSpacing: -1.6 };
 
   const heroMetrics = isPhone
-    ? { minHeight: 360, dockOffset: -56, copyPad: 64 }
+    ? { minHeight: 416, dockOffset: -56, copyPad: 64, topPad: 60 }
     : isTablet
-      ? { minHeight: 430, dockOffset: -64, copyPad: 78 }
-      : { minHeight: 520, dockOffset: -88, copyPad: 96 };
+      ? { minHeight: 494, dockOffset: -64, copyPad: 78, topPad: 68 }
+      : { minHeight: 592, dockOffset: -88, copyPad: 96, topPad: 76 };
   const popularQuery = useQuery({
     queryKey: ["properties", "home", "popular"],
     queryFn: () =>
@@ -318,7 +242,10 @@ export function HomeScreen() {
         <View style={[styles.heroPhoto, { minHeight: heroMetrics.minHeight }]}>
           <ImageBackground
             source={HERO_IMAGE}
-            style={[styles.heroBg, { minHeight: heroMetrics.minHeight }]}
+            style={[
+              styles.heroBg,
+              { minHeight: heroMetrics.minHeight, paddingTop: heroMetrics.topPad },
+            ]}
             resizeMode="cover"
           >
             {/* Scrim only deep enough to carry white type — the room stays visible. */}
@@ -423,10 +350,11 @@ export function HomeScreen() {
               contentContainerStyle={styles.featuredCardsRow}
             >
               {featuredProperties.map((property) => (
-                <FeaturedPropertyCard
+                <PropertyCard
                   key={property.id}
                   property={property}
-                  width={isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : undefined}
+                  variant="feature"
+                  width={isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500}
                 />
               ))}
             </ScrollView>

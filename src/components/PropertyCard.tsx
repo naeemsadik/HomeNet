@@ -1,453 +1,424 @@
-import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck, Sparkles } from "lucide-react-native";
+import React from "react";
+import {
+  Image,
+  ImageBackground,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Image, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle, View, Platform } from "react-native";
-import type { Property } from "@/data/properties";
+import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck } from "lucide-react-native";
+import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, webPointer } from "@/theme";
+import type { Property } from "@/features/property/types/property";
 
-type PropertyCardData = Omit<Property, "id"> & { id: string | number };
+export type PropertyCardVariant = "standard" | "feature";
 
-export interface PropertyCardModel {
-  id: string | number;
-  title: string;
-  location: string;
-  price: string;
-  monthlyPrice?: string;
-  image: string;
-  tag?: string;
-  beds?: number | null;
-  baths?: number | null;
-  area?: string | null;
-  type?: string;
-  score?: number;
-  forRent?: boolean;
-  isVerified?: boolean;
+interface PropertyCardProps {
+  property: Property;
+  /**
+   * `standard` — photo above a fact block. The default everywhere.
+   * `feature`  — photo fills the card, facts overlay it. Curated rails only;
+   *              see the scrim note below before reusing it.
+   */
+  variant?: PropertyCardVariant;
+  saved?: boolean;
+  onSave?: () => void;
+  onPress?: () => void;
+  imageHeight?: number;
+  width?: number;
+  style?: StyleProp<ViewStyle>;
 }
 
-export function formatApiPropertyToCardModel(p: any): PropertyCardModel {
-  const isRent = p.listing_type === "rent" || Boolean(p.forRent);
-  const currency = p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳");
-  const formattedPrice = typeof p.price === "number"
-    ? `${currency} ${p.price.toLocaleString("en-BD")}`
-    : String(p.price || "");
-  const monthlyPrice = isRent && !formattedPrice.endsWith("/mo") ? `${formattedPrice}/mo` : formattedPrice;
+/**
+ * Bangladeshi money reads in crore and lakh, not in grouped digits.
+ * 48,500,000 is unparseable at a glance; 4.85 Cr is not.
+ */
+function formatPrice(price: number, currency: string): string {
+  const unit = currency === "BDT" ? "৳" : currency;
+  if (price >= 10_000_000) return `${unit} ${(price / 10_000_000).toFixed(2).replace(/\.00$/, "")} Cr`;
+  if (price >= 100_000) return `${unit} ${(price / 100_000).toFixed(2).replace(/\.00$/, "")} Lac`;
+  return `${unit} ${price.toLocaleString("en-BD")}`;
+}
 
-  // Media
-  const image =
-    p.media?.find((m: any) => m.media_type === "image")?.url ||
-    p.media?.[0]?.url ||
-    p.image ||
-    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=85";
-
-  // Location
-  const location = p.area?.name
-    ? `${p.area.name}, ${p.area.city || "Dhaka"}`
-    : p.address || p.location || "Dhaka";
-
-  // Specs
-  const rawAmenities = (p.amenities as any) || {};
-  const beds = p.bedrooms ?? rawAmenities.bedrooms ?? (p.beds !== undefined ? p.beds : null);
-  const baths = p.bathrooms ?? rawAmenities.bathrooms ?? (p.baths !== undefined ? p.baths : null);
-  const areaSize = p.area_size || p.sqft;
-  const area = areaSize ? `${areaSize} ${p.area_unit || "sqft"}` : (p.area || "");
-
+function readSpecs(property: Property) {
+  const amenities = (property.amenities ?? {}) as Record<string, unknown>;
+  const num = (v: unknown) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
   return {
-    id: p.id,
-    title: p.title || "Property",
-    location,
-    price: formattedPrice,
-    monthlyPrice,
-    image,
-    tag: p.is_verified ? "Verified" : p.tag || "New",
-    beds,
-    baths,
-    area,
-    type: p.type || "Apartment",
-    score: p.score ?? Math.min(99, Math.max(82, Math.round(85 + ((p.view_count || 0) % 14)))),
-    forRent: isRent,
-    isVerified: Boolean(p.is_verified ?? (p.tag === "Verified")),
+    // `land` and `parking` carry neither, so both legitimately come back null.
+    beds: num(property.bedrooms ?? amenities.bedrooms),
+    baths: num(property.bathrooms ?? amenities.bathrooms),
+    area: property.area_size
+      ? `${property.area_size.toLocaleString("en-BD")} ${property.area_unit || "sqft"}`
+      : null,
   };
 }
 
 export function PropertyCard({
-  property: rawProp,
-  saved,
+  property,
+  variant = "standard",
+  saved = false,
   onSave,
-  mode,
-  imageHeight,
-  list = false,
-  feature = false,
-  badgeText,
-  style,
   onPress,
-}: {
-  property: PropertyCardModel | any;
-  saved: boolean;
-  onSave: () => void;
-  mode?: "buy" | "rent";
-  imageHeight?: number;
-  list?: boolean;
-  feature?: boolean;
-  badgeText?: string;
-  style?: StyleProp<ViewStyle>;
-  onPress?: () => void;
-}) {
+  imageHeight,
+  width,
+  style,
+}: PropertyCardProps) {
   const { isPhone } = useResponsive();
-  const property = ("media" in rawProp || "area_size" in rawProp || "listing_type" in rawProp || !rawProp.monthlyPrice)
-    ? formatApiPropertyToCardModel(rawProp)
-    : rawProp;
 
-  const isRent = mode === "rent" || property.forRent === true;
-  const isNew = property.tag === "New";
-  const isVerified = Boolean(property.isVerified ?? (property.tag === "Verified"));
-  const score = property.score;
-  const isHighTierScore = score !== undefined && score >= 85;
+  const photo =
+    property.media?.find((m) => m.media_type === "image")?.url ??
+    property.media?.[0]?.url ??
+    null;
 
-  // Split rent price if contains /mo
-  const rawPrice = isRent ? (property.monthlyPrice || property.price) : property.price;
-  const priceParts = rawPrice ? rawPrice.split("/mo") : [rawPrice];
-  const mainPrice = priceParts[0]?.trim();
-  const hasMo = isRent || priceParts.length > 1;
+  const location =
+    [property.area?.name, property.area?.city].filter(Boolean).join(", ") ||
+    property.address ||
+    "Location unavailable";
 
-  const handleCardPress = () => {
-    if (onPress) {
-      onPress();
-    } else if (property.id) {
-      router.push(`/property/${property.id}` as any);
-    }
+  const isRent = property.listing_type === "rent";
+  const price = formatPrice(property.price, property.price_currency || "BDT");
+  const specs = readSpecs(property);
+  const isFeature = variant === "feature";
+
+  const open = () => {
+    if (onPress) onPress();
+    else if (property.id) router.push(`/property/${property.id}` as never);
   };
 
-  const defaultHeight = isPhone ? 180 : 210;
-  const finalImageHeight = imageHeight ?? defaultHeight;
+  const mediaHeight = imageHeight ?? (isFeature ? (isPhone ? 300 : 360) : isPhone ? 190 : 210);
 
-  return (
+  const verifiedBadge = property.is_verified ? (
+    <View style={styles.badgeRow} pointerEvents="none">
+      <View style={styles.verifiedBadge}>
+        <ShieldCheck color={colorTokens.info} size={13} strokeWidth={2.4} />
+        <Text style={styles.verifiedText}>Verified</Text>
+      </View>
+    </View>
+  ) : null;
+
+  /**
+   * Rendered as a SIBLING of the card's pressable, never a child.
+   * react-native-web renders Pressable as <button>, and a nested button is
+   * invalid HTML — it breaks hydration and swallows the inner click.
+   */
+  const saveButton = onSave ? (
     <Pressable
-      accessibilityLabel={`Property ${property.title}`}
       accessibilityRole="button"
-      onPress={handleCardPress}
-      style={({ pressed }) => [
+      accessibilityLabel={saved ? `Remove ${property.title} from saved` : `Save ${property.title}`}
+      onPress={onSave}
+      style={[styles.saveButton, webPointer]}
+    >
+      <Heart
+        color={saved ? colorTokens.notification : colorTokens.ink}
+        fill={saved ? colorTokens.notification : "transparent"}
+        size={17}
+      />
+    </Pressable>
+  ) : null;
+
+  const placeholder = (
+    <View style={styles.placeholder}>
+      <LandPlot color={colorTokens.subtle} size={30} />
+      <Text style={styles.placeholderText}>No photo provided</Text>
+    </View>
+  );
+
+  // ── Feature: photo fills the card, facts overlay it ──────────────────────
+  if (isFeature) {
+    return (
+      <View style={[styles.shell, width ? { width } : null, style]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${property.title}, ${isRent ? "for rent" : "for sale"}, ${price}`}
+        onPress={open}
+        style={({ hovered, pressed }: any) => [
+          styles.card,
+          styles.cardFeature,
+          hovered && styles.cardHovered,
+          pressed && styles.cardPressed,
+          webPointer,
+        ]}
+      >
+        <View style={{ height: mediaHeight }}>
+          {photo ? (
+            <ImageBackground source={{ uri: photo }} style={styles.fill} resizeMode="cover">
+              {/*
+                0.86 at the base is not a taste choice. White text over a pure-white
+                photo blended with ink at 0.86 still measures ~5:1, so the overlay
+                stays legible on the brightest listing anyone can upload.
+              */}
+              <LinearGradient
+                colors={["rgba(11,26,23,0)", "rgba(11,26,23,0.45)", "rgba(11,26,23,0.86)"]}
+                locations={[0, 0.5, 1]}
+                style={StyleSheet.absoluteFill}
+              />
+              {verifiedBadge}
+              <View style={styles.featureBody}>
+                <Text numberOfLines={1} style={styles.featureLocation}>{location}</Text>
+                <Text numberOfLines={2} style={styles.featureTitle}>{property.title}</Text>
+                <Text style={styles.featurePrice}>
+                  {price}
+                  {isRent ? <Text style={styles.featurePriceSuffix}>/mo</Text> : null}
+                </Text>
+              </View>
+            </ImageBackground>
+          ) : (
+            <View style={styles.fill}>
+              {placeholder}
+              {verifiedBadge}
+            </View>
+          )}
+        </View>
+      </Pressable>
+      {saveButton}
+      </View>
+    );
+  }
+
+  // ── Standard: photo above a fact block ───────────────────────────────────
+  return (
+    <View style={[styles.shell, width ? { width } : null, style]}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${property.title}, ${isRent ? "for rent" : "for sale"}, ${price}`}
+      onPress={open}
+      style={({ hovered, pressed }: any) => [
         styles.card,
-        isPhone && styles.cardPhone,
-        webPointer,
-        style,
+        hovered && styles.cardHovered,
         pressed && styles.cardPressed,
+        webPointer,
       ]}
     >
-      {/* Image Container */}
-      <View style={[styles.imageWrap, { height: finalImageHeight }]}>
-        {property.image ? (
-          <Image source={{ uri: property.image }} style={styles.image} resizeMode="cover" />
+      <View style={[styles.media, { height: mediaHeight }]}>
+        {photo ? (
+          <Image source={{ uri: photo }} style={styles.fill} resizeMode="cover" />
         ) : (
-          <View style={styles.imagePlaceholder}>
-            <LandPlot color="#6B7D78" size={36} />
-            <Text style={styles.imagePlaceholderText}>No media</Text>
-          </View>
+          placeholder
         )}
-
-        {/* Top Badges */}
-        <View style={styles.topBadgesRow}>
-          <View style={styles.badgeCluster}>
-            {isVerified ? (
-              <View style={styles.verifiedBadge}>
-                <ShieldCheck color="#04cf92" size={14} />
-                <Text style={styles.verifiedText}>Verified</Text>
-              </View>
-            ) : null}
-            {isNew ? (
-              <View style={styles.newBadge}>
-                <Text style={styles.newBadgeText}>New</Text>
-              </View>
-            ) : null}
-          </View>
-
-          {/* Heart / Save Button */}
-          <Pressable
-            accessibilityLabel={saved ? "Remove from saved" : "Save property"}
-            onPress={(e) => {
-              e?.stopPropagation?.();
-              onSave();
-            }}
-            style={[styles.saveButton, webPointer]}
-          >
-            <Heart
-              color={saved ? "#F4823A" : "#0B1A17"}
-              fill={saved ? "#F4823A" : "transparent"}
-              size={18}
-            />
-          </Pressable>
-        </View>
-
-        {/* Bottom Tag on Image (For Sale / For Rent) */}
-        <View style={styles.intentTagWrap}>
-          <View style={styles.intentTag}>
-            <Text style={styles.intentTagText}>
-              {isRent ? "For Rent" : "For Sale"}
-            </Text>
-          </View>
+        {verifiedBadge}
+        <View style={styles.intentTag}>
+          <Text style={styles.intentText}>{isRent ? "For rent" : "For sale"}</Text>
         </View>
       </View>
 
-      {/* Card Body */}
-      <View style={[styles.body, isPhone && styles.bodyPhone]}>
-        {/* Price & Investment Score */}
-        <View style={styles.priceRow}>
-          <View style={styles.priceContainer}>
-            <Text style={[styles.priceText, isPhone && styles.priceTextPhone]}>{mainPrice}</Text>
-            {hasMo ? <Text style={styles.moText}> /mo</Text> : null}
-          </View>
-          {score !== undefined ? (
-            <View style={styles.scoreContainer}>
-              <Sparkles color={isHighTierScore ? "#04cf92" : "#2251D6"} size={14} />
-              <Text
-                style={[
-                  styles.scoreText,
-                  { color: isHighTierScore ? "#04cf92" : "#2251D6" },
-                ]}
-              >
-                {score}
-              </Text>
-            </View>
-          ) : null}
-        </View>
+      <View style={styles.body}>
+        <Text style={styles.price}>
+          {price}
+          {isRent ? <Text style={styles.priceSuffix}>/mo</Text> : null}
+        </Text>
 
-        {/* Title */}
-        <View style={styles.titleLink}>
-          <Text numberOfLines={1} style={[styles.titleText, isPhone && styles.titleTextPhone]}>
-            {property.title}
-          </Text>
-        </View>
+        <Text numberOfLines={2} style={styles.title}>{property.title}</Text>
 
-        {/* Location */}
         <View style={styles.locationRow}>
-          <MapPin color="#5C6B66" size={14} />
-          <Text numberOfLines={1} style={[styles.locationText, isPhone && styles.locationTextPhone]}>
-            {property.location}
-          </Text>
+          <MapPin color={colorTokens.muted} size={14} strokeWidth={2} />
+          <Text numberOfLines={1} style={styles.location}>{location}</Text>
         </View>
 
-        {/* Specs Row */}
-        <View style={[styles.specsRow, isPhone && styles.specsRowPhone]}>
-          {property.beds !== undefined && property.beds > 0 ? (
-            <View style={styles.specItem}>
-              <BedDouble color="#5C6B66" size={16} />
-              <Text style={styles.specText}>{property.beds}</Text>
-            </View>
-          ) : null}
-          {property.baths !== undefined && property.baths > 0 ? (
-            <View style={styles.specItem}>
-              <Bath color="#5C6B66" size={16} />
-              <Text style={styles.specText}>{property.baths}</Text>
-            </View>
-          ) : null}
-          {property.area ? (
-            <View style={styles.specItem}>
-              <LandPlot color="#5C6B66" size={16} />
-              <Text style={styles.specText}>{property.area}</Text>
-            </View>
-          ) : null}
-        </View>
+        {specs.beds || specs.baths || specs.area ? (
+          <View style={styles.specs}>
+            {specs.beds ? (
+              <View style={styles.spec}>
+                <BedDouble color={colorTokens.muted} size={15} strokeWidth={2} />
+                <Text style={styles.specText}>{specs.beds}</Text>
+              </View>
+            ) : null}
+            {specs.baths ? (
+              <View style={styles.spec}>
+                <Bath color={colorTokens.muted} size={15} strokeWidth={2} />
+                <Text style={styles.specText}>{specs.baths}</Text>
+              </View>
+            ) : null}
+            {specs.area ? (
+              <View style={styles.spec}>
+                <LandPlot color={colorTokens.muted} size={15} strokeWidth={2} />
+                <Text style={styles.specText}>{specs.area}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
       </View>
     </Pressable>
+    {saveButton}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // Positioning context so the save button can overlay without nesting inside
+  // the card's <button>.
+  shell: {
+    width: "100%",
+    position: "relative",
+  },
+  // Elevation declared once: a hairline. No shadow underneath it.
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    borderWidth: 1.2,
-    borderColor: "rgba(11, 26, 23, 0.08)",
+    width: "100%",
+    borderRadius: radius.sm,
     overflow: "hidden",
+    backgroundColor: colorTokens.surface,
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
+    ...(Platform.select({
+      web: { transition: "border-color 0.15s ease" },
+      default: {},
+    }) as any),
   },
-  cardPhone: {
-    borderRadius: 16,
-  },
-  cardPressed: {
-    opacity: 0.96,
-  },
-  imageWrap: {
+  cardFeature: { borderColor: "transparent" },
+  cardHovered: { borderColor: "rgba(11, 26, 23, 0.20)" },
+  cardPressed: { opacity: 0.94 },
+
+  fill: { width: "100%", height: "100%" },
+
+  media: {
     position: "relative",
     width: "100%",
-    backgroundColor: "#F4F6F5",
-    overflow: "hidden",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: colorTokens.surfaceSunken,
   },
-  image: {
-    width: "100%",
-    height: "100%",
+  placeholder: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: colorTokens.surfaceSunken,
   },
-  imagePlaceholder: { alignItems: "center", flex: 1, gap: 6, justifyContent: "center" },
-  imagePlaceholderText: { color: "#6B7D78", fontFamily: fonts.regular, fontSize: 12 },
-  topBadgesRow: {
+  placeholderText: {
+    color: colorTokens.subtle,
+    fontFamily: fonts.medium,
+    fontSize: 12,
+  },
+
+  badgeRow: {
     position: "absolute",
     top: 12,
     left: 12,
-    right: 12,
+    // Stops short of the save button's 34px + 12px gutter.
+    right: 58,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  badgeCluster: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+    alignItems: "flex-start",
   },
   verifiedBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "#E6FAF4",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 999,
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.infoSurface,
   },
   verifiedText: {
-    color: "#04cf92",
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  newBadge: {
-    backgroundColor: "#FDEEE2",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  newBadgeText: {
-    color: "#F4823A",
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    fontWeight: "600",
+    color: colorTokens.info,
+    fontFamily: fonts.bold,
+    fontSize: 11.5,
   },
   saveButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    position: "absolute",
+    top: 12,
+    right: 12,
+    zIndex: 2,
+    width: 34,
+    height: 34,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255, 255, 255, 0.92)",
   },
-  intentTagWrap: {
-    position: "absolute",
-    bottom: 12,
-    left: 12,
-  },
+
   intentTag: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    position: "absolute",
+    left: 12,
+    bottom: 12,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
+    paddingVertical: 5,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255, 255, 255, 0.94)",
   },
-  intentTagText: {
-    color: "#2251D6",
+  intentText: {
+    color: colorTokens.ink,
     fontFamily: fonts.semiBold,
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: 11.5,
   },
-  body: {
-    padding: 16,
-    gap: 6,
-  },
-  bodyPhone: {
-    padding: 12,
-    gap: 4,
-  },
-  priceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  priceContainer: {
-    flexDirection: "row",
-    alignItems: "baseline",
-  },
-  priceText: {
-    color: "#0B1A17",
-    fontFamily: fonts.headingBold,
+
+  body: { padding: 16, gap: 5 },
+  price: {
+    color: colorTokens.ink,
+    fontFamily: fonts.headingExtraBold,
     fontSize: 20,
-    fontWeight: "700",
-    lineHeight: 28,
+    letterSpacing: -0.4,
   },
-  priceTextPhone: {
-    fontSize: 18,
-    lineHeight: 24,
-  },
-  moText: {
-    color: "#5C6B66",
+  priceSuffix: {
+    color: colorTokens.muted,
     fontFamily: fonts.regular,
     fontSize: 14,
-    lineHeight: 20,
+    letterSpacing: 0,
   },
-  scoreContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  scoreText: {
-    color: "#04cf92",
+  title: {
+    color: colorTokens.ink,
     fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 15,
+    lineHeight: 21,
   },
-  titleLink: {
-    marginTop: 2,
+  locationRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+  location: {
+    flex: 1,
+    color: colorTokens.muted,
+    fontFamily: fonts.regular,
+    fontSize: 13.5,
   },
-  titleText: {
-    color: "#0B1A17",
-    fontFamily: fonts.semiBold,
-    fontSize: 16,
-    fontWeight: "600",
-    lineHeight: 24,
-  },
-  titleTextPhone: {
-    fontSize: 14.5,
-    lineHeight: 20,
-  },
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  locationText: {
-    color: "#5C6B66",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
-  locationTextPhone: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  specsRow: {
-    marginTop: 6,
-    paddingTop: 12.8,
-    borderTopWidth: 0.8,
-    borderTopColor: "rgba(11, 26, 23, 0.08)",
+  specs: {
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
-    gap: 12,
+    gap: 14,
     rowGap: 6,
+    marginTop: 11,
+    paddingTop: 11,
+    borderTopWidth: 1,
+    borderTopColor: colorTokens.divider,
   },
-  specsRowPhone: {
-    marginTop: 4,
-    paddingTop: 8,
-    gap: 10,
-    rowGap: 4,
-  },
-  specItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    flexShrink: 1,
-  },
+  spec: { flexDirection: "row", alignItems: "center", gap: 5 },
   specText: {
-    color: "#5C6B66",
+    color: colorTokens.muted,
     fontFamily: fonts.semiBold,
+    fontSize: 13.5,
+  },
+
+  featureBody: {
+    position: "absolute",
+    left: 18,
+    right: 18,
+    bottom: 16,
+    gap: 3,
+  },
+  featureLocation: {
+    color: "rgba(255, 255, 255, 0.82)",
+    fontFamily: fonts.medium,
+    fontSize: 13,
+  },
+  featureTitle: {
+    color: "#FFFFFF",
+    fontFamily: fonts.headingBold,
+    fontSize: 17,
+    lineHeight: 23,
+  },
+  featurePrice: {
+    marginTop: 3,
+    color: "#FFFFFF",
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 20,
+    letterSpacing: -0.3,
+  },
+  featurePriceSuffix: {
+    color: "rgba(255, 255, 255, 0.82)",
+    fontFamily: fonts.regular,
     fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
   },
 });

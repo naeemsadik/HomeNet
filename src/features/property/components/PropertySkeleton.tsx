@@ -1,47 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { View, Animated, StyleSheet } from "react-native";
-import { feedColors } from "./PropertyBadge";
+import React, { useEffect, useRef } from "react";
+import { Animated, StyleSheet, View } from "react-native";
+import { colorTokens, radius } from "@/theme";
 
+/** Mirrors PropertyCard's standard geometry so the swap to real content is calm. */
 export function PropertySkeleton() {
-  const [pulseAnim] = useState(new Animated.Value(0.4));
+  const pulse = useRef(new Animated.Value(0.45)).current;
 
   useEffect(() => {
-    Animated.loop(
+    const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 0.9,
-          duration: 750,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0.4,
-          duration: 750,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, [pulseAnim]);
+        Animated.timing(pulse, { toValue: 0.9, duration: 750, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.45, duration: 750, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
 
   return (
-    <View style={styles.card}>
-      {/* 16:9 Image Box Skeleton */}
-      <Animated.View style={[styles.imageSkeleton, { opacity: pulseAnim }]} />
-
-      {/* Details Padding Container */}
-      <View style={styles.content}>
-        {/* Title Bar Skeleton */}
-        <Animated.View style={[styles.titleLine, { opacity: pulseAnim }]} />
-        <Animated.View style={[styles.titleLineShort, { opacity: pulseAnim }]} />
-
-        {/* Details Row Skeleton (Beds, Baths, Sqft) */}
-        <View style={styles.detailsRow}>
-          <Animated.View style={[styles.detailPill, { opacity: pulseAnim }]} />
-          <Animated.View style={[styles.detailPill, { opacity: pulseAnim }]} />
-          <Animated.View style={[styles.detailPill, { opacity: pulseAnim }]} />
+    <View style={styles.card} accessibilityLabel="Loading property">
+      <Animated.View style={[styles.image, { opacity: pulse }]} />
+      <View style={styles.body}>
+        <Animated.View style={[styles.price, { opacity: pulse }]} />
+        <Animated.View style={[styles.titleLong, { opacity: pulse }]} />
+        <Animated.View style={[styles.titleShort, { opacity: pulse }]} />
+        <View style={styles.specs}>
+          <Animated.View style={[styles.spec, { opacity: pulse }]} />
+          <Animated.View style={[styles.spec, { opacity: pulse }]} />
+          <Animated.View style={[styles.spec, { opacity: pulse }]} />
         </View>
-
-        {/* Location Bar Skeleton */}
-        <Animated.View style={[styles.locationLine, { opacity: pulseAnim }]} />
       </View>
     </View>
   );
@@ -49,7 +36,7 @@ export function PropertySkeleton() {
 
 export function PropertySkeletonFeed() {
   return (
-    <View style={styles.feedContainer}>
+    <View style={styles.feed}>
       <PropertySkeleton />
       <PropertySkeleton />
       <PropertySkeleton />
@@ -57,55 +44,31 @@ export function PropertySkeletonFeed() {
   );
 }
 
+const shimmer = colorTokens.surfaceSunken;
+
 const styles = StyleSheet.create({
-  feedContainer: {
-    padding: 16,
-    gap: 16,
-  },
+  feed: { gap: 16, paddingVertical: 8 },
   card: {
-    backgroundColor: feedColors.card,
-    borderRadius: 12,
-    overflow: "hidden",
+    flex: 1,
+    minWidth: 260,
+    backgroundColor: colorTokens.surface,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: feedColors.border,
+    borderColor: colorTokens.divider,
+    overflow: "hidden",
   },
-  imageSkeleton: {
-    width: "100%",
-    aspectRatio: 16 / 9,
-    backgroundColor: feedColors.border,
-  },
-  content: {
-    padding: 14,
-    gap: 10,
-  },
-  titleLine: {
-    height: 16,
-    width: "85%",
-    borderRadius: 4,
-    backgroundColor: feedColors.border,
-  },
-  titleLineShort: {
-    height: 16,
-    width: "55%",
-    borderRadius: 4,
-    backgroundColor: feedColors.border,
-  },
-  detailsRow: {
+  image: { width: "100%", aspectRatio: 16 / 9, backgroundColor: shimmer },
+  body: { padding: 16, gap: 9 },
+  price: { height: 20, width: "45%", borderRadius: 4, backgroundColor: shimmer },
+  titleLong: { height: 14, width: "85%", borderRadius: 4, backgroundColor: shimmer },
+  titleShort: { height: 14, width: "55%", borderRadius: 4, backgroundColor: shimmer },
+  specs: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 4,
-  },
-  detailPill: {
-    height: 14,
-    width: 60,
-    borderRadius: 4,
-    backgroundColor: feedColors.border,
-  },
-  locationLine: {
-    height: 12,
-    width: "40%",
-    borderRadius: 4,
-    backgroundColor: feedColors.border,
+    gap: 14,
     marginTop: 2,
+    paddingTop: 11,
+    borderTopWidth: 1,
+    borderTopColor: colorTokens.divider,
   },
+  spec: { height: 12, width: 54, borderRadius: 4, backgroundColor: shimmer },
 });

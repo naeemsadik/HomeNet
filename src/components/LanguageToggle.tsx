@@ -6,11 +6,16 @@ import { fonts, webPointer } from "@/theme";
 
 interface LanguageToggleProps {
   compact?: boolean;
+  variant?: "default" | "crystal";
 }
 
-export function LanguageToggle({ compact = false }: LanguageToggleProps) {
+export function LanguageToggle({
+  compact = false,
+  variant = "default",
+}: LanguageToggleProps) {
   const { currentLanguage, toggleLanguage } = useLanguageStore();
   const isBangla = currentLanguage === "bn";
+  const isCrystal = variant === "crystal";
 
   return (
     <Pressable
@@ -19,7 +24,8 @@ export function LanguageToggle({ compact = false }: LanguageToggleProps) {
       style={({ pressed, hovered }: any) => [
         styles.button,
         compact && styles.buttonCompact,
-        hovered && styles.buttonHovered,
+        isCrystal && styles.buttonCrystal,
+        hovered && (isCrystal ? styles.buttonCrystalHovered : styles.buttonHovered),
         pressed && styles.buttonPressed,
         webPointer,
       ]}
@@ -32,14 +38,18 @@ export function LanguageToggle({ compact = false }: LanguageToggleProps) {
     >
       <View style={styles.iconWrap}>
         <Globe
-          color="#0B1A17"
+          color={isCrystal ? "#FFFFFF" : "#0B1A17"}
           size={compact ? 15 : 17}
           strokeWidth={2}
         />
       </View>
 
       <Text
-        style={[styles.label, compact && styles.labelCompact]}
+        style={[
+          styles.label,
+          compact && styles.labelCompact,
+          isCrystal && styles.labelCrystal,
+        ]}
         {...(Platform.OS === "web" ? ({ className: "notranslate", translate: "no" } as any) : {})}
       >
         {isBangla ? "বাংলা" : "English"}
@@ -54,9 +64,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
     borderWidth: 1.5,
-    borderColor: "#04cf92",
+    borderColor: "rgba(4, 207, 146, 0.85)",
     height: 38,
     paddingHorizontal: 13,
     borderRadius: 999,
@@ -66,6 +76,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 3,
     elevation: 1,
+    ...(Platform.select({
+      web: {
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+      },
+      default: {},
+    }) as any),
   },
   buttonCompact: {
     height: 32,
@@ -95,5 +112,17 @@ const styles = StyleSheet.create({
   },
   labelCompact: {
     fontSize: 12,
+  },
+  labelCrystal: {
+    color: "#FFFFFF",
+  },
+  buttonCrystal: {
+    backgroundColor: "rgba(255, 255, 255, 0.16)",
+    borderColor: "rgba(255, 255, 255, 0.35)",
+    shadowColor: "transparent",
+  },
+  buttonCrystalHovered: {
+    backgroundColor: "rgba(255, 255, 255, 0.26)",
+    borderColor: "rgba(255, 255, 255, 0.5)",
   },
 });
