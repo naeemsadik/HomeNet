@@ -20,6 +20,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
+import { initGoogleTranslateScript } from "@/utils/language";
 
 // Keyboard focus ring. Not colorTokens.primary (#04cf92), which sits at 2.03:1
 // on white and fails the 3:1 WCAG 1.4.11 minimum for a focus indicator.
@@ -89,6 +90,8 @@ export default function RootLayout() {
         "%cSee https://homenetbd.com/self-xss for more information.",
         "font-size: 16px; color: #3b82f6;",
       );
+
+      initGoogleTranslateScript();
     }
 
     setUnauthorizedHandler(() => {

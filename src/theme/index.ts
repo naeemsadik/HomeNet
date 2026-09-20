@@ -5,11 +5,13 @@
 export { colorTokens, type ColorTokens } from "./colors";
 export { fontTokens, type FontTokens } from "./fonts";
 export { radiusTokens, type RadiusTokens } from "./radius";
+export { layoutTokens, type LayoutTokens } from "./layout";
 export { ThemeProvider, useTheme, type Theme, type ThemeProviderProps } from "./ThemeProvider";
 
 import { colorTokens } from "./colors";
 import { fontTokens } from "./fonts";
 import { radiusTokens } from "./radius";
+import { layoutTokens } from "./layout";
 import { Platform, type TextStyle, type ViewStyle } from "react-native";
 
 export const colors = {
@@ -35,6 +37,8 @@ export const colors = {
 export const fonts = fontTokens;
 
 export const radius = radiusTokens;
+
+export const layout = layoutTokens;
 
 export const shadow: ViewStyle = Platform.select({
   web: {

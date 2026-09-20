@@ -1,4 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   ChevronLeft,
@@ -27,17 +28,30 @@ import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
 import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
 import { AppButton, AppLink } from "@/components/ui";
-import {
-  latestNews,
-  trustedPartners,
-} from "@/data/properties";
+import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
+import { ContrastColumns } from "@/components/landing/ContrastColumns";
+import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
+import { JourneyTrack } from "@/components/landing/JourneyTrack";
+import { VerificationPipeline } from "@/components/landing/VerificationPipeline";
+import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
 import type { Property as ApiProperty } from "@/features/property/types/property";
 import { useResponsive } from "@/hooks/useResponsive";
 import { toApiError } from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
-import { colors, fonts, webPointer } from "@/theme";
+import { colors, fonts, layout, webPointer } from "@/theme";
 
 
+
+/**
+ * Hero photograph — placeholder until real imagery is shot.
+ *
+ * Replace with a HomeNet-owned photo of a Bangladeshi interior. Spec: landscape,
+ * min 2400×1400, a lived-in room (not an exterior tower), natural daylight, with
+ * the left-to-centre area uncluttered so the headline sits on calm pixels.
+ */
+const HERO_IMAGE = {
+  uri: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=80",
+};
 
 function PropertyResult({
   children,
@@ -162,7 +176,22 @@ function FeaturedPropertyCard({ property, width }: { property: ApiProperty; widt
 }
 
 export function HomeScreen() {
-  const { isPhone, isTablet, width } = useResponsive();
+  const { isPhone, isTablet, isCompact, width } = useResponsive();
+
+  // Hero scales in steps rather than snapping from 34px straight to 64px.
+  const heroType = isPhone
+    ? { fontSize: 34, lineHeight: 39, letterSpacing: -0.7 }
+    : isTablet
+      ? { fontSize: 42, lineHeight: 47, letterSpacing: -1.0 }
+      : isCompact
+        ? { fontSize: 52, lineHeight: 58, letterSpacing: -1.3 }
+        : { fontSize: 64, lineHeight: 70, letterSpacing: -1.6 };
+
+  const heroMetrics = isPhone
+    ? { minHeight: 360, dockOffset: -56, copyPad: 64 }
+    : isTablet
+      ? { minHeight: 430, dockOffset: -64, copyPad: 78 }
+      : { minHeight: 520, dockOffset: -88, copyPad: 96 };
   const popularQuery = useQuery({
     queryKey: ["properties", "home", "popular"],
     queryFn: () =>
@@ -285,61 +314,87 @@ export function HomeScreen() {
     };
   }, [cardStep, featuredProperties.length]);
 
-  return (
-    <AppChrome active="home">
-      {/* ─────────────────────────────────────────────────────────────
-          1. HERO SECTION (Figma data-node-id="1:92")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={[styles.heroContainer, isPhone && styles.heroContainerPhone]}>
-        <ImageBackground
-          source={{
-            uri: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1600&q=85",
-          }}
-          style={styles.heroBg}
-          resizeMode="cover"
-        >
-          {/* Exact Figma Hero Gradient Overlay: 136.17deg from rgba(15, 109, 85, 0.92) to rgba(34, 81, 214, 0.75) */}
-          <LinearGradient
-            colors={["rgba(15, 109, 85, 0.92)", "rgba(34, 81, 214, 0.75)"]}
-            end={{ x: 1, y: 0.85 }}
-            start={{ x: 0, y: 0.15 }}
-            style={StyleSheet.absoluteFill}
-          />
+  const hero = (
+      <View style={styles.heroBlock}>
+        <View style={[styles.heroPhoto, { minHeight: heroMetrics.minHeight }]}>
+          <ImageBackground
+            source={HERO_IMAGE}
+            style={[styles.heroBg, { minHeight: heroMetrics.minHeight }]}
+            resizeMode="cover"
+          >
+            {/* Scrim only deep enough to carry white type — the room stays visible. */}
+            <LinearGradient
+              colors={[
+                "rgba(6, 22, 18, 0.58)",
+                "rgba(6, 22, 18, 0.20)",
+                "rgba(6, 22, 18, 0.34)",
+              ]}
+              locations={[0, 0.52, 1]}
+              style={StyleSheet.absoluteFill}
+            />
 
-          <View style={[styles.heroContent, isPhone && styles.heroContentPhone]}>
-            {/* Tag Pill */}
-            <View style={styles.heroTagPill}>
-              <Sparkles color="#FFFFFF" size={14} />
-              <Text style={styles.heroTagText}>
-                Bangladesh's AI property marketplace
+            <View
+              style={[
+                styles.heroCopy,
+                isPhone && styles.heroCopyPhone,
+                { paddingBottom: heroMetrics.copyPad },
+              ]}
+            >
+              <Text style={[styles.heroHeading, heroType]}>
+                Find a home you can trust
               </Text>
             </View>
+          </ImageBackground>
+        </View>
 
-            {/* Heading 1 */}
-            <Text style={[styles.heroHeading, isPhone && styles.heroHeadingPhone]}>
-              Find a home you can trust, priced by AI.
-            </Text>
+        <View style={[styles.dockGutter, isPhone && styles.dockGutterPhone]}>
+        <View
+          style={[
+            styles.searchDock,
+            isPhone && styles.searchDockPhone,
+            { marginTop: heroMetrics.dockOffset },
+          ]}
+        >
+          <HeroSearchWidget docked />
 
-            {/* Subtitle Paragraph */}
-            <Text style={[styles.heroSubtitle, isPhone && styles.heroSubtitlePhone]}>
-              Verified listings, AI valuation and investment scores for apartments, houses, land and commercial spaces across Bangladesh.
-            </Text>
-
-            {/* Hero Search Widget (Figma node 214:4655) */}
-            <HeroSearchWidget />
+          <View style={[styles.ownerBand, isPhone && styles.ownerBandPhone]}>
+            <View style={styles.ownerCopy}>
+              <Text style={styles.ownerTitle}>Listing your own property?</Text>
+              <Text style={styles.ownerSub}>
+                Describe it in one sentence — HomeNet fills in the rest.
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="List your property"
+              onPress={() => router.push("/property/create" as never)}
+              style={({ hovered, pressed }: any) => [
+                styles.ownerCta,
+                isPhone && styles.ownerCtaPhone,
+                hovered && styles.ownerCtaHovered,
+                pressed && { opacity: 0.9 },
+                webPointer,
+              ]}
+            >
+              <Text style={styles.ownerCtaText}>List your property</Text>
+            </Pressable>
           </View>
-        </ImageBackground>
+        </View>
+        </View>
       </View>
 
 
+  );
 
+  return (
+    <AppChrome active="home" bleed={hero}>
       {/* ─────────────────────────────────────────────────────────────
-          2. OWNER ON-RAMP: LIST YOUR PROPERTY
+          2. PRODUCT VISUAL — browser + phone preview of real listings
       ───────────────────────────────────────────────────────────── */}
-      <OwnerListPropertySection />
+      <HeroProductVisual />
 
       {/* ─────────────────────────────────────────────────────────────
-          3. FEATURED PROPERTIES (Figma data-node-id="1:194")
+          3. FEATURED PROPERTIES (live API)
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
@@ -436,106 +491,43 @@ export function HomeScreen() {
 
 
       {/* ─────────────────────────────────────────────────────────────
-          10. MARKET INSIGHTS & TRUSTED PARTNERS (Figma data-node-id="1:1156")
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <View style={[styles.twoColSection, isTablet && styles.twoColSectionTablet]}>
-          {/* Left: Market insights */}
-          <View style={styles.marketInsightCard}>
-            <View style={styles.sectionHeaderInner}>
-              <View>
-                <Text style={styles.sectionTitle}>Market insights</Text>
-              </View>
-            </View>
-
-            {/* No market-data source exists yet, so nothing is charted. */}
-            <View style={styles.chartWrapper}>
-              <View style={styles.requestState}>
-                <TrendingUp color={colors.greenOnLight} size={26} />
-                <Text style={styles.requestStateTitle}>Market data coming soon</Text>
-                <Text style={styles.requestStateCopy}>
-                  Price trends for Bangladesh will appear here once market data is
-                  available.
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Right: Trusted partners */}
-          <View style={styles.trustedPartnersCard}>
-            <View style={styles.sectionHeaderInner}>
-              <View>
-                <Text style={styles.sectionTitle}>Trusted partners</Text>
-                <Text style={styles.sectionSubtitle}>Verified agencies on Homenet</Text>
-              </View>
-            </View>
-
-            <View style={styles.partnersList}>
-              {trustedPartners.map((partner) => (
-                <View key={partner.name} style={styles.partnerRow}>
-                  <View style={styles.partnerInfoWrap}>
-                    <View style={styles.partnerAvatarCircle}>
-                      <Text style={styles.partnerAvatarText}>{partner.initial}</Text>
-                    </View>
-                    <View>
-                      <View style={styles.partnerNameRow}>
-                        <Text style={styles.partnerNameText}>{partner.name}</Text>
-                        <ShieldCheck color="#04cf92" size={16} />
-                      </View>
-                      <Text style={styles.partnerDealsText}>{partner.deals}</Text>
-                    </View>
-                  </View>
-
-                  <AppLink href="/users" style={styles.partnerViewBtn}>
-                    <Text style={styles.partnerViewBtnText}>View</Text>
-                  </AppLink>
-                </View>
-              ))}
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          11. LATEST PROPERTY NEWS (Figma data-node-id="1:1262")
+          4. HOW IT WORKS — dual seeker / owner track
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Latest property news</Text>
-          <AppLink href="/about" style={styles.seeAllLink}>
-            <Text style={styles.seeAllText}>See all</Text>
-          </AppLink>
+          <Text style={styles.sectionTitle}>A clear path for both sides</Text>
         </View>
-
-        <View style={[styles.newsGrid, isTablet && styles.newsGridTablet, isPhone && styles.newsGridPhone]}>
-          {latestNews.map((article) => (
-            <AppLink
-              href="/about"
-              key={article.id}
-              style={[styles.newsCard, isTablet && styles.newsCardTablet, isPhone && styles.newsCardPhone]}
-            >
-              <View style={styles.newsImageWrap}>
-                <Image
-                  source={{ uri: article.image }}
-                  style={styles.newsImage}
-                  resizeMode="cover"
-                />
-              </View>
-              <View style={styles.newsBody}>
-                <View style={styles.newsTagRow}>
-                  <View style={styles.newsTagPill}>
-                    <Text style={styles.newsTagPillText}>{article.tag}</Text>
-                  </View>
-                  <Text style={styles.newsTimeText}>{article.time}</Text>
-                </View>
-                <Text numberOfLines={2} style={styles.newsTitle}>
-                  {article.title}
-                </Text>
-              </View>
-            </AppLink>
-          ))}
-        </View>
+        <JourneyTrack />
       </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          5. TRUST — the problem, then the verification pipeline
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Why HomeNet listings are different</Text>
+        </View>
+        <ContrastColumns />
+        <View style={styles.sectionGap} />
+        <VerificationPipeline />
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          6. AI LISTING — describe it, HomeNet fills the fields
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <AiFlagshipSection />
+      </View>
+
+      {/* ─────────────────────────────────────────────────────────────
+          7. OWNER CTA — list your property
+      ───────────────────────────────────────────────────────────── */}
+      <OwnerListPropertySection />
+
+      {/* ─────────────────────────────────────────────────────────────
+          8. GUIDES & INSIGHTS — editorial, API-ready
+      ───────────────────────────────────────────────────────────── */}
+      <PropertyGuidesSection />
 
 
     </AppChrome>
@@ -546,6 +538,9 @@ const styles = StyleSheet.create({
   sectionSpacing: {
     marginTop: 40,
     width: "100%",
+  },
+  sectionGap: {
+    height: 24,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -588,89 +583,118 @@ const styles = StyleSheet.create({
   },
 
   /* 1. Hero Section */
-  heroContainer: {
+  heroBlock: {
     width: "100%",
-    borderRadius: 28,
-    borderWidth: 0.8,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    overflow: "hidden",
-    minHeight: 495,
   },
-  heroContainerPhone: {
-    borderRadius: 18,
-    minHeight: 420,
+  // Full-bleed: the photograph runs edge to edge, outside the page container.
+  heroPhoto: {
+    width: "100%",
+    overflow: "hidden",
+    minHeight: 520,
   },
   heroBg: {
     width: "100%",
-    minHeight: 495,
+    minHeight: 520,
     justifyContent: "center",
   },
-  heroContent: {
+  heroCopy: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
+    alignItems: "center",
     paddingHorizontal: 24,
-    paddingVertical: 56,
-    width: "100%",
-    maxWidth: 1100,
-    alignSelf: "center",
-    alignItems: "center",
+    paddingBottom: 96,
   },
-  heroContentPhone: {
+  heroCopyPhone: {
     paddingHorizontal: 16,
-    paddingVertical: 24,
-    width: "100%",
-    alignItems: "center",
+    paddingBottom: 72,
   },
-  heroTagPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "center",
-    gap: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-    marginBottom: 16,
-  },
-  heroTagText: {
-    color: "#FFFFFF",
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 18,
-  },
+  // Display weight is light on purpose: the photograph carries the volume.
   heroHeading: {
     color: "#FFFFFF",
-    fontFamily: fonts.headingExtraBold,
-    fontSize: 47.8,
-    fontWeight: "800",
-    lineHeight: 50.2,
-    letterSpacing: -0.95,
-    marginBottom: 12,
-    maxWidth: 900,
-    textAlign: "center",
-    alignSelf: "center",
-  },
-  heroHeadingPhone: {
-    fontSize: 27,
-    lineHeight: 33,
-    letterSpacing: -0.5,
-    marginBottom: 10,
-    maxWidth: "100%",
+    fontFamily: fonts.headingSemiBold,
+    fontSize: 64,
+    lineHeight: 70,
+    letterSpacing: -1.6,
     textAlign: "center",
   },
-  heroSubtitle: {
-    color: "rgba(255, 255, 255, 0.85)",
+
+  // The dock sits back inside the page gutter even though the photo does not.
+  dockGutter: {
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: layout.gutter,
+  },
+  dockGutterPhone: {
+    paddingHorizontal: layout.gutterPhone,
+  },
+
+  // The dock owns radius + shadow; the widget inside runs flush.
+  searchDock: {
+    width: "100%",
+    maxWidth: 940,
+    marginTop: -88,
+    borderRadius: 16,
+    overflow: "hidden",
+    ...(Platform.select({
+      web: { boxShadow: "0 28px 64px -24px rgba(11, 26, 23, 0.34)" },
+      default: {
+        shadowColor: "#0B1A17",
+        shadowOffset: { width: 0, height: 22 },
+        shadowOpacity: 0.26,
+        shadowRadius: 48,
+        elevation: 16,
+      },
+    }) as any),
+  },
+  searchDockPhone: {
+    marginTop: -56,
+    borderRadius: 12,
+  },
+
+  ownerBand: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 20,
+    paddingHorizontal: 28,
+    paddingVertical: 20,
+    backgroundColor: colors.ink,
+  },
+  ownerBandPhone: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+  },
+  ownerCopy: { flexShrink: 1, gap: 3 },
+  ownerTitle: {
+    color: "#FFFFFF",
+    fontFamily: fonts.headingBold,
+    fontSize: 17,
+  },
+  ownerSub: {
+    color: "rgba(255, 255, 255, 0.72)",
     fontFamily: fonts.regular,
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 24,
-    maxWidth: 780,
-    textAlign: "center",
-    alignSelf: "center",
+    fontSize: 14,
+    lineHeight: 20,
   },
-  heroSubtitlePhone: {
-    fontSize: 13.5,
-    lineHeight: 19,
-    marginBottom: 16,
-    textAlign: "center",
+  ownerCta: {
+    flexShrink: 0,
+    height: 46,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+  },
+  ownerCtaPhone: { height: 44 },
+  ownerCtaHovered: { backgroundColor: "rgba(255, 255, 255, 0.88)" },
+  ownerCtaText: {
+    color: colors.ink,
+    fontFamily: fonts.bold,
+    fontSize: 15,
   },
 
 

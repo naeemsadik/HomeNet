@@ -7,8 +7,8 @@ export default function Root({ children }: PropsWithChildren) {
       <head>
         <meta charSet="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
-        <meta content="AI-assisted property discovery and market insights in Bangladesh." name="description" />
-        <title>HomeNet | Find a home you can trust, priced by AI</title>
+        <meta content="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet." name="description" />
+        <title>HomeNet — Real Estate Marketplace with Verified Listings</title>
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <ScrollViewStyleReset />
@@ -41,9 +41,33 @@ export default function Root({ children }: PropsWithChildren) {
             outline-style: none !important;
             box-shadow: none !important;
           }
+
+          /* ─── Google Translate UI Cleanup ──────────────────────────────── */
+          .goog-te-banner-frame.skiptranslate,
+          .goog-te-banner-frame,
+          .goog-te-balloon-frame,
+          #goog-gt-tt,
+          .goog-tooltip,
+          .goog-tooltip:hover {
+            display: none !important;
+            visibility: hidden !important;
+          }
+          body {
+            top: 0px !important;
+            position: static !important;
+          }
+          .skiptranslate iframe {
+            display: none !important;
+          }
+          #google_translate_element {
+            display: none !important;
+          }
         ` }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <div id="google_translate_element" style={{ display: "none" }} />
+        {children}
+      </body>
     </html>
   );
 }

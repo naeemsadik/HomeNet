@@ -1,5 +1,5 @@
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colors, fonts, layout, shadow, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
@@ -39,6 +39,7 @@ import { router } from "expo-router";
 import { Brand } from "./Brand";
 import { LoginModal } from "./LoginModal";
 import { AiFinderModal } from "./AiFinderModal";
+import { LanguageToggle } from "./LanguageToggle";
 import { AppLink } from "./ui";
 import { Footer } from "./Footer";
 
@@ -65,7 +66,7 @@ const sidebarNav: {
   badge?: number;
   authGated?: boolean;
 }[] = [
-    { label: "Home", href: "/", icon: Home, key: "home" },
+    { label: "Home", href: "/home", icon: Home, key: "home" },
     { label: "Insights", href: "/market", icon: TrendingUp, key: "market" },
     { label: "Saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
     { label: "Profile", href: "/profile", icon: User, key: "profile", authGated: true },
@@ -163,7 +164,7 @@ function SideBar({
         </View>
         <Text style={styles.sidebarCardTitle}>List your property</Text>
         <Text style={styles.sidebarCardSubtitle}>
-          Get AI pricing & reach 2M+ buyers.
+          Free to list. Describe it in a sentence.
         </Text>
         <AppLink href="/sell" style={styles.postAdButton} onPress={onNavigate}>
           <Text style={styles.postAdButtonText}>Post an ad</Text>
@@ -186,12 +187,18 @@ function TopBar({
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
 
+    // Seekers-first: the two search intents lead, Saved follows. Everything
+    // else lives in the drawer (tablet/phone) or the footer.
     const topNavLinks: {
       label: string;
       href: string;
       key: string;
       authGated?: boolean;
-    }[] = [];
+    }[] = [
+      { label: "Buy", href: "/buy", key: "buy" },
+      { label: "Rent", href: "/rent", key: "rent" },
+      { label: "Saved", href: "/saved", key: "saved", authGated: true },
+    ];
 
   return (
     <SafeAreaView
@@ -239,12 +246,14 @@ function TopBar({
                 <Pressable
                   key={link.label}
                   onPress={handlePress}
-                  style={({ pressed }) => [
+                  style={({ pressed, hovered }: any) => [
                     styles.topNavLink,
+                    hovered && styles.topNavLinkHovered,
                     webPointer,
                     pressed && { opacity: 0.8 },
                   ]}
                   accessibilityRole="link"
+                  accessibilityState={{ selected: isSelected }}
                 >
                   <Text
                     style={[
@@ -262,6 +271,31 @@ function TopBar({
         ) : null}
 
         <View style={[styles.topRightActions, isPhone && styles.topRightActionsPhone]}>
+          {/* Language Toggle (ENG / BN) */}
+          <LanguageToggle compact={isPhone} />
+
+          {/* Owner path: present on every page, visually subordinate to search. */}
+          {!isPhone ? (
+            <Pressable
+              accessibilityLabel="List your property"
+              accessibilityRole="button"
+              onPress={() => {
+                if (user) router.push("/property/create" as any);
+                else
+                  useAuthModalStore
+                    .getState()
+                    .open(() => router.push("/property/create" as any));
+              }}
+              style={({ pressed }) => [
+                styles.listPropertyBtn,
+                webPointer,
+                pressed && { opacity: 0.85 },
+              ]}
+            >
+              <Text style={styles.listPropertyText}>List your property</Text>
+            </Pressable>
+          ) : null}
+
           {user ? (
             <>
               {/* Notification Button */}
@@ -410,7 +444,7 @@ function TopBar({
                             const confirmed = window.confirm("Are you sure you want to log out?");
                             if (confirmed) {
                               await logout();
-                              router.push("/");
+                              router.push("/home");
                             }
                           } else {
                             Alert.alert("Log Out", "Are you sure you want to log out?", [
@@ -420,7 +454,7 @@ function TopBar({
                                 style: "destructive",
                                 onPress: async () => {
                                   await logout();
-                                  router.push("/");
+                                  router.push("/home");
                                 },
                               },
                             ]);
@@ -485,7 +519,7 @@ function TopBar({
 function MobileNav({ active }: { active: ActivePage }) {
   const user = useAuthStore((s) => s.user);
   const links = [
-    { label: "Home", href: "/", icon: Home, selected: active === "home", authGated: false },
+    { label: "Home", href: "/home", icon: Home, selected: active === "home", authGated: false },
     {
       label: "Insights",
       href: "/market",
@@ -559,9 +593,15 @@ function MobileNav({ active }: { active: ActivePage }) {
 export function AppChrome({
   children,
   active,
+  bleed,
 }: {
   children: ReactNode;
   active: ActivePage;
+  /**
+   * Edge-to-edge content rendered above `children`, outside the page container.
+   * For full-bleed hero bands that must not inherit the 1240px gutter.
+   */
+  bleed?: ReactNode;
 }) {
   const { isTablet, isPhone } = useResponsive();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -576,6 +616,7 @@ export function AppChrome({
           showsVerticalScrollIndicator={false}
           style={{ width: "100%" }}
         >
+          {bleed ? <View style={styles.bleed}>{bleed}</View> : null}
           <View style={[styles.mainGutter, isPhone && styles.mainGutterPhone]}>
             <View style={[styles.main, isPhone && styles.mainPhone]}>{children}</View>
           </View>
@@ -750,41 +791,49 @@ const styles = StyleSheet.create({
   topbarSafe: {
     zIndex: 20,
     backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1.2,
+    borderBottomWidth: 1,
     borderBottomColor: "rgba(11, 26, 23, 0.08)",
     width: "100%",
+    ...(Platform.select({
+      web: { position: "sticky", top: 0 },
+      default: {},
+    }) as any),
   },
   topbar: {
     width: "100%",
-    maxWidth: 1600,
+    maxWidth: layout.containerMaxWidth,
     marginHorizontal: "auto",
-    minHeight: 74,
+    minHeight: layout.navHeight,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 32,
+    paddingHorizontal: layout.gutter,
     paddingVertical: 12,
     gap: 16,
   },
   topbarTablet: {
-    minHeight: 64,
-    paddingHorizontal: 16,
+    minHeight: layout.navHeightTablet,
+    paddingHorizontal: layout.gutterTablet,
   },
   topbarPhone: {
-    minHeight: 56,
-    paddingHorizontal: 8,
+    minHeight: layout.navHeightPhone,
+    paddingHorizontal: layout.gutterPhone,
     gap: 4,
   },
+  // Left and right flex equally so the centre block is optically centred
+  // regardless of how wide the brand or the action cluster becomes.
   topbarLeft: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "flex-start",
     gap: 12,
-    flexShrink: 0,
+    minWidth: 0,
   },
   topbarLeftPhone: {
     gap: 6,
   },
   topNavCenter: {
+    flexShrink: 0,
     flexDirection: "row",
     alignItems: "center",
     gap: 28,
@@ -792,7 +841,15 @@ const styles = StyleSheet.create({
   topNavLink: {
     position: "relative",
     paddingVertical: 10,
-    paddingHorizontal: 4,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    ...(Platform.select({
+      web: { transition: "background-color 0.15s ease" },
+      default: {},
+    }) as any),
+  },
+  topNavLinkHovered: {
+    backgroundColor: "rgba(11, 26, 23, 0.04)",
   },
   topNavLinkText: {
     fontFamily: fonts.semiBold,
@@ -899,14 +956,30 @@ const styles = StyleSheet.create({
     lineHeight: 11,
   },
   topRightActions: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "flex-end",
     gap: 12,
-    flexShrink: 0,
+    minWidth: 0,
   },
   topRightActionsPhone: {
     gap: 6,
+  },
+  listPropertyBtn: {
     flexShrink: 0,
+    height: 38,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: "#04cf92",
+  },
+  listPropertyText: {
+    color: "#FFFFFF",
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    fontWeight: "700",
   },
   rightmoveSignInBtn: {
     flexDirection: "row",
@@ -1277,9 +1350,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8FAF9",
   },
 
+  bleed: {
+    width: "100%",
+  },
+
+  // Same container as the navbar — alignment is structural, not tuned.
   mainGutter: {
     width: "100%",
-    maxWidth: 1665,
+    maxWidth: layout.containerMaxWidth,
     paddingTop: 16,
     paddingBottom: 48,
   },
@@ -1290,10 +1368,10 @@ const styles = StyleSheet.create({
 
   main: {
     width: "100%",
-    paddingHorizontal: 24,
+    paddingHorizontal: layout.gutter,
   },
   mainPhone: {
-    paddingHorizontal: 12,
+    paddingHorizontal: layout.gutterPhone,
   },
 
   /* Mobile bottom bar */

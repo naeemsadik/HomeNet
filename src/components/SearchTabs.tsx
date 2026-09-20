@@ -1,7 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { router, type Href } from "expo-router";
-import { fonts, webPointer } from "@/theme";
+import { colors, fonts, webPointer } from "@/theme";
 
 export type SearchTabType = "buy" | "rent" | "short-let";
 
@@ -9,7 +8,6 @@ interface SearchTabsProps {
   activeTab: SearchTabType;
   onChange: (tab: SearchTabType) => void;
   compact?: boolean;
-  variant?: "light" | "dark";
 }
 
 const TABS: { key: SearchTabType; label: string }[] = [
@@ -18,16 +16,9 @@ const TABS: { key: SearchTabType; label: string }[] = [
   { key: "short-let", label: "Short-let" },
 ];
 
-export function SearchTabs({
-  activeTab,
-  onChange,
-  compact = false,
-  variant = "dark",
-}: SearchTabsProps) {
-  const isDark = variant === "dark";
-
+export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {
   return (
-    <View style={[styles.container, compact && styles.containerCompact]}>
+    <View style={styles.row}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab.key;
         return (
@@ -35,138 +26,70 @@ export function SearchTabs({
             key={tab.key}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
-            accessibilityLabel={`${tab.label} tab`}
+            accessibilityLabel={`${tab.label} properties`}
             onPress={() => onChange(tab.key)}
-            style={[
-              styles.tabButton,
-              compact && styles.tabButtonCompact,
+            style={({ hovered }: any) => [
+              styles.tab,
+              compact && styles.tabCompact,
               webPointer,
+              hovered && !isActive && styles.tabHovered,
             ]}
           >
             <Text
               style={[
-                styles.tabText,
-                compact && styles.tabTextCompact,
-                isDark
-                  ? isActive
-                    ? styles.tabTextActiveDark
-                    : styles.tabTextInactiveDark
-                  : isActive
-                  ? styles.tabTextActiveLight
-                  : styles.tabTextInactiveLight,
+                styles.label,
+                compact && styles.labelCompact,
+                isActive && styles.labelActive,
               ]}
             >
               {tab.label}
             </Text>
-            {isActive ? (
-              <View
-                style={[
-                  styles.activeIndicator,
-                  isDark ? styles.activeIndicatorDark : styles.activeIndicatorLight,
-                  compact && styles.activeIndicatorCompact,
-                ]}
-              />
-            ) : null}
+            <View style={[styles.rule, isActive && styles.ruleActive]} />
           </Pressable>
         );
       })}
-
-      {/* Insights — navigates to /market instead of changing search tab */}
-      <Pressable
-        accessibilityRole="link"
-        accessibilityLabel="Insights page"
-        onPress={() => router.push("/market" as Href)}
-        style={[
-          styles.tabButton,
-          compact && styles.tabButtonCompact,
-          webPointer,
-        ]}
-      >
-        <Text
-          style={[
-            styles.tabText,
-            compact && styles.tabTextCompact,
-            isDark ? styles.tabTextInactiveDark : styles.tabTextInactiveLight,
-          ]}
-        >
-          Insights
-        </Text>
-      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  row: {
     flexDirection: "row",
-    alignItems: "center",
-    height: 48,
-    flexShrink: 1,
+    alignItems: "flex-end",
   },
-  containerCompact: {
-    height: 40,
+  tab: {
+    paddingTop: 4,
+    paddingBottom: 0,
+    marginRight: 32,
   },
-  tabButton: {
-    position: "relative",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100%",
+  tabCompact: {
+    marginRight: 22,
+  },
+  tabHovered: {
+    opacity: 0.7,
+  },
+  label: {
+    color: colors.muted,
+    fontFamily: fonts.medium,
+    fontSize: 17,
+    lineHeight: 24,
+  },
+  labelCompact: {
+    fontSize: 15,
+    lineHeight: 21,
+  },
+  // Weight carries the state; the rule only reinforces it.
+  labelActive: {
+    color: colors.greenOnLight,
+    fontFamily: fonts.bold,
+  },
+  rule: {
+    height: 2,
+    marginTop: 7,
+    borderRadius: 2,
     backgroundColor: "transparent",
-    flexShrink: 0,
   },
-  tabButtonCompact: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  tabText: {
-    fontSize: 16,
-    lineHeight: 22,
-    textAlign: "center",
-    fontFamily: fonts.medium,
-  },
-  tabTextCompact: {
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  tabTextActiveDark: {
-    color: "#FFFFFF",
-    fontFamily: fonts.bold,
-    fontWeight: "700",
-  },
-  tabTextInactiveDark: {
-    color: "rgba(255, 255, 255, 0.7)",
-    fontFamily: fonts.medium,
-    fontWeight: "500",
-  },
-  tabTextActiveLight: {
-    color: "#04cf92",
-    fontFamily: fonts.bold,
-    fontWeight: "700",
-  },
-  tabTextInactiveLight: {
-    color: "#5C6B66",
-    fontFamily: fonts.medium,
-    fontWeight: "500",
-  },
-  activeIndicator: {
-    position: "absolute",
-    bottom: 0,
-    left: 12,
-    right: 12,
-    height: 3,
-    borderRadius: 999,
-  },
-  activeIndicatorDark: {
-    backgroundColor: "#04cf92",
-  },
-  activeIndicatorLight: {
-    backgroundColor: "#04cf92",
-  },
-  activeIndicatorCompact: {
-    left: 8,
-    right: 8,
-    height: 2.5,
+  ruleActive: {
+    backgroundColor: colors.greenOnLight,
   },
 });

@@ -261,7 +261,7 @@ export function SellerProfileScreen() {
         } else {
           Alert.alert("Account Deleted", "Your account has been permanently deleted.");
         }
-        router.replace("/");
+        router.replace("/home");
       } catch (err: any) {
         Alert.alert("Error", err?.message || "Failed to delete account. Please try again.");
       } finally {
@@ -295,7 +295,7 @@ export function SellerProfileScreen() {
       } catch (err) {
         console.warn("Logout error:", err);
       }
-      router.replace("/");
+      router.replace("/home");
     };
 
     if (Platform.OS === "web") {

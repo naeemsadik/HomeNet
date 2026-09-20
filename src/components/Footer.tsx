@@ -105,9 +105,9 @@ export function Footer({ style }: FooterProps = {}) {
   ];
 
   const proBenefits = [
-    "Property Boosting (5x leads)",
+    "Property Boosting",
     "Priority Notice & Alerts",
-    "AI Valuation & Analytics",
+    "Listing Analytics",
     "Verified Agency Badge",
     "Direct WhatsApp Inquiries",
     "Dedicated Account Support",
@@ -173,7 +173,7 @@ export function Footer({ style }: FooterProps = {}) {
             <View style={styles.mobileDownloadTextWrap}>
               <Text style={styles.mobileDownloadHeading}>Download the Homenet app</Text>
               <Text style={styles.mobileDownloadSub}>
-                Explore, buy & rent properties with live AI valuation on Android.
+                Browse verified listings and contact owners directly, on Android.
               </Text>
             </View>
             <View style={styles.mobileDownloadBtnWrap}>
@@ -261,7 +261,7 @@ export function Footer({ style }: FooterProps = {}) {
 
           {/* Copyright notice */}
           <Text style={styles.footerCopyrightText}>
-            Copyright © 2026 HomeNet Group Limited. All rights reserved. Bangladesh's AI property marketplace.
+            Copyright © 2026 HomeNet Group Limited. All rights reserved.
           </Text>
         </View>
       </View>
@@ -370,7 +370,7 @@ export function Footer({ style }: FooterProps = {}) {
 
         {/* Copyright notice */}
         <Text style={styles.footerCopyrightText}>
-          Copyright © 2026 HomeNet Group Limited. All rights reserved. Bangladesh's AI property marketplace.
+          Copyright © 2026 HomeNet Group Limited. All rights reserved.
         </Text>
       </View>
     </View>

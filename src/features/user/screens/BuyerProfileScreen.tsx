@@ -191,7 +191,7 @@ export function BuyerProfileScreen() {
         setIsDeletingAccount(true);
         await deleteUser(user.id);
         await logout();
-        router.replace("/");
+        router.replace("/home");
         Alert.alert("Account Deleted", "Your account has been permanently removed.");
       } catch (err: any) {
         Alert.alert("Error", err?.message || "Failed to delete account. Please try again.");
@@ -230,7 +230,7 @@ export function BuyerProfileScreen() {
       } catch (err) {
         console.warn("Logout error:", err);
       }
-      router.replace("/");
+      router.replace("/home");
     };
 
     if (Platform.OS === "web") {
@@ -268,7 +268,7 @@ export function BuyerProfileScreen() {
                 if (router.canGoBack()) {
                   router.back();
                 } else {
-                  router.push("/");
+                  router.push("/home");
                 }
               }}
               style={({ pressed }) => [

@@ -48,7 +48,6 @@ import {
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink } from "@/components/ui";
-import { allProperties, propertyImages, searchPageListings } from "@/data/properties";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
 import { colors, fonts, shadow, webPointer } from "@/theme";
@@ -121,33 +120,7 @@ export function PropertyDetailScreen() {
       ? apiDetail.media.filter((m) => m.media_type === "image").map((m) => m.url)
       : [];
 
-    let images = rawImages;
-    if (images.length === 0) {
-      images = [
-        propertyImages.interior,
-        propertyImages.living,
-        propertyImages.bright,
-        propertyImages.kitchen,
-        propertyImages.apartment,
-        propertyImages.penthouse,
-        propertyImages.studio,
-        propertyImages.lobby,
-        propertyImages.tower,
-        propertyImages.house,
-        propertyImages.commercial,
-        propertyImages.skyline,
-      ];
-    } else if (images.length <= 8) {
-      // Ensure listing has at least 12 photos so the requested "+4 images" expansion feature is active
-      const extraDemos = [
-        propertyImages.interior,
-        propertyImages.living,
-        propertyImages.kitchen,
-        propertyImages.bright,
-      ];
-      const needed = Math.max(4, 12 - images.length);
-      images = [...images, ...extraDemos.slice(0, needed)];
-    }
+    const images = rawImages;
 
     const identity = apiDetail.user?.auth_identities?.[0];
     const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
@@ -166,7 +139,7 @@ export function PropertyDetailScreen() {
       pricePeriod: apiDetail.listing_type === "rent" ? "/mo" : "",
       isVerified: Boolean(apiDetail.is_verified),
       isBoosted: false,
-      score: (apiDetail as any).score ?? 85,
+      score: (apiDetail as any).score ?? null,
       bedrooms: Number((apiDetail as any).bedrooms ?? rawAmenities.bedrooms ?? 0),
       bathrooms: Number((apiDetail as any).bathrooms ?? rawAmenities.bathrooms ?? 0),
       areaSqft: apiDetail.area_size ? apiDetail.area_size.toLocaleString("en-BD") : null,
@@ -195,7 +168,7 @@ export function PropertyDetailScreen() {
           imageUrl: sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
           status: sim.status,
           views: (sim.view_count || 0).toLocaleString(),
-          score: (sim as any).score ?? 85,
+          score: (sim as any).score ?? null,
         };
       }),
     };

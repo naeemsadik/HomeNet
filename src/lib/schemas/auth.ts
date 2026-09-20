@@ -56,3 +56,35 @@ export const changePasswordSchema = z
   });
 
 export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
+
+// ─── Auth modal ────────────────────────────────────────────────────────────
+
+/**
+ * Sign-up inside the auth modal. No confirm-password field: the modal ships a
+ * show-password toggle instead, so a second entry adds friction without catching
+ * anything the toggle doesn't.
+ */
+export const signUpModalSchema = z.object({
+  full_name: z
+    .string()
+    .min(1, "Full name is required")
+    .refine((v) => v.trim().length >= 2, "Full name must be at least 2 characters"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Enter a valid email address"),
+  password: passwordBase,
+});
+
+export type AuthModalFormData = {
+  full_name?: string;
+  email: string;
+  password: string;
+};
+
+/** Resolver schema for the modal, which swaps between sign-in and sign-up. */
+export function authModalSchema(mode: "signin" | "signup") {
+  return mode === "signin"
+    ? loginSchema.extend({ full_name: z.string().optional() })
+    : signUpModalSchema;
+}

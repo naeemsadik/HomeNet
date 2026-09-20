@@ -121,7 +121,7 @@ export function SellerDashboardScreen() {
       const confirmed = window.confirm("Are you sure you want to log out?");
       if (confirmed) {
         logout();
-        router.replace("/");
+        router.replace("/home");
       }
       return;
     }
@@ -133,7 +133,7 @@ export function SellerDashboardScreen() {
         style: "destructive",
         onPress: () => {
           logout();
-          router.replace("/");
+          router.replace("/home");
         },
       },
     ]);

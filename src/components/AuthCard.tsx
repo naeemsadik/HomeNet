@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ActivityIndicator,
   Alert,
@@ -24,6 +26,7 @@ import {
   X,
 } from "lucide-react-native";
 import { useAuthStore } from "@/stores/authStore";
+import { authModalSchema, type AuthModalFormData } from "@/lib/schemas/auth";
 import { fonts, webPointer } from "@/theme";
 
 const authBuildingImage = require("../../assets/auth-hero-building.png");
@@ -162,17 +165,28 @@ export function AuthCard({
   style,
 }: AuthCardProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
 
   const { login, register, loading, error: storeError, clearError } = useAuthStore();
 
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AuthModalFormData>({
+    resolver: zodResolver(authModalSchema(mode)) as any,
+    defaultValues: { full_name: "", email: "", password: "" },
+    mode: "onSubmit",
+  });
+
+  // Rules differ per mode, so a stale value from the other tab must not survive.
+  useEffect(() => {
+    reset({ full_name: "", email: "", password: "" });
+  }, [mode, reset]);
+
   const handleTabSwitch = (newMode: AuthMode) => {
     setMode(newMode);
-    setFormError(null);
     clearError();
   };
 
@@ -187,50 +201,20 @@ export function AuthCard({
     );
   };
 
-  const handleSubmit = async () => {
-    setFormError(null);
+  const onSubmit = async (data: AuthModalFormData) => {
+    const email = data.email.trim();
+    const ok =
+      mode === "signin"
+        ? await login({ email, password: data.password })
+        : await register({
+            full_name: (data.full_name ?? "").trim(),
+            email,
+            password: data.password,
+          });
 
-    const cleanEmail = email.trim();
-    if (!cleanEmail) {
-      setFormError("Please enter your email address");
-      return;
-    }
-
-    if (!password) {
-      setFormError("Please enter your password");
-      return;
-    }
-
-    if (mode === "signin") {
-      const ok = await login({ email: cleanEmail, password });
-      if (ok) {
-        if (onClose) onClose();
-        if (onSuccess) onSuccess();
-      }
-    } else {
-      const cleanName = fullName.trim();
-      if (!cleanName) {
-        setFormError("Please enter your full name");
-        return;
-      }
-      if (cleanName.length < 2) {
-        setFormError("Full name must be at least 2 characters");
-        return;
-      }
-      if (password.length < 8) {
-        setFormError("Password must be at least 8 characters");
-        return;
-      }
-
-      const ok = await register({
-        full_name: cleanName,
-        email: cleanEmail,
-        password,
-      });
-      if (ok) {
-        if (onClose) onClose();
-        if (onSuccess) onSuccess();
-      }
+    if (ok) {
+      if (onClose) onClose();
+      if (onSuccess) onSuccess();
     }
   };
 
@@ -283,7 +267,7 @@ export function AuthCard({
 
             {/* Subtitle (Node 282:12) */}
             <Text style={styles.brandSubtitle}>
-              Bangladesh's AI property marketplace
+              Property marketplace · Bangladesh
             </Text>
           </LinearGradient>
         </ImageBackground>
@@ -356,78 +340,108 @@ export function AuthCard({
           <View style={styles.dividerLine} />
         </View>
 
-        {/* Error Message */}
-        {formError || storeError ? (
+        {/* Server-side error; field errors render inline below each input. */}
+        {storeError ? (
           <View style={styles.errorAlert}>
-            <Text style={styles.errorText}>
-              {formError || storeError}
-            </Text>
+            <Text style={styles.errorText}>{storeError}</Text>
           </View>
         ) : null}
 
         {/* Form Inputs (Node 282:37) */}
         <View style={styles.formContainer}>
           {mode === "signup" ? (
-            <View style={styles.inputWrap}>
-              <User color="#5C6B66" size={16} style={styles.inputLeftIcon} />
-              <TextInput
-                autoCapitalize="words"
-                onChangeText={(val) => {
-                  setFullName(val);
-                  if (formError) setFormError(null);
-                  if (storeError) clearError();
-                }}
-                placeholder="Full name"
-                placeholderTextColor="rgba(11, 26, 23, 0.5)"
-                style={styles.textInput}
-                value={fullName}
-              />
+            <View>
+              <View style={[styles.inputWrap, errors.full_name && styles.inputWrapError]}>
+                <User color="#5C6B66" size={16} style={styles.inputLeftIcon} />
+                <Controller
+                  control={control}
+                  name="full_name"
+                  render={({ field: { onChange, value } }) => (
+                    <TextInput
+                      autoCapitalize="words"
+                      onChangeText={(val) => {
+                        onChange(val);
+                        if (storeError) clearError();
+                      }}
+                      placeholder="Full name"
+                      placeholderTextColor="rgba(11, 26, 23, 0.5)"
+                      style={styles.textInput}
+                      value={value ?? ""}
+                    />
+                  )}
+                />
+              </View>
+              {errors.full_name ? (
+                <Text style={styles.fieldError}>{errors.full_name.message}</Text>
+              ) : null}
             </View>
           ) : null}
 
-          <View style={styles.inputWrap}>
-            <Mail color="#5C6B66" size={16} style={styles.inputLeftIcon} />
-            <TextInput
-              autoCapitalize="none"
-              keyboardType="email-address"
-              onChangeText={(val) => {
-                setEmail(val);
-                if (formError) setFormError(null);
-                if (storeError) clearError();
-              }}
-              placeholder="Email address"
-              placeholderTextColor="rgba(11, 26, 23, 0.5)"
-              style={styles.textInput}
-              value={email}
-            />
+          <View>
+            <View style={[styles.inputWrap, errors.email && styles.inputWrapError]}>
+              <Mail color="#5C6B66" size={16} style={styles.inputLeftIcon} />
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="email-address"
+                    onChangeText={(val) => {
+                      onChange(val);
+                      if (storeError) clearError();
+                    }}
+                    placeholder="Email address"
+                    placeholderTextColor="rgba(11, 26, 23, 0.5)"
+                    style={styles.textInput}
+                    value={value ?? ""}
+                  />
+                )}
+              />
+            </View>
+            {errors.email ? (
+              <Text style={styles.fieldError}>{errors.email.message}</Text>
+            ) : null}
           </View>
 
-          <View style={styles.inputWrap}>
-            <Lock color="#5C6B66" size={16} style={styles.inputLeftIcon} />
-            <TextInput
-              autoCapitalize="none"
-              onChangeText={(val) => {
-                setPassword(val);
-                if (formError) setFormError(null);
-                if (storeError) clearError();
-              }}
-              placeholder={mode === "signin" ? "Password" : "Create password"}
-              placeholderTextColor="rgba(11, 26, 23, 0.5)"
-              secureTextEntry={!showPassword}
-              style={styles.textInput}
-              value={password}
-            />
-            <Pressable
-              onPress={() => setShowPassword((prev) => !prev)}
-              style={styles.inputRightAction}
-              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? (
-                <EyeOff color="#5C6B66" size={16} />
-              ) : (
-                <Eye color="#5C6B66" size={16} />
-              )}
-            </Pressable>
+          <View>
+            <View style={[styles.inputWrap, errors.password && styles.inputWrapError]}>
+              <Lock color="#5C6B66" size={16} style={styles.inputLeftIcon} />
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onChangeText={(val) => {
+                      onChange(val);
+                      if (storeError) clearError();
+                    }}
+                    placeholder={mode === "signin" ? "Password" : "Create password"}
+                    placeholderTextColor="rgba(11, 26, 23, 0.5)"
+                    secureTextEntry={!showPassword}
+                    style={styles.textInput}
+                    value={value ?? ""}
+                  />
+                )}
+              />
+              <Pressable
+                onPress={() => setShowPassword((prev) => !prev)}
+                style={styles.inputRightAction}
+                accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff color="#5C6B66" size={16} />
+                ) : (
+                  <Eye color="#5C6B66" size={16} />
+                )}
+              </Pressable>
+            </View>
+            {errors.password ? (
+              <Text style={styles.fieldError}>{errors.password.message}</Text>
+            ) : null}
           </View>
 
           {mode === "signin" ? (
@@ -443,7 +457,7 @@ export function AuthCard({
           {/* Submit Button (Node 282:60 - 44px height, rounded 20px) */}
           <Pressable
             disabled={loading}
-            onPress={handleSubmit}
+            onPress={handleSubmit(onSubmit)}
             style={[styles.submitButton, loading && { opacity: 0.7 }, webPointer]}
           >
             {loading ? (
@@ -484,8 +498,8 @@ export function AuthCard({
             <FigmaSparkleIcon />
           </View>
           <Text style={styles.promoText}>
-            Join 240,000+ users getting AI-powered property insights tailored
-            to your searches.
+            Listing a property? Paste a plain description and HomeNet fills the
+            details for you.
           </Text>
         </View>
       </ContentWrapper>
@@ -690,6 +704,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
+  },
+  inputWrapError: {
+    borderColor: "#DC2626",
+    backgroundColor: "#FEF2F2",
+  },
+  fieldError: {
+    marginTop: 6,
+    marginLeft: 4,
+    color: "#DC2626",
+    fontFamily: fonts.medium,
+    fontSize: 12,
   },
   inputLeftIcon: {
     marginRight: 10,

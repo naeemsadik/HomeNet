@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
+import { goToPostAuthDestination } from "@/lib/postAuth";
 import { AuthCard } from "./AuthCard";
 
 export function AuthModal() {
@@ -23,7 +24,9 @@ export function AuthModal() {
           onClose={close}
           onSuccess={() => {
             close();
-            onSuccess?.();
+            // Intent wins; fall back to role-based routing for a bare sign-in.
+            if (onSuccess) onSuccess();
+            else goToPostAuthDestination();
           }}
           showClose
         />

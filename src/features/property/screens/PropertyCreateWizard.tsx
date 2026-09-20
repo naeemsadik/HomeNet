@@ -375,7 +375,7 @@ export function PropertyCreateWizard() {
       const confirmed = window.confirm("Are you sure you want to log out?");
       if (confirmed) {
         logout();
-        router.replace("/");
+        router.replace("/home");
       }
       return;
     }
@@ -386,7 +386,7 @@ export function PropertyCreateWizard() {
         style: "destructive",
         onPress: () => {
           logout();
-          router.replace("/");
+          router.replace("/home");
         },
       },
     ]);
