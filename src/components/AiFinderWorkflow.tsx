@@ -372,7 +372,6 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
                   {matches.map((property) => (
                     <PropertyCard
                       key={property.id}
-                      mode={goal === "Rent a home" ? "rent" : "buy"}
                       onPress={() => {
                         if (isModal && onClose) onClose();
                         router.push(`/property/${property.id}` as Href);

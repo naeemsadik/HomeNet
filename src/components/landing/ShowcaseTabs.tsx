@@ -28,7 +28,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { BrowserFrame } from "./BrowserFrame";
 import { PhoneFrame } from "./PhoneFrame";
 import { previewProperties } from "@/data/landingPreview";
-import { PropertyCard } from "@/features/property/components/PropertyCard";
+import { PropertyCard } from "@/components/PropertyCard";
 import { SellerStatCard } from "@/features/seller/components/SellerStatCard";
 import { landingCopy } from "@/content/landingCopy";
 

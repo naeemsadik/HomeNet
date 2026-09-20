@@ -1,35 +1,18 @@
 import { useEffect, useState } from "react";
-import { Platform, useWindowDimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 
 export function useResponsive() {
-  const { width: rnWidth, height: rnHeight } = useWindowDimensions();
-  const isWeb = Platform.OS === "web";
-
-  /**
-   * `useWindowDimensions` does not reliably re-emit on browser resize under
-   * react-native-web here, which froze every breakpoint at first-paint width.
-   * On web we track the viewport directly; native keeps the RN hook.
-   */
-  const [webSize, setWebSize] = useState<{ w: number; h: number } | null>(null);
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!isWeb || typeof window === "undefined") return;
+    setMounted(true);
+  }, []);
 
-    const sync = () => setWebSize({ w: window.innerWidth, h: window.innerHeight });
-    sync();
-
-    window.addEventListener("resize", sync);
-    window.addEventListener("orientationchange", sync);
-    return () => {
-      window.removeEventListener("resize", sync);
-      window.removeEventListener("orientationchange", sync);
-    };
-  }, [isWeb]);
-
-  // The static export renders with no window. 1200 keeps the first paint
-  // desktop-shaped; the effect above corrects it on mount.
-  const width = isWeb ? (webSize?.w ?? 1200) : rnWidth;
-  const height = isWeb ? (webSize?.h ?? 800) : rnHeight;
+  // On client web, window dimensions are available immediately so responsive states are accurate on initial render
+  const isClientWeb = typeof window !== "undefined";
+  const width = isClientWeb ? windowWidth : (mounted ? windowWidth : 1200);
+  const height = isClientWeb ? windowHeight : (mounted ? windowHeight : 800);
 
   const isPhone = width <= 600;
   const isTablet = width <= 820;

@@ -24,7 +24,6 @@ import {
   type FilterState,
 } from "@/components/AdvancedFiltersModal";
 import { RightmoveFilterCard, type RightmoveFilters } from "@/components/RightmoveFilterCard";
-import { toPropertyCard } from "@/features/property/adapters/toPropertyCard";
 import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
 import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -182,13 +181,8 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
     refresh,
   } = usePropertyFeed(apiFilters);
 
-  // Return mapped API properties without fallback mock data
-  const results = useMemo(() => {
-    if (apiProperties && apiProperties.length > 0) {
-      return apiProperties.map(toPropertyCard);
-    }
-    return [];
-  }, [apiProperties]);
+  // PropertyCard consumes the API shape directly — no adapter needed.
+  const results = apiProperties ?? [];
 
   const handleResetFilters = () => {
     setRightmoveFilters({
@@ -280,9 +274,8 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
               >
                 {results.map((prop) => (
                   <PropertyCard
-                    imageHeight={isPhone ? 180 : 220}
+                    imageHeight={isPhone ? 180 : 210}
                     key={prop.id}
-                    mode={mode}
                     onSave={() => toggleSaved(prop.id)}
                     property={prop}
                     saved={savedIds.includes(prop.id)}
@@ -293,10 +286,8 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" }) {
               <View style={styles.listLayout}>
                 {results.map((prop) => (
                   <PropertyCard
-                    imageHeight={isPhone ? 180 : undefined}
+                    imageHeight={isPhone ? 180 : 210}
                     key={prop.id}
-                    list={!isPhone}
-                    mode={mode}
                     onSave={() => toggleSaved(prop.id)}
                     property={prop}
                     saved={savedIds.includes(prop.id)}

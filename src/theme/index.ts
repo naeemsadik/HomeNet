@@ -14,24 +14,38 @@ import { radiusTokens } from "./radius";
 import { layoutTokens } from "./layout";
 import { Platform, type TextStyle, type ViewStyle } from "react-native";
 
+/**
+ * Shorthand aliases over `colorTokens`. Same roles, shorter names.
+ * New code should prefer the role names on `colorTokens` directly.
+ */
 export const colors = {
-  ink: colorTokens.textPrimary,
-  black: colorTokens.textBlack,
-  muted: colorTokens.textSecondary,
+  ink: colorTokens.ink,
+  black: colorTokens.ink,
+  body: colorTokens.body,
+  muted: colorTokens.muted,
+  subtle: colorTokens.subtle,
   line: colorTokens.divider,
-  soft: colorTokens.backgroundAlt,
-  softBlue: colorTokens.verifiedLight,
-  green: colorTokens.primary,
-  greenDark: colorTokens.primary,
-  greenLight: colorTokens.primaryLight,
-  greenOnLight: colorTokens.primaryOnLight,
-  blue: colorTokens.verified,
-  blueLight: colorTokens.verifiedLight,
-  orange: colorTokens.orange,
-  orangeLight: colorTokens.orangeLight,
-  white: colorTokens.background,
-  coral: colorTokens.error,
-  sidebar: colorTokens.sidebar,
+  soft: colorTokens.canvas,
+  sunken: colorTokens.surfaceSunken,
+  softBlue: colorTokens.infoSurface,
+  /** Fill only — see `greenOnLight` for text. */
+  green: colorTokens.brand,
+  /** Was identical to `green`, so every "dark" state was a no-op. */
+  greenDark: colorTokens.brandHover,
+  greenLight: colorTokens.brandSurface,
+  greenOnLight: colorTokens.brandText,
+  blue: colorTokens.info,
+  blueLight: colorTokens.infoSurface,
+  orange: colorTokens.notification,
+  orangeLight: colorTokens.notificationSurface,
+  warning: colorTokens.warningText,
+  warningLight: colorTokens.warningSurface,
+  white: colorTokens.surface,
+  /** Now a real red rather than the shared orange. */
+  coral: colorTokens.errorText,
+  error: colorTokens.errorText,
+  errorLight: colorTokens.errorSurface,
+  sidebar: colorTokens.surface,
 } as const;
 
 export const fonts = fontTokens;
