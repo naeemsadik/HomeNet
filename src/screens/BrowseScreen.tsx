@@ -28,7 +28,7 @@ import { PropertySkeletonFeed } from "@/features/property/components/PropertySke
 import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import type { PropertyType } from "@/types/api";
 
 export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
@@ -196,7 +196,14 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
   } = usePropertyFeed(apiFilters);
 
   // PropertyCard consumes the API shape directly — no adapter needed.
-  const results = apiProperties ?? [];
+  const feed = apiProperties ?? [];
+
+  // The API currently ignores `status` when `listing_type` is set, so a sold
+  // query comes back full of active listings. Presenting those as completed
+  // sales would be a lie, so the client re-asserts the filter: if the server
+  // did not honour it, this empties out and the honest gate below shows.
+  const isSoldView = rightmoveFilters.purpose === "sold";
+  const results = isSoldView ? feed.filter((p) => p.status === "sold") : feed;
 
   const handleResetFilters = () => {
     setRightmoveFilters({
@@ -321,9 +328,18 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
               </View>
             ) : null}
           </View>
+        ) : isSoldView ? (
+          <View style={styles.emptyContainer}>
+            <Search color={colorTokens.brand} size={32} />
+            <Text style={styles.emptyTitle}>No sold prices published yet</Text>
+            <Text style={styles.emptySubtitle}>
+              HomeNet publishes a sale here once it has completed and been
+              confirmed. Nothing has been confirmed for this area so far.
+            </Text>
+          </View>
         ) : (
           <View style={styles.emptyContainer}>
-            <Search color="#04cf92" size={32} />
+            <Search color={colorTokens.brand} size={32} />
             <Text style={styles.emptyTitle}>No matching properties</Text>
             <Text style={styles.emptySubtitle}>
               Try broadening your search query, adjusting your budget, or clearing some filters.
