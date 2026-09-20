@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Children, useState } from "react";
-import type { DimensionValue } from "react-native";
 import { Platform, ScrollView, StyleSheet, View } from "react-native";
+import type { DimensionValue } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 
 export function PropertyGrid({

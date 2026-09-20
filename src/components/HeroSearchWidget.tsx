@@ -54,7 +54,8 @@ export function HeroSearchWidget({
       onSearch(query, activeTab, selectedArea);
       return;
     }
-    const target = activeTab === "buy" ? "/buy" : "/rent";
+    const target =
+      activeTab === "sold" ? "/sold" : activeTab === "buy" ? "/buy" : "/rent";
     const params = new URLSearchParams();
     if (query.trim()) params.set("query", query.trim());
     if (activeTab === "short-let") params.set("subtype", "short-let");
@@ -66,8 +67,8 @@ export function HeroSearchWidget({
   const placeholder =
     activeTab === "short-let"
       ? "Search short-let and serviced flats"
-      : activeTab === "rent"
-        ? "Gulshan, Banani, Dhanmondi, or area…"
+      : activeTab === "sold"
+        ? "See what sold in an area…"
         : "Gulshan, Banani, Dhanmondi, or area…";
 
   return (
