@@ -99,22 +99,55 @@ function PropertyResult({
 }
 
 export function HomeScreen() {
-  const { isPhone, isTablet, isCompact, width } = useResponsive();
+  const {
+    isPhone,
+    isTablet,
+    isCompact,
+    isDesktop,
+    isWide,
+    isUltrawide,
+    isLargeScreen,
+    isTall,
+    width,
+    height,
+  } = useResponsive();
 
-  // Hero scales in steps rather than snapping from 34px straight to 64px.
+  // Hero scales seamlessly across mobile, tablet, laptop, large desktop, and ultrawide:
   const heroType = isPhone
     ? { fontSize: 34, lineHeight: 39, letterSpacing: -0.7 }
     : isTablet
       ? { fontSize: 42, lineHeight: 47, letterSpacing: -1.0 }
       : isCompact
-        ? { fontSize: 52, lineHeight: 58, letterSpacing: -1.3 }
-        : { fontSize: 64, lineHeight: 70, letterSpacing: -1.6 };
+        ? { fontSize: 50, lineHeight: 56, letterSpacing: -1.3 }
+        : isUltrawide
+          ? { fontSize: 72, lineHeight: 80, letterSpacing: -2.0 }
+          : isWide
+            ? { fontSize: 66, lineHeight: 74, letterSpacing: -1.8 }
+            : { fontSize: 60, lineHeight: 68, letterSpacing: -1.6 };
 
+  // Viewport-aware hero metrics that scale with screen height and width:
+  // On laptops (height ~750), minHeight ~600 keeps the search dock right at the fold.
+  // On large 1080p/1440p monitors (height 900-1200+), minHeight scales proportionally to maintain
+  // the architectural photo's aspect ratio without squishing and prevents the next section from peeking halfway.
   const heroMetrics = isPhone
     ? { minHeight: 416, dockOffset: -56, copyPad: 64, topPad: 60 }
     : isTablet
       ? { minHeight: 494, dockOffset: -64, copyPad: 78, topPad: 68 }
-      : { minHeight: 592, dockOffset: -88, copyPad: 96, topPad: 76 };
+      : isCompact
+        ? { minHeight: 560, dockOffset: -80, copyPad: 88, topPad: 72 }
+        : isLargeScreen || isTall
+          ? {
+              minHeight: Math.max(680, Math.min(840, Math.round(height * 0.72))),
+              dockOffset: -104,
+              copyPad: 110,
+              topPad: 88,
+            }
+          : {
+              minHeight: Math.max(580, Math.min(640, Math.round(height * 0.68))),
+              dockOffset: -88,
+              copyPad: 96,
+              topPad: 76,
+            };
   const popularQuery = useQuery({
     queryKey: ["properties", "home", "popular"],
     queryFn: () =>
@@ -263,6 +296,7 @@ export function HomeScreen() {
               style={[
                 styles.heroCopy,
                 isPhone && styles.heroCopyPhone,
+                isLargeScreen && styles.heroCopyLarge,
                 { paddingBottom: heroMetrics.copyPad },
               ]}
             >
@@ -278,6 +312,7 @@ export function HomeScreen() {
           style={[
             styles.searchDock,
             isPhone && styles.searchDockPhone,
+            isLargeScreen && styles.searchDockLarge,
             { marginTop: heroMetrics.dockOffset },
           ]}
         >
@@ -530,6 +565,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 96,
   },
+  heroCopyLarge: {
+    maxWidth: 1100,
+  },
   heroCopyPhone: {
     paddingHorizontal: 16,
     paddingBottom: 72,
@@ -571,6 +609,10 @@ const styles = StyleSheet.create({
         elevation: 16,
       },
     }) as any),
+  },
+  searchDockLarge: {
+    maxWidth: 1060,
+    borderRadius: 20,
   },
   searchDockPhone: {
     marginTop: -56,

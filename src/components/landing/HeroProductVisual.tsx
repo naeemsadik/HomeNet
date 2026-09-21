@@ -25,7 +25,7 @@ import { previewProperties } from "@/data/landingPreview";
 import { PropertyCard } from "@/components/PropertyCard";
 
 export function HeroProductVisual() {
-  const { isPhone, isTablet, isCompact } = useResponsive();
+  const { isPhone, isTablet, isCompact, isLargeScreen, isTall } = useResponsive();
 
   const handleOpenApp = () => {
     router.push("/buy" as any);
@@ -39,17 +39,22 @@ export function HeroProductVisual() {
       onPress={handleOpenApp}
       accessibilityRole="link"
       accessibilityLabel="Open live properties in HomeNet"
-      style={[styles.container, webPointer]}
+      style={[
+        styles.container,
+        (isLargeScreen || isTall) && styles.containerLarge,
+        webPointer,
+      ]}
     >
       {/* On desktop and tablet: full browser frame with phone overlay */}
       {!isPhone ? (
-        <View style={styles.compositionWrap}>
+        <View style={[styles.compositionWrap, isLargeScreen && styles.compositionWrapLarge]}>
           {/* Main Desktop Browser Frame */}
           <BrowserFrame
             url="homenet.com.bd/buy?city=Dhaka"
             style={[
               styles.browserFrame,
               isCompact && styles.browserFrameCompact,
+              isLargeScreen && styles.browserFrameLarge,
             ]}
             contentStyle={styles.browserBody}
           >
@@ -161,15 +166,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 28,
   },
+  containerLarge: {
+    marginTop: 44,
+  },
   compositionWrap: {
     position: "relative",
     width: "100%",
     maxWidth: 920,
     alignItems: "center",
   },
+  compositionWrapLarge: {
+    maxWidth: 1080,
+  },
   browserFrame: {
     width: "100%",
     maxWidth: 860,
+  },
+  browserFrameLarge: {
+    maxWidth: 1020,
   },
   browserFrameCompact: {
     maxWidth: 740,

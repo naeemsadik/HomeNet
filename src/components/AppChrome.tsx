@@ -184,7 +184,7 @@ function TopBar({
   onOpenMenu?: () => void;
   isCrystal?: boolean;
 }) {
-  const { isTablet, isPhone } = useResponsive();
+  const { isTablet, isPhone, containerMaxWidth } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -214,6 +214,7 @@ function TopBar({
           styles.topbar,
           isTablet && styles.topbarTablet,
           isPhone && styles.topbarPhone,
+          { maxWidth: containerMaxWidth },
         ]}
       >
         {/* Left: Brand + Hamburger (mobile) */}
@@ -628,7 +629,7 @@ export function AppChrome({
   active: ActivePage;
   bleed?: ReactNode;
 }) {
-  const { isTablet, isPhone } = useResponsive();
+  const { isTablet, isPhone, containerMaxWidth } = useResponsive();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -671,7 +672,13 @@ export function AppChrome({
           style={{ width: "100%" }}
         >
           {bleed ? <View style={styles.bleed}>{bleed}</View> : null}
-          <View style={[styles.mainGutter, isPhone && styles.mainGutterPhone]}>
+          <View
+            style={[
+              styles.mainGutter,
+              isPhone && styles.mainGutterPhone,
+              { maxWidth: containerMaxWidth },
+            ]}
+          >
             <View style={[styles.main, isPhone && styles.mainPhone]}>{children}</View>
           </View>
           <Footer />

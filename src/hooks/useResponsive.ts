@@ -17,7 +17,14 @@ export function useResponsive() {
   const isPhone = width <= 600;
   const isTablet = width <= 820;
   const isCompact = width <= 1100;
+  const isDesktop = width > 1100 && width <= 1500;
+  const isWide = width > 1500 && width <= 1920;
+  const isUltrawide = width > 1920;
+  const isLargeScreen = width > 1500;
+  const isTall = height >= 900;
+
   const sidebarWidth = isCompact ? 204 : 226;
+  const containerMaxWidth = isUltrawide ? 1600 : isWide ? 1440 : isDesktop ? 1280 : 1200;
 
   return {
     width,
@@ -25,7 +32,13 @@ export function useResponsive() {
     isPhone,
     isTablet,
     isCompact,
+    isDesktop,
+    isWide,
+    isUltrawide,
+    isLargeScreen,
+    isTall,
+    containerMaxWidth,
     sidebarWidth,
-    contentPadding: isPhone ? 14 : isTablet ? 18 : 36,
+    contentPadding: isPhone ? 14 : isTablet ? 18 : isWide ? 44 : 36,
   };
 }
