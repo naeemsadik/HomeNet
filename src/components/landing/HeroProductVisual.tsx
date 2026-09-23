@@ -19,6 +19,7 @@ import {
 } from "lucide-react-native";
 import { fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { cdnImage } from "@/lib/cloudinaryImage";
 import { BrowserFrame } from "./BrowserFrame";
 import { PhoneFrame } from "./PhoneFrame";
 import { previewProperties } from "@/data/landingPreview";
@@ -92,7 +93,7 @@ export function HeroProductVisual() {
               <View style={styles.mobileDetailPreview}>
                 <View style={styles.mobileDetailImageWrap}>
                   <Image
-                    source={{ uri: p1.media?.[0]?.url }}
+                    source={{ uri: cdnImage(p1.media?.[0]?.url, 640, 280) }}
                     style={styles.mobileDetailImage}
                     resizeMode="cover"
                   />
@@ -127,7 +128,7 @@ export function HeroProductVisual() {
             <View style={styles.mobileDetailPreview}>
               <View style={styles.mobileDetailImageWrap}>
                 <Image
-                  source={{ uri: p1.media?.[0]?.url }}
+                  source={{ uri: cdnImage(p1.media?.[0]?.url, 640, 280) }}
                   style={styles.mobileDetailImage}
                   resizeMode="cover"
                 />

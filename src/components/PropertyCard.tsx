@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck } from "lucide-react-native";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { cdnImage } from "@/lib/cloudinaryImage";
 import type { Property } from "@/features/property/types/property";
 
 export type PropertyCardVariant = "standard" | "feature";
@@ -74,7 +75,7 @@ export function PropertyCard({
 }: PropertyCardProps) {
   const { isPhone } = useResponsive();
 
-  const photo =
+  const original =
     property.media?.find((m) => m.media_type === "image")?.url ??
     property.media?.[0]?.url ??
     null;
@@ -95,6 +96,11 @@ export function PropertyCard({
   };
 
   const mediaHeight = imageHeight ?? (isFeature ? (isPhone ? 300 : 360) : isPhone ? 190 : 210);
+
+  // Widest a card gets is ~600 (half of the 1240 container); a feature card
+  // spans it. Fetch at 2x that for retina, and pass the height so the crop
+  // matches the box instead of arriving at the wrong aspect ratio.
+  const photo = cdnImage(original, isFeature ? 1240 : 1200, mediaHeight * 2);
 
   const verifiedBadge = property.is_verified ? (
     <View style={styles.badgeRow} pointerEvents="none">

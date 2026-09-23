@@ -39,6 +39,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { toApiError } from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
 import { colors, fonts, layout, webPointer } from "@/theme";
+import { HERO_IMAGE_URL } from "@/lib/heroImage";
 
 
 
@@ -49,9 +50,7 @@ import { colors, fonts, layout, webPointer } from "@/theme";
  * min 2400×1400, a lived-in room (not an exterior tower), natural daylight, with
  * the left-to-centre area uncluttered so the headline sits on calm pixels.
  */
-const HERO_IMAGE = {
-  uri: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=80",
-};
+const HERO_IMAGE = { uri: HERO_IMAGE_URL };
 
 function PropertyResult({
   children,

@@ -1,5 +1,6 @@
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { PropsWithChildren } from "react";
+import { HERO_IMAGE_URL } from "@/lib/heroImage";
 
 export default function Root({ children }: PropsWithChildren) {
   return (
@@ -11,6 +12,19 @@ export default function Root({ children }: PropsWithChildren) {
         <title>HomeNet — Real Estate Marketplace with Verified Listings</title>
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        {/*
+          The homepage LCP element is a CSS background image, which the preload
+          scanner cannot see until the bundle has rendered. Announcing it here
+          starts the download in parallel with the JS instead of after it.
+          The URL must stay identical to HomeScreen's — hence the shared constant.
+        */}
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link
+          rel="preload"
+          as="image"
+          fetchPriority="high"
+          href={HERO_IMAGE_URL}
+        />
         <ScrollViewStyleReset />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
