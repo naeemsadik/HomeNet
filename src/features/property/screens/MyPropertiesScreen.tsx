@@ -50,6 +50,7 @@ import { Footer } from "@/components/Footer";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
 import type { Property } from "../types/property";
+import { cdnImage } from "@/lib/cloudinaryImage";
 
 export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
 
@@ -86,7 +87,11 @@ export function MyPropertiesScreen() {
       id: p.id,
       title: p.title || "Untitled Property",
       location: [p.area?.name, (p.area as any)?.city].filter(Boolean).join(", ") || p.address || "Location unavailable",
-      imageUrl: p.media?.find((media) => media.media_type === "image")?.url || p.media?.[0]?.url,
+      imageUrl: cdnImage(
+        p.media?.find((media) => media.media_type === "image")?.url || p.media?.[0]?.url,
+        700,
+        460,
+      ),
       type: p.subtype || p.type || "Apartment",
       listingType: p.listing_type === "rent" ? "For Rent" : "For Sale",
       price: `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${p.listing_type === "rent" ? "/mo" : ""}`,

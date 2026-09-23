@@ -31,6 +31,7 @@ import { previewProperties } from "@/data/landingPreview";
 import { PropertyCard } from "@/components/PropertyCard";
 import { SellerStatCard } from "@/features/seller/components/SellerStatCard";
 import { landingCopy } from "@/content/landingCopy";
+import { cdnImage } from "@/lib/cloudinaryImage";
 
 export function ShowcaseTabs() {
   const { isPhone, isTablet } = useResponsive();
@@ -63,7 +64,7 @@ export function ShowcaseTabs() {
   return (
     <View style={styles.container}>
       {/* Horizontal Tabs Selection */}
-      <View style={styles.tabsRow}>
+      <View accessibilityRole="tablist" style={styles.tabsRow}>
         {tabs.map((tab) => {
           const selected = activeTab === tab.id;
           return (
@@ -131,7 +132,7 @@ export function ShowcaseTabs() {
               {/* Image Gallery Mock */}
               <View style={styles.detailGalleryMock}>
                 <Image
-                  source={{ uri: p1.media?.[0]?.url }}
+                  source={{ uri: cdnImage(p1.media?.[0]?.url, 1000, 440) }}
                   style={styles.detailMainImage}
                   resizeMode="cover"
                 />

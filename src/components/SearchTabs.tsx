@@ -20,7 +20,7 @@ const TABS: { key: SearchTabType; label: string }[] = [
 
 export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {
   return (
-    <View style={styles.row}>
+    <View accessibilityRole="tablist" style={styles.row}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab.key;
         return (

@@ -47,9 +47,11 @@ import {
   View,
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
+import { PageMeta } from "@/components/PageMeta";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
+import { cdnImage } from "@/lib/cloudinaryImage";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 import Svg, { Path } from "react-native-svg";
 import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
@@ -120,7 +122,11 @@ export function PropertyDetailScreen() {
       ? apiDetail.media.filter((m) => m.media_type === "image").map((m) => m.url)
       : [];
 
-    const images = rawImages;
+    // The gallery is the largest image on the page, so it gets a generous
+    // width — but still a bounded one, not the 3 MB original.
+    const images = rawImages
+      .map((url) => cdnImage(url, 1600, 1000))
+      .filter((url): url is string => Boolean(url));
 
     const identity = apiDetail.user?.auth_identities?.[0];
     const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
@@ -165,7 +171,11 @@ export function PropertyDetailScreen() {
           location: [sim.area?.name, (sim.area as any)?.city].filter(Boolean).join(", ") || sim.address || "Dhaka",
           price: `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? sim.price.toLocaleString() : sim.price}`,
           specs: `${Number(simAmenities.bedrooms ?? 0)} Beds · ${Number(simAmenities.bathrooms ?? 0)} Baths · ${sim.area_size?.toLocaleString() ?? "N/A"} ${sim.area_unit || "sqft"}`,
-          imageUrl: sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
+          imageUrl: cdnImage(
+        sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
+        700,
+        460,
+      ),
           status: sim.status,
           views: (sim.view_count || 0).toLocaleString(),
           score: (sim as any).score ?? null,
@@ -333,6 +343,12 @@ export function PropertyDetailScreen() {
 
   return (
     <AppChrome active="property">
+      {/* The listing itself is the page title — that is what a search result
+          for this URL should read. */}
+      <PageMeta
+        title={`${property.title} — ${property.location} | HomeNet`}
+        description={`${property.listingType} at ${property.priceCurrency}${property.price}${property.pricePeriod}. ${property.address}.`}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.scrollBody,

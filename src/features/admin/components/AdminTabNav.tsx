@@ -41,7 +41,7 @@ export function AdminTabNav({ active, onChange, userRoles }: AdminTabNavProps) {
   });
 
   return (
-    <View style={styles.container}>
+    <View accessibilityRole="tablist" style={styles.container}>
       {visibleTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = active === tab.key;
