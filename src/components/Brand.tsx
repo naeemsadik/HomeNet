@@ -12,7 +12,7 @@ import { AppLink } from "./ui";
  * `translate="no"` and add the `notranslate` class directly on the DOM node
  * via a ref after mount.
  */
-function useNoTranslate<T extends HTMLElement>() {
+function useNoTranslate<T = any>() {
   const ref = useRef<T>(null);
   useEffect(() => {
     if (Platform.OS !== "web" || !ref.current) return;
