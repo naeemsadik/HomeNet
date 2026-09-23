@@ -17,17 +17,21 @@ function getCookie(name: string): string | null {
   return match ? decodeURIComponent(match[2]) : null;
 }
 
-function setCookie(name: string, value: string, days: number = 365) {
+function setCookie(name: string, value: string) {
   if (Platform.OS !== "web" || typeof document === "undefined") return;
-  const d = new Date();
-  d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-  const expires = "expires=" + d.toUTCString();
   const domain = window.location.hostname;
-  
-  // Set for current path & root path, also set without domain for localhost
-  document.cookie = `${name}=${value};${expires};path=/`;
+  document.cookie = `${name}=${value};path=/;`;
   if (domain && domain !== "localhost") {
-    document.cookie = `${name}=${value};${expires};path=/;domain=.${domain}`;
+    document.cookie = `${name}=${value};path=/;domain=.${domain};`;
+  }
+}
+
+function clearCookie(name: string) {
+  if (Platform.OS !== "web" || typeof document === "undefined") return;
+  const domain = window.location.hostname;
+  document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  if (domain && domain !== "localhost") {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=.${domain};`;
   }
 }
 
@@ -39,7 +43,7 @@ function getInitialLanguage(): SupportedLanguage {
     const cookie = getCookie(COOKIE_NAME);
     if (cookie && cookie.includes("/bn")) return "bn";
   } catch {
-    // ignore storage errors
+    // ignore
   }
   return "en";
 }
@@ -50,23 +54,35 @@ function applyGoogleTranslation(targetLang: SupportedLanguage) {
   try {
     localStorage.setItem("homenet_lang", targetLang);
   } catch {
-    // ignore storage errors
+    // ignore
   }
 
-  const transValue = targetLang === "bn" ? "/en/bn" : "/en/en";
-  setCookie(COOKIE_NAME, transValue);
+  if (targetLang === "bn") {
+    setCookie(COOKIE_NAME, "/en/bn");
+  } else {
+    clearCookie(COOKIE_NAME);
+    setCookie(COOKIE_NAME, "/en/en");
+  }
 
-  // The widget is no longer loaded on boot, so the first switch has to pull it
-  // in. If it is already present we can drive its select directly; otherwise
-  // the cookie is set and a reload brings the page back translated.
   const selectEl = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
   if (selectEl) {
-    selectEl.value = targetLang;
-    selectEl.dispatchEvent(new Event("change", { bubbles: true }));
-  } else {
-    ensureGoogleTranslateScript();
-    window.location.reload();
+    if (targetLang === "bn") {
+      selectEl.value = "bn";
+      if (typeof selectEl.onchange === "function") {
+        selectEl.onchange(new Event("change"));
+      }
+      selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+      return;
+    } else {
+      // Switching to English: Google Translate script does not reliably un-translate live DOM nodes
+      // without restoring original or reloading with cleared cookie.
+      // Clear select & reload cleanly for 100% accurate, fast restoration
+      window.location.reload();
+      return;
+    }
   }
+
+  window.location.reload();
 }
 
 export const useLanguageStore = create<LanguageState>((set, get) => ({
@@ -82,20 +98,9 @@ export const useLanguageStore = create<LanguageState>((set, get) => ({
   },
 }));
 
-/**
- * Loads the Google Translate widget. Idempotent.
- *
- * This used to run on every visit, costing ~105 KiB (60 KiB of it unused), a
- * 57 ms long task and a non-composited animation from its spinner — for a
- * feature most visitors never touch. It is now called only when the visitor
- * actually switches language, or on boot for someone who already reads in
- * Bangla (see `shouldLoadTranslateOnBoot`), since their page has to come back
- * translated rather than in English.
- */
 export function ensureGoogleTranslateScript() {
   if (Platform.OS !== "web" || typeof document === "undefined") return;
 
-  // Setup Google Translate Init Function
   (window as any).googleTranslateElementInit = () => {
     if ((window as any).google && (window as any).google.translate) {
       new (window as any).google.translate.TranslateElement(
@@ -110,22 +115,17 @@ export function ensureGoogleTranslateScript() {
     }
   };
 
-  // Inject Script if not already loaded
   const existingScript = document.getElementById("google-translate-script");
   if (!existingScript) {
     const script = document.createElement("script");
     script.id = "google-translate-script";
     script.type = "text/javascript";
-    script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     script.async = true;
     document.body.appendChild(script);
   }
 }
 
-/**
- * True when the visitor's stored preference is Bangla, so the widget must be
- * present on first paint for the page to render in the language they chose.
- */
 export function shouldLoadTranslateOnBoot(): boolean {
-  return getInitialLanguage() === "bn";
+  return true;
 }
