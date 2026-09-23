@@ -1,7 +1,27 @@
+import { useEffect, useRef } from "react";
 import { Home } from "lucide-react-native";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { colors, fonts } from "@/theme";
 import { AppLink } from "./ui";
+
+/**
+ * Mark a DOM node (and all its descendants) as untranslatable.
+ *
+ * React Native Web strips unknown HTML props like `translate` and `className`,
+ * so the only reliable way to shield text from Google Translate is to set
+ * `translate="no"` and add the `notranslate` class directly on the DOM node
+ * via a ref after mount.
+ */
+function useNoTranslate<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    if (Platform.OS !== "web" || !ref.current) return;
+    const el = ref.current as unknown as HTMLElement;
+    el.setAttribute("translate", "no");
+    el.classList.add("notranslate");
+  }, []);
+  return ref;
+}
 
 export function Brand({
   compact = false,
@@ -19,6 +39,7 @@ export function Brand({
   const isLarge = size === "large";
   const isCompact = compact || size === "compact";
   const isLight = variant === "light";
+  const brandRef = useNoTranslate<View>();
 
   return (
     <AppLink
@@ -40,16 +61,18 @@ export function Brand({
           strokeWidth={2}
         />
       </View>
-      <Text
-        style={[
-          styles.text,
-          isCompact && styles.textCompact,
-          isLarge && styles.textLarge,
-          isLight && { color: "#FFFFFF" },
-        ]}
-      >
-        Home<Text style={{ color: "#04cf92" }}>net</Text>
-      </Text>
+      <View ref={brandRef}>
+        <Text
+          style={[
+            styles.text,
+            isCompact && styles.textCompact,
+            isLarge && styles.textLarge,
+            isLight && { color: "#FFFFFF" },
+          ]}
+        >
+          Home<Text style={{ color: "#04cf92" }}>net</Text>
+        </Text>
+      </View>
     </AppLink>
   );
 }
