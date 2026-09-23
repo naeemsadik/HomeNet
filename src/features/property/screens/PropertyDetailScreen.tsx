@@ -47,6 +47,7 @@ import {
   View,
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
+import { PageMeta } from "@/components/PageMeta";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
@@ -342,6 +343,12 @@ export function PropertyDetailScreen() {
 
   return (
     <AppChrome active="property">
+      {/* The listing itself is the page title — that is what a search result
+          for this URL should read. */}
+      <PageMeta
+        title={`${property.title} — ${property.location} | HomeNet`}
+        description={`${property.listingType} at ${property.priceCurrency}${property.price}${property.pricePeriod}. ${property.address}.`}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.scrollBody,

@@ -20,7 +20,8 @@ import { AuthModal } from "@/components/AuthModal";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
-import { initGoogleTranslateScript } from "@/utils/language";
+import { ensureGoogleTranslateScript, shouldLoadTranslateOnBoot } from "@/utils/language";
+import { PageMeta } from "@/components/PageMeta";
 
 // Keyboard focus ring. Not colorTokens.primary (#04cf92), which sits at 2.03:1
 // on white and fails the 3:1 WCAG 1.4.11 minimum for a focus indicator.
@@ -91,7 +92,11 @@ export default function RootLayout() {
         "font-size: 16px; color: #3b82f6;",
       );
 
-      initGoogleTranslateScript();
+      // Only visitors who already read in Bangla pay for the translate
+      // widget up front; for everyone else it loads on first use.
+      if (shouldLoadTranslateOnBoot()) {
+        ensureGoogleTranslateScript();
+      }
     }
 
     setUnauthorizedHandler(() => {
@@ -107,6 +112,13 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
+        {/* Default document title. Routes that render their own PageMeta
+            override this; without it, any route lacking one would ship the
+            empty <title> that Expo Router emits by default. */}
+        <PageMeta
+          title="HomeNet — Verified Property Listings in Bangladesh"
+          description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
+        />
         <StatusBar style="dark" />
         <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
         <AuthModal />

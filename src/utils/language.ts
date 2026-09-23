@@ -56,13 +56,15 @@ function applyGoogleTranslation(targetLang: SupportedLanguage) {
   const transValue = targetLang === "bn" ? "/en/bn" : "/en/en";
   setCookie(COOKIE_NAME, transValue);
 
-  // Trigger Google Translate Select Element if present
+  // The widget is no longer loaded on boot, so the first switch has to pull it
+  // in. If it is already present we can drive its select directly; otherwise
+  // the cookie is set and a reload brings the page back translated.
   const selectEl = document.querySelector(".goog-te-combo") as HTMLSelectElement | null;
   if (selectEl) {
     selectEl.value = targetLang;
     selectEl.dispatchEvent(new Event("change", { bubbles: true }));
   } else {
-    // Fallback: reload page so Google Translate widget picks up the cookie
+    ensureGoogleTranslateScript();
     window.location.reload();
   }
 }
@@ -80,7 +82,17 @@ export const useLanguageStore = create<LanguageState>((set, get) => ({
   },
 }));
 
-export function initGoogleTranslateScript() {
+/**
+ * Loads the Google Translate widget. Idempotent.
+ *
+ * This used to run on every visit, costing ~105 KiB (60 KiB of it unused), a
+ * 57 ms long task and a non-composited animation from its spinner — for a
+ * feature most visitors never touch. It is now called only when the visitor
+ * actually switches language, or on boot for someone who already reads in
+ * Bangla (see `shouldLoadTranslateOnBoot`), since their page has to come back
+ * translated rather than in English.
+ */
+export function ensureGoogleTranslateScript() {
   if (Platform.OS !== "web" || typeof document === "undefined") return;
 
   // Setup Google Translate Init Function
@@ -108,4 +120,12 @@ export function initGoogleTranslateScript() {
     script.async = true;
     document.body.appendChild(script);
   }
+}
+
+/**
+ * True when the visitor's stored preference is Bangla, so the widget must be
+ * present on first paint for the page to render in the language they chose.
+ */
+export function shouldLoadTranslateOnBoot(): boolean {
+  return getInitialLanguage() === "bn";
 }

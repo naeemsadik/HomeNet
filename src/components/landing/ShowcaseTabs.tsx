@@ -64,7 +64,7 @@ export function ShowcaseTabs() {
   return (
     <View style={styles.container}>
       {/* Horizontal Tabs Selection */}
-      <View style={styles.tabsRow}>
+      <View accessibilityRole="tablist" style={styles.tabsRow}>
         {tabs.map((tab) => {
           const selected = activeTab === tab.id;
           return (

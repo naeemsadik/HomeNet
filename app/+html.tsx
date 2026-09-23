@@ -9,7 +9,9 @@ export default function Root({ children }: PropsWithChildren) {
         <meta charSet="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <meta content="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet." name="description" />
-        <title>HomeNet — Real Estate Marketplace with Verified Listings</title>
+        {/* The title is supplied per route via PageMeta (expo-router/head),
+            which fills Expo Router's own react-helmet tag. A static <title>
+            here would be a second, competing title element. */}
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         {/*
@@ -26,9 +28,18 @@ export default function Root({ children }: PropsWithChildren) {
           href={HERO_IMAGE_URL}
         />
         <ScrollViewStyleReset />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+        {/*
+          Inter and Plus Jakarta Sans are bundled and registered by useFonts in
+          _layout.tsx, under the family names Inter_400Regular,
+          PlusJakartaSans_700Bold and so on — which is what all ~675 fonts.*
+          token call sites resolve to.
+
+          The Google Fonts stylesheet that used to sit here registered a second,
+          differently-named copy ("Inter", "Plus Jakarta Sans") that only this
+          file's base CSS rule ever referenced. It downloaded both families
+          again and blocked first paint for ~200 ms to do it. Removed: the
+          bundled copies are the ones the app actually renders with.
+        */}
         <style dangerouslySetInnerHTML={{ __html: `
           html, body, #root {
             height: 100%;
@@ -36,7 +47,7 @@ export default function Root({ children }: PropsWithChildren) {
             margin: 0;
             overflow-x: hidden;
             background: #f8faf9;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter_400Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
           }
