@@ -1,10 +1,30 @@
-import { ArrowRight, BookOpen, ImageOff } from "lucide-react-native";
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ArrowRight, BookOpen, ExternalLink } from "lucide-react-native";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Linking,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { router } from "expo-router";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, radius, webPointer } from "@/theme";
 import { usePropertyGuides } from "../hooks/usePropertyGuides";
 import type { PropertyGuide } from "../types/news";
+import { GUIDE_FALLBACK_IMAGE, resolveGuideImage } from "../utils/guideImageStrategy";
+
+/** Category switcher tabs requested for the homepage section. */
+type GuideTab = "All" | "Market News" | "Legal & Docs" | "Buyer & Seller";
+const GUIDE_TABS: GuideTab[] = [
+  "All",
+  "Market News",
+  "Legal & Docs",
+  "Buyer & Seller",
+];
 
 /** Topics the section will carry once the guides source is connected. */
 const PLANNED_TOPICS = [
@@ -16,12 +36,41 @@ const PLANNED_TOPICS = [
 
 function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boolean }) {
   const { isPhone } = useResponsive();
+  const isRss = guide.sourceType === "rss";
+
+  const resolvedUrl = useMemo(
+    () => guide.imageUrl || resolveGuideImage(guide),
+    [guide.imageUrl, guide.id, guide.slug, guide.category, guide.title, guide.sourceType],
+  );
+  const [hasError, setHasError] = useState(false);
+  const displayUri = hasError ? GUIDE_FALLBACK_IMAGE : resolvedUrl;
+
+  useEffect(() => {
+    setHasError(false);
+  }, [resolvedUrl]);
+
+  const handleImageError = () => {
+    setHasError(true);
+  };
+
+  const handlePress = () => {
+    if (isRss && (guide.sourceUrl || guide.href)) {
+      const targetUrl = guide.sourceUrl || guide.href;
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        window.open(targetUrl, "_blank", "noopener,noreferrer");
+      } else {
+        void Linking.openURL(targetUrl);
+      }
+      return;
+    }
+    router.push(guide.href as never);
+  };
 
   return (
     <Pressable
       accessibilityRole="link"
-      accessibilityLabel={`${guide.category}: ${guide.title}`}
-      onPress={() => router.push(guide.href as never)}
+      accessibilityLabel={`${isRss ? guide.sourceName || "External News" : "HomeNet Guide"} - ${guide.category}: ${guide.title}`}
+      onPress={handlePress}
       style={({ pressed, hovered }: any) => [
         styles.card,
         featured && !isPhone && styles.cardFeatured,
@@ -31,24 +80,40 @@ function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boole
       ]}
     >
       <View style={[styles.thumb, featured && !isPhone && styles.thumbFeatured]}>
-        {guide.imageUrl ? (
-          <Image
-            source={{ uri: guide.imageUrl }}
-            style={styles.thumbImage}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={styles.thumbPlaceholder}>
-            <ImageOff color={colors.muted} size={20} />
-          </View>
-        )}
+        <Image
+          source={{ uri: displayUri }}
+          style={styles.thumbImage}
+          resizeMode="cover"
+          onError={handleImageError}
+        />
       </View>
 
-      <View style={styles.cardBody}>
+      <View
+        style={[
+          styles.cardBody,
+          featured && !isPhone && styles.cardBodyFeatured,
+        ]}
+      >
         <View style={styles.metaRow}>
+          {/* Source Attribution Badge */}
+          {isRss ? (
+            <View style={styles.rssSourcePill}>
+              <Text numberOfLines={1} style={styles.rssSourceText}>
+                {guide.sourceName || "Market News"}
+              </Text>
+              <ExternalLink color="#1D4ED8" size={11} strokeWidth={2.2} />
+            </View>
+          ) : (
+            <View style={styles.homeNetPill}>
+              <Text style={styles.homeNetPillText}>HomeNet Guide</Text>
+            </View>
+          )}
+
+          {/* Category Pill */}
           <View style={styles.categoryPill}>
             <Text style={styles.categoryText}>{guide.category}</Text>
           </View>
+
           <Text style={styles.readTime}>{guide.readTime}</Text>
         </View>
 
@@ -60,7 +125,7 @@ function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boole
         </Text>
 
         {featured && !isPhone && guide.excerpt ? (
-          <Text numberOfLines={2} style={styles.cardExcerpt}>
+          <Text numberOfLines={3} style={styles.cardExcerpt}>
             {guide.excerpt}
           </Text>
         ) : null}
@@ -71,25 +136,55 @@ function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boole
 
 export function PropertyGuidesSection() {
   const { isPhone, isTablet } = useResponsive();
-  const { data, isLoading, isError } = usePropertyGuides(4);
+  const [activeTab, setActiveTab] = useState<GuideTab>("All");
+  const { data, isLoading, isError } = usePropertyGuides({ limit: 12 });
 
-  const items = data?.items ?? [];
+  const allItems = data?.items ?? [];
+
+  // Filter items client-side according to active category tab
+  const filteredItems = useMemo(() => {
+    if (activeTab === "Market News") {
+      return allItems.filter(
+        (item) =>
+          item.category === "Market" ||
+          item.category === "Developments" ||
+          item.category === "Investment" ||
+          item.sourceType === "rss",
+      );
+    }
+    if (activeTab === "Legal & Docs") {
+      return allItems.filter(
+        (item) => item.category === "Legal" || item.category === "Ownership",
+      );
+    }
+    if (activeTab === "Buyer & Seller") {
+      return allItems.filter(
+        (item) =>
+          item.category === "Buying" ||
+          item.category === "Selling" ||
+          item.category === "Renting",
+      );
+    }
+    return allItems;
+  }, [allItems, activeTab]);
+
+  const items = filteredItems.slice(0, 4);
   const [lead, ...rest] = items;
 
   return (
     <View style={styles.section}>
       <View style={[styles.header, isPhone && styles.headerPhone]}>
         <View style={styles.headerCopy}>
-          <Text style={styles.eyebrow}>Guides & insights</Text>
+          <Text style={styles.eyebrow}>Blogs & Real Estate News</Text>
           <Text style={[styles.title, isPhone && styles.titlePhone]}>
-            Property advice for Bangladesh
+            Property advice & market updates
           </Text>
         </View>
 
-        {items.length > 0 ? (
+        {allItems.length > 0 ? (
           <Pressable
             accessibilityRole="link"
-            onPress={() => router.push("/about" as never)}
+            onPress={() => router.push("/guides" as never)}
             style={({ hovered }: any) => [styles.seeAll, hovered && { opacity: 0.7 }, webPointer]}
           >
             <Text style={styles.seeAllText}>See all guides</Text>
@@ -98,11 +193,42 @@ export function PropertyGuidesSection() {
         ) : null}
       </View>
 
+      {/* Category Switcher Tabs */}
+      <View style={[styles.tabBar, isPhone && styles.tabBarPhone]}>
+        {GUIDE_TABS.map((tab) => {
+          const isActive = activeTab === tab;
+          return (
+            <Pressable
+              key={tab}
+              onPress={() => setActiveTab(tab)}
+              style={({ hovered }: any) => [
+                styles.tabChip,
+                isActive && styles.tabChipActive,
+                hovered && !isActive && styles.tabChipHovered,
+                webPointer,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={`Filter by ${tab}`}
+              accessibilityState={{ selected: isActive }}
+            >
+              <Text
+                style={[
+                  styles.tabChipText,
+                  isActive && styles.tabChipTextActive,
+                ]}
+              >
+                {tab}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
       {isLoading ? (
         <View style={styles.stateBox}>
           <ActivityIndicator color={colors.green} size="small" />
         </View>
-      ) : isError || items.length === 0 ? (
+      ) : isError || allItems.length === 0 ? (
         // No guides source yet. Say so plainly rather than shipping filler.
         <View style={styles.emptyPanel}>
           <View style={styles.emptyIconWell}>
@@ -120,6 +246,24 @@ export function PropertyGuidesSection() {
               </View>
             ))}
           </View>
+        </View>
+      ) : items.length === 0 ? (
+        // Empty state when filtering a tab with 0 results
+        <View style={styles.emptyFilteredPanel}>
+          <Text style={styles.emptyFilteredTitle}>No articles in this category yet</Text>
+          <Text style={styles.emptyFilteredCopy}>
+            We are actively preparing new market reports and guides for this section.
+          </Text>
+          <Pressable
+            onPress={() => setActiveTab("All")}
+            style={({ hovered }: any) => [
+              styles.resetTabBtn,
+              hovered && { opacity: 0.8 },
+              webPointer,
+            ]}
+          >
+            <Text style={styles.resetTabBtnText}>Show all guides & news</Text>
+          </Pressable>
         </View>
       ) : (
         <View
@@ -158,7 +302,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     justifyContent: "space-between",
     gap: 16,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   headerPhone: {
     flexDirection: "column",
@@ -190,6 +334,43 @@ const styles = StyleSheet.create({
     color: colors.greenOnLight,
     fontFamily: fonts.bold,
     fontSize: 14,
+  },
+
+  /* Category Switcher Tabs */
+  tabBar: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 20,
+  },
+  tabBarPhone: {
+    gap: 6,
+    marginBottom: 16,
+  },
+  tabChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: radius.pill,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  tabChipActive: {
+    backgroundColor: colors.ink,
+    borderColor: colors.ink,
+  },
+  tabChipHovered: {
+    borderColor: "rgba(11,26,23,0.24)",
+    backgroundColor: colors.soft,
+  },
+  tabChipText: {
+    color: colors.muted,
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+  },
+  tabChipTextActive: {
+    color: colors.white,
+    fontFamily: fonts.bold,
   },
 
   grid: { flexDirection: "row", gap: 20, width: "100%" },
@@ -231,16 +412,47 @@ const styles = StyleSheet.create({
   },
 
   cardBody: { flex: 1, minWidth: 0, gap: 6, justifyContent: "center" },
-  metaRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  categoryPill: {
+  cardBodyFeatured: { padding: 18, gap: 8 },
+  metaRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 },
+
+  /* Badge Styles */
+  homeNetPill: {
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: radius.pill,
     backgroundColor: colors.greenLight,
   },
-  categoryText: {
+  homeNetPillText: {
     color: colors.greenOnLight,
     fontFamily: fonts.bold,
+    fontSize: 11,
+  },
+  rssSourcePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radius.pill,
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1,
+    borderColor: "rgba(34,81,214,0.16)",
+  },
+  rssSourceText: {
+    color: "#1D4ED8",
+    fontFamily: fonts.bold,
+    fontSize: 11,
+    maxWidth: 140,
+  },
+  categoryPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radius.pill,
+    backgroundColor: colors.soft,
+  },
+  categoryText: {
+    color: colors.muted,
+    fontFamily: fonts.semiBold,
     fontSize: 11,
   },
   readTime: {
@@ -276,6 +488,39 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.line,
+  },
+  emptyFilteredPanel: {
+    width: "100%",
+    alignItems: "center",
+    gap: 8,
+    padding: 28,
+    borderRadius: radius.md,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.line,
+  },
+  emptyFilteredTitle: {
+    color: colors.ink,
+    fontFamily: fonts.headingBold,
+    fontSize: 16,
+  },
+  emptyFilteredCopy: {
+    color: colors.muted,
+    fontFamily: fonts.regular,
+    fontSize: 13.5,
+    textAlign: "center",
+  },
+  resetTabBtn: {
+    marginTop: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colors.soft,
+  },
+  resetTabBtnText: {
+    color: colors.greenOnLight,
+    fontFamily: fonts.semiBold,
+    fontSize: 12.5,
   },
   emptyIconWell: {
     width: 48,
@@ -319,3 +564,4 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
   },
 });
+
