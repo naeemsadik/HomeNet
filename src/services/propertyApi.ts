@@ -17,6 +17,13 @@ export async function getProperties(params: PropertyFilters = {}) {
   return data;
 }
 
+export async function getSoldProperties(params: PropertyFilters = {}) {
+  const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>("/v1/properties/sold", {
+    params,
+  });
+  return data;
+}
+
 export async function getAdminProperties(params: PropertyFilters = {}) {
   const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>(
     "/v1/properties/admin",
