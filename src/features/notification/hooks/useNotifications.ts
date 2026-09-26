@@ -7,18 +7,22 @@ import { fetchNotifications, fetchUnreadCount, markAllRead, markAsRead } from ".
  * Notifications are per signed-in user; nothing is fetched for visitors. That
  * matters beyond saving requests: a 401 from these endpoints would otherwise
  * run the app's session-expired handling on every poll.
+ *
+ * The user id is part of every cache key. Logging out does not clear the
+ * query cache, so without it the next person to sign in on the same browser
+ * would briefly see the previous user's notifications.
  */
-function useSignedIn() {
-  return useAuthStore((state) => Boolean(state.user));
+function useSignedInUserId() {
+  return useAuthStore((state) => state.user?.id ?? null);
 }
 
 export function useNotifications(
   audience: NotificationAudience = "user",
   { limit = 20, enabled = true }: { limit?: number; enabled?: boolean } = {},
 ) {
-  const signedIn = useSignedIn();
+  const userId = useSignedInUserId();
   return useInfiniteQuery({
-    queryKey: ["notifications", audience, "list", limit],
+    queryKey: ["notifications", userId, audience, "list", limit],
     queryFn: ({ pageParam }) => fetchNotifications({ page: pageParam, limit, audience }),
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage.data) return undefined;
@@ -26,16 +30,16 @@ export function useNotifications(
       return allPages.length * pageSize < total ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
-    enabled: signedIn && enabled,
+    enabled: userId !== null && enabled,
   });
 }
 
 export function useUnreadCount(audience: NotificationAudience = "user") {
-  const signedIn = useSignedIn();
+  const userId = useSignedInUserId();
   return useQuery({
-    queryKey: ["notifications", audience, "unread-count"],
+    queryKey: ["notifications", userId, audience, "unread-count"],
     queryFn: () => fetchUnreadCount(audience),
-    enabled: signedIn,
+    enabled: userId !== null,
     // Polling rather than a socket: a minute's delay is fine for approvals and
     // price drops, and TanStack pauses it while the tab is in the background.
     refetchInterval: 60_000,
