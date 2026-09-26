@@ -13,7 +13,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 
 export interface RightmoveFilters {
   radius: string; // "0", "1", "3", "5", "10", "20"
-  propertyType: string; // "all", "apartment", "house", "commercial", "land", "short-let"
+  propertyType: string; // "all" or an API PropertyType: "residential", "commercial", "land", "parking"
   addedToSite: string; // "", "24h", "3d", "7d", "14d"
   includeSold: boolean;
   verifiedOnly: boolean;
@@ -43,12 +43,16 @@ const RADIUS_OPTIONS = [
   { label: "+ 20 km", value: "20" },
 ];
 
+// Values are the API's `PropertyType` enum. "Apartment" and "house" are
+// subtypes, not types: sending them as `type` makes the API reject the whole
+// search with a 400. They come back as their own options once the API can
+// filter by subtype (docs/BACKEND_REQUIREMENTS.md).
 const PROPERTY_TYPE_OPTIONS = [
   { label: "Any", value: "all" },
-  { label: "Apartment / Flat", value: "apartment" },
-  { label: "House / Villa", value: "house" },
+  { label: "Flats & houses", value: "residential" },
   { label: "Commercial", value: "commercial" },
   { label: "Land / Plot", value: "land" },
+  { label: "Parking / Garage", value: "parking" },
 ];
 
 const ADDED_TO_SITE_OPTIONS = [

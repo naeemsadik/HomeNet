@@ -32,6 +32,23 @@ import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import type { PropertyType } from "@/types/api";
 
+/**
+ * Maps a `?type=` URL value onto the API's PropertyType enum. Older links and
+ * bookmarks carry the subtype names "apartment" and "house", which the API
+ * rejects as a type; they are folded into "residential" so those links still
+ * open a working search instead of an error.
+ */
+const API_PROPERTY_TYPES = ["residential", "commercial", "land", "parking"];
+const LEGACY_RESIDENTIAL_TYPES = ["apartment", "flat", "house", "villa"];
+
+function toPropertyTypeFilter(raw?: string): string {
+  const value = raw?.toLowerCase();
+  if (!value) return "all";
+  if (API_PROPERTY_TYPES.includes(value)) return value;
+  if (LEGACY_RESIDENTIAL_TYPES.includes(value)) return "residential";
+  return "all";
+}
+
 export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
   const { isPhone, isTablet } = useResponsive();
   const params = useLocalSearchParams<{
@@ -66,10 +83,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
   // Rightmove Filter state
   const [rightmoveFilters, setRightmoveFilters] = useState<RightmoveFilters>({
     radius: "",
-    propertyType:
-      params.type && ["apartment", "house", "commercial", "land"].includes(params.type.toLowerCase())
-        ? params.type.toLowerCase()
-        : "all",
+    propertyType: toPropertyTypeFilter(params.type),
     addedToSite: "",
     includeSold: params.status === "sold",
     verifiedOnly: params.is_verified === "true",
