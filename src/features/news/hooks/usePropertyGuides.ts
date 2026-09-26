@@ -14,8 +14,8 @@ export function usePropertyGuides(options?: number | FetchPropertyGuidesParams) 
   return useQuery({
     queryKey: ["guides", params],
     queryFn: () => fetchPropertyGuides(params),
-    staleTime: 30 * 60_000,
-    gcTime: 60 * 60_000,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000,    // 30 minutes
   });
 }
 
@@ -27,8 +27,8 @@ export function usePropertyGuide(slug: string) {
     queryKey: ["guide", slug],
     queryFn: () => fetchPropertyGuideBySlug(slug),
     enabled: Boolean(slug),
-    staleTime: 30 * 60_000,
-    gcTime: 60 * 60_000,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000,    // 30 minutes
   });
 }
 
