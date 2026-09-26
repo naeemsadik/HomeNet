@@ -2,15 +2,14 @@ import {
   ArrowLeft,
   BookOpen,
   ExternalLink,
-  ImageOff,
   RotateCcw,
   Search,
   X,
 } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
+  FlatList,
   Linking,
   Platform,
   Pressable,
@@ -19,6 +18,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -35,7 +35,7 @@ const ARCHIVE_TABS: ArchiveTab[] = [
   "Buyer & Seller",
 ];
 
-function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
+const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
   const isRss = guide.sourceType === "rss";
 
   const resolvedUrl = useMemo(
@@ -48,13 +48,13 @@ function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
     setImgUri(resolvedUrl);
   }, [resolvedUrl]);
 
-  const handleImageError = () => {
+  const handleImageError = useCallback(() => {
     if (imgUri !== GUIDE_FALLBACK_IMAGE) {
       setImgUri(GUIDE_FALLBACK_IMAGE);
     }
-  };
+  }, [imgUri]);
 
-  const handlePress = () => {
+  const handlePress = useCallback(() => {
     if (isRss && (guide.sourceUrl || guide.href)) {
       const targetUrl = guide.sourceUrl || guide.href;
       if (Platform.OS === "web" && typeof window !== "undefined") {
@@ -65,7 +65,7 @@ function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
       return;
     }
     router.push(guide.href as never);
-  };
+  }, [isRss, guide.sourceUrl, guide.href]);
 
   return (
     <Pressable
@@ -83,7 +83,9 @@ function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
         <Image
           source={{ uri: imgUri }}
           style={styles.cardImage}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={200}
           onError={handleImageError}
         />
       </View>
@@ -130,7 +132,7 @@ function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
       </View>
     </Pressable>
   );
-}
+});
 
 export function GuidesArchiveScreen() {
   const { isPhone, isTablet, isDesktop } = useResponsive();
@@ -179,6 +181,25 @@ export function GuidesArchiveScreen() {
 
     return result;
   }, [allGuides, activeTab, searchQuery]);
+
+  const numColumns = isPhone ? 1 : isTablet ? 2 : 3;
+
+  const renderGuideItem = useCallback(
+    ({ item }: { item: PropertyGuide }) => (
+      <View
+        style={[
+          styles.gridItem,
+          isTablet && styles.gridItemTablet,
+          isPhone && styles.gridItemPhone,
+        ]}
+      >
+        <ArchiveGuideCard guide={item} />
+      </View>
+    ),
+    [isTablet, isPhone],
+  );
+
+  const keyExtractor = useCallback((item: PropertyGuide) => item.id, []);
 
   return (
     <AppChrome active="home">
@@ -305,26 +326,19 @@ export function GuidesArchiveScreen() {
             </Pressable>
           </View>
         ) : (
-          <View
-            style={[
-              styles.grid,
-              isTablet && styles.gridTablet,
-              isPhone && styles.gridPhone,
-            ]}
-          >
-            {filteredGuides.map((guide) => (
-              <View
-                key={guide.id}
-                style={[
-                  styles.gridItem,
-                  isTablet && styles.gridItemTablet,
-                  isPhone && styles.gridItemPhone,
-                ]}
-              >
-                <ArchiveGuideCard guide={guide} />
-              </View>
-            ))}
-          </View>
+          <FlatList
+            key={`guides-grid-${numColumns}`}
+            data={filteredGuides}
+            renderItem={renderGuideItem}
+            keyExtractor={keyExtractor}
+            numColumns={numColumns}
+            initialNumToRender={6}
+            maxToRenderPerBatch={8}
+            windowSize={5}
+            scrollEnabled={false}
+            columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
+            contentContainerStyle={styles.listContainer}
+          />
         )}
       </View>
     </AppChrome>
@@ -450,28 +464,23 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
   },
 
-  /* Grid Layout */
-  grid: {
+  /* FlatList Grid Layout */
+  listContainer: {
+    width: "100%",
+  },
+  gridRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
     gap: 20,
-  },
-  gridTablet: {
-    gap: 16,
-  },
-  gridPhone: {
-    flexDirection: "column",
-    gap: 16,
+    marginBottom: 20,
   },
   gridItem: {
-    width: "calc(33.333% - 14px)",
-  } as any,
-  gridItemTablet: {
-    width: "calc(50% - 8px)",
-  } as any,
+    flex: 1,
+  },
+  gridItemTablet: {},
   gridItemPhone: {
     width: "100%",
-  } as any,
+    marginBottom: 16,
+  },
 
   /* Card */
   card: {
@@ -499,12 +508,6 @@ const styles = StyleSheet.create({
   cardImage: {
     width: "100%",
     height: "100%",
-  },
-  cardPlaceholder: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.soft,
   },
   cardBody: {
     padding: 16,

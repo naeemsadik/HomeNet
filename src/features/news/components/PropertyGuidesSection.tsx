@@ -1,8 +1,7 @@
 import { ArrowRight, BookOpen, ExternalLink } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Linking,
   Platform,
   Pressable,
@@ -10,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, radius, webPointer } from "@/theme";
@@ -34,7 +34,7 @@ const PLANNED_TOPICS = [
   "Understanding katha, bigha and sqft",
 ];
 
-function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boolean }) {
+const GuideCard = memo(function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boolean }) {
   const { isPhone } = useResponsive();
   const isRss = guide.sourceType === "rss";
 
@@ -49,11 +49,11 @@ function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boole
     setHasError(false);
   }, [resolvedUrl]);
 
-  const handleImageError = () => {
+  const handleImageError = useCallback(() => {
     setHasError(true);
-  };
+  }, []);
 
-  const handlePress = () => {
+  const handlePress = useCallback(() => {
     if (isRss && (guide.sourceUrl || guide.href)) {
       const targetUrl = guide.sourceUrl || guide.href;
       if (Platform.OS === "web" && typeof window !== "undefined") {
@@ -64,7 +64,7 @@ function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boole
       return;
     }
     router.push(guide.href as never);
-  };
+  }, [isRss, guide.sourceUrl, guide.href]);
 
   return (
     <Pressable
@@ -83,7 +83,9 @@ function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boole
         <Image
           source={{ uri: displayUri }}
           style={styles.thumbImage}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={200}
           onError={handleImageError}
         />
       </View>
@@ -132,7 +134,7 @@ function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boole
       </View>
     </Pressable>
   );
-}
+});
 
 export function PropertyGuidesSection() {
   const { isPhone, isTablet } = useResponsive();
