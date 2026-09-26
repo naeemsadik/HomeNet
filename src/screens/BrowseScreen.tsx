@@ -111,7 +111,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
 
   // View mode & Saved properties store
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const { savedIds, toggleSaved } = useSavedStore();
+  const { savedIds, toggleSaved, isSaved } = useSavedStore();
 
   // Sync params when URL changes (e.g. from hero search widget)
   useEffect(() => {
@@ -237,8 +237,8 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
   };
 
   const handleToggleSaved = useCallback(
-    (propertyId: string) => {
-      toggleSaved(propertyId);
+    (property: (typeof results)[number] | string) => {
+      void toggleSaved(property);
     },
     [toggleSaved]
   );
@@ -248,13 +248,13 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
       <View style={styles.listItemWrap}>
         <PropertyCard
           imageHeight={isPhone ? 180 : 210}
-          onSave={() => handleToggleSaved(item.id)}
+          onSave={() => handleToggleSaved(item)}
           property={item}
-          saved={savedIds.includes(item.id)}
+          saved={isSaved(item.id)}
         />
       </View>
     ),
-    [isPhone, handleToggleSaved, savedIds]
+    [isPhone, handleToggleSaved, isSaved, savedIds]
   );
 
   const keyExtractor = useCallback((item: (typeof results)[number]) => item.id, []);
@@ -344,9 +344,9 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
                   <PropertyCard
                     imageHeight={isPhone ? 180 : 210}
                     key={prop.id}
-                    onSave={() => handleToggleSaved(prop.id)}
+                    onSave={() => handleToggleSaved(prop)}
                     property={prop}
-                    saved={savedIds.includes(prop.id)}
+                    saved={isSaved(prop.id)}
                   />
                 ))}
               </PropertyGrid>

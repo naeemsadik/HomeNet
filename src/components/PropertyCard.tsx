@@ -16,6 +16,7 @@ import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import type { Property } from "@/features/property/types/property";
+import { useSavedStore } from "@/stores/savedStore";
 
 export type PropertyCardVariant = "standard" | "feature";
 
@@ -115,25 +116,44 @@ function PropertyCardComponent({
     </View>
   ) : null;
 
+  const isSavedInStore = useSavedStore((state) => state.isSaved(property?.id));
+  const isCardSaved = saved !== undefined ? saved : isSavedInStore;
+
+  const handleSave = (e?: any) => {
+    if (e && typeof e.stopPropagation === "function") {
+      e.stopPropagation();
+    }
+    if (onSave) {
+      onSave();
+    } else if (property) {
+      void useSavedStore.getState().toggleSaved(property);
+    }
+  };
+
   /**
    * Rendered as a SIBLING of the card's pressable, never a child.
    * react-native-web renders Pressable as <button>, and a nested button is
    * invalid HTML — it breaks hydration and swallows the inner click.
    */
-  const saveButton = onSave ? (
+  const saveButton = (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={saved ? `Remove ${property.title} from saved` : `Save ${property.title}`}
-      onPress={onSave}
-      style={[styles.saveButton, webPointer]}
+      accessibilityLabel={isCardSaved ? `Remove ${property.title} from saved` : `Save ${property.title}`}
+      onPress={handleSave}
+      style={({ hovered, pressed }: any) => [
+        styles.saveButton,
+        hovered && { backgroundColor: "#FFFFFF", transform: [{ scale: 1.06 }] },
+        pressed && { transform: [{ scale: 0.94 }] },
+        webPointer,
+      ]}
     >
       <Heart
-        color={saved ? colorTokens.notification : colorTokens.ink}
-        fill={saved ? colorTokens.notification : "transparent"}
+        color={isCardSaved ? "#D4183D" : colorTokens.ink}
+        fill={isCardSaved ? "#D4183D" : "transparent"}
         size={17}
       />
     </Pressable>
-  ) : null;
+  );
 
   const placeholder = (
     <View style={styles.placeholder}>

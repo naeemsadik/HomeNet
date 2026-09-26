@@ -8,7 +8,7 @@ import {
   Plus,
   Share2,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   ImageBackground,
@@ -25,18 +25,51 @@ import { AppLink } from "@/components/ui";
 import { getSavedProperties, unsaveProperty } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
+import { useSavedStore } from "@/stores/savedStore";
+import { useAuthStore } from "@/stores/authStore";
+import type { Property } from "@/features/property/types/property";
 
 export function SavedScreen() {
   const { isPhone, isTablet, width } = useResponsive();
   const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
 
   const { data: savedData, isLoading } = useQuery({
     queryKey: ["properties", "saved"],
     queryFn: getSavedProperties,
     staleTime: 5 * 60 * 1000,
+    enabled: !!user,
   });
 
-  const savedListings = savedData?.data ?? [];
+  const localSavedMap = useSavedStore((s) => s.savedProperties);
+  const savedIds = useSavedStore((s) => s.savedIds);
+  const toggleSaved = useSavedStore((s) => s.toggleSaved);
+
+  // Sync server saved properties into the saved store whenever fetched
+  useEffect(() => {
+    if (savedData?.data && Array.isArray(savedData.data) && savedData.data.length > 0) {
+      useSavedStore.getState().setSavedProperties(savedData.data);
+    }
+  }, [savedData]);
+
+  // Combine server listings with locally saved listings, deduplicating by ID
+  const savedListings = useMemo(() => {
+    const map = new Map<string, Property>();
+    // First local listings
+    Object.values(localSavedMap || {}).forEach((p) => {
+      if (p && p.id && savedIds.includes(String(p.id))) {
+        map.set(String(p.id), p);
+      }
+    });
+    // Overlay server listings
+    const serverItems = savedData?.data ?? [];
+    serverItems.forEach((p) => {
+      if (p && p.id && savedIds.includes(String(p.id))) {
+        map.set(String(p.id), p);
+      }
+    });
+    return Array.from(map.values());
+  }, [savedData, localSavedMap, savedIds]);
 
   const unsaveMutation = useMutation({
     mutationFn: (id: string) => unsaveProperty(id),
@@ -45,9 +78,12 @@ export function SavedScreen() {
     },
   });
 
-  function handleToggleSaved(id: string | number) {
-    unsaveMutation.mutate(String(id));
-  }
+  const handleToggleSaved = async (id: string | number) => {
+    await toggleSaved(id);
+    if (user) {
+      unsaveMutation.mutate(String(id));
+    }
+  };
 
   return (
     <AppChrome active="saved">
@@ -80,7 +116,7 @@ export function SavedScreen() {
           </View>
         </View>
 
-        {isLoading ? (
+        {isLoading && savedListings.length === 0 ? (
           <View style={{ padding: 48, alignItems: "center" }}>
             <ActivityIndicator size="large" color="#04cf92" />
             <Text style={{ marginTop: 12, color: "#5C6B66", fontFamily: fonts.medium }}>

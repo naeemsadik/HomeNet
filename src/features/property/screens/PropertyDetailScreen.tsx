@@ -55,6 +55,7 @@ import { cdnImage } from "@/lib/cloudinaryImage";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 import Svg, { Path } from "react-native-svg";
 import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
+import { useSavedStore } from "@/stores/savedStore";
 
 function WhatsAppIcon({ size = 18, color = "#25D366" }: { size?: number; color?: string }) {
   return (
@@ -99,7 +100,8 @@ export function PropertyDetailScreen() {
   );
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [saved, setSaved] = useState(false);
+  const isPropertySaved = useSavedStore((s) => s.isSaved(id ?? ""));
+  const toggleSaved = useSavedStore((s) => s.toggleSaved);
   const [bookModalVisible, setBookModalVisible] = useState(false);
   const [thumbScrollX, setThumbScrollX] = useState(0);
   const [maxThumbScroll, setMaxThumbScroll] = useState(448);
@@ -375,12 +377,20 @@ export function PropertyDetailScreen() {
             </Pressable>
 
             <Pressable
-              onPress={() => setSaved((s) => !s)}
+              onPress={() => {
+                if (apiDetail) {
+                  void toggleSaved(apiDetail);
+                } else if (id) {
+                  void toggleSaved(id);
+                }
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={isPropertySaved ? "Remove from saved" : "Save property"}
               style={({ pressed }) => [styles.actionCircleBtn, webPointer, pressed && styles.pressed]}
             >
               <Heart
-                color={saved ? "#D4183D" : "#0B1A17"}
-                fill={saved ? "#D4183D" : "transparent"}
+                color={isPropertySaved ? "#D4183D" : "#0B1A17"}
+                fill={isPropertySaved ? "#D4183D" : "transparent"}
                 size={18}
               />
             </Pressable>
