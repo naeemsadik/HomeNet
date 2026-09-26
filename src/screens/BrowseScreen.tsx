@@ -156,7 +156,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
 
     return {
       listing_type:
-        rightmoveFilters.purpose === "sale" || isSold
+        rightmoveFilters.purpose === "sale"
           ? ("sale" as const)
           : rightmoveFilters.purpose === "rent" || isShortLet
           ? ("rent" as const)
