@@ -31,6 +31,10 @@ export function useNotifications(
     },
     initialPageParam: 1,
     enabled: userId !== null && enabled,
+    // Refetch whenever a list mounts (opening the bell, visiting the screen).
+    // The badge polls every minute, so under the app-wide five-minute staleTime
+    // the list could show a new count with none of the new items in it.
+    staleTime: 0,
   });
 }
 
