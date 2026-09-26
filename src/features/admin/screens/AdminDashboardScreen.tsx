@@ -11,13 +11,16 @@ import { AdminUsersScreen } from "./AdminUsersScreen";
 import { AdminRolesScreen } from "./AdminRolesScreen";
 import { AdminAreasScreen } from "./AdminAreasScreen";
 import { hasAnyAdminPermission } from "@/lib/permissions";
+import { NotificationList } from "@/features/notification/components/NotificationList";
+import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 
-type AdminTab = "properties" | "users" | "roles" | "areas" | "settings";
+type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
 
 export function AdminDashboardScreen() {
   const { isPhone, contentPadding } = useResponsive();
   const userRoles = useAuthStore((s) => s.userRoles);
   const [activeTab, setActiveTab] = useState<AdminTab>("properties");
+  const { data: adminUnread } = useUnreadCount("admin");
 
   const hasAccess = hasAnyAdminPermission(userRoles);
   const isFullAdmin = userRoles.some((userRole) => ["admin", "superadmin"].includes(userRole.role.name));
@@ -27,9 +30,10 @@ export function AdminDashboardScreen() {
     ),
   );
   const allowedTabs: AdminTab[] = isFullAdmin
-    ? ["properties", "users", "roles", "areas", "settings"]
+    ? ["properties", "notifications", "users", "roles", "areas", "settings"]
     : [
         ...(["manage_properties", "moderate_listing", "review_verification"].some((name) => permissionNames.has(name)) ? ["properties" as const] : []),
+        ...(permissionNames.has("manage_properties") ? ["notifications" as const] : []),
         ...(permissionNames.has("manage_users") ? ["users" as const] : []),
         ...(["view_roles", "manage_roles"].some((name) => permissionNames.has(name)) ? ["roles" as const] : []),
         ...(permissionNames.has("manage_areas") ? ["areas" as const] : []),
@@ -62,10 +66,16 @@ export function AdminDashboardScreen() {
           <Text style={styles.subtitle}>Manage properties, users, and roles.</Text>
         </View>
 
-        <AdminTabNav active={visibleTab} onChange={setActiveTab} userRoles={userRoles} />
+        <AdminTabNav
+          active={visibleTab}
+          onChange={setActiveTab}
+          userRoles={userRoles}
+          badges={{ notifications: adminUnread?.data?.count ?? 0 }}
+        />
 
         <View style={styles.tabContent}>
           {visibleTab === "properties" && <AdminPropertiesScreen />}
+          {visibleTab === "notifications" && <NotificationList audience="admin" />}
           {visibleTab === "users" && <AdminUsersScreen />}
           {visibleTab === "roles" && <AdminRolesScreen />}
           {visibleTab === "areas" && <AdminAreasScreen />}

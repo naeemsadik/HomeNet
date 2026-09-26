@@ -100,7 +100,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
   const [area, setArea] = useState("Gulshan & Banani");
   const [budget, setBudget] = useState("BDT 2–4 Cr");
 
-  const { savedIds, toggleSaved } = useSavedStore();
+  const { savedIds, toggleSaved, isSaved } = useSavedStore();
 
   const queryParams = useMemo(() => {
     const range = budgetRanges[budget] || {};
@@ -376,9 +376,9 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
                         if (isModal && onClose) onClose();
                         router.push(`/property/${property.id}` as Href);
                       }}
-                      onSave={() => toggleSaved(property.id)}
+                      onSave={() => toggleSaved(property)}
                       property={property}
-                      saved={savedIds.includes(property.id)}
+                      saved={isSaved(property.id)}
                     />
                   ))}
                 </PropertyGrid>

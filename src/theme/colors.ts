@@ -54,6 +54,8 @@ export const colorTokens = {
   /** Notification dots and unread counts. Not a status colour. */
   notification: "#F4823A",
   notificationSurface: "#FDEEE2",
+  /** Saved / favorite property heart indicator. */
+  saved: "#D4183D",
 
   // ─── Fixed ──────────────────────────────────────────────────────────────
   onBrand: "#FFFFFF",

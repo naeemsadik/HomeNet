@@ -1,5 +1,5 @@
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, layout, shadow, webPointer } from "@/theme";
+import { colors, colorTokens, fonts, layout, shadow, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
@@ -20,7 +20,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react-native";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   Alert,
   Image,
@@ -42,6 +42,8 @@ import { AiFinderModal } from "./AiFinderModal";
 import { LanguageToggle } from "./LanguageToggle";
 import { AppLink } from "./ui";
 import { Footer } from "./Footer";
+import { NotificationPreview } from "@/features/notification/components/NotificationPreview";
+import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 
 export type ActivePage =
   | "home"
@@ -189,6 +191,9 @@ function TopBar({
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
+  const { data: unreadData } = useUnreadCount("user");
+  const unreadCount = unreadData?.data?.count ?? 0;
+  const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
 
     // Seekers-first: the two search intents lead, Saved follows. Everything
     // else lives in the drawer (tablet/phone) or the footer.
@@ -313,7 +318,11 @@ function TopBar({
               {/* Notification Button */}
               <View style={styles.notificationWrap}>
                 <Pressable
-                  accessibilityLabel="Open notifications"
+                  accessibilityLabel={
+                    unreadCount > 0
+                      ? `Open notifications, ${unreadCount} unread`
+                      : "Open notifications"
+                  }
                   onPress={() => {
                     setUserDropdownOpen(false);
                     setNotificationsOpen((open) => !open);
@@ -330,13 +339,17 @@ function TopBar({
                     size={isPhone ? 16 : 19}
                     strokeWidth={2}
                   />
+                  {unreadCount > 0 ? (
+                    <View style={styles.notificationBadge} pointerEvents="none">
+                      <Text style={styles.notificationBadgeText}>
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </Text>
+                    </View>
+                  ) : null}
                 </Pressable>
                 {notificationsOpen ? (
                   <View style={styles.notificationPopover}>
-                    <Text style={styles.notificationTitle}>Notifications</Text>
-                    <Text style={styles.notificationCopy}>
-                      You have no new notifications.
-                    </Text>
+                    <NotificationPreview onNavigate={closeNotifications} />
                   </View>
                 ) : null}
               </View>
@@ -1082,26 +1095,28 @@ const styles = StyleSheet.create({
       default: {},
     }) as any),
   },
+  // Red with white text (5.25:1). The theme's orange "notification" token is
+  // 2.59:1 on white, too low for a number people need to read.
   notificationBadge: {
     position: "absolute",
-    top: 2,
-    right: 2,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#F4823A",
+    top: -3,
+    right: -3,
+    minWidth: 17,
+    height: 17,
+    paddingHorizontal: 4,
+    borderRadius: 9,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 3,
+    backgroundColor: colorTokens.errorText,
     borderWidth: 1.5,
-    borderColor: "#FFFFFF",
+    borderColor: colorTokens.surface,
   },
   notificationBadgeText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "700",
-    lineHeight: 11,
+    lineHeight: 12,
   },
   topRightActions: {
     flexShrink: 0,
@@ -1478,7 +1493,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 48,
     right: 0,
-    width: 240,
+    width: 320,
     padding: 14,
     borderRadius: 14,
     backgroundColor: "rgba(255, 255, 255, 0.92)",
