@@ -10,9 +10,10 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react-native";
-import { useState, useRef, useEffect, type ReactNode } from "react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Image,
   ImageBackground,
   NativeScrollEvent,
@@ -346,6 +347,32 @@ export function HomeScreen() {
 
   );
 
+  const renderFeaturedItem = useCallback(
+    ({ item }: { item: ApiProperty }) => (
+      <PropertyCard
+        property={item}
+        variant="feature"
+        width={isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500}
+      />
+    ),
+    [isPhone, isTablet, width]
+  );
+
+  const featuredKeyExtractor = useCallback((item: ApiProperty) => item.id, []);
+
+  const getFeaturedItemLayout = useCallback(
+    (_: any, index: number) => {
+      const cardWidth = isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500;
+      const step = cardWidth + 20;
+      return {
+        length: step,
+        offset: step * index,
+        index,
+      };
+    },
+    [isPhone, isTablet, width]
+  );
+
   return (
     <AppChrome active="home" bleed={hero}>
       {/* ─────────────────────────────────────────────────────────────
@@ -375,23 +402,21 @@ export function HomeScreen() {
           onRetry={() => void popularQuery.refetch()}
         >
           <View ref={featuredWrapperRef} style={styles.featuredWrapper}>
-            <ScrollView
-              ref={featuredScrollRef}
+            <FlatList
+              ref={featuredScrollRef as any}
               horizontal
+              data={featuredProperties}
+              renderItem={renderFeaturedItem}
+              keyExtractor={featuredKeyExtractor}
+              getItemLayout={getFeaturedItemLayout}
+              initialNumToRender={6}
+              maxToRenderPerBatch={8}
+              windowSize={5}
               showsHorizontalScrollIndicator={false}
               onScroll={handleFeaturedScroll}
               scrollEventThrottle={16}
               contentContainerStyle={styles.featuredCardsRow}
-            >
-              {featuredProperties.map((property) => (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                  variant="feature"
-                  width={isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500}
-                />
-              ))}
-            </ScrollView>
+            />
 
             {/* Position Bar for Left-Right Move (Both Mobile & PC) */}
             {featuredProperties.length > 1 && (
