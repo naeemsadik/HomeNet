@@ -1,17 +1,33 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { FlatList, RefreshControl, View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import type { Notification } from "@/types/api";
-import { useNotifications, useMarkAllRead } from "../hooks/useNotifications";
+import { router } from "expo-router";
+import type { Notification, NotificationAudience } from "@/types/api";
+import {
+  useMarkAllRead,
+  useMarkAsRead,
+  useNotifications,
+  useUnreadCount,
+} from "../hooks/useNotifications";
 import { NotificationItem } from "./NotificationItem";
 import { colorTokens, fonts } from "@/theme";
 import { Pressable } from "react-native";
 import { Bell } from "lucide-react-native";
 
+// Says only what the system actually sends. Messaging (FR-12) is out of
+// scope, so nothing here may promise messages.
+const EMPTY_COPY: Record<NotificationAudience, string> = {
+  user: "You'll hear here when your listing is approved, or when a property you saved sells or drops in price.",
+  admin: "New listings waiting for review will appear here.",
+};
+
 interface NotificationListProps {
+  /** "user" in the app, "admin" in the admin panel. */
+  audience?: NotificationAudience;
+  /** Overrides the default: mark as read, then open the notification's link. */
   onPressItem?: (notification: Notification) => void;
 }
 
-export function NotificationList({ onPressItem }: NotificationListProps) {
+export function NotificationList({ audience = "user", onPressItem }: NotificationListProps) {
   const {
     data,
     fetchNextPage,
@@ -20,12 +36,24 @@ export function NotificationList({ onPressItem }: NotificationListProps) {
     isLoading,
     isRefetching,
     refetch,
-  } = useNotifications();
-
-  const markAll = useMarkAllRead();
+  } = useNotifications(audience);
+  const { data: unreadData } = useUnreadCount(audience);
+  const markAll = useMarkAllRead(audience);
+  const { mutate: markOneRead } = useMarkAsRead();
 
   const notifications = data?.pages.flatMap((page) => page.data?.items ?? []) ?? [];
-  const totalUnread = notifications.filter((n) => !n.read).length;
+  // The server's count covers pages not loaded yet.
+  const totalUnread =
+    unreadData?.data?.count ?? notifications.filter((n) => !n.read).length;
+
+  const openNotification = useCallback(
+    (notification: Notification) => {
+      if (!notification.read) markOneRead(notification.id);
+      if (onPressItem) onPressItem(notification);
+      else if (notification.link) router.push(notification.link as never);
+    },
+    [markOneRead, onPressItem],
+  );
 
   if (isLoading) {
     return (
@@ -43,7 +71,7 @@ export function NotificationList({ onPressItem }: NotificationListProps) {
         </View>
         <Text style={styles.emptyTitle}>No notifications yet</Text>
         <Text style={styles.emptySubtitle}>
-          You'll see property updates, messages, and verification status here.
+          {EMPTY_COPY[audience]}
         </Text>
       </View>
     );
@@ -67,7 +95,7 @@ export function NotificationList({ onPressItem }: NotificationListProps) {
         data={notifications}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <NotificationItem notification={item} onPress={onPressItem} />
+          <NotificationItem notification={item} onPress={openNotification} />
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}

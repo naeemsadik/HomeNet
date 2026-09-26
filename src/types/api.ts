@@ -165,13 +165,20 @@ export interface AssignPermissionDto {
   permissionId: string;
 }
 
+/** Which portal a notification belongs to: the user app, or the admin panel. */
+export type NotificationAudience = "user" | "admin";
+
 export interface Notification {
   id: string;
   user_id: string;
+  audience: NotificationAudience;
   type: string;
   title: string;
   message: string;
+  /** In-app path to open when tapped, e.g. /property/<id>. */
+  link: string | null;
   read: boolean;
+  read_at: string | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
 }
@@ -181,6 +188,7 @@ export interface NotificationListResponse {
   total: number;
   page: number;
   limit: number;
+  total_pages?: number;
 }
 
 export interface UnreadCountResponse {

@@ -16,7 +16,7 @@ export function NotificationScreen() {
           <Eyebrow>Notifications</Eyebrow>
           <Text style={styles.title}>Stay updated</Text>
           <Text style={styles.subtitle}>
-            Property updates, verification status, and community activity.
+            Listing approvals, and news about properties you've saved.
           </Text>
         </View>
         <View style={styles.listSection}>
