@@ -25,9 +25,8 @@ import { colors, fonts, shadow, webPointer } from "@/theme";
 import {
   type AiParsedProperty,
   AI_FIELD_DEFINITIONS,
-  AiParseError,
 } from "../types/aiListing";
-import { parsePropertyWithAi } from "../services/aiPropertyParser";
+import { useGeneratePropertyDescription } from "../hooks/useGeneratePropertyDescription";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -43,20 +42,28 @@ interface AiListingSheetProps {
 
 export function AiListingSheet({ visible, onClose, onApply }: AiListingSheetProps) {
   const { isPhone, width } = useResponsive();
-  const [state, setState] = useState<SheetState>("idle");
+  const [step, setStep] = useState<Exclude<SheetState, "loading">>("idle");
+  const {
+    mutate: runParse,
+    reset: resetParse,
+    isPending,
+    error: parseError,
+  } = useGeneratePropertyDescription();
+  // Loading comes from the request itself, so it can never be left stuck on.
+  const state: SheetState = isPending ? "loading" : step;
   const [description, setDescription] = useState("");
   const [parsed, setParsed] = useState<AiParsedProperty | null>(null);
   const [editingField, setEditingField] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const error = parseError?.message ?? null;
 
   const containerMaxWidth = isPhone ? "100%" : Math.min(width - 120, 640);
 
   const resetSheet = useCallback(() => {
-    setState("idle");
+    setStep("idle");
     setParsed(null);
     setEditingField(null);
-    setError(null);
-  }, []);
+    resetParse();
+  }, [resetParse]);
 
   const handleClose = useCallback(() => {
     // Prevent cancelling while AI is actively reading/parsing
@@ -66,30 +73,23 @@ export function AiListingSheet({ visible, onClose, onApply }: AiListingSheetProp
     onClose();
   }, [state, onClose, resetSheet]);
 
-  const handleAnalyze = useCallback(async () => {
-    if (description.trim().length < 20) return;
-    setState("loading");
-    setError(null);
-    try {
-      const result = await parsePropertyWithAi(description.trim());
-      setParsed(result);
-      setState("preview");
-    } catch (err) {
-      setError(
-        err instanceof AiParseError
-          ? err.message
-          : "Something went wrong parsing your description. Please try again.",
-      );
-      setState("idle");
-    }
-  }, [description]);
+  const handleAnalyze = useCallback(() => {
+    const text = description.trim();
+    if (text.length < 20) return;
+    runParse(text, {
+      onSuccess: (result) => {
+        setParsed(result);
+        setStep("preview");
+      },
+    });
+  }, [description, runParse]);
 
   const handleTryAgain = useCallback(() => {
-    setState("idle");
+    setStep("idle");
     setParsed(null);
     setEditingField(null);
-    setError(null);
-  }, []);
+    resetParse();
+  }, [resetParse]);
 
   const handleApply = useCallback(() => {
     if (parsed) {
