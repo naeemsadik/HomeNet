@@ -1,5 +1,6 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
+  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,7 +16,7 @@ import {
   Search,
 } from "lucide-react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { PropertyCard } from "@/components/PropertyCard";
+import { PropertyCard, CARD_HEIGHT } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
 import { AppButton } from "@/components/ui";
 import {
@@ -221,6 +222,38 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
     });
   };
 
+  const handleToggleSaved = useCallback(
+    (propertyId: string) => {
+      toggleSaved(propertyId);
+    },
+    [toggleSaved]
+  );
+
+  const renderPropertyItem = useCallback(
+    ({ item }: { item: (typeof results)[number] }) => (
+      <View style={styles.listItemWrap}>
+        <PropertyCard
+          imageHeight={isPhone ? 180 : 210}
+          onSave={() => handleToggleSaved(item.id)}
+          property={item}
+          saved={savedIds.includes(item.id)}
+        />
+      </View>
+    ),
+    [isPhone, handleToggleSaved, savedIds]
+  );
+
+  const keyExtractor = useCallback((item: (typeof results)[number]) => item.id, []);
+
+  const getItemLayout = useCallback(
+    (_: any, index: number) => ({
+      length: CARD_HEIGHT,
+      offset: CARD_HEIGHT * index,
+      index,
+    }),
+    []
+  );
+
   return (
     <AppChrome active={mode || "buy"}>
       <View style={styles.container}>
@@ -297,24 +330,24 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
                   <PropertyCard
                     imageHeight={isPhone ? 180 : 210}
                     key={prop.id}
-                    onSave={() => toggleSaved(prop.id)}
+                    onSave={() => handleToggleSaved(prop.id)}
                     property={prop}
                     saved={savedIds.includes(prop.id)}
                   />
                 ))}
               </PropertyGrid>
             ) : (
-              <View style={styles.listLayout}>
-                {results.map((prop) => (
-                  <PropertyCard
-                    imageHeight={isPhone ? 180 : 210}
-                    key={prop.id}
-                    onSave={() => toggleSaved(prop.id)}
-                    property={prop}
-                    saved={savedIds.includes(prop.id)}
-                  />
-                ))}
-              </View>
+              <FlatList
+                data={results}
+                renderItem={renderPropertyItem}
+                keyExtractor={keyExtractor}
+                getItemLayout={getItemLayout}
+                initialNumToRender={6}
+                maxToRenderPerBatch={8}
+                windowSize={5}
+                scrollEnabled={false}
+                contentContainerStyle={styles.listLayout}
+              />
             )}
 
             {hasMore ? (
@@ -415,6 +448,9 @@ const styles = StyleSheet.create({
   },
   listLayout: {
     gap: 16,
+  },
+  listItemWrap: {
+    width: "100%",
   },
   loadMoreWrap: {
     alignItems: "center",

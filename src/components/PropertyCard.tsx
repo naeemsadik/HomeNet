@@ -1,7 +1,5 @@
-import React from "react";
+import React, { memo } from "react";
 import {
-  Image,
-  ImageBackground,
   Platform,
   Pressable,
   StyleSheet,
@@ -10,6 +8,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck } from "lucide-react-native";
@@ -20,7 +19,12 @@ import type { Property } from "@/features/property/types/property";
 
 export type PropertyCardVariant = "standard" | "feature";
 
-interface PropertyCardProps {
+/**
+ * Fixed standard numeric height including card content and spacing for layout optimization.
+ */
+export const CARD_HEIGHT = 380;
+
+export interface PropertyCardProps {
   property: Property;
   /**
    * `standard` — photo above a fact block. The default everywhere.
@@ -63,7 +67,7 @@ function readSpecs(property: Property) {
   };
 }
 
-export function PropertyCard({
+function PropertyCardComponent({
   property,
   variant = "standard",
   saved = false,
@@ -142,50 +146,57 @@ export function PropertyCard({
   if (isFeature) {
     return (
       <View style={[styles.shell, width ? { width } : null, style]}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`${property.title}, ${isRent ? "for rent" : "for sale"}, ${price}`}
-        onPress={open}
-        style={({ hovered, pressed }: any) => [
-          styles.card,
-          styles.cardFeature,
-          hovered && styles.cardHovered,
-          pressed && styles.cardPressed,
-          webPointer,
-        ]}
-      >
-        <View style={{ height: mediaHeight }}>
-          {photo ? (
-            <ImageBackground source={{ uri: photo }} style={styles.fill} resizeMode="cover">
-              {/*
-                0.86 at the base is not a taste choice. White text over a pure-white
-                photo blended with ink at 0.86 still measures ~5:1, so the overlay
-                stays legible on the brightest listing anyone can upload.
-              */}
-              <LinearGradient
-                colors={["rgba(11,26,23,0)", "rgba(11,26,23,0.45)", "rgba(11,26,23,0.86)"]}
-                locations={[0, 0.5, 1]}
-                style={StyleSheet.absoluteFill}
-              />
-              {verifiedBadge}
-              <View style={styles.featureBody}>
-                <Text numberOfLines={1} style={styles.featureLocation}>{location}</Text>
-                <Text numberOfLines={2} style={styles.featureTitle}>{property.title}</Text>
-                <Text style={styles.featurePrice}>
-                  {price}
-                  {isRent ? <Text style={styles.featurePriceSuffix}>/mo</Text> : null}
-                </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${property.title}, ${isRent ? "for rent" : "for sale"}, ${price}`}
+          onPress={open}
+          style={({ hovered, pressed }: any) => [
+            styles.card,
+            styles.cardFeature,
+            hovered && styles.cardHovered,
+            pressed && styles.cardPressed,
+            webPointer,
+          ]}
+        >
+          <View style={{ height: mediaHeight, width: "100%", overflow: "hidden" }}>
+            {photo ? (
+              <>
+                <Image
+                  source={{ uri: photo }}
+                  style={StyleSheet.absoluteFill}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                  transition={200}
+                />
+                {/*
+                  0.86 at the base is not a taste choice. White text over a pure-white
+                  photo blended with ink at 0.86 still measures ~5:1, so the overlay
+                  stays legible on the brightest listing anyone can upload.
+                */}
+                <LinearGradient
+                  colors={["rgba(11,26,23,0)", "rgba(11,26,23,0.45)", "rgba(11,26,23,0.86)"]}
+                  locations={[0, 0.5, 1]}
+                  style={StyleSheet.absoluteFill}
+                />
+                {verifiedBadge}
+                <View style={styles.featureBody}>
+                  <Text numberOfLines={1} style={styles.featureLocation}>{location}</Text>
+                  <Text numberOfLines={2} style={styles.featureTitle}>{property.title}</Text>
+                  <Text style={styles.featurePrice}>
+                    {price}
+                    {isRent ? <Text style={styles.featurePriceSuffix}>/mo</Text> : null}
+                  </Text>
+                </View>
+              </>
+            ) : (
+              <View style={styles.fill}>
+                {placeholder}
+                {verifiedBadge}
               </View>
-            </ImageBackground>
-          ) : (
-            <View style={styles.fill}>
-              {placeholder}
-              {verifiedBadge}
-            </View>
-          )}
-        </View>
-      </Pressable>
-      {saveButton}
+            )}
+          </View>
+        </Pressable>
+        {saveButton}
       </View>
     );
   }
@@ -193,70 +204,78 @@ export function PropertyCard({
   // ── Standard: photo above a fact block ───────────────────────────────────
   return (
     <View style={[styles.shell, width ? { width } : null, style]}>
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${property.title}, ${isRent ? "for rent" : "for sale"}, ${price}`}
-      onPress={open}
-      style={({ hovered, pressed }: any) => [
-        styles.card,
-        hovered && styles.cardHovered,
-        pressed && styles.cardPressed,
-        webPointer,
-      ]}
-    >
-      <View style={[styles.media, { height: mediaHeight }]}>
-        {photo ? (
-          <Image source={{ uri: photo }} style={styles.fill} resizeMode="cover" />
-        ) : (
-          placeholder
-        )}
-        {verifiedBadge}
-        <View style={styles.intentTag}>
-          <Text style={styles.intentText}>{isRent ? "For rent" : "For sale"}</Text>
-        </View>
-      </View>
-
-      <View style={styles.body}>
-        <Text style={styles.price}>
-          {price}
-          {isRent ? <Text style={styles.priceSuffix}>/mo</Text> : null}
-        </Text>
-
-        <Text numberOfLines={2} style={styles.title}>{property.title}</Text>
-
-        <View style={styles.locationRow}>
-          <MapPin color={colorTokens.muted} size={14} strokeWidth={2} />
-          <Text numberOfLines={1} style={styles.location}>{location}</Text>
-        </View>
-
-        {specs.beds || specs.baths || specs.area ? (
-          <View style={styles.specs}>
-            {specs.beds ? (
-              <View style={styles.spec}>
-                <BedDouble color={colorTokens.muted} size={15} strokeWidth={2} />
-                <Text style={styles.specText}>{specs.beds}</Text>
-              </View>
-            ) : null}
-            {specs.baths ? (
-              <View style={styles.spec}>
-                <Bath color={colorTokens.muted} size={15} strokeWidth={2} />
-                <Text style={styles.specText}>{specs.baths}</Text>
-              </View>
-            ) : null}
-            {specs.area ? (
-              <View style={styles.spec}>
-                <LandPlot color={colorTokens.muted} size={15} strokeWidth={2} />
-                <Text style={styles.specText}>{specs.area}</Text>
-              </View>
-            ) : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${property.title}, ${isRent ? "for rent" : "for sale"}, ${price}`}
+        onPress={open}
+        style={({ hovered, pressed }: any) => [
+          styles.card,
+          hovered && styles.cardHovered,
+          pressed && styles.cardPressed,
+          webPointer,
+        ]}
+      >
+        <View style={[styles.media, { height: mediaHeight }]}>
+          {photo ? (
+            <Image
+              source={{ uri: photo }}
+              style={styles.fill}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={200}
+            />
+          ) : (
+            placeholder
+          )}
+          {verifiedBadge}
+          <View style={styles.intentTag}>
+            <Text style={styles.intentText}>{isRent ? "For rent" : "For sale"}</Text>
           </View>
-        ) : null}
-      </View>
-    </Pressable>
-    {saveButton}
+        </View>
+
+        <View style={styles.body}>
+          <Text style={styles.price}>
+            {price}
+            {isRent ? <Text style={styles.priceSuffix}>/mo</Text> : null}
+          </Text>
+
+          <Text numberOfLines={2} style={styles.title}>{property.title}</Text>
+
+          <View style={styles.locationRow}>
+            <MapPin color={colorTokens.muted} size={14} strokeWidth={2} />
+            <Text numberOfLines={1} style={styles.location}>{location}</Text>
+          </View>
+
+          {specs.beds || specs.baths || specs.area ? (
+            <View style={styles.specs}>
+              {specs.beds ? (
+                <View style={styles.spec}>
+                  <BedDouble color={colorTokens.muted} size={15} strokeWidth={2} />
+                  <Text style={styles.specText}>{specs.beds}</Text>
+                </View>
+              ) : null}
+              {specs.baths ? (
+                <View style={styles.spec}>
+                  <Bath color={colorTokens.muted} size={15} strokeWidth={2} />
+                  <Text style={styles.specText}>{specs.baths}</Text>
+                </View>
+              ) : null}
+              {specs.area ? (
+                <View style={styles.spec}>
+                  <LandPlot color={colorTokens.muted} size={15} strokeWidth={2} />
+                  <Text style={styles.specText}>{specs.area}</Text>
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+        </View>
+      </Pressable>
+      {saveButton}
     </View>
   );
 }
+
+export const PropertyCard = memo(PropertyCardComponent);
 
 const styles = StyleSheet.create({
   // Positioning context so the save button can overlay without nesting inside
@@ -270,7 +289,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderRadius: radius.sm,
     overflow: "hidden",
-    backgroundColor: colorTokens.surface,
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: colorTokens.divider,
     ...(Platform.select({
@@ -348,14 +367,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.94)",
   },
   intentText: {
-    color: colorTokens.ink,
+    color: "#0B1A17",
     fontFamily: fonts.semiBold,
     fontSize: 11.5,
   },
 
   body: { padding: 16, gap: 5 },
   price: {
-    color: colorTokens.ink,
+    color: "#0F6D55",
     fontFamily: fonts.headingExtraBold,
     fontSize: 20,
     letterSpacing: -0.4,
@@ -367,7 +386,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
   },
   title: {
-    color: colorTokens.ink,
+    color: "#0B1A17",
     fontFamily: fonts.semiBold,
     fontSize: 15,
     lineHeight: 21,
