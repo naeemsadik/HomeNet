@@ -286,7 +286,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
         {/* ─── 4. Results Count & View Toggle Toolbar ─────────────────────── */}
         <View style={styles.toolbar}>
           <Text style={styles.resultCountText}>
-            {results.length} properties found
+            {results.length} {results.length === 1 ? "property" : "properties"} found
           </Text>
 
           <View style={styles.viewToggleWrap}>
