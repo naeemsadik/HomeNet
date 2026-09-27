@@ -7,8 +7,9 @@ node_modules/
 .metro-health-check*
 expo-env.d.ts
 
-# Generated builds
+# Generated builds (Vercel runs `npm run build` itself, so dist/ is never deployed from git)
 web-build/
+dist/
 coverage/
 
 # Expo prebuild output (this project uses managed native configuration)

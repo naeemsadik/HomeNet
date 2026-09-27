@@ -49,10 +49,11 @@ import { styles } from "./SellerProfileScreen.styles";
 
 const DEFAULT_AVATAR =
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop";
-const DEFAULT_NAME = "Fuad Abrar";
+// Sample values shown (greyed out) in signed-out preview. Never a real person.
+const DEFAULT_NAME = "Your name";
 const DEFAULT_AGENCY = "Homenet Verified Partner";
 const DEFAULT_BUYER_PREF = "Apartments & Houses in Dhaka";
-const DEFAULT_EMAIL = "fowadabrar10112002@icloud.com";
+const DEFAULT_EMAIL = "you@example.com";
 const DEFAULT_PHONE = "+880 1700-000000";
 
 export function SellerProfileScreen() {

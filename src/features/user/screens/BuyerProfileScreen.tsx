@@ -35,8 +35,9 @@ import type { UploadInput } from "@/services/upload";
 
 const DEFAULT_AVATAR =
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop";
-const DEFAULT_NAME = "Fuad Abrar";
-const DEFAULT_EMAIL = "fowadabrar10112002@icloud.com";
+// Sample values shown (greyed out) in signed-out preview. Never a real person.
+const DEFAULT_NAME = "Your name";
+const DEFAULT_EMAIL = "you@example.com";
 const DEFAULT_PHONE = "+880 1700-000000";
 
 export function BuyerProfileScreen() {
