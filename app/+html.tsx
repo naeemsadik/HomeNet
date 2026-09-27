@@ -1,6 +1,5 @@
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { PropsWithChildren } from "react";
-import { HERO_IMAGE_URL } from "@/lib/heroImage";
 
 export default function Root({ children }: PropsWithChildren) {
   return (
@@ -14,19 +13,10 @@ export default function Root({ children }: PropsWithChildren) {
             here would be a second, competing title element. */}
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        {/*
-          The homepage LCP element is a CSS background image, which the preload
-          scanner cannot see until the bundle has rendered. Announcing it here
-          starts the download in parallel with the JS instead of after it.
-          The URL must stay identical to HomeScreen's — hence the shared constant.
-        */}
+        {/* The homepage hero preload lives in app/index.tsx: every page shares
+            this file, and on the others an unused preload logs a console
+            warning. */}
         <link rel="preconnect" href="https://images.unsplash.com" />
-        <link
-          rel="preload"
-          as="image"
-          fetchPriority="high"
-          href={HERO_IMAGE_URL}
-        />
         <ScrollViewStyleReset />
         {/*
           Inter and Plus Jakarta Sans are bundled and registered by useFonts in

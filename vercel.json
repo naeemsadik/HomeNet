@@ -28,10 +28,9 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/((?!api/|_expo/|assets/|favicon.ico|.*\\..*).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/property/:id", "destination": "/property/[id]" },
+    { "source": "/guides/:slug", "destination": "/guides/[slug]" },
+    { "source": "/users/:id", "destination": "/users/[id]" }
   ],
   "headers": [
     {

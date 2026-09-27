@@ -132,6 +132,13 @@ function filterCuratedGuides(params: FetchPropertyGuidesParams): PropertyGuideLi
 }
 
 /**
+ * The API has no `/v1/guides` module yet. Asking anyway logged a 404 in the
+ * browser console on every home and guides page view before the curated
+ * fallback kicked in. Flip this once the backend ships the endpoint.
+ */
+const GUIDES_API_ENABLED = false;
+
+/**
  * Fetches the property guides and news feed.
  *
  * Tries the backend `/v1/guides` endpoint first. If the backend module is not yet deployed,
@@ -142,6 +149,8 @@ export async function fetchPropertyGuides(
 ): Promise<PropertyGuideList> {
   const params: FetchPropertyGuidesParams =
     typeof options === "number" ? { limit: options } : options || {};
+
+  if (!GUIDES_API_ENABLED) return filterCuratedGuides(params);
 
   try {
     const apiParams: Record<string, any> = {
@@ -190,16 +199,18 @@ export async function fetchPropertyGuideBySlug(
 ): Promise<PropertyGuide | null> {
   if (!slug) return null;
 
-  try {
-    const { data } = await apiClient.get<ApiResponse<any>>(`/v1/guides/${slug}`, {
-      timeout: 5000,
-    });
+  if (GUIDES_API_ENABLED) {
+    try {
+      const { data } = await apiClient.get<ApiResponse<any>>(`/v1/guides/${slug}`, {
+        timeout: 5000,
+      });
 
-    if (data?.data) {
-      return normalizeGuide(data.data);
+      if (data?.data) {
+        return normalizeGuide(data.data);
+      }
+    } catch {
+      // Ignore and check curated fallback
     }
-  } catch {
-    // Ignore and check curated fallback
   }
 
   const fallback = CURATED_PROPERTY_GUIDES.find((g) => g.slug === slug);
