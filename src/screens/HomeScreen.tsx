@@ -6,15 +6,11 @@ import {
   ChevronRight,
   LandPlot,
   RotateCcw,
-  ShieldCheck,
-  Sparkles,
-  TrendingUp,
 } from "lucide-react-native";
 import { memo, useMemo, useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   ImageBackground,
   NativeScrollEvent,
   NativeSyntheticEvent,

@@ -37,7 +37,6 @@ import { UserRoleBadges } from "@/features/admin/components/UserRoleBadges";
 import { RoleAssignmentModal } from "@/features/admin/components/RoleAssignmentModal";
 import { ConfirmDialog } from "@/features/admin/components/ConfirmDialog";
 import { useUserRoles } from "@/features/admin/hooks/useUserRoles";
-import type { UserRole } from "@/features/admin/types/admin";
 
 function ProviderIcon({ provider }: { provider: string }) {
   switch (provider) {

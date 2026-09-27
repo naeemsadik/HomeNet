@@ -1,24 +1,16 @@
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
-  BadgeCheck,
   Bath,
   BedDouble,
   Building2,
   Calendar,
   Camera,
   Check,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Clock,
   ExternalLink,
-  Eye,
-  Flame,
-  Globe,
   Heart,
-  Info,
-  Layers,
   MapPin,
   Maximize2,
   Phone,
@@ -29,7 +21,6 @@ import {
   TrendingUp,
   UserRound,
   X,
-  Zap,
   type LucideIcon,
 } from "lucide-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -52,7 +43,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
 import { shareLink } from "@/lib/share";
 import { cdnImage } from "@/lib/cloudinaryImage";
-import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, fonts, shadow, webPointer } from "@/theme";
 import Svg, { Path } from "react-native-svg";
 import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
 import { useSavedStore } from "@/stores/savedStore";

@@ -1,11 +1,11 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { ArrowLeft, LoaderCircle, Mail, ShieldCheck, UserRound, XCircle } from "lucide-react-native";
+import { LoaderCircle, Mail, ShieldCheck, UserRound, XCircle } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colors, fonts, shadow } from "@/theme";
 import { getUser, type UserProfile } from "@/services/userApi";
 
 export function UserDetailScreen({ userId }: { userId: string }) {

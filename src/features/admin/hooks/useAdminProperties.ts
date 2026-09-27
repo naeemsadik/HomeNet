@@ -5,7 +5,6 @@ import {
   getAdminProperties,
 } from "@/services/propertyApi";
 import type {
-  PropertyAdminItem,
   PropertyAdminListResponse,
   PropertyAdminFilters,
 } from "../types/admin";

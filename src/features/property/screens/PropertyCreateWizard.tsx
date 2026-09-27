@@ -1,7 +1,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
-  BadgeCheck,
   BarChart2,
   Bell,
   Building2,
@@ -11,17 +10,10 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleHelp,
-  Compass,
   CreditCard,
-  Globe,
-  Grid,
-  Image as ImageIcon,
   LayoutDashboard,
-  Layers,
   LogOut,
   MapPin,
-  Maximize2,
-  Plus,
   PlusCircle,
   Rocket,
   Save,
@@ -30,10 +22,8 @@ import {
   ShieldCheck,
   Sparkles,
   Trash2,
-  Upload,
   User,
   Video,
-  Zap,
 } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -66,11 +56,10 @@ import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
 import { confirmAction, notify } from "@/lib/alert";
 import type { UploadInput } from "@/services/upload";
-import { colorTokens, colors, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import type { Area, PropertyType, UpsertPropertyDto } from "@/types/api";
 import {
   PROPERTY_TYPE_CONFIGS,
-  type PropertyTypeConfig,
 } from "../constants/propertyCategories";
 import {
   useCreateProperty,

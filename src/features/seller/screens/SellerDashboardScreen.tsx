@@ -2,9 +2,7 @@ import {
   ArrowUpRight,
   BadgeCheck,
   BarChart2,
-  BarChart3,
   Bell,
-  Bookmark,
   Building2,
   Check,
   CheckCircle2,
@@ -12,17 +10,14 @@ import {
   CreditCard,
   Eye,
   FileText,
-  Globe,
   Handshake,
   Heart,
-  Home,
   LayoutDashboard,
   LineChart as LineChartIcon,
   LogOut,
   Mail,
   MessageSquare,
   Phone,
-  Plus,
   PlusCircle,
   Rocket,
   Search,
@@ -58,7 +53,7 @@ import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
 import { useMyProperties } from "@/features/property/hooks/useMyProperties";
 import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
 import { SellerTopHeader } from "../components/SellerTopHeader";

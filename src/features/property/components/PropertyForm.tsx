@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, StyleSheet, KeyboardAvoidingView, Pl
 import { Send, ArrowRight, ArrowLeft, Check, MapPin } from "lucide-react-native";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { colorTokens, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts } from "@/theme";
 import { FormFloatingInput } from "@/components/FormFloatingInput";
 import { FormSelectField } from "@/components/FormSelectField";
 import { ErrorBanner, AuthButton } from "@/components/AuthFormFields";

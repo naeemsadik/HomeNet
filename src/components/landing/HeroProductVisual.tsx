@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Image,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -9,13 +8,10 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import {
-  Compass,
   Mail,
   MapPin,
-  Phone,
   Search,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react-native";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";

@@ -8,7 +8,7 @@ import {
   Linking,
 } from "react-native";
 import { Phone, Mail, UserRound } from "lucide-react-native";
-import { colorTokens, fontTokens, shadow, webPointer } from "@/theme";
+import { colorTokens, fontTokens, shadow } from "@/theme";
 import type { PropertyDetailUser } from "../hooks/usePropertyDetail";
 
 interface SellerCardProps {

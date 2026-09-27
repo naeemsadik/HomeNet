@@ -13,7 +13,7 @@ import { Eyebrow } from "@/components/ui";
 import { useAuthStore } from "@/stores/authStore";
 import { useUpdateUserProfile, useUploadAvatar, useDeleteAvatar } from "../hooks/useUserMutations";
 import { editProfileSchema, type EditProfileFormData } from "@/lib/schemas/user";
-import { colorTokens, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import type { UploadInput } from "@/services/upload";
 

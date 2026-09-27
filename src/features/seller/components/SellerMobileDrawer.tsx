@@ -1,4 +1,4 @@
-import { Building2, X } from "lucide-react-native";
+import { X } from "lucide-react-native";
 import {
   Modal,
   Pressable,

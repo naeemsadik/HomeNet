@@ -11,7 +11,6 @@ import {
   type KeyboardTypeOptions,
   type StyleProp,
   type ViewStyle,
-  type TextStyle,
 } from "react-native";
 import { colorTokens, colors, fonts, webPointer } from "@/theme";
 

@@ -3,16 +3,13 @@ import {
   CheckCircle2,
   Image as ImageIcon,
   MoreVertical,
-  Paperclip,
   Phone,
-  Plus,
   Search,
   Send,
   Video,
 } from "lucide-react-native";
 import { useState } from "react";
 import {
-  FlatList,
   Image,
   Pressable,
   ScrollView,
@@ -25,7 +22,7 @@ import { notify } from "@/lib/alert";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colorTokens, colors, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 
 interface Conversation {
   id: string;

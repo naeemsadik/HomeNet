@@ -1,7 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import {
   ArrowLeft,
-  Bell,
   CheckCircle2,
   Eye,
   EyeOff,

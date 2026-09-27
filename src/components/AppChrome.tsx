@@ -4,16 +4,10 @@ import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
   Bell,
-  ChevronDown,
   Heart,
   Home,
-  LogIn,
   LogOut,
-  Mail,
-  MapPin,
   Menu,
-  Phone,
-  ShieldCheck,
   Sparkles,
   TrendingUp,
   User,
@@ -29,12 +23,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { confirmAction } from "@/lib/alert";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Line, Path, Rect } from "react-native-svg";
+import Svg, { Path } from "react-native-svg";
 import { router } from "expo-router";
 import { Brand } from "./Brand";
 import { LoginModal } from "./LoginModal";

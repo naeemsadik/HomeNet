@@ -2,10 +2,8 @@ import React, { useMemo, useState, useEffect, useCallback } from "react";
 import {
   FlatList,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";

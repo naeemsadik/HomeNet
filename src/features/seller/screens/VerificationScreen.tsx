@@ -6,7 +6,6 @@ import {
   Clock,
   CreditCard,
   FileCheck,
-  Globe,
   IdCard,
   LayoutDashboard,
   LogOut,

@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import {
   Image,
-  Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -13,20 +11,15 @@ import {
   ArrowRight,
   Bath,
   Bed,
-  Check,
   Eye,
   Home,
-  Mail,
-  MapPin,
   Maximize2,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
 } from "lucide-react-native";
 import { fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { BrowserFrame } from "./BrowserFrame";
-import { PhoneFrame } from "./PhoneFrame";
 import { previewProperties } from "@/data/landingPreview";
 import { PropertyCard } from "@/components/PropertyCard";
 import { SellerStatCard } from "@/features/seller/components/SellerStatCard";

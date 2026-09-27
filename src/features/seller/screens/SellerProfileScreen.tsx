@@ -8,8 +8,6 @@ import {
   CreditCard,
   Eye,
   EyeOff,
-  Globe,
-  Heart,
   KeyRound,
   LayoutDashboard,
   LogOut,
@@ -38,7 +36,7 @@ import {
   View,
 } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
-import { router, useLocalSearchParams, usePathname } from "expo-router";
+import { router } from "expo-router";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";

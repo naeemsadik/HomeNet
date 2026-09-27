@@ -9,7 +9,6 @@ import {
   RotateCcw,
   Sparkles,
   WalletCards,
-  X,
   type LucideIcon,
 } from "lucide-react-native";
 import React, { useMemo, useState } from "react";

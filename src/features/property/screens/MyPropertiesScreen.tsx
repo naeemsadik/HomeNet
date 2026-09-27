@@ -1,15 +1,12 @@
 import { router } from "expo-router";
 import {
-  BadgeCheck,
   BarChart2,
-  Bell,
   Building2,
   CheckCircle2,
   CircleHelp,
   CreditCard,
   Edit,
   Eye,
-  Globe,
   Heart,
   LayoutDashboard,
   LogOut,
@@ -19,7 +16,6 @@ import {
   PlusCircle,
   Rocket,
   RotateCcw,
-  Search,
   ShieldCheck,
   Sparkles,
   Trash2,
@@ -34,7 +30,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
@@ -42,13 +37,12 @@ import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { colorTokens, colors, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { Footer } from "@/components/Footer";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
-import type { Property } from "../types/property";
 import { cdnImage } from "@/lib/cloudinaryImage";
 
 export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";

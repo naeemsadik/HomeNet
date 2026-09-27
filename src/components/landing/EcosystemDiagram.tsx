@@ -3,13 +3,8 @@ import { StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   ArrowRight,
-  Bot,
-  Building,
-  CheckCircle2,
-  Compass,
   Home,
   ShieldCheck,
-  UserCheck,
   Users,
 } from "lucide-react-native";
 import { fonts } from "@/theme";

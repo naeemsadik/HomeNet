@@ -6,7 +6,6 @@ import {
   CalendarCheck,
   Clock,
   ExternalLink,
-  RotateCcw,
   Share2,
   ShieldCheck,
   User,

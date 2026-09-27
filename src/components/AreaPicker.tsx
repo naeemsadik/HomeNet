@@ -10,7 +10,6 @@ import {
   View,
   ScrollView,
   FlatList,
-  ActivityIndicator,
   Animated,
   useWindowDimensions,
 } from "react-native";
@@ -22,7 +21,6 @@ import {
   X,
   Check,
   Building,
-  Navigation,
 } from "lucide-react-native";
 import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 import { useAreaPicker } from "@/hooks/useAreaPicker";

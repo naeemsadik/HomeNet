@@ -1,12 +1,12 @@
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
-import { Camera, LoaderCircle, LogOut, Save, ShieldCheck, Trash2, UserRound, KeyRound } from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { Camera, LoaderCircle, LogOut, ShieldCheck, Trash2, UserRound, KeyRound } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
-import { AppButton, Eyebrow } from "@/components/ui";
+import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";

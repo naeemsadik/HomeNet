@@ -12,7 +12,8 @@
     "build": "expo export --platform web && node -e \"require('fs').copyFileSync('dist/+not-found.html', 'dist/404.html')\"",
     "export:web": "expo export --platform web",
     "smoke:api": "node scripts/api-smoke.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "expo lint"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -48,6 +49,9 @@
   "devDependencies": {
     "@react-native-community/cli": "^20.2.0",
     "@types/react": "~19.2.2",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~57.0.2",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "typescript": "~6.0.3"
   }
 }

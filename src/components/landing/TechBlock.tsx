@@ -4,7 +4,6 @@ import {
   Compass,
   Database,
   Cpu,
-  Layers,
   CheckCircle2,
 } from "lucide-react-native";
 import { fonts } from "@/theme";
