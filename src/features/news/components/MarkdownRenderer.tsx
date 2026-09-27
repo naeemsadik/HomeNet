@@ -2,6 +2,7 @@ import React from "react";
 import {
   Linking,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -180,32 +181,40 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         );
 
         elements.push(
-          <View key={`table-${index}`} style={styles.tableWrapper}>
-            <View style={styles.tableHeaderRow}>
-              {headerRow.map((col, colIdx) => (
-                <View key={`th-${colIdx}`} style={styles.tableHeaderCell}>
-                  <Text style={styles.tableHeaderText}>{col}</Text>
-                </View>
-              ))}
-            </View>
-            {bodyRows.map((row, rowIdx) => (
-              <View
-                key={`tr-${rowIdx}`}
-                style={[
-                  styles.tableRow,
-                  rowIdx % 2 === 1 && styles.tableRowAlt,
-                ]}
-              >
-                {row.map((cell, cellIdx) => (
-                  <View key={`td-${rowIdx}-${cellIdx}`} style={styles.tableCell}>
-                    <Text style={styles.tableCellText}>
-                      {renderInlineText(cell, `td-inner-${rowIdx}-${cellIdx}`)}
-                    </Text>
+          <ScrollView
+            key={`table-scroll-${index}`}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.tableScroll}
+            contentContainerStyle={styles.tableScrollContent}
+          >
+            <View style={styles.tableWrapper}>
+              <View style={styles.tableHeaderRow}>
+                {headerRow.map((col, colIdx) => (
+                  <View key={`th-${colIdx}`} style={styles.tableHeaderCell}>
+                    <Text style={styles.tableHeaderText}>{col}</Text>
                   </View>
                 ))}
               </View>
-            ))}
-          </View>,
+              {bodyRows.map((row, rowIdx) => (
+                <View
+                  key={`tr-${rowIdx}`}
+                  style={[
+                    styles.tableRow,
+                    rowIdx % 2 === 1 && styles.tableRowAlt,
+                  ]}
+                >
+                  {row.map((cell, cellIdx) => (
+                    <View key={`td-${rowIdx}-${cellIdx}`} style={styles.tableCell}>
+                      <Text style={styles.tableCellText}>
+                        {renderInlineText(cell, `td-inner-${rowIdx}-${cellIdx}`)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ))}
+            </View>
+          </ScrollView>,
         );
         continue;
       }
@@ -380,13 +389,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 26,
   },
+  tableScroll: {
+    width: "100%",
+    marginVertical: 12,
+  },
+  tableScrollContent: {
+    minWidth: "100%",
+  },
   tableWrapper: {
     width: "100%",
+    minWidth: 500,
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.line,
     overflow: "hidden",
-    marginVertical: 12,
   },
   tableHeaderRow: {
     flexDirection: "row",
@@ -396,6 +412,7 @@ const styles = StyleSheet.create({
   },
   tableHeaderCell: {
     flex: 1,
+    minWidth: 120,
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
@@ -414,6 +431,7 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     flex: 1,
+    minWidth: 120,
     paddingHorizontal: 12,
     paddingVertical: 10,
     justifyContent: "center",

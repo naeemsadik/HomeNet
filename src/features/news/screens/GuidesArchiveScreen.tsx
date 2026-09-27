@@ -135,7 +135,7 @@ const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: Prop
 });
 
 export function GuidesArchiveScreen() {
-  const { isPhone, isTablet, isDesktop } = useResponsive();
+  const { isPhone, isTablet, width } = useResponsive();
   const [activeTab, setActiveTab] = useState<ArchiveTab>("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -182,7 +182,7 @@ export function GuidesArchiveScreen() {
     return result;
   }, [allGuides, activeTab, searchQuery]);
 
-  const numColumns = isPhone ? 1 : isTablet ? 2 : 3;
+  const numColumns = isPhone ? 1 : width < 1000 ? 2 : 3;
 
   const renderGuideItem = useCallback(
     ({ item }: { item: PropertyGuide }) => (
@@ -348,7 +348,7 @@ export function GuidesArchiveScreen() {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    maxWidth: 1140,
+    maxWidth: 1320,
     alignSelf: "center",
     paddingTop: 32,
     paddingBottom: 72,
@@ -388,12 +388,12 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
   },
   titlePhone: {
-    fontSize: 26,
+    fontSize: 25,
     lineHeight: 32,
-    letterSpacing: -0.6,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    maxWidth: 720,
+    maxWidth: 760,
     color: colors.muted,
     fontFamily: fonts.regular,
     fontSize: 15.5,
@@ -470,8 +470,8 @@ const styles = StyleSheet.create({
   },
   gridRow: {
     flexDirection: "row",
-    gap: 20,
-    marginBottom: 20,
+    gap: 22,
+    marginBottom: 22,
   },
   gridItem: {
     flex: 1,
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   },
   cardThumb: {
     width: "100%",
-    height: 170,
+    height: 190,
     backgroundColor: colors.soft,
   },
   cardImage: {
