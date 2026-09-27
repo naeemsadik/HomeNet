@@ -69,12 +69,8 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
 
   const handlePress = useCallback(() => {
     if (isRss && (guide.sourceUrl || guide.href)) {
-      const targetUrl = guide.sourceUrl || guide.href;
-      if (Platform.OS === "web" && typeof window !== "undefined") {
-        window.open(targetUrl, "_blank", "noopener,noreferrer");
-      } else {
-        void Linking.openURL(targetUrl);
-      }
+      // Same scheme check as every other external guide link (BUG-05).
+      openExternalUrl(guide.sourceUrl || guide.href);
       return;
     }
     router.push(guide.href as never);
