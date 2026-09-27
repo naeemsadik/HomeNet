@@ -618,10 +618,12 @@ export function AppChrome({
   children,
   active,
   bleed,
+  fluid,
 }: {
   children: ReactNode;
   active: ActivePage;
   bleed?: ReactNode;
+  fluid?: boolean;
 }) {
   const { isTablet, isPhone, containerMaxWidth } = useResponsive();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -670,10 +672,18 @@ export function AppChrome({
             style={[
               styles.mainGutter,
               isPhone && styles.mainGutterPhone,
-              { maxWidth: containerMaxWidth },
+              fluid ? styles.mainGutterFluid : { maxWidth: containerMaxWidth },
             ]}
           >
-            <View style={[styles.main, isPhone && styles.mainPhone]}>{children}</View>
+            <View
+              style={[
+                styles.main,
+                isPhone && styles.mainPhone,
+                fluid && styles.mainFluid,
+              ]}
+            >
+              {children}
+            </View>
           </View>
           <Footer />
         </ScrollView>

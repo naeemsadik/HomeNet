@@ -813,6 +813,13 @@ export const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 48,
   },
+  // `fluid` pages (guides) run edge to edge instead of in the container.
+  mainGutterFluid: {
+    width: "100%",
+    maxWidth: "100%",
+    paddingTop: 16,
+    paddingBottom: 48,
+  },
   mainGutterPhone: {
     paddingTop: 10,
     paddingBottom: 24,
@@ -821,6 +828,10 @@ export const styles = StyleSheet.create({
   main: {
     width: "100%",
     paddingHorizontal: layout.gutter,
+  },
+  mainFluid: {
+    width: "100%",
+    paddingHorizontal: 0,
   },
   mainPhone: {
     paddingHorizontal: layout.gutterPhone,

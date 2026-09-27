@@ -13,7 +13,7 @@
  * Requires confirmation of market precedence and legal review.
  * Swap here once confirmed without touching any component layout.
  */
-export const HERO_HEADLINE = "The verified way to find property in Bangladesh.";
+export const HERO_HEADLINE = "Find Your Home With Trust";
 
 // MARKET POSITION CLAIM — DISABLED PENDING BUSINESS APPROVAL.
 // Cannot be substantiated from the repository. Set `approved: true` ONLY on
@@ -281,7 +281,7 @@ export const landingCopy = {
   },
   seekersSection: {
     eyebrow: "For Seekers",
-    title: "Find a home you can trust, without the runaround",
+    title: "Find Your Home With Trust, without the runaround",
     benefits: [
       "Comprehensive search across residential, commercial, plots, and parking",
       "Every single photo and the exact location on the map before you visit",
