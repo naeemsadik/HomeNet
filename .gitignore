@@ -62,6 +62,7 @@ Desktop.ini
 # Local API reference material and agent configurations
 /docs/
 AGENTS.md
+CLAUDE.md
 .agents/
 .claude/
 claude/
