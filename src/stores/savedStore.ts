@@ -1,20 +1,24 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { saveProperty, unsaveProperty } from "@/services/propertyApi";
+import { getSavedProperties, saveProperty, unsaveProperty } from "@/services/propertyApi";
 import { useAuthStore } from "@/stores/authStore";
+import { queryClient } from "@/lib/queryClient";
 import type { Property } from "@/features/property/types/property";
 
 export interface SavedState {
   savedIds: string[];
-  savedProperties: Record<string, any>;
   isSaved: (id: string | number | undefined | null) => boolean;
-  toggleSaved: (propertyOrId: Property | any) => Promise<boolean>;
-  addSaved: (propertyOrId: Property | any) => Promise<void>;
+  toggleSaved: (propertyOrId: Property | string | number | any) => Promise<boolean>;
+  addSaved: (propertyOrId: Property | string | number | any) => Promise<void>;
   removeSaved: (id: string | number) => Promise<void>;
-  setSavedProperties: (properties: any[]) => void;
-  getSavedList: () => any[];
+  setSavedIds: (ids: (string | number)[]) => void;
+  syncGuestSaves: () => Promise<void>;
   clearSaved: () => void;
+  // Deprecated backwards-compat methods (kept to prevent breaking callers, does not store entities)
+  savedProperties?: Record<string, any>;
+  setSavedProperties: (properties: (Property | any)[]) => void;
+  getSavedList: () => any[];
 }
 
 export const useSavedStore = create<SavedState>()(
@@ -30,61 +34,56 @@ export const useSavedStore = create<SavedState>()(
         return savedIds.includes(s) || (typeof id === "number" && (savedIds as any[]).includes(id));
       },
 
-      toggleSaved: async (propertyOrId: Property | string | number) => {
+      toggleSaved: async (propertyOrId: Property | string | number | any) => {
         if (!propertyOrId) return false;
         const isObj = typeof propertyOrId === "object" && propertyOrId !== null;
         const id = String(isObj ? (propertyOrId as Property).id : propertyOrId);
         if (!id) return false;
 
-        const currentIds = get().savedIds;
-        const isCurrentlySaved =
-          currentIds.includes(id) ||
-          (isObj && currentIds.includes(String((propertyOrId as any).id)));
+        const currentIds = get().savedIds.map(String);
+        const isCurrentlySaved = currentIds.includes(id);
+        const user = useAuthStore.getState().user;
 
         if (isCurrentlySaved) {
-          // Unsave
-          const nextProps = { ...get().savedProperties };
-          delete nextProps[id];
-          set({
-            savedIds: currentIds.filter((item) => String(item) !== id),
-            savedProperties: nextProps,
-          });
+          // Optimistically unsave
+          const nextIds = currentIds.filter((item) => item !== id);
+          set({ savedIds: nextIds });
 
-          // Sync with server if logged in
-          const user = useAuthStore.getState().user;
           if (user) {
             try {
               await unsaveProperty(id);
+              queryClient.invalidateQueries({ queryKey: ["properties", "saved"] });
+              return false;
             } catch (err) {
-              console.warn("Failed to unsave property on server:", err);
+              // Roll back on failure
+              set({ savedIds: currentIds });
+              console.error("[savedStore] Failed to unsave property on server, rolling back:", err);
+              return true;
             }
           }
           return false;
         } else {
-          // Save
-          const nextProps = { ...get().savedProperties };
-          if (isObj) {
-            nextProps[id] = propertyOrId as Property;
-          }
-          set({
-            savedIds: [...currentIds.filter((item) => String(item) !== id), id],
-            savedProperties: nextProps,
-          });
+          // Optimistically save
+          const nextIds = Array.from(new Set([...currentIds, id]));
+          set({ savedIds: nextIds });
 
-          // Sync with server if logged in
-          const user = useAuthStore.getState().user;
           if (user) {
             try {
               await saveProperty(id);
+              queryClient.invalidateQueries({ queryKey: ["properties", "saved"] });
+              return true;
             } catch (err) {
-              console.warn("Failed to save property on server:", err);
+              // Roll back on failure
+              set({ savedIds: currentIds });
+              console.error("[savedStore] Failed to save property on server, rolling back:", err);
+              return false;
             }
           }
           return true;
         }
       },
 
-      addSaved: async (propertyOrId: Property | string | number) => {
+      addSaved: async (propertyOrId: Property | string | number | any) => {
         if (!propertyOrId) return;
         const isObj = typeof propertyOrId === "object" && propertyOrId !== null;
         const id = String(isObj ? (propertyOrId as Property).id : propertyOrId);
@@ -102,42 +101,63 @@ export const useSavedStore = create<SavedState>()(
         }
       },
 
-      setSavedProperties: (properties: Property[]) => {
-        if (!Array.isArray(properties)) return;
-        const currentProps = { ...get().savedProperties };
-        const idSet = new Set(get().savedIds.map(String));
-
-        properties.forEach((p) => {
-          if (p && p.id) {
-            const idStr = String(p.id);
-            idSet.add(idStr);
-            currentProps[idStr] = p;
-          }
-        });
-
-        set({
-          savedIds: Array.from(idSet),
-          savedProperties: currentProps,
-        });
+      setSavedIds: (ids: (string | number)[]) => {
+        if (!Array.isArray(ids)) return;
+        set({ savedIds: Array.from(new Set(ids.map(String))) });
       },
 
-      getSavedList: () => {
-        const { savedIds, savedProperties } = get();
-        return savedIds
-          .map((id) => savedProperties[String(id)])
-          .filter((p): p is any => Boolean(p && p.id));
+      syncGuestSaves: async () => {
+        const user = useAuthStore.getState().user;
+        if (!user) return;
+
+        const currentIds = get().savedIds.map(String);
+        if (currentIds.length > 0) {
+          // Sync all local/guest saves to server
+          await Promise.allSettled(
+            currentIds.map((id) =>
+              saveProperty(id).catch((err) => {
+                console.warn(`[savedStore] Failed to sync guest property ${id}:`, err);
+              })
+            )
+          );
+        }
+
+        // Fetch latest saved properties from server to guarantee sync
+        try {
+          const res = await getSavedProperties();
+          if (res?.data && Array.isArray(res.data)) {
+            const serverIds = res.data.map((p) => String(p.id));
+            set({ savedIds: serverIds });
+          }
+          queryClient.invalidateQueries({ queryKey: ["properties", "saved"] });
+        } catch (err) {
+          console.error("[savedStore] Failed to fetch server saved properties during sync:", err);
+        }
       },
 
       clearSaved: () => {
         set({ savedIds: [], savedProperties: {} });
+        queryClient.removeQueries({ queryKey: ["properties", "saved"] });
       },
+
+      setSavedProperties: (properties: (Property | any)[]) => {
+        if (!Array.isArray(properties)) return;
+        const idSet = new Set(get().savedIds.map(String));
+        properties.forEach((p) => {
+          if (p && p.id) {
+            idSet.add(String(p.id));
+          }
+        });
+        set({ savedIds: Array.from(idSet) });
+      },
+
+      getSavedList: () => [],
     }),
     {
       name: "homenet_saved_properties",
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         savedIds: state.savedIds,
-        savedProperties: state.savedProperties,
       }),
     }
   )

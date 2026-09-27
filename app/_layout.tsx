@@ -12,7 +12,7 @@ import {
   PlusJakartaSans_800ExtraBold,
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { useFonts } from "expo-font";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -22,22 +22,12 @@ import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
 import { ensureGoogleTranslateScript, shouldLoadTranslateOnBoot } from "@/utils/language";
 import { PageMeta } from "@/components/PageMeta";
+import { queryClient } from "@/lib/queryClient";
 
 // Keyboard focus ring. Not colorTokens.primary (#04cf92), which sits at 2.03:1
 // on white and fails the 3:1 WCAG 1.4.11 minimum for a focus indicator.
 const FOCUS_RING_COLOR = colorTokens.primaryOnLight;
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      staleTime: 5 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
-    },
-  },
-});
 
 export default function RootLayout() {
   const [loaded] = useFonts({
