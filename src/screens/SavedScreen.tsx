@@ -22,11 +22,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
 import { AppLink } from "@/components/ui";
-import { getSavedProperties, unsaveProperty } from "@/services/propertyApi";
+import { getPropertyById, getSavedProperties, unsaveProperty } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 import { useSavedStore } from "@/stores/savedStore";
 import { useAuthStore } from "@/stores/authStore";
+import type { ApiResponse } from "@/types/api";
 import type { Property } from "@/features/property/types/property";
 
 export function SavedScreen() {
@@ -34,54 +35,91 @@ export function SavedScreen() {
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
 
-  const { data: savedData, isLoading } = useQuery({
+  // Server saved properties for authenticated user
+  const { data: savedData, isLoading: isServerLoading } = useQuery({
     queryKey: ["properties", "saved"],
     queryFn: getSavedProperties,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
     enabled: !!user,
   });
 
-  const localSavedMap = useSavedStore((s) => s.savedProperties);
   const savedIds = useSavedStore((s) => s.savedIds);
-  const toggleSaved = useSavedStore((s) => s.toggleSaved);
 
-  // Sync server saved properties into the saved store whenever fetched
+  // Guest saved properties (when not logged in, fetched by savedIds)
+  const { data: guestProperties, isLoading: isGuestLoading } = useQuery({
+    queryKey: ["properties", "guest", savedIds],
+    queryFn: async () => {
+      const results = await Promise.allSettled(
+        savedIds.map((id) => getPropertyById(id))
+      );
+      return results
+        .filter(
+          (r): r is PromiseFulfilledResult<ApiResponse<Property>> =>
+            r.status === "fulfilled" && !!r.value?.data
+        )
+        .map((r) => r.value.data);
+    },
+    enabled: !user && savedIds.length > 0,
+    staleTime: 60 * 1000,
+  });
+
+  // Sync server saved IDs into savedStore so cards show red hearts across pages
   useEffect(() => {
-    if (savedData?.data && Array.isArray(savedData.data) && savedData.data.length > 0) {
-      useSavedStore.getState().setSavedProperties(savedData.data);
+    if (user && savedData?.data && Array.isArray(savedData.data)) {
+      const serverIds = savedData.data.map((p) => String(p.id));
+      useSavedStore.getState().setSavedIds(serverIds);
     }
-  }, [savedData]);
+  }, [user, savedData]);
 
-  // Combine server listings with locally saved listings, deduplicating by ID
+  // Server state via TanStack Query (no full property objects stored in Zustand)
   const savedListings = useMemo(() => {
-    const map = new Map<string, Property>();
-    // First local listings
-    Object.values(localSavedMap || {}).forEach((p) => {
-      if (p && p.id && savedIds.includes(String(p.id))) {
-        map.set(String(p.id), p);
-      }
-    });
-    // Overlay server listings
-    const serverItems = savedData?.data ?? [];
-    serverItems.forEach((p) => {
-      if (p && p.id && savedIds.includes(String(p.id))) {
-        map.set(String(p.id), p);
-      }
-    });
-    return Array.from(map.values());
-  }, [savedData, localSavedMap, savedIds]);
+    const list = user ? (savedData?.data ?? []) : (guestProperties ?? []);
+    return list.filter((p): p is Property => Boolean(p && p.id));
+  }, [user, savedData?.data, guestProperties]);
 
+  const isLoading = user ? isServerLoading : (!user && savedIds.length > 0 && isGuestLoading);
+
+  // Optimistic unsave mutation for authenticated users
   const unsaveMutation = useMutation({
     mutationFn: (id: string) => unsaveProperty(id),
-    onSuccess: () => {
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ["properties", "saved"] });
+      const previousData = queryClient.getQueryData<ApiResponse<Property[]>>(["properties", "saved"]);
+
+      if (previousData?.data) {
+        queryClient.setQueryData<ApiResponse<Property[]>>(["properties", "saved"], {
+          ...previousData,
+          data: previousData.data.filter((p) => String(p.id) !== String(id)),
+        });
+      }
+
+      const previousIds = useSavedStore.getState().savedIds;
+      useSavedStore.setState({
+        savedIds: previousIds.filter((itemId) => String(itemId) !== String(id)),
+      });
+
+      return { previousData, previousIds };
+    },
+    onError: (err, id, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(["properties", "saved"], context.previousData);
+      }
+      if (context?.previousIds) {
+        useSavedStore.setState({ savedIds: context.previousIds });
+      }
+      console.error("[SavedScreen] Failed to unsave property on server, rolling back:", err);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["properties", "saved"] });
     },
   });
 
-  const handleToggleSaved = async (id: string | number) => {
-    await toggleSaved(id);
+  const handleToggleSaved = (id: string | number) => {
+    const idStr = String(id);
     if (user) {
-      unsaveMutation.mutate(String(id));
+      unsaveMutation.mutate(idStr);
+    } else {
+      void useSavedStore.getState().removeSaved(idStr);
     }
   };
 
@@ -94,7 +132,9 @@ export function SavedScreen() {
         <View style={styles.headerTitleWrap}>
           <Text style={styles.pageHeading}>Saved</Text>
           <Text style={styles.pageSubtitle}>
-            Your saved properties &amp; bookmarks
+            {!user && savedIds.length > 0
+              ? "Saved locally on this device · Sign in to sync across devices"
+              : "Your saved properties & bookmarks"}
           </Text>
         </View>
 

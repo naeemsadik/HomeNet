@@ -9,6 +9,7 @@ import {
 } from "@/services/authApi";
 import { getUserRoles } from "@/services/roleApi";
 import { notifyUnauthorized, toApiError } from "@/services/apiClient";
+import { useSavedStore } from "@/stores/savedStore";
 import type {
   AuthUser,
   ChangePasswordDto,
@@ -56,6 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await saveTokens(response.data.access_token, response.data.refresh_token);
       set({ user: response.data.user, loading: false });
       await get().fetchUserRoles(response.data.user.id);
+      void useSavedStore.getState().syncGuestSaves();
       return true;
     } catch (error) {
       set({ loading: false, ...authError(error) });
@@ -71,6 +73,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await saveTokens(response.data.access_token, response.data.refresh_token);
       set({ user: response.data.user, loading: false });
       await get().fetchUserRoles(response.data.user.id);
+      void useSavedStore.getState().syncGuestSaves();
       return true;
     } catch (error) {
       set({ loading: false, ...authError(error) });
@@ -85,6 +88,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (refreshToken) await logoutUser(refreshToken).catch(() => undefined);
     } finally {
       await clearTokens();
+      useSavedStore.getState().clearSaved();
       get().resetSession();
       await notifyUnauthorized();
     }
@@ -141,7 +145,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   hydrate: async () => {
     if (get().hydrated) return;
     try {
-      if (await getAccessToken()) await get().fetchMe();
+      if (await getAccessToken()) {
+        await get().fetchMe();
+        void useSavedStore.getState().syncGuestSaves();
+      }
     } catch {
       await clearTokens();
       get().resetSession();
@@ -150,14 +157,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  resetSession: () =>
+  resetSession: () => {
+    useSavedStore.getState().clearSaved();
     set({
       user: null,
       loading: false,
       error: null,
       errorCode: null,
       userRoles: [],
-    }),
+    });
+  },
 }));
 
 if (typeof window !== "undefined") {
