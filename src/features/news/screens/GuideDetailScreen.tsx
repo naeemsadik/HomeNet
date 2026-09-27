@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BookOpen,
   Calendar,
+  CalendarCheck,
   Clock,
   ExternalLink,
   RotateCcw,
@@ -12,7 +13,6 @@ import {
 } from "lucide-react-native";
 import {
   ActivityIndicator,
-  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -20,6 +20,8 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { openExternalUrl } from "@/lib/safeUrl";
+import { shareLink } from "@/lib/share";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
@@ -51,20 +53,12 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
   const isRss = guide?.sourceType === "rss";
 
   const handleExternalRead = () => {
-    if (!guide?.sourceUrl && !guide?.href) return;
-    const url = guide.sourceUrl || guide.href;
-    if (Platform.OS === "web" && typeof window !== "undefined") {
-      window.open(url, "_blank", "noopener,noreferrer");
-    } else {
-      void Linking.openURL(url);
-    }
+    openExternalUrl(guide?.sourceUrl || guide?.href);
   };
 
   const handleShare = () => {
-    if (Platform.OS === "web" && typeof navigator !== "undefined" && navigator.clipboard) {
-      void navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
-    }
+    if (!guide) return;
+    void shareLink({ title: guide.title });
   };
 
   return (
@@ -248,6 +242,14 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                   <Calendar color={colors.muted} size={14} />
                   <Text style={styles.metaItemText}>
                     {formatDate(guide.publishedAt)}
+                  </Text>
+                </View>
+              ) : null}
+              {guide.updatedAt ? (
+                <View style={styles.metaItem}>
+                  <CalendarCheck color={colors.muted} size={14} />
+                  <Text style={styles.metaItemText}>
+                    Last reviewed {formatDate(guide.updatedAt)}
                   </Text>
                 </View>
               ) : null}

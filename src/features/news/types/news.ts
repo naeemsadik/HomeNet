@@ -35,6 +35,8 @@ export interface PropertyGuide {
   imageUrl: string | null;
   /** ISO 8601. Null hides the date rather than inventing one. */
   publishedAt: string | null;
+  /** ISO 8601. When the content (and any figures in it) was last checked. */
+  updatedAt?: string | null;
   /** In-app route or external URL. */
   href: string;
   /** Whether the guide is an in-house HomeNet guide or syndicated via external RSS. */

@@ -10,8 +10,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Linking,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -20,6 +18,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { openExternalUrl } from "@/lib/safeUrl";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
@@ -55,13 +54,8 @@ const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: Prop
   }, [imgUri]);
 
   const handlePress = useCallback(() => {
-    if (isRss && (guide.sourceUrl || guide.href)) {
-      const targetUrl = guide.sourceUrl || guide.href;
-      if (Platform.OS === "web" && typeof window !== "undefined") {
-        window.open(targetUrl, "_blank", "noopener,noreferrer");
-      } else {
-        void Linking.openURL(targetUrl);
-      }
+    if (isRss) {
+      openExternalUrl(guide.sourceUrl || guide.href);
       return;
     }
     router.push(guide.href as never);

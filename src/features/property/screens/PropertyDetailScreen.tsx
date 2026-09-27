@@ -41,7 +41,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   View,
@@ -51,6 +50,7 @@ import { PageMeta } from "@/components/PageMeta";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
+import { shareLink } from "@/lib/share";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { colors, fonts, shadow, webPointer } from "@/theme";
 import Svg, { Path } from "react-native-svg";
@@ -218,24 +218,9 @@ export function PropertyDetailScreen() {
   };
 
   // Used to claim the link was copied without copying anything.
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!property) return;
-    if (Platform.OS !== "web" || typeof window === "undefined") {
-      await Share.share({ message: property.title }).catch(() => {});
-      return;
-    }
-    const url = window.location.href;
-    if (typeof navigator.share === "function") {
-      // Rejects when the user closes the share sheet; nothing to report.
-      await navigator.share({ title: property.title, url }).catch(() => {});
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      notify("Link copied", "The property link is on your clipboard.");
-    } catch {
-      notify("Copy this link", url);
-    }
+    void shareLink({ title: property.title });
   };
 
   // Guest saves live only on this device, so say so once they land.

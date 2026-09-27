@@ -1,11 +1,17 @@
 import type { PropertyGuide } from "@/features/news/types/news";
 
 /**
- * Authoritative, curated property and legal guides for Bangladesh.
+ * Curated property and legal guides for Bangladesh.
  *
  * Serves as:
- * 1. Initial high-quality content for HomeNet's guides & insights.
+ * 1. Initial content for HomeNet's guides & insights.
  * 2. Instant zero-latency fallback whenever backend `/v1/guides` is unavailable.
+ *
+ * Rules for this file:
+ * - Credit "HomeNet Team". Never invent a desk, specialist or credential.
+ * - Any statutory fee, tax or rate needs the fee disclaimer, a cited source,
+ *   and `updatedAt` set to the date the figure was last checked. Rates change
+ *   with every Finance Act.
  */
 export const CURATED_PROPERTY_GUIDES: PropertyGuide[] = [
   {
@@ -19,13 +25,17 @@ export const CURATED_PROPERTY_GUIDES: PropertyGuide[] = [
     imageUrl:
       "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=85",
     publishedAt: "2026-08-15T09:00:00.000Z",
+    updatedAt: "2026-09-27T00:00:00.000Z",
     href: "/guides/namzari-mutation-bangladesh-guide",
     sourceType: "internal",
-    sourceName: "HomeNet Legal Desk",
+    sourceName: "HomeNet Team",
     sourceUrl: null,
     tags: ["Namzari", "Mutation", "Land Ministry", "AC Land", "DCR"],
     contentMarkdown: `
 # Understanding Namzari (Mutation) in Bangladesh
+
+> **Disclaimer:** Rates cited are for reference only. Verify all statutory fees with
+> the relevant Sub-registry, NBR circular, or a qualified lawyer before any transaction.
 
 Many property buyers in Bangladesh mistakenly believe that completing a purchase deed (*Saf-Kabala*) at the Sub-registry office is the final step in establishing ownership. **It is not.**
 
@@ -56,13 +66,13 @@ Applications are filed online through **mutation.land.gov.bd**:
 ## Step-by-Step Procedure
 
 ### 1. Online Application
-Visit [mutation.land.gov.bd](https://mutation.land.gov.bd) and select "New Application" (*Notun Abedon*). Fill in your NID, mobile number, district, upazila/thana, and mouza details. Upload scanned copies of your deed and tax receipts (PDF or JPEG, under 25MB total).
+Visit [mutation.land.gov.bd](https://mutation.land.gov.bd) and select "New Application" (*Notun Abedon*). Fill in your NID, mobile number, district, upazila/thana, and mouza details. Upload scanned copies of your deed and tax receipts; the portal lists the accepted file types and sizes. You pay a **Tk 20 court fee** and a **Tk 50 notice fee** online at this stage.
 
 ### 2. Application Tracking
 Upon submission, an SMS with your **Application ID** and tracking link is sent to your registered mobile number.
 
 ### 3. Field Verification
-The Union/Circle Land Sub-office (*Tahshil Office*) conducts field verification and submits a report to the AC Land office within 7 to 15 working days.
+The Union/Circle Land Sub-office (*Tahshil Office*) conducts field verification and submits a report to the AC Land office. Track progress with your Application ID rather than relying on a fixed timeline.
 
 ### 4. Hearing & Scrutiny
 If required, the AC Land office schedules a hearing where both parties (or representatives) verify original documents.
@@ -70,14 +80,20 @@ If required, the AC Land office schedules a hearing where both parties (or repre
 ### 5. Official Order & Fee Payment
 Once approved:
 - An official approval SMS arrives.
-- Pay the official government **DCR fee (Tk 1,100)** via online payment (bKash, Nagad, Rocket, or cards).
+- Pay the **DCR fee of Tk 1,100** online: Tk 1,000 for the record correction and Tk 100 for the mutation khatian.
 
 ### 6. Download E-Khatian & DCR
-Download your QR-code verified **E-Namzari Khatian** and **Duplicate Carbon Receipt (DCR)** directly from the portal. These online documents have full legal validity across all courts, sub-registries, and banks.
+Download your QR-code verified **E-Namzari Khatian** and **Duplicate Carbon Receipt (DCR)** directly from the portal. The QR-coded DCR issued online carries the same legal validity as one issued by the manual method.
+
+---
+
+## Sources
+
+- [e-Mutation portal, Ministry of Land](https://mutation.land.gov.bd)
+- [BSS: "Applicant can pay e-mutation fee online" (2 Nov 2021), fee breakdown](https://www.bssnews.net/news/25997)
     `.trim(),
     author: {
-      name: "HomeNet Legal Desk",
-      role: "Property & Land Law Advisory",
+      name: "HomeNet Team",
     },
   },
 
@@ -93,11 +109,15 @@ Download your QR-code verified **E-Namzari Khatian** and **Duplicate Carbon Rece
     publishedAt: "2026-08-20T10:30:00.000Z",
     href: "/guides/how-to-verify-khatian-cs-sa-rs-bs",
     sourceType: "internal",
-    sourceName: "HomeNet Legal Desk",
+    sourceName: "HomeNet Team",
     sourceUrl: null,
     tags: ["Khatian", "Porcha", "CS", "SA", "RS", "BS", "City Survey"],
     contentMarkdown: `
 # How to Verify Khatian (CS, SA, RS, BS) Before Buying
+
+> **Disclaimer:** This guide is general information, not legal advice. Land records and
+> procedures vary by district; confirm with the AC Land office, the Sub-registry, or a
+> qualified lawyer before any transaction.
 
 In Bangladesh, real estate disputes usually originate from defective land titles or forged Khatians (*Porchas*). Understanding the progression of historical land surveys is essential for every property buyer.
 
@@ -131,8 +151,7 @@ The modern survey. In Dhaka, it is commonly designated as **Dhaka City Survey**.
    Confirm at the Sub-registry and AC Land office that the property is not classified as *Khas* (government land), *Arpita* (vested property), or encumbered by bank liens or ongoing court injunctions.
     `.trim(),
     author: {
-      name: "HomeNet Legal Desk",
-      role: "Property & Land Law Advisory",
+      name: "HomeNet Team",
     },
   },
 
@@ -142,47 +161,64 @@ The modern survey. In Dhaka, it is commonly designated as **Dhaka City Survey**.
     category: "Buying",
     title: "Dhaka Flat Registration Costs & Stamp Duty Breakdown",
     excerpt:
-      "A complete calculation guide for stamp duty, registration fees, local government taxes, and AIT (Section 53FF) when buying a flat in Dhaka.",
-    readTime: "4 min read",
+      "What it costs to register a flat in Dhaka: stamp duty, registration fee and local government tax, plus the seller's and developer's taxes under the Income Tax Act 2023.",
+    readTime: "5 min read",
     imageUrl: null,
     publishedAt: "2026-08-25T11:00:00.000Z",
+    updatedAt: "2026-09-27T00:00:00.000Z",
     href: "/guides/dhaka-flat-registration-costs-breakdown",
     sourceType: "internal",
-    sourceName: "HomeNet Advisory",
+    sourceName: "HomeNet Team",
     sourceUrl: null,
-    tags: ["Registration", "Stamp Duty", "AIT", "Taxes", "Dhaka"],
+    tags: ["Registration", "Stamp Duty", "Transfer Tax", "Taxes", "Dhaka"],
     contentMarkdown: `
 # Dhaka Flat Registration Costs & Stamp Duty Breakdown
 
-Registering a newly purchased flat or apartment in Dhaka involves several statutory fees payable to the Sub-registry office and the National Board of Revenue (NBR).
+> **Disclaimer:** Rates cited are for reference only. Verify all statutory fees with
+> the relevant Sub-registry, NBR circular, or a qualified lawyer before any transaction.
+
+Registering a flat you have bought in Dhaka involves several statutory charges, collected by the Sub-registry office before the deed is registered. Rates change with Finance Acts and NBR rules, so treat the figures below as a starting point and confirm them before you budget.
 
 ---
 
-## Standard Cost Breakdown (Dhaka City Corporation)
+## Standard Cost Breakdown (City Corporation Areas)
 
-| Fee Type | Rate | Description |
-| :--- | :--- | :--- |
-| **Stamp Duty** | 1.5% | Payable via Treasury Chalan or e-stamp. |
-| **Registration Fee** | 1.0% | Paid to the Sub-registry office. |
-| **Local Government Tax** | 2.0% | Paid to Dhaka North (DNCC) or Dhaka South (DSCC). |
-| **Advance Income Tax (AIT)** | Fixed per sqft | Under Section 53FF, varies by location (e.g. Gulshan/Banani vs. Mirpur/Uttara). |
-| **Gain Tax (53C)** | 4.0% - 8.0% | Paid by the seller / developer; ensure proof of payment is attached. |
+| Charge | Paid by | Rate | Source |
+| :--- | :--- | :--- | :--- |
+| **Stamp Duty** | Buyer | 1.5% of the deed value | [Finance Act 2022, Schedule I](https://bdlaws.minlaw.gov.bd/act-1409/act-chapter-print-2323.html) |
+| **Registration Fee** | Buyer | Commonly 1% of the deed value; set by the Government's fee table | [Registration Act 1908, s.78](https://bdlaws.minlaw.gov.bd/act-90/part-details-293.html) |
+| **Local Government Tax** | Buyer | Commonly 2% in city corporation areas | Reported rate; confirm at the Sub-registry |
+| **Transfer Tax (s.125)** | Seller | Set by NBR rules and varies by area. Capped at the higher of Tk 20 lakh per katha of land, Tk 1,000 per sqft of flat, or 10% of the deed value | [Income Tax Act 2023, s.125](https://nbr.gov.bd/uploads/acts/Income_tax_act_2023.pdf) |
+| **Developer Tax (s.126)** | Developer | Set by NBR rules and varies by area. Capped at Tk 1,600 per square metre of residential floor space, and 5% of the deed value for the land share | [Income Tax Act 2023, s.126](https://nbr.gov.bd/uploads/acts/Income_tax_act_2023.pdf) |
+
+The seller's transfer tax is often called "gain tax". Sections 125 and 126 of the Income Tax Act 2023 replaced sections 53H and 53FF of the old Income Tax Ordinance 1984.
 
 ---
 
-## Example Calculation: 1,500 Sqft Flat at Tk 1.5 Crore in Mirpur
+## Example: 1,500 Sqft Flat at Tk 1.5 Crore in Mirpur
+
+The buyer's registration costs, using the rates above:
 
 1. **Stamp Duty (1.5%)**: Tk 2,25,000
-2. **Registration Fee (1.0%)**: Tk 1,50,000
-3. **Local Govt Tax (2.0%)**: Tk 3,00,000
-4. **Section 53FF AIT**: Varies by zone (~Tk 300–600 per sqft in general Dhaka zones).
-5. **Estimated Incidental Costs**: Legal drafting, clerk dues, and stamp vendor fees (~Tk 20,000–35,000).
+2. **Registration Fee (about 1%)**: Tk 1,50,000
+3. **Local Government Tax (about 2%)**: Tk 3,00,000
+4. **Total**: about Tk 6,75,000, plus deed-writing and drafting charges, which vary.
 
-> **Pro Tip**: Always demand an official e-Chalan receipt for every fee paid at the Sub-registry. Never hand over unreceipted cash for statutory fees.
+The seller's transfer tax and the developer's tax are not in this total. If you are buying from a developer, ask whether the price includes the developer's tax. For 1,500 sqft (about 139 square metres) it can be up to about Tk 2.2 lakh, plus up to 5% of the deed value for the land share.
+
+> **Pro Tip**: Always demand an official receipt (e-Chalan) for every fee paid at the Sub-registry. Never hand over unreceipted cash for statutory fees.
+
+---
+
+## Sources
+
+- [Finance Act 2022: stamp duty on instruments, Schedule I (Conveyance)](https://bdlaws.minlaw.gov.bd/act-1409/act-chapter-print-2323.html)
+- [Registration Act 1908, Part XIII: fees for registration](https://bdlaws.minlaw.gov.bd/act-90/part-details-293.html)
+- [Income Tax Act 2023 as amended by the Finance Act 2024, sections 125 and 126 (NBR)](https://nbr.gov.bd/uploads/acts/Income_tax_act_2023.pdf)
+- Registration fee and local government tax as reported by [The Business Standard (27 May 2023)](https://www.tbsnews.net/economy/budget/govt-double-gain-tax-land-flat-registration-638738)
     `.trim(),
     author: {
-      name: "HomeNet Advisory",
-      role: "Finance & Taxation Specialist",
+      name: "HomeNet Team",
     },
   },
 
@@ -196,9 +232,10 @@ Registering a newly purchased flat or apartment in Dhaka involves several statut
     readTime: "4 min read",
     imageUrl: null,
     publishedAt: "2026-09-01T08:15:00.000Z",
+    updatedAt: "2026-09-27T00:00:00.000Z",
     href: "/guides/understanding-katha-bigha-decimal-sqft",
     sourceType: "internal",
-    sourceName: "HomeNet Advisory",
+    sourceName: "HomeNet Team",
     sourceUrl: null,
     tags: ["Katha", "Bigha", "Decimal", "Measurement", "Land Area"],
     contentMarkdown: `
@@ -212,7 +249,7 @@ Property listings in Bangladesh switch fluidly between imperial, metric, and tra
 
 - **1 Katha** = **720 Square Feet (sqft)** = **66.89 Square Metres (sqm)** = **1.65 Decimal (Shatangsho)**
 - **20 Katha** = **1 Bigha** = **14,400 Square Feet** = **33 Decimal**
-- **3 Bighas** = **1 Acre** = **100 Decimal** = **43,560 Square Feet**
+- **1 Acre** = **100 Decimal** = **43,560 Square Feet** (about 3 Bighas, which is 43,200 sqft)
 - **1 Chhatak** = **45 Square Feet** (1/16th of a Katha)
 
 ---
@@ -224,8 +261,7 @@ When buying an apartment advertised as "1,800 sqft":
 - **Always ask for the approved structural floor plan** to verify the exact usable carpet area before signing contracts.
     `.trim(),
     author: {
-      name: "HomeNet Advisory",
-      role: "Real Estate Research",
+      name: "HomeNet Team",
     },
   },
 
@@ -241,7 +277,7 @@ When buying an apartment advertised as "1,800 sqft":
     publishedAt: "2026-09-05T12:00:00.000Z",
     href: "/guides/dhaka-apartment-buyer-inspection-checklist",
     sourceType: "internal",
-    sourceName: "HomeNet Editorial",
+    sourceName: "HomeNet Team",
     sourceUrl: null,
     tags: ["Checklist", "Inspection", "Dhaka", "RAJUK", "Amenities"],
     contentMarkdown: `
@@ -271,8 +307,7 @@ Before signing a deed or transferring a booking deposit for a Dhaka flat, run th
    Ensure rooftop solar setups meet utility net-metering standards where applicable.
     `.trim(),
     author: {
-      name: "HomeNet Editorial",
-      role: "Quality & Standards",
+      name: "HomeNet Team",
     },
   },
 
@@ -282,7 +317,7 @@ Before signing a deed or transferring a booking deposit for a Dhaka flat, run th
     category: "Selling",
     title: "How Direct Property Listing Saves Lakhs in Dhaka",
     excerpt:
-      "How typical 1-2% intermediary broker commissions cost buyers and sellers up to 5 lakh BDT, and why direct-owner listings offer cleaner transactions.",
+      "How a typical 1-2% broker commission can cost each side up to Tk 5 lakh on a Tk 2.5 crore flat, and why direct-owner listings offer cleaner transactions.",
     readTime: "3 min read",
     imageUrl: null,
     publishedAt: "2026-09-10T14:30:00.000Z",
@@ -299,7 +334,7 @@ In Dhaka's traditional property market, informal brokers (*Dalals*) frequently i
 ---
 
 ## The Hidden Cost of Intermediaries
-- On a **Tk 2.5 Crore flat** in Gulshan or Dhanmondi, a 2% brokerage commission from both sides totals **Tk 10 Lakhs** drained from the transaction.
+- On a **Tk 2.5 Crore flat** in Gulshan or Dhanmondi, a 2% brokerage commission is Tk 5 lakh from each side: **Tk 10 lakh** in total drained from the transaction.
 - Beyond fees, intermediaries often inflate asking prices or conceal physical drawbacks to rush deals through.
 
 ---
@@ -311,7 +346,6 @@ In Dhaka's traditional property market, informal brokers (*Dalals*) frequently i
     `.trim(),
     author: {
       name: "HomeNet Team",
-      role: "Platform Advisory",
     },
   },
 ];

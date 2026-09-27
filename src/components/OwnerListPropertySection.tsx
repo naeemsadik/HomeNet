@@ -573,6 +573,7 @@ export function OwnerListPropertySection() {
         visible={aiSheetVisible}
         onClose={() => setAiSheetVisible(false)}
         onApply={handleAiApply}
+        onUseManualForm={() => setIsModalOpen(true)}
       />
     </>
   );
