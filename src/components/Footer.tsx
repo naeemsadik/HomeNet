@@ -77,7 +77,6 @@ export function Footer({ style }: FooterProps = {}) {
     { label: "Commercial to rent", href: "/rent" },
     { label: "Short-let & Serviced", href: "/rent?subtype=short-let" },
     { label: "Verified listings only", href: "/buy?is_verified=true" },
-    { label: "Find an agent", href: "/users" },
     { label: "Student accommodation", href: "/rent" },
     { label: "New developments", href: "/buy" },
   ];
@@ -101,7 +100,6 @@ export function Footer({ style }: FooterProps = {}) {
     { label: "Investor relations", href: "/about" },
     { label: "Careers", href: "/about" },
     { label: "Contact us", href: "/about" },
-    { label: "Verified agencies", href: "/users" },
   ];
 
   const proBenefits = [
