@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badgeCountText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontSize: 12,
     fontFamily: fonts.bold,
   },

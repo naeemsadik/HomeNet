@@ -775,7 +775,7 @@ export function PropertyDetailScreen() {
                 onPress={() => setBookModalVisible(true)}
                 style={({ pressed }) => [styles.bookVisitBtn, webPointer, pressed && styles.pressed]}
               >
-                <Calendar color="#FFFFFF" size={18} />
+                <Calendar color={colorTokens.onAccent} size={18} />
                 <Text style={styles.bookVisitBtnText}>Book a visit</Text>
               </Pressable>
             </View>

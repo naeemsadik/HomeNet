@@ -833,7 +833,7 @@ export const styles = StyleSheet.create({
     borderRadius: 999,
   },
   bookVisitBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontSize: 15,
     fontFamily: fonts.bold,
   },

@@ -96,7 +96,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badgeCountText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontSize: 12,
     fontFamily: fonts.bold,
   },
@@ -193,7 +193,7 @@ export const styles = StyleSheet.create({
   notificationBadgeText: {
     fontSize: 10,
     fontFamily: fonts.bold,
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     lineHeight: 12,
   },
   notificationDropdown: {

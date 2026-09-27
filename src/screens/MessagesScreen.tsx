@@ -237,7 +237,7 @@ export function MessagesScreen() {
               }
               style={({ pressed }) => [styles.scheduleVisitBtn, webPointer, pressed && styles.pressed]}
             >
-              <Calendar color="#FFFFFF" size={15} />
+              <Calendar color={colorTokens.onAccent} size={15} />
               <Text style={styles.scheduleVisitText}>Schedule visit</Text>
             </Pressable>
           </View>
@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   unreadBadgeText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontSize: 11,
     fontFamily: fonts.bold,
   },
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   scheduleVisitText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontSize: 12,
     fontFamily: fonts.bold,
   },

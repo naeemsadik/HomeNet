@@ -100,7 +100,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badgeCountText: {
-    color: colors.white,
+    color: colorTokens.onAccent,
     fontSize: 12,
     fontFamily: fonts.bold,
   },

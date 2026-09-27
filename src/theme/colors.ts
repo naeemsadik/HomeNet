@@ -63,6 +63,9 @@ export const colorTokens = {
   onInk: "#FFFFFF",
   /** Text and icons on an `errorText` (red) fill. 5.3:1. */
   onDanger: "#FFFFFF",
+  /** Text and icons on the `notification` orange (#F4823A, 6.9:1) and WhatsApp
+   *  green (#25D366, 9.0:1) fills. White measures 2.6:1 and 2.0:1 on them. */
+  onAccent: "#0B1A17",
   overlay: "rgba(11, 26, 23, 0.45)",
   shadow: "rgba(11, 26, 23, 0.10)",
 

@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badgeText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontFamily: fonts.semiBold,
     fontSize: 12,
     fontWeight: "600",

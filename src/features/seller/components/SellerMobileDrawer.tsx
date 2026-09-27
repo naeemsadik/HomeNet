@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import type { SellerNavKey } from "../screens/SellerDashboardScreen";
 
 export interface SellerNavItem {
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badgeCountText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontSize: 12,
     fontFamily: fonts.bold,
   },

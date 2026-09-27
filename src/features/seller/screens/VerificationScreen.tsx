@@ -37,7 +37,7 @@ import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
 import { ToggleViewButton } from "../components/ToggleViewButton";
@@ -417,7 +417,7 @@ export function VerificationScreen() {
                             </View>
                           ) : isInProgress ? (
                             <View style={styles.timelineCircleInProgress}>
-                              <Clock color="#FFFFFF" size={13} strokeWidth={2.2} />
+                              <Clock color={colorTokens.onAccent} size={13} strokeWidth={2.2} />
                             </View>
                           ) : (
                             <View style={styles.timelineCirclePending}>
