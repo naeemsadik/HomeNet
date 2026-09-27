@@ -139,7 +139,7 @@ apiClient.interceptors.response.use(
       Boolean(originalRequest?.url?.includes("localhost:3000"));
 
     if (isNetworkError && isTargetingLocalhost && !originalRequest?._fallbackTried) {
-      console.warn(
+      if (__DEV__) console.warn(
         `[apiClient] Local server at ${apiBaseUrl} is unavailable. Switching to Vercel endpoint: ${VERCEL_API_BASE_URL}`,
       );
       setApiBaseUrl(VERCEL_API_BASE_URL);

@@ -35,13 +35,13 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Linking,
   Modal,
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -56,6 +56,7 @@ import { colors, fonts, shadow, webPointer } from "@/theme";
 import Svg, { Path } from "react-native-svg";
 import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
 import { useSavedStore } from "@/stores/savedStore";
+import { useAuthStore } from "@/stores/authStore";
 
 function WhatsAppIcon({ size = 18, color = "#25D366" }: { size?: number; color?: string }) {
   return (
@@ -102,6 +103,9 @@ export function PropertyDetailScreen() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const isPropertySaved = useSavedStore((s) => s.isSaved(id ?? ""));
   const toggleSaved = useSavedStore((s) => s.toggleSaved);
+  const isSignedIn = useAuthStore((s) => Boolean(s.user));
+  const [guestSaveHint, setGuestSaveHint] = useState(false);
+  const guestSaveHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [bookModalVisible, setBookModalVisible] = useState(false);
   const [thumbScrollX, setThumbScrollX] = useState(0);
   const [maxThumbScroll, setMaxThumbScroll] = useState(448);
@@ -151,6 +155,8 @@ export function PropertyDetailScreen() {
       bedrooms: Number((apiDetail as any).bedrooms ?? rawAmenities.bedrooms ?? 0),
       bathrooms: Number((apiDetail as any).bathrooms ?? rawAmenities.bathrooms ?? 0),
       areaSqft: apiDetail.area_size ? apiDetail.area_size.toLocaleString("en-BD") : null,
+      // Placeholder: the API has no valuation yet, so the card below never
+      // renders. Wire this up when the backend ships one.
       aiValuation: null as AiValuation | null,
       description: apiDetail.description || "No description provided.",
       amenities: amenityList,
@@ -188,7 +194,7 @@ export function PropertyDetailScreen() {
 
   const handleCall = () => {
     if (!property?.seller.phone) {
-      Alert.alert("Phone unavailable", "The property owner has not shared a phone number.");
+      notify("Phone unavailable", "The property owner has not shared a phone number.");
       return;
     }
     void Linking.openURL(`tel:${property.seller.phone}`);
@@ -204,17 +210,48 @@ export function PropertyDetailScreen() {
     const message = `Hello ${property?.seller.name || "Seller"}, I'm interested in your property "${property?.title || "Property"}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) on Homenet. Is this property currently available?`;
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     void Linking.openURL(whatsappUrl).catch(() => {
-      Alert.alert(
+      notify(
         "WhatsApp",
         `Could not launch WhatsApp. You can message the seller directly at ${rawPhone}.`,
       );
     });
   };
 
-  const handleShare = () => {
+  // Used to claim the link was copied without copying anything.
+  const handleShare = async () => {
     if (!property) return;
-    Alert.alert("Share Property", `Share link for "${property.title}" copied to clipboard.`);
+    if (Platform.OS !== "web" || typeof window === "undefined") {
+      await Share.share({ message: property.title }).catch(() => {});
+      return;
+    }
+    const url = window.location.href;
+    if (typeof navigator.share === "function") {
+      // Rejects when the user closes the share sheet; nothing to report.
+      await navigator.share({ title: property.title, url }).catch(() => {});
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      notify("Link copied", "The property link is on your clipboard.");
+    } catch {
+      notify("Copy this link", url);
+    }
   };
+
+  // Guest saves live only on this device, so say so once they land.
+  const handleToggleSaved = async () => {
+    const target = apiDetail ?? id;
+    if (!target) return;
+    const nowSaved = await toggleSaved(target);
+    if (!nowSaved || isSignedIn) return;
+    setGuestSaveHint(true);
+    if (guestSaveHintTimer.current) clearTimeout(guestSaveHintTimer.current);
+    guestSaveHintTimer.current = setTimeout(() => setGuestSaveHint(false), 4000);
+  };
+
+  useEffect(() => () => {
+    if (guestSaveHintTimer.current) clearTimeout(guestSaveHintTimer.current);
+  }, []);
 
   const DESKTOP_VISIBLE_COUNT = 8;
   const totalPhotos = property?.mediaImages.length || 0;
@@ -377,13 +414,7 @@ export function PropertyDetailScreen() {
             </Pressable>
 
             <Pressable
-              onPress={() => {
-                if (apiDetail) {
-                  void toggleSaved(apiDetail);
-                } else if (id) {
-                  void toggleSaved(id);
-                }
-              }}
+              onPress={handleToggleSaved}
               accessibilityRole="button"
               accessibilityLabel={isPropertySaved ? "Remove from saved" : "Save property"}
               style={({ pressed }) => [styles.actionCircleBtn, webPointer, pressed && styles.pressed]}
@@ -396,6 +427,14 @@ export function PropertyDetailScreen() {
             </Pressable>
           </View>
         </View>
+
+        {guestSaveHint ? (
+          <View style={styles.guestSaveHint} accessibilityLiveRegion="polite">
+            <Text style={styles.guestSaveHintText}>
+              Saved on this device. Sign in to sync your saves across devices.
+            </Text>
+          </View>
+        ) : null}
 
         {/* Main Content & Sidebar Grid */}
         <View style={[styles.mainLayoutGrid, isTablet && styles.mainLayoutGridTablet]}>
@@ -872,7 +911,7 @@ export function PropertyDetailScreen() {
             <Pressable
               onPress={() => {
                 setBookModalVisible(false);
-                Alert.alert("Visit Requested!", "The seller will contact you shortly to confirm the appointment.");
+                notify("Visit requested", "The seller will contact you shortly to confirm the appointment.");
               }}
               style={styles.confirmVisitBtn}
             >
@@ -1062,6 +1101,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.semiBold,
     color: "#0B1A17",
+  },
+  guestSaveHint: {
+    alignSelf: "flex-end",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    backgroundColor: "#0B1A17",
+  },
+  guestSaveHintText: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: "#FFFFFF",
   },
   actionHeaderBtns: {
     flexDirection: "row",

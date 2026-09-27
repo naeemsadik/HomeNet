@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 import { Lock, ShieldAlert } from "lucide-react-native";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
-import { hasAnyAdminPermission } from "@/lib/permissions";
+import { hasAnyAdminPermission, hasPermission } from "@/lib/permissions";
 import { colors, fonts, radius, webPointer } from "@/theme";
 import { AppChrome, type ActivePage } from "./AppChrome";
 
@@ -11,6 +11,11 @@ interface RequireAuthProps {
   children: ReactNode;
   /** Also require an admin role or any admin-level permission. */
   admin?: boolean;
+  /**
+   * Also require this permission. Pass the one the page's API calls need, so
+   * the page never renders for someone whose requests would be refused.
+   */
+  permission?: string;
   /** Nav highlight for the gate's chrome. Children supply their own chrome. */
   active?: ActivePage;
 }
@@ -25,6 +30,7 @@ interface RequireAuthProps {
 export function RequireAuth({
   children,
   admin = false,
+  permission,
   active = "home",
 }: RequireAuthProps) {
   const user = useAuthStore((s) => s.user);
@@ -72,7 +78,9 @@ export function RequireAuth({
     );
   }
 
-  if (admin && !hasAnyAdminPermission(userRoles)) {
+  const lacksAdmin = admin && !hasAnyAdminPermission(userRoles);
+  const lacksPermission = permission !== undefined && !hasPermission(userRoles, permission);
+  if (lacksAdmin || lacksPermission) {
     return (
       <AppChrome active={active}>
       <View style={styles.center}>

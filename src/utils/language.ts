@@ -41,12 +41,16 @@ function getCookie(name: string): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+// Without an expiry the cookie died with the tab: localStorage still said
+// "bn", so the toggle showed Bangla while Google Translate rendered English.
+const COOKIE_MAX_AGE = `max-age=${365 * 24 * 60 * 60}`;
+
 function setCookie(name: string, value: string) {
   if (Platform.OS !== "web" || typeof document === "undefined") return;
   const domain = window.location.hostname;
-  document.cookie = `${name}=${value};path=/;SameSite=Lax;`;
+  document.cookie = `${name}=${value};path=/;SameSite=Lax;${COOKIE_MAX_AGE}`;
   if (domain && domain !== "localhost" && !/^\d+\.\d+\.\d+\.\d+$/.test(domain)) {
-    document.cookie = `${name}=${value};path=/;domain=.${domain};SameSite=Lax;`;
+    document.cookie = `${name}=${value};path=/;domain=.${domain};SameSite=Lax;${COOKIE_MAX_AGE}`;
   }
 }
 
@@ -164,4 +168,12 @@ export function ensureGoogleTranslateScript() {
  */
 export function shouldLoadTranslateOnBoot(): boolean {
   return getInitialLanguage() === "bn";
+}
+
+/**
+ * Re-writes the Bangla cookie before the translate script reads it. Readers
+ * who chose Bangla before the cookie had an expiry have only localStorage left.
+ */
+export function restoreTranslateCookie() {
+  if (getInitialLanguage() === "bn") setCookie(COOKIE_NAME, "/en/bn");
 }

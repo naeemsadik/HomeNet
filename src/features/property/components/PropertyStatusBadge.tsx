@@ -1,3 +1,4 @@
+import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import React, { useEffect, useRef } from "react";
 import { View, Text, Animated, StyleSheet } from "react-native";
 import { Check, Clock, AlertTriangle, X as XIcon, FileEdit } from "lucide-react-native";
@@ -70,12 +71,12 @@ export function PropertyStatusBadge({
         Animated.timing(pulseAnim, {
           toValue: 0.5,
           duration: 1200,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
           duration: 1200,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
       ]),
     );

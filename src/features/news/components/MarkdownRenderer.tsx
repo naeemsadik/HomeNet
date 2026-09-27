@@ -8,6 +8,16 @@ import {
 } from "react-native";
 import { colors, fonts, radius } from "@/theme";
 
+const SAFE_LINK_PROTOCOLS = ["http:", "https:", "mailto:", "tel:"];
+
+function isSafeLinkUrl(url: string): boolean {
+  try {
+    return SAFE_LINK_PROTOCOLS.includes(new URL(url).protocol);
+  } catch {
+    return false;
+  }
+}
+
 interface MarkdownRendererProps {
   content: string;
 }
@@ -43,6 +53,8 @@ function renderInlineText(text: string, keyPrefix: string) {
     if (linkMatch) {
       const [, linkText, linkUrl] = linkMatch;
       const handleLink = () => {
+        // Guide text can come from the API; a javascript: link would run.
+        if (!isSafeLinkUrl(linkUrl)) return;
         if (Platform.OS === "web" && typeof window !== "undefined") {
           window.open(linkUrl, "_blank", "noopener,noreferrer");
         } else {

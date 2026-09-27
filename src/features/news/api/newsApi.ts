@@ -1,3 +1,4 @@
+import { z } from "zod";
 import apiClient from "@/services/apiClient";
 import type { ApiResponse } from "@/types/api";
 import { CURATED_PROPERTY_GUIDES } from "@/content/curatedGuides";
@@ -27,6 +28,50 @@ function normalizeCategory(rawCat?: string | null): GuideCategory {
   return map[rawCat.toLowerCase()] || "Market";
 }
 
+const guideSchema = z.object({
+  id: z.string().min(1),
+  slug: z.string().min(1),
+  category: z.enum([
+    "Market",
+    "Buying",
+    "Renting",
+    "Selling",
+    "Legal",
+    "Ownership",
+    "Investment",
+    "Developments",
+  ]),
+  title: z.string().min(1),
+  excerpt: z.string(),
+  readTime: z.string(),
+  imageUrl: z.string().nullable(),
+  publishedAt: z.string().nullable(),
+  href: z.string().min(1),
+  sourceType: z.enum(["internal", "rss"]),
+  sourceName: z.string().nullable().optional(),
+  sourceUrl: z.string().nullable().optional(),
+  tags: z.array(z.string()).optional(),
+  contentMarkdown: z.string().nullable().optional(),
+  author: z
+    .object({
+      name: z.string().min(1),
+      role: z.string().optional(),
+      avatarUrl: z.string().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
+}) satisfies z.ZodType<PropertyGuide>;
+
+/**
+ * Normalizes a live API guide and checks the result, so a malformed record
+ * is dropped instead of reaching the guide screens with missing fields.
+ */
+function parseGuide(raw: unknown): PropertyGuide | null {
+  if (!raw || typeof raw !== "object") return null;
+  const result = guideSchema.safeParse(normalizeGuide(raw));
+  return result.success ? result.data : null;
+}
+
 /**
  * Normalizes backend snake_case guide payload to the frontend PropertyGuide interface.
  */
@@ -52,7 +97,7 @@ function normalizeGuide(raw: any): PropertyGuide {
     imageUrl: sourceType === "rss" ? null : rawImageUrl,
   });
 
-  const author = raw.author
+  const author = raw.author && (raw.author.name || raw.author.full_name)
     ? {
         name: raw.author.name || raw.author.full_name,
         role: raw.author.role,
@@ -132,6 +177,13 @@ function filterCuratedGuides(params: FetchPropertyGuidesParams): PropertyGuideLi
 }
 
 /**
+ * The API has no `/v1/guides` module yet. Asking anyway logged a 404 in the
+ * browser console on every home and guides page view before the curated
+ * fallback kicked in. Flip this once the backend ships the endpoint.
+ */
+const GUIDES_API_ENABLED = false;
+
+/**
  * Fetches the property guides and news feed.
  *
  * Tries the backend `/v1/guides` endpoint first. If the backend module is not yet deployed,
@@ -142,6 +194,8 @@ export async function fetchPropertyGuides(
 ): Promise<PropertyGuideList> {
   const params: FetchPropertyGuidesParams =
     typeof options === "number" ? { limit: options } : options || {};
+
+  if (!GUIDES_API_ENABLED) return filterCuratedGuides(params);
 
   try {
     const apiParams: Record<string, any> = {
@@ -166,7 +220,9 @@ export async function fetchPropertyGuides(
 
     if (data?.data && Array.isArray(data.data.items) && data.data.items.length > 0) {
       return {
-        items: data.data.items.map(normalizeGuide),
+        items: data.data.items
+          .map(parseGuide)
+          .filter((guide: PropertyGuide | null): guide is PropertyGuide => guide !== null),
         total: data.data.total ?? data.data.items.length,
         page: data.data.page ?? params.page ?? 1,
         limit: data.data.limit ?? params.limit ?? 10,
@@ -190,16 +246,17 @@ export async function fetchPropertyGuideBySlug(
 ): Promise<PropertyGuide | null> {
   if (!slug) return null;
 
-  try {
-    const { data } = await apiClient.get<ApiResponse<any>>(`/v1/guides/${slug}`, {
-      timeout: 5000,
-    });
+  if (GUIDES_API_ENABLED) {
+    try {
+      const { data } = await apiClient.get<ApiResponse<any>>(`/v1/guides/${slug}`, {
+        timeout: 5000,
+      });
 
-    if (data?.data) {
-      return normalizeGuide(data.data);
+      const guide = parseGuide(data?.data);
+      if (guide) return guide;
+    } catch {
+      // Ignore and check curated fallback
     }
-  } catch {
-    // Ignore and check curated fallback
   }
 
   const fallback = CURATED_PROPERTY_GUIDES.find((g) => g.slug === slug);

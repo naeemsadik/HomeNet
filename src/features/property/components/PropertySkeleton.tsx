@@ -1,3 +1,4 @@
+import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 import { colorTokens, radius } from "@/theme";
@@ -9,8 +10,8 @@ export function PropertySkeleton() {
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.9, duration: 750, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.45, duration: 750, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.9, duration: 750, useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(pulse, { toValue: 0.45, duration: 750, useNativeDriver: USE_NATIVE_DRIVER }),
       ]),
     );
     loop.start();

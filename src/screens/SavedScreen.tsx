@@ -1,17 +1,7 @@
-import { LinearGradient } from "expo-linear-gradient";
-import {
-  Bookmark,
-  Building2,
-  Eye,
-  GitCompare,
-  Heart,
-  Plus,
-  Share2,
-} from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { Bookmark, Heart } from "lucide-react-native";
+import { useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
-  ImageBackground,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -24,7 +14,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { AppLink } from "@/components/ui";
 import { getPropertyById, getSavedProperties, unsaveProperty } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, webPointer } from "@/theme";
+import { fonts } from "@/theme";
 import { useSavedStore } from "@/stores/savedStore";
 import { useAuthStore } from "@/stores/authStore";
 import type { ApiResponse } from "@/types/api";

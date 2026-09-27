@@ -33,7 +33,7 @@ export function AdminDashboardScreen() {
     ? ["properties", "notifications", "users", "roles", "areas", "settings"]
     : [
         ...(["manage_properties", "moderate_listing", "review_verification"].some((name) => permissionNames.has(name)) ? ["properties" as const] : []),
-        ...(permissionNames.has("manage_properties") ? ["notifications" as const] : []),
+        ...(permissionNames.has("moderate_listing") ? ["notifications" as const] : []),
         ...(permissionNames.has("manage_users") ? ["users" as const] : []),
         ...(["view_roles", "manage_roles"].some((name) => permissionNames.has(name)) ? ["roles" as const] : []),
         ...(permissionNames.has("manage_areas") ? ["areas" as const] : []),

@@ -20,8 +20,9 @@ const TABS: {
   permissions?: string[];
 }[] = [
   { key: "properties", label: "Properties", icon: Building2, permissions: ["manage_properties", "moderate_listing", "review_verification"] },
-  // The API sends admin notifications to whoever holds manage_properties.
-  { key: "notifications", label: "Notifications", icon: Bell, permissions: ["manage_properties"] },
+  // The API sends admin notifications to holders of moderate_listing. Not
+  // manage_properties: every buyer_seller account has that one.
+  { key: "notifications", label: "Notifications", icon: Bell, permissions: ["moderate_listing"] },
   { key: "users", label: "Users", icon: Users, permissions: ["manage_users"] },
   { key: "roles", label: "Roles", icon: ShieldCheck, permissions: ["view_roles", "manage_roles"] },
   { key: "areas", label: "Areas", icon: MapPinned, permissions: ["manage_areas"] },

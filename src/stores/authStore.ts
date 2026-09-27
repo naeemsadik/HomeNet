@@ -169,6 +169,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 }));
 
-if (typeof window !== "undefined") {
+// A console handle for debugging. Never in production, where it would hand
+// login, logout and resetSession to any script on the page.
+if (__DEV__ && typeof window !== "undefined") {
   (window as any).__authStore = useAuthStore;
 }
