@@ -1,3 +1,4 @@
+import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import { useEffect, useRef } from "react";
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { AlertTriangle, Trash2 } from "lucide-react-native";
@@ -22,7 +23,7 @@ export function DeleteUserDialog({
 
   useEffect(() => {
     if (visible) {
-      Animated.spring(scale, { toValue: 1, useNativeDriver: true, tension: 65, friction: 9 }).start();
+      Animated.spring(scale, { toValue: 1, useNativeDriver: USE_NATIVE_DRIVER, tension: 65, friction: 9 }).start();
     } else {
       scale.setValue(0.9);
     }

@@ -1,3 +1,4 @@
+import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -46,12 +47,12 @@ function AreaSkeleton() {
         Animated.timing(pulseAnim, {
           toValue: 0.9,
           duration: 800,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
         Animated.timing(pulseAnim, {
           toValue: 0.4,
           duration: 800,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
       ])
     ).start();

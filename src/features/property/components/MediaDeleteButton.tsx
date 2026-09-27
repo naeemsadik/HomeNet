@@ -1,3 +1,4 @@
+import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { AlertTriangle, Trash2, X } from "lucide-react-native";
@@ -18,7 +19,7 @@ export function MediaDeleteButton({ mediaId, onSuccess, onError }: MediaDeleteBu
 
   useEffect(() => {
     if (confirmVisible) {
-      Animated.spring(scale, { toValue: 1, useNativeDriver: true, tension: 65, friction: 9 }).start();
+      Animated.spring(scale, { toValue: 1, useNativeDriver: USE_NATIVE_DRIVER, tension: 65, friction: 9 }).start();
     } else {
       scale.setValue(0.9);
     }

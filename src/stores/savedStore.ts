@@ -6,11 +6,14 @@ import { useAuthStore } from "@/stores/authStore";
 import { queryClient } from "@/lib/queryClient";
 import type { Property } from "@/features/property/types/property";
 
+/** Anything with an id (Property, PropertyDetail, a card) or the id itself. */
+type SaveTarget = { id: string | number } | string | number;
+
 export interface SavedState {
   savedIds: string[];
   isSaved: (id: string | number | undefined | null) => boolean;
-  toggleSaved: (propertyOrId: Property | string | number | any) => Promise<boolean>;
-  addSaved: (propertyOrId: Property | string | number | any) => Promise<void>;
+  toggleSaved: (propertyOrId: SaveTarget) => Promise<boolean>;
+  addSaved: (propertyOrId: SaveTarget) => Promise<void>;
   removeSaved: (id: string | number) => Promise<void>;
   setSavedIds: (ids: (string | number)[]) => void;
   syncGuestSaves: () => Promise<void>;
@@ -34,10 +37,10 @@ export const useSavedStore = create<SavedState>()(
         return savedIds.includes(s) || (typeof id === "number" && (savedIds as any[]).includes(id));
       },
 
-      toggleSaved: async (propertyOrId: Property | string | number | any) => {
+      toggleSaved: async (propertyOrId: SaveTarget) => {
         if (!propertyOrId) return false;
         const isObj = typeof propertyOrId === "object" && propertyOrId !== null;
-        const id = String(isObj ? (propertyOrId as Property).id : propertyOrId);
+        const id = String(isObj ? (propertyOrId as { id: string | number }).id : propertyOrId);
         if (!id) return false;
 
         const currentIds = get().savedIds.map(String);
@@ -55,9 +58,11 @@ export const useSavedStore = create<SavedState>()(
               queryClient.invalidateQueries({ queryKey: ["properties", "saved"] });
               return false;
             } catch (err) {
-              // Roll back on failure
+              // Roll back on failure. The heart flipping back is the user's
+              // feedback; the log is for development only, so production
+              // consoles stay clean.
               set({ savedIds: currentIds });
-              console.error("[savedStore] Failed to unsave property on server, rolling back:", err);
+              if (__DEV__) console.error("[savedStore] Failed to unsave property on server, rolling back:", err);
               return true;
             }
           }
@@ -75,7 +80,7 @@ export const useSavedStore = create<SavedState>()(
             } catch (err) {
               // Roll back on failure
               set({ savedIds: currentIds });
-              console.error("[savedStore] Failed to save property on server, rolling back:", err);
+              if (__DEV__) console.error("[savedStore] Failed to save property on server, rolling back:", err);
               return false;
             }
           }
@@ -83,10 +88,10 @@ export const useSavedStore = create<SavedState>()(
         }
       },
 
-      addSaved: async (propertyOrId: Property | string | number | any) => {
+      addSaved: async (propertyOrId: SaveTarget) => {
         if (!propertyOrId) return;
         const isObj = typeof propertyOrId === "object" && propertyOrId !== null;
-        const id = String(isObj ? (propertyOrId as Property).id : propertyOrId);
+        const id = String(isObj ? (propertyOrId as { id: string | number }).id : propertyOrId);
         if (!id) return;
         if (!get().isSaved(id)) {
           await get().toggleSaved(propertyOrId);
@@ -116,7 +121,7 @@ export const useSavedStore = create<SavedState>()(
           await Promise.allSettled(
             currentIds.map((id) =>
               saveProperty(id).catch((err) => {
-                console.warn(`[savedStore] Failed to sync guest property ${id}:`, err);
+                if (__DEV__) console.warn(`[savedStore] Failed to sync guest property ${id}:`, err);
               })
             )
           );
@@ -131,7 +136,7 @@ export const useSavedStore = create<SavedState>()(
           }
           queryClient.invalidateQueries({ queryKey: ["properties", "saved"] });
         } catch (err) {
-          console.error("[savedStore] Failed to fetch server saved properties during sync:", err);
+          if (__DEV__) console.error("[savedStore] Failed to fetch server saved properties during sync:", err);
         }
       },
 
