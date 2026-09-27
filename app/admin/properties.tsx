@@ -3,7 +3,7 @@ import { AdminPropertiesScreen } from "@/features/admin/screens/AdminPropertiesS
 
 export default function AdminPropertiesRoute() {
   return (
-    <RequireAuth admin active="home">
+    <RequireAuth admin permission="manage_properties" active="home">
       <AdminPropertiesScreen />
     </RequireAuth>
   );
