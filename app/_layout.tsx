@@ -21,7 +21,12 @@ import { ToastHost } from "@/components/ToastHost";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
-import { ensureGoogleTranslateScript, restoreTranslateCookie, shouldLoadTranslateOnBoot } from "@/utils/language";
+import {
+  ensureGoogleTranslateScript,
+  restoreSavedLanguage,
+  restoreTranslateCookie,
+  shouldLoadTranslateOnBoot,
+} from "@/utils/language";
 import { PageMeta } from "@/components/PageMeta";
 import { queryClient } from "@/lib/queryClient";
 
@@ -82,6 +87,8 @@ export default function RootLayout() {
         "%cSee https://homenetbd.com/self-xss for more information.",
         "font-size: 16px; color: #3b82f6;",
       );
+
+      restoreSavedLanguage();
 
       // Only visitors who already read in Bangla pay for the translate
       // widget up front; for everyone else it loads on first use.

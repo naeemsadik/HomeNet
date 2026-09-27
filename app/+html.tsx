@@ -71,7 +71,10 @@ export default function Root({ children }: PropsWithChildren) {
             top: 0px !important;
             position: static !important;
           }
-          .skiptranslate iframe {
+          .skiptranslate iframe,
+          iframe.skiptranslate {
+            /* Google's own translate bar and floating button; the navbar has
+               the language toggle. The button otherwise covers the logo. */
             display: none !important;
           }
           #google_translate_element {

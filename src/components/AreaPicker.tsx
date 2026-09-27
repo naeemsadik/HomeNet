@@ -10,7 +10,6 @@ import {
   ScrollView,
   FlatList,
   Animated,
-  useWindowDimensions,
 } from "react-native";
 import {
   MapPin,
@@ -23,6 +22,7 @@ import {
 } from "lucide-react-native";
 import { colorTokens, colors, webPointer } from "@/theme";
 import { useAreaPicker } from "@/hooks/useAreaPicker";
+import { useWindowSize } from "@/hooks/useResponsive";
 import type { Area } from "@/types/api";
 import { styles } from "./AreaPicker.styles";
 
@@ -84,7 +84,7 @@ export function AreaPicker({
   selectedArea,
   initialCity,
 }: AreaPickerProps) {
-  const { width } = useWindowDimensions();
+  const { width } = useWindowSize();
   const isPhone = width <= 600;
 
   const {
