@@ -19,9 +19,9 @@ export interface SavedState {
   syncGuestSaves: () => Promise<void>;
   clearSaved: () => void;
   // Deprecated backwards-compat methods (kept to prevent breaking callers, does not store entities)
-  savedProperties?: Record<string, any>;
-  setSavedProperties: (properties: (Property | any)[]) => void;
-  getSavedList: () => any[];
+  savedProperties?: Record<string, Property>;
+  setSavedProperties: (properties: { id: string | number }[]) => void;
+  getSavedList: () => Property[];
 }
 
 export const useSavedStore = create<SavedState>()(
@@ -34,7 +34,8 @@ export const useSavedStore = create<SavedState>()(
         if (id === undefined || id === null) return false;
         const s = String(id);
         const { savedIds } = get();
-        return savedIds.includes(s) || (typeof id === "number" && (savedIds as any[]).includes(id));
+        // Older persisted state may hold numeric ids, so compare as strings.
+        return savedIds.some((saved) => String(saved) === s);
       },
 
       toggleSaved: async (propertyOrId: SaveTarget) => {
@@ -145,7 +146,7 @@ export const useSavedStore = create<SavedState>()(
         queryClient.removeQueries({ queryKey: ["properties", "saved"] });
       },
 
-      setSavedProperties: (properties: (Property | any)[]) => {
+      setSavedProperties: (properties: { id: string | number }[]) => {
         if (!Array.isArray(properties)) return;
         const idSet = new Set(get().savedIds.map(String));
         properties.forEach((p) => {

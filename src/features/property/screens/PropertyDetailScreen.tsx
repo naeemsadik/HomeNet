@@ -169,6 +169,8 @@ export function PropertyDetailScreen() {
         phone: identity?.phone || null,
         email: identity?.email || "",
       },
+      // Placeholder, like aiValuation: no API field yet, so the
+      // recommendation card never renders.
       aiRecommendation: null as string | null,
       nearbyPlaces: [] as NearbyPlace[],
       similarProperties: similarProperties.map((sim) => {
@@ -635,7 +637,7 @@ export function PropertyDetailScreen() {
               </View>
 
               <Text style={styles.aiValuationDesc}>
-                Estimated fair value <Text style={styles.boldText}>৳ {property.aiValuation.estimatedValue} /mo</Text>.{" "}
+                Estimated fair value <Text style={styles.boldText}>৳ {property.aiValuation.estimatedValue}{property.pricePeriod}</Text>.{" "}
                 {property.aiValuation.comparisonText}
               </Text>
 
