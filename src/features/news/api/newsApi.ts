@@ -68,7 +68,7 @@ const guideSchema = z.object({
  * Normalizes a live API guide and checks the result, so a malformed record
  * is dropped instead of reaching the guide screens with missing fields.
  */
-function parseGuide(raw: unknown): PropertyGuide | null {
+export function parseGuide(raw: unknown): PropertyGuide | null {
   if (!raw || typeof raw !== "object") return null;
   const result = guideSchema.safeParse(normalizeGuide(raw));
   return result.success ? result.data : null;
