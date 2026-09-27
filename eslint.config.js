@@ -21,6 +21,11 @@ module.exports = defineConfig([
         { vars: "all", args: "none", ignoreRestSiblings: true, caughtErrors: "all" },
       ],
       "react-hooks/exhaustive-deps": "warn",
+      // src/lib/zod.ts configures Zod for our CSP before any schema exists.
+      "no-restricted-imports": [
+        "error",
+        { paths: [{ name: "zod", message: 'Import { z } from "@/lib/zod" so the CSP-safe config applies.' }] },
+      ],
       // React Compiler rules that eslint-config-expo enables as errors. The
       // existing code predates them (e.g. `useRef(new Animated.Value()).current`),
       // so they warn until those components are reworked.
@@ -39,6 +44,10 @@ module.exports = defineConfig([
       // Warn, not error: the codebase has existing `any` debt to pay down.
       "@typescript-eslint/no-explicit-any": "warn",
     },
+  },
+  {
+    files: ["src/lib/zod.ts"],
+    rules: { "no-restricted-imports": "off" },
   },
   {
     // Jest globals, and require() inside jest.isolateModules to reload a module.

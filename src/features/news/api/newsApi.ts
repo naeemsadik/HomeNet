@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import apiClient from "@/services/apiClient";
 import type { ApiResponse } from "@/types/api";
 import { isSafeLinkUrl } from "@/lib/safeUrl";
