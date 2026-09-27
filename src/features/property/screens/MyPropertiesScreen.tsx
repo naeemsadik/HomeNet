@@ -29,9 +29,7 @@ import {
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -39,6 +37,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { confirmAction, notify } from "@/lib/alert";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -133,26 +132,14 @@ export function MyPropertiesScreen() {
 
   // Sidebar items
   const logout = useAuthStore((s) => s.logout);
-  const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm("Are you sure you want to log out?");
-      if (confirmed) {
-        logout();
-        router.replace("/home");
-      }
-      return;
-    }
-    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: () => {
-          logout();
-          router.replace("/home");
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
+      confirmLabel: "Log Out",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    logout();
+    router.replace("/home");
   };
 
   const sidebarNavItems: {
@@ -177,21 +164,18 @@ export function MyPropertiesScreen() {
     { key: "logout", label: "Logout", icon: LogOut, danger: true, href: "/" },
   ];
 
-  const handleDelete = (id: string, title: string) => {
-    Alert.alert("Delete Property", `Are you sure you want to delete "${title}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteMutation.mutateAsync(id);
-          } catch (deleteError) {
-            Alert.alert("Delete failed", deleteError instanceof Error ? deleteError.message : "Request failed.");
-          }
-        },
-      },
-    ]);
+  // Had no web branch, so deleting a listing was impossible on web.
+  const handleDelete = async (id: string, title: string) => {
+    const confirmed = await confirmAction("Delete Property", `Are you sure you want to delete "${title}"?`, {
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    try {
+      await deleteMutation.mutateAsync(id);
+    } catch (deleteError) {
+      notify("Delete failed", deleteError instanceof Error ? deleteError.message : "Request failed.");
+    }
   };
 
   return (

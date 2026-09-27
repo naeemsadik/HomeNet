@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { View, Text, Image, Pressable, ScrollView, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import { View, Text, Image, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, Trash2, UserRound } from "lucide-react-native";
 import { router } from "expo-router";
@@ -44,7 +45,7 @@ export function EditProfileScreen() {
     try {
       await updateProfile.mutateAsync({ id: user.id, data: { full_name: data.full_name } });
       await fetchMe();
-      Alert.alert("Success", "Profile updated.", [{ text: "OK", onPress: () => router.back() }]);
+      notify("Success", "Profile updated.", { onConfirm: () => router.back() });
     } catch (err: any) {
       setServerError(err?.message || "Failed to update profile");
     }
@@ -53,7 +54,7 @@ export function EditProfileScreen() {
   const handleAvatarUpload = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission needed", "Allow access to your photo library.");
+      notify("Permission needed", "Allow access to your photo library.");
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -73,7 +74,7 @@ export function EditProfileScreen() {
       };
       await uploadAvatar.mutateAsync(file);
       await fetchMe();
-      Alert.alert("Success", "Avatar updated.");
+      notify("Success", "Avatar updated.");
     } catch (err: any) {
       setServerError(err?.message || "Failed to upload avatar");
     }
@@ -83,7 +84,7 @@ export function EditProfileScreen() {
     try {
       await deleteAvatar.mutateAsync();
       await fetchMe();
-      Alert.alert("Success", "Avatar removed.");
+      notify("Success", "Avatar removed.");
     } catch (err: any) {
       setServerError(err?.message || "Failed to remove avatar");
     }

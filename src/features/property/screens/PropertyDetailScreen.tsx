@@ -52,7 +52,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
 import { shareLink } from "@/lib/share";
 import { cdnImage } from "@/lib/cloudinaryImage";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 import Svg, { Path } from "react-native-svg";
 import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
 import { useSavedStore } from "@/stores/savedStore";
@@ -200,14 +200,13 @@ export function PropertyDetailScreen() {
     void Linking.openURL(`tel:${property.seller.phone}`);
   };
 
-  const handleWhatsApp = () => {
+  const openWhatsApp = (message: string) => {
     const rawPhone = property?.seller.phone;
     if (!rawPhone) {
       notify("Phone unavailable", "The property owner has not shared a phone number.");
       return;
     }
     const cleanPhone = rawPhone.replace(/[^\d]/g, "");
-    const message = `Hello ${property?.seller.name || "Seller"}, I'm interested in your property "${property?.title || "Property"}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) on Homenet. Is this property currently available?`;
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     void Linking.openURL(whatsappUrl).catch(() => {
       notify(
@@ -215,6 +214,21 @@ export function PropertyDetailScreen() {
         `Could not launch WhatsApp. You can message the seller directly at ${rawPhone}.`,
       );
     });
+  };
+
+  const handleWhatsApp = () => {
+    openWhatsApp(
+      `Hello ${property?.seller.name || "Seller"}, I'm interested in your property "${property?.title || "Property"}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) on Homenet. Is this property currently available?`,
+    );
+  };
+
+  // There is no visit-booking API, so the request goes to the seller directly
+  // instead of a confirmation screen promising a callback nobody schedules.
+  const handleRequestVisit = () => {
+    const link = Platform.OS === "web" && typeof window !== "undefined" ? ` (${window.location.href})` : "";
+    openWhatsApp(
+      `Hello ${property?.seller.name || "Seller"}, I'd like to visit your property "${property?.title || "Property"}" listed on Homenet${link}. When would be a good time to see it?`,
+    );
   };
 
   // Used to claim the link was copied without copying anything.
@@ -890,39 +904,55 @@ export function PropertyDetailScreen() {
             </View>
 
             <Text style={styles.modalBodyText}>
-              Schedule an in-person viewing of <Text style={{ fontFamily: fonts.bold }}>{property.title}</Text> with agent {property.seller.name}.
+              Ask {property.seller.name} to arrange an in-person viewing of{" "}
+              <Text style={{ fontFamily: fonts.bold }}>{property.title}</Text>. WhatsApp opens with
+              your request already written.
             </Text>
 
-            <Pressable
-              onPress={() => {
-                setBookModalVisible(false);
-                notify("Visit requested", "The seller will contact you shortly to confirm the appointment.");
-              }}
-              style={styles.confirmVisitBtn}
-            >
-              <Text style={styles.confirmVisitText}>Confirm Visit Request</Text>
-            </Pressable>
-
-            <View style={styles.modalDivider}>
-              <View style={styles.modalDividerLine} />
-              <Text style={styles.modalDividerText}>or chat directly</Text>
-              <View style={styles.modalDividerLine} />
-            </View>
+            {property.seller.phone ? null : (
+              <Text style={styles.modalNoPhoneText}>
+                The owner hasn't shared a phone number, so a visit can't be requested yet.
+              </Text>
+            )}
 
             <Pressable
+              accessibilityRole="button"
               disabled={!property.seller.phone}
               onPress={() => {
                 setBookModalVisible(false);
-                handleWhatsApp();
+                handleRequestVisit();
               }}
               style={[
-                styles.modalWhatsAppBtn,
+                styles.confirmVisitBtn,
                 webPointer,
                 !property.seller.phone && styles.actionBtnDisabled,
               ]}
             >
-              <WhatsAppIcon size={18} color="#FFFFFF" />
-              <Text style={styles.modalWhatsAppBtnText}>Chat on WhatsApp with Agent</Text>
+              <WhatsAppIcon size={18} color={colorTokens.onBrand} />
+              <Text style={styles.confirmVisitText}>Request visit on WhatsApp</Text>
+            </Pressable>
+
+            <View style={styles.modalDivider}>
+              <View style={styles.modalDividerLine} />
+              <Text style={styles.modalDividerText}>or call</Text>
+              <View style={styles.modalDividerLine} />
+            </View>
+
+            <Pressable
+              accessibilityRole="button"
+              disabled={!property.seller.phone}
+              onPress={() => {
+                setBookModalVisible(false);
+                handleCall();
+              }}
+              style={[
+                styles.modalCallBtn,
+                webPointer,
+                !property.seller.phone && styles.actionBtnDisabled,
+              ]}
+            >
+              <Phone size={18} color={colorTokens.ink} />
+              <Text style={styles.modalCallBtnText}>Call {property.seller.name}</Text>
             </Pressable>
           </View>
         </View>
@@ -1927,16 +1957,24 @@ const styles = StyleSheet.create({
     color: "#5C6B66",
     lineHeight: 20,
   },
+  modalNoPhoneText: {
+    fontSize: 13,
+    fontFamily: fonts.medium,
+    color: colorTokens.warningText,
+    lineHeight: 18,
+  },
   confirmVisitBtn: {
     height: 44,
-    backgroundColor: "#04cf92",
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: colorTokens.brand,
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,
   },
   confirmVisitText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontSize: 14,
     fontFamily: fonts.bold,
   },
@@ -1956,23 +1994,20 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     color: "#5C6B66",
   },
-  modalWhatsAppBtn: {
+  modalCallBtn: {
     height: 44,
     borderRadius: 999,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#25D366",
-    shadowColor: "#25D366",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
+    backgroundColor: colorTokens.surface,
   },
-  modalWhatsAppBtnText: {
+  modalCallBtnText: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#FFFFFF",
+    color: colorTokens.ink,
   },
 });

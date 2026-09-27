@@ -23,7 +23,6 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -32,6 +31,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { confirmAction } from "@/lib/alert";
 import Svg, { Circle } from "react-native-svg";
 import { router } from "expo-router";
 import { AppLink } from "@/components/ui";
@@ -131,26 +131,14 @@ export function VerificationScreen() {
   const strokeDashoffset = circumference * (1 - progressPercent / 100);
 
   const logout = useAuthStore((s) => s.logout);
-  const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm("Are you sure you want to log out?");
-      if (confirmed) {
-        logout();
-        router.replace("/home");
-      }
-      return;
-    }
-    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: () => {
-          logout();
-          router.replace("/home");
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
+      confirmLabel: "Log Out",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    logout();
+    router.replace("/home");
   };
 
   const sidebarNavItems = [

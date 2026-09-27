@@ -22,7 +22,6 @@ import {
 } from "lucide-react-native";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
-  Alert,
   Image,
   Modal,
   Platform,
@@ -33,6 +32,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { confirmAction } from "@/lib/alert";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Line, Path, Rect } from "react-native-svg";
 import { router } from "expo-router";
@@ -475,25 +475,13 @@ function TopBar({
                         accessibilityRole="button"
                         onPress={async () => {
                           setUserDropdownOpen(false);
-                          if (Platform.OS === "web") {
-                            const confirmed = window.confirm("Are you sure you want to log out?");
-                            if (confirmed) {
-                              await logout();
-                              router.push("/home");
-                            }
-                          } else {
-                            Alert.alert("Log Out", "Are you sure you want to log out?", [
-                              { text: "Cancel", style: "cancel" },
-                              {
-                                text: "Log Out",
-                                style: "destructive",
-                                onPress: async () => {
-                                  await logout();
-                                  router.push("/home");
-                                },
-                              },
-                            ]);
-                          }
+                          const confirmed = await confirmAction("Log Out", "Are you sure you want to log out?", {
+                            confirmLabel: "Log Out",
+                            destructive: true,
+                          });
+                          if (!confirmed) return;
+                          await logout();
+                          router.push("/home");
                         }}
                         style={({ pressed, hovered }: any) => [
                           styles.dropdownItem,

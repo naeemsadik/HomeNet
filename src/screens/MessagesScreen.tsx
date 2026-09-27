@@ -12,7 +12,6 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Alert,
   FlatList,
   Image,
   Pressable,
@@ -22,6 +21,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { notify } from "@/lib/alert";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -233,7 +233,7 @@ export function MessagesScreen() {
 
             <Pressable
               onPress={() =>
-                Alert.alert(
+                notify(
                   "Schedule Visit",
                   `Requesting visit appointment with ${activeConv.name} for ${activeConv.propertyTitle}.`
                 )

@@ -15,7 +15,6 @@ import {
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Modal,
   Platform,
@@ -26,6 +25,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { confirmAction, notify } from "@/lib/alert";
 import { router } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -82,7 +82,7 @@ export function BuyerProfileScreen() {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert(
+        notify(
           "Permission Required",
           "Please grant photo library access to change your profile picture."
         );
@@ -110,11 +110,11 @@ export function BuyerProfileScreen() {
         };
         await uploadAvatar(file, asset.fileName || "profile.jpg");
         await fetchMe();
-        Alert.alert("Success", "Profile photo updated successfully.");
+        notify("Success", "Profile photo updated successfully.");
       }
     } catch (err: any) {
-      console.warn("Avatar upload error:", err);
-      Alert.alert("Notice", "Photo selected. Save changes to keep it.");
+      if (__DEV__) console.warn("Avatar upload error:", err);
+      notify("Notice", "Photo selected. Save changes to keep it.");
     } finally {
       setIsUploading(false);
     }
@@ -122,14 +122,12 @@ export function BuyerProfileScreen() {
 
   const handleSaveChanges = async () => {
     if (!user) {
-      Alert.alert(
+      const signIn = await confirmAction(
         "Preview Mode",
-        "Sign in to sync your profile updates across all your devices.",
-        [
-          { text: "Sign In", onPress: () => router.push("/profile" as any) },
-          { text: "OK", style: "cancel" },
-        ]
+        "Sign in to sync your profile updates across all your devices. Sign in now?",
+        { confirmLabel: "Sign In", cancelLabel: "Not now" },
       );
+      if (signIn) router.push("/profile" as any);
       return;
     }
 
@@ -139,9 +137,9 @@ export function BuyerProfileScreen() {
         full_name: fullName.trim() || user.full_name,
       });
       await fetchMe();
-      Alert.alert("Saved", "Your profile details have been updated.");
+      notify("Saved", "Your profile details have been updated.");
     } catch (err: any) {
-      Alert.alert("Error", err?.message || "Failed to save profile changes.");
+      notify("Error", err?.message || "Failed to save profile changes.");
     } finally {
       setIsSaving(false);
     }
@@ -172,7 +170,7 @@ export function BuyerProfileScreen() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      Alert.alert("Success", "Your password has been changed successfully.");
+      notify("Success", "Your password has been changed successfully.");
     } catch (err: any) {
       setPasswordError(err?.message || "Failed to change password. Please check your current password.");
     } finally {
@@ -182,7 +180,7 @@ export function BuyerProfileScreen() {
 
   const handleDeleteAccount = async () => {
     if (!user) {
-      Alert.alert("Notice", "No authenticated account to delete in preview mode.");
+      notify("Notice", "No authenticated account to delete in preview mode.");
       return;
     }
 
@@ -192,35 +190,20 @@ export function BuyerProfileScreen() {
         await deleteUser(user.id);
         await logout();
         router.replace("/home");
-        Alert.alert("Account Deleted", "Your account has been permanently removed.");
+        notify("Account Deleted", "Your account has been permanently removed.");
       } catch (err: any) {
-        Alert.alert("Error", err?.message || "Failed to delete account. Please try again.");
+        notify("Error", err?.message || "Failed to delete account. Please try again.");
       } finally {
         setIsDeletingAccount(false);
       }
     };
 
-    if (Platform.OS === "web") {
-      const confirmed =
-        typeof window !== "undefined"
-          ? window.confirm(
-              "Are you sure you want to permanently delete your account? This action cannot be undone."
-            )
-          : true;
-      if (confirmed) {
-        await doDelete();
-      }
-      return;
-    }
-
-    Alert.alert(
+    const confirmed = await confirmAction(
       "Permanently Delete Account",
-      "Are you sure you want to delete your account? All your personal information, saved listings, and history will be permanently erased.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete Permanently", style: "destructive", onPress: doDelete },
-      ]
+      "Are you sure you want to delete your account? All your personal information, saved listings, and history will be permanently erased. This cannot be undone.",
+      { confirmLabel: "Delete Permanently", destructive: true },
     );
+    if (confirmed) await doDelete();
   };
 
   const handleLogout = async () => {
@@ -228,25 +211,16 @@ export function BuyerProfileScreen() {
       try {
         await logout();
       } catch (err) {
-        console.warn("Logout error:", err);
+        if (__DEV__) console.warn("Logout error:", err);
       }
       router.replace("/home");
     };
 
-    if (Platform.OS === "web") {
-      const confirmed =
-        typeof window !== "undefined"
-          ? window.confirm("Are you sure you want to log out?")
-          : true;
-      if (!confirmed) return;
-      await doLogout();
-      return;
-    }
-
-    Alert.alert("Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Logout", style: "destructive", onPress: doLogout },
-    ]);
+    const confirmed = await confirmAction("Logout", "Are you sure you want to log out?", {
+      confirmLabel: "Logout",
+      destructive: true,
+    });
+    if (confirmed) await doLogout();
   };
 
   return (

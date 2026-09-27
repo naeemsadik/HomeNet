@@ -3,7 +3,6 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ActivityIndicator,
-  Alert,
   ImageBackground,
   Pressable,
   ScrollView,
@@ -14,6 +13,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { notify } from "@/lib/alert";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { ClipPath, Defs, Path, Rect } from "react-native-svg";
 import {
@@ -191,11 +191,11 @@ export function AuthCard({
   };
 
   const handleSocialClick = (provider: string) => {
-    Alert.alert(provider, `${provider} sign-in will be available soon.`);
+    notify(provider, `${provider} sign-in will be available soon.`);
   };
 
   const handleForgotPassword = () => {
-    Alert.alert(
+    notify(
       "Forgot Password",
       "Please contact support@homenet.com or use account security settings to reset your password."
     );

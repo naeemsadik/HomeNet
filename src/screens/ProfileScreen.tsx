@@ -2,7 +2,8 @@ import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { Camera, LoaderCircle, LogOut, Save, ShieldCheck, Trash2, UserRound, KeyRound } from "lucide-react-native";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { confirmAction, notify } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, Eyebrow } from "@/components/ui";
@@ -43,7 +44,7 @@ export function ProfileScreen() {
       // Refresh user details in store
       const { fetchMe } = useAuthStore.getState();
       await fetchMe();
-      Alert.alert("Success", "Profile name updated successfully.");
+      notify("Success", "Profile name updated successfully.");
     } catch (err: any) {
       setLocalError(err?.message || "Failed to update profile name");
     } finally {
@@ -55,7 +56,7 @@ export function ProfileScreen() {
     if (!user) return;
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission needed", "Allow access to your photo library to upload an avatar.");
+      notify("Permission needed", "Allow access to your photo library to upload an avatar.");
       return;
     }
 
@@ -81,7 +82,7 @@ export function ProfileScreen() {
       
       const { fetchMe } = useAuthStore.getState();
       await fetchMe();
-      Alert.alert("Success", "Avatar uploaded successfully.");
+      notify("Success", "Avatar uploaded successfully.");
     } catch (err: any) {
       setLocalError(err?.message || "Failed to upload avatar");
     } finally {
@@ -98,7 +99,7 @@ export function ProfileScreen() {
       
       const { fetchMe } = useAuthStore.getState();
       await fetchMe();
-      Alert.alert("Success", "Avatar removed.");
+      notify("Success", "Avatar removed.");
     } catch (err: any) {
       setLocalError(err?.message || "Failed to remove avatar");
     } finally {
@@ -108,25 +109,22 @@ export function ProfileScreen() {
 
   const handleDeleteAccount = async () => {
     if (!user) return;
-    Alert.alert("Delete Account", "Are you sure? This action is permanent.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            setUpdatingProfile(true);
-            await deleteUser(user.id);
-            await logout();
-            Alert.alert("Deleted", "Your account has been deleted.");
-          } catch (err: any) {
-            setLocalError(err?.message || "Failed to delete account");
-          } finally {
-            setUpdatingProfile(false);
-          }
-        },
-      },
-    ]);
+    // Had no web branch, so deleting an account was impossible on web.
+    const confirmed = await confirmAction("Delete Account", "Are you sure? This action is permanent.", {
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    try {
+      setUpdatingProfile(true);
+      await deleteUser(user.id);
+      await logout();
+      notify("Deleted", "Your account has been deleted.");
+    } catch (err: any) {
+      setLocalError(err?.message || "Failed to delete account");
+    } finally {
+      setUpdatingProfile(false);
+    }
   };
 
   return (

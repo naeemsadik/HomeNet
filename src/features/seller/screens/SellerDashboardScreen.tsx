@@ -35,9 +35,7 @@ import {
 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -45,6 +43,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { confirmAction } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
 import { AiFinderWorkflow } from "@/components/AiFinderWorkflow";
 import Svg, {
@@ -116,27 +115,14 @@ export function SellerDashboardScreen() {
     }
   }, [tab]);
 
-  const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm("Are you sure you want to log out?");
-      if (confirmed) {
-        logout();
-        router.replace("/home");
-      }
-      return;
-    }
-
-    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: () => {
-          logout();
-          router.replace("/home");
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
+      confirmLabel: "Log Out",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    logout();
+    router.replace("/home");
   };
 
   const { data: myPropertiesData } = useMyProperties();

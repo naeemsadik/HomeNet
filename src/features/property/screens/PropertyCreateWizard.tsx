@@ -38,7 +38,6 @@ import {
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Platform,
   Pressable,
@@ -65,7 +64,7 @@ import { Footer } from "@/components/Footer";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
-import { notify } from "@/lib/alert";
+import { confirmAction, notify } from "@/lib/alert";
 import type { UploadInput } from "@/services/upload";
 import { colors, fonts, webPointer } from "@/theme";
 import type { Area, PropertyType, UpsertPropertyDto } from "@/types/api";
@@ -370,26 +369,14 @@ export function PropertyCreateWizard() {
   };
 
   const logout = useAuthStore((s) => s.logout);
-  const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm("Are you sure you want to log out?");
-      if (confirmed) {
-        logout();
-        router.replace("/home");
-      }
-      return;
-    }
-    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: () => {
-          logout();
-          router.replace("/home");
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
+      confirmLabel: "Log Out",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    logout();
+    router.replace("/home");
   };
 
   // Sidebar items - aligned with HomeNet standards (all seller tabs present)

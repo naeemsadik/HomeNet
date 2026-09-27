@@ -27,7 +27,6 @@ import {
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Modal,
   Platform,
@@ -38,6 +37,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { confirmAction, notify } from "@/lib/alert";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
@@ -103,35 +103,32 @@ export function SellerProfileScreen() {
   const isNormalText = (val: string, defaultVal: string) =>
     Boolean(user) || (val.length > 0 && val !== defaultVal);
 
-  const handleBadgePress = () => {
+  // The browser's confirm dialog only has OK / Cancel, so each message ends
+  // with the question its OK answers.
+  const handleBadgePress = async () => {
     if (isVerified) {
-      Alert.alert(
+      const view = await confirmAction(
         "Verified Account",
-        "Your identity and credentials have been verified by HomeNet.",
-        [
-          { text: "View Verification", onPress: () => router.push("/verification" as any) },
-          { text: "OK", style: "cancel" },
-        ]
+        "Your identity and credentials have been verified by HomeNet. View your verification details?",
+        { confirmLabel: "View Verification", cancelLabel: "OK" },
       );
+      if (view) router.push("/verification" as any);
     } else if (!user) {
-      Alert.alert(
+      // Verification needs an account (the route is behind RequireAuth), so
+      // signing in is the only step to offer.
+      const signIn = await confirmAction(
         "Sign In Required",
-        "You are currently viewing a preview profile. Please sign in or complete verification to get your verified badge.",
-        [
-          { text: "Sign In", onPress: () => router.push("/profile" as any) },
-          { text: "Get Verified", onPress: () => router.push("/verification" as any) },
-          { text: "Cancel", style: "cancel" },
-        ]
+        "You are currently viewing a preview profile. Sign in, then complete verification to get your verified badge. Sign in now?",
+        { confirmLabel: "Sign In" },
       );
+      if (signIn) router.push("/profile" as any);
     } else {
-      Alert.alert(
+      const go = await confirmAction(
         "Verification Pending",
-        "Your account is not verified yet. Submit your documents in the Verification Center to get verified.",
-        [
-          { text: "Go to Verification", onPress: () => router.push("/verification" as any) },
-          { text: "Cancel", style: "cancel" },
-        ]
+        "Your account is not verified yet. Submit your documents in the Verification Center to get verified. Go there now?",
+        { confirmLabel: "Go to Verification" },
       );
+      if (go) router.push("/verification" as any);
     }
   };
 
@@ -153,7 +150,7 @@ export function SellerProfileScreen() {
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert(
+        notify(
           "Permission needed",
           "Allow access to your photo library to change your profile picture."
         );
@@ -181,10 +178,10 @@ export function SellerProfileScreen() {
         };
         await uploadAvatar(file, asset.fileName || "avatar.jpg");
         await fetchMe();
-        Alert.alert("Success", "Profile photo updated successfully.");
+        notify("Success", "Profile photo updated successfully.");
       }
     } catch (err: any) {
-      Alert.alert("Error", err?.message || "Failed to update profile photo");
+      notify("Error", err?.message || "Failed to update profile photo");
     } finally {
       setIsUploading(false);
     }
@@ -192,7 +189,7 @@ export function SellerProfileScreen() {
 
   const handleSaveChanges = async () => {
     if (!fullName.trim()) {
-      Alert.alert("Validation", "Please enter your full name.");
+      notify("Validation", "Please enter your full name.");
       return;
     }
 
@@ -202,9 +199,9 @@ export function SellerProfileScreen() {
         await updateUser(user.id, { full_name: fullName.trim() });
         await fetchMe();
       }
-      Alert.alert("Success", "Profile changes saved successfully.");
+      notify("Success", "Profile changes saved successfully.");
     } catch (err: any) {
-      Alert.alert("Error", err?.message || "Failed to save profile changes");
+      notify("Error", err?.message || "Failed to save profile changes");
     } finally {
       setIsSaving(false);
     }
@@ -237,7 +234,7 @@ export function SellerProfileScreen() {
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        Alert.alert("Success", "Your password has been changed successfully.");
+        notify("Success", "Your password has been changed successfully.");
       } else {
         setPasswordError("Failed to change password. Please check your current password.");
       }
@@ -256,36 +253,21 @@ export function SellerProfileScreen() {
           await deleteUser(user.id);
           await logout();
         }
-        if (Platform.OS === "web") {
-          window.alert("Your account has been permanently deleted.");
-        } else {
-          Alert.alert("Account Deleted", "Your account has been permanently deleted.");
-        }
+        notify("Account Deleted", "Your account has been permanently deleted.");
         router.replace("/home");
       } catch (err: any) {
-        Alert.alert("Error", err?.message || "Failed to delete account. Please try again.");
+        notify("Error", err?.message || "Failed to delete account. Please try again.");
       } finally {
         setIsDeletingAccount(false);
       }
     };
 
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm(
-        "Permanently Delete Account?\n\nWarning: This action cannot be undone. All your listings, saved properties, and profile data will be permanently wiped.\n\nAre you sure you want to proceed?"
-      );
-      if (!confirmed) return;
-      await doDelete();
-      return;
-    }
-
-    Alert.alert(
+    const confirmed = await confirmAction(
       "Permanently Delete Account",
-      "Warning: This action cannot be undone. All your listings, saved properties, and account data will be permanently deleted.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete Permanently", style: "destructive", onPress: doDelete },
-      ]
+      "Warning: This action cannot be undone. All your listings, saved properties, and account data will be permanently deleted. Are you sure you want to proceed?",
+      { confirmLabel: "Delete Permanently", destructive: true },
     );
+    if (confirmed) await doDelete();
   };
 
   const handleLogout = async () => {
@@ -293,29 +275,16 @@ export function SellerProfileScreen() {
       try {
         await logout();
       } catch (err) {
-        console.warn("Logout error:", err);
+        if (__DEV__) console.warn("Logout error:", err);
       }
       router.replace("/home");
     };
 
-    if (Platform.OS === "web") {
-      const confirmed =
-        typeof window !== "undefined"
-          ? window.confirm("Are you sure you want to log out?")
-          : true;
-      if (!confirmed) return;
-      await doLogout();
-      return;
-    }
-
-    Alert.alert("Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: doLogout,
-      },
-    ]);
+    const confirmed = await confirmAction("Logout", "Are you sure you want to log out?", {
+      confirmLabel: "Logout",
+      destructive: true,
+    });
+    if (confirmed) await doLogout();
   };
 
   return (
