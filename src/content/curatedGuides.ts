@@ -186,8 +186,8 @@ Registering a flat you have bought in Dhaka involves several statutory charges, 
 | Charge | Paid by | Rate | Source |
 | :--- | :--- | :--- | :--- |
 | **Stamp Duty** | Buyer | 1.5% of the deed value | [Finance Act 2022, Schedule I](https://bdlaws.minlaw.gov.bd/act-1409/act-chapter-print-2323.html) |
-| **Registration Fee** | Buyer | Commonly 1% of the deed value; set by the Government's fee table | [Registration Act 1908, s.78](https://bdlaws.minlaw.gov.bd/act-90/part-details-293.html) |
-| **Local Government Tax** | Buyer | Commonly 2% in city corporation areas | Reported rate; confirm at the Sub-registry |
+| **Registration Fee** | Buyer | Set by the Government's fee table. Sub-registry charters list 1% to 2% of the deed value; confirm the current rate | [Registration Act 1908, s.78](https://bdlaws.minlaw.gov.bd/act-90/part-details-293.html) |
+| **Local Government Tax** | Buyer | Varies by area: reported as 2% in Dhaka's city corporations; Sub-registry charters elsewhere list 3% | Confirm at your Sub-registry |
 | **Transfer Tax (s.125)** | Seller | Set by NBR rules and varies by area. Capped at the higher of Tk 20 lakh per katha of land, Tk 1,000 per sqft of flat, or 10% of the deed value | [Income Tax Act 2023, s.125](https://nbr.gov.bd/uploads/acts/Income_tax_act_2023.pdf) |
 | **Developer Tax (s.126)** | Developer | Set by NBR rules and varies by area. Capped at Tk 1,600 per square metre of residential floor space, and 5% of the deed value for the land share | [Income Tax Act 2023, s.126](https://nbr.gov.bd/uploads/acts/Income_tax_act_2023.pdf) |
 
@@ -200,9 +200,11 @@ The seller's transfer tax is often called "gain tax". Sections 125 and 126 of th
 The buyer's registration costs, using the rates above:
 
 1. **Stamp Duty (1.5%)**: Tk 2,25,000
-2. **Registration Fee (about 1%)**: Tk 1,50,000
-3. **Local Government Tax (about 2%)**: Tk 3,00,000
-4. **Total**: about Tk 6,75,000, plus deed-writing and drafting charges, which vary.
+2. **Registration Fee (1% to 2%)**: Tk 1,50,000 to Tk 3,00,000
+3. **Local Government Tax (2% to 3%)**: Tk 3,00,000 to Tk 4,50,000
+4. **Total**: about Tk 6,75,000 to Tk 9,75,000, plus deed-writing and drafting charges, which vary.
+
+The registration fee and local government tax are given as ranges because the official figures published online disagree and are out of date. Ask your Sub-registry for the current rates before you budget.
 
 The seller's transfer tax and the developer's tax are not in this total. If you are buying from a developer, ask whether the price includes the developer's tax. For 1,500 sqft (about 139 square metres) it can be up to about Tk 2.2 lakh, plus up to 5% of the deed value for the land share.
 
@@ -215,7 +217,8 @@ The seller's transfer tax and the developer's tax are not in this total. If you 
 - [Finance Act 2022: stamp duty on instruments, Schedule I (Conveyance)](https://bdlaws.minlaw.gov.bd/act-1409/act-chapter-print-2323.html)
 - [Registration Act 1908, Part XIII: fees for registration](https://bdlaws.minlaw.gov.bd/act-90/part-details-293.html)
 - [Income Tax Act 2023 as amended by the Finance Act 2024, sections 125 and 126 (NBR)](https://nbr.gov.bd/uploads/acts/Income_tax_act_2023.pdf)
-- Registration fee and local government tax as reported by [The Business Standard (27 May 2023)](https://www.tbsnews.net/economy/budget/govt-double-gain-tax-land-flat-registration-638738)
+- Registration fee and local government tax as reported for Dhaka by [The Business Standard (27 May 2023)](https://www.tbsnews.net/economy/budget/govt-double-gain-tax-land-flat-registration-638738)
+- Sub-registry citizen charters, which list different rates and predate current law: [Kumarkhali, updated 26 Mar 2021](https://sr.kumarkhali.kushtia.gov.bd/pages/static-pages/69811b1ca31054345f1de98b) and [Bheramara, updated 30 Mar 2019](https://sr.bheramara.kushtia.gov.bd/site/page/1b26ca6c-ec53-49f3-bc43-0ceeea7bf2f1)
     `.trim(),
     author: {
       name: "HomeNet Team",
