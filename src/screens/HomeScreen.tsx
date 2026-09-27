@@ -10,7 +10,7 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react-native";
-import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
+import { memo, useMemo, useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -20,7 +20,6 @@ import {
   NativeSyntheticEvent,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -154,121 +153,11 @@ export function HomeScreen() {
       getProperties({ status: "active", sort_by: "view_count_desc", page: 1, limit: 10 }),
   });
 
-  const popularProperties = popularQuery.data?.data?.items ?? [];
-  const featuredProperties = popularProperties.slice(0, 6);
+  const popularItems = popularQuery.data?.data?.items;
+  // Stable reference so the memoized rail skips unrelated re-renders.
+  const featuredProperties = useMemo(() => (popularItems ?? []).slice(0, 6), [popularItems]);
   const popularError = popularQuery.error ? toApiError(popularQuery.error).message : null;
 
-  const featuredScrollRef = useRef<ScrollView>(null);
-  const featuredWrapperRef = useRef<View>(null);
-  const [featuredScrollX, setFeaturedScrollX] = useState(0);
-  const [maxFeaturedScroll, setMaxFeaturedScroll] = useState(200);
-  const [trackWidth, setTrackWidth] = useState(200);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [contentWidth, setContentWidth] = useState(0);
-
-  const currentScrollXRef = useRef(0);
-  const maxScrollRef = useRef(200);
-  const isWheelScrollingRef = useRef(false);
-
-  const cardStep = isPhone ? Math.min(width - 32, 340) + 20 : isTablet ? 440 : 540;
-
-  const handleFeaturedScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, layoutMeasurement, contentSize } = e.nativeEvent;
-    const max = Math.max(1, contentSize.width - layoutMeasurement.width);
-    setMaxFeaturedScroll(max);
-    maxScrollRef.current = max;
-    setFeaturedScrollX(contentOffset.x);
-    currentScrollXRef.current = contentOffset.x;
-    setContainerWidth(layoutMeasurement.width);
-    setContentWidth(contentSize.width);
-  };
-
-  const featuredProgress = Math.max(
-    0,
-    Math.min(1, maxFeaturedScroll > 0 ? featuredScrollX / maxFeaturedScroll : 0)
-  );
-  const canScrollLeft = featuredScrollX > 6;
-  const canScrollRight = featuredScrollX < maxFeaturedScroll - 6;
-  const calculatedThumb =
-    contentWidth > 0 && containerWidth > 0
-      ? (containerWidth / contentWidth) * 100
-      : 30;
-  const thumbPercent = Math.max(22, Math.min(42, calculatedThumb));
-
-  const scrollFeatured = (direction: "left" | "right") => {
-    const currentX = currentScrollXRef.current;
-    const targetX =
-      direction === "left"
-        ? Math.max(0, currentX - cardStep)
-        : Math.min(maxFeaturedScroll, currentX + cardStep);
-    currentScrollXRef.current = targetX;
-    featuredScrollRef.current?.scrollTo({ x: targetX, animated: true });
-  };
-
-  const handleTrackPress = (e: any) => {
-    if (maxFeaturedScroll <= 0 || trackWidth <= 0) return;
-    const clickX = e.nativeEvent.locationX;
-    const ratio = Math.max(0, Math.min(1, clickX / trackWidth));
-    const targetX = ratio * maxFeaturedScroll;
-    currentScrollXRef.current = targetX;
-    featuredScrollRef.current?.scrollTo({ x: targetX, animated: true });
-  };
-
-  useEffect(() => {
-    if (Platform.OS !== "web") return;
-
-    const getDomNode = (refObj: any) => {
-      if (!refObj) return null;
-      if (refObj instanceof HTMLElement) return refObj;
-      if (typeof refObj.getScrollableNode === "function") return refObj.getScrollableNode();
-      if (typeof refObj.getInnerViewNode === "function") return refObj.getInnerViewNode();
-      if (refObj._node instanceof HTMLElement) return refObj._node;
-      return null;
-    };
-
-    const targetNode = getDomNode(featuredWrapperRef.current);
-    if (!targetNode || typeof targetNode.addEventListener !== "function") return;
-
-    let wheelTimer: any = null;
-
-    const onWheel = (e: WheelEvent) => {
-      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (Math.abs(delta) < 8) return;
-
-      const direction = delta > 0 ? "right" : "left";
-      const currentX = currentScrollXRef.current;
-      const maxScroll = maxScrollRef.current;
-
-      // Allow natural page vertical scroll if user has reached boundary:
-      if (direction === "left" && currentX <= 6) return;
-      if (direction === "right" && currentX >= maxScroll - 6) return;
-
-      // Intercept scroll wheel over featured section
-      e.preventDefault();
-
-      if (isWheelScrollingRef.current) return;
-      isWheelScrollingRef.current = true;
-
-      const nextTarget =
-        direction === "right"
-          ? Math.min(maxScroll, Math.floor((currentX + 30) / cardStep + 1) * cardStep)
-          : Math.max(0, Math.ceil((currentX - 30) / cardStep - 1) * cardStep);
-
-      currentScrollXRef.current = nextTarget;
-      featuredScrollRef.current?.scrollTo({ x: nextTarget, animated: true });
-
-      clearTimeout(wheelTimer);
-      wheelTimer = setTimeout(() => {
-        isWheelScrollingRef.current = false;
-      }, 320);
-    };
-
-    targetNode.addEventListener("wheel", onWheel, { passive: false });
-    return () => {
-      targetNode.removeEventListener("wheel", onWheel);
-      clearTimeout(wheelTimer);
-    };
-  }, [cardStep, featuredProperties.length]);
 
   const hero = (
       <View style={styles.heroBlock}>
@@ -347,31 +236,6 @@ export function HomeScreen() {
 
   );
 
-  const renderFeaturedItem = useCallback(
-    ({ item }: { item: ApiProperty }) => (
-      <PropertyCard
-        property={item}
-        variant="feature"
-        width={isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500}
-      />
-    ),
-    [isPhone, isTablet, width]
-  );
-
-  const featuredKeyExtractor = useCallback((item: ApiProperty) => item.id, []);
-
-  const getFeaturedItemLayout = useCallback(
-    (_: any, index: number) => {
-      const cardWidth = isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500;
-      const step = cardWidth + 20;
-      return {
-        length: step,
-        offset: step * index,
-        index,
-      };
-    },
-    [isPhone, isTablet, width]
-  );
 
   return (
     <AppChrome active="home" bleed={hero}>
@@ -401,76 +265,7 @@ export function HomeScreen() {
           loading={popularQuery.isLoading}
           onRetry={() => void popularQuery.refetch()}
         >
-          <View ref={featuredWrapperRef} style={styles.featuredWrapper}>
-            <FlatList
-              ref={featuredScrollRef as any}
-              horizontal
-              data={featuredProperties}
-              renderItem={renderFeaturedItem}
-              keyExtractor={featuredKeyExtractor}
-              getItemLayout={getFeaturedItemLayout}
-              initialNumToRender={6}
-              maxToRenderPerBatch={8}
-              windowSize={5}
-              showsHorizontalScrollIndicator={false}
-              onScroll={handleFeaturedScroll}
-              scrollEventThrottle={16}
-              contentContainerStyle={styles.featuredCardsRow}
-            />
-
-            {/* Position Bar for Left-Right Move (Both Mobile & PC) */}
-            {featuredProperties.length > 1 && (
-              <View style={styles.featuredPositionBarWrap}>
-                <Pressable
-                  onPress={() => scrollFeatured("left")}
-                  disabled={!canScrollLeft}
-                  style={({ pressed }) => [
-                    styles.scrollArrowBtn,
-                    !canScrollLeft && styles.scrollArrowBtnDisabled,
-                    pressed && canScrollLeft && styles.scrollArrowBtnPressed,
-                    webPointer,
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Previous featured property"
-                >
-                  <ChevronLeft size={16} color={canScrollLeft ? colors.green : "#94A3B8"} strokeWidth={2.5} />
-                </Pressable>
-
-                <Pressable
-                  onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
-                  onPress={handleTrackPress}
-                  style={[styles.featuredPositionTrack, isPhone && styles.featuredPositionTrackPhone, webPointer]}
-                  accessibilityRole="progressbar"
-                  accessibilityLabel="Featured properties position bar"
-                >
-                  <View
-                    style={[
-                      styles.featuredPositionThumb,
-                      {
-                        left: `${featuredProgress * (100 - thumbPercent)}%`,
-                        width: `${thumbPercent}%`,
-                      },
-                    ]}
-                  />
-                </Pressable>
-
-                <Pressable
-                  onPress={() => scrollFeatured("right")}
-                  disabled={!canScrollRight}
-                  style={({ pressed }) => [
-                    styles.scrollArrowBtn,
-                    !canScrollRight && styles.scrollArrowBtnDisabled,
-                    pressed && canScrollRight && styles.scrollArrowBtnPressed,
-                    webPointer,
-                  ]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Next featured property"
-                >
-                  <ChevronRight size={16} color={canScrollRight ? colors.green : "#94A3B8"} strokeWidth={2.5} />
-                </Pressable>
-              </View>
-            )}
-          </View>
+          <FeaturedRail properties={featuredProperties} />
         </PropertyResult>
       </View>
 
@@ -517,6 +312,224 @@ export function HomeScreen() {
     </AppChrome>
   );
 }
+
+/**
+ * The featured carousel owns its scroll state so scrolling re-renders only
+ * the rail, not the whole home page.
+ */
+const FeaturedRail = memo(function FeaturedRail({ properties }: { properties: ApiProperty[] }) {
+  const { isPhone, isTablet, width } = useResponsive();
+  const featuredScrollRef = useRef<FlatList<ApiProperty>>(null);
+  const featuredWrapperRef = useRef<View>(null);
+  const [featuredScrollX, setFeaturedScrollX] = useState(0);
+  const [trackWidth, setTrackWidth] = useState(200);
+  // Sizes change on layout, not on scroll, so they are measured there.
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [contentWidth, setContentWidth] = useState(0);
+  const maxFeaturedScroll =
+    containerWidth > 0 && contentWidth > 0
+      ? Math.max(1, contentWidth - containerWidth)
+      : 200;
+
+  const currentScrollXRef = useRef(0);
+  const maxScrollRef = useRef(maxFeaturedScroll);
+  maxScrollRef.current = maxFeaturedScroll;
+  const isWheelScrollingRef = useRef(false);
+
+  const cardStep = isPhone ? Math.min(width - 32, 340) + 20 : isTablet ? 440 : 540;
+
+  const handleFeaturedScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const x = e.nativeEvent.contentOffset.x;
+    currentScrollXRef.current = x;
+    setFeaturedScrollX(x);
+  };
+
+  const featuredProgress = Math.max(
+    0,
+    Math.min(1, maxFeaturedScroll > 0 ? featuredScrollX / maxFeaturedScroll : 0)
+  );
+  const canScrollLeft = featuredScrollX > 6;
+  const canScrollRight = featuredScrollX < maxFeaturedScroll - 6;
+  const calculatedThumb =
+    contentWidth > 0 && containerWidth > 0
+      ? (containerWidth / contentWidth) * 100
+      : 30;
+  const thumbPercent = Math.max(22, Math.min(42, calculatedThumb));
+
+  const scrollFeatured = (direction: "left" | "right") => {
+    const currentX = currentScrollXRef.current;
+    const targetX =
+      direction === "left"
+        ? Math.max(0, currentX - cardStep)
+        : Math.min(maxFeaturedScroll, currentX + cardStep);
+    currentScrollXRef.current = targetX;
+    featuredScrollRef.current?.scrollToOffset({ offset: targetX, animated: true });
+  };
+
+  const handleTrackPress = (e: any) => {
+    if (maxFeaturedScroll <= 0 || trackWidth <= 0) return;
+    const clickX = e.nativeEvent.locationX;
+    const ratio = Math.max(0, Math.min(1, clickX / trackWidth));
+    const targetX = ratio * maxFeaturedScroll;
+    currentScrollXRef.current = targetX;
+    featuredScrollRef.current?.scrollToOffset({ offset: targetX, animated: true });
+  };
+
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+
+    const getDomNode = (refObj: any) => {
+      if (!refObj) return null;
+      if (refObj instanceof HTMLElement) return refObj;
+      if (typeof refObj.getScrollableNode === "function") return refObj.getScrollableNode();
+      if (typeof refObj.getInnerViewNode === "function") return refObj.getInnerViewNode();
+      if (refObj._node instanceof HTMLElement) return refObj._node;
+      return null;
+    };
+
+    const targetNode = getDomNode(featuredWrapperRef.current);
+    if (!targetNode || typeof targetNode.addEventListener !== "function") return;
+
+    let wheelTimer: any = null;
+
+    const onWheel = (e: WheelEvent) => {
+      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (Math.abs(delta) < 8) return;
+
+      const direction = delta > 0 ? "right" : "left";
+      const currentX = currentScrollXRef.current;
+      const maxScroll = maxScrollRef.current;
+
+      // Allow natural page vertical scroll if user has reached boundary:
+      if (direction === "left" && currentX <= 6) return;
+      if (direction === "right" && currentX >= maxScroll - 6) return;
+
+      // Intercept scroll wheel over featured section
+      e.preventDefault();
+
+      if (isWheelScrollingRef.current) return;
+      isWheelScrollingRef.current = true;
+
+      const nextTarget =
+        direction === "right"
+          ? Math.min(maxScroll, Math.floor((currentX + 30) / cardStep + 1) * cardStep)
+          : Math.max(0, Math.ceil((currentX - 30) / cardStep - 1) * cardStep);
+
+      currentScrollXRef.current = nextTarget;
+      featuredScrollRef.current?.scrollToOffset({ offset: nextTarget, animated: true });
+
+      clearTimeout(wheelTimer);
+      wheelTimer = setTimeout(() => {
+        isWheelScrollingRef.current = false;
+      }, 320);
+    };
+
+    targetNode.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      targetNode.removeEventListener("wheel", onWheel);
+      clearTimeout(wheelTimer);
+    };
+  }, [cardStep, properties.length]);
+
+  const renderFeaturedItem = useCallback(
+    ({ item }: { item: ApiProperty }) => (
+      <PropertyCard
+        property={item}
+        variant="feature"
+        width={isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500}
+      />
+    ),
+    [isPhone, isTablet, width]
+  );
+
+  const featuredKeyExtractor = useCallback((item: ApiProperty) => item.id, []);
+
+  const getFeaturedItemLayout = useCallback(
+    (_: any, index: number) => {
+      const cardWidth = isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500;
+      const step = cardWidth + 20;
+      return {
+        length: step,
+        offset: step * index,
+        index,
+      };
+    },
+    [isPhone, isTablet, width]
+  );
+
+  return (
+    <View ref={featuredWrapperRef} style={styles.featuredWrapper}>
+      <FlatList
+        ref={featuredScrollRef}
+        horizontal
+        data={properties}
+        renderItem={renderFeaturedItem}
+        keyExtractor={featuredKeyExtractor}
+        getItemLayout={getFeaturedItemLayout}
+        initialNumToRender={6}
+        maxToRenderPerBatch={8}
+        windowSize={5}
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleFeaturedScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={styles.featuredCardsRow}
+      />
+
+      {/* Position Bar for Left-Right Move (Both Mobile & PC) */}
+      {properties.length > 1 && (
+        <View style={styles.featuredPositionBarWrap}>
+          <Pressable
+            onPress={() => scrollFeatured("left")}
+            disabled={!canScrollLeft}
+            style={({ pressed }) => [
+              styles.scrollArrowBtn,
+              !canScrollLeft && styles.scrollArrowBtnDisabled,
+              pressed && canScrollLeft && styles.scrollArrowBtnPressed,
+              webPointer,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Previous featured property"
+          >
+            <ChevronLeft size={16} color={canScrollLeft ? colors.green : "#94A3B8"} strokeWidth={2.5} />
+          </Pressable>
+
+          <Pressable
+            onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
+            onPress={handleTrackPress}
+            style={[styles.featuredPositionTrack, isPhone && styles.featuredPositionTrackPhone, webPointer]}
+            accessibilityRole="progressbar"
+            accessibilityLabel="Featured properties position bar"
+          >
+            <View
+              style={[
+                styles.featuredPositionThumb,
+                {
+                  left: `${featuredProgress * (100 - thumbPercent)}%`,
+                  width: `${thumbPercent}%`,
+                },
+              ]}
+            />
+          </Pressable>
+
+          <Pressable
+            onPress={() => scrollFeatured("right")}
+            disabled={!canScrollRight}
+            style={({ pressed }) => [
+              styles.scrollArrowBtn,
+              !canScrollRight && styles.scrollArrowBtnDisabled,
+              pressed && canScrollRight && styles.scrollArrowBtnPressed,
+              webPointer,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel="Next featured property"
+          >
+            <ChevronRight size={16} color={canScrollRight ? colors.green : "#94A3B8"} strokeWidth={2.5} />
+          </Pressable>
+        </View>
+      )}
+    </View>
+  );
+});
 
 const styles = StyleSheet.create({
   sectionSpacing: {
