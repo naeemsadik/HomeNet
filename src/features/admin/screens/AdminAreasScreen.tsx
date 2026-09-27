@@ -23,7 +23,8 @@ import {
 } from "@/services/areaApi";
 import { toApiError } from "@/services/apiClient";
 import type { Area, AreaDetail, CreateAreaDto } from "@/types/api";
-import { colorTokens, fontTokens, webPointer } from "@/theme";
+import { colorTokens, fontTokens, webPointer } from "@/theme";
+import { LiveText } from "@/components/LiveText";
 
 interface AreaFormProps {
   visible: boolean;
@@ -338,7 +339,7 @@ export function AdminAreasScreen() {
           <Pressable disabled={page === 1} onPress={() => setPage((value) => value - 1)} style={styles.secondaryButton}>
             <Text style={styles.secondaryButtonText}>Previous</Text>
           </Pressable>
-          <Text style={styles.pageText}>{page} / {totalPages}</Text>
+          <LiveText style={styles.pageText}>{page} / {totalPages}</LiveText>
           <Pressable disabled={page >= totalPages} onPress={() => setPage((value) => value + 1)} style={styles.secondaryButton}>
             <Text style={styles.secondaryButtonText}>Next</Text>
           </Pressable>

@@ -16,7 +16,8 @@ import { colorTokens, fonts } from "@/theme";
 import { useSavedStore } from "@/stores/savedStore";
 import { useAuthStore } from "@/stores/authStore";
 import type { ApiResponse } from "@/types/api";
-import type { Property } from "@/features/property/types/property";
+import type { Property } from "@/features/property/types/property";
+import { LiveText } from "@/components/LiveText";
 
 export function SavedScreen() {
   const { isPhone } = useResponsive();
@@ -140,7 +141,7 @@ export function SavedScreen() {
         <View style={styles.sectionHeader}>
           <View style={styles.titleWithIconRow}>
             <Bookmark color="#0B1A17" size={20} />
-            <Text style={styles.sectionTitle}>Saved properties ({savedListings.length})</Text>
+            <LiveText style={styles.sectionTitle}>Saved properties ({savedListings.length})</LiveText>
           </View>
         </View>
 

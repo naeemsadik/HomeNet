@@ -36,7 +36,8 @@ import { AppLink } from "./ui";
 import { Footer } from "./Footer";
 import { NotificationPreview } from "@/features/notification/components/NotificationPreview";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
-import { styles } from "./AppChrome.styles";
+import { styles } from "./AppChrome.styles";
+import { LiveText } from "@/components/LiveText";
 
 export type ActivePage =
   | "home"
@@ -334,9 +335,9 @@ function TopBar({
                   />
                   {unreadCount > 0 ? (
                     <View style={styles.notificationBadge} pointerEvents="none">
-                      <Text style={styles.notificationBadgeText}>
+                      <LiveText style={styles.notificationBadgeText}>
                         {unreadCount > 9 ? "9+" : unreadCount}
-                      </Text>
+                      </LiveText>
                     </View>
                   ) : null}
                 </Pressable>

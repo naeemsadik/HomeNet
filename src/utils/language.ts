@@ -120,7 +120,10 @@ function applyGoogleTranslation(targetLang: SupportedLanguage) {
 }
 
 export const useLanguageStore = create<LanguageState>((set, get) => ({
-  currentLanguage: getInitialLanguage(),
+  // "en" to match the pre-rendered HTML; restoreSavedLanguage() applies the
+  // reader's choice once the app has hydrated. Reading it here made every
+  // Bangla reader's first render differ from the static page (React #418).
+  currentLanguage: "en",
   setLanguage: (lang: SupportedLanguage) => {
     set({ currentLanguage: lang });
     applyGoogleTranslation(lang);
@@ -166,6 +169,11 @@ export function ensureGoogleTranslateScript() {
  * Only loads script at boot for visitors who previously saved Bangla.
  * Default English visitors have 0 KB initial translate overhead.
  */
+/** Puts the reader's saved language into the store. Call after hydration. */
+export function restoreSavedLanguage() {
+  useLanguageStore.setState({ currentLanguage: getInitialLanguage() });
+}
+
 export function shouldLoadTranslateOnBoot(): boolean {
   return getInitialLanguage() === "bn";
 }

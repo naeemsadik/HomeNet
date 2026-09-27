@@ -1,3 +1,5 @@
+// First, so production is silent before anything else can log.
+import "@/lib/productionConsole";
 import { useEffect } from "react";
 import {
   Inter_400Regular,
@@ -21,7 +23,12 @@ import { ToastHost } from "@/components/ToastHost";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
-import { ensureGoogleTranslateScript, restoreTranslateCookie, shouldLoadTranslateOnBoot } from "@/utils/language";
+import {
+  ensureGoogleTranslateScript,
+  restoreSavedLanguage,
+  restoreTranslateCookie,
+  shouldLoadTranslateOnBoot,
+} from "@/utils/language";
 import { PageMeta } from "@/components/PageMeta";
 import { queryClient } from "@/lib/queryClient";
 
@@ -69,19 +76,7 @@ export default function RootLayout() {
         document.head.appendChild(style);
       }
 
-      // Self-XSS console warning (Facebook-style)
-      console.log(
-        "%cStop!",
-        "color: red; font-size: 60px; font-weight: bold; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);",
-      );
-      console.log(
-        "%cThis is a browser feature intended for developers. If someone told you to copy and paste something here to enable a HomeNet feature or \"hack\" someone's account, it's a scam and will give them access to your HomeNet account.",
-        "font-size: 16px; color: #FFFFFF;",
-      );
-      console.log(
-        "%cSee https://homenetbd.com/self-xss for more information.",
-        "font-size: 16px; color: #3b82f6;",
-      );
+      restoreSavedLanguage();
 
       // Only visitors who already read in Bangla pay for the translate
       // widget up front; for everyone else it loads on first use.

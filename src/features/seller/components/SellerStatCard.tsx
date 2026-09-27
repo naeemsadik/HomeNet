@@ -1,6 +1,7 @@
 import { TrendingUp } from "lucide-react-native";
 import { Platform, StyleSheet, Text, View } from "react-native";
-import { fonts } from "@/theme";
+import { fonts } from "@/theme";
+import { LiveText } from "@/components/LiveText";
 
 export interface StatItem {
   id: string;
@@ -40,9 +41,9 @@ export function SellerStatCard({ item }: SellerStatCardProps) {
       </View>
 
       {/* Dynamic Metric Value */}
-      <Text numberOfLines={1} style={styles.statValue}>
+      <LiveText numberOfLines={1} style={styles.statValue}>
         {item.value}
-      </Text>
+      </LiveText>
 
       {/* Metric Label */}
       <Text numberOfLines={1} style={styles.statLabel}>

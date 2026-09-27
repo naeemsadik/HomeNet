@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Bell, Building2, MapPinned, Settings, ShieldCheck, Users } from "lucide-react-native";
 import { colorTokens, fontTokens } from "@/theme";
-import type { UserRole } from "../types/admin";
+import type { UserRole } from "../types/admin";
+import { LiveText } from "@/components/LiveText";
 
 type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
 
@@ -66,9 +67,9 @@ export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNav
             </Text>
             {count > 0 ? (
               <View style={[styles.count, isActive && styles.countActive]}>
-                <Text style={[styles.countText, isActive && styles.countTextActive]}>
+                <LiveText style={[styles.countText, isActive && styles.countTextActive]}>
                   {count > 99 ? "99+" : count}
-                </Text>
+                </LiveText>
               </View>
             ) : null}
           </Pressable>

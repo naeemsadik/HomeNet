@@ -43,7 +43,8 @@ import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDra
 import { Footer } from "@/components/Footer";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
-import { cdnImage } from "@/lib/cloudinaryImage";
+import { cdnImage } from "@/lib/cloudinaryImage";
+import { LiveText } from "@/components/LiveText";
 
 export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
 
@@ -276,9 +277,9 @@ export function MyPropertiesScreen() {
                         {label}
                       </Text>
                       <View style={[styles.pillCountBg, isSelected && styles.pillCountBgActive]}>
-                        <Text style={[styles.pillCountText, isSelected && styles.pillCountTextActive]}>
+                        <LiveText style={[styles.pillCountText, isSelected && styles.pillCountTextActive]}>
                           {count}
-                        </Text>
+                        </LiveText>
                       </View>
                     </Pressable>
                   );
