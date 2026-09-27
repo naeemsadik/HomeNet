@@ -311,7 +311,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                           pressed && !isAnalyzeDisabled && s.pressed,
                         ]}
                       >
-                        <Sparkles color="#FFFFFF" size={16} />
+                        <Sparkles color={colorTokens.onBrand} size={16} />
                         <Text style={s.analyzeBtnText}>Analyze with AI</Text>
                       </Pressable>
                     )}
@@ -468,7 +468,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                         ]}
                       >
                         <Text style={s.applyBtnText}>Apply & Continue</Text>
-                        <ArrowRight color="#FFFFFF" size={16} />
+                        <ArrowRight color={colorTokens.onBrand} size={16} />
                       </Pressable>
                     </View>
 
@@ -744,7 +744,7 @@ const s = StyleSheet.create({
   analyzeBtnText: {
     fontFamily: fonts.semiBold,
     fontSize: 15,
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
 
   // ─── Preview ──────────────────────────────────────────────────────────────
@@ -900,7 +900,7 @@ const s = StyleSheet.create({
   applyBtnText: {
     fontFamily: fonts.semiBold,
     fontSize: 15,
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   disclaimerText: {
     fontFamily: fonts.regular,

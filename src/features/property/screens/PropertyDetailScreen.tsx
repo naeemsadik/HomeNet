@@ -371,7 +371,7 @@ export function PropertyDetailScreen() {
         <View style={styles.requestState}>
           <Text style={styles.requestError}>{error instanceof Error ? error.message : "Property not found."}</Text>
           <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>
-            <RotateCcw color="#FFFFFF" size={16} />
+            <RotateCcw color={colorTokens.onBrand} size={16} />
             <Text style={styles.retryText}>{error ? "Retry" : "Go Back"}</Text>
           </Pressable>
         </View>
@@ -705,7 +705,7 @@ export function PropertyDetailScreen() {
                         <Text style={styles.mapTooltipText}>{property.address || property.location}</Text>
                       </View>
                       <View style={styles.mapPinCircle}>
-                        <MapPin color="#FFFFFF" size={18} />
+                        <MapPin color={colorTokens.onBrand} size={18} />
                       </View>
                     </View>
                   </Pressable>
@@ -1087,7 +1087,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 11,
   },
-  retryText: { color: "#FFFFFF", fontFamily: fonts.semiBold, fontSize: 14 },
+  retryText: { color: colorTokens.onBrand, fontFamily: fonts.semiBold, fontSize: 14 },
   scrollBody: {
     padding: 24,
     gap: 20,

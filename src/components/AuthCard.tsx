@@ -27,7 +27,7 @@ import {
 } from "lucide-react-native";
 import { useAuthStore } from "@/stores/authStore";
 import { authModalSchema, type AuthModalFormData } from "@/lib/schemas/auth";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 
 const authBuildingImage = require("../../assets/auth-hero-building.png");
 
@@ -461,13 +461,13 @@ export function AuthCard({
             style={[styles.submitButton, loading && { opacity: 0.7 }, webPointer]}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator color={colorTokens.onBrand} size="small" />
             ) : (
               <>
                 <Text style={styles.submitButtonText}>
                   {mode === "signin" ? "Sign In" : "Create Account"}
                 </Text>
-                <ArrowRight color="#FFFFFF" size={16} strokeWidth={2.2} />
+                <ArrowRight color={colorTokens.onBrand} size={16} strokeWidth={2.2} />
               </>
             )}
           </Pressable>
@@ -753,7 +753,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitButtonText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 14,
     fontWeight: "700",

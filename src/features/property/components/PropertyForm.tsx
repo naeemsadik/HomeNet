@@ -105,7 +105,7 @@ export function PropertyForm({
             <View key={s} style={styles.stepItem}>
               <View style={[styles.stepDot, i <= step && styles.stepDotActive, i < step && styles.stepDotDone]}>
                 {i < step ? (
-                  <Check color={colorTokens.textInverse} size={13} />
+                  <Check color={colorTokens.onBrand} size={13} />
                 ) : (
                   <Text style={[styles.stepDotText, i <= step && styles.stepDotTextActive]}>{i + 1}</Text>
                 )}
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     color: colorTokens.textMuted,
   },
   stepDotTextActive: {
-    color: colorTokens.textInverse,
+    color: colorTokens.onBrand,
   },
   stepLabel: {
     fontSize: 11,

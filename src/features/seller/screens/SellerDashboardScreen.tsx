@@ -58,7 +58,7 @@ import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { colors, fonts, radius, shadow, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useMyProperties } from "@/features/property/hooks/useMyProperties";
 import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
 import { SellerTopHeader } from "../components/SellerTopHeader";
@@ -629,7 +629,7 @@ export function SellerDashboardScreen() {
                       ]}
                     >
                       {isSelected ? (
-                        <Check color={colors.white} size={12} strokeWidth={3} />
+                        <Check color={colorTokens.onBrand} size={12} strokeWidth={3} />
                       ) : null}
                     </View>
                     <View style={{ flex: 1, gap: 2 }}>
@@ -659,7 +659,7 @@ export function SellerDashboardScreen() {
                 onPress={() => setBoostModalVisible(false)}
                 style={[styles.boostConfirmBtn, webPointer]}
               >
-                <Rocket color={colors.white} size={16} />
+                <Rocket color={colorTokens.onBrand} size={16} />
                 <Text style={styles.boostConfirmBtnText}>Activate Boost</Text>
               </Pressable>
             </View>
@@ -1775,7 +1775,7 @@ const styles = StyleSheet.create({
   boostConfirmBtnText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: colors.white,
+    color: colorTokens.onBrand,
   },
   tabHeroBanner: {
     padding: 22,

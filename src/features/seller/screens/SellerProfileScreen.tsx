@@ -42,7 +42,7 @@ import { router, useLocalSearchParams, usePathname } from "expo-router";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
 import type { UploadInput } from "@/services/upload";
@@ -732,7 +732,7 @@ export function SellerProfileScreen() {
                 ]}
               >
                 {isSaving ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={colorTokens.onBrand} size="small" />
                 ) : (
                   <Text style={styles.saveBtnText}>Save changes</Text>
                 )}
@@ -899,7 +899,7 @@ export function SellerProfileScreen() {
                 ]}
               >
                 {isChangingPassword ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={colorTokens.onBrand} size="small" />
                 ) : (
                   <Text style={styles.modalSubmitBtnText}>Update password</Text>
                 )}
@@ -1499,7 +1499,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   // Change Password Modal
   modalBackdrop: {
@@ -1636,7 +1636,7 @@ const styles = StyleSheet.create({
   modalSubmitBtnText: {
     fontSize: 13.5,
     fontFamily: fonts.semiBold,
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontWeight: "600",
   },
   pressed: {

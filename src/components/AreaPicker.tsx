@@ -24,7 +24,7 @@ import {
   Building,
   Navigation,
 } from "lucide-react-native";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 import { useAreaPicker } from "@/hooks/useAreaPicker";
 import type { Area } from "@/types/api";
 
@@ -420,7 +420,7 @@ export function AreaPicker({
                 onPress={handleSelectCurrentLevel}
                 style={[styles.selectionBannerBtn, webPointer]}
               >
-                <Check size={14} color="#FFFFFF" />
+                <Check size={14} color={colorTokens.onBrand} />
                 <Text style={styles.selectionBannerBtnText}>Confirm This Level</Text>
               </Pressable>
             </View>
@@ -530,7 +530,7 @@ export function AreaPicker({
                             accessibilityLabel={`Select ${item.name}`}
                           >
                             {isSelected ? (
-                              <Check size={13} color="#FFFFFF" strokeWidth={2.5} />
+                              <Check size={13} color={colorTokens.onBrand} strokeWidth={2.5} />
                             ) : (
                               <Text style={styles.directSelectText}>Select</Text>
                             )}
@@ -702,7 +702,7 @@ const styles = StyleSheet.create({
     color: "#4A5B55",
   },
   chipTextActive: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
   },
@@ -820,7 +820,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   selectionBannerBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontSize: 12,
     fontFamily: fonts.bold,
   },

@@ -25,7 +25,7 @@ import { notify } from "@/lib/alert";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, webPointer } from "@/theme";
 
 interface Conversation {
   id: string;
@@ -317,7 +317,7 @@ export function MessagesScreen() {
               onPress={() => handleSendMessage()}
               style={({ pressed }) => [styles.sendBtn, webPointer, pressed && styles.pressed]}
             >
-              <Send color="#FFFFFF" size={16} />
+              <Send color={colorTokens.onBrand} size={16} />
             </Pressable>
           </View>
         </View>
@@ -578,7 +578,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   messageTextUser: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   messageTextAgent: {
     color: "#0B1A17",
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   emptyBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },

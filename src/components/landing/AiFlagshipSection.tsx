@@ -324,7 +324,7 @@ export const AiFlagshipSection: React.FC = () => {
                         ]}
                         onPress={demoState === 'idle' ? runSequence : handleManualAnalyze}
                       >
-                        <Sparkles size={15} color="#FFFFFF" style={{ marginRight: 8 }} />
+                        <Sparkles size={15} color="#0B1A17" style={{ marginRight: 8 }} />
                         <Text style={styles.analyzeBtnText}>{copy.analyzeBtn}</Text>
                       </Pressable>
                     )}
@@ -500,7 +500,7 @@ export const AiFlagshipSection: React.FC = () => {
                         onPress={handleApply}
                       >
                         <Text style={styles.applyBtnText}>{copy.applyBtn}</Text>
-                        <ArrowRight size={15} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                        <ArrowRight size={15} color="#0B1A17" style={{ marginLeft: 6 }} />
                       </Pressable>
                     </View>
 

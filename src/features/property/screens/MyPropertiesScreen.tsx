@@ -42,7 +42,7 @@ import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { colors, fonts, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, webPointer } from "@/theme";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { Footer } from "@/components/Footer";
@@ -294,7 +294,7 @@ export function MyPropertiesScreen() {
 
             {/* Add Property Primary Button */}
             <AppLink href="/property/create" style={styles.addPropertyBtn}>
-              <Plus color="#FFFFFF" size={16} />
+              <Plus color={colorTokens.onBrand} size={16} />
               <Text style={styles.addPropertyBtnText}>Add new property</Text>
             </AppLink>
           </View>
@@ -311,7 +311,7 @@ export function MyPropertiesScreen() {
                 <Text style={styles.emptyTitle}>Could not load listings</Text>
                 <Text style={styles.emptySub}>{error instanceof Error ? error.message : "Request failed."}</Text>
                 <Pressable onPress={() => void refetch()} style={styles.retryButton}>
-                  <RotateCcw color="#FFFFFF" size={16} />
+                  <RotateCcw color={colorTokens.onBrand} size={16} />
                   <Text style={styles.retryText}>Retry</Text>
                 </Pressable>
               </View>
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
   },
   pillLabelActive: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   pillCountBg: {
     backgroundColor: "transparent",
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   addPropertyBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },
@@ -878,7 +878,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 10,
   },
-  retryText: { color: "#FFFFFF", fontFamily: fonts.semiBold, fontSize: 14 },
+  retryText: { color: colorTokens.onBrand, fontFamily: fonts.semiBold, fontSize: 14 },
   loadMoreButton: {
     alignItems: "center",
     alignSelf: "center",

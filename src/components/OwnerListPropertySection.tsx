@@ -32,7 +32,7 @@ import { usePropertyWizardStore } from "@/features/property/stores/propertyWizar
 import { AiListingSheet } from "@/features/property/components/AiListingSheet";
 import type { AiParsedProperty } from "@/features/property/types/aiListing";
 import { AppButton } from "@/components/ui";
-import { colors, fonts, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, webPointer } from "@/theme";
 
 export type OwnerIntentId =
   | "sell_residential"
@@ -446,9 +446,9 @@ export function OwnerListPropertySection() {
                   isPhone && styles.aiCtaButtonPhone,
                 ]}
               >
-                <Sparkles color="#FFFFFF" size={15} strokeWidth={2.2} />
+                <Sparkles color={colorTokens.onBrand} size={15} strokeWidth={2.2} />
                 <Text style={styles.aiCtaButtonText}>List with AI</Text>
-                <ArrowRight color="#FFFFFF" size={15} strokeWidth={2.2} />
+                <ArrowRight color={colorTokens.onBrand} size={15} strokeWidth={2.2} />
               </View>
             </Pressable>
 
@@ -497,7 +497,7 @@ export function OwnerListPropertySection() {
                         </View>
                         {isSelected ? (
                           <View style={styles.checkCircleSelected}>
-                            <Check color="#FFFFFF" size={12} strokeWidth={3} />
+                            <Check color={colorTokens.onBrand} size={12} strokeWidth={3} />
                           </View>
                         ) : null}
                       </View>
@@ -561,7 +561,7 @@ export function OwnerListPropertySection() {
                   <Text style={styles.continueButtonText}>
                     Continue with {selectedIntent.label}
                   </Text>
-                  <ArrowRight color="#FFFFFF" size={16} />
+                  <ArrowRight color={colorTokens.onBrand} size={16} />
                 </Pressable>
               </View>
             </View>
@@ -1060,7 +1060,7 @@ const styles = StyleSheet.create({
     }) as any),
   },
   continueButtonText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
   },
@@ -1172,6 +1172,6 @@ const styles = StyleSheet.create({
   aiCtaButtonText: {
     fontFamily: fonts.semiBold,
     fontSize: 14,
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
 });

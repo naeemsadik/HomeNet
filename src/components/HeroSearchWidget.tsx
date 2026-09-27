@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { ChevronDown, MapPin, Search, Sparkles, X } from "lucide-react-native";
-import { colors, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
@@ -151,7 +151,7 @@ export function HeroSearchWidget({
             webPointer,
           ]}
         >
-          <Search color={colors.white} size={17} strokeWidth={2.4} />
+          <Search color={colorTokens.onBrand} size={17} strokeWidth={2.4} />
           <Text style={styles.searchLabel}>Search</Text>
         </Pressable>
       </View>
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   searchButtonHovered: { backgroundColor: colors.greenOnLight },
   searchButtonPressed: { opacity: 0.9 },
   searchLabel: {
-    color: colors.white,
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 16,
   },

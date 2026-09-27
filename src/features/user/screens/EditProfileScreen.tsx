@@ -107,7 +107,7 @@ export function EditProfileScreen() {
                 <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <UserRound color={colorTokens.textInverse} size={34} />
+                  <UserRound color={colorTokens.brandText} size={34} />
                 </View>
               )}
               <Pressable
@@ -116,9 +116,9 @@ export function EditProfileScreen() {
                 accessibilityLabel="Upload avatar"
               >
                 {uploadAvatar.isPending ? (
-                  <ActivityIndicator color={colorTokens.textInverse} size={12} />
+                  <ActivityIndicator color={colorTokens.onBrand} size={12} />
                 ) : (
-                  <Camera color={colorTokens.textInverse} size={15} />
+                  <Camera color={colorTokens.onBrand} size={15} />
                 )}
               </Pressable>
             </View>

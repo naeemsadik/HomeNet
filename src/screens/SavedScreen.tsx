@@ -14,7 +14,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { AppLink } from "@/components/ui";
 import { getPropertyById, getSavedProperties, unsaveProperty } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
-import { fonts } from "@/theme";
+import { colorTokens, fonts } from "@/theme";
 import { useSavedStore } from "@/stores/savedStore";
 import { useAuthStore } from "@/stores/authStore";
 import type { ApiResponse } from "@/types/api";
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#04cf92",
   },
   browseButtonText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
   },

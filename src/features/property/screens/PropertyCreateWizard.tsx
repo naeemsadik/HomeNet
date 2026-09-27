@@ -66,7 +66,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
 import { confirmAction, notify } from "@/lib/alert";
 import type { UploadInput } from "@/services/upload";
-import { colors, fonts, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, webPointer } from "@/theme";
 import type { Area, PropertyType, UpsertPropertyDto } from "@/types/api";
 import {
   PROPERTY_TYPE_CONFIGS,
@@ -624,7 +624,7 @@ export function PropertyCreateWizard() {
                         ]}
                       >
                         {isDone ? (
-                          <Check color="#FFFFFF" size={16} />
+                          <Check color={colorTokens.onBrand} size={16} />
                         ) : (
                           <Text style={[styles.stepCircleText, isCurrent && styles.stepCircleTextCurrent]}>
                             {st.num}
@@ -1329,7 +1329,7 @@ export function PropertyCreateWizard() {
                     ]}
                   >
                     <Text style={[styles.nextBtnText, isPhone && styles.nextBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>Next</Text>
-                    <ChevronRight color="#FFFFFF" size={15} strokeWidth={2} />
+                    <ChevronRight color={colorTokens.onBrand} size={15} strokeWidth={2} />
                   </Pressable>
                 ) : (
                   <Pressable
@@ -1344,9 +1344,9 @@ export function PropertyCreateWizard() {
                     ]}
                   >
                     {store.isSubmitting ? (
-                      <ActivityIndicator color="#FFFFFF" size="small" />
+                      <ActivityIndicator color={colorTokens.onBrand} size="small" />
                     ) : (
-                      <Send color="#FFFFFF" size={14} />
+                      <Send color={colorTokens.onBrand} size={14} />
                     )}
                     <Text style={[styles.publishBtnText, isPhone && styles.publishBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
                       {isPhone ? "Submit" : "Submit for verification"}
@@ -2081,7 +2081,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   unitPillTextActive: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   formHint: {
     fontSize: 12,
@@ -2171,7 +2171,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   coverBadgeText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontSize: 11,
     fontFamily: fonts.bold,
   },
@@ -2328,7 +2328,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
   },
   nextBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },
@@ -2342,7 +2342,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
   },
   publishBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },
@@ -2413,7 +2413,7 @@ const styles = StyleSheet.create({
   nextBtnTextMobile: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   publishBtnMobile: {
     height: 38,
@@ -2428,7 +2428,7 @@ const styles = StyleSheet.create({
   publishBtnTextMobile: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   btnTextNarrow: {
     fontSize: 12,

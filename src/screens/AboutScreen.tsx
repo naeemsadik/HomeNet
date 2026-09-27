@@ -10,7 +10,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink, Eyebrow, FeatureCard } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 
 export function AboutScreen() {
   const { isPhone } = useResponsive();
@@ -65,7 +65,7 @@ export function AboutScreen() {
       >
         <View style={styles.contactLeft}>
           <View style={styles.contactIcon}>
-            <HeartHandshake color={colors.white} size={22} />
+            <HeartHandshake color={colorTokens.onBrand} size={22} />
           </View>
           <View style={styles.contactCopyWrap}>
             <Text style={styles.contactTitle}>Need help with a property decision?</Text>

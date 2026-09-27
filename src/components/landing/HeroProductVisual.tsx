@@ -17,7 +17,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react-native";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { BrowserFrame } from "./BrowserFrame";
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   searchReplicaBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 13,
     fontWeight: "700",

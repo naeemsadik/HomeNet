@@ -44,7 +44,7 @@ export function AmenityChips({ type, amenities, onToggle }: AmenityChipsProps) {
               accessibilityLabel={`${label} amenity`}
             >
               <View style={[styles.check, active && styles.checkActive]}>
-                {active ? <Check color={colorTokens.textInverse} size={12} strokeWidth={3} /> : null}
+                {active ? <Check color={colorTokens.onBrand} size={12} strokeWidth={3} /> : null}
               </View>
               <Text style={[styles.chipText, active && styles.chipTextActive]}>
                 {label}

@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { Check, ChevronDown, Edit3, HelpCircle, Search, Sparkles } from "lucide-react-native";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 
 export interface RightmoveFilters {
@@ -292,7 +292,7 @@ export function RightmoveFilterCard({
                 ]}
               >
                 {filters.includeSold ? (
-                  <Check color="#FFFFFF" size={13} strokeWidth={3} />
+                  <Check color={colorTokens.onBrand} size={13} strokeWidth={3} />
                 ) : null}
               </View>
               <Text style={styles.checkboxLabel}>
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   saveTitleBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",

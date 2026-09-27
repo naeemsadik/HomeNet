@@ -300,7 +300,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
               ]}
             >
               <Grid2X2
-                color={viewMode === "grid" ? "#FFFFFF" : "#5C6B66"}
+                color={viewMode === "grid" ? colorTokens.onBrand : "#5C6B66"}
                 size={16}
               />
             </Pressable>
@@ -315,7 +315,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
               ]}
             >
               <List
-                color={viewMode === "list" ? "#FFFFFF" : "#5C6B66"}
+                color={viewMode === "list" ? colorTokens.onBrand : "#5C6B66"}
                 size={16}
               />
             </Pressable>
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   clearAllBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",

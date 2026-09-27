@@ -163,7 +163,7 @@ function SideBar({
       {/* List your property Card (Figma node 1:2025) */}
       <View style={styles.sidebarCard}>
         <View style={styles.sidebarCardIconWrap}>
-          <Sparkles color="#FFFFFF" size={20} />
+          <Sparkles color={colorTokens.onBrand} size={20} />
         </View>
         <Text style={styles.sidebarCardTitle}>List your property</Text>
         <Text style={styles.sidebarCardSubtitle}>
@@ -831,7 +831,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   postAdButtonText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
@@ -1100,7 +1100,7 @@ const styles = StyleSheet.create({
     borderColor: colorTokens.surface,
   },
   notificationBadgeText: {
-    color: colorTokens.onBrand,
+    color: colorTokens.onDanger,
     fontFamily: fonts.bold,
     fontSize: 10,
     fontWeight: "700",
@@ -1128,7 +1128,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#04cf92",
   },
   listPropertyText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "700",
@@ -1422,33 +1422,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 20,
     textAlign: "center",
-  },
-  signInButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    backgroundColor: "#04cf92",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 999,
-    height: 38,
-    flexShrink: 0,
-  },
-  signInButtonPhone: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    gap: 4,
-    height: 32,
-  },
-  signInButtonText: {
-    color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  signInButtonTextPhone: {
-    fontSize: 12,
-    fontWeight: "600",
   },
   notificationWrap: {
     position: "relative",

@@ -8,7 +8,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { FloatingInput, ErrorBanner, AuthButton } from "@/components/AuthFormFields";
 import { AuthCard } from "@/components/AuthCard";
@@ -144,7 +144,7 @@ export function ProfileScreen() {
                 </View>
               )}
               <Pressable accessibilityLabel="Upload avatar" onPress={handleAvatarUpload} style={[styles.avatarAction, webPointer]}>
-                {uploadingAvatar ? <LoaderCircle color={colors.white} size={15} /> : <Camera color={colors.white} size={15} />}
+                {uploadingAvatar ? <LoaderCircle color={colorTokens.onBrand} size={15} /> : <Camera color={colorTokens.onBrand} size={15} />}
               </Pressable>
             </View>
 
