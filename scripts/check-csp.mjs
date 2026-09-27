@@ -5,6 +5,12 @@
 // Expo Router's hydration flag, allowed by its sha256 hash. If an Expo upgrade
 // changes that script, the browser would silently block it in production; this
 // turns that into a failed build with the hash to add instead.
+//
+// script-src also carries a hash this check cannot see: Google Translate's
+// sandbox iframe (srcdoc, sha256-R6kjt5…) runs one inline script and loads
+// translations as scripts from translate-pa.googleapis.com. Without both,
+// Bangla silently stays English. If Google changes that script, the console
+// shows a CSP error on about:srcdoc with the new hash; swap it in vercel.json.
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
