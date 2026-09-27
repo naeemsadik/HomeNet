@@ -2,7 +2,8 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, View } from "
 import { Search, Users } from "lucide-react-native";
 import { colorTokens, fontTokens } from "@/theme";
 import { UserAdminItemRow } from "./UserAdminItem";
-import type { UserWithRoles } from "../types/admin";
+import type { UserWithRoles } from "../types/admin";
+import { LiveText } from "@/components/LiveText";
 
 interface UserAdminListProps {
   users: UserWithRoles[];
@@ -39,7 +40,7 @@ export function UserAdminList({
         />
       </View>
 
-      <Text style={styles.count}>Showing {users.length} of {total} users</Text>
+      <LiveText style={styles.count}>Showing {users.length} of {total} users</LiveText>
 
       {isLoading ? (
         <View style={styles.center}>

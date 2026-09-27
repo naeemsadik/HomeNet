@@ -28,7 +28,8 @@ import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import type { PropertyType } from "@/types/api";
+import type { PropertyType } from "@/types/api";
+import { LiveText } from "@/components/LiveText";
 
 /**
  * Maps a `?type=` URL value onto the API's PropertyType enum. Older links and
@@ -283,9 +284,9 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
 
         {/* ─── 4. Results Count & View Toggle Toolbar ─────────────────────── */}
         <View style={styles.toolbar}>
-          <Text style={styles.resultCountText}>
+          <LiveText style={styles.resultCountText}>
             {results.length} {results.length === 1 ? "property" : "properties"} found
-          </Text>
+          </LiveText>
 
           <View style={styles.viewToggleWrap}>
             <Pressable

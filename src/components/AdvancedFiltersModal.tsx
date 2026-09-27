@@ -9,7 +9,8 @@ import {
   View,
 } from "react-native";
 import { Check, MapPin, Sparkles, X } from "lucide-react-native";
-import { colorTokens, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
+import { LiveText } from "@/components/LiveText";
 
 export type FilterState = {
   location: string;
@@ -325,9 +326,9 @@ export function AdvancedFiltersModal({
               onPress={handleApply}
               style={[styles.applyButton, webPointer]}
             >
-              <Text style={styles.applyButtonText}>
+              <LiveText style={styles.applyButtonText}>
                 Show {resultCount} results
-              </Text>
+              </LiveText>
             </Pressable>
           </View>
         </View>

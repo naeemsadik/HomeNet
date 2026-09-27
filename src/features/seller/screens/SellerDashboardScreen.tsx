@@ -59,7 +59,8 @@ import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerStatCard, type StatItem } from "../components/SellerStatCard";
 import { ToggleViewButton } from "../components/ToggleViewButton";
 import { Footer } from "@/components/Footer";
-import { styles } from "./SellerDashboardScreen.styles";
+import { styles } from "./SellerDashboardScreen.styles";
+import { LiveText } from "@/components/LiveText";
 
 // Types
 export type SellerNavKey =
@@ -421,7 +422,7 @@ export function SellerDashboardScreen() {
                       ) : null}
                     </View>
 
-                    <Text style={styles.statValueDesktop}>{item.value}</Text>
+                    <LiveText style={styles.statValueDesktop}>{item.value}</LiveText>
                     <Text style={styles.statLabelDesktop}>{item.label}</Text>
                   </View>
                 );

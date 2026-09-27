@@ -2,7 +2,8 @@ import { BarChart2, TrendingUp } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts } from "@/theme";
-import { styles } from "../screens/SellerDashboardScreen.styles";
+import { styles } from "../screens/SellerDashboardScreen.styles";
+import { LiveText } from "@/components/LiveText";
 
 /** Analytics tab. */
 export function SellerAnalyticsWorkspace() {
@@ -33,7 +34,7 @@ export function SellerAnalyticsWorkspace() {
           { label: "Market Health Score", value: "88 / 100", sub: "Strong seller market", color: "#0F6D55" },
         ].map((kpi, idx) => (
           <View key={idx} style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
-            <Text style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</Text>
+            <LiveText style={[styles.kpiValue, { color: kpi.color }]}>{kpi.value}</LiveText>
             <Text style={styles.kpiLabel}>{kpi.label}</Text>
             <Text style={styles.kpiSub}>{kpi.sub}</Text>
           </View>

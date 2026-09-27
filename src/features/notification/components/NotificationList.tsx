@@ -11,7 +11,8 @@ import {
 import { NotificationItem } from "./NotificationItem";
 import { colorTokens, fonts } from "@/theme";
 
-import { Bell } from "lucide-react-native";
+import { Bell } from "lucide-react-native";
+import { LiveText } from "@/components/LiveText";
 
 // Says only what the system actually sends. Messaging (FR-12) is out of
 // scope, so nothing here may promise messages.
@@ -81,7 +82,7 @@ export function NotificationList({ audience = "user", onPressItem }: Notificatio
     <View style={styles.listContainer}>
       {totalUnread > 0 ? (
         <View style={styles.header}>
-          <Text style={styles.unreadText}>{totalUnread} unread</Text>
+          <LiveText style={styles.unreadText}>{totalUnread} unread</LiveText>
           <Pressable
             onPress={() => markAll.mutate()}
             style={styles.markAllBtn}

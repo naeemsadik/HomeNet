@@ -2,7 +2,8 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, Vi
 import { Building2, Search } from "lucide-react-native";
 import { colorTokens, fontTokens } from "@/theme";
 import { PropertyAdminItemRow } from "./PropertyAdminItem";
-import type { PropertyAdminItem } from "../types/admin";
+import type { PropertyAdminItem } from "../types/admin";
+import { LiveText } from "@/components/LiveText";
 
 const STATUS_FILTERS = ["all", "draft", "pending", "active", "sold", "archived"] as const;
 
@@ -68,7 +69,7 @@ export function PropertyAdminList({
         />
       </View>
 
-      <Text style={styles.count}>Showing {properties.length} of {total} properties</Text>
+      <LiveText style={styles.count}>Showing {properties.length} of {total} properties</LiveText>
 
       {isLoading ? (
         <View style={styles.center}>
