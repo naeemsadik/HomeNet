@@ -14,7 +14,6 @@ import {
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -23,6 +22,8 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
+import { openExternalUrl } from "@/lib/safeUrl";
+import { shareLink } from "@/lib/share";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
@@ -68,12 +69,8 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
 
   const handlePress = useCallback(() => {
     if (isRss && (guide.sourceUrl || guide.href)) {
-      const targetUrl = guide.sourceUrl || guide.href;
-      if (Platform.OS === "web" && typeof window !== "undefined") {
-        window.open(targetUrl, "_blank", "noopener,noreferrer");
-      } else {
-        void Linking.openURL(targetUrl);
-      }
+      // Same scheme check as every other external guide link (BUG-05).
+      openExternalUrl(guide.sourceUrl || guide.href);
       return;
     }
     router.push(guide.href as never);
@@ -148,20 +145,12 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
   }, [allGuidesData, slug, guide?.id]);
 
   const handleExternalRead = () => {
-    if (!guide?.sourceUrl && !guide?.href) return;
-    const url = guide.sourceUrl || guide.href;
-    if (Platform.OS === "web" && typeof window !== "undefined") {
-      window.open(url, "_blank", "noopener,noreferrer");
-    } else {
-      void Linking.openURL(url);
-    }
+    openExternalUrl(guide?.sourceUrl || guide?.href);
   };
 
   const handleShare = () => {
-    if (Platform.OS === "web" && typeof navigator !== "undefined" && navigator.clipboard) {
-      void navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
-    }
+    if (!guide) return;
+    void shareLink({ title: guide.title });
   };
 
   return (
@@ -511,6 +500,14 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                       <Text style={styles.factLabel}>Published</Text>
                       <Text style={styles.factValue}>
                         {formatDate(guide.publishedAt)}
+                      </Text>
+                    </View>
+                  ) : null}
+                  {guide.updatedAt ? (
+                    <View style={styles.factRow}>
+                      <Text style={styles.factLabel}>Last reviewed</Text>
+                      <Text style={styles.factValue}>
+                        {formatDate(guide.updatedAt)}
                       </Text>
                     </View>
                   ) : null}

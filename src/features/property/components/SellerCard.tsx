@@ -8,7 +8,7 @@ import {
   Linking,
 } from "react-native";
 import { Phone, Mail, UserRound } from "lucide-react-native";
-import { colorTokens, fontTokens, shadow, webPointer } from "@/theme";
+import { colorTokens, fontTokens, shadow } from "@/theme";
 import type { PropertyDetailUser } from "../hooks/usePropertyDetail";
 
 interface SellerCardProps {
@@ -66,7 +66,7 @@ export function SellerCard({ user }: SellerCardProps) {
             accessibilityRole="button"
             accessibilityLabel={`Call ${user.full_name}`}
           >
-            <Phone color={colorTokens.textInverse} size={16} />
+            <Phone color={colorTokens.onBrand} size={16} />
             <Text style={styles.actionBtnTextPrimary}>Call</Text>
           </Pressable>
         ) : null}
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   actionBtnTextPrimary: {
     fontSize: 14,
     fontFamily: fontTokens.bold,
-    color: colorTokens.textInverse,
+    color: colorTokens.onBrand,
   },
   actionBtnTextSecondary: {
     fontSize: 14,

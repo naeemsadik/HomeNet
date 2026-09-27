@@ -60,7 +60,7 @@ export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNav
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
           >
-            <Icon color={isActive ? colorTokens.textInverse : colorTokens.textSecondary} size={16} />
+            <Icon color={isActive ? colorTokens.onBrand : colorTokens.textSecondary} size={16} />
             <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
               {tab.label}
             </Text>
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   countActive: { backgroundColor: colorTokens.surface },
   countText: {
-    color: colorTokens.onBrand,
+    color: colorTokens.onDanger,
     fontFamily: fontTokens.bold,
     fontSize: 10.5,
   },
@@ -121,6 +121,6 @@ const styles = StyleSheet.create({
     color: colorTokens.textSecondary,
   },
   tabTextActive: {
-    color: colorTokens.textInverse,
+    color: colorTokens.onBrand,
   },
 });

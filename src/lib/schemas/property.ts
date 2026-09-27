@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import type { PropertyType, ListingType } from "@/types/api";
 
 const propertyTypes: [PropertyType, ...PropertyType[]] = [

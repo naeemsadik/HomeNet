@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink, Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, radius } from "@/theme";
+import { colorTokens, colors, fonts, radius } from "@/theme";
 
 const PLANNED = [
   {
@@ -56,7 +56,7 @@ export function MarketScreen() {
 
           <AppLink href="/buy" style={styles.cta}>
             <Text style={styles.ctaText}>Browse verified listings</Text>
-            <ArrowRight color={colors.white} size={16} />
+            <ArrowRight color={colorTokens.onBrand} size={16} />
           </AppLink>
         </View>
       </View>
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.green,
   },
   ctaText: {
-    color: colors.white,
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 14,
   },

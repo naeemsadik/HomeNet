@@ -3,7 +3,6 @@ import { fonts, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { Sparkles } from "lucide-react-native";
 import {
-  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -11,6 +10,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { notify } from "@/lib/alert";
 import Svg, { Line, Path, Rect } from "react-native-svg";
 
 export function GooglePlayButton() {
@@ -19,7 +19,7 @@ export function GooglePlayButton() {
       accessibilityLabel="Get it on Google Play"
       style={[styles.playStoreBtn, webPointer]}
       onPress={() => {
-        Alert.alert(
+        notify(
           "Download Homenet",
           "Homenet for Android is launching soon on the Google Play Store!"
         );

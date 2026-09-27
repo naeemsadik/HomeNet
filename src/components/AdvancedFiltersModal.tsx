@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { Check, MapPin, Sparkles, X } from "lucide-react-native";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 
 export type FilterState = {
   location: string;
@@ -307,7 +307,7 @@ export function AdvancedFiltersModal({
                 ]}
               >
                 {localFilters.verifiedOnly ? (
-                  <Check color="#FFFFFF" size={14} strokeWidth={2.5} />
+                  <Check color={colorTokens.onBrand} size={14} strokeWidth={2.5} />
                 ) : null}
               </View>
             </Pressable>
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   pillOptionTextActive: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   amenitiesWrap: {
     flexDirection: "row",
@@ -565,7 +565,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   applyButtonText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",

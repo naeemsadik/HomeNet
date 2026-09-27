@@ -3,17 +3,13 @@ import {
   CheckCircle2,
   Image as ImageIcon,
   MoreVertical,
-  Paperclip,
   Phone,
-  Plus,
   Search,
   Send,
   Video,
 } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Alert,
-  FlatList,
   Image,
   Pressable,
   ScrollView,
@@ -22,10 +18,11 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { notify } from "@/lib/alert";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 
 interface Conversation {
   id: string;
@@ -55,7 +52,7 @@ const quickSuggestions = [
 
 export function MessagesScreen() {
   const { isPhone } = useResponsive();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");
@@ -233,14 +230,14 @@ export function MessagesScreen() {
 
             <Pressable
               onPress={() =>
-                Alert.alert(
+                notify(
                   "Schedule Visit",
                   `Requesting visit appointment with ${activeConv.name} for ${activeConv.propertyTitle}.`
                 )
               }
               style={({ pressed }) => [styles.scheduleVisitBtn, webPointer, pressed && styles.pressed]}
             >
-              <Calendar color="#FFFFFF" size={15} />
+              <Calendar color={colorTokens.onAccent} size={15} />
               <Text style={styles.scheduleVisitText}>Schedule visit</Text>
             </Pressable>
           </View>
@@ -317,7 +314,7 @@ export function MessagesScreen() {
               onPress={() => handleSendMessage()}
               style={({ pressed }) => [styles.sendBtn, webPointer, pressed && styles.pressed]}
             >
-              <Send color="#FFFFFF" size={16} />
+              <Send color={colorTokens.onBrand} size={16} />
             </Pressable>
           </View>
         </View>
@@ -453,7 +450,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   unreadBadgeText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontSize: 11,
     fontFamily: fonts.bold,
   },
@@ -538,7 +535,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   scheduleVisitText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontSize: 12,
     fontFamily: fonts.bold,
   },
@@ -578,7 +575,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   messageTextUser: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   messageTextAgent: {
     color: "#0B1A17",
@@ -691,7 +688,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   emptyBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },

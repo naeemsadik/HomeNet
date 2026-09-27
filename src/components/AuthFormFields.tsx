@@ -11,9 +11,8 @@ import {
   type KeyboardTypeOptions,
   type StyleProp,
   type ViewStyle,
-  type TextStyle,
 } from "react-native";
-import { colors, fonts, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, webPointer } from "@/theme";
 
 // ─── Floating-Label Input ──────────────────────────────────────────────────
 
@@ -215,7 +214,7 @@ export function AuthButton({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === "primary" ? "#FFFFFF" : colors.green}
+          color={variant === "primary" ? colorTokens.onBrand : colors.greenOnLight}
         />
       ) : (
         <>
@@ -224,10 +223,10 @@ export function AuthButton({
               size={16}
               color={
                 variant === "primary"
-                  ? "#FFFFFF"
+                  ? colorTokens.onBrand
                   : variant === "ghost"
                     ? colors.muted
-                    : colors.green
+                    : colors.greenOnLight
               }
             />
           ) : null}
@@ -422,8 +421,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 0.2,
   },
-  authButtonLabelPrimary: { color: "#FFFFFF" },
-  authButtonLabelSecondary: { color: colors.green },
+  authButtonLabelPrimary: { color: colorTokens.onBrand },
+  // Brand fill (#04cf92) is 2.03:1 as text on white; brand-text is 6.3:1.
+  authButtonLabelSecondary: { color: colors.greenOnLight },
   authButtonLabelGhost: { color: colors.muted },
 
   // Divider

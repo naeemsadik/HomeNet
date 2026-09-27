@@ -1,6 +1,7 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import apiClient from "@/services/apiClient";
 import type { ApiResponse } from "@/types/api";
+import { isSafeLinkUrl } from "@/lib/safeUrl";
 import { CURATED_PROPERTY_GUIDES } from "@/content/curatedGuides";
 import type {
   FetchPropertyGuidesParams,
@@ -46,6 +47,7 @@ const guideSchema = z.object({
   readTime: z.string(),
   imageUrl: z.string().nullable(),
   publishedAt: z.string().nullable(),
+  updatedAt: z.string().nullable().optional(),
   href: z.string().min(1),
   sourceType: z.enum(["internal", "rss"]),
   sourceName: z.string().nullable().optional(),
@@ -66,10 +68,17 @@ const guideSchema = z.object({
  * Normalizes a live API guide and checks the result, so a malformed record
  * is dropped instead of reaching the guide screens with missing fields.
  */
-function parseGuide(raw: unknown): PropertyGuide | null {
+export function parseGuide(raw: unknown): PropertyGuide | null {
   if (!raw || typeof raw !== "object") return null;
   const result = guideSchema.safeParse(normalizeGuide(raw));
   return result.success ? result.data : null;
+}
+
+/** An in-app route ("/guides/…") or an external URL with a safe scheme; anything else is dropped. */
+function safeHref(href: unknown): string | null {
+  if (typeof href !== "string" || !href) return null;
+  if (href.startsWith("/") && !href.startsWith("//")) return href;
+  return isSafeLinkUrl(href) ? href : null;
 }
 
 /**
@@ -83,6 +92,7 @@ function normalizeGuide(raw: any): PropertyGuide {
   const title = raw.title || "";
   const tags = Array.isArray(raw.tags) ? raw.tags : [];
   const rawImageUrl = raw.image_url || raw.imageUrl || null;
+  const sourceUrl = safeHref(raw.source_url ?? raw.sourceUrl);
 
   // Resolve editorial photography separate from content:
   // - external RSS never scrapes publisher images (uses reliable category/topic editorial photos)
@@ -120,14 +130,13 @@ function normalizeGuide(raw: any): PropertyGuide {
     readTime: raw.read_time || raw.readTime || "4 min read",
     imageUrl,
     publishedAt: raw.published_at || raw.publishedAt || null,
+    updatedAt: raw.updated_at || raw.updatedAt || null,
     href:
-      raw.href ||
-      (sourceType === "rss"
-        ? raw.source_url || raw.sourceUrl || "#"
-        : `/guides/${slug}`),
+      safeHref(raw.href) ??
+      (sourceType === "rss" ? (sourceUrl ?? "#") : `/guides/${slug}`),
     sourceType,
     sourceName: raw.source_name ?? raw.sourceName ?? null,
-    sourceUrl: raw.source_url ?? raw.sourceUrl ?? null,
+    sourceUrl,
     tags,
     contentMarkdown: raw.content_markdown ?? raw.contentMarkdown ?? null,
     author,

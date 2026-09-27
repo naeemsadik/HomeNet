@@ -4,7 +4,7 @@ import { Lock, ShieldAlert } from "lucide-react-native";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { hasAnyAdminPermission, hasPermission } from "@/lib/permissions";
-import { colors, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
 import { AppChrome, type ActivePage } from "./AppChrome";
 
 interface RequireAuthProps {
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.85 },
   ctaText: {
-    color: colors.white,
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 14,
   },

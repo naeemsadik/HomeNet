@@ -64,13 +64,14 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
  * destructive — deletes or cannot be undone
  *
  * Foreground colours are brand-TEXT (#0F6D55), never brand-fill (#04cf92),
- * which measures 2.03:1 on white.
+ * which measures 2.03:1 on white. Text on the brand fill is ink (`onBrand`,
+ * 8.8:1) — white on #04cf92 is 2.03:1 and fails WCAG AA.
  */
 const VARIANT_FG: Record<ButtonVariant, string> = {
   primary: colorTokens.onBrand,
   secondary: colorTokens.ink,
   ghost: colorTokens.brandText,
-  destructive: colorTokens.onBrand,
+  destructive: colorTokens.onDanger,
 };
 
 export function AppButton({

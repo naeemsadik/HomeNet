@@ -6,7 +6,6 @@ import {
   Clock,
   CreditCard,
   FileCheck,
-  Globe,
   IdCard,
   LayoutDashboard,
   LogOut,
@@ -23,7 +22,6 @@ import {
 } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -32,13 +30,14 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { confirmAction } from "@/lib/alert";
 import Svg, { Circle } from "react-native-svg";
 import { router } from "expo-router";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
 import { ToggleViewButton } from "../components/ToggleViewButton";
@@ -131,26 +130,14 @@ export function VerificationScreen() {
   const strokeDashoffset = circumference * (1 - progressPercent / 100);
 
   const logout = useAuthStore((s) => s.logout);
-  const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm("Are you sure you want to log out?");
-      if (confirmed) {
-        logout();
-        router.replace("/home");
-      }
-      return;
-    }
-    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: () => {
-          logout();
-          router.replace("/home");
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
+      confirmLabel: "Log Out",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    logout();
+    router.replace("/home");
   };
 
   const sidebarNavItems = [
@@ -430,7 +417,7 @@ export function VerificationScreen() {
                             </View>
                           ) : isInProgress ? (
                             <View style={styles.timelineCircleInProgress}>
-                              <Clock color="#FFFFFF" size={13} strokeWidth={2.2} />
+                              <Clock color={colorTokens.onAccent} size={13} strokeWidth={2.2} />
                             </View>
                           ) : (
                             <View style={styles.timelineCirclePending}>

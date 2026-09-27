@@ -5,7 +5,7 @@ import { Users, Building2, Clock, BarChart3, ChevronRight, type LucideIcon } fro
 import { useQuery } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";
-import { colorTokens, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, fonts, shadow } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import apiClient from "@/services/apiClient";
 import type { ApiResponse, AdminStats } from "@/types/api";

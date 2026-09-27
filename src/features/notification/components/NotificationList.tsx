@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { FlatList, RefreshControl, View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { FlatList, RefreshControl, View, Text, StyleSheet, ActivityIndicator , Pressable } from "react-native";
 import { router } from "expo-router";
 import type { Notification, NotificationAudience } from "@/types/api";
 import {
@@ -10,7 +10,7 @@ import {
 } from "../hooks/useNotifications";
 import { NotificationItem } from "./NotificationItem";
 import { colorTokens, fonts } from "@/theme";
-import { Pressable } from "react-native";
+
 import { Bell } from "lucide-react-native";
 
 // Says only what the system actually sends. Messaging (FR-12) is out of

@@ -16,7 +16,7 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, AppLink, Eyebrow, FeatureCard, SectionHeader, SelectField } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow } from "@/theme";
+import { colorTokens, colors, fonts, shadow } from "@/theme";
 
 export function SellScreen() {
   const { isPhone, isTablet, isCompact } = useResponsive();
@@ -38,7 +38,7 @@ export function SellScreen() {
         </View>
         <View style={[styles.valuationCard, isPhone && styles.valuationCardPhone]}>
           <View style={styles.valuationHead}>
-            <View style={styles.valuationIcon}><BarChart3 color={colors.white} size={20} /></View>
+            <View style={styles.valuationIcon}><BarChart3 color={colorTokens.onBrand} size={20} /></View>
             <View><Text style={styles.valuationTitle}>Start with a free valuation</Text><Text style={styles.valuationCopy}>See a data-backed range in under a minute.</Text></View>
           </View>
           <View style={styles.formGroup}>

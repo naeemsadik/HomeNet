@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet, Alert, ActivityIndicator, Text } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
+import { notify } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyForm } from "../components/PropertyForm";
@@ -25,7 +26,7 @@ export function PropertyEditScreen() {
     enabled: !!id,
   });
 
-  const handleSubmit = async (dto: UpsertPropertyDto, images: Array<{ uri: string; file?: Blob | File }>) => {
+  const handleSubmit = async (dto: UpsertPropertyDto, images: { uri: string; file?: Blob | File }[]) => {
     if (!id) return;
     try {
       const result = await updateProperty.mutateAsync({ id, dto });
@@ -37,11 +38,9 @@ export function PropertyEditScreen() {
         }
       }
 
-      Alert.alert("Success", "Property updated successfully.", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      notify("Success", "Property updated successfully.", { onConfirm: () => router.back() });
     } catch (err: any) {
-      Alert.alert("Error", err?.message || "Failed to update property");
+      notify("Error", err?.message || "Failed to update property");
     }
   };
 

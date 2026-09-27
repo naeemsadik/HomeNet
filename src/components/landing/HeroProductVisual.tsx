@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Image,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -9,15 +8,12 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import {
-  Compass,
   Mail,
   MapPin,
-  Phone,
   Search,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react-native";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { BrowserFrame } from "./BrowserFrame";
@@ -26,7 +22,7 @@ import { previewProperties } from "@/data/landingPreview";
 import { PropertyCard } from "@/components/PropertyCard";
 
 export function HeroProductVisual() {
-  const { isPhone, isTablet, isCompact, isLargeScreen, isTall } = useResponsive();
+  const { isPhone, isCompact, isLargeScreen, isTall } = useResponsive();
 
   const handleOpenApp = () => {
     router.push("/buy" as any);
@@ -237,7 +233,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   searchReplicaBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 13,
     fontWeight: "700",

@@ -14,7 +14,6 @@ import {
 } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Alert,
   FlatList,
   Image,
   Pressable,
@@ -23,9 +22,9 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { notify } from "@/lib/alert";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";
-import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import {
@@ -37,7 +36,6 @@ import { UserRoleBadges } from "@/features/admin/components/UserRoleBadges";
 import { RoleAssignmentModal } from "@/features/admin/components/RoleAssignmentModal";
 import { ConfirmDialog } from "@/features/admin/components/ConfirmDialog";
 import { useUserRoles } from "@/features/admin/hooks/useUserRoles";
-import type { UserRole } from "@/features/admin/types/admin";
 
 function ProviderIcon({ provider }: { provider: string }) {
   switch (provider) {
@@ -58,7 +56,6 @@ function UserRolesLoader({ userId }: { userId: string }) {
 }
 
 export function UsersScreen() {
-  const { isPhone } = useResponsive();
   const userRoles = useAuthStore((s) => s.userRoles);
   const currentUser = useAuthStore((s) => s.user);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -131,7 +128,7 @@ export function UsersScreen() {
       setFilteredUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
       setDeleteTarget(null);
     } catch (err) {
-      Alert.alert("Error", err instanceof Error ? err.message : "Failed to delete user");
+      notify("Error", err instanceof Error ? err.message : "Failed to delete user");
     } finally {
       setDeleting(false);
     }

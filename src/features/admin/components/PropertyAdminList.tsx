@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     color: colorTokens.textSecondary,
   },
   filterTextActive: {
-    color: colorTokens.textInverse,
+    color: colorTokens.onBrand,
   },
   searchRow: {
     flexDirection: "row",

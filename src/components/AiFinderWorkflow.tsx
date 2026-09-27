@@ -9,7 +9,6 @@ import {
   RotateCcw,
   Sparkles,
   WalletCards,
-  X,
   type LucideIcon,
 } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
@@ -31,7 +30,7 @@ import { AppButton, Eyebrow } from "@/components/ui";
 import { getProperties } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 
 const steps = ["Goal", "Location", "Budget", "Matches"];
 
@@ -76,13 +75,13 @@ function Choice({
     >
       {Icon ? (
         <View style={[styles.choiceIcon, selected && styles.choiceIconSelected]}>
-          <Icon color={selected ? colors.white : colors.green} size={20} />
+          <Icon color={selected ? colorTokens.onBrand : colors.greenOnLight} size={20} />
         </View>
       ) : null}
       <Text style={styles.choiceTitle}>{label}</Text>
       <Text style={styles.choiceCopy}>{copy}</Text>
       <View style={[styles.choiceCheck, selected && styles.choiceCheckSelected]}>
-        {selected ? <Check color={colors.white} size={12} /> : null}
+        {selected ? <Check color={colorTokens.onBrand} size={12} /> : null}
       </View>
     </Pressable>
   );
@@ -100,7 +99,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
   const [area, setArea] = useState("Gulshan & Banani");
   const [budget, setBudget] = useState("BDT 2–4 Cr");
 
-  const { savedIds, toggleSaved, isSaved } = useSavedStore();
+  const { toggleSaved, isSaved } = useSavedStore();
 
   const queryParams = useMemo(() => {
     const range = budgetRanges[budget] || {};
@@ -159,7 +158,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
         style={styles.aiInsightBanner}
       >
         <View style={styles.aiInsightIcon}>
-          <Sparkles color={colors.white} size={18} />
+          <Sparkles color={colorTokens.onBrand} size={18} />
         </View>
         <View style={styles.aiInsightCopyWrap}>
           <Text style={styles.aiInsightTitle}>What this means for your search</Text>
@@ -190,7 +189,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
                     ]}
                   >
                     {isCompleted ? (
-                      <Check color={colors.white} size={13} strokeWidth={2.6} />
+                      <Check color={colorTokens.onBrand} size={13} strokeWidth={2.6} />
                     ) : (
                       <Text
                         style={[
@@ -330,7 +329,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
           >
             <View style={[styles.resultSummary, isPhone && styles.resultSummaryPhone]}>
               <View style={styles.resultIcon}>
-                <Sparkles color={colors.white} size={22} />
+                <Sparkles color={colorTokens.onBrand} size={22} />
               </View>
               <View style={styles.resultCopyWrap}>
                 <Eyebrow style={styles.resultEyebrow}>Your strongest matches</Eyebrow>
@@ -591,7 +590,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   progressNumberActive: {
-    color: colors.white,
+    color: colorTokens.onBrand,
   },
   progressLabel: {
     color: "#98A59F",

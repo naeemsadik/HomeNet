@@ -116,7 +116,7 @@ export function PermissionEditorModal({ visible, role, onClose }: PermissionEdit
                       <ActivityIndicator color={colorTokens.primary} size="small" />
                     ) : assigned ? (
                       <View style={styles.checkChip}>
-                        <Check color={colorTokens.textInverse} size={12} />
+                        <Check color={colorTokens.onBrand} size={12} />
                         <Text style={styles.checkText}>Assigned</Text>
                       </View>
                     ) : (
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   checkText: {
     fontSize: 11,
     fontFamily: fontTokens.bold,
-    color: colorTokens.textInverse,
+    color: colorTokens.onBrand,
   },
   addChip: {
     paddingHorizontal: 10,

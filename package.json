@@ -9,10 +9,13 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "build": "expo export --platform web && node -e \"require('fs').copyFileSync('dist/+not-found.html', 'dist/404.html')\"",
+    "build": "expo export --platform web && node -e \"require('fs').copyFileSync('dist/+not-found.html', 'dist/404.html')\" && node scripts/check-csp.mjs",
     "export:web": "expo export --platform web",
     "smoke:api": "node scripts/api-smoke.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "expo lint",
+    "test": "jest",
+    "check": "npm run typecheck && npm run lint && npm test"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -47,7 +50,14 @@
   },
   "devDependencies": {
     "@react-native-community/cli": "^20.2.0",
+    "@react-native/jest-preset": "0.86.0",
+    "@types/jest": "^29.5.14",
     "@types/react": "~19.2.2",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~57.0.2",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "jest": "^29.7.0",
+    "jest-expo": "57.0.2",
     "typescript": "~6.0.3"
   }
 }

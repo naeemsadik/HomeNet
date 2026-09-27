@@ -16,6 +16,12 @@ function useSignedInUserId() {
   return useAuthStore((state) => state.user?.id ?? null);
 }
 
+// While the API is failing, poll every five minutes instead of every minute.
+// With the app-wide `retry: 2`, an outage used to put three failed requests a
+// minute into every open tab's console.
+const UNREAD_POLL_MS = 60_000;
+const UNREAD_POLL_WHILE_FAILING_MS = 5 * 60_000;
+
 export function useNotifications(
   audience: NotificationAudience = "user",
   { limit = 20, enabled = true }: { limit?: number; enabled?: boolean } = {},
@@ -35,6 +41,8 @@ export function useNotifications(
     // The badge polls every minute, so under the app-wide five-minute staleTime
     // the list could show a new count with none of the new items in it.
     staleTime: 0,
+    // Opening the bell again is the retry; automatic ones only add errors.
+    retry: false,
   });
 }
 
@@ -46,7 +54,10 @@ export function useUnreadCount(audience: NotificationAudience = "user") {
     enabled: userId !== null,
     // Polling rather than a socket: a minute's delay is fine for approvals and
     // price drops, and TanStack pauses it while the tab is in the background.
-    refetchInterval: 60_000,
+    // The next poll is the retry.
+    refetchInterval: (query) =>
+      query.state.status === "error" ? UNREAD_POLL_WHILE_FAILING_MS : UNREAD_POLL_MS,
+    retry: false,
   });
 }
 

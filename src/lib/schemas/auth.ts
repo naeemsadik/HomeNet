@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 // ─── Password rules (shared between register & change-password) ────────────
 

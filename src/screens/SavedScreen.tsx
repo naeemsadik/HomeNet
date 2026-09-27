@@ -2,8 +2,6 @@ import { Bookmark, Heart } from "lucide-react-native";
 import { useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
-  Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -14,14 +12,14 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { AppLink } from "@/components/ui";
 import { getPropertyById, getSavedProperties, unsaveProperty } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
-import { fonts } from "@/theme";
+import { colorTokens, fonts } from "@/theme";
 import { useSavedStore } from "@/stores/savedStore";
 import { useAuthStore } from "@/stores/authStore";
 import type { ApiResponse } from "@/types/api";
 import type { Property } from "@/features/property/types/property";
 
 export function SavedScreen() {
-  const { isPhone, isTablet, width } = useResponsive();
+  const { isPhone } = useResponsive();
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
 
@@ -97,7 +95,7 @@ export function SavedScreen() {
       if (context?.previousIds) {
         useSavedStore.setState({ savedIds: context.previousIds });
       }
-      console.error("[SavedScreen] Failed to unsave property on server, rolling back:", err);
+      if (__DEV__) console.error("[SavedScreen] Failed to unsave property on server, rolling back:", err);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["properties", "saved"] });
@@ -220,104 +218,8 @@ const styles = StyleSheet.create({
     gap: 8,
     height: 40,
   },
-  shareBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 16.8,
-    paddingVertical: 8.8,
-    borderRadius: 999,
-    borderWidth: 0.8,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    backgroundColor: "#FFFFFF",
-  },
-  shareBtnText: {
-    color: "#0B1A17",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
-  compareBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 999,
-    backgroundColor: "#04cf92",
-  },
-  compareBtnText: {
-    color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
 
   /* 2. Folders Row */
-  foldersSection: {
-    marginTop: 32,
-    width: "100%",
-  },
-  foldersRow: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  folderCard: {
-    width: 176,
-    height: 132,
-    borderRadius: 20,
-    overflow: "hidden",
-    borderWidth: 1.6,
-    borderColor: "transparent",
-  },
-  folderCardActive: {
-    borderColor: "#04cf92",
-  },
-  folderBg: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "flex-end",
-  },
-  folderContent: {
-    padding: 12,
-    gap: 2,
-  },
-  folderName: {
-    marginTop: 4,
-    color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontSize: 16,
-    fontWeight: "600",
-    lineHeight: 24,
-  },
-  folderCount: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    fontWeight: "600",
-    lineHeight: 16,
-  },
-  newFolderCard: {
-    width: 176,
-    height: 132,
-    borderRadius: 20,
-    borderWidth: 1.6,
-    borderStyle: "dashed",
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-  },
-  newFolderText: {
-    color: "#5C6B66",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
 
   /* Common Section Header */
   sectionSpacing: {
@@ -366,27 +268,6 @@ const styles = StyleSheet.create({
   },
 
   /* 4. Recently Viewed (3 Columns) */
-  recentlyViewedGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 16,
-    width: "100%",
-    alignItems: "flex-start",
-  },
-  recentlyViewedGridPhone: {
-    flexDirection: "column",
-    alignItems: "stretch",
-  },
-  recentCardItem: {
-    flex: 1,
-    minWidth: 260,
-  },
-  recentCardItemPhone: {
-    flex: 0,
-    flexGrow: 0,
-    minWidth: 0,
-    width: "100%",
-  },
   exploreLink: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -430,7 +311,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#04cf92",
   },
   browseButtonText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
   },

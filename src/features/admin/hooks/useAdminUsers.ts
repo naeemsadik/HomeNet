@@ -2,12 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getUser, listUsers } from "@/services/userApi";
 import type { UserWithRoles, UserAdminFilters } from "../types/admin";
 
-interface UserAdminListResponse {
-  items: UserWithRoles[];
-  total: number;
-  page: number;
-  limit: number;
-}
 
 export function useAdminUsers(filters: UserAdminFilters) {
   return useQuery({

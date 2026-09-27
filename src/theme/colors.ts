@@ -58,8 +58,14 @@ export const colorTokens = {
   saved: "#D4183D",
 
   // ─── Fixed ──────────────────────────────────────────────────────────────
-  onBrand: "#FFFFFF",
+  /** Text and icons on a `brand` fill. Ink: 8.8:1 on #04cf92 (white was 2.03:1). */
+  onBrand: "#0B1A17",
   onInk: "#FFFFFF",
+  /** Text and icons on an `errorText` (red) fill. 5.3:1. */
+  onDanger: "#FFFFFF",
+  /** Text and icons on the `notification` orange (#F4823A, 6.9:1) and WhatsApp
+   *  green (#25D366, 9.0:1) fills. White measures 2.6:1 and 2.0:1 on them. */
+  onAccent: "#0B1A17",
   overlay: "rgba(11, 26, 23, 0.45)",
   shadow: "rgba(11, 26, 23, 0.10)",
 
@@ -81,7 +87,8 @@ export const colorTokens = {
   primary: "#04cf92",
   primaryDark: "#03b57f",
   primaryLight: "#E6FAF4",
-  primaryText: "#FFFFFF",
+  /** Text on a `primary` fill — same role as `onBrand`. */
+  primaryText: "#0B1A17",
   primaryOnLight: "#0F6D55",
   verified: "#2251D6",
   verifiedLight: "#E8EEFC",

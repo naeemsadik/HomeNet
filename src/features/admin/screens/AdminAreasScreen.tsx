@@ -160,7 +160,7 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
                 style={[styles.primaryButton, (loading || !name.trim()) && styles.disabled]}
               >
                 {loading ? (
-                  <ActivityIndicator color={colorTokens.textInverse} size="small" />
+                  <ActivityIndicator color={colorTokens.onBrand} size="small" />
                 ) : (
                   <Text style={styles.primaryButtonText}>{initial ? "Save" : "Create"}</Text>
                 )}
@@ -262,7 +262,7 @@ export function AdminAreasScreen() {
           }}
           style={[styles.addButton, webPointer]}
         >
-          <Plus color={colorTokens.textInverse} size={16} />
+          <Plus color={colorTokens.onBrand} size={16} />
           <Text style={styles.addButtonText}>Add Area</Text>
         </Pressable>
       </View>
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontFamily: fontTokens.extraBold, color: colorTokens.textPrimary },
   subtitle: { fontSize: 13, fontFamily: fontTokens.regular, color: colorTokens.textSecondary, marginTop: 4 },
   addButton: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 10, backgroundColor: colorTokens.primary, paddingHorizontal: 14, paddingVertical: 10 },
-  addButtonText: { color: colorTokens.textInverse, fontFamily: fontTokens.bold, fontSize: 13 },
+  addButtonText: { color: colorTokens.onBrand, fontFamily: fontTokens.bold, fontSize: 13 },
   searchRow: { borderRadius: 12, borderWidth: 1, borderColor: colorTokens.divider, backgroundColor: colorTokens.backgroundAlt, paddingHorizontal: 12 },
   searchInput: { minHeight: 42, color: colorTokens.textPrimary, fontFamily: fontTokens.regular },
   backButton: { flexDirection: "row", alignItems: "center", gap: 6 },
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   advancedFields: { gap: 8 },
   formActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginTop: 10 },
   primaryButton: { minWidth: 90, minHeight: 40, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: colorTokens.primary, paddingHorizontal: 14 },
-  primaryButtonText: { color: colorTokens.textInverse, fontFamily: fontTokens.bold, fontSize: 13 },
+  primaryButtonText: { color: colorTokens.onBrand, fontFamily: fontTokens.bold, fontSize: 13 },
   secondaryButton: { minHeight: 38, alignItems: "center", justifyContent: "center", borderRadius: 10, borderWidth: 1, borderColor: colorTokens.divider, paddingHorizontal: 14 },
   secondaryButtonText: { color: colorTokens.textSecondary, fontFamily: fontTokens.semiBold, fontSize: 12 },
   disabled: { opacity: 0.5 },

@@ -1,12 +1,13 @@
 import React from "react";
-import { View, Text, Pressable, ScrollView, Image, StyleSheet, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, StyleSheet } from "react-native";
+import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, Trash2, Plus } from "lucide-react-native";
 import { colorTokens, fonts } from "@/theme";
 
 interface ImageUploaderProps {
-  images: Array<{ uri: string; file?: Blob | File }>;
-  onAdd: (images: Array<{ uri: string; file?: Blob | File }>) => void;
+  images: { uri: string; file?: Blob | File }[];
+  onAdd: (images: { uri: string; file?: Blob | File }[]) => void;
   onRemove: (index: number) => void;
   maxImages?: number;
 }
@@ -15,13 +16,13 @@ export function ImageUploader({ images, onAdd, onRemove, maxImages = 10 }: Image
   const handlePick = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission needed", "Allow access to your photo library to upload images.");
+      notify("Permission needed", "Allow access to your photo library to upload images.");
       return;
     }
 
     const remaining = maxImages - images.length;
     if (remaining <= 0) {
-      Alert.alert("Limit reached", `You can upload up to ${maxImages} images.`);
+      notify("Limit reached", `You can upload up to ${maxImages} images.`);
       return;
     }
 

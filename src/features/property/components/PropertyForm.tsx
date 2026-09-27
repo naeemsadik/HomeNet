@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, StyleSheet, KeyboardAvoidingView, Pl
 import { Send, ArrowRight, ArrowLeft, Check, MapPin } from "lucide-react-native";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { colorTokens, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts } from "@/theme";
 import { FormFloatingInput } from "@/components/FormFloatingInput";
 import { FormSelectField } from "@/components/FormSelectField";
 import { ErrorBanner, AuthButton } from "@/components/AuthFormFields";
@@ -20,8 +20,8 @@ interface PropertyFormProps {
   mode: "create" | "edit";
   initialData?: Partial<UpsertPropertyDto>;
   initialArea?: Area | null;
-  initialImages?: Array<{ uri: string; file?: Blob | File }>;
-  onSubmit: (data: UpsertPropertyDto, images: Array<{ uri: string; file?: Blob | File }>) => void;
+  initialImages?: { uri: string; file?: Blob | File }[];
+  onSubmit: (data: UpsertPropertyDto, images: { uri: string; file?: Blob | File }[]) => void;
   onCancel?: () => void;
   loading?: boolean;
   error?: string | null;
@@ -42,9 +42,9 @@ export function PropertyForm({
   const [step, setStep] = useState(0);
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
   const [area, setArea] = useState<Area | null>(initialArea);
-  const [images, setImages] = useState<Array<{ uri: string; file?: Blob | File }>>(initialImages);
+  const [images, setImages] = useState<{ uri: string; file?: Blob | File }[]>(initialImages);
 
-  const { control, handleSubmit, trigger, setValue, watch, formState: { errors } } = useForm<PropertyFormData>({
+  const { control, handleSubmit, trigger, setValue, formState: { errors } } = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema) as Resolver<PropertyFormData>,
     defaultValues: {
       title: initialData?.title ?? "",
@@ -105,7 +105,7 @@ export function PropertyForm({
             <View key={s} style={styles.stepItem}>
               <View style={[styles.stepDot, i <= step && styles.stepDotActive, i < step && styles.stepDotDone]}>
                 {i < step ? (
-                  <Check color={colorTokens.textInverse} size={13} />
+                  <Check color={colorTokens.onBrand} size={13} />
                 ) : (
                   <Text style={[styles.stepDotText, i <= step && styles.stepDotTextActive]}>{i + 1}</Text>
                 )}
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     color: colorTokens.textMuted,
   },
   stepDotTextActive: {
-    color: colorTokens.textInverse,
+    color: colorTokens.onBrand,
   },
   stepLabel: {
     fontSize: 11,

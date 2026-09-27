@@ -21,7 +21,7 @@ import {
   View,
 } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 import {
   type AiParsedProperty,
   AI_FIELD_DEFINITIONS,
@@ -36,11 +36,13 @@ interface AiListingSheetProps {
   visible: boolean;
   onClose: () => void;
   onApply: (data: AiParsedProperty) => void;
+  /** Offered when quick listing can't run (service down, daily quota used). */
+  onUseManualForm?: () => void;
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
-export function AiListingSheet({ visible, onClose, onApply }: AiListingSheetProps) {
+export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: AiListingSheetProps) {
   const { isPhone, width } = useResponsive();
   const [step, setStep] = useState<Exclude<SheetState, "loading">>("idle");
   const {
@@ -55,6 +57,10 @@ export function AiListingSheet({ visible, onClose, onApply }: AiListingSheetProp
   const [parsed, setParsed] = useState<AiParsedProperty | null>(null);
   const [editingField, setEditingField] = useState<string | null>(null);
   const error = parseError?.message ?? null;
+  // Retrying won't help when the service is down or the quota is used up.
+  const offerManualForm =
+    Boolean(onUseManualForm) &&
+    (parseError?.code === "UNAVAILABLE" || parseError?.code === "QUOTA_EXCEEDED");
 
   const containerMaxWidth = isPhone ? "100%" : Math.min(width - 120, 640);
 
@@ -90,6 +96,11 @@ export function AiListingSheet({ visible, onClose, onApply }: AiListingSheetProp
     setEditingField(null);
     resetParse();
   }, [resetParse]);
+
+  const handleUseManualForm = useCallback(() => {
+    handleClose();
+    onUseManualForm?.();
+  }, [handleClose, onUseManualForm]);
 
   const handleApply = useCallback(() => {
     if (parsed) {
@@ -202,26 +213,41 @@ export function AiListingSheet({ visible, onClose, onApply }: AiListingSheetProp
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator
               >
-                {/* Error banner with Try Again button */}
+                {/* Error banner: retry, or the step-by-step form when retrying can't help */}
                 {error && (
                   <View style={s.errorBanner}>
-                    <AlertTriangle color="#D96A24" size={16} />
+                    <AlertTriangle color={colorTokens.warningText} size={16} />
                     <View style={s.errorTextWrap}>
                       <Text style={s.errorText}>{error}</Text>
                     </View>
-                    <Pressable
-                      accessibilityHint="Retries the AI property parsing"
-                      accessibilityLabel="Try again"
-                      accessibilityRole="button"
-                      onPress={handleTryAgain}
-                      style={({ pressed }) => [
-                        s.errorTryAgainBtn,
-                        webPointer,
-                        pressed && s.pressed,
-                      ]}
-                    >
-                      <Text style={s.errorTryAgainText}>Try again</Text>
-                    </Pressable>
+                    {offerManualForm ? (
+                      <Pressable
+                        accessibilityHint="Closes quick listing and opens the step-by-step listing form"
+                        accessibilityRole="button"
+                        onPress={handleUseManualForm}
+                        style={({ pressed }) => [
+                          s.errorTryAgainBtn,
+                          webPointer,
+                          pressed && s.pressed,
+                        ]}
+                      >
+                        <Text style={s.errorTryAgainText}>Use step-by-step form</Text>
+                      </Pressable>
+                    ) : (
+                      <Pressable
+                        accessibilityHint="Retries the AI property parsing"
+                        accessibilityLabel="Try again"
+                        accessibilityRole="button"
+                        onPress={handleTryAgain}
+                        style={({ pressed }) => [
+                          s.errorTryAgainBtn,
+                          webPointer,
+                          pressed && s.pressed,
+                        ]}
+                      >
+                        <Text style={s.errorTryAgainText}>Try again</Text>
+                      </Pressable>
+                    )}
                   </View>
                 )}
 
@@ -285,7 +311,7 @@ export function AiListingSheet({ visible, onClose, onApply }: AiListingSheetProp
                           pressed && !isAnalyzeDisabled && s.pressed,
                         ]}
                       >
-                        <Sparkles color="#FFFFFF" size={16} />
+                        <Sparkles color={colorTokens.onBrand} size={16} />
                         <Text style={s.analyzeBtnText}>Analyze with AI</Text>
                       </Pressable>
                     )}
@@ -442,7 +468,7 @@ export function AiListingSheet({ visible, onClose, onApply }: AiListingSheetProp
                         ]}
                       >
                         <Text style={s.applyBtnText}>Apply & Continue</Text>
-                        <ArrowRight color="#FFFFFF" size={16} />
+                        <ArrowRight color={colorTokens.onBrand} size={16} />
                       </Pressable>
                     </View>
 
@@ -616,11 +642,12 @@ const s = StyleSheet.create({
   errorText: {
     fontFamily: fonts.medium,
     fontSize: 13,
-    color: "#D96A24",
+    // Amber, not the old #D96A24 (2.9:1 on this surface).
+    color: colorTokens.warningText,
     lineHeight: 18,
   },
   errorTryAgainBtn: {
-    backgroundColor: "#D96A24",
+    backgroundColor: colorTokens.warningText,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 6,
@@ -717,7 +744,7 @@ const s = StyleSheet.create({
   analyzeBtnText: {
     fontFamily: fonts.semiBold,
     fontSize: 15,
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
 
   // ─── Preview ──────────────────────────────────────────────────────────────
@@ -873,7 +900,7 @@ const s = StyleSheet.create({
   applyBtnText: {
     fontFamily: fonts.semiBold,
     fontSize: 15,
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   disclaimerText: {
     fontFamily: fonts.regular,

@@ -1,15 +1,12 @@
 import { router } from "expo-router";
 import {
-  BadgeCheck,
   BarChart2,
-  Bell,
   Building2,
   CheckCircle2,
   CircleHelp,
   CreditCard,
   Edit,
   Eye,
-  Globe,
   Heart,
   LayoutDashboard,
   LogOut,
@@ -19,7 +16,6 @@ import {
   PlusCircle,
   Rocket,
   RotateCcw,
-  Search,
   ShieldCheck,
   Sparkles,
   Trash2,
@@ -29,27 +25,24 @@ import {
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import { confirmAction, notify } from "@/lib/alert";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { colors, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { Footer } from "@/components/Footer";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
-import type { Property } from "../types/property";
 import { cdnImage } from "@/lib/cloudinaryImage";
 
 export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
@@ -133,26 +126,14 @@ export function MyPropertiesScreen() {
 
   // Sidebar items
   const logout = useAuthStore((s) => s.logout);
-  const handleLogout = () => {
-    if (Platform.OS === "web") {
-      const confirmed = window.confirm("Are you sure you want to log out?");
-      if (confirmed) {
-        logout();
-        router.replace("/home");
-      }
-      return;
-    }
-    Alert.alert("Log Out", "Are you sure you want to log out of your account?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: () => {
-          logout();
-          router.replace("/home");
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
+      confirmLabel: "Log Out",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    logout();
+    router.replace("/home");
   };
 
   const sidebarNavItems: {
@@ -177,21 +158,18 @@ export function MyPropertiesScreen() {
     { key: "logout", label: "Logout", icon: LogOut, danger: true, href: "/" },
   ];
 
-  const handleDelete = (id: string, title: string) => {
-    Alert.alert("Delete Property", `Are you sure you want to delete "${title}"?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteMutation.mutateAsync(id);
-          } catch (deleteError) {
-            Alert.alert("Delete failed", deleteError instanceof Error ? deleteError.message : "Request failed.");
-          }
-        },
-      },
-    ]);
+  // Had no web branch, so deleting a listing was impossible on web.
+  const handleDelete = async (id: string, title: string) => {
+    const confirmed = await confirmAction("Delete Property", `Are you sure you want to delete "${title}"?`, {
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!confirmed) return;
+    try {
+      await deleteMutation.mutateAsync(id);
+    } catch (deleteError) {
+      notify("Delete failed", deleteError instanceof Error ? deleteError.message : "Request failed.");
+    }
   };
 
   return (
@@ -310,7 +288,7 @@ export function MyPropertiesScreen() {
 
             {/* Add Property Primary Button */}
             <AppLink href="/property/create" style={styles.addPropertyBtn}>
-              <Plus color="#FFFFFF" size={16} />
+              <Plus color={colorTokens.onBrand} size={16} />
               <Text style={styles.addPropertyBtnText}>Add new property</Text>
             </AppLink>
           </View>
@@ -327,7 +305,7 @@ export function MyPropertiesScreen() {
                 <Text style={styles.emptyTitle}>Could not load listings</Text>
                 <Text style={styles.emptySub}>{error instanceof Error ? error.message : "Request failed."}</Text>
                 <Pressable onPress={() => void refetch()} style={styles.retryButton}>
-                  <RotateCcw color="#FFFFFF" size={16} />
+                  <RotateCcw color={colorTokens.onBrand} size={16} />
                   <Text style={styles.retryText}>Retry</Text>
                 </Pressable>
               </View>
@@ -661,7 +639,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badgeCountText: {
-    color: "#FFFFFF",
+    color: colorTokens.onAccent,
     fontSize: 12,
     fontFamily: fonts.bold,
   },
@@ -720,7 +698,7 @@ const styles = StyleSheet.create({
     color: "#0B1A17",
   },
   pillLabelActive: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   pillCountBg: {
     backgroundColor: "transparent",
@@ -744,7 +722,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   addPropertyBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },
@@ -894,7 +872,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 10,
   },
-  retryText: { color: "#FFFFFF", fontFamily: fonts.semiBold, fontSize: 14 },
+  retryText: { color: colorTokens.onBrand, fontFamily: fonts.semiBold, fontSize: 14 },
   loadMoreButton: {
     alignItems: "center",
     alignSelf: "center",

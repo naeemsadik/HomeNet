@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import apiClient, { toApiError } from "@/services/apiClient";
 import type { ApiResponse } from "@/types/api";
 import {
@@ -10,7 +10,7 @@ import {
  * HomeNet AI — client side.
  *
  * The app calls HomeNet operations; the API decides which provider and model
- * serve each one (see docs/AI_LAYER.md). Nothing in the app knows which vendor
+ * serve each one (see docs/BACKEND_REQUIREMENTS.md §1). Nothing in the app knows which vendor
  * is behind an operation, and no provider key ever reaches the client —
  * anything prefixed EXPO_PUBLIC_ is published inside the bundle.
  */

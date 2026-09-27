@@ -103,7 +103,7 @@ export function RoleAssignmentModal({ visible, user, onClose }: RoleAssignmentMo
                       <ActivityIndicator color={colorTokens.primary} size="small" />
                     ) : assigned ? (
                       <View style={styles.checkCircle}>
-                        <Check color={colorTokens.textInverse} size={14} />
+                        <Check color={colorTokens.onBrand} size={14} />
                       </View>
                     ) : (
                       <View style={styles.emptyCircle} />

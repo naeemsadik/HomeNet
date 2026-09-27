@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { View, Text, Image, Pressable, ScrollView, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import { View, Text, Image, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, Trash2, UserRound } from "lucide-react-native";
 import { router } from "expo-router";
@@ -12,18 +13,16 @@ import { Eyebrow } from "@/components/ui";
 import { useAuthStore } from "@/stores/authStore";
 import { useUpdateUserProfile, useUploadAvatar, useDeleteAvatar } from "../hooks/useUserMutations";
 import { editProfileSchema, type EditProfileFormData } from "@/lib/schemas/user";
-import { colorTokens, fonts, shadow, webPointer } from "@/theme";
-import { useResponsive } from "@/hooks/useResponsive";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import type { UploadInput } from "@/services/upload";
 
 export function EditProfileScreen() {
-  const { isPhone } = useResponsive();
   const { user, fetchMe } = useAuthStore();
   const updateProfile = useUpdateUserProfile();
   const uploadAvatar = useUploadAvatar();
   const deleteAvatar = useDeleteAvatar();
 
-  const { control, handleSubmit, reset, watch, formState: { isValid, isDirty, errors } } = useForm<EditProfileFormData>({
+  const { control, handleSubmit, reset, formState: { isValid, isDirty } } = useForm<EditProfileFormData>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: { full_name: user?.full_name ?? "" },
     mode: "onChange",
@@ -44,7 +43,7 @@ export function EditProfileScreen() {
     try {
       await updateProfile.mutateAsync({ id: user.id, data: { full_name: data.full_name } });
       await fetchMe();
-      Alert.alert("Success", "Profile updated.", [{ text: "OK", onPress: () => router.back() }]);
+      notify("Success", "Profile updated.", { onConfirm: () => router.back() });
     } catch (err: any) {
       setServerError(err?.message || "Failed to update profile");
     }
@@ -53,7 +52,7 @@ export function EditProfileScreen() {
   const handleAvatarUpload = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission needed", "Allow access to your photo library.");
+      notify("Permission needed", "Allow access to your photo library.");
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -73,7 +72,7 @@ export function EditProfileScreen() {
       };
       await uploadAvatar.mutateAsync(file);
       await fetchMe();
-      Alert.alert("Success", "Avatar updated.");
+      notify("Success", "Avatar updated.");
     } catch (err: any) {
       setServerError(err?.message || "Failed to upload avatar");
     }
@@ -83,7 +82,7 @@ export function EditProfileScreen() {
     try {
       await deleteAvatar.mutateAsync();
       await fetchMe();
-      Alert.alert("Success", "Avatar removed.");
+      notify("Success", "Avatar removed.");
     } catch (err: any) {
       setServerError(err?.message || "Failed to remove avatar");
     }
@@ -106,7 +105,7 @@ export function EditProfileScreen() {
                 <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <UserRound color={colorTokens.textInverse} size={34} />
+                  <UserRound color={colorTokens.brandText} size={34} />
                 </View>
               )}
               <Pressable
@@ -115,9 +114,9 @@ export function EditProfileScreen() {
                 accessibilityLabel="Upload avatar"
               >
                 {uploadAvatar.isPending ? (
-                  <ActivityIndicator color={colorTokens.textInverse} size={12} />
+                  <ActivityIndicator color={colorTokens.onBrand} size={12} />
                 ) : (
-                  <Camera color={colorTokens.textInverse} size={15} />
+                  <Camera color={colorTokens.onBrand} size={15} />
                 )}
               </Pressable>
             </View>

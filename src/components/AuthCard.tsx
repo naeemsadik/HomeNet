@@ -3,7 +3,6 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ActivityIndicator,
-  Alert,
   ImageBackground,
   Pressable,
   ScrollView,
@@ -14,6 +13,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { notify } from "@/lib/alert";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { ClipPath, Defs, Path, Rect } from "react-native-svg";
 import {
@@ -27,7 +27,7 @@ import {
 } from "lucide-react-native";
 import { useAuthStore } from "@/stores/authStore";
 import { authModalSchema, type AuthModalFormData } from "@/lib/schemas/auth";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 
 const authBuildingImage = require("../../assets/auth-hero-building.png");
 
@@ -191,13 +191,16 @@ export function AuthCard({
   };
 
   const handleSocialClick = (provider: string) => {
-    Alert.alert(provider, `${provider} sign-in will be available soon.`);
+    notify(provider, `${provider} sign-in will be available soon.`);
   };
 
+  // There is no password-reset endpoint yet, so point people at the contact
+  // address the About page publishes (the old one was on a different domain,
+  // homenet.com, and "account settings" can't be reached while signed out).
   const handleForgotPassword = () => {
-    Alert.alert(
+    notify(
       "Forgot Password",
-      "Please contact support@homenet.com or use account security settings to reset your password."
+      "Password reset isn't available in the app yet. Email hello@homenet.com.bd from the address on your account and we'll help you reset it."
     );
   };
 
@@ -461,13 +464,13 @@ export function AuthCard({
             style={[styles.submitButton, loading && { opacity: 0.7 }, webPointer]}
           >
             {loading ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
+              <ActivityIndicator color={colorTokens.onBrand} size="small" />
             ) : (
               <>
                 <Text style={styles.submitButtonText}>
                   {mode === "signin" ? "Sign In" : "Create Account"}
                 </Text>
-                <ArrowRight color="#FFFFFF" size={16} strokeWidth={2.2} />
+                <ArrowRight color={colorTokens.onBrand} size={16} strokeWidth={2.2} />
               </>
             )}
           </Pressable>
@@ -753,7 +756,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitButtonText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 14,
     fontWeight: "700",
