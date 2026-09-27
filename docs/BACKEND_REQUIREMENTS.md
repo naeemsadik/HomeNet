@@ -123,21 +123,27 @@ where the numbers come from, and never present them as an appraisal.
 
 ---
 
-## 4. Bug — GET /v1/properties returns 500 when `limit` is missing
+## 4. Bug — unfiltered GET /v1/properties returns 500
 
 Observed on 2026-09-27 against `https://homenet-api.vercel.app`:
 
 | Request | Status |
 |---|---|
 | `GET /v1/properties` | **500** "An unexpected internal server error occurred" |
-| `GET /v1/properties?page=1` | **500** |
-| `GET /v1/properties?limit=1` | 200 |
+| `GET /v1/properties?page=1&limit=20` | **500** |
 | `GET /v1/properties?page=1&limit=1` | 200 |
+| `GET /v1/properties?status=active&sort_by=view_count_desc&page=1&limit=10` | 200 |
+| `GET /v1/properties?listing_type=sale&page=1&limit=20` | 200 |
+| `GET /v1/properties?listing_type=rent&page=1&limit=20` | 200 |
 
-Every call in the app passes `limit`, so users don't hit this today. But a
-missing optional query parameter must never cause a 500. Default `limit` (the
-app uses 10–20) and `page` (1) in the DTO, and return 400 with a validation
-message for values that are invalid (non-numeric, ≤ 0, above a maximum).
+Whether the request fails depends on which rows it returns, not on which
+parameters it sends. So one or more records most likely fail serialization, for
+example a listing whose `listing_type` is neither `sale` nor `rent`, or one with
+a missing relation. Filtered queries skip the bad record(s). The app's Buy, Rent,
+home and similar-listing queries all filter, so users don't hit this today. But
+any unfiltered call, or a filter that happens to include the bad record, will
+fail. Find the record in the server logs, fix the data, and make the list
+endpoint skip or repair a bad row rather than fail the whole page.
 
 ## 5. Status checks the frontend can't make
 
