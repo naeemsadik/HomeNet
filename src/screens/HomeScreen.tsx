@@ -99,12 +99,10 @@ export function HomeScreen() {
     isPhone,
     isTablet,
     isCompact,
-    isDesktop,
     isWide,
     isUltrawide,
     isLargeScreen,
     isTall,
-    width,
     height,
   } = useResponsive();
 
@@ -469,6 +467,10 @@ const FeaturedRail = memo(function FeaturedRail({ properties }: { properties: Ap
         showsHorizontalScrollIndicator={false}
         onScroll={handleFeaturedScroll}
         scrollEventThrottle={16}
+        // The widths were declared but never set, so the scroll limit stayed
+        // at its 200px fallback and "next" stopped after one short step.
+        onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+        onContentSizeChange={(w) => setContentWidth(w)}
         contentContainerStyle={styles.featuredCardsRow}
       />
 
