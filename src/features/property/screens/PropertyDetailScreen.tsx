@@ -42,6 +42,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -204,16 +205,32 @@ export function PropertyDetailScreen() {
     const message = `Hello ${property?.seller.name || "Seller"}, I'm interested in your property "${property?.title || "Property"}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) on Homenet. Is this property currently available?`;
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     void Linking.openURL(whatsappUrl).catch(() => {
-      Alert.alert(
+      notify(
         "WhatsApp",
         `Could not launch WhatsApp. You can message the seller directly at ${rawPhone}.`,
       );
     });
   };
 
-  const handleShare = () => {
+  // Used to claim the link was copied without copying anything.
+  const handleShare = async () => {
     if (!property) return;
-    Alert.alert("Share Property", `Share link for "${property.title}" copied to clipboard.`);
+    if (Platform.OS !== "web" || typeof window === "undefined") {
+      await Share.share({ message: property.title }).catch(() => {});
+      return;
+    }
+    const url = window.location.href;
+    if (typeof navigator.share === "function") {
+      // Rejects when the user closes the share sheet; nothing to report.
+      await navigator.share({ title: property.title, url }).catch(() => {});
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      notify("Link copied", "The property link is on your clipboard.");
+    } catch {
+      notify("Copy this link", url);
+    }
   };
 
   const DESKTOP_VISIBLE_COUNT = 8;

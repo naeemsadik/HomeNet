@@ -20,7 +20,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
-import { ensureGoogleTranslateScript, shouldLoadTranslateOnBoot } from "@/utils/language";
+import { ensureGoogleTranslateScript, restoreTranslateCookie, shouldLoadTranslateOnBoot } from "@/utils/language";
 import { PageMeta } from "@/components/PageMeta";
 import { queryClient } from "@/lib/queryClient";
 
@@ -85,6 +85,7 @@ export default function RootLayout() {
       // Only visitors who already read in Bangla pay for the translate
       // widget up front; for everyone else it loads on first use.
       if (shouldLoadTranslateOnBoot()) {
+        restoreTranslateCookie();
         ensureGoogleTranslateScript();
       }
     }
