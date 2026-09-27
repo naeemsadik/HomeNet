@@ -637,10 +637,12 @@ export function AppChrome({
   children,
   active,
   bleed,
+  fluid,
 }: {
   children: ReactNode;
   active: ActivePage;
   bleed?: ReactNode;
+  fluid?: boolean;
 }) {
   const { isTablet, isPhone, containerMaxWidth } = useResponsive();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -689,10 +691,18 @@ export function AppChrome({
             style={[
               styles.mainGutter,
               isPhone && styles.mainGutterPhone,
-              { maxWidth: containerMaxWidth },
+              fluid ? styles.mainGutterFluid : { maxWidth: containerMaxWidth },
             ]}
           >
-            <View style={[styles.main, isPhone && styles.mainPhone]}>{children}</View>
+            <View
+              style={[
+                styles.main,
+                isPhone && styles.mainPhone,
+                fluid && styles.mainFluid,
+              ]}
+            >
+              {children}
+            </View>
           </View>
           <Footer />
         </ScrollView>
@@ -1561,6 +1571,12 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 48,
   },
+  mainGutterFluid: {
+    width: "100%",
+    maxWidth: "100%",
+    paddingTop: 16,
+    paddingBottom: 48,
+  },
   mainGutterPhone: {
     paddingTop: 10,
     paddingBottom: 24,
@@ -1569,6 +1585,10 @@ const styles = StyleSheet.create({
   main: {
     width: "100%",
     paddingHorizontal: layout.gutter,
+  },
+  mainFluid: {
+    width: "100%",
+    paddingHorizontal: 0,
   },
   mainPhone: {
     paddingHorizontal: layout.gutterPhone,
