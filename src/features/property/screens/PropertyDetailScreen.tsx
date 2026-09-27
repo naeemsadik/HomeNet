@@ -41,7 +41,6 @@ import { cdnImage } from "@/lib/cloudinaryImage";
 import { colorTokens, webPointer } from "@/theme";
 import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
 import { useSavedStore } from "@/stores/savedStore";
-import { useAuthStore } from "@/stores/authStore";
 import { styles } from "./PropertyDetailScreen.styles";
 import { BookVisitModal } from "../components/BookVisitModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
@@ -72,9 +71,6 @@ export function PropertyDetailScreen() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const isPropertySaved = useSavedStore((s) => s.isSaved(id ?? ""));
   const toggleSaved = useSavedStore((s) => s.toggleSaved);
-  const isSignedIn = useAuthStore((s) => Boolean(s.user));
-  const [guestSaveHint, setGuestSaveHint] = useState(false);
-  const guestSaveHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [bookModalVisible, setBookModalVisible] = useState(false);
   const [thumbScrollX, setThumbScrollX] = useState(0);
   const [maxThumbScroll, setMaxThumbScroll] = useState(448);
@@ -208,20 +204,11 @@ export function PropertyDetailScreen() {
     void shareLink({ title: property.title });
   };
 
-  // Guest saves live only on this device, so say so once they land.
-  const handleToggleSaved = async () => {
+  // Guests get a "saved on this device" toast from the saved store.
+  const handleToggleSaved = () => {
     const target = apiDetail ?? id;
-    if (!target) return;
-    const nowSaved = await toggleSaved(target);
-    if (!nowSaved || isSignedIn) return;
-    setGuestSaveHint(true);
-    if (guestSaveHintTimer.current) clearTimeout(guestSaveHintTimer.current);
-    guestSaveHintTimer.current = setTimeout(() => setGuestSaveHint(false), 4000);
+    if (target) void toggleSaved(target);
   };
-
-  useEffect(() => () => {
-    if (guestSaveHintTimer.current) clearTimeout(guestSaveHintTimer.current);
-  }, []);
 
   const DESKTOP_VISIBLE_COUNT = 8;
   const totalPhotos = property?.mediaImages.length || 0;
@@ -398,13 +385,6 @@ export function PropertyDetailScreen() {
           </View>
         </View>
 
-        {guestSaveHint ? (
-          <View style={styles.guestSaveHint} accessibilityLiveRegion="polite">
-            <Text style={styles.guestSaveHintText}>
-              Saved on this device. Sign in to sync your saves across devices.
-            </Text>
-          </View>
-        ) : null}
 
         {/* Main Content & Sidebar Grid */}
         <View style={[styles.mainLayoutGrid, isTablet && styles.mainLayoutGridTablet]}>

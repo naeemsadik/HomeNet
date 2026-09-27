@@ -17,6 +17,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthModal } from "@/components/AuthModal";
+import { ToastHost } from "@/components/ToastHost";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
@@ -113,6 +114,7 @@ export default function RootLayout() {
         <StatusBar style="dark" />
         <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
         <AuthModal />
+        <ToastHost />
       </SafeAreaProvider>
     </QueryClientProvider>
   );

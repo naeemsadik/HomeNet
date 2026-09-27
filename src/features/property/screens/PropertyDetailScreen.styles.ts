@@ -56,18 +56,6 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     color: "#0B1A17",
   },
-  guestSaveHint: {
-    alignSelf: "flex-end",
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    backgroundColor: "#0B1A17",
-  },
-  guestSaveHintText: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: "#FFFFFF",
-  },
   actionHeaderBtns: {
     flexDirection: "row",
     alignItems: "center",

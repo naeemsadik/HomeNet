@@ -4,6 +4,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getSavedProperties, saveProperty, unsaveProperty } from "@/services/propertyApi";
 import { useAuthStore } from "@/stores/authStore";
 import { queryClient } from "@/lib/queryClient";
+import { showToast } from "@/lib/toast";
+import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import type { Property } from "@/features/property/types/property";
 
 /** Anything with an id (Property, PropertyDetail, a card) or the id itself. */
@@ -85,6 +87,11 @@ export const useSavedStore = create<SavedState>()(
               return false;
             }
           }
+          // Guest saves live only on this device. Said here, not per screen,
+          // so every heart (cards, Browse, AI Finder, detail) behaves the same.
+          showToast("Saved on this device. Sign in to sync your saves across devices.", {
+            action: { label: "Sign in", onPress: () => useAuthModalStore.getState().open() },
+          });
           return true;
         }
       },

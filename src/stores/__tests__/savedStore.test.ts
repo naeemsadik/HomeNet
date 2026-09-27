@@ -1,5 +1,6 @@
 import { useSavedStore } from "@/stores/savedStore";
 import { saveProperty, unsaveProperty } from "@/services/propertyApi";
+import { useToastStore } from "@/lib/toast";
 
 const mockUser: { current: { id: string } | null } = { current: null };
 
@@ -20,6 +21,7 @@ beforeEach(() => {
   mockUser.current = null;
   jest.clearAllMocks();
   useSavedStore.setState({ savedIds: [] });
+  useToastStore.getState().dismiss();
 });
 
 describe("savedStore.isSaved", () => {
@@ -57,6 +59,20 @@ describe("savedStore.toggleSaved", () => {
 
     expect(mockSave).not.toHaveBeenCalled();
     expect(mockUnsave).not.toHaveBeenCalled();
+  });
+
+  it("tells a guest the save is on this device only, and offers sign-in", async () => {
+    await useSavedStore.getState().toggleSaved("5");
+    const toast = useToastStore.getState().toast;
+    expect(toast?.message).toMatch(/Saved on this device/);
+    expect(toast?.action?.label).toBe("Sign in");
+  });
+
+  it("shows no device-only toast for a signed-in save", async () => {
+    mockUser.current = { id: "u1" };
+    mockSave.mockResolvedValue(undefined);
+    await useSavedStore.getState().toggleSaved("9");
+    expect(useToastStore.getState().toast).toBeNull();
   });
 
   it("saves through the API when signed in", async () => {
