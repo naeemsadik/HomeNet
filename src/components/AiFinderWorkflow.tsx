@@ -99,7 +99,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
   const [area, setArea] = useState("Gulshan & Banani");
   const [budget, setBudget] = useState("BDT 2–4 Cr");
 
-  const { savedIds, toggleSaved, isSaved } = useSavedStore();
+  const { toggleSaved, isSaved } = useSavedStore();
 
   const queryParams = useMemo(() => {
     const range = budgetRanges[budget] || {};

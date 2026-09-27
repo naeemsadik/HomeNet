@@ -88,7 +88,7 @@ interface ActivityItem {
 }
 
 export function SellerDashboardScreen() {
-  const { isPhone, isTablet, width } = useResponsive();
+  const { isPhone, isTablet } = useResponsive();
   const { user } = useAuthStore();
   const logout = useAuthStore((s) => s.logout);
   const { tab } = useLocalSearchParams<{ tab?: string }>();

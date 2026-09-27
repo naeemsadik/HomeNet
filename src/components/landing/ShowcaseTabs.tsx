@@ -27,7 +27,7 @@ import { landingCopy } from "@/content/landingCopy";
 import { cdnImage } from "@/lib/cloudinaryImage";
 
 export function ShowcaseTabs() {
-  const { isPhone, isTablet } = useResponsive();
+  const { isTablet } = useResponsive();
   const [activeTab, setActiveTab] = useState<"browse" | "detail" | "create" | "dashboard">(
     "browse"
   );

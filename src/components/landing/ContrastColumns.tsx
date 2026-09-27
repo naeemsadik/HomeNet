@@ -6,7 +6,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { landingCopy } from "@/content/landingCopy";
 
 export function ContrastColumns() {
-  const { isTablet, isPhone } = useResponsive();
+  const { isTablet } = useResponsive();
   const { withoutTitle, withoutItems, withTitle, withItems } = landingCopy.problem;
 
   return (

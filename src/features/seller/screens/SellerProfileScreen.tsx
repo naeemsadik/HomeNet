@@ -52,7 +52,6 @@ const DEFAULT_AVATAR =
 // Sample values shown (greyed out) in signed-out preview. Never a real person.
 const DEFAULT_NAME = "Your name";
 const DEFAULT_AGENCY = "Homenet Verified Partner";
-const DEFAULT_BUYER_PREF = "Apartments & Houses in Dhaka";
 const DEFAULT_EMAIL = "you@example.com";
 const DEFAULT_PHONE = "+880 1700-000000";
 

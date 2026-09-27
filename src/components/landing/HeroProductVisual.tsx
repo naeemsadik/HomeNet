@@ -22,7 +22,7 @@ import { previewProperties } from "@/data/landingPreview";
 import { PropertyCard } from "@/components/PropertyCard";
 
 export function HeroProductVisual() {
-  const { isPhone, isTablet, isCompact, isLargeScreen, isTall } = useResponsive();
+  const { isPhone, isCompact, isLargeScreen, isTall } = useResponsive();
 
   const handleOpenApp = () => {
     router.push("/buy" as any);

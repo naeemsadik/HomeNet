@@ -14,17 +14,15 @@ import { useAuthStore } from "@/stores/authStore";
 import { useUpdateUserProfile, useUploadAvatar, useDeleteAvatar } from "../hooks/useUserMutations";
 import { editProfileSchema, type EditProfileFormData } from "@/lib/schemas/user";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import { useResponsive } from "@/hooks/useResponsive";
 import type { UploadInput } from "@/services/upload";
 
 export function EditProfileScreen() {
-  const { isPhone } = useResponsive();
   const { user, fetchMe } = useAuthStore();
   const updateProfile = useUpdateUserProfile();
   const uploadAvatar = useUploadAvatar();
   const deleteAvatar = useDeleteAvatar();
 
-  const { control, handleSubmit, reset, watch, formState: { isValid, isDirty, errors } } = useForm<EditProfileFormData>({
+  const { control, handleSubmit, reset, formState: { isValid, isDirty } } = useForm<EditProfileFormData>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: { full_name: user?.full_name ?? "" },
     mode: "onChange",

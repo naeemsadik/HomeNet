@@ -52,7 +52,7 @@ const quickSuggestions = [
 
 export function MessagesScreen() {
   const { isPhone } = useResponsive();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");

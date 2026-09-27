@@ -48,7 +48,7 @@ function toPropertyTypeFilter(raw?: string): string {
 }
 
 export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
-  const { isPhone, isTablet } = useResponsive();
+  const { isPhone } = useResponsive();
   const params = useLocalSearchParams<{
     query?: string;
     search?: string;

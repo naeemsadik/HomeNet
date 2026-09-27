@@ -19,7 +19,7 @@ export function EcosystemDiagram({
   activeCount = 0,
   areasCount = 0,
 }: EcosystemDiagramProps) {
-  const { isTablet, isPhone } = useResponsive();
+  const { isTablet } = useResponsive();
 
   return (
     <View style={styles.container}>

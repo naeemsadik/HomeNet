@@ -129,7 +129,7 @@ const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: Prop
 });
 
 export function GuidesArchiveScreen() {
-  const { isPhone, isTablet, isDesktop } = useResponsive();
+  const { isPhone, isTablet } = useResponsive();
   const [activeTab, setActiveTab] = useState<ArchiveTab>("All");
   const [searchQuery, setSearchQuery] = useState("");
 

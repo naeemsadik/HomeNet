@@ -181,7 +181,6 @@ export function RightmoveFilterCard({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [customLocation, setCustomLocation] = useState(filters.query || locationName);
   const isDesktop = !isPhone && !isTablet;
-  const isSmallScreen = isPhone || isTablet;
 
   const handleUpdate = (patch: Partial<RightmoveFilters>) => {
     const updated = { ...filters, ...patch };

@@ -28,8 +28,9 @@ module.exports = defineConfig([
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/immutability": "warn",
       "react-hooks/purity": "warn",
-      // Apostrophes in copy render fine in React Native.
-      "react/no-unescaped-entities": "warn",
+      // Guards against HTML-parsing surprises in DOM JSX; React Native <Text>
+      // renders ' and " literally, so escaping copy would only hurt reading it.
+      "react/no-unescaped-entities": "off",
     },
   },
   {
@@ -38,5 +39,11 @@ module.exports = defineConfig([
       // Warn, not error: the codebase has existing `any` debt to pay down.
       "@typescript-eslint/no-explicit-any": "warn",
     },
+  },
+  {
+    // Jest globals, and require() inside jest.isolateModules to reload a module.
+    files: ["jest.setup.js", "**/__tests__/**"],
+    languageOptions: { globals: { jest: "readonly" } },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
   },
 ]);

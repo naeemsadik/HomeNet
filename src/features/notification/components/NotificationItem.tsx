@@ -2,8 +2,8 @@ import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Bell, Check, Clock } from "lucide-react-native";
 import type { Notification } from "@/types/api";
-import { colorTokens } from "@/theme";
-import { fonts } from "@/theme";
+import { colorTokens , fonts } from "@/theme";
+
 
 interface NotificationItemProps {
   notification: Notification;

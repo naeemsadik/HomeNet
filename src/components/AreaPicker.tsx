@@ -159,7 +159,7 @@ export function AreaPicker({
           animated: true,
           viewPosition: 0.5,
         });
-      } catch (err) {
+      } catch {
         // Safe catch for cases where the FlatList is not fully rendered
       }
     }

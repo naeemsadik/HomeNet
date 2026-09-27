@@ -20,8 +20,8 @@ interface PropertyFormProps {
   mode: "create" | "edit";
   initialData?: Partial<UpsertPropertyDto>;
   initialArea?: Area | null;
-  initialImages?: Array<{ uri: string; file?: Blob | File }>;
-  onSubmit: (data: UpsertPropertyDto, images: Array<{ uri: string; file?: Blob | File }>) => void;
+  initialImages?: { uri: string; file?: Blob | File }[];
+  onSubmit: (data: UpsertPropertyDto, images: { uri: string; file?: Blob | File }[]) => void;
   onCancel?: () => void;
   loading?: boolean;
   error?: string | null;
@@ -42,9 +42,9 @@ export function PropertyForm({
   const [step, setStep] = useState(0);
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
   const [area, setArea] = useState<Area | null>(initialArea);
-  const [images, setImages] = useState<Array<{ uri: string; file?: Blob | File }>>(initialImages);
+  const [images, setImages] = useState<{ uri: string; file?: Blob | File }[]>(initialImages);
 
-  const { control, handleSubmit, trigger, setValue, watch, formState: { errors } } = useForm<PropertyFormData>({
+  const { control, handleSubmit, trigger, setValue, formState: { errors } } = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema) as Resolver<PropertyFormData>,
     defaultValues: {
       title: initialData?.title ?? "",

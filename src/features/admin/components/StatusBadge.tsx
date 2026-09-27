@@ -20,8 +20,6 @@ export function PropertyStatusBadge({ status }: { status: PropertyStatus }) {
   );
 }
 
-type RoleName = "admin" | "superadmin" | "moderator" | "buyer_seller";
-
 const ROLE_CONFIG: Record<string, { bg: string; text: string }> = {
   admin: { bg: colorTokens.primaryLight, text: colorTokens.primary },
   superadmin: { bg: colorTokens.primaryLight, text: colorTokens.primaryDark },

@@ -46,8 +46,8 @@ function formatDate(isoString: string | null): string {
 }
 
 export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
-  const { isPhone, isTablet } = useResponsive();
-  const { data: guide, isLoading, isError, refetch } = usePropertyGuide(slug);
+  const { isPhone } = useResponsive();
+  const { data: guide, isLoading, isError } = usePropertyGuide(slug);
 
   const isRss = guide?.sourceType === "rss";
 

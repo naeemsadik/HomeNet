@@ -26,7 +26,7 @@ export function PropertyEditScreen() {
     enabled: !!id,
   });
 
-  const handleSubmit = async (dto: UpsertPropertyDto, images: Array<{ uri: string; file?: Blob | File }>) => {
+  const handleSubmit = async (dto: UpsertPropertyDto, images: { uri: string; file?: Blob | File }[]) => {
     if (!id) return;
     try {
       const result = await updateProperty.mutateAsync({ id, dto });

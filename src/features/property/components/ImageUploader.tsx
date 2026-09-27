@@ -6,8 +6,8 @@ import { Camera, Trash2, Plus } from "lucide-react-native";
 import { colorTokens, fonts } from "@/theme";
 
 interface ImageUploaderProps {
-  images: Array<{ uri: string; file?: Blob | File }>;
-  onAdd: (images: Array<{ uri: string; file?: Blob | File }>) => void;
+  images: { uri: string; file?: Blob | File }[];
+  onAdd: (images: { uri: string; file?: Blob | File }[]) => void;
   onRemove: (index: number) => void;
   maxImages?: number;
 }

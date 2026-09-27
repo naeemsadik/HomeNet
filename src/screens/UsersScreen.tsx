@@ -25,7 +25,6 @@ import {
 import { notify } from "@/lib/alert";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";
-import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import {
@@ -57,7 +56,6 @@ function UserRolesLoader({ userId }: { userId: string }) {
 }
 
 export function UsersScreen() {
-  const { isPhone } = useResponsive();
   const userRoles = useAuthStore((s) => s.userRoles);
   const currentUser = useAuthStore((s) => s.user);
   const [users, setUsers] = useState<UserProfile[]>([]);
