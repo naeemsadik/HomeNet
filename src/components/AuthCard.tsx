@@ -194,10 +194,13 @@ export function AuthCard({
     notify(provider, `${provider} sign-in will be available soon.`);
   };
 
+  // There is no password-reset endpoint yet, so point people at the contact
+  // address the About page publishes (the old one was on a different domain,
+  // homenet.com, and "account settings" can't be reached while signed out).
   const handleForgotPassword = () => {
     notify(
       "Forgot Password",
-      "Please contact support@homenet.com or use account security settings to reset your password."
+      "Password reset isn't available in the app yet. Email hello@homenet.com.bd from the address on your account and we'll help you reset it."
     );
   };
 
