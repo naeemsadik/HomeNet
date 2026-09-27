@@ -365,6 +365,8 @@ export function PropertyDetailScreen() {
           <View style={styles.actionHeaderBtns}>
             <Pressable
               onPress={handleShare}
+              accessibilityRole="button"
+              accessibilityLabel="Share property"
               style={({ pressed }) => [styles.actionCircleBtn, webPointer, pressed && styles.pressed]}
             >
               <Share2 color="#0B1A17" size={18} />
