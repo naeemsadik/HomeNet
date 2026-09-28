@@ -7,7 +7,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Check, ChevronDown, Edit3 } from "lucide-react-native";
+import { Check, ChevronDown, Edit3 } from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 

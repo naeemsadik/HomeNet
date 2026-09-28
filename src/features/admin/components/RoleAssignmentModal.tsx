@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { Check, X } from "lucide-react-native";
+import { Check, X } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { useUserRoles } from "../hooks/useUserRoles";
 import { useRoleMutations } from "../hooks/useRoleMutations";

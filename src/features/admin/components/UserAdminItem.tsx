@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Settings, Trash2, UserRound } from "lucide-react-native";
+import { Settings, Trash2, UserRound } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { RoleBadge } from "./StatusBadge";
 import type { UserWithRoles } from "../types/admin";

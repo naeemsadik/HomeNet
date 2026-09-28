@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { ArrowRight, PlusCircle, Search } from "lucide-react-native";
+import { ArrowRight, PlusCircle, Search } from "@/components/icons";
 import { router } from "expo-router";
 import { AppButton } from "@/components/ui";
 import { fonts } from "@/theme";

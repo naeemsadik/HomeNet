@@ -19,7 +19,7 @@ import {
   Upload,
   User,
   BarChart2,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useState } from "react";
 import {
   Platform,

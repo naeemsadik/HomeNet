@@ -1,4 +1,4 @@
-import { Bell, Menu, Search, X } from "lucide-react-native";
+import { Bell, Menu, Search, X } from "@/components/icons";
 import {
   Platform,
   Pressable,

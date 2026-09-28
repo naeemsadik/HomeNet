@@ -7,7 +7,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { X } from "lucide-react-native";
+import { X } from "@/components/icons";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
 import { useResponsive } from "@/hooks/useResponsive";
 import { AiFinderWorkflow } from "./AiFinderWorkflow";

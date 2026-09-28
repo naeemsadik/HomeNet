@@ -10,7 +10,7 @@ import {
   Trash2,
   User,
   X,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,

@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { router } from "expo-router";
-import { MapPin } from "lucide-react-native";
+import { MapPin } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { useSimilarProperties } from "../hooks/usePropertyDetail";
 import type { Property } from "../types/property";

@@ -21,7 +21,7 @@ import {
   Trash2,
   User,
   Zap,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,

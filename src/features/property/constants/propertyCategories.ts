@@ -9,7 +9,7 @@ import {
   Compass,
   Home,
   LucideIcon,
-} from "lucide-react-native";
+} from "@/components/icons";
 import type { PropertyType } from "@/types/api";
 
 export interface PropertySubtypeOption {

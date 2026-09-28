@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { Globe } from "lucide-react-native";
+import { Globe } from "@/components/icons";
 import { useLanguageStore } from "@/utils/language";
 import { fonts, webPointer } from "@/theme";
 

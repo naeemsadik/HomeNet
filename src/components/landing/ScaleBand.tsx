@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { ShieldCheck } from "lucide-react-native";
+import { ShieldCheck } from "@/components/icons";
 import { fonts } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { MetricTile } from "./MetricTile";

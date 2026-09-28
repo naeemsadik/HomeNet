@@ -1,4 +1,4 @@
-import { CreditCard } from "lucide-react-native";
+import { CreditCard } from "@/components/icons";
 import { Pressable, Text, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors } from "@/theme";

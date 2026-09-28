@@ -19,7 +19,7 @@ import {
   X,
   Check,
   Building,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { colorTokens, colors, webPointer } from "@/theme";
 import { useAreaPicker } from "@/hooks/useAreaPicker";
 import { useWindowSize } from "@/hooks/useResponsive";
@@ -101,7 +101,7 @@ export function AreaPicker({
     navigateToBreadcrumb,
     resetNav,
     selectCity,
-  } = useAreaPicker({ initialCity });
+  } = useAreaPicker({ initialCity, enabled: visible });
 
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const flatListRef = React.useRef<FlatList>(null);

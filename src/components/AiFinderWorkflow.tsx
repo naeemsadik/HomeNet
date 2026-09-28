@@ -10,7 +10,7 @@ import {
   Sparkles,
   WalletCards,
   type LucideIcon,
-} from "lucide-react-native";
+} from "@/components/icons";
 import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,

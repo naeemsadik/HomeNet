@@ -1,5 +1,5 @@
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { Building2, Search } from "lucide-react-native";
+import { Building2, Search } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { PropertyAdminItemRow } from "./PropertyAdminItem";
 import type { PropertyAdminItem } from "../types/admin";

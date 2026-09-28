@@ -1,4 +1,4 @@
-import { Check, Rocket, X } from "lucide-react-native";
+import { Check, Rocket, X } from "@/components/icons";
 import { Modal, Pressable, Text, View } from "react-native";
 import { colorTokens, colors, webPointer } from "@/theme";
 import { styles } from "../screens/SellerDashboardScreen.styles";

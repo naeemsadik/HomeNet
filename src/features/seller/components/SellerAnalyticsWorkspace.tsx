@@ -1,4 +1,4 @@
-import { BarChart2, TrendingUp } from "lucide-react-native";
+import { BarChart2, TrendingUp } from "@/components/icons";
 import { Text, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts } from "@/theme";

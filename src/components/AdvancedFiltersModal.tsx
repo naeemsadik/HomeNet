@@ -8,7 +8,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Check, MapPin, Sparkles, X } from "lucide-react-native";
+import { Check, MapPin, Sparkles, X } from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
 

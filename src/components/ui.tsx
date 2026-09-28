@@ -1,5 +1,5 @@
 import { router, type Href } from "expo-router";
-import { ArrowRight, Check, ChevronDown, type LucideIcon } from "lucide-react-native";
+import { ArrowRight, Check, ChevronDown, type LucideIcon } from "@/components/icons";
 import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,

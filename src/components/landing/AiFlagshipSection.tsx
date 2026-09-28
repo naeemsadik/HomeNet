@@ -20,7 +20,7 @@ import {
   ShieldAlert,
   Sliders,
   Play,
-} from 'lucide-react-native';
+} from '@/components/icons';
 import { colors, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useAuthStore } from '../../stores/authStore';

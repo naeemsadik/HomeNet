@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { View, Text, Image, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";
-import { Camera, Trash2, UserRound } from "lucide-react-native";
+import { Camera, Trash2, UserRound } from "@/components/icons";
 import { router } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

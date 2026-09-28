@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { CheckCircle2, FileCheck, Lock, ShieldCheck } from "lucide-react-native";
+import { CheckCircle2, FileCheck, Lock, ShieldCheck } from "@/components/icons";
 import { fonts } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { landingCopy } from "@/content/landingCopy";

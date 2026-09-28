@@ -7,7 +7,7 @@ import {
   Search,
   Send,
   Video,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useState } from "react";
 import {
   Image,

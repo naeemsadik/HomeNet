@@ -6,7 +6,7 @@ import {
   RotateCcw,
   Sparkles,
   X,
-} from "lucide-react-native";
+} from "@/components/icons";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,

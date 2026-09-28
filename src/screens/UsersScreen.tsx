@@ -11,7 +11,7 @@ import {
   UserRound,
   Users,
   XCircle,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useCallback, useEffect, useState } from "react";
 import {
   FlatList,

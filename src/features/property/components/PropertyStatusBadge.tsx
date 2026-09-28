@@ -1,7 +1,7 @@
 import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import React, { useEffect, useRef } from "react";
 import { View, Text, Animated, StyleSheet } from "react-native";
-import { Check, Clock, AlertTriangle, X as XIcon, FileEdit } from "lucide-react-native";
+import { Check, Clock, AlertTriangle, X as XIcon, FileEdit } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 
 type PropertyStatus = "draft" | "pending" | "active" | "sold" | "archived" | "rejected";

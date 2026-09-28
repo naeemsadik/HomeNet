@@ -1,4 +1,4 @@
-import { Bookmark, Heart } from "lucide-react-native";
+import { Bookmark, Heart } from "@/components/icons";
 import { useEffect, useMemo } from "react";
 import {
   ActivityIndicator,

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
-import { ChevronDown, MapPin, Search, Sparkles, X } from "lucide-react-native";
+import { ChevronDown, MapPin, Search, Sparkles, X } from "@/components/icons";
 import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";

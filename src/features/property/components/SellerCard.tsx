@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Linking,
 } from "react-native";
-import { Phone, Mail, UserRound } from "lucide-react-native";
+import { Phone, Mail, UserRound } from "@/components/icons";
 import { colorTokens, fontTokens, shadow } from "@/theme";
 import type { PropertyDetailUser } from "../hooks/usePropertyDetail";
 

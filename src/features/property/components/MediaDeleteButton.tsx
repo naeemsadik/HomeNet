@@ -1,7 +1,7 @@
 import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { AlertTriangle, Trash2, X } from "lucide-react-native";
+import { AlertTriangle, Trash2, X } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { useMediaDelete } from "../hooks/useMediaDelete";
 

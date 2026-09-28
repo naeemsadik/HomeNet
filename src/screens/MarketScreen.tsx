@@ -1,4 +1,4 @@
-import { ArrowRight, ChartNoAxesCombined, MapPin, ShieldCheck } from "lucide-react-native";
+import { ArrowRight, ChartNoAxesCombined, MapPin, ShieldCheck } from "@/components/icons";
 import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink, Eyebrow } from "@/components/ui";

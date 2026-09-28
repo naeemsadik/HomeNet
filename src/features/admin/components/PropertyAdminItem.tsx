@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Check, Eye, Trash2, UserRound, X } from "lucide-react-native";
+import { Check, Eye, Trash2, UserRound, X } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { PropertyStatusBadge } from "./StatusBadge";
 import type { PropertyAdminItem } from "../types/admin";

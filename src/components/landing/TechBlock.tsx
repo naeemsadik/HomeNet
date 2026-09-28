@@ -5,7 +5,7 @@ import {
   Database,
   Cpu,
   CheckCircle2,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { fonts } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { landingCopy } from "@/content/landingCopy";

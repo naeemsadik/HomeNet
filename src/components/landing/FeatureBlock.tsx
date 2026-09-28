@@ -7,7 +7,7 @@ import {
   Layers,
   MapPin,
   Sparkles,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { fonts } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { landingCopy } from "@/content/landingCopy";

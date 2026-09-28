@@ -19,7 +19,7 @@ import {
   Sparkles,
   TrendingUp,
   UserRound,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,

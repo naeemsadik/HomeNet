@@ -1,4 +1,4 @@
-import { ExternalLink, MapPin, type LucideIcon } from "lucide-react-native";
+import { ExternalLink, MapPin, type LucideIcon } from "@/components/icons";
 import { Image, Linking, Platform, Pressable, Text, View } from "react-native";
 import { colorTokens, webPointer } from "@/theme";
 import { styles } from "../screens/PropertyDetailScreen.styles";

@@ -13,7 +13,7 @@ import {
   User,
   X,
   type LucideIcon,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   Image,

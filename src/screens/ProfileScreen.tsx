@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
-import { Camera, LoaderCircle, LogOut, ShieldCheck, Trash2, UserRound, KeyRound } from "lucide-react-native";
+import { Camera, LoaderCircle, LogOut, ShieldCheck, Trash2, UserRound, KeyRound } from "@/components/icons";
 import { useEffect, useState } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";

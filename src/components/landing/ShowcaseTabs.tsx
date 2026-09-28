@@ -16,7 +16,7 @@ import {
   Maximize2,
   ShieldCheck,
   Sparkles,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { BrowserFrame } from "./BrowserFrame";

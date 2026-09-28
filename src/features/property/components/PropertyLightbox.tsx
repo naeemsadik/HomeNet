@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, X } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, X } from "@/components/icons";
 import { useRef, type RefObject } from "react";
 import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { webPointer } from "@/theme";

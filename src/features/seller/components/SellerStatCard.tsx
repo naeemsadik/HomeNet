@@ -1,4 +1,4 @@
-import { TrendingUp } from "lucide-react-native";
+import { TrendingUp } from "@/components/icons";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { fonts } from "@/theme";
 import { LiveText } from "@/components/LiveText";

@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Bell, Building2, MapPinned, Settings, ShieldCheck, Users } from "lucide-react-native";
+import { Bell, Building2, MapPinned, Settings, ShieldCheck, Users } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import type { UserRole } from "../types/admin";
 import { LiveText } from "@/components/LiveText";
