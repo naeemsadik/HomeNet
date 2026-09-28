@@ -189,7 +189,7 @@ export const AiFlagshipSection: React.FC = () => {
           {/* =========================================================================
               LEFT COLUMN: The 3 Core Truths (Ordered 1, 2, 3)
               ========================================================================= */}
-          <View style={styles.headlinesCol}>
+          <View style={[styles.headlinesCol, isTablet && styles.headlinesColStacked]}>
             {copy.headlines.map((headline, idx) => {
               const isActive = activeHeadline === idx;
               const icons = [
@@ -238,7 +238,7 @@ export const AiFlagshipSection: React.FC = () => {
           {/* =========================================================================
               RIGHT COLUMN: The Product Demonstration (Authentic AiListingSheet)
               ========================================================================= */}
-          <View style={styles.demoCol}>
+          <View style={[styles.demoCol, isTablet && styles.demoColStacked]}>
             {/* Device Frame */}
             <View style={styles.deviceFrame}>
               {/* Device Window Chrome */}
