@@ -167,14 +167,9 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
     return allItems;
   }, [allItems, activeTab]);
 
-  const { lead, rest, hasItems } = useMemo(() => {
-    const sliced = filteredItems.slice(0, 4);
-    return {
-      lead: sliced[0],
-      rest: sliced.slice(1),
-      hasItems: sliced.length > 0,
-    };
-  }, [filteredItems]);
+  const items = filteredItems.slice(0, 4);
+  const [lead, ...rest] = items;
+  const hasItems = items.length > 0;
 
   const isStacked = isPhone || isTablet;
 
