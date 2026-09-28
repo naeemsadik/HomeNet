@@ -1,18 +1,6 @@
 // First, so production is silent before anything else can log.
 import "@/lib/productionConsole";
 import { useEffect } from "react";
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_800ExtraBold,
-} from "@expo-google-fonts/inter";
-import {
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-  PlusJakartaSans_800ExtraBold,
-} from "@expo-google-fonts/plus-jakarta-sans";
 import { useFonts } from "expo-font";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
@@ -23,6 +11,7 @@ import { ToastHost } from "@/components/ToastHost";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
+import { appFonts } from "@/theme/appFonts";
 import {
   ensureGoogleTranslateScript,
   restoreSavedLanguage,
@@ -38,16 +27,8 @@ const FOCUS_RING_COLOR = colorTokens.primaryOnLight;
 
 
 export default function RootLayout() {
-  const [loaded] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    Inter_800ExtraBold,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
-  });
+  // Latin subsets with font-display: swap on web; full files on native.
+  const [loaded] = useFonts(appFonts);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
