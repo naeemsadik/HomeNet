@@ -101,7 +101,7 @@ export function AreaPicker({
     navigateToBreadcrumb,
     resetNav,
     selectCity,
-  } = useAreaPicker({ initialCity });
+  } = useAreaPicker({ initialCity, enabled: visible });
 
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const flatListRef = React.useRef<FlatList>(null);

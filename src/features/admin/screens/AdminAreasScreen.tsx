@@ -18,13 +18,15 @@ import {
   deleteArea,
   fetchArea,
   fetchAreaChildren,
-  fetchAreas,
   updateArea,
 } from "@/services/areaApi";
 import { toApiError } from "@/services/apiClient";
 import type { Area, AreaDetail, CreateAreaDto } from "@/types/api";
 import { colorTokens, fontTokens, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
+import { allAreasQuery, filterAreas, pageAreas } from "@/hooks/useAllAreas";
+
+const ADMIN_AREAS_PAGE_SIZE = 20;
 
 interface AreaFormProps {
   visible: boolean;
@@ -201,8 +203,10 @@ export function AdminAreasScreen() {
         const response = await fetchAreaChildren(parentId);
         return { items: response.data ?? [], total: response.data?.length ?? 0, total_pages: 1 };
       }
-      const response = await fetchAreas({ search: search.trim() || undefined, page, limit: 20 });
-      return response.data ?? { items: [], total: 0, total_pages: 0 };
+      // Search and paging run on the shared all-areas list: the API answers
+      // every areas query from one cache entry (see useAllAreas).
+      const all = await queryClient.fetchQuery(allAreasQuery);
+      return pageAreas(filterAreas(all.items, { search }), page, ADMIN_AREAS_PAGE_SIZE);
     },
   });
 

@@ -1,6 +1,6 @@
 import { useQueries } from "@tanstack/react-query";
 import { getProperties } from "@/services/propertyApi";
-import { fetchAreas } from "@/services/areaApi";
+import { allAreasQuery } from "@/hooks/useAllAreas";
 
 const STALE_TIME = 10 * 60_000; // 10 minutes
 
@@ -34,11 +34,9 @@ export function useLandingMetrics(): ResolvedLandingMetrics {
           getProperties({ listing_type: "rent", limit: 1, sort_by: "view_count_desc" }),
         staleTime: STALE_TIME,
       },
-      {
-        queryKey: ["landing", "metrics", "areas"],
-        queryFn: () => fetchAreas({ limit: 1 }),
-        staleTime: STALE_TIME,
-      },
+      // Not a `limit: 1` request of its own: the API caches every areas
+      // query under one key, and that answer was served to the area picker.
+      allAreasQuery,
     ],
   });
 
@@ -50,7 +48,7 @@ export function useLandingMetrics(): ResolvedLandingMetrics {
   const activeListings = (activeQuery.data as any)?.data?.total ?? 0;
   const forSale = (saleQuery.data as any)?.data?.total ?? 0;
   const forRent = (rentQuery.data as any)?.data?.total ?? 0;
-  const areasCovered = (areasQuery.data as any)?.data?.total ?? 0;
+  const areasCovered = areasQuery.data?.total ?? 0;
 
   return {
     activeListings,
