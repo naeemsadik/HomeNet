@@ -43,6 +43,7 @@ const GuideCard = memo(function GuideCard({ guide, featured }: { guide: Property
   );
   const [hasError, setHasError] = useState(false);
   const displayUri = hasError ? GUIDE_FALLBACK_IMAGE : resolvedUrl;
+  const imageSource = useMemo(() => ({ uri: displayUri }), [displayUri]);
 
   useEffect(() => {
     setHasError(false);
@@ -75,7 +76,7 @@ const GuideCard = memo(function GuideCard({ guide, featured }: { guide: Property
     >
       <View style={[styles.thumb, featured && !isPhone && styles.thumbFeatured]}>
         <Image
-          source={{ uri: displayUri }}
+          source={imageSource}
           style={styles.thumbImage}
           contentFit="cover"
           cachePolicy="memory-disk"
@@ -130,10 +131,12 @@ const GuideCard = memo(function GuideCard({ guide, featured }: { guide: Property
   );
 });
 
-export function PropertyGuidesSection() {
+const GUIDES_LIMIT = 12;
+
+export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
   const { isPhone, isTablet } = useResponsive();
   const [activeTab, setActiveTab] = useState<GuideTab>("All");
-  const { data, isLoading, isError } = usePropertyGuides({ limit: 12 });
+  const { data, isLoading, isError } = usePropertyGuides(GUIDES_LIMIT);
 
   const allItems = data?.items ?? [];
 
@@ -164,8 +167,16 @@ export function PropertyGuidesSection() {
     return allItems;
   }, [allItems, activeTab]);
 
-  const items = filteredItems.slice(0, 4);
-  const [lead, ...rest] = items;
+  const { lead, rest, hasItems } = useMemo(() => {
+    const sliced = filteredItems.slice(0, 4);
+    return {
+      lead: sliced[0],
+      rest: sliced.slice(1),
+      hasItems: sliced.length > 0,
+    };
+  }, [filteredItems]);
+
+  const isStacked = isPhone || isTablet;
 
   return (
     <View style={styles.section}>
@@ -243,7 +254,7 @@ export function PropertyGuidesSection() {
             ))}
           </View>
         </View>
-      ) : items.length === 0 ? (
+      ) : !hasItems ? (
         // Empty state when filtering a tab with 0 results
         <View style={styles.emptyFilteredPanel}>
           <Text style={styles.emptyFilteredTitle}>No articles in this category yet</Text>
@@ -262,21 +273,15 @@ export function PropertyGuidesSection() {
           </Pressable>
         </View>
       ) : (
-        <View
-          style={[
-            styles.grid,
-            isTablet && styles.gridTablet,
-            isPhone && styles.gridPhone,
-          ]}
-        >
+        <View style={[styles.grid, isStacked && styles.gridStacked]}>
           {lead ? (
-            <View style={[styles.leadCol, (isTablet || isPhone) && styles.fullCol]}>
+            <View style={isStacked ? styles.leadColStacked : styles.leadCol}>
               <GuideCard guide={lead} featured />
             </View>
           ) : null}
 
           {rest.length > 0 ? (
-            <View style={[styles.restCol, (isTablet || isPhone) && styles.fullCol]}>
+            <View style={isStacked ? styles.restColStacked : styles.restCol}>
               {rest.map((guide) => (
                 <GuideCard key={guide.id} guide={guide} />
               ))}
@@ -286,7 +291,7 @@ export function PropertyGuidesSection() {
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   section: {
@@ -370,11 +375,11 @@ const styles = StyleSheet.create({
   },
 
   grid: { flexDirection: "row", gap: 20, width: "100%" },
-  gridTablet: { flexDirection: "column" },
-  gridPhone: { flexDirection: "column", gap: 14 },
+  gridStacked: { flexDirection: "column", gap: 14 },
   leadCol: { flex: 1.15, minWidth: 0 },
+  leadColStacked: { width: "100%" },
   restCol: { flex: 1, minWidth: 0, gap: 14 },
-  fullCol: { flex: undefined, width: "100%" },
+  restColStacked: { width: "100%", gap: 14 },
 
   card: {
     flexDirection: "row",
@@ -386,7 +391,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     padding: 12,
   },
-  cardFeatured: { flexDirection: "column", gap: 0, padding: 0 },
+  cardFeatured: {
+    flexDirection: "column",
+    gap: 0,
+    padding: 0,
+    overflow: "hidden",
+  },
   cardHovered: { borderColor: "rgba(11,26,23,0.18)" },
   cardPressed: { opacity: 0.92 },
 
@@ -398,8 +408,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.soft,
     flexShrink: 0,
   },
-  thumbFeatured: { width: "100%", height: 240, borderRadius: 0 },
-  thumbImage: { width: "100%", height: "100%" },
+  thumbFeatured: {
+    width: "100%",
+    height: 240,
+    borderTopLeftRadius: radius.md - 1,
+    borderTopRightRadius: radius.md - 1,
+    borderRadius: 0,
+    overflow: "hidden",
+  },
+  thumbImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: radius.xs,
+    overflow: "hidden",
+  },
   thumbPlaceholder: {
     flex: 1,
     alignItems: "center",
@@ -408,7 +430,11 @@ const styles = StyleSheet.create({
   },
 
   cardBody: { flex: 1, minWidth: 0, gap: 6, justifyContent: "center" },
-  cardBodyFeatured: { padding: 18, gap: 8 },
+  cardBodyFeatured: {
+    padding: 18,
+    gap: 8,
+    backgroundColor: colors.white,
+  },
   metaRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8 },
 
   /* Badge Styles */

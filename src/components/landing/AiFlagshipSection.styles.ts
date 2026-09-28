@@ -96,6 +96,12 @@ export const styles = StyleSheet.create({
     gap: 16,
     width: '100%',
   },
+  headlinesColStacked: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
+    width: '100%',
+  },
   headlineCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: radius.lg,
@@ -181,6 +187,12 @@ export const styles = StyleSheet.create({
   },
   demoCol: {
     flex: 1.15,
+    width: '100%',
+  },
+  demoColStacked: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
     width: '100%',
   },
   deviceFrame: {
