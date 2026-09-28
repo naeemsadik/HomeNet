@@ -1,4 +1,4 @@
-import { BarChart2, CheckCircle2, Sparkles, TrendingUp } from "lucide-react-native";
+import { BarChart2, CheckCircle2, Sparkles, TrendingUp } from "@/components/icons";
 import { Text, View } from "react-native";
 import { AiFinderWorkflow } from "@/components/AiFinderWorkflow";
 import { useResponsive } from "@/hooks/useResponsive";

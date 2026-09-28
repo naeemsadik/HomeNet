@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Sparkles, ArrowRight, PlusCircle, ChevronRight } from 'lucide-react-native';
+import { Sparkles, ArrowRight, PlusCircle, ChevronRight } from '@/components/icons';
 import { radius, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { landingCopy } from '../../content/landingCopy';

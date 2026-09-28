@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { LoaderCircle, Mail, ShieldCheck, UserRound, XCircle } from "lucide-react-native";
+import { LoaderCircle, Mail, ShieldCheck, UserRound, XCircle } from "@/components/icons";
 import { useEffect, useState } from "react";
 import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";

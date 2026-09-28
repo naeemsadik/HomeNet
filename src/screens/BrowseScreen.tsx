@@ -12,7 +12,7 @@ import {
   List,
   RotateCcw,
   Search,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard, CARD_HEIGHT } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";

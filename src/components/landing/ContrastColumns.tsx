@@ -1,6 +1,6 @@
 import React from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
-import { Check, X } from "lucide-react-native";
+import { Check, X } from "@/components/icons";
 import { colorTokens, fonts } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { landingCopy } from "@/content/landingCopy";

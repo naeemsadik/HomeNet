@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
-import { Send, ArrowRight, ArrowLeft, Check, MapPin } from "lucide-react-native";
+import { Send, ArrowRight, ArrowLeft, Check, MapPin } from "@/components/icons";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { colorTokens, fonts } from "@/theme";

@@ -19,7 +19,7 @@ import {
   X,
   Check,
   Building,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { colorTokens, colors, webPointer } from "@/theme";
 import { useAreaPicker } from "@/hooks/useAreaPicker";
 import { useWindowSize } from "@/hooks/useResponsive";

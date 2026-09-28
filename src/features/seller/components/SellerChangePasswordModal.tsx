@@ -1,4 +1,4 @@
-import { Eye, EyeOff, KeyRound, X } from "lucide-react-native";
+import { Eye, EyeOff, KeyRound, X } from "@/components/icons";
 import { useState } from "react";
 import { ActivityIndicator, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";

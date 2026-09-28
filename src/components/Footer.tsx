@@ -1,7 +1,7 @@
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
-import { Sparkles } from "lucide-react-native";
+import { Sparkles } from "@/components/icons";
 import {
   Pressable,
   StyleSheet,

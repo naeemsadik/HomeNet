@@ -11,7 +11,7 @@ import {
 import { NotificationItem } from "./NotificationItem";
 import { colorTokens, fonts } from "@/theme";
 
-import { Bell } from "lucide-react-native";
+import { Bell } from "@/components/icons";
 import { LiveText } from "@/components/LiveText";
 
 // Says only what the system actually sends. Messaging (FR-12) is out of

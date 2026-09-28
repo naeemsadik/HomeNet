@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { Lock, ShieldAlert } from "lucide-react-native";
+import { Lock, ShieldAlert } from "@/components/icons";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { hasAnyAdminPermission, hasPermission } from "@/lib/permissions";

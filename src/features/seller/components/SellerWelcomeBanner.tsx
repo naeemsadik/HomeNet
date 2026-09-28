@@ -7,7 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { PlusCircle, Rocket } from "lucide-react-native";
+import { PlusCircle, Rocket } from "@/components/icons";
 import Svg, { Path } from "react-native-svg";
 import { AppLink } from "@/components/ui";
 import { fonts, webPointer } from "@/theme";

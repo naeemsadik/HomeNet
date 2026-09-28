@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Check } from "lucide-react-native";
+import { Check } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 
 interface PropertyAmenitiesProps {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { User, ArrowRight, Menu, X, ExternalLink, ChevronRight } from 'lucide-react-native';
+import { User, ArrowRight, Menu, X, ExternalLink, ChevronRight } from '@/components/icons';
 import { colors, radius, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useAuthStore } from '../../stores/authStore';

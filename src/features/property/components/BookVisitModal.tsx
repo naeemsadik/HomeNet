@@ -1,4 +1,4 @@
-import { Phone, X } from "lucide-react-native";
+import { Phone, X } from "@/components/icons";
 import { Modal, Pressable, Text, View } from "react-native";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { styles } from "../screens/PropertyDetailScreen.styles";

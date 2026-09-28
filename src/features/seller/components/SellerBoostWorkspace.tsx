@@ -1,4 +1,4 @@
-import { CheckCircle2, MessageSquare, Rocket, Sparkles, TrendingUp } from "lucide-react-native";
+import { CheckCircle2, MessageSquare, Rocket, Sparkles, TrendingUp } from "@/components/icons";
 import { Pressable, Text, View } from "react-native";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";

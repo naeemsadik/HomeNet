@@ -5,7 +5,7 @@ import {
   RotateCcw,
   Search,
   X,
-} from "lucide-react-native";
+} from "@/components/icons";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,

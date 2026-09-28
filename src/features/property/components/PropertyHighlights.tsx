@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Maximize, Building2, Tag, Calendar } from "lucide-react-native";
+import { Maximize, Building2, Tag, Calendar } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 
 interface PropertyHighlightsProps {

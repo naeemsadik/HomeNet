@@ -1,4 +1,4 @@
-import { CircleHelp, Mail, MessageSquare, Phone } from "lucide-react-native";
+import { CircleHelp, Mail, MessageSquare, Phone } from "@/components/icons";
 import { Text, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors } from "@/theme";

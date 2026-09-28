@@ -24,7 +24,7 @@ import {
   Mail,
   User,
   X,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useAuthStore } from "@/stores/authStore";
 import { authModalSchema, type AuthModalFormData } from "@/lib/schemas/auth";
 import { colorTokens, fonts, webPointer } from "@/theme";

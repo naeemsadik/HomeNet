@@ -10,7 +10,7 @@ import {
   NativeScrollEvent,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ArrowRight, PlusCircle, ChevronRight, Sparkles } from 'lucide-react-native';
+import { ArrowRight, PlusCircle, ChevronRight, Sparkles } from '@/components/icons';
 import { colors, radius, fonts } from '../theme';
 import { useResponsive } from '../hooks/useResponsive';
 import { landingCopy, HERO_HEADLINE } from '../content/landingCopy';

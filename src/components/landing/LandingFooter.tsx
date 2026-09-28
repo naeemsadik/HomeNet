@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Cpu } from 'lucide-react-native';
+import { Cpu } from '@/components/icons';
 import { colors, radius, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { Brand } from '../Brand';

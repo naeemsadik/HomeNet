@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, ExternalLink } from "lucide-react-native";
+import { ArrowRight, BookOpen, ExternalLink } from "@/components/icons";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,

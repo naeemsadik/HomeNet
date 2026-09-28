@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   Sparkles,
   type LucideIcon,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";

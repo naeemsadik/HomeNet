@@ -23,7 +23,7 @@ import {
   TrendingUp,
   User,
   Zap,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useEffect, useState } from "react";
 import {
   ScrollView,

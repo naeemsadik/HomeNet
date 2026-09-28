@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Pressable } from "react-native";
 import { router } from "expo-router";
-import { Users, Building2, Clock, BarChart3, ChevronRight, type LucideIcon } from "lucide-react-native";
+import { Users, Building2, Clock, BarChart3, ChevronRight, type LucideIcon } from "@/components/icons";
 import { useQuery } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";

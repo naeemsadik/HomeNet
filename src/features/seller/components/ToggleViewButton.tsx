@@ -9,7 +9,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { RefreshCw } from "lucide-react-native";
+import { RefreshCw } from "@/components/icons";
 import { router, type Href } from "expo-router";
 import { colors, fonts, radius, webPointer } from "@/theme";
 

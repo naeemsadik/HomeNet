@@ -1,4 +1,4 @@
-import { CheckCircle2 } from "lucide-react-native";
+import { CheckCircle2 } from "@/components/icons";
 import { Text, View } from "react-native";
 import type { PropertyTypeConfig } from "../../constants/propertyCategories";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";

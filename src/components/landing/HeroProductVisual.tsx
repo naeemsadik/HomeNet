@@ -12,7 +12,7 @@ import {
   MapPin,
   Search,
   ShieldCheck,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";

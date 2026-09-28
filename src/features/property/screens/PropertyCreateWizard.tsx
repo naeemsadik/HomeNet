@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   Sparkles,
   User,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,

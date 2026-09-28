@@ -24,7 +24,7 @@ import {
   Sparkles,
   TrendingUp,
   X,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { usePropertyWizardStore } from "@/features/property/stores/propertyWizardStore";

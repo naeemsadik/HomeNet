@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, MapPinned, Pencil, Plus, Trash2, X } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, MapPinned, Pencil, Plus, Trash2, X } from "@/components/icons";
 import { AreaPicker } from "@/components/AreaPicker";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import {

@@ -1,5 +1,5 @@
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, View } from "react-native";
-import { Search, Users } from "lucide-react-native";
+import { Search, Users } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { UserAdminItemRow } from "./UserAdminItem";
 import type { UserWithRoles } from "../types/admin";
