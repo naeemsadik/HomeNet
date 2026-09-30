@@ -56,11 +56,12 @@ export function toApiError(error: unknown): ApiError {
   return new ApiError(String(error));
 }
 
+export const PRODUCTION_API_BASE_URL = "https://api.homenetbd.com";
 export const VERCEL_API_BASE_URL = "https://homenet-api.vercel.app";
 export const LOCAL_API_BASE_URL = "http://localhost:3000/api";
 
 let apiBaseUrl = (
-  process.env.EXPO_PUBLIC_API_BASE_URL || VERCEL_API_BASE_URL
+  process.env.EXPO_PUBLIC_API_BASE_URL || PRODUCTION_API_BASE_URL
 ).replace(/\/$/, "");
 
 export function getApiBaseUrl(): string {
