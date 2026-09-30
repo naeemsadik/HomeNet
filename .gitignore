@@ -69,3 +69,8 @@ CLAUDE.md
 claude/
 DESIGN.md
 skills-lock.json
+
+# AI-tool configuration: local to each developer, not part of the app
+.codex/
+.21st/
+mcp.json
