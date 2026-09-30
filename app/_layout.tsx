@@ -20,6 +20,11 @@ import {
 } from "@/utils/language";
 import { PageMeta } from "@/components/PageMeta";
 import { queryClient } from "@/lib/queryClient";
+import { installDomGuard } from "@/lib/domGuard";
+
+// Before React renders: Google Translate rewrites text nodes React still holds,
+// and React's later removeChild/insertBefore on them would crash the app.
+installDomGuard();
 
 // Keyboard focus ring. Not colorTokens.primary (#04cf92), which sits at 2.03:1
 // on white and fails the 3:1 WCAG 1.4.11 minimum for a focus indicator.
