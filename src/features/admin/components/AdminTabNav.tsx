@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Bell, Building2, MapPinned, Settings, ShieldCheck, Users } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import type { UserRole } from "../types/admin";
+import { hasPermission, isAdmin } from "@/lib/permissions";
 import { LiveText } from "@/components/LiveText";
 
 type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
@@ -29,16 +30,6 @@ const TABS: {
   { key: "areas", label: "Areas", icon: MapPinned, permissions: ["manage_areas"] },
   { key: "settings", label: "Settings", icon: Settings },
 ];
-
-function hasPermission(userRoles: UserRole[], permission: string): boolean {
-  return userRoles.some((ur) =>
-    ur.role.role_permissions?.some((rp) => rp.permission.name === permission),
-  );
-}
-
-function isAdmin(userRoles: UserRole[]): boolean {
-  return userRoles.some((ur) => ur.role.name === "admin" || ur.role.name === "superadmin");
-}
 
 export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNavProps) {
   const visibleTabs = TABS.filter((tab) => {

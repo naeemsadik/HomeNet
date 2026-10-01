@@ -201,6 +201,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
 
   const {
     properties: apiProperties,
+    total,
     loading,
     isError,
     hasMore,
@@ -218,6 +219,8 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
   // did not honour it, this empties out and the honest gate below shows.
   const isSoldView = rightmoveFilters.purpose === "sold";
   const results = isSoldView ? feed.filter((p) => p.status === "sold") : feed;
+  // The API total ignores the client-side sold filter, so the sold view counts what it shows.
+  const totalCount = isSoldView ? results.length : (total ?? results.length);
 
   const handleResetFilters = () => {
     setRightmoveFilters({
@@ -279,13 +282,13 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
             setRightmoveFilters(applied);
             void refresh();
           }}
-          totalResults={results.length}
+          totalResults={totalCount}
         />
 
         {/* ─── 4. Results Count & View Toggle Toolbar ─────────────────────── */}
         <View style={styles.toolbar}>
           <LiveText style={styles.resultCountText}>
-            {results.length} {results.length === 1 ? "property" : "properties"} found
+            {totalCount} {totalCount === 1 ? "property" : "properties"} found
           </LiveText>
 
           <View style={styles.viewToggleWrap}>
@@ -405,7 +408,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
           onApply={(updated) => setModalFilters(updated)}
           onClose={() => setIsFilterModalOpen(false)}
           onReset={() => setModalFilters(defaultFilterState)}
-          resultCount={results.length}
+          resultCount={totalCount}
           visible={isFilterModalOpen}
         />
       </View>

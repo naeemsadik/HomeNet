@@ -10,7 +10,7 @@ import { AdminPropertiesScreen } from "./AdminPropertiesScreen";
 import { AdminUsersScreen } from "./AdminUsersScreen";
 import { AdminRolesScreen } from "./AdminRolesScreen";
 import { AdminAreasScreen } from "./AdminAreasScreen";
-import { hasAnyAdminPermission } from "@/lib/permissions";
+import { hasAnyAdminPermission, isAdmin } from "@/lib/permissions";
 import { NotificationList } from "@/features/notification/components/NotificationList";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 
@@ -23,7 +23,7 @@ export function AdminDashboardScreen() {
   const { data: adminUnread } = useUnreadCount("admin");
 
   const hasAccess = hasAnyAdminPermission(userRoles);
-  const isFullAdmin = userRoles.some((userRole) => ["admin", "superadmin"].includes(userRole.role.name));
+  const isFullAdmin = isAdmin(userRoles);
   const permissionNames = new Set(
     userRoles.flatMap((userRole) =>
       userRole.role.role_permissions?.map((rolePermission) => rolePermission.permission.name) ?? [],
