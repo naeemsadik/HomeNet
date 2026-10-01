@@ -1,11 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getUser, listUsers } from "@/services/userApi";
 import type { UserWithRoles, UserAdminFilters } from "../types/admin";
 
+// GET /v1/users is not paginated, so the full list is cached once per search
+// and pages are revealed from it without further requests.
+export const ADMIN_USERS_PAGE_SIZE = 20;
 
 export function useAdminUsers(filters: UserAdminFilters) {
+  const page = filters.page ?? 1;
+  const limit = filters.limit ?? ADMIN_USERS_PAGE_SIZE;
   return useQuery({
-    queryKey: ["admin", "users", filters],
+    queryKey: ["admin", "users", { search: filters.search }],
     queryFn: async () => {
       const response = await listUsers();
       const query = filters.search?.trim().toLowerCase();
@@ -21,6 +26,8 @@ export function useAdminUsers(filters: UserAdminFilters) {
         limit: users.length,
       };
     },
+    select: (result) => ({ ...result, items: result.items.slice(0, page * limit), page, limit }),
+    placeholderData: keepPreviousData,
   });
 }
 

@@ -10,11 +10,14 @@ import type { UserWithRoles } from "../types/admin";
 import { deleteUser } from "@/services/userApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { toApiError } from "@/services/apiClient";
+import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export function AdminUsersScreen() {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [roleModalUser, setRoleModalUser] = useState<UserWithRoles | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserWithRoles | null>(null);
+  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
     mutationFn: deleteUser,
@@ -25,13 +28,17 @@ export function AdminUsersScreen() {
   });
 
   const { data, error, isLoading, refetch } = useAdminUsers({
-    search: search || undefined,
-    page: 1,
-    limit: 50,
+    search: debouncedSearch || undefined,
+    page,
   });
 
   const users = data?.items ?? [];
   const total = data?.total ?? 0;
+
+  function handleSearchChange(query: string) {
+    setSearch(query);
+    setPage(1);
+  }
 
   function handleView(userId: string) {
     router.push(`/users/${userId}` as never);
@@ -49,10 +56,12 @@ export function AdminUsersScreen() {
         total={total}
         isLoading={isLoading}
         searchQuery={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         onManageRoles={setRoleModalUser}
         onView={handleView}
         onDelete={setDeleteTarget}
+        onLoadMore={() => setPage((current) => current + 1)}
+        hasMore={users.length < total}
       />
 
       <RoleAssignmentModal

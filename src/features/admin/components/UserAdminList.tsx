@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { Search, Users } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { UserAdminItemRow } from "./UserAdminItem";
@@ -14,6 +14,8 @@ interface UserAdminListProps {
   onManageRoles: (user: UserWithRoles) => void;
   onView: (userId: string) => void;
   onDelete: (user: UserWithRoles) => void;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
 }
 
 export function UserAdminList({
@@ -25,6 +27,8 @@ export function UserAdminList({
   onManageRoles,
   onView,
   onDelete,
+  onLoadMore,
+  hasMore = false,
 }: UserAdminListProps) {
   return (
     <View style={styles.container}>
@@ -66,6 +70,13 @@ export function UserAdminList({
               <Users color={colorTokens.textMuted} size={40} />
               <Text style={styles.emptyText}>No users found</Text>
             </View>
+          }
+          ListFooterComponent={
+            hasMore ? (
+              <Pressable onPress={onLoadMore} style={styles.loadMore} accessibilityRole="button" accessibilityLabel="Load more users">
+                <Text style={styles.loadMoreText}>Load More</Text>
+              </Pressable>
+            ) : null
           }
         />
       )}
@@ -114,5 +125,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fontTokens.semiBold,
     color: colorTokens.textMuted,
+  },
+  loadMore: {
+    alignItems: "center",
+    paddingVertical: 14,
+    marginTop: 8,
+    borderRadius: 12,
+    backgroundColor: colorTokens.backgroundAlt,
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
+  },
+  loadMoreText: {
+    fontSize: 13,
+    fontFamily: fontTokens.bold,
+    color: colorTokens.primary,
   },
 });
