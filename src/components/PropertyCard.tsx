@@ -35,8 +35,9 @@ export interface PropertyCardProps {
    */
   variant?: PropertyCardVariant;
   saved?: boolean;
-  onSave?: () => void;
-  onPress?: () => void;
+  /** Receives the card's property, so a list can pass one stable handler to every card. */
+  onSave?: (property: Property) => void;
+  onPress?: (property: Property) => void;
   imageHeight?: number;
   width?: number;
   style?: StyleProp<ViewStyle>;
@@ -86,7 +87,7 @@ function PropertyCardComponent({
   const isFeature = variant === "feature";
 
   const open = () => {
-    if (onPress) onPress();
+    if (onPress) onPress(property);
     else if (property.id) router.push(`/property/${property.id}` as never);
   };
 
@@ -114,7 +115,7 @@ function PropertyCardComponent({
       e.stopPropagation();
     }
     if (onSave) {
-      onSave();
+      onSave(property);
     } else if (property) {
       void useSavedStore.getState().toggleSaved(property);
     }

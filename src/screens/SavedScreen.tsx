@@ -1,5 +1,5 @@
 import { Bookmark, Heart } from "@/components/icons";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -103,14 +103,18 @@ export function SavedScreen() {
     },
   });
 
-  const handleToggleSaved = (id: string | number) => {
-    const idStr = String(id);
-    if (user) {
-      unsaveMutation.mutate(idStr);
-    } else {
-      void useSavedStore.getState().removeSaved(idStr);
-    }
-  };
+  const { mutate: unsave } = unsaveMutation;
+  const handleUnsaveCard = useCallback(
+    (property: Property) => {
+      const idStr = String(property.id);
+      if (user) {
+        unsave(idStr);
+      } else {
+        void useSavedStore.getState().removeSaved(idStr);
+      }
+    },
+    [user, unsave],
+  );
 
   return (
     <AppChrome active="saved">
@@ -171,7 +175,7 @@ export function SavedScreen() {
                 property={prop}
                 imageHeight={isPhone ? 180 : 220}
                 saved={true}
-                onSave={() => handleToggleSaved(prop.id)}
+                onSave={handleUnsaveCard}
                 style={[styles.savedCardItem, isPhone && styles.savedCardItemPhone]}
               />
             ))}
