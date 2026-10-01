@@ -17,6 +17,7 @@ export function usePropertyFeed(filters: PropertyFilters) {
   });
 
   return {
+    total: query.data?.pages[0]?.data?.total,
     properties: query.data?.pages.flatMap((page) => page.data?.items ?? []) ?? [],
     // isPending stays true from mount until the first settle, including between
     // retry attempts, so an unresolved feed can never look like an empty one.
