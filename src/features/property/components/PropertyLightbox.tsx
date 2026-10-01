@@ -92,6 +92,7 @@ export function PropertyLightbox({
 
           <Image
             source={{ uri: images[activeIndex] || images[0] }}
+            accessibilityLabel={`Photo ${activeIndex + 1} of ${images.length}`}
             style={styles.lightboxImage}
             resizeMode="contain"
           />
@@ -125,7 +126,7 @@ export function PropertyLightbox({
                   webPointer,
                 ]}
               >
-                <Image source={{ uri: img }} style={styles.thumbnailImg} />
+                <Image source={{ uri: img }} accessibilityLabel={`Photo ${idx + 1}`} style={styles.thumbnailImg} />
               </Pressable>
             ))}
           </ScrollView>

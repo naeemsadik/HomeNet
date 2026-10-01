@@ -45,6 +45,7 @@ import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { LiveText } from "@/components/LiveText";
+import { NoTranslateText } from "@/components/NoTranslateText";
 
 export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
 
@@ -336,7 +337,7 @@ export function MyPropertiesScreen() {
                       {/* Property Info (Thumbnail, Title, Verified, Boost, Location) */}
                       <View style={[styles.tdCell, { flex: 2.2, flexDirection: "row", gap: 12, alignItems: "center" }]}>
                         {item.imageUrl ? (
-                          <Image source={{ uri: item.imageUrl }} style={styles.propThumb} />
+                          <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.propThumb} />
                         ) : (
                           <View style={[styles.propThumb, styles.imagePlaceholder]}>
                             <Building2 color="#6B7D78" size={20} />
@@ -362,7 +363,7 @@ export function MyPropertiesScreen() {
 
                       {/* Price Column */}
                       <View style={[styles.tdCell, { flex: 1.1 }]}>
-                        <Text style={styles.priceText}>{item.price}</Text>
+                        <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
                       </View>
 
                       {/* Status Column */}
@@ -426,7 +427,7 @@ export function MyPropertiesScreen() {
                     <View key={item.id} style={styles.mobileCard}>
                       <View style={styles.mobileCardHead}>
                         {item.imageUrl ? (
-                          <Image source={{ uri: item.imageUrl }} style={styles.mobileThumb} />
+                          <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.mobileThumb} />
                         ) : (
                           <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
                             <Building2 color="#6B7D78" size={20} />
@@ -450,7 +451,7 @@ export function MyPropertiesScreen() {
 
                     <View style={styles.mobileCardBody}>
                       <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
-                        <Text style={styles.priceText}>{item.price}</Text>
+                        <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                           <Sparkles color="#04cf92" size={14} />
                           <Text style={styles.aiValueText}>{item.aiValue}</Text>

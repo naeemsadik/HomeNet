@@ -46,6 +46,7 @@ import { BookVisitModal } from "../components/BookVisitModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
 import { PropertyLocationSection, type NearbyPlace } from "../components/PropertyLocationSection";
 import { WhatsAppIcon } from "../components/WhatsAppIcon";
+import { NoTranslateText } from "@/components/NoTranslateText";
 
 type AiValuation = {
   estimatedValue: string;
@@ -418,6 +419,7 @@ export function PropertyDetailScreen() {
                 {property.mediaImages.length ? (
                   <Image
                     source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
+                    accessibilityLabel={`${property.title}, photo ${activeImageIndex + 1}`}
                     style={styles.mainImage}
                   />
                 ) : (
@@ -507,7 +509,7 @@ export function PropertyDetailScreen() {
                           webPointer,
                         ]}
                       >
-                        <Image source={{ uri: img }} style={styles.thumbnailImg} />
+                        <Image source={{ uri: img }} accessibilityLabel={`${property.title}, photo ${idx + 1}`} style={styles.thumbnailImg} />
                         {showPlusBadge ? (
                           <View style={styles.moreImagesOverlay}>
                             <Text style={styles.moreImagesText}>+{extraPhotosCount} images</Text>
@@ -650,7 +652,7 @@ export function PropertyDetailScreen() {
                     {property.similarProperties.map((sim) => (
                       <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
                         {sim.imageUrl ? (
-                          <Image source={{ uri: sim.imageUrl }} style={styles.similarThumb} />
+                          <Image source={{ uri: sim.imageUrl }} accessibilityLabel={sim.title} style={styles.similarThumb} />
                         ) : (
                           <View style={[styles.similarThumb, styles.similarThumbPlaceholder]}>
                             <Building2 color="#6B7D78" size={24} />
@@ -688,7 +690,7 @@ export function PropertyDetailScreen() {
             <View style={styles.sellerCard}>
               <View style={styles.sellerRow}>
                 {property.seller.avatarUrl ? (
-                  <Image source={{ uri: property.seller.avatarUrl }} style={styles.sellerAvatar} />
+                  <Image source={{ uri: property.seller.avatarUrl }} accessibilityLabel={property.seller.name} style={styles.sellerAvatar} />
                 ) : (
                   <View style={[styles.sellerAvatar, styles.sellerAvatarPlaceholder]}>
                     <UserRound color="#4F625D" size={24} />
@@ -713,10 +715,10 @@ export function PropertyDetailScreen() {
                     </View>
                   ) : null}
                 </View>
-                <Text style={styles.priceCalloutValue}>
+                <NoTranslateText style={styles.priceCalloutValue}>
                   {property.priceCurrency} {property.price}{" "}
                   <Text style={styles.priceCalloutPeriod}>{property.pricePeriod}</Text>
-                </Text>
+                </NoTranslateText>
               </View>
 
               {/* Action Buttons Row */}

@@ -3,6 +3,7 @@ import { Check, Eye, Trash2, UserRound, X } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { PropertyStatusBadge } from "./StatusBadge";
 import type { PropertyAdminItem } from "../types/admin";
+import { NoTranslateText } from "@/components/NoTranslateText";
 
 interface PropertyAdminItemProps {
   item: PropertyAdminItem;
@@ -28,7 +29,7 @@ export function PropertyAdminItemRow({
       <View style={styles.topRow}>
         <View style={styles.thumbnailWrap}>
           {thumbnail ? (
-            <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
+            <Image source={{ uri: thumbnail }} accessibilityLabel={item.title} style={styles.thumbnail} />
           ) : (
             <View style={styles.thumbnailPlaceholder}>
               <UserRound color={colorTokens.textMuted} size={20} />
@@ -37,9 +38,9 @@ export function PropertyAdminItemRow({
         </View>
         <View style={styles.info}>
           <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
-          <Text style={styles.price}>
+          <NoTranslateText style={styles.price}>
             {item.price_currency} {item.price.toLocaleString()}
-          </Text>
+          </NoTranslateText>
           {item.user ? (
             <Text style={styles.owner} numberOfLines={1}>by {item.user.full_name}</Text>
           ) : null}
