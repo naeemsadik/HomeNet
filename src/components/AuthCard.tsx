@@ -251,7 +251,7 @@ export function AuthCard({
           >
             {/* Optional Close Button (Node 282:81) */}
             {showClose && onClose ? (
-              <Pressable
+              <Pressable accessibilityRole="button"
                 accessibilityLabel="Close"
                 onPress={onClose}
                 style={[styles.closeButton, webPointer]}
@@ -278,7 +278,7 @@ export function AuthCard({
 
       {/* ─── Mode Switcher Tabs (Node 282:13 - 50.4px height) ─── */}
       <View style={styles.tabSwitcher}>
-        <Pressable
+        <Pressable accessibilityRole="button"
           onPress={() => handleTabSwitch("signin")}
           style={[
             styles.tabItem,
@@ -296,7 +296,7 @@ export function AuthCard({
           </Text>
         </Pressable>
 
-        <Pressable
+        <Pressable accessibilityRole="button"
           onPress={() => handleTabSwitch("signup")}
           style={[
             styles.tabItem,
@@ -319,7 +319,7 @@ export function AuthCard({
       <ContentWrapper {...(contentWrapperProps as any)}>
         {/* Social Buttons (Node 282:19 - 42.4px height, gap: 12px) */}
         <View style={styles.socialButtonsRow}>
-          <Pressable
+          <Pressable accessibilityRole="button"
             onPress={() => handleSocialClick("Google")}
             style={[styles.googleButton, webPointer]}
           >
@@ -327,7 +327,7 @@ export function AuthCard({
             <Text style={styles.googleButtonText}>Google</Text>
           </Pressable>
 
-          <Pressable
+          <Pressable accessibilityRole="button"
             onPress={() => handleSocialClick("Facebook")}
             style={[styles.facebookButton, webPointer]}
           >
@@ -367,6 +367,7 @@ export function AuthCard({
                         if (storeError) clearError();
                       }}
                       placeholder="Full name"
+                      accessibilityLabel="Full name"
                       placeholderTextColor="rgba(11, 26, 23, 0.5)"
                       style={styles.textInput}
                       value={value ?? ""}
@@ -396,6 +397,7 @@ export function AuthCard({
                       if (storeError) clearError();
                     }}
                     placeholder="Email address"
+                    accessibilityLabel="Email address"
                     placeholderTextColor="rgba(11, 26, 23, 0.5)"
                     style={styles.textInput}
                     value={value ?? ""}
@@ -423,6 +425,7 @@ export function AuthCard({
                       if (storeError) clearError();
                     }}
                     placeholder={mode === "signin" ? "Password" : "Create password"}
+                    accessibilityLabel={mode === "signin" ? "Password" : "Create password"}
                     placeholderTextColor="rgba(11, 26, 23, 0.5)"
                     secureTextEntry={!showPassword}
                     style={styles.textInput}
@@ -430,7 +433,7 @@ export function AuthCard({
                   />
                 )}
               />
-              <Pressable
+              <Pressable accessibilityRole="button"
                 onPress={() => setShowPassword((prev) => !prev)}
                 style={styles.inputRightAction}
                 accessibilityLabel={showPassword ? "Hide password" : "Show password"}
@@ -449,7 +452,7 @@ export function AuthCard({
 
           {mode === "signin" ? (
             <View style={styles.forgotPasswordRow}>
-              <Pressable onPress={handleForgotPassword} style={webPointer}>
+              <Pressable accessibilityRole="button" onPress={handleForgotPassword} style={webPointer}>
                 <Text style={styles.forgotPasswordText}>
                   Forgot password?
                 </Text>
@@ -458,7 +461,7 @@ export function AuthCard({
           ) : null}
 
           {/* Submit Button (Node 282:60 - 44px height, rounded 20px) */}
-          <Pressable
+          <Pressable accessibilityRole="button"
             disabled={loading}
             onPress={handleSubmit(onSubmit)}
             style={[styles.submitButton, loading && { opacity: 0.7 }, webPointer]}
@@ -483,7 +486,7 @@ export function AuthCard({
               ? "Don't have an account? "
               : "Already have an account? "}
           </Text>
-          <Pressable
+          <Pressable accessibilityRole="button"
             onPress={() =>
               handleTabSwitch(mode === "signin" ? "signup" : "signin")
             }

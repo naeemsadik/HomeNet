@@ -18,6 +18,7 @@ import { cdnImage } from "@/lib/cloudinaryImage";
 import { formatPrice } from "@/lib/format";
 import type { Property } from "@/features/property/types/property";
 import { useSavedStore } from "@/stores/savedStore";
+import { NoTranslateText } from "@/components/NoTranslateText";
 
 export type PropertyCardVariant = "standard" | "feature";
 
@@ -35,8 +36,9 @@ export interface PropertyCardProps {
    */
   variant?: PropertyCardVariant;
   saved?: boolean;
-  onSave?: () => void;
-  onPress?: () => void;
+  /** Receives the card's property, so a list can pass one stable handler to every card. */
+  onSave?: (property: Property) => void;
+  onPress?: (property: Property) => void;
   imageHeight?: number;
   width?: number;
   style?: StyleProp<ViewStyle>;
@@ -86,7 +88,7 @@ function PropertyCardComponent({
   const isFeature = variant === "feature";
 
   const open = () => {
-    if (onPress) onPress();
+    if (onPress) onPress(property);
     else if (property.id) router.push(`/property/${property.id}` as never);
   };
 
@@ -114,7 +116,7 @@ function PropertyCardComponent({
       e.stopPropagation();
     }
     if (onSave) {
-      onSave();
+      onSave(property);
     } else if (property) {
       void useSavedStore.getState().toggleSaved(property);
     }
@@ -173,6 +175,7 @@ function PropertyCardComponent({
               <>
                 <Image
                   source={{ uri: photo }}
+                  accessibilityLabel={property.title}
                   style={StyleSheet.absoluteFill}
                   contentFit="cover"
                   cachePolicy="memory-disk"
@@ -192,10 +195,10 @@ function PropertyCardComponent({
                 <View style={styles.featureBody}>
                   <Text numberOfLines={1} style={styles.featureLocation}>{location}</Text>
                   <Text numberOfLines={2} style={styles.featureTitle}>{property.title}</Text>
-                  <Text style={styles.featurePrice}>
+                  <NoTranslateText style={styles.featurePrice}>
                     {price}
                     {isRent ? <Text style={styles.featurePriceSuffix}>/mo</Text> : null}
-                  </Text>
+                  </NoTranslateText>
                 </View>
               </>
             ) : (
@@ -229,6 +232,7 @@ function PropertyCardComponent({
           {photo ? (
             <Image
               source={{ uri: photo }}
+              accessibilityLabel={property.title}
               style={styles.fill}
               contentFit="cover"
               cachePolicy="memory-disk"
@@ -244,10 +248,10 @@ function PropertyCardComponent({
         </View>
 
         <View style={styles.body}>
-          <Text style={styles.price}>
+          <NoTranslateText style={styles.price}>
             {price}
             {isRent ? <Text style={styles.priceSuffix}>/mo</Text> : null}
-          </Text>
+          </NoTranslateText>
 
           <Text numberOfLines={2} style={styles.title}>{property.title}</Text>
 

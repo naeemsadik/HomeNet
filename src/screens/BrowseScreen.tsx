@@ -250,7 +250,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
       <View style={styles.listItemWrap}>
         <PropertyCard
           imageHeight={isPhone ? 180 : 210}
-          onSave={() => handleToggleSaved(item)}
+          onSave={handleToggleSaved}
           property={item}
           saved={isSaved(item.id)}
         />
@@ -346,7 +346,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
                   <PropertyCard
                     imageHeight={isPhone ? 180 : 210}
                     key={prop.id}
-                    onSave={() => handleToggleSaved(prop)}
+                    onSave={handleToggleSaved}
                     property={prop}
                     saved={isSaved(prop.id)}
                   />

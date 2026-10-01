@@ -1,7 +1,6 @@
 import { Bookmark, Heart } from "@/components/icons";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import {
-  ActivityIndicator,
   StyleSheet,
   Text,
   View,
@@ -18,6 +17,7 @@ import { useAuthStore } from "@/stores/authStore";
 import type { ApiResponse } from "@/types/api";
 import type { Property } from "@/features/property/types/property";
 import { LiveText } from "@/components/LiveText";
+import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
 
 export function SavedScreen() {
   const { isPhone } = useResponsive();
@@ -103,14 +103,18 @@ export function SavedScreen() {
     },
   });
 
-  const handleToggleSaved = (id: string | number) => {
-    const idStr = String(id);
-    if (user) {
-      unsaveMutation.mutate(idStr);
-    } else {
-      void useSavedStore.getState().removeSaved(idStr);
-    }
-  };
+  const { mutate: unsave } = unsaveMutation;
+  const handleUnsaveCard = useCallback(
+    (property: Property) => {
+      const idStr = String(property.id);
+      if (user) {
+        unsave(idStr);
+      } else {
+        void useSavedStore.getState().removeSaved(idStr);
+      }
+    },
+    [user, unsave],
+  );
 
   return (
     <AppChrome active="saved">
@@ -146,12 +150,7 @@ export function SavedScreen() {
         </View>
 
         {isLoading && savedListings.length === 0 ? (
-          <View style={{ padding: 48, alignItems: "center" }}>
-            <ActivityIndicator size="large" color="#04cf92" />
-            <Text style={{ marginTop: 12, color: "#5C6B66", fontFamily: fonts.medium }}>
-              Loading saved properties...
-            </Text>
-          </View>
+          <PropertySkeletonFeed />
         ) : savedListings.length === 0 ? (
           <View style={styles.emptySavedBox}>
             <Heart color="#899790" size={48} />
@@ -171,7 +170,7 @@ export function SavedScreen() {
                 property={prop}
                 imageHeight={isPhone ? 180 : 220}
                 saved={true}
-                onSave={() => handleToggleSaved(prop.id)}
+                onSave={handleUnsaveCard}
                 style={[styles.savedCardItem, isPhone && styles.savedCardItemPhone]}
               />
             ))}

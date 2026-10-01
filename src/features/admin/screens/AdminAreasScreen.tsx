@@ -9,7 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, MapPinned, Pencil, Plus, Trash2, X } from "@/components/icons";
 import { AreaPicker } from "@/components/AreaPicker";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -25,6 +25,7 @@ import type { Area, AreaDetail, CreateAreaDto } from "@/types/api";
 import { colorTokens, fontTokens, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
 import { allAreasQuery, filterAreas, pageAreas } from "@/hooks/useAllAreas";
+import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 const ADMIN_AREAS_PAGE_SIZE = 20;
 
@@ -195,19 +196,21 @@ export function AdminAreasScreen() {
   const [deleteTarget, setDeleteTarget] = useState<Area | null>(null);
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null);
   const parentId = path.at(-1)?.id;
+  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
 
   const areasQuery = useQuery({
-    queryKey: ["areas", "admin", search, page, parentId],
+    queryKey: ["areas", "admin", debouncedSearch, page, parentId],
     queryFn: async () => {
-      if (parentId && !search.trim()) {
+      if (parentId && !debouncedSearch.trim()) {
         const response = await fetchAreaChildren(parentId);
         return { items: response.data ?? [], total: response.data?.length ?? 0, total_pages: 1 };
       }
       // Search and paging run on the shared all-areas list: the API answers
       // every areas query from one cache entry (see useAllAreas).
       const all = await queryClient.fetchQuery(allAreasQuery);
-      return pageAreas(filterAreas(all.items, { search }), page, ADMIN_AREAS_PAGE_SIZE);
+      return pageAreas(filterAreas(all.items, { search: debouncedSearch }), page, ADMIN_AREAS_PAGE_SIZE);
     },
+    placeholderData: keepPreviousData,
   });
 
   const saveMutation = useMutation({

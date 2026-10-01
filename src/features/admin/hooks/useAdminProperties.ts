@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   adminDeleteProperty,
   adminUpdateProperty,
@@ -9,19 +9,27 @@ import type {
   PropertyAdminFilters,
 } from "../types/admin";
 
-export function useAdminProperties(filters: PropertyAdminFilters) {
-  return useQuery({
+export const ADMIN_PROPERTIES_PAGE_SIZE = 20;
+
+/** Pages accumulate in the cache, so invalidating after a mutation keeps every loaded page. */
+export function useAdminProperties(filters: Omit<PropertyAdminFilters, "page">) {
+  return useInfiniteQuery({
     queryKey: ["admin", "properties", filters],
-    queryFn: async () => {
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }) => {
+      const limit = filters.limit ?? ADMIN_PROPERTIES_PAGE_SIZE;
       const params: Record<string, string | number> = {};
       if (filters.status) params.status = filters.status;
       if (filters.search) params.search = filters.search;
-      params.page = filters.page ?? 1;
-      params.limit = filters.limit ?? 20;
+      params.page = pageParam;
+      params.limit = limit;
 
       const response = await getAdminProperties(params);
-      return (response.data ?? { items: [], total: 0, page: 1, limit: 20 }) as PropertyAdminListResponse;
+      return (response.data ?? { items: [], total: 0, page: pageParam, limit }) as PropertyAdminListResponse;
     },
+    getNextPageParam: (lastPage) =>
+      lastPage.page * lastPage.limit < lastPage.total ? lastPage.page + 1 : undefined,
+    placeholderData: keepPreviousData,
   });
 }
 

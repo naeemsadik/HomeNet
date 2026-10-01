@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { router } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { colorTokens, fontTokens } from "@/theme";
@@ -6,74 +6,32 @@ import { useAdminProperties, useAdminPropertyMutations } from "../hooks/useAdmin
 import { PropertyAdminList } from "../components/PropertyAdminList";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { toApiError } from "@/services/apiClient";
-import type { PropertyAdminItem } from "../types/admin";
+import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 export function AdminPropertiesScreen() {
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [properties, setProperties] = useState<PropertyAdminItem[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
 
-  const { data, error, isLoading, refetch } = useAdminProperties({
+  const { data, error, isLoading, refetch, hasNextPage, fetchNextPage } = useAdminProperties({
     status: status === "all" ? undefined : status,
-    search: search || undefined,
-    page,
-    limit: 20,
+    search: debouncedSearch || undefined,
   });
 
   const { approveProperty, rejectProperty, deleteProperty } = useAdminPropertyMutations();
 
-  const total = data?.total ?? 0;
-  const hasMore = properties.length < total;
-
-  useEffect(() => {
-    if (!data) return;
-    setProperties((current) =>
-      page === 1
-        ? data.items
-        : [...current, ...data.items.filter((item) => !current.some((existing) => existing.id === item.id))],
-    );
-  }, [data, page]);
-
-  function handleApprove(id: string) {
-    approveProperty.mutate(id, { onSuccess: resetResults });
-  }
-
-  function handleReject(id: string) {
-    rejectProperty.mutate(id, { onSuccess: resetResults });
-  }
-
-  function resetResults() {
-    setPage(1);
-    setProperties([]);
-  }
+  const properties = data?.pages.flatMap((page) => page.items) ?? [];
+  const total = data?.pages[0]?.total ?? 0;
 
   function handleDeleteConfirm() {
     if (deleteTarget) {
-      deleteProperty.mutate(deleteTarget, {
-        onSuccess: () => {
-          setDeleteTarget(null);
-          resetResults();
-        },
-      });
+      deleteProperty.mutate(deleteTarget, { onSuccess: () => setDeleteTarget(null) });
     }
   }
 
   function handleView(id: string) {
     router.push(`/property/${id}` as never);
-  }
-
-  function handleStatusChange(newStatus: string) {
-    setStatus(newStatus);
-    setPage(1);
-    setProperties([]);
-  }
-
-  function handleSearchChange(query: string) {
-    setSearch(query);
-    setPage(1);
-    setProperties([]);
   }
 
   return (
@@ -90,14 +48,14 @@ export function AdminPropertiesScreen() {
         isMutating={approveProperty.isPending || rejectProperty.isPending || deleteProperty.isPending}
         activeStatus={status}
         searchQuery={search}
-        onStatusChange={handleStatusChange}
-        onSearchChange={handleSearchChange}
-        onApprove={handleApprove}
-        onReject={handleReject}
+        onStatusChange={setStatus}
+        onSearchChange={setSearch}
+        onApprove={(id) => approveProperty.mutate(id)}
+        onReject={(id) => rejectProperty.mutate(id)}
         onDelete={setDeleteTarget}
         onView={handleView}
-        onLoadMore={() => setPage((p) => p + 1)}
-        hasMore={hasMore}
+        onLoadMore={() => void fetchNextPage()}
+        hasMore={hasNextPage}
       />
       {error ? (
         <Text onPress={() => void refetch()} style={styles.errorText}>

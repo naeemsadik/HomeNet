@@ -113,13 +113,13 @@ export function AdvancedFiltersModal({
       onRequestClose={onClose}
     >
       <View style={styles.backdrop}>
-        <Pressable style={styles.backdropTouch} onPress={onClose} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Close advanced filters" style={styles.backdropTouch} onPress={onClose} />
 
         <View style={styles.modalCard}>
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Advanced filters</Text>
-            <Pressable
+            <Pressable accessibilityRole="button"
               accessibilityLabel="Close advanced filters"
               onPress={onClose}
               style={[styles.closeButton, webPointer]}
@@ -146,6 +146,7 @@ export function AdvancedFiltersModal({
                     setLocalFilters((prev) => ({ ...prev, location: text }))
                   }
                   placeholder="Enter location (e.g. Gulshan, Dhaka)"
+                  accessibilityLabel="Location"
                   placeholderTextColor="rgba(11, 26, 23, 0.4)"
                   style={styles.textInput}
                   value={localFilters.location}
@@ -164,6 +165,7 @@ export function AdvancedFiltersModal({
                       setLocalFilters((prev) => ({ ...prev, minPrice: val }))
                     }
                     placeholder="Min"
+                    accessibilityLabel="Minimum price"
                     placeholderTextColor="rgba(11, 26, 23, 0.5)"
                     style={styles.priceInput}
                     value={localFilters.minPrice}
@@ -177,6 +179,7 @@ export function AdvancedFiltersModal({
                       setLocalFilters((prev) => ({ ...prev, maxPrice: val }))
                     }
                     placeholder="Max"
+                    accessibilityLabel="Maximum price"
                     placeholderTextColor="rgba(11, 26, 23, 0.5)"
                     style={styles.priceInput}
                     value={localFilters.maxPrice}
@@ -192,7 +195,7 @@ export function AdvancedFiltersModal({
                 {BEDROOM_OPTIONS.map((opt) => {
                   const isSelected = localFilters.bedrooms === opt.value;
                   return (
-                    <Pressable
+                    <Pressable accessibilityRole="button"
                       key={`bed-${opt.label}`}
                       onPress={() =>
                         setLocalFilters((prev) => ({
@@ -227,7 +230,7 @@ export function AdvancedFiltersModal({
                 {BATHROOM_OPTIONS.map((opt) => {
                   const isSelected = localFilters.bathrooms === opt.value;
                   return (
-                    <Pressable
+                    <Pressable accessibilityRole="button"
                       key={`bath-${opt.label}`}
                       onPress={() =>
                         setLocalFilters((prev) => ({
@@ -262,7 +265,7 @@ export function AdvancedFiltersModal({
                 {AMENITY_OPTIONS.map((amenity) => {
                   const isSelected = localFilters.amenities.includes(amenity);
                   return (
-                    <Pressable
+                    <Pressable accessibilityRole="button"
                       key={amenity}
                       onPress={() => toggleAmenity(amenity)}
                       style={[
@@ -286,7 +289,7 @@ export function AdvancedFiltersModal({
             </View>
 
             {/* Verified listings only */}
-            <Pressable
+            <Pressable accessibilityRole="button"
               onPress={() =>
                 setLocalFilters((prev) => ({
                   ...prev,
@@ -316,13 +319,13 @@ export function AdvancedFiltersModal({
 
           {/* Footer Actions */}
           <View style={styles.footer}>
-            <Pressable
+            <Pressable accessibilityRole="button"
               onPress={handleReset}
               style={[styles.resetButton, webPointer]}
             >
               <Text style={styles.resetButtonText}>Reset</Text>
             </Pressable>
-            <Pressable
+            <Pressable accessibilityRole="button"
               onPress={handleApply}
               style={[styles.applyButton, webPointer]}
             >

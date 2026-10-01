@@ -11,7 +11,7 @@ import {
   WalletCards,
   type LucideIcon,
 } from "@/components/icons";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -30,6 +30,7 @@ import { AppButton, Eyebrow } from "@/components/ui";
 import { getProperties } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
+import type { Property } from "@/features/property/types/property";
 import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 
 const steps = ["Goal", "Location", "Budget", "Matches"];
@@ -100,6 +101,13 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
   const [budget, setBudget] = useState("BDT 2–4 Cr");
 
   const { toggleSaved, isSaved } = useSavedStore();
+  const handleOpenMatch = useCallback(
+    (property: Property) => {
+      if (isModal && onClose) onClose();
+      router.push(`/property/${property.id}` as Href);
+    },
+    [isModal, onClose],
+  );
 
   const queryParams = useMemo(() => {
     const range = budgetRanges[budget] || {};
@@ -371,11 +379,8 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
                   {matches.map((property) => (
                     <PropertyCard
                       key={property.id}
-                      onPress={() => {
-                        if (isModal && onClose) onClose();
-                        router.push(`/property/${property.id}` as Href);
-                      }}
-                      onSave={() => toggleSaved(property)}
+                      onPress={handleOpenMatch}
+                      onSave={toggleSaved}
                       property={property}
                       saved={isSaved(property.id)}
                     />
