@@ -17,6 +17,28 @@ export async function getProperties(params: PropertyFilters = {}) {
   return data;
 }
 
+/**
+ * Properties across several areas — a parent area plus its sub-areas.
+ *
+ * `area_id` takes one id and matches that area only, so one request goes out per
+ * id. The results are merged newest first, de-duplicated, and cut to the page
+ * size; `total` is the number of distinct listings found.
+ */
+export async function getPropertiesInAreas(filters: PropertyFilters, areaIds: string[]) {
+  if (areaIds.length <= 1) {
+    const response = await getProperties(areaIds.length ? { ...filters, area_id: areaIds[0] } : filters);
+    return { items: response.data?.items ?? [], total: response.data?.total ?? 0 };
+  }
+
+  const responses = await Promise.all(areaIds.map((id) => getProperties({ ...filters, area_id: id })));
+  const seen = new Set<string>();
+  const merged = responses
+    .flatMap((response) => response.data?.items ?? [])
+    .filter((property) => !seen.has(property.id) && seen.add(property.id))
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  return { items: merged.slice(0, filters.limit ?? merged.length), total: merged.length };
+}
+
 export async function getSoldProperties(params: PropertyFilters = {}) {
   const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>("/v1/properties/sold", {
     params,

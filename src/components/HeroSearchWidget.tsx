@@ -39,7 +39,7 @@ export function HeroSearchWidget({
 
   const handleAiSearch = () => {
     if (!isPhone) {
-      openAiModal();
+      openAiModal(query.trim());
       return;
     }
     const params = new URLSearchParams();
