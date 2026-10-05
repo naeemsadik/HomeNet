@@ -1,5 +1,5 @@
 import apiClient from "@/services/apiClient";
-import { generatePropertyDescription, parsePropertySearch } from "@/services/aiApi";
+import { generatePropertyDescription, smartSearch } from "@/services/aiApi";
 
 jest.mock("@/services/apiClient", () => ({
   __esModule: true,
@@ -66,59 +66,136 @@ describe("generatePropertyDescription (quick listing)", () => {
   });
 });
 
-describe("parsePropertySearch (AI search)", () => {
-  it("posts the query to its own endpoint", async () => {
-    respond({ bedrooms: 3 });
-    await parsePropertySearch("3 bed flat in Gulshan");
-    expect(post).toHaveBeenCalledWith("/v1/ai/parse-search", { query: "3 bed flat in Gulshan" }, { timeout: 20_000 });
+const card = (over: Record<string, unknown> = {}) => ({
+  id: "p1",
+  title: "Luxury 4BR Apartment in Gulshan-1",
+  type: "residential",
+  subtype: null,
+  listing_type: "sale",
+  price: 25_000_000,
+  price_currency: "BDT",
+  area_size: 2200,
+  area_unit: "sqft",
+  address: "Road 11",
+  amenities: { bedrooms: 4 },
+  is_verified: true,
+  published_at: "2026-09-01T00:00:00.000Z",
+  area: { id: "gulshan-1", name: "Gulshan-1", city: "Dhaka" },
+  media: [{ id: "m1", url: "https://img/1.jpg", thumbnail_url: null }],
+  ai_badges: ["4 beds as requested"],
+  ...over,
+});
+
+const filters = (over: Record<string, unknown> = {}) => ({
+  area: "Gulshan",
+  listing_type: "sale",
+  type: "residential",
+  min_price: null,
+  max_price: 30_000_000,
+  bedrooms: 3,
+  bathrooms: null,
+  amenities: ["parking"],
+  ...over,
+});
+
+const pagination = { total: 1, page: 1, limit: 12, total_pages: 1 };
+
+describe("smartSearch (AI search)", () => {
+  it("posts to the property smart-search route with paging and the long timeout", async () => {
+    respond({ query: "q", filters: filters(), listings: [], pagination });
+    await smartSearch({ query: "3 bed flat in Gulshan", page: 2, limit: 5 });
+    expect(post).toHaveBeenCalledWith(
+      "/v1/properties/smart-search",
+      { query: "3 bed flat in Gulshan", page: 2, limit: 5 },
+      { timeout: 30_000 },
+    );
   });
 
-  it("accepts numbers as numbers or numeric strings", async () => {
-    respond({ listingType: "rent", maxPrice: "40000", minArea: 800, bedrooms: "2", areaName: " Dhanmondi " });
-    await expect(parsePropertySearch("2 bed rent Dhanmondi")).resolves.toEqual({
-      listingType: "rent",
-      maxPrice: 40_000,
-      minArea: 800,
-      bedrooms: 2,
-      areaName: "Dhanmondi",
-    });
+  it("defaults to the first page of twelve", async () => {
+    respond({ query: "q", filters: filters(), listings: [], pagination });
+    await smartSearch({ query: "flat" });
+    expect(post.mock.calls[0][1]).toEqual({ query: "flat", page: 1, limit: 12 });
   });
 
-  it("drops values that can't be filters instead of failing the whole search", async () => {
+  it("returns the filters, the listings with their badges, and the paging", async () => {
+    respond({ query: "3 bed flat", filters: filters(), listings: [card()], pagination });
+    const result = await smartSearch({ query: "3 bed flat" });
+    expect(result.query).toBe("3 bed flat");
+    expect(result.filters).toEqual(filters());
+    expect(result.listings).toHaveLength(1);
+    expect(result.listings[0]).toMatchObject({ id: "p1", price: 25_000_000, ai_badges: ["4 beds as requested"] });
+    expect(result.pagination).toEqual(pagination);
+  });
+
+  it("keeps a listing whose optional parts are broken, and skips one that is unusable", async () => {
     respond({
-      listingType: "swap",
-      type: "land",
-      minPrice: -5,
-      maxPrice: "cheap",
-      bedrooms: 2.5,
-      bathrooms: 2,
-      areaName: "   ",
-      unmatched: ["near the metro", ""],
-      summary: "Land, 2 bathrooms",
-      confidence: { type: "high", bathrooms: "certain" },
+      query: "q",
+      filters: filters(),
+      listings: [
+        card({ id: "ok", ai_badges: "not a list", media: "nope", area_size: "big", is_verified: "yes" }),
+        card({ id: "", title: "no id" }),
+        card({ id: "bad-type", type: "castle" }),
+        { nonsense: true },
+      ],
+      pagination,
     });
-    await expect(parsePropertySearch("land")).resolves.toEqual({
-      type: "land",
-      bathrooms: 2,
-      summary: "Land, 2 bathrooms",
+    const { listings } = await smartSearch({ query: "q" });
+    expect(listings.map((l) => l.id)).toEqual(["ok"]);
+    expect(listings[0]).toMatchObject({ ai_badges: [], media: [], area_size: null, is_verified: false });
+  });
+
+  it("drops a bad filter value without inventing a filter or losing the others", async () => {
+    respond({
+      query: "q",
+      filters: filters({ type: "castle", min_price: -5, max_price: "30000000", bedrooms: 3, amenities: "parking", listing_type: "short_let" }),
+      listings: [],
+      pagination,
+    });
+    const result = await smartSearch({ query: "q" });
+    expect(result.filters).toEqual({
+      area: "Gulshan",
+      listing_type: "short_let",
+      type: null,
+      min_price: null,
+      max_price: null, // a numeric string is not a number: the API sends numbers
+      bedrooms: 3,
+      bathrooms: null,
+      amenities: [],
     });
   });
 
-  it("treats a missing body as unreadable", async () => {
-    respond(null);
-    await expect(parsePropertySearch("hi")).rejects.toMatchObject({ code: "UNREADABLE" });
+  it("treats missing filters as 'nothing understood' and missing paging as one page", async () => {
+    respond({ listings: [card()] });
+    const result = await smartSearch({ query: "q" });
+    expect(result.filters).toEqual({
+      area: null,
+      listing_type: null,
+      type: null,
+      min_price: null,
+      max_price: null,
+      bedrooms: null,
+      bathrooms: null,
+      amenities: [],
+    });
+    expect(result.pagination).toEqual({ total: 1, page: 1, limit: 1, total_pages: 1 });
+  });
+
+  it.each([null, "text", undefined])("treats %p as unreadable", async (data) => {
+    respond(data);
+    await expect(smartSearch({ query: "q" })).rejects.toMatchObject({ code: "UNREADABLE" });
   });
 
   it.each([
     [null, "NETWORK_ERROR"],
     [401, "UNAUTHENTICATED"],
-    [429, "QUOTA_EXCEEDED"],
-    [422, "UNREADABLE"],
-    [404, "UNAVAILABLE"],
-    [503, "UNAVAILABLE"],
+    [429, "QUOTA_EXCEEDED"], // the API's throttle: 20 searches a minute
+    [400, "UNREADABLE"], // query too short or invalid
+    [503, "UNAVAILABLE"], // "AI service is experiencing high demand"
+    [502, "UNAVAILABLE"], // model returned something unusable
+    [404, "UNAVAILABLE"], // route not deployed
   ])("maps status %p to %s with search wording, never listing wording", async (status, code) => {
     fail(status);
-    const error = await parsePropertySearch("flat").catch((e) => e);
+    const error = await smartSearch({ query: "flat" }).catch((e) => e);
     expect(error).toMatchObject({ name: "AiParseError", code });
     expect(error.message).not.toMatch(/quick listing|step-by-step/i);
   });

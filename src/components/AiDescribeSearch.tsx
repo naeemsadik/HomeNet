@@ -1,5 +1,5 @@
-import { AlertTriangle, ArrowRight, Search, Sparkles, X } from "@/components/icons";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AlertTriangle, ArrowRight, Search, Sparkles } from "@/components/icons";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -9,32 +9,24 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useQuery } from "@tanstack/react-query";
 import { router, type Href } from "expo-router";
 import { LiveText } from "@/components/LiveText";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
 import { AppButton } from "@/components/ui";
-import { useAllAreas } from "@/hooks/useAllAreas";
-import { useParsePropertySearch } from "@/features/property/hooks/useParsePropertySearch";
-import type { AiParsedSearch } from "@/features/property/types/aiSearch";
+import { useSmartSearch } from "@/features/property/hooks/useSmartSearch";
 import type { Property } from "@/features/property/types/property";
-import {
-  describeSearch,
-  toSearchQuery,
-  withoutFields,
-  type SearchChip,
-} from "@/features/property/utils/aiSearchFilters";
-import { getPropertiesInAreas } from "@/services/propertyApi";
+import { describeFilters, toCardProperty } from "@/features/property/utils/aiSearchFilters";
 import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, colors, fonts, webPointer } from "@/theme";
 
-const MAX_QUERY_LENGTH = 500;
+/** The API's limit on a query (3–300 characters). */
+const MAX_QUERY_LENGTH = 300;
 const MIN_QUERY_LENGTH = 3;
 
 const EXAMPLES = [
   "3 bedroom flat for sale in Gulshan under 3 crore",
-  "2 bedroom apartment to rent in Dhanmondi, up to 40 thousand",
+  "2 bedroom apartment to rent in Dhanmondi, up to 40 thousand, with parking",
   "Land in Uttara between 50 lakh and 1.5 crore",
 ];
 
@@ -48,57 +40,26 @@ interface AiDescribeSearchProps {
 
 export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: AiDescribeSearchProps) {
   const [text, setText] = useState(initialPrompt);
-  const [parsed, setParsed] = useState<AiParsedSearch | null>(null);
-  // Once a chip is removed the AI's one-line summary no longer describes the search.
-  const [edited, setEdited] = useState(false);
-  const { mutate: runParse, isPending, error: parseError, reset } = useParsePropertySearch();
+  // The query that was actually sent; typing doesn't search until Find is pressed.
+  const [submitted, setSubmitted] = useState<string | null>(initialPrompt.trim().length >= MIN_QUERY_LENGTH ? initialPrompt.trim() : null);
   const { toggleSaved, isSaved } = useSavedStore();
 
+  const search = useSmartSearch(submitted);
   const trimmed = text.trim();
-  const canSearch = trimmed.length >= MIN_QUERY_LENGTH && !isPending;
+  const isSearching = search.isFetching && !search.isFetchingNextPage;
+  const canSearch = trimmed.length >= MIN_QUERY_LENGTH && !isSearching;
 
-  const search = useCallback(
-    (query: string) => {
-      const clean = query.trim();
-      if (clean.length < MIN_QUERY_LENGTH) return;
-      runParse(clean, {
-        onSuccess: (result) => {
-          setEdited(false);
-          setParsed(result);
-        },
-      });
-    },
-    [runParse],
-  );
-
-  // A query typed in the hero search box starts working immediately, once.
-  const autoRan = useRef(false);
-  useEffect(() => {
-    if (initialPrompt.trim() && !autoRan.current) {
-      autoRan.current = true;
-      search(initialPrompt);
-    }
-  }, [initialPrompt, search]);
-
-  const areas = useAllAreas({ enabled: parsed !== null });
-  const query = useMemo(
-    () => (parsed ? toSearchQuery(parsed, areas.data?.items ?? []) : null),
-    [parsed, areas.data],
-  );
-  const chips = useMemo(() => (parsed && query ? describeSearch(parsed, query.area) : []), [parsed, query]);
-
-  const results = useQuery({
-    queryKey: ["properties", "ai-search", query?.filters, query?.areaIds],
-    queryFn: () => getPropertiesInAreas(query!.filters, query!.areaIds),
-    // With no filter understood the API would return everything, which is not an answer.
-    enabled: Boolean(query) && chips.length > 0 && !areas.isLoading,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const removeChip = (chip: SearchChip) => {
-    setEdited(true);
-    setParsed((current) => (current ? withoutFields(current, chip.fields) : current));
+  const runSearch = () => {
+    if (!canSearch) return;
+    if (trimmed === submitted) void search.refetch();
+    else setSubmitted(trimmed);
   };
+
+  const firstPage = search.data?.pages[0];
+  const chips = useMemo(() => (firstPage ? describeFilters(firstPage.filters) : []), [firstPage]);
+  const listings = useMemo(() => search.data?.pages.flatMap((page) => page.listings) ?? [], [search.data]);
+  const total = firstPage?.pagination.total ?? 0;
+  const forRent = firstPage?.filters.listing_type === "rent" || firstPage?.filters.listing_type === "short_let";
 
   const openProperty = useCallback(
     (property: Property) => {
@@ -107,31 +68,34 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
     },
     [onClose],
   );
+  const browseAll = () => {
+    onClose?.();
+    router.push(forRent ? "/rent" : "/buy");
+  };
 
-  const offerGuided = parseError?.code === "UNAVAILABLE" || parseError?.code === "QUOTA_EXCEEDED";
-  const items = results.data?.items ?? [];
-  const total = results.data?.total ?? 0;
-  const forRent = parsed?.listingType === "rent";
+  const error = search.error;
+  const offerGuided = error?.code === "UNAVAILABLE" || error?.code === "QUOTA_EXCEEDED";
+  const hasResult = Boolean(firstPage) && !error;
 
   return (
     <View style={styles.wrap}>
       <TextInput
         accessibilityHint="Describe the home you want in your own words"
         accessibilityLabel="Describe the home you want"
-        editable={!isPending}
+        editable={!isSearching}
         maxLength={MAX_QUERY_LENGTH}
         multiline
         onChangeText={setText}
-        onSubmitEditing={() => search(text)}
+        onSubmitEditing={runSearch}
         placeholder="e.g. 3 bedroom flat for sale in Gulshan under 3 crore"
         placeholderTextColor={colors.muted}
         returnKeyType="search"
-        style={[styles.input, isPending && styles.inputDisabled]}
+        style={[styles.input, isSearching && styles.inputDisabled]}
         textAlignVertical="top"
         value={text}
       />
 
-      {!parsed && !isPending ? (
+      {!hasResult && !isSearching ? (
         <View style={styles.examples}>
           {EXAMPLES.map((example) => (
             <Pressable
@@ -155,17 +119,17 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
         <AppButton
           disabled={!canSearch}
           icon={Search}
-          label={isPending ? "Reading your search…" : "Find homes"}
-          loading={isPending}
-          onPress={() => search(text)}
+          label={isSearching ? "Reading your search…" : "Find homes"}
+          loading={isSearching}
+          onPress={runSearch}
         />
-        <Text style={styles.hint}>AI reads your words into filters. Listings come from HomeNet's own search.</Text>
+        <Text style={styles.hint}>AI reads your words into filters. Only verified listings are shown.</Text>
       </View>
 
-      {parseError ? (
+      {error ? (
         <View style={styles.errorBanner}>
           <AlertTriangle color={colorTokens.warningText} size={16} />
-          <Text style={styles.errorText}>{parseError.message}</Text>
+          <Text style={styles.errorText}>{error.message}</Text>
           {offerGuided ? (
             <Pressable
               accessibilityRole="button"
@@ -178,7 +142,7 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
         </View>
       ) : null}
 
-      {parsed && !parseError ? (
+      {hasResult ? (
         <View style={styles.results}>
           <View style={styles.understoodHeader}>
             <Sparkles color={colors.greenOnLight} size={16} />
@@ -186,103 +150,98 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
             <Pressable
               accessibilityLabel="Start a new search"
               accessibilityRole="button"
-              onPress={() => {
-                setParsed(null);
-                reset();
-              }}
+              onPress={() => setSubmitted(null)}
               style={[styles.newSearch, webPointer]}
             >
               <Text style={styles.newSearchText}>New search</Text>
             </Pressable>
           </View>
 
-          {parsed.summary && !edited ? <Text style={styles.summary}>{parsed.summary}</Text> : null}
-
           {chips.length > 0 ? (
-            <View style={styles.chips}>
-              {chips.map((chip) => (
-                <View key={chip.id} style={[styles.chip, chip.confidence === "low" && styles.chipLow]}>
-                  <Text style={[styles.chipText, chip.confidence === "low" && styles.chipTextLow]}>
-                    {chip.label}
-                    {chip.confidence === "low" ? " (check this)" : ""}
-                  </Text>
-                  <Pressable
-                    accessibilityLabel={`Remove ${chip.label}`}
-                    accessibilityRole="button"
-                    hitSlop={8}
-                    onPress={() => removeChip(chip)}
-                    style={webPointer}
-                  >
-                    <X color={chip.confidence === "low" ? colorTokens.warningText : colors.greenOnLight} size={13} />
-                  </Pressable>
-                </View>
-              ))}
-            </View>
+            <>
+              <View style={styles.chips}>
+                {chips.map((chip) => (
+                  <View key={chip.id} style={styles.chip}>
+                    <Text style={styles.chipText}>{chip.label}</Text>
+                  </View>
+                ))}
+              </View>
+              <Text style={styles.notice}>Wrong? Change your words above and search again.</Text>
+            </>
           ) : (
             <Text style={styles.notice}>
-              There's nothing to search on. Mention where, what kind of property, or your budget.
+              We couldn't pick out a place, a kind of property or a budget. Try mentioning where, what kind, or how much.
             </Text>
           )}
 
-          {parsed.unmatched?.length ? (
-            <Text style={styles.notice}>Not applied, because there's no filter for it: {parsed.unmatched.join(", ")}.</Text>
-          ) : null}
-
           {chips.length > 0 ? (
-            results.isLoading || areas.isLoading ? (
-              <View style={styles.center}>
-                <ActivityIndicator color={colors.green} />
-              </View>
-            ) : results.isError ? (
+            listings.length === 0 ? (
               <View style={styles.empty}>
-                <Text style={styles.emptyTitle}>We couldn't load listings</Text>
-                <AppButton label="Try again" onPress={() => void results.refetch()} style={styles.emptyAction} />
-              </View>
-            ) : items.length === 0 ? (
-              <View style={styles.empty}>
-                <Text style={styles.emptyTitle}>No listings match all of this yet</Text>
+                <Text style={styles.emptyTitle}>No verified listings match all of this yet</Text>
                 <Text style={styles.emptyText}>
-                  Remove a filter above to widen the search, or browse everything that's listed.
+                  Try a wider budget or fewer requirements, or browse everything that's listed.
                 </Text>
                 <AppButton
                   label={`Browse all ${forRent ? "rentals" : "properties for sale"}`}
-                  onPress={() => {
-                    onClose?.();
-                    router.push(forRent ? "/rent" : "/buy");
-                  }}
+                  onPress={browseAll}
                   style={styles.emptyAction}
                 />
               </View>
             ) : (
               <View style={styles.grid}>
                 <LiveText style={styles.count}>
-                  {total} {total === 1 ? "listing" : "listings"} found
+                  {total} verified {total === 1 ? "listing" : "listings"} found
                 </LiveText>
                 <PropertyGrid>
-                  {items.map((property) => (
-                    <PropertyCard
-                      key={property.id}
-                      onPress={openProperty}
-                      onSave={toggleSaved}
-                      property={property}
-                      saved={isSaved(property.id)}
-                    />
+                  {listings.map((listing) => (
+                    <View key={listing.id} style={styles.cardWrap}>
+                      <PropertyCard
+                        onPress={openProperty}
+                        onSave={toggleSaved}
+                        property={toCardProperty(listing)}
+                        saved={isSaved(listing.id)}
+                      />
+                      {listing.ai_badges.length > 0 ? (
+                        <View accessibilityLabel={`AI notes: ${listing.ai_badges.join(", ")}`} style={styles.badges}>
+                          <Sparkles color={colors.greenOnLight} size={12} />
+                          {listing.ai_badges.map((badge) => (
+                            <View key={badge} style={styles.badge}>
+                              <Text style={styles.badgeText}>{badge}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      ) : null}
+                    </View>
                   ))}
                 </PropertyGrid>
+
+                {search.hasNextPage ? (
+                  <AppButton
+                    label="Show more"
+                    loading={search.isFetchingNextPage}
+                    onPress={() => void search.fetchNextPage()}
+                    variant="secondary"
+                  />
+                ) : null}
                 <AppButton
                   label={`View all ${forRent ? "rental" : "sale"} properties`}
-                  onPress={() => {
-                    onClose?.();
-                    router.push(forRent ? "/rent" : "/buy");
-                  }}
+                  onPress={browseAll}
                   trailingIcon={ArrowRight}
-                  variant="secondary"
+                  variant="ghost"
                 />
               </View>
             )
           ) : null}
 
-          <Text style={styles.disclaimer}>AI can misread a search. Remove or correct anything above.</Text>
+          <Text style={styles.disclaimer}>
+            AI can misread a search, and its notes on each listing are written by AI. Check the listing for the facts.
+          </Text>
+        </View>
+      ) : null}
+
+      {isSearching && !firstPage ? (
+        <View style={styles.center}>
+          <ActivityIndicator color={colors.green} />
         </View>
       ) : null}
     </View>
@@ -344,29 +303,21 @@ const styles = StyleSheet.create({
   understoodTitle: { flex: 1, color: colors.ink, fontFamily: fonts.semiBold, fontSize: 14 },
   newSearch: { paddingHorizontal: 8, paddingVertical: 4 },
   newSearchText: { color: colors.greenOnLight, fontFamily: fonts.semiBold, fontSize: 13, textDecorationLine: "underline" },
-  summary: { color: colors.muted, fontFamily: fonts.regular, fontSize: 13, lineHeight: 19 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    borderRadius: 999,
-    paddingLeft: 12,
-    paddingRight: 9,
-    paddingVertical: 6,
-    backgroundColor: colors.greenLight,
-  },
-  chipLow: { backgroundColor: "#FEF3E4" },
+  chip: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.greenLight },
   chipText: { color: colors.greenOnLight, fontFamily: fonts.semiBold, fontSize: 12.5 },
-  chipTextLow: { color: colorTokens.warningText },
   notice: { color: colors.muted, fontFamily: fonts.regular, fontSize: 12.5, lineHeight: 18 },
 
   center: { padding: 28, alignItems: "center" },
   grid: { gap: 14 },
   count: { color: colors.ink, fontFamily: fonts.semiBold, fontSize: 14 },
+  cardWrap: { gap: 8 },
+  badges: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 6, paddingHorizontal: 2 },
+  badge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, backgroundColor: colors.greenLight },
+  badgeText: { color: colors.greenOnLight, fontFamily: fonts.medium, fontSize: 11.5 },
   empty: { padding: 24, alignItems: "center", borderRadius: 16, backgroundColor: "#F8FAF9" },
   emptyTitle: { color: colors.ink, fontFamily: fonts.bold, fontSize: 15, textAlign: "center" },
   emptyText: { marginTop: 6, color: colors.muted, fontFamily: fonts.regular, fontSize: 13, textAlign: "center", lineHeight: 19 },
   emptyAction: { marginTop: 14 },
-  disclaimer: { color: colors.muted, fontFamily: fonts.regular, fontSize: 12, textAlign: "center" },
+  disclaimer: { color: colors.muted, fontFamily: fonts.regular, fontSize: 12, textAlign: "center", lineHeight: 17 },
 });

@@ -1,11 +1,6 @@
 import type { Area } from "@/types/api";
-import {
-  areaIdsFor,
-  describeSearch,
-  resolveArea,
-  toSearchQuery,
-  withoutFields,
-} from "../aiSearchFilters";
+import type { SmartSearchFilters, SmartSearchListing } from "../../types/aiSearch";
+import { areaIdsFor, describeFilters, resolveArea, toCardProperty } from "../aiSearchFilters";
 
 const area = (id: string, name: string, parent: string | null = null): Area => ({
   id,
@@ -68,99 +63,103 @@ describe("areaIdsFor", () => {
   });
 });
 
-describe("toSearchQuery", () => {
-  it("maps a parsed search onto the properties filters", () => {
-    const { filters, area: matched, areaIds } = toSearchQuery(
-      {
-        listingType: "sale",
-        type: "residential",
-        minPrice: 10_000_000,
-        maxPrice: 30_000_000,
-        minArea: 1200,
-        bedrooms: 3,
-        bathrooms: 2,
-        areaName: "Gulshan",
-      },
-      areas,
-    );
-    expect(filters).toEqual({
-      status: "active",
-      limit: 12,
-      listing_type: "sale",
-      type: "residential",
-      min_price: 10_000_000,
-      max_price: 30_000_000,
-      min_area: 1200,
-      bedrooms: 3,
-      bathrooms: 2,
-    });
-    expect(matched?.id).toBe("gulshan");
-    expect(areaIds).toEqual(["gulshan", "gulshan-1", "gulshan-2"]);
-  });
+const noFilters: SmartSearchFilters = {
+  area: null,
+  listing_type: null,
+  type: null,
+  min_price: null,
+  max_price: null,
+  bedrooms: null,
+  bathrooms: null,
+  amenities: [],
+};
 
-  it("searches an unmatched place as text so it still narrows the results", () => {
-    const { filters, area: matched, areaIds } = toSearchQuery({ areaName: "Narnia", city: "Dhaka" }, areas);
-    expect(matched).toBeNull();
-    expect(areaIds).toEqual([]);
-    expect(filters).toMatchObject({ search: "Narnia", city: "Dhaka" });
-  });
-
-  it("does not add a city or text search when the area was matched", () => {
-    const { filters } = toSearchQuery({ areaName: "Banani", city: "Dhaka" }, areas);
-    expect(filters.city).toBeUndefined();
-    expect(filters.search).toBeUndefined();
-  });
-
-  it("falls back to text search while areas are not loaded", () => {
-    const { filters, areaIds } = toSearchQuery({ areaName: "Banani" }, []);
-    expect(areaIds).toEqual([]);
-    expect(filters.search).toBe("Banani");
-  });
-});
-
-describe("describeSearch", () => {
+describe("describeFilters", () => {
   it("lists what was understood, in plain words", () => {
-    const chips = describeSearch(
-      { listingType: "rent", type: "residential", maxPrice: 40_000, bedrooms: 2, areaName: "Dhanmondi" },
-      null,
-    );
-    expect(chips.map((c) => c.label)).toEqual(["For rent", "Residential", "Dhanmondi", "Up to ৳ 40,000", "2+ bedrooms"]);
+    const chips = describeFilters({
+      ...noFilters,
+      listing_type: "rent",
+      type: "residential",
+      area: "Dhanmondi",
+      max_price: 40_000,
+      bedrooms: 2,
+      amenities: ["parking", "loading_dock"],
+    });
+    expect(chips.map((c) => c.label)).toEqual([
+      "For rent",
+      "Residential",
+      "Dhanmondi",
+      "Up to ৳ 40,000",
+      "2+ bedrooms",
+      "Parking",
+      "Loading dock",
+    ]);
   });
 
   it("writes prices in crore and lakh, as ranges or one-sided", () => {
-    const label = (p: Parameters<typeof describeSearch>[0]) => describeSearch(p, null).find((c) => c.id === "price")?.label;
-    expect(label({ minPrice: 5_000_000, maxPrice: 15_000_000 })).toBe("৳ 50 Lac – ৳ 1.50 Cr");
-    expect(label({ minPrice: 20_000_000 })).toBe("From ৳ 2 Cr");
-    expect(label({ maxPrice: 20_000_000 })).toBe("Up to ৳ 2 Cr");
+    const label = (f: Partial<SmartSearchFilters>) =>
+      describeFilters({ ...noFilters, ...f }).find((c) => c.id === "price")?.label;
+    expect(label({ min_price: 5_000_000, max_price: 15_000_000 })).toBe("৳ 50 Lac – ৳ 1.50 Cr");
+    expect(label({ min_price: 20_000_000 })).toBe("From ৳ 2 Cr");
+    expect(label({ max_price: 20_000_000 })).toBe("Up to ৳ 2 Cr");
   });
 
-  it("shows the matched area's own name", () => {
-    expect(describeSearch({ areaName: "gulshan 2" }, areas[2])[0].label).toBe("Gulshan-2");
+  it("names short-lets and bathrooms", () => {
+    expect(describeFilters({ ...noFilters, listing_type: "short_let", bathrooms: 2 }).map((c) => c.label)).toEqual([
+      "Short-let",
+      "2+ bathrooms",
+    ]);
   });
 
-  it("describes size ranges", () => {
-    const label = (p: Parameters<typeof describeSearch>[0]) => describeSearch(p, null).find((c) => c.id === "size")?.label;
-    expect(label({ minArea: 1000, maxArea: 1800 })).toBe("1,000 – 1,800 sqft");
-    expect(label({ minArea: 1500 })).toBe("1,500+ sqft");
-  });
-
-  it("carries the least certain confidence for a chip", () => {
-    const [chip] = describeSearch(
-      { maxPrice: 1, minPrice: 0, confidence: { minPrice: "high", maxPrice: "low" } },
-      null,
-    );
-    expect(chip.confidence).toBe("low");
-  });
-
-  it("is empty when nothing was understood", () => {
-    expect(describeSearch({ summary: "hello", unmatched: ["hello"] }, null)).toEqual([]);
+  it("is empty when the query gave nothing to filter on", () => {
+    expect(describeFilters(noFilters)).toEqual([]);
   });
 });
 
-describe("withoutFields", () => {
-  it("drops a removed chip's fields and leaves the rest", () => {
-    const parsed = { minPrice: 1, maxPrice: 2, bedrooms: 3, summary: "x" };
-    expect(withoutFields(parsed, ["minPrice", "maxPrice"])).toEqual({ bedrooms: 3, summary: "x" });
-    expect(parsed.minPrice).toBe(1);
+const listing: SmartSearchListing = {
+  id: "p1",
+  title: "Luxury 4BR Apartment in Gulshan-1",
+  type: "residential",
+  subtype: "apartment",
+  listing_type: "sale",
+  price: 25_000_000,
+  price_currency: "BDT",
+  area_size: 2200,
+  area_unit: "sqft",
+  address: "Road 11, Gulshan-1",
+  amenities: { bedrooms: 4, bathrooms: 4, lift: true },
+  is_verified: true,
+  published_at: "2026-09-01T00:00:00.000Z",
+  area: { id: "gulshan-1", name: "Gulshan-1", city: "Dhaka" },
+  media: [{ id: "m1", url: "https://img/1.jpg", thumbnail_url: null }],
+  ai_badges: ["4 beds as requested"],
+};
+
+describe("toCardProperty", () => {
+  it("fills a Property from the slim search card", () => {
+    const property = toCardProperty(listing);
+    expect(property).toMatchObject({
+      id: "p1",
+      title: listing.title,
+      price: 25_000_000,
+      is_verified: true,
+      status: "active",
+      area: { id: "gulshan-1", name: "Gulshan-1", city: "Dhaka" },
+      amenities: { bedrooms: 4, bathrooms: 4, lift: true },
+    });
+    expect(property.media).toEqual([
+      { id: "m1", property_id: "p1", media_type: "image", url: "https://img/1.jpg", public_id: "", thumbnail_url: null, display_order: 0 },
+    ]);
+  });
+
+  it("shows a short-let as a rental, as Browse does", () => {
+    expect(toCardProperty({ ...listing, listing_type: "short_let" }).listing_type).toBe("rent");
+    expect(toCardProperty(listing).listing_type).toBe("sale");
+  });
+
+  it("copes with a listing that has no photo or publish date", () => {
+    const property = toCardProperty({ ...listing, media: [], published_at: null });
+    expect(property.media).toEqual([]);
+    expect(property.published_at).toBeNull();
   });
 });

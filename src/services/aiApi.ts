@@ -5,7 +5,11 @@ import {
   AiParseError,
   type AiParsedProperty,
 } from "@/features/property/types/aiListing";
-import type { AiParsedSearch } from "@/features/property/types/aiSearch";
+import type {
+  SmartSearchFilters,
+  SmartSearchListing,
+  SmartSearchResult,
+} from "@/features/property/types/aiSearch";
 
 /**
  * HomeNet AI — client side.
@@ -124,54 +128,108 @@ export async function generatePropertyDescription(
 
 // ─── AI search ─────────────────────────────────────────────────────────────────
 
-const amount = z
-  .union([z.number(), z.string()])
-  .transform((value) => Number(value))
-  .pipe(z.number().finite().nonnegative());
-const count = amount.pipe(z.number().int());
-const place = z.string().trim().min(1);
+const PROPERTY_TYPE = z.enum(["residential", "commercial", "land", "parking"]);
+const LISTING_TYPE = z.enum(["sale", "rent", "short_let"]);
 
-const PARSED_SEARCH_FIELDS = {
-  listingType: z.enum(["sale", "rent"]),
-  type: z.enum(["residential", "commercial", "land", "parking"]),
-  minPrice: amount,
-  maxPrice: amount,
-  minArea: amount,
-  maxArea: amount,
-  bedrooms: count,
-  bathrooms: count,
-  areaName: place,
-  city: place,
-  unmatched: z.array(z.string().trim().min(1)),
-  summary: z.string().trim().min(1),
-  confidence: z.record(z.string(), CONFIDENCE),
-} satisfies Record<keyof AiParsedSearch, z.ZodType>;
+// Filters fall back to "not stated" one by one: a bad value in one never
+// discards the rest, and never invents a filter the model didn't produce.
+const nullableNumber = z.number().finite().positive().nullable().catch(null);
+const filtersSchema = z
+  .object({
+    area: z.string().trim().min(1).nullable().catch(null),
+    listing_type: LISTING_TYPE.nullable().catch(null),
+    type: PROPERTY_TYPE.nullable().catch(null),
+    min_price: nullableNumber,
+    max_price: nullableNumber,
+    bedrooms: nullableNumber,
+    bathrooms: nullableNumber,
+    amenities: z.array(z.string()).catch([]),
+  })
+  .catch({
+    area: null,
+    listing_type: null,
+    type: null,
+    min_price: null,
+    max_price: null,
+    bedrooms: null,
+    bathrooms: null,
+    amenities: [],
+  });
+
+const listingSchema = z.object({
+  id: z.string().min(1),
+  title: z.string(),
+  type: PROPERTY_TYPE,
+  subtype: z.string().nullable().catch(null),
+  listing_type: LISTING_TYPE,
+  price: z.number().finite(),
+  price_currency: z.string().catch("BDT"),
+  area_size: z.number().finite().nullable().catch(null),
+  area_unit: z.string().nullable().catch(null),
+  address: z.string().nullable().catch(null),
+  amenities: z.record(z.string(), z.unknown()).nullable().catch(null),
+  is_verified: z.boolean().catch(false),
+  published_at: z.string().nullable().catch(null),
+  area: z.object({ id: z.string(), name: z.string(), city: z.string().nullable().catch(null) }),
+  media: z
+    .array(z.object({ id: z.string(), url: z.string(), thumbnail_url: z.string().nullable().catch(null) }))
+    .catch([]),
+  // Badges are a bonus: the API leaves them empty when the model fails.
+  ai_badges: z.array(z.string().trim().min(1)).catch([]),
+}) satisfies z.ZodType<SmartSearchListing>;
+
+function parseSmartSearch(raw: unknown, unreadable: AiParseError): SmartSearchResult {
+  if (!raw || typeof raw !== "object") throw unreadable;
+  const source = raw as Record<string, unknown>;
+
+  // One malformed listing is skipped; the rest still show.
+  const listings = (Array.isArray(source.listings) ? source.listings : []).flatMap((item) => {
+    const parsed = listingSchema.safeParse(item);
+    return parsed.success ? [parsed.data] : [];
+  });
+
+  const page = z.object({ total: z.number(), page: z.number(), limit: z.number(), total_pages: z.number() });
+  const pagination = page.safeParse(source.pagination);
+
+  return {
+    query: typeof source.query === "string" ? source.query : "",
+    filters: filtersSchema.parse(source.filters) as SmartSearchFilters,
+    listings,
+    pagination: pagination.success
+      ? pagination.data
+      : { total: listings.length, page: 1, limit: listings.length, total_pages: 1 },
+  };
+}
 
 const SEARCH_COPY: AiErrorCopy = {
   unauthenticated: "Please log in to use AI search.",
-  quota: "You've reached the AI search limit for now. You can answer the guided questions instead.",
+  quota: "Lots of people are searching right now. Wait a minute, or answer the guided questions instead.",
   unreadable:
-    "We couldn't make sense of that. Try something like “2 bedroom flat for rent in Dhanmondi under 40 thousand”.",
-  unavailable: "AI search isn't available right now. You can answer the guided questions instead.",
+    "We couldn't make sense of that. Describe the place, the kind of property or your budget, for example “2 bedroom flat for rent in Dhanmondi under 40 thousand”.",
+  unavailable: "AI search is busy or unavailable right now. You can answer the guided questions instead.",
 };
 
+export interface SmartSearchParams {
+  query: string;
+  page?: number;
+  /** The API allows 1–20. */
+  limit?: number;
+}
+
 /**
- * AI search: a seeker's plain-words query → search filters. The listings are
- * then fetched from the normal properties API with those filters.
- * Server contract: POST /v1/ai/parse-search (docs/BACKEND_REQUIREMENTS.md §1b).
+ * AI search: a seeker's plain-words query → matching verified listings, the
+ * filters the model understood, and short "why it matches" badges.
+ * Server contract: POST /v1/properties/smart-search (docs/BACKEND_REQUIREMENTS.md §1b).
  */
-export async function parsePropertySearch(query: string): Promise<AiParsedSearch> {
+export async function smartSearch({ query, page = 1, limit = 12 }: SmartSearchParams): Promise<SmartSearchResult> {
   try {
     const { data } = await apiClient.post<ApiResponse<unknown>>(
-      "/v1/ai/parse-search",
-      { query },
-      { timeout: 20_000 },
+      "/v1/properties/smart-search",
+      { query, page, limit },
+      // Two model calls (filters, then badges) of up to 8 s each, plus the database.
+      { timeout: 30_000 },
     );
-    return pickValidFields<AiParsedSearch>(
-      data.data,
-      PARSED_SEARCH_FIELDS,
-      new AiParseError(SEARCH_COPY.unreadable, "UNREADABLE"),
-    );
+    return parseSmartSearch(data.data, new AiParseError(SEARCH_COPY.unreadable, "UNREADABLE"));
   } catch (error) {
     throw toAiParseError(error, SEARCH_COPY);
   }
