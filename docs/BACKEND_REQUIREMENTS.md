@@ -69,6 +69,120 @@ fields that fail, so one bad value doesn't discard the rest.
 
 ---
 
+## 1b. POST /v1/ai/parse-search — AI search
+
+Turns a seeker's plain-words query into **search filters**. Used by the AI
+Finder's "describe it" box (`src/components/AiDescribeSearch.tsx` →
+`src/services/aiApi.ts`). The model only produces filters: the listings
+themselves come from the normal `GET /v1/properties` with those filters, so the
+AI never invents or ranks a listing. This is `parseSearchQuery` in
+`docs/AI_LAYER.md` (FR-08).
+
+**Auth:** optional. Seekers search before they sign in, so the route should be
+`@Public()`; if a token is sent, use it for the quota. Rate-limit per user, and
+per IP when anonymous (a daily quota → 429).
+
+### Request
+
+```json
+{ "query": "3 bedroom flat for sale in Gulshan under 3 crore, near the metro" }
+```
+
+| Field | Type | Required | Constraints |
+|---|---|---|---|
+| `query` | string | Yes | The client sends 3–500 characters (`maxLength` on the box). Validate and cap server-side. |
+
+The client allows a 20 s timeout.
+
+### Success — 200
+
+`data` holds any subset of these fields. **Omit what the query didn't say;
+never guess.** These are exactly the filters `GET /v1/properties` can apply.
+
+| Field | Type | Notes |
+|---|---|---|
+| `listingType` | `sale` · `rent` | |
+| `type` | `residential` · `commercial` · `land` · `parking` | A flat, apartment or house is `residential`. |
+| `minPrice`, `maxPrice` | number, BDT | "under 2 crore" → `maxPrice: 20000000`. 1 crore = 10,000,000; 1 lakh = 100,000. |
+| `minArea`, `maxArea` | number, **sq ft** | Convert katha / bigha / sqm. See the open question below. |
+| `bedrooms`, `bathrooms` | integer | Treated as a minimum ("3+"). |
+| `areaName` | string | The place as the seeker said it ("Gulshan 2"). The app matches it to an area; send the name, not an id. |
+| `city` | string | Only if a city is named. |
+| `unmatched` | string[] | Parts of the query no filter can express ("near the metro", "south facing"). Shown to the seeker as "not applied". |
+| `summary` | string | One plain sentence of what was understood. |
+| `confidence` | `{ [field]: "high" \| "medium" \| "low" }` | Keyed by the field names above. `low` shows a "check this" flag. |
+
+The client validates each field on its own (zod, `aiApi.ts`) and drops only the
+ones that fail. Returning `{}` is valid: the app tells the seeker nothing was
+understood and does **not** list everything.
+
+**Example:** `"3 bhk flat rent Dhanmondi max 40k"` →
+
+```json
+{
+  "listingType": "rent", "type": "residential", "bedrooms": 3,
+  "maxPrice": 40000, "areaName": "Dhanmondi", "city": "Dhaka",
+  "summary": "A 3 bedroom flat to rent in Dhanmondi, up to ৳ 40,000.",
+  "confidence": { "bedrooms": "medium", "maxPrice": "high" }
+}
+```
+
+### Errors — same mapping as §1
+
+| Status | When | What the seeker sees |
+|---|---|---|
+| 401 | Only if the route is not public | "Please log in to use AI search." |
+| 429 | Quota used | Limit message + "Answer guided questions" button |
+| 400 / 422 | Empty, too long or unparseable | "We couldn't make sense of that…" with an example |
+| 404 / 5xx | Not deployed, or every provider down | "AI search isn't available right now" + "Answer guided questions" button |
+
+### Server requirements
+
+- Same as §1: key in server env only, validate the model output against the
+  table above, never echo a vendor error, don't log full queries at info level.
+- Accept Bangla and Banglish queries ("৩ বেডরুম ফ্ল্যাট গুলশানে"), not only English.
+- Cache by normalised query for ~5 minutes (`docs/AI_LAYER.md`).
+
+### Turning it on
+
+The finder shows the box only when the web build has
+`EXPO_PUBLIC_AI_SEARCH_ENABLED=true` (`src/lib/features.ts`). Until then it
+shows the guided questions alone. Once this route is live in production, set
+the variable in the web project's environment and redeploy — the web build is
+static, so it is fixed at build time.
+
+### Open questions for the API team
+
+1. Does `min_area` / `max_area` on `GET /v1/properties` compare against
+   `area_size` as stored, or in square feet? The client passes square feet.
+2. Is `bedrooms` an exact match or a minimum? The Browse screen and the finder
+   both treat it as a minimum ("3+").
+
+---
+
+## 1c. `area_id` on GET /v1/properties doesn't include sub-areas
+
+Observed against `https://api.homenetbd.com` on 2026-10-05:
+
+| Request | `total` |
+|---|---|
+| `?status=active&area_id=<Gulshan>` | **0** |
+| `…&area_id=<Gulshan-1>` | 1 |
+| `…&area_id=<Gulshan-2>` | 1 |
+| `…&area_id=<Mirpur>` / `<Uttara>` | **0** (listings are under Mirpur-10, Sector-7…) |
+
+Listings are attached to the sub-area, so filtering by the parent a seeker
+actually names ("Gulshan") finds nothing. The app works around it by sending
+one request per sub-area and merging (`getPropertiesInAreas`,
+`src/services/propertyApi.ts`). Better: make a parent `area_id` match its
+children as well. The app's merge de-duplicates by id, so it keeps working
+either way.
+
+Also: `GET /v1/areas` returns six test rows ("Postman Area …", "Postman Geo
+…") in production data. Anything that lists all areas, such as the area picker, can show them.
+
+---
+
 ## 2. Auth tokens in httpOnly cookies (web)
 
 **Today:** on web, `src/services/tokenStorage.ts` keeps the access and refresh
@@ -151,5 +265,7 @@ endpoint skip or repair a bad row rather than fail the whole page.
   that is also what a `POST`-only route returns, so the route's existence
   can't be confirmed from outside. Until it responds, the app shows "Quick
   listing isn't available right now" and offers the step-by-step form.
+- **§1b `POST /v1/ai/parse-search`:** same situation. The finder hides its
+  "describe it" box until the web build sets `EXPO_PUBLIC_AI_SEARCH_ENABLED`.
 - **`/v1/guides`** returns 404. The app has `GUIDES_API_ENABLED` off and uses
   its curated guides, validated with the same schema the API response will be.
