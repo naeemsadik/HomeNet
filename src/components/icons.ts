@@ -99,6 +99,7 @@ export { default as Shield } from "lucide-react-native/icons/shield";
 export { default as ShieldAlert } from "lucide-react-native/icons/shield-alert";
 export { default as ShieldCheck } from "lucide-react-native/icons/shield-check";
 export { default as Sliders } from "lucide-react-native/icons/sliders-vertical";
+export { default as SlidersHorizontal } from "lucide-react-native/icons/sliders-horizontal";
 export { default as Sparkles } from "lucide-react-native/icons/sparkles";
 export { default as Tag } from "lucide-react-native/icons/tag";
 export { default as Trash2 } from "lucide-react-native/icons/trash-2";

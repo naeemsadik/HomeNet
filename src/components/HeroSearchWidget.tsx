@@ -1,12 +1,24 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
-import { ChevronDown, MapPin, Search, Sparkles, X } from "@/components/icons";
+import {
+  ChevronDown,
+  MapPin,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  X,
+} from "@/components/icons";
 import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
 import { AreaPicker } from "./AreaPicker";
+import {
+  AdvancedFiltersModal,
+  defaultFilterState,
+  type FilterState,
+} from "./AdvancedFiltersModal";
 import type { Area } from "@/types/api";
 
 export type HeroSearchTab = SearchTabType;
@@ -28,6 +40,20 @@ export function HeroSearchWidget({
   const [query, setQuery] = useState("");
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState<Area | null>(null);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>(defaultFilterState);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (filters.minPrice) count++;
+    if (filters.maxPrice) count++;
+    if (filters.bedrooms !== null) count++;
+    if (filters.bathrooms !== null) count++;
+    if (filters.amenities.length > 0) count += filters.amenities.length;
+    if (filters.verifiedOnly) count++;
+    return count;
+  }, [filters]);
+  const hasActiveFilters = activeFilterCount > 0;
 
   const openAiModal = useAiFinderModalStore((state) => state.open);
 
@@ -60,6 +86,11 @@ export function HeroSearchWidget({
     if (query.trim()) params.set("query", query.trim());
     if (activeTab === "short-let") params.set("subtype", "short-let");
     locationParams(params);
+    if (filters.minPrice) params.set("min_price", filters.minPrice);
+    if (filters.maxPrice) params.set("max_price", filters.maxPrice);
+    if (filters.bedrooms !== null) params.set("bedrooms", String(filters.bedrooms));
+    if (filters.bathrooms !== null) params.set("bathrooms", String(filters.bathrooms));
+    if (filters.verifiedOnly) params.set("is_verified", "true");
     const qs = params.toString();
     router.push((qs ? `${target}?${qs}` : target) as never);
   };
@@ -98,6 +129,32 @@ export function HeroSearchWidget({
               <X color={colors.muted} size={16} />
             </Pressable>
           ) : null}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              hasActiveFilters
+                ? `Open search filters, ${activeFilterCount} active`
+                : "Open search filters"
+            }
+            onPress={() => setFilterModalOpen(true)}
+            style={({ hovered }: any) => [
+              styles.filterButton,
+              hasActiveFilters && styles.filterButtonActive,
+              hovered && styles.filterButtonHovered,
+              webPointer,
+            ]}
+          >
+            <SlidersHorizontal
+              color={hasActiveFilters ? colorTokens.brandText : colors.muted}
+              size={18}
+              strokeWidth={2}
+            />
+            {hasActiveFilters ? (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+              </View>
+            ) : null}
+          </Pressable>
         </View>
 
         <Pressable
@@ -176,6 +233,14 @@ export function HeroSearchWidget({
           setSelectedArea(area);
           setAreaPickerOpen(false);
         }}
+      />
+
+      <AdvancedFiltersModal
+        filters={filters}
+        onApply={(updated) => setFilters(updated)}
+        onClose={() => setFilterModalOpen(false)}
+        onReset={() => setFilters(defaultFilterState)}
+        visible={filterModalOpen}
       />
     </View>
   );
@@ -257,6 +322,38 @@ const styles = StyleSheet.create({
   } as any,
   inputPhone: { fontSize: 15 },
   clear: { padding: 4 },
+  filterButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: -8,
+  },
+  filterButtonActive: {
+    backgroundColor: colorTokens.brandSurface,
+  },
+  filterButtonHovered: {
+    backgroundColor: "rgba(11, 26, 23, 0.05)",
+  },
+  filterBadge: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colorTokens.brand,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+  },
+  filterBadgeText: {
+    color: colorTokens.onBrand,
+    fontFamily: fonts.bold,
+    fontSize: 10,
+    lineHeight: 12,
+  },
 
   areaButton: {
     height: 56,
