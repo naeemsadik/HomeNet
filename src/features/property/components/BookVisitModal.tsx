@@ -61,11 +61,18 @@ export function BookVisitModal({
             style={[
               styles.confirmVisitBtn,
               webPointer,
-              !sellerPhone && styles.actionBtnDisabled,
+              !sellerPhone && styles.confirmVisitBtnDisabled,
             ]}
           >
-            <WhatsAppIcon size={18} color={colorTokens.onBrand} />
-            <Text style={styles.confirmVisitText}>Request visit on WhatsApp</Text>
+            <WhatsAppIcon size={18} color={sellerPhone ? colorTokens.onBrand : colorTokens.subtle} />
+            <Text
+              style={[
+                styles.confirmVisitText,
+                !sellerPhone && styles.confirmVisitTextDisabled,
+              ]}
+            >
+              Request visit on WhatsApp
+            </Text>
           </Pressable>
 
           <View style={styles.modalDivider}>
@@ -84,11 +91,18 @@ export function BookVisitModal({
             style={[
               styles.modalCallBtn,
               webPointer,
-              !sellerPhone && styles.actionBtnDisabled,
+              !sellerPhone && styles.modalCallBtnDisabled,
             ]}
           >
-            <Phone size={18} color={colorTokens.ink} />
-            <Text style={styles.modalCallBtnText}>Call {sellerName}</Text>
+            <Phone size={18} color={sellerPhone ? colorTokens.ink : colorTokens.subtle} />
+            <Text
+              style={[
+                styles.modalCallBtnText,
+                !sellerPhone && styles.modalCallBtnTextDisabled,
+              ]}
+            >
+              Call {sellerName}
+            </Text>
           </Pressable>
         </View>
       </View>
