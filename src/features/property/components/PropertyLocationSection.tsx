@@ -1,6 +1,7 @@
 import { ExternalLink, MapPin, type LucideIcon } from "@/components/icons";
 import { Image, Linking, Platform, Pressable, Text, View } from "react-native";
 import { colorTokens, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 import { styles } from "../screens/PropertyDetailScreen.styles";
 
 export type NearbyPlace = {
@@ -27,17 +28,18 @@ export function PropertyLocationSection({
   mapEmbedUrl,
   mapExternalUrl,
 }: PropertyLocationSectionProps) {
+  const { t } = useTranslation();
   return (
     <View style={styles.sectionCard}>
       <View style={styles.sectionHeaderBetween}>
-        <Text style={styles.sectionHeading}>Location & neighbourhood</Text>
+        <Text style={styles.sectionHeading}>{t("propertyDetail.location")}</Text>
         <Pressable
-          accessibilityLabel="Open in Google Maps"
+          accessibilityLabel={t("propertyDetail.openGoogleMaps")}
           onPress={() => void Linking.openURL(mapExternalUrl)}
           style={({ pressed }) => [styles.openMapsBtn, webPointer, pressed && styles.pressed]}
         >
           <ExternalLink color="#04cf92" size={14} />
-          <Text style={styles.openMapsBtnText}>Open Google Maps</Text>
+          <Text style={styles.openMapsBtnText}>{t("propertyDetail.openGoogleMaps")}</Text>
         </Pressable>
       </View>
 

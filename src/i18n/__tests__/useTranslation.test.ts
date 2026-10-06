@@ -19,6 +19,13 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("en", "filters.title")).toBe("Advanced filters");
       expect(translate("en", "areaPicker.title")).toBe("Select Location");
       expect(translate("en", "browse.gridView")).toBe("Grid view");
+      expect(translate("en", "propertyDetail.forSale")).toBe("For Sale");
+      expect(translate("en", "propertyDetail.aboutProperty")).toBe(
+        "About this property"
+      );
+      expect(translate("en", "propertyDetail.bookViewing")).toBe(
+        "Book a visit"
+      );
     });
 
     it("translates static keys in Bengali", () => {
@@ -28,9 +35,16 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("bn", "filters.title")).toBe("অ্যাডভান্সড ফিল্টার");
       expect(translate("bn", "areaPicker.title")).toBe("এলাকা নির্বাচন করুন");
       expect(translate("bn", "browse.gridView")).toBe("গ্রিড ভিউ");
+      expect(translate("bn", "propertyDetail.forSale")).toBe("বিক্রির জন্য");
+      expect(translate("bn", "propertyDetail.aboutProperty")).toBe(
+        "এই প্রপার্টি সম্পর্কে"
+      );
+      expect(translate("bn", "propertyDetail.bookViewing")).toBe(
+        "পরিদর্শনের বুকিং দিন"
+      );
     });
 
-    it("translates filters and browse interpolation keys", () => {
+    it("translates filters, browse, and propertyDetail interpolation keys", () => {
       expect(translate("en", "filters.showResults", { count: 12 })).toBe(
         "Show 12 results"
       );
@@ -43,6 +57,12 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("bn", "browse.propertiesFound", { count: "৮" })).toBe(
         "৮টি প্রপার্টি পাওয়া গেছে"
       );
+      expect(
+        translate("en", "propertyDetail.photoOf", { current: 1, total: 10 })
+      ).toBe("1 of 10");
+      expect(
+        translate("bn", "propertyDetail.photoOf", { current: "১", total: "১০" })
+      ).toBe("১ / ১০");
     });
 
     it("interpolates parameters with {{key}} format", () => {
