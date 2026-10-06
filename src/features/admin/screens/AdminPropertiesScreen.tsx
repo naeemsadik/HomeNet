@@ -7,8 +7,10 @@ import { PropertyAdminList } from "../components/PropertyAdminList";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { toApiError } from "@/services/apiClient";
 import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useTranslation } from "@/i18n";
 
 export function AdminPropertiesScreen() {
+  const { t } = useTranslation();
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -37,8 +39,8 @@ export function AdminPropertiesScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Property Management</Text>
-        <Text style={styles.subtitle}>Review and manage all property listings.</Text>
+        <Text style={styles.title}>{t("admin.propertyManagement")}</Text>
+        <Text style={styles.subtitle}>{t("admin.propertyManagementSubtitle")}</Text>
       </View>
 
       <PropertyAdminList
@@ -70,9 +72,9 @@ export function AdminPropertiesScreen() {
 
       <ConfirmDialog
         visible={!!deleteTarget}
-        title="Delete Property"
-        message="This will permanently delete this property. This action cannot be undone."
-        confirmLabel="Delete"
+        title={t("admin.deletePropertyTitle")}
+        message={t("admin.deletePropertyMessage")}
+        confirmLabel={t("admin.actions.delete")}
         variant="danger"
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteTarget(null)}

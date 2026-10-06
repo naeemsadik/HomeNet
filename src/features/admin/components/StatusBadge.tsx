@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import { colorTokens, fontTokens } from "@/theme";
+import { useTranslation, translateListingStatus } from "@/i18n";
 
 type PropertyStatus = "draft" | "active" | "pending" | "sold" | "archived";
 
@@ -12,10 +13,12 @@ const STATUS_CONFIG: Record<PropertyStatus, { bg: string; text: string; label: s
 };
 
 export function PropertyStatusBadge({ status }: { status: PropertyStatus }) {
+  const { language } = useTranslation();
   const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.draft;
+  const label = language === "bn" ? translateListingStatus(status, language) : config.label;
   return (
     <View style={[styles.badge, { backgroundColor: config.bg }]}>
-      <Text style={[styles.text, { color: config.text }]}>{config.label}</Text>
+      <Text style={[styles.text, { color: config.text }]}>{label}</Text>
     </View>
   );
 }

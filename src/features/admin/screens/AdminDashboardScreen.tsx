@@ -13,10 +13,12 @@ import { AdminAreasScreen } from "./AdminAreasScreen";
 import { hasAnyAdminPermission, isAdmin } from "@/lib/permissions";
 import { NotificationList } from "@/features/notification/components/NotificationList";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
+import { useTranslation } from "@/i18n";
 
 type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
 
 export function AdminDashboardScreen() {
+  const { t } = useTranslation();
   const { isPhone, contentPadding } = useResponsive();
   const userRoles = useAuthStore((s) => s.userRoles);
   const [activeTab, setActiveTab] = useState<AdminTab>("properties");
@@ -45,9 +47,9 @@ export function AdminDashboardScreen() {
     return (
       <AppChrome active="home">
         <View style={styles.denied}>
-          <Text style={styles.deniedTitle}>Access Denied</Text>
+          <Text style={styles.deniedTitle}>{t("admin.accessDenied")}</Text>
           <Text style={styles.deniedText}>
-            You don't have permission to access the admin dashboard.
+            {t("admin.accessDeniedDesc")}
           </Text>
         </View>
       </AppChrome>
@@ -62,8 +64,8 @@ export function AdminDashboardScreen() {
       >
         <View style={styles.headerSection}>
           <Eyebrow>Admin</Eyebrow>
-          <Text style={styles.title}>Admin Dashboard</Text>
-          <Text style={styles.subtitle}>Manage properties, users, and roles.</Text>
+          <Text style={styles.title}>{t("admin.dashboardTitle")}</Text>
+          <Text style={styles.subtitle}>{t("admin.dashboardSubtitle")}</Text>
         </View>
 
         <AdminTabNav
@@ -81,7 +83,7 @@ export function AdminDashboardScreen() {
           {visibleTab === "areas" && <AdminAreasScreen />}
           {visibleTab === "settings" && (
             <View style={styles.settingsPlaceholder}>
-              <Text style={styles.settingsText}>Settings coming soon.</Text>
+              <Text style={styles.settingsText}>{t("admin.settingsComingSoon")}</Text>
             </View>
           )}
         </View>

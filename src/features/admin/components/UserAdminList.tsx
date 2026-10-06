@@ -2,8 +2,9 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, Vi
 import { Search, Users } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { UserAdminItemRow } from "./UserAdminItem";
-import type { UserWithRoles } from "../types/admin";
+import type { UserWithRoles } from "../types/admin";
 import { LiveText } from "@/components/LiveText";
+import { useTranslation, formatLocalizedNumber } from "@/i18n";
 
 interface UserAdminListProps {
   users: UserWithRoles[];
@@ -30,6 +31,8 @@ export function UserAdminList({
   onLoadMore,
   hasMore = false,
 }: UserAdminListProps) {
+  const { t, language } = useTranslation();
+
   return (
     <View style={styles.container}>
       <View style={styles.searchRow}>
@@ -37,14 +40,19 @@ export function UserAdminList({
         <TextInput
           value={searchQuery}
           onChangeText={onSearchChange}
-          placeholder="Search users by name or email..."
+          placeholder={t("admin.searchUsersPlaceholder")}
           placeholderTextColor={colorTokens.textMuted}
           style={styles.searchInput}
           accessibilityLabel="Search users"
         />
       </View>
 
-      <LiveText style={styles.count}>Showing {users.length} of {total} users</LiveText>
+      <LiveText style={styles.count}>
+        {t("admin.showingUserCount", {
+          count: formatLocalizedNumber(users.length, language),
+          total: formatLocalizedNumber(total, language),
+        })}
+      </LiveText>
 
       {isLoading ? (
         <View style={styles.center}>
@@ -68,13 +76,13 @@ export function UserAdminList({
           ListEmptyComponent={
             <View style={styles.empty}>
               <Users color={colorTokens.textMuted} size={40} />
-              <Text style={styles.emptyText}>No users found</Text>
+              <Text style={styles.emptyText}>{t("admin.noUsersFound")}</Text>
             </View>
           }
           ListFooterComponent={
             hasMore ? (
               <Pressable onPress={onLoadMore} style={styles.loadMore} accessibilityRole="button" accessibilityLabel="Load more users">
-                <Text style={styles.loadMoreText}>Load More</Text>
+                <Text style={styles.loadMoreText}>{t("admin.loadMore")}</Text>
               </Pressable>
             ) : null
           }

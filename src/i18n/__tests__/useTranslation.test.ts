@@ -33,6 +33,14 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("en", "auth.signIn")).toBe("Sign in");
       expect(translate("en", "auth.signUp")).toBe("Create an account");
       expect(translate("en", "auth.resetPassword")).toBe("Reset password");
+      expect(translate("en", "dashboard.sellerDashboard")).toBe("Seller Dashboard");
+      expect(translate("en", "dashboard.totalListings")).toBe("Total Listings");
+      expect(translate("en", "dashboard.tabs.myListings")).toBe("My Listings");
+      expect(translate("en", "admin.dashboardTitle")).toBe("Admin Dashboard");
+      expect(translate("en", "admin.columns.property")).toBe("Property");
+      expect(translate("en", "admin.actions.activate")).toBe("Activate");
+      expect(translate("en", "seller.myListings")).toBe("My Listings");
+      expect(translate("en", "seller.actions.edit")).toBe("Edit");
     });
 
     it("translates static keys in Bengali", () => {
@@ -56,6 +64,14 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("bn", "auth.signIn")).toBe("সাইন ইন");
       expect(translate("bn", "auth.signUp")).toBe("অ্যাকাউন্ট তৈরি করুন");
       expect(translate("bn", "auth.resetPassword")).toBe("পাসওয়ার্ড রিসেট করুন");
+      expect(translate("bn", "dashboard.sellerDashboard")).toBe("সেলার ড্যাশবোর্ড");
+      expect(translate("bn", "dashboard.totalListings")).toBe("মোট প্রপার্টি");
+      expect(translate("bn", "dashboard.tabs.myListings")).toBe("আমার প্রপার্টি");
+      expect(translate("bn", "admin.dashboardTitle")).toBe("অ্যাডমিন ড্যাশবোর্ড");
+      expect(translate("bn", "admin.columns.property")).toBe("প্রপার্টি");
+      expect(translate("bn", "admin.actions.activate")).toBe("সক্রিয় করুন");
+      expect(translate("bn", "seller.myListings")).toBe("আমার প্রপার্টি");
+      expect(translate("bn", "seller.actions.edit")).toBe("সম্পাদনা");
     });
 
     it("translates filters, browse, and propertyDetail interpolation keys", () => {
@@ -89,6 +105,18 @@ describe("i18n engine and useTranslation hook", () => {
       expect(
         translate("bn", "auth.socialComingSoon", { provider: "Google" })
       ).toBe("Google সাইন-ইন শীঘ্রই উপলব্ধ হবে।");
+      expect(
+        translate("en", "admin.showingCount", { count: 5, total: 20 })
+      ).toBe("Showing 5 of 20 properties");
+      expect(
+        translate("bn", "admin.showingCount", { count: "৫", total: "২০" })
+      ).toBe("২০টির মধ্যে ৫টি প্রপার্টি দেখানো হচ্ছে");
+      expect(
+        translate("en", "seller.deleteConfirmMessage", { title: "Gulshan Flat" })
+      ).toBe("Are you sure you want to delete \"Gulshan Flat\"?");
+      expect(
+        translate("bn", "seller.deleteConfirmMessage", { title: "গুলশান ফ্ল্যাট" })
+      ).toBe("আপনি কি নিশ্চিত যে \"গুলশান ফ্ল্যাট\" মুছে ফেলতে চান?");
     });
 
     it("interpolates parameters with {{key}} format", () => {
