@@ -12,18 +12,12 @@ import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
 import { appFonts } from "@/theme/appFonts";
-import {
-  ensureGoogleTranslateScript,
-  restoreSavedLanguage,
-  restoreTranslateCookie,
-  shouldLoadTranslateOnBoot,
-} from "@/utils/language";
+import { restoreSavedLanguage } from "@/i18n";
 import { PageMeta } from "@/components/PageMeta";
 import { queryClient } from "@/lib/queryClient";
 import { installDomGuard } from "@/lib/domGuard";
 
-// Before React renders: Google Translate rewrites text nodes React still holds,
-// and React's later removeChild/insertBefore on them would crash the app.
+// Before React renders: browser translation/extensions might rewrite text nodes.
 installDomGuard();
 
 // Keyboard focus ring. Not colorTokens.primary (#04cf92), which sits at 2.03:1
@@ -63,13 +57,6 @@ export default function RootLayout() {
       }
 
       restoreSavedLanguage();
-
-      // Only visitors who already read in Bangla pay for the translate
-      // widget up front; for everyone else it loads on first use.
-      if (shouldLoadTranslateOnBoot()) {
-        restoreTranslateCookie();
-        ensureGoogleTranslateScript();
-      }
     }
 
     setUnauthorizedHandler(() => {
