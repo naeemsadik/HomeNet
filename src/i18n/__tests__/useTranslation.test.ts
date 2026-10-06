@@ -26,6 +26,13 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("en", "propertyDetail.bookViewing")).toBe(
         "Book a visit"
       );
+      expect(translate("en", "saved.title")).toBe("Saved Properties");
+      expect(translate("en", "saved.emptyTitle")).toBe(
+        "No saved properties yet"
+      );
+      expect(translate("en", "auth.signIn")).toBe("Sign in");
+      expect(translate("en", "auth.signUp")).toBe("Create an account");
+      expect(translate("en", "auth.resetPassword")).toBe("Reset password");
     });
 
     it("translates static keys in Bengali", () => {
@@ -42,6 +49,13 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("bn", "propertyDetail.bookViewing")).toBe(
         "পরিদর্শনের বুকিং দিন"
       );
+      expect(translate("bn", "saved.title")).toBe("সংরক্ষিত প্রপার্টিসমূহ");
+      expect(translate("bn", "saved.emptyTitle")).toBe(
+        "এখনও কোনো সংরক্ষিত প্রপার্টি নেই"
+      );
+      expect(translate("bn", "auth.signIn")).toBe("সাইন ইন");
+      expect(translate("bn", "auth.signUp")).toBe("অ্যাকাউন্ট তৈরি করুন");
+      expect(translate("bn", "auth.resetPassword")).toBe("পাসওয়ার্ড রিসেট করুন");
     });
 
     it("translates filters, browse, and propertyDetail interpolation keys", () => {
@@ -63,6 +77,18 @@ describe("i18n engine and useTranslation hook", () => {
       expect(
         translate("bn", "propertyDetail.photoOf", { current: "১", total: "১০" })
       ).toBe("১ / ১০");
+      expect(translate("en", "saved.count", { count: 3 })).toBe(
+        "3 saved properties"
+      );
+      expect(translate("bn", "saved.count", { count: "৩" })).toBe(
+        "৩টি সংরক্ষিত প্রপার্টি"
+      );
+      expect(
+        translate("en", "auth.socialComingSoon", { provider: "Google" })
+      ).toBe("Google sign-in will be available soon.");
+      expect(
+        translate("bn", "auth.socialComingSoon", { provider: "Google" })
+      ).toBe("Google সাইন-ইন শীঘ্রই উপলব্ধ হবে।");
     });
 
     it("interpolates parameters with {{key}} format", () => {
