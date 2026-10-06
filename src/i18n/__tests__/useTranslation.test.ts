@@ -16,12 +16,33 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("en", "nav.home")).toBe("Home");
       expect(translate("en", "hero.tabs.buy")).toBe("Buy");
       expect(translate("en", "propertyCard.verified")).toBe("Verified");
+      expect(translate("en", "filters.title")).toBe("Advanced filters");
+      expect(translate("en", "areaPicker.title")).toBe("Select Location");
+      expect(translate("en", "browse.gridView")).toBe("Grid view");
     });
 
     it("translates static keys in Bengali", () => {
       expect(translate("bn", "nav.home")).toBe("হোম");
       expect(translate("bn", "hero.tabs.buy")).toBe("কিনুন");
       expect(translate("bn", "propertyCard.verified")).toBe("যাচাইকৃত");
+      expect(translate("bn", "filters.title")).toBe("অ্যাডভান্সড ফিল্টার");
+      expect(translate("bn", "areaPicker.title")).toBe("এলাকা নির্বাচন করুন");
+      expect(translate("bn", "browse.gridView")).toBe("গ্রিড ভিউ");
+    });
+
+    it("translates filters and browse interpolation keys", () => {
+      expect(translate("en", "filters.showResults", { count: 12 })).toBe(
+        "Show 12 results"
+      );
+      expect(translate("bn", "filters.showResults", { count: "১২" })).toBe(
+        "১২টি ফলাফল দেখুন"
+      );
+      expect(translate("en", "browse.propertiesFound", { count: 8 })).toBe(
+        "8 properties found"
+      );
+      expect(translate("bn", "browse.propertiesFound", { count: "৮" })).toBe(
+        "৮টি প্রপার্টি পাওয়া গেছে"
+      );
     });
 
     it("interpolates parameters with {{key}} format", () => {

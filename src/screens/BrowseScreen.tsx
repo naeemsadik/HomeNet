@@ -28,8 +28,9 @@ import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import type { PropertyType } from "@/types/api";
+import type { PropertyType } from "@/types/api";
 import { LiveText } from "@/components/LiveText";
+import { useTranslation, formatLocalizedNumber } from "@/i18n";
 
 /**
  * Maps a `?type=` URL value onto the API's PropertyType enum. Older links and
@@ -49,6 +50,7 @@ function toPropertyTypeFilter(raw?: string): string {
 }
 
 export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
+  const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
   const params = useLocalSearchParams<{
     query?: string;
@@ -288,12 +290,18 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
         {/* ─── 4. Results Count & View Toggle Toolbar ─────────────────────── */}
         <View style={styles.toolbar}>
           <LiveText style={styles.resultCountText}>
-            {totalCount} {totalCount === 1 ? "property" : "properties"} found
+            {totalCount === 1
+              ? t("browse.propertyFound", {
+                  count: formatLocalizedNumber(totalCount, language),
+                })
+              : t("browse.propertiesFound", {
+                  count: formatLocalizedNumber(totalCount, language),
+                })}
           </LiveText>
 
           <View style={styles.viewToggleWrap}>
             <Pressable
-              accessibilityLabel="Grid view"
+              accessibilityLabel={t("browse.gridView")}
               onPress={() => setViewMode("grid")}
               style={[
                 styles.viewToggleBtn,
@@ -308,7 +316,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
             </Pressable>
 
             <Pressable
-              accessibilityLabel="List view"
+              accessibilityLabel={t("browse.listView")}
               onPress={() => setViewMode("list")}
               style={[
                 styles.viewToggleBtn,
@@ -329,9 +337,9 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
           <PropertySkeletonFeed />
         ) : isError && results.length === 0 ? (
           <View style={styles.centerContainer}>
-            <Text style={styles.emptyTitle}>Could not load live properties</Text>
-            <Text style={styles.emptySubtitle}>Something went wrong while loading listings. Please try again.</Text>
-            <AppButton icon={RotateCcw} label="Retry" onPress={() => void refresh()} />
+            <Text style={styles.emptyTitle}>{t("browse.loadErrorTitle")}</Text>
+            <Text style={styles.emptySubtitle}>{t("browse.loadErrorSubtitle")}</Text>
+            <AppButton icon={RotateCcw} label={t("browse.retry")} onPress={() => void refresh()} />
           </View>
         ) : results.length > 0 ? (
           <View style={styles.resultsContainer}>
@@ -370,7 +378,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
               <View style={styles.loadMoreWrap}>
                 <AppButton
                   disabled={fetchingNextPage}
-                  label={fetchingNextPage ? "Loading..." : "Load more listings"}
+                  label={fetchingNextPage ? t("browse.loadingMore") : t("browse.loadMore")}
                   onPress={() => void loadMore()}
                   style={styles.loadMoreBtn}
                 />
@@ -380,24 +388,23 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
         ) : isSoldView ? (
           <View style={styles.emptyContainer}>
             <Search color={colorTokens.brand} size={32} />
-            <Text style={styles.emptyTitle}>No sold prices published yet</Text>
+            <Text style={styles.emptyTitle}>{t("browse.noSoldTitle")}</Text>
             <Text style={styles.emptySubtitle}>
-              HomeNet publishes a sale here once it has completed and been
-              confirmed. Nothing has been confirmed for this area so far.
+              {t("browse.noSoldSubtitle")}
             </Text>
           </View>
         ) : (
           <View style={styles.emptyContainer}>
             <Search color={colorTokens.brand} size={32} />
-            <Text style={styles.emptyTitle}>No matching properties</Text>
+            <Text style={styles.emptyTitle}>{t("browse.noMatchingTitle")}</Text>
             <Text style={styles.emptySubtitle}>
-              Try broadening your search query, adjusting your budget, or clearing some filters.
+              {t("browse.noMatchingSubtitle")}
             </Text>
             <Pressable
               onPress={handleResetFilters}
               style={[styles.clearAllBtn, webPointer]}
             >
-              <Text style={styles.clearAllBtnText}>Reset all filters</Text>
+              <Text style={styles.clearAllBtnText}>{t("browse.resetAllFilters")}</Text>
             </Pressable>
           </View>
         )}

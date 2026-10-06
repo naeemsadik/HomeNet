@@ -23,6 +23,7 @@ import {
 import { colorTokens, colors, webPointer } from "@/theme";
 import { useAreaPicker } from "@/hooks/useAreaPicker";
 import { useWindowSize } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import type { Area } from "@/types/api";
 import { styles } from "./AreaPicker.styles";
 
@@ -84,6 +85,7 @@ export function AreaPicker({
   selectedArea,
   initialCity,
 }: AreaPickerProps) {
+  const { t } = useTranslation();
   const { width } = useWindowSize();
   const isPhone = width <= 600;
 
@@ -223,7 +225,12 @@ export function AreaPicker({
       onRequestClose={onClose}
     >
       <View style={[styles.modalOverlay, !isPhone && styles.modalOverlayDesktop]}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close location picker" style={styles.backdropPressable} onPress={onClose} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("areaPicker.close")}
+          style={styles.backdropPressable}
+          onPress={onClose}
+        />
         
         <View 
           style={[styles.sheetContent, isPhone ? styles.sheetPhone : styles.sheetTablet]}
@@ -243,21 +250,23 @@ export function AreaPicker({
               <View style={styles.headerIconCircle}>
                 <MapPin size={16} color="#04cf92" strokeWidth={2.2} />
               </View>
-              <Text style={styles.headerTitle}>Select Location</Text>
+              <Text style={styles.headerTitle}>{t("areaPicker.title")}</Text>
             </View>
             <View style={styles.headerActions}>
               {selectedArea ? (
-                <Pressable accessibilityRole="button"
+                <Pressable
+                  accessibilityRole="button"
                   onPress={handleClearSelection}
                   style={[styles.clearSelectBtn, webPointer]}
                 >
-                  <Text style={styles.clearSelectText}>Clear Selected</Text>
+                  <Text style={styles.clearSelectText}>{t("areaPicker.clearSelected")}</Text>
                 </Pressable>
               ) : null}
-              <Pressable accessibilityRole="button"
+              <Pressable
+                accessibilityRole="button"
                 onPress={onClose}
                 style={[styles.closeButton, webPointer]}
-                accessibilityLabel="Close location picker"
+                accessibilityLabel={t("areaPicker.close")}
               >
                 <X size={17} color="#5C6B66" strokeWidth={2} />
               </Pressable>
@@ -271,7 +280,8 @@ export function AreaPicker({
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.chipsScroll}
             >
-              <Pressable accessibilityRole="button"
+              <Pressable
+                accessibilityRole="button"
                 onPress={() => selectCity(null)}
                 style={[
                   styles.chip,
@@ -285,14 +295,15 @@ export function AreaPicker({
                     selectedCity === null && styles.chipTextActive,
                   ]}
                 >
-                  All Cities
+                  {t("areaPicker.allCities")}
                 </Text>
               </Pressable>
 
               {availableCities.map((city) => {
                 const isActive = selectedCity === city;
                 return (
-                  <Pressable accessibilityRole="button"
+                  <Pressable
+                    accessibilityRole="button"
                     key={city}
                     onPress={() => selectCity(city)}
                     style={[
@@ -322,16 +333,17 @@ export function AreaPicker({
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="Search zones, neighborhoods or areas..."
+                placeholder={t("areaPicker.searchPlaceholder")}
                 placeholderTextColor="#8B9892"
                 style={styles.searchInput}
                 autoCorrect={false}
                 clearButtonMode="while-editing"
               />
               {searchQuery.length > 0 ? (
-                <Pressable accessibilityRole="button"
+                <Pressable
+                  accessibilityRole="button"
                   onPress={() => setSearchQuery("")}
-                  accessibilityLabel="Clear search"
+                  accessibilityLabel={t("areaPicker.clearSearch")}
                   style={[styles.clearSearchBtn, webPointer]}
                 >
                   <X size={16} color={colors.muted} />
@@ -348,17 +360,19 @@ export function AreaPicker({
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.breadcrumbScroll}
               >
-                <Pressable accessibilityRole="button"
+                <Pressable
+                  accessibilityRole="button"
                   onPress={resetNav}
                   style={[styles.breadcrumbBtn, webPointer]}
                 >
-                  <Text style={styles.breadcrumbTextHome}>Root</Text>
+                  <Text style={styles.breadcrumbTextHome}>{t("areaPicker.root")}</Text>
                 </Pressable>
 
                 {selectedCity ? (
                   <>
                     <ChevronRight size={12} color={colors.muted} style={styles.breadDivider} />
-                    <Pressable accessibilityRole="button"
+                    <Pressable
+                      accessibilityRole="button"
                       onPress={resetNav}
                       style={[styles.breadcrumbBtn, webPointer]}
                     >
@@ -370,7 +384,8 @@ export function AreaPicker({
                 {navPath.map((item, index) => (
                   <React.Fragment key={item.id}>
                     <ChevronRight size={12} color={colors.muted} style={styles.breadDivider} />
-                    <Pressable accessibilityRole="button"
+                    <Pressable
+                      accessibilityRole="button"
                       onPress={() => navigateToBreadcrumb(index)}
                       disabled={index === navPath.length - 1}
                       style={[
@@ -393,12 +408,13 @@ export function AreaPicker({
               </ScrollView>
 
               {navPath.length > 0 ? (
-                <Pressable accessibilityRole="button"
+                <Pressable
+                  accessibilityRole="button"
                   onPress={drillUp}
                   style={[styles.backStepBtn, webPointer]}
                 >
                   <ChevronLeft size={16} color={colors.green} />
-                  <Text style={styles.backStepText}>Back</Text>
+                  <Text style={styles.backStepText}>{t("areaPicker.back")}</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -408,19 +424,20 @@ export function AreaPicker({
           {navPath.length > 0 && !searchQuery ? (
             <View style={styles.selectionBanner}>
               <Text style={styles.selectionBannerLabel}>
-                Current level:{" "}
+                {t("areaPicker.currentLevel")}{" "}
                 <Text style={styles.selectionBannerValue}>
                   {navPath.length > 0
                     ? navPath[navPath.length - 1].name
                     : selectedCity}
                 </Text>
               </Text>
-              <Pressable accessibilityRole="button"
+              <Pressable
+                accessibilityRole="button"
                 onPress={handleSelectCurrentLevel}
                 style={[styles.selectionBannerBtn, webPointer]}
               >
                 <Check size={14} color={colorTokens.onBrand} />
-                <Text style={styles.selectionBannerBtnText}>Confirm This Level</Text>
+                <Text style={styles.selectionBannerBtnText}>{t("areaPicker.confirmThisLevel")}</Text>
               </Pressable>
             </View>
           ) : null}
@@ -432,19 +449,20 @@ export function AreaPicker({
             ) : error ? (
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{error}</Text>
-                <Pressable accessibilityRole="button"
+                <Pressable
+                  accessibilityRole="button"
                   onPress={resetNav}
                   style={[styles.retryButton, webPointer]}
                 >
-                  <Text style={styles.retryButtonText}>Go to Root</Text>
+                  <Text style={styles.retryButtonText}>{t("areaPicker.goToRoot")}</Text>
                 </Pressable>
               </View>
             ) : areas.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Building size={40} color={colors.line} style={styles.emptyIcon} />
-                <Text style={styles.emptyTitle}>No locations found</Text>
+                <Text style={styles.emptyTitle}>{t("areaPicker.noLocationsFound")}</Text>
                 <Text style={styles.emptySubtitle}>
-                  Try clearing your search or checking another city.
+                  {t("areaPicker.emptySubtitle")}
                 </Text>
               </View>
             ) : (
@@ -474,7 +492,8 @@ export function AreaPicker({
                       ]}
                     >
                       {/* Left: Tapping name/row selects it if leaf, or drills down if parent */}
-                      <Pressable accessibilityRole="button"
+                      <Pressable
+                        accessibilityRole="button"
                         style={({ pressed }) => [
                           styles.areaInfoPressable,
                           webPointer,
@@ -509,7 +528,7 @@ export function AreaPicker({
                           <Text style={styles.areaCity}>
                             {item.city
                               ? item.city.charAt(0).toUpperCase() + item.city.slice(1).toLowerCase()
-                              : "Area"}
+                              : t("areaPicker.areaFallback")}
                           </Text>
                         </View>
                       </Pressable>
@@ -518,7 +537,8 @@ export function AreaPicker({
                       <View style={styles.actionCol}>
                         {/* If it is a parent node, offer a direct select button */}
                         {!isLeaf ? (
-                          <Pressable accessibilityRole="button"
+                          <Pressable
+                            accessibilityRole="button"
                             onPress={() => handleSelectArea(item)}
                             style={({ pressed }) => [
                               styles.directSelectBtn,
@@ -526,12 +546,12 @@ export function AreaPicker({
                               webPointer,
                               pressed && { opacity: 0.8 },
                             ]}
-                            accessibilityLabel={`Select ${item.name}`}
+                            accessibilityLabel={t("areaPicker.selectArea", { name: item.name })}
                           >
                             {isSelected ? (
                               <Check size={13} color={colorTokens.onBrand} strokeWidth={2.5} />
                             ) : (
-                              <Text style={styles.directSelectText}>Select</Text>
+                              <Text style={styles.directSelectText}>{t("areaPicker.select")}</Text>
                             )}
                           </Pressable>
                         ) : isSelected ? (
@@ -542,7 +562,8 @@ export function AreaPicker({
 
                         {/* Drill Down arrow (if parent and not searching) */}
                         {!isLeaf && !searchQuery ? (
-                          <Pressable accessibilityRole="button"
+                          <Pressable
+                            accessibilityRole="button"
                             onPress={() => drillDown(item)}
                             style={({ pressed }) => [
                               styles.drillBtn,
