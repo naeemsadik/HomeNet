@@ -227,6 +227,10 @@ export const en = {
     close: "Close",
     showPassword: "Show password",
     hidePassword: "Hide password",
+    signInToContinue: "Sign in to continue",
+    signInRequiredDesc: "This page is only available to signed-in accounts.",
+    accessDenied: "You don't have access",
+    adminRequiredDesc: "This area needs an administrator role. Ask an admin if you think this is wrong.",
   },
   dashboard: {
     title: "Dashboard",

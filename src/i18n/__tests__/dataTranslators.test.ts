@@ -77,8 +77,10 @@ describe("dataTranslators", () => {
       expect(translatePropertyType("smart-home", "bn")).toBe("smart-home");
     });
 
-    it("returns raw unknown string as fallback without error", () => {
-      expect(translatePropertyType("space-station", "bn")).toBe("space-station");
+    it("handles null, undefined, empty string, and non-string safely", () => {
+      expect(translatePropertyType("" as any, "bn")).toBe("");
+      expect(translatePropertyType(null as any, "bn")).toBe("");
+      expect(translatePropertyType(undefined as any, "bn")).toBe("");
     });
   });
 
@@ -97,6 +99,12 @@ describe("dataTranslators", () => {
 
     it("returns fallback for unknown statuses", () => {
       expect(translateListingStatus("custom_status", "bn")).toBe("custom_status");
+    });
+
+    it("handles null, undefined, empty string, and non-string safely", () => {
+      expect(translateListingStatus("" as any, "bn")).toBe("");
+      expect(translateListingStatus(null as any, "bn")).toBe("");
+      expect(translateListingStatus(undefined as any, "bn")).toBe("");
     });
   });
 
@@ -119,6 +127,12 @@ describe("dataTranslators", () => {
 
     it("returns fallback safely for custom amenities", () => {
       expect(translateAmenity("Helipad", "bn")).toBe("Helipad");
+    });
+
+    it("handles null, undefined, empty string, and non-string safely", () => {
+      expect(translateAmenity("" as any, "bn")).toBe("");
+      expect(translateAmenity(null as any, "bn")).toBe("");
+      expect(translateAmenity(undefined as any, "bn")).toBe("");
     });
   });
 });

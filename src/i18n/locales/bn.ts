@@ -229,6 +229,10 @@ export const bn: TranslationSchema = {
     close: "বন্ধ করুন",
     showPassword: "পাসওয়ার্ড দেখুন",
     hidePassword: "পাসওয়ার্ড লুকান",
+    signInToContinue: "চালিয়ে যেতে সাইন ইন করুন",
+    signInRequiredDesc: "এই পৃষ্ঠাটি শুধুমাত্র সাইন-ইন করা অ্যাকাউন্টের জন্য উপলব্ধ।",
+    accessDenied: "আপনার অ্যাক্সেস নেই",
+    adminRequiredDesc: "এই অংশে অ্যাডমিনিস্ট্রেটর রোলের প্রয়োজন। এটি ভুল মনে হলে কোনো অ্যাডমিনের সাথে যোগাযোগ করুন।",
   },
   dashboard: {
     title: "ড্যাশবোর্ড",

@@ -179,4 +179,60 @@ describe("i18n engine and useTranslation hook", () => {
       expect(useLanguageStore.getState().currentLanguage).toBe("bn");
     });
   });
+
+  describe("Schema Parity & Translation Integrity", () => {
+    function getLeaves(obj: any, prefix = ""): Record<string, string> {
+      const leaves: Record<string, string> = {};
+      for (const k of Object.keys(obj)) {
+        const fullKey = prefix ? `${prefix}.${k}` : k;
+        if (typeof obj[k] === "object" && obj[k] !== null) {
+          Object.assign(leaves, getLeaves(obj[k], fullKey));
+        } else {
+          leaves[fullKey] = String(obj[k]);
+        }
+      }
+      return leaves;
+    }
+
+    const { en } = require("../locales/en");
+    const { bn } = require("../locales/bn");
+    const enLeaves = getLeaves(en);
+    const bnLeaves = getLeaves(bn);
+
+    it("has 100% exact key parity between English and Bengali dictionaries", () => {
+      const enKeys = Object.keys(enLeaves).sort();
+      const bnKeys = Object.keys(bnLeaves).sort();
+
+      const missingInBn = enKeys.filter((k) => !(k in bnLeaves));
+      const missingInEn = bnKeys.filter((k) => !(k in enLeaves));
+
+      expect(missingInBn).toEqual([]);
+      expect(missingInEn).toEqual([]);
+      expect(enKeys).toEqual(bnKeys);
+    });
+
+    it("ensures no translation value is empty or undefined", () => {
+      for (const [key, value] of Object.entries(enLeaves)) {
+        expect(value.trim().length).toBeGreaterThan(0);
+      }
+      for (const [key, value] of Object.entries(bnLeaves)) {
+        expect(value.trim().length).toBeGreaterThan(0);
+      }
+    });
+
+    it("ensures matching interpolation parameters between en and bn", () => {
+      const tokenRegex = /\{\{([^}]+)\}\}|\{([^}]+)\}/g;
+      const normalizeTokens = (str: string) => {
+        const matches = str.match(tokenRegex) || [];
+        return matches.map((t) => t.replace(/[{}]/g, "").trim()).sort();
+      };
+
+      for (const key of Object.keys(enLeaves)) {
+        const enTokens = normalizeTokens(enLeaves[key]);
+        const bnTokens = normalizeTokens(bnLeaves[key]);
+        expect(bnTokens).toEqual(enTokens);
+      }
+    });
+  });
 });
+
