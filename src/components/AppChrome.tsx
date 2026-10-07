@@ -28,6 +28,7 @@ import { confirmAction } from "@/lib/alert";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { router } from "expo-router";
+import { useTranslation, type TranslationKey } from "@/i18n";
 import { Brand } from "./Brand";
 import { LoginModal } from "./LoginModal";
 import { AiFinderModal } from "./AiFinderModal";
@@ -36,7 +37,7 @@ import { AppLink } from "./ui";
 import { Footer } from "./Footer";
 import { NotificationPreview } from "@/features/notification/components/NotificationPreview";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
-import { styles } from "./AppChrome.styles";
+import { styles } from "./AppChrome.styles";
 import { LiveText } from "@/components/LiveText";
 
 export type ActivePage =
@@ -55,18 +56,18 @@ export type ActivePage =
   | "seller"
   | "messages";
 
-const sidebarNav: {
-  label: string;
+const sidebarNavConfig: {
+  translationKey: TranslationKey;
   href: string;
   icon: LucideIcon;
   key: ActivePage;
   badge?: number;
   authGated?: boolean;
 }[] = [
-    { label: "Home", href: "/home", icon: Home, key: "home" },
-    { label: "Insights", href: "/market", icon: TrendingUp, key: "market" },
-    { label: "Saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
-    { label: "Profile", href: "/profile", icon: User, key: "profile", authGated: true },
+    { translationKey: "nav.home", href: "/home", icon: Home, key: "home" },
+    { translationKey: "nav.insights", href: "/market", icon: TrendingUp, key: "market" },
+    { translationKey: "nav.saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
+    { translationKey: "nav.profile", href: "/profile", icon: User, key: "profile", authGated: true },
   ];
 
 function SideBar({
@@ -78,6 +79,7 @@ function SideBar({
   onNavigate?: () => void;
   modal?: boolean;
 }) {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   return (
     <SafeAreaView
@@ -88,7 +90,7 @@ function SideBar({
         <Brand />
         {modal ? (
           <Pressable
-            accessibilityLabel="Close navigation"
+            accessibilityLabel={t("nav.closeMenu")}
             onPress={onNavigate}
             style={[styles.circleButton, webPointer]}
           >
@@ -98,8 +100,8 @@ function SideBar({
       </View>
 
       <View style={styles.sideNav}>
-        {sidebarNav
-          .map(({ label, href, icon: Icon, key, badge, authGated }) => {
+        {sidebarNavConfig.map(({ translationKey, href, icon: Icon, key, badge, authGated }) => {
+          const label = t(translationKey);
           const selected =
             active === key ||
             ((key === "search" || key === "buy") &&
@@ -159,12 +161,12 @@ function SideBar({
         <View style={styles.sidebarCardIconWrap}>
           <Sparkles color={colorTokens.onBrand} size={20} />
         </View>
-        <Text style={styles.sidebarCardTitle}>List your property</Text>
+        <Text style={styles.sidebarCardTitle}>{t("nav.listProperty")}</Text>
         <Text style={styles.sidebarCardSubtitle}>
-          Free to list. Describe it in a sentence.
+          {t("nav.listPropertyDesc")}
         </Text>
         <AppLink href="/sell" style={styles.postAdButton} onPress={onNavigate}>
-          <Text style={styles.postAdButtonText}>Post an ad</Text>
+          <Text style={styles.postAdButtonText}>{t("nav.postAd")}</Text>
         </AppLink>
       </View>
     </SafeAreaView>
@@ -180,6 +182,7 @@ function TopBar({
   onOpenMenu?: () => void;
   isCrystal?: boolean;
 }) {
+  const { t } = useTranslation();
   const { isTablet, isPhone, containerMaxWidth } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -189,19 +192,19 @@ function TopBar({
   const unreadCount = unreadData?.data?.count ?? 0;
   const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
 
-    // Seekers-first: the two search intents lead, Saved follows. Everything
-    // else lives in the drawer (tablet/phone) or the footer.
-    const topNavLinks: {
-      label: string;
-      href: string;
-      key: string;
-      authGated?: boolean;
-    }[] = [
-      { label: "Buy", href: "/buy", key: "buy" },
-      { label: "Rent", href: "/rent", key: "rent" },
-      { label: "Sold", href: "/sold", key: "sold" },
-      { label: "Saved", href: "/saved", key: "saved", authGated: true },
-    ];
+  // Seekers-first: the two search intents lead, Saved follows. Everything
+  // else lives in the drawer (tablet/phone) or the footer.
+  const topNavLinks: {
+    translationKey: TranslationKey;
+    href: string;
+    key: string;
+    authGated?: boolean;
+  }[] = [
+    { translationKey: "nav.buy", href: "/buy", key: "buy" },
+    { translationKey: "nav.rent", href: "/rent", key: "rent" },
+    { translationKey: "nav.sold", href: "/sold", key: "sold" },
+    { translationKey: "nav.saved", href: "/saved", key: "saved", authGated: true },
+  ];
 
   return (
     <SafeAreaView
@@ -227,7 +230,7 @@ function TopBar({
                 isCrystal && styles.menuButtonCrystal,
                 webPointer,
               ]}
-              accessibilityLabel="Open navigation menu"
+              accessibilityLabel={t("nav.openMenu")}
             >
               <Menu
                 color={isCrystal ? "#FFFFFF" : "#0B1A17"}
@@ -243,6 +246,7 @@ function TopBar({
         {!isTablet && topNavLinks.length > 0 ? (
           <View style={styles.topNavCenter}>
             {topNavLinks.map((link) => {
+              const label = t(link.translationKey);
               const isSelected =
                 active === link.key ||
                 (link.key === "buy" && (active === "search" || active === "property"));
@@ -257,7 +261,7 @@ function TopBar({
 
               return (
                 <Pressable
-                  key={link.label}
+                  key={link.key}
                   onPress={handlePress}
                   style={({ pressed, hovered }: any) => [
                     styles.topNavLink,
@@ -275,7 +279,7 @@ function TopBar({
                       isCrystal && styles.topNavLinkTextCrystal,
                     ]}
                   >
-                    {link.label}
+                    {label}
                   </Text>
                   {isSelected ? <View style={styles.topNavIndicator} /> : null}
                 </Pressable>
@@ -288,7 +292,7 @@ function TopBar({
           {/* Owner path: present on every page, visually subordinate to search. */}
           {!isPhone ? (
             <Pressable
-              accessibilityLabel="List your property"
+              accessibilityLabel={t("nav.listProperty")}
               accessibilityRole="button"
               onPress={() => {
                 if (user) router.push("/property/create" as any);
@@ -303,7 +307,7 @@ function TopBar({
                 pressed && { opacity: 0.85 },
               ]}
             >
-              <Text style={styles.listPropertyText}>List your property</Text>
+              <Text style={styles.listPropertyText}>{t("nav.listProperty")}</Text>
             </Pressable>
           ) : null}
 
@@ -314,8 +318,8 @@ function TopBar({
                 <Pressable
                   accessibilityLabel={
                     unreadCount > 0
-                      ? `Open notifications, ${unreadCount} unread`
-                      : "Open notifications"
+                      ? t("nav.openNotificationsWithCount", { count: unreadCount })
+                      : t("nav.openNotifications")
                   }
                   onPress={() => {
                     setUserDropdownOpen(false);
@@ -351,7 +355,7 @@ function TopBar({
               {/* User Avatar + Triangle Dropdown Trigger */}
               <View style={styles.userDropdownWrap}>
                 <Pressable
-                  accessibilityLabel="Open user menu"
+                  accessibilityLabel={t("nav.openUserMenu")}
                   onPress={() => {
                     setNotificationsOpen(false);
                     setUserDropdownOpen((open) => !open);
@@ -409,7 +413,7 @@ function TopBar({
                         />
                         <View style={styles.dropdownProfileInfo}>
                           <Text numberOfLines={1} style={styles.userDropdownName}>
-                            {user.full_name || "Account"}
+                            {user.full_name || t("nav.account")}
                           </Text>
                           {user.email ? (
                             <Text numberOfLines={1} style={styles.userDropdownEmail}>
@@ -423,7 +427,7 @@ function TopBar({
 
                       {/* Saved Button */}
                       <Pressable
-                        accessibilityLabel="Saved properties"
+                        accessibilityLabel={t("nav.savedProperties")}
                         accessibilityRole="button"
                         onPress={() => {
                           setUserDropdownOpen(false);
@@ -438,12 +442,12 @@ function TopBar({
                         <View style={[styles.dropdownIconBox, { backgroundColor: "rgba(4, 207, 146, 0.10)" }]}>
                           <Heart color="#04cf92" size={16} strokeWidth={2} />
                         </View>
-                        <Text style={styles.dropdownItemText}>Saved</Text>
+                        <Text style={styles.dropdownItemText}>{t("nav.saved")}</Text>
                       </Pressable>
 
                       {/* Profile Button */}
                       <Pressable
-                        accessibilityLabel="Profile settings"
+                        accessibilityLabel={t("nav.profileSettings")}
                         accessibilityRole="button"
                         onPress={() => {
                           setUserDropdownOpen(false);
@@ -458,19 +462,19 @@ function TopBar({
                         <View style={styles.dropdownIconBox}>
                           <User color="#0B1A17" size={16} strokeWidth={1.8} />
                         </View>
-                        <Text style={styles.dropdownItemText}>Profile</Text>
+                        <Text style={styles.dropdownItemText}>{t("nav.profile")}</Text>
                       </Pressable>
 
                       <View style={styles.dropdownDivider} />
 
                       {/* Log out Button */}
                       <Pressable
-                        accessibilityLabel="Log out"
+                        accessibilityLabel={t("nav.logOut")}
                         accessibilityRole="button"
                         onPress={async () => {
                           setUserDropdownOpen(false);
-                          const confirmed = await confirmAction("Log Out", "Are you sure you want to log out?", {
-                            confirmLabel: "Log Out",
+                          const confirmed = await confirmAction(t("nav.logOutConfirmTitle"), t("nav.logOutConfirmMsg"), {
+                            confirmLabel: t("nav.logOut"),
                             destructive: true,
                           });
                           if (!confirmed) return;
@@ -487,7 +491,7 @@ function TopBar({
                           <LogOut color="#EF4444" size={16} strokeWidth={1.8} />
                         </View>
                         <Text style={[styles.dropdownItemText, { color: "#EF4444" }]}>
-                          Log out
+                          {t("nav.logOut")}
                         </Text>
                       </Pressable>
                     </View>
@@ -498,7 +502,7 @@ function TopBar({
           ) : (
             <Pressable
               onPress={() => setAuthModalOpen(true)}
-              accessibilityLabel="Sign in"
+              accessibilityLabel={t("nav.signIn")}
               accessibilityRole="button"
               style={({ pressed }) => [
                 styles.rightmoveSignInBtn,
@@ -523,7 +527,7 @@ function TopBar({
                   isCrystal && styles.rightmoveSignInTextCrystal,
                 ]}
               >
-                Sign in
+                {t("nav.signIn")}
               </Text>
             </Pressable>
           )}
@@ -542,25 +546,32 @@ function TopBar({
 }
 
 function MobileNav({ active }: { active: ActivePage }) {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
-  const links = [
-    { label: "Home", href: "/home", icon: Home, selected: active === "home", authGated: false },
+  const links: {
+    translationKey: TranslationKey;
+    href: string;
+    icon: LucideIcon;
+    selected: boolean;
+    authGated: boolean;
+  }[] = [
+    { translationKey: "nav.home", href: "/home", icon: Home, selected: active === "home", authGated: false },
     {
-      label: "Insights",
+      translationKey: "nav.insights",
       href: "/market",
       icon: TrendingUp,
       selected: active === "market",
       authGated: false,
     },
     {
-      label: "Saved",
+      translationKey: "nav.saved",
       href: "/saved",
       icon: Heart,
       selected: active === "saved",
       authGated: true,
     },
     {
-      label: "Profile",
+      translationKey: "nav.profile",
       href: "/profile",
       icon: User,
       selected: active === "profile",
@@ -574,7 +585,8 @@ function MobileNav({ active }: { active: ActivePage }) {
       style={styles.mobileNavSafe}
     >
       <View style={styles.mobileNav}>
-        {links.map(({ label, href, icon: Icon, selected, authGated }) => {
+        {links.map(({ translationKey, href, icon: Icon, selected, authGated }) => {
+          const label = t(translationKey);
           const handlePress = () => {
             if (authGated && !user) {
               useAuthModalStore.getState().open(() => router.push(href as any));
@@ -585,7 +597,7 @@ function MobileNav({ active }: { active: ActivePage }) {
 
           return (
             <Pressable
-              key={label}
+              key={translationKey}
               onPress={handlePress}
               style={({ pressed }) => [
                 styles.mobileNavLink,

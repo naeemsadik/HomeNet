@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, fonts, webPointer } from "@/theme";
+import { useTranslation, type TranslationKey } from "@/i18n";
 
 export type SearchTabType = "buy" | "rent" | "short-let" | "sold";
 
@@ -10,25 +11,28 @@ interface SearchTabsProps {
   compact?: boolean;
 }
 
-const TABS: { key: SearchTabType; label: string }[] = [
-  { key: "buy", label: "Buy" },
-  { key: "rent", label: "Rent" },
-  { key: "short-let", label: "Short-let" },
+const TABS: { key: SearchTabType; translationKey: TranslationKey }[] = [
+  { key: "buy", translationKey: "hero.tabs.buy" },
+  { key: "rent", translationKey: "hero.tabs.rent" },
+  { key: "short-let", translationKey: "hero.tabs.shortLet" },
   // Sold is a research intent, not a buying one — it trails the live tabs.
-  { key: "sold", label: "Sold" },
+  { key: "sold", translationKey: "hero.tabs.sold" },
 ];
 
 export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {
+  const { t } = useTranslation();
+
   return (
     <View accessibilityRole="tablist" style={styles.row}>
       {TABS.map((tab) => {
         const isActive = activeTab === tab.key;
+        const label = t(tab.translationKey);
         return (
           <Pressable
             key={tab.key}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
-            accessibilityLabel={`${tab.label} properties`}
+            accessibilityLabel={`${label} properties`}
             onPress={() => onChange(tab.key)}
             style={({ hovered }: any) => [
               styles.tab,
@@ -44,7 +48,7 @@ export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsP
                 isActive && styles.labelActive,
               ]}
             >
-              {tab.label}
+              {label}
             </Text>
             <View style={[styles.rule, isActive && styles.ruleActive]} />
           </Pressable>

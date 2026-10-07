@@ -11,6 +11,7 @@ import { PlusCircle, Rocket } from "@/components/icons";
 import Svg, { Path } from "react-native-svg";
 import { AppLink } from "@/components/ui";
 import { fonts, webPointer } from "@/theme";
+import { useTranslation, formatLocalizedNumber } from "@/i18n";
 
 export interface SellerWelcomeBannerProps {
   name?: string;
@@ -31,29 +32,23 @@ export function SellerWelcomeBanner({
   addPropertyHref = "/property/create",
   style,
 }: SellerWelcomeBannerProps) {
+  const { t, language } = useTranslation();
+
   return (
     <View style={[styles.container, style]}>
       <View style={styles.contentLeft}>
         {/* Subtitle */}
-        <Text style={styles.subtitle}>Welcome back,</Text>
+        <Text style={styles.subtitle}>{t("dashboard.welcomeBack")}</Text>
 
         {/* Heading */}
         <Text style={styles.title}>{name} 👋</Text>
 
         {/* Description */}
         <Text style={styles.description}>
-          Your listings have{" "}
-          <Text style={styles.boldText}>
-            {typeof viewsThisWeek === "number"
-              ? viewsThisWeek.toLocaleString()
-              : viewsThisWeek}{" "}
-            total views
-          </Text>{" "}
-          and{" "}
-          <Text style={styles.boldText}>
-            {inquiriesThisWeek} buyer inquiries
-          </Text>{" "}
-          so far. Keep the momentum going.
+          {t("dashboard.bannerDescription", {
+            views: formatLocalizedNumber(viewsThisWeek, language),
+            inquiries: formatLocalizedNumber(inquiriesThisWeek, language),
+          })}
         </Text>
 
         {/* Action Buttons Row */}
@@ -65,7 +60,7 @@ export function SellerWelcomeBanner({
               style={[styles.primaryBtn, webPointer]}
             >
               <PlusCircle color="#04cf92" size={16} strokeWidth={2} />
-              <Text style={styles.primaryBtnText}>Add new property</Text>
+              <Text style={styles.primaryBtnText}>{t("dashboard.addNewProperty")}</Text>
             </AppLink>
           ) : (
             <Pressable
@@ -77,12 +72,12 @@ export function SellerWelcomeBanner({
               ]}
             >
               <PlusCircle color="#04cf92" size={16} strokeWidth={2} />
-              <Text style={styles.primaryBtnText}>Add new property</Text>
+              <Text style={styles.primaryBtnText}>{t("dashboard.addNewProperty")}</Text>
             </Pressable>
           )}
 
           <Pressable
-            accessibilityLabel="Boost a listing"
+            accessibilityLabel={t("dashboard.boostListing")}
             onPress={onBoostListing}
             style={({ pressed }) => [
               styles.secondaryBtn,
@@ -91,7 +86,7 @@ export function SellerWelcomeBanner({
             ]}
           >
             <Rocket color="#FFFFFF" size={16} strokeWidth={2} />
-            <Text style={styles.secondaryBtnText}>Boost a listing</Text>
+            <Text style={styles.secondaryBtnText}>{t("dashboard.boostListing")}</Text>
           </Pressable>
         </View>
       </View>

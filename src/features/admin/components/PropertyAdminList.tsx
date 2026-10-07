@@ -2,8 +2,9 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, Vi
 import { Building2, Search } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { PropertyAdminItemRow } from "./PropertyAdminItem";
-import type { PropertyAdminItem } from "../types/admin";
+import type { PropertyAdminItem } from "../types/admin";
 import { LiveText } from "@/components/LiveText";
+import { useTranslation, translateListingStatus, formatLocalizedNumber } from "@/i18n";
 
 const STATUS_FILTERS = ["all", "draft", "pending", "active", "sold", "archived"] as const;
 
@@ -40,21 +41,26 @@ export function PropertyAdminList({
   onLoadMore,
   hasMore = false,
 }: PropertyAdminListProps) {
+  const { t, language } = useTranslation();
+
   return (
     <View style={styles.container}>
       <View style={styles.filterRow}>
-        {STATUS_FILTERS.map((status) => (
-          <Pressable
-            key={status}
-            onPress={() => onStatusChange(status)}
-            style={[styles.filterChip, activeStatus === status && styles.filterChipActive]}
-            accessibilityLabel={`Filter by ${status}`}
-          >
-            <Text style={[styles.filterText, activeStatus === status && styles.filterTextActive]}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </Text>
-          </Pressable>
-        ))}
+        {STATUS_FILTERS.map((status) => {
+          const label = status === "all" ? t("admin.filters.all") : (language === "bn" ? translateListingStatus(status, language) : status.charAt(0).toUpperCase() + status.slice(1));
+          return (
+            <Pressable
+              key={status}
+              onPress={() => onStatusChange(status)}
+              style={[styles.filterChip, activeStatus === status && styles.filterChipActive]}
+              accessibilityLabel={`Filter by ${status}`}
+            >
+              <Text style={[styles.filterText, activeStatus === status && styles.filterTextActive]}>
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       <View style={styles.searchRow}>
@@ -62,14 +68,19 @@ export function PropertyAdminList({
         <TextInput
           value={searchQuery}
           onChangeText={onSearchChange}
-          placeholder="Search properties..."
+          placeholder={t("admin.searchPropertiesPlaceholder")}
           placeholderTextColor={colorTokens.textMuted}
           style={styles.searchInput}
           accessibilityLabel="Search properties"
         />
       </View>
 
-      <LiveText style={styles.count}>Showing {properties.length} of {total} properties</LiveText>
+      <LiveText style={styles.count}>
+        {t("admin.showingCount", {
+          count: formatLocalizedNumber(properties.length, language),
+          total: formatLocalizedNumber(total, language),
+        })}
+      </LiveText>
 
       {isLoading ? (
         <View style={styles.center}>
@@ -95,13 +106,13 @@ export function PropertyAdminList({
           ListEmptyComponent={
             <View style={styles.empty}>
               <Building2 color={colorTokens.textMuted} size={40} />
-              <Text style={styles.emptyText}>No properties found</Text>
+              <Text style={styles.emptyText}>{t("admin.noPropertiesFound")}</Text>
             </View>
           }
           ListFooterComponent={
             hasMore ? (
               <Pressable onPress={onLoadMore} style={styles.loadMore} accessibilityLabel="Load more properties">
-                <Text style={styles.loadMoreText}>Load More</Text>
+                <Text style={styles.loadMoreText}>{t("admin.loadMore")}</Text>
               </Pressable>
             ) : null
           }

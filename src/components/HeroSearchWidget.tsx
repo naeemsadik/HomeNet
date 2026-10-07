@@ -12,6 +12,7 @@ import {
 import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
+import { useTranslation } from "@/i18n";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
 import { AreaPicker } from "./AreaPicker";
 import {
@@ -35,6 +36,7 @@ export function HeroSearchWidget({
   onSearch,
   docked = false,
 }: HeroSearchWidgetProps) {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
   const [activeTab, setActiveTab] = useState<HeroSearchTab>(initialTab);
   const [query, setQuery] = useState("");
@@ -97,10 +99,10 @@ export function HeroSearchWidget({
 
   const placeholder =
     activeTab === "short-let"
-      ? "Search short-let and serviced flats"
+      ? t("hero.placeholders.shortLet")
       : activeTab === "sold"
-        ? "See what sold in an area…"
-        : "Gulshan, Banani, Dhanmondi, or area…";
+        ? t("hero.placeholders.sold")
+        : t("hero.placeholders.buyRent");
 
   return (
     <View style={[styles.card, isPhone && styles.cardPhone, docked && styles.cardDocked]}>
@@ -122,7 +124,7 @@ export function HeroSearchWidget({
           />
           {query ? (
             <Pressable
-              accessibilityLabel="Clear search"
+              accessibilityLabel={t("hero.clearSearch")}
               onPress={() => setQuery("")}
               style={[styles.clear, webPointer]}
             >
@@ -133,8 +135,8 @@ export function HeroSearchWidget({
             accessibilityRole="button"
             accessibilityLabel={
               hasActiveFilters
-                ? `Open search filters, ${activeFilterCount} active`
-                : "Open search filters"
+                ? t("hero.openFiltersWithCount", { count: activeFilterCount })
+                : t("hero.openFilters")
             }
             onPress={() => setFilterModalOpen(true)}
             style={({ hovered }: any) => [
@@ -159,7 +161,11 @@ export function HeroSearchWidget({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Filter by area, currently ${selectedArea ? selectedArea.name : "all locations"}`}
+          accessibilityLabel={
+            selectedArea
+              ? t("hero.filterByAreaWithLocation", { location: selectedArea.name })
+              : t("hero.filterByArea")
+          }
           onPress={() => setAreaPickerOpen(true)}
           style={({ hovered }: any) => [
             styles.areaButton,
@@ -178,11 +184,11 @@ export function HeroSearchWidget({
             numberOfLines={1}
             style={[styles.areaLabel, selectedArea && styles.areaLabelActive]}
           >
-            {selectedArea ? selectedArea.name : "All locations"}
+            {selectedArea ? selectedArea.name : t("hero.allLocations")}
           </Text>
           {selectedArea ? (
             <Pressable
-              accessibilityLabel="Clear location"
+              accessibilityLabel={t("hero.clearLocation")}
               onPress={(e) => {
                 e.stopPropagation();
                 setSelectedArea(null);
@@ -209,7 +215,7 @@ export function HeroSearchWidget({
           ]}
         >
           <Search color={colorTokens.onBrand} size={17} strokeWidth={2.4} />
-          <Text style={styles.searchLabel}>Search</Text>
+          <Text style={styles.searchLabel}>{t("hero.search")}</Text>
         </Pressable>
       </View>
 
@@ -221,7 +227,7 @@ export function HeroSearchWidget({
       >
         <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.2} />
         <Text style={styles.aiText}>
-          Describe what you want in plain words — try AI search
+          {t("hero.aiPrompt")}
         </Text>
       </Pressable>
 

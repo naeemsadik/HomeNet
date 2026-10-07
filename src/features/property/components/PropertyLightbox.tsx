@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, X } from "@/components/icons";
 import { useRef, type RefObject } from "react";
 import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { webPointer } from "@/theme";
+import { useTranslation, formatLocalizedNumber } from "@/i18n";
 import { styles } from "../screens/PropertyDetailScreen.styles";
 
 type PropertyLightboxProps = {
@@ -29,6 +30,7 @@ export function PropertyLightbox({
   onNext,
   thumbScrollRef,
 }: PropertyLightboxProps) {
+  const { t, language } = useTranslation();
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
 
@@ -47,7 +49,10 @@ export function PropertyLightbox({
               {title}
             </Text>
             <Text style={styles.lightboxSubtitle}>
-              {activeIndex + 1} of {images.length} photos
+              {t("propertyDetail.photoOf", {
+                current: formatLocalizedNumber(activeIndex + 1, language),
+                total: formatLocalizedNumber(images.length, language),
+              })}
             </Text>
           </View>
 
@@ -55,7 +60,7 @@ export function PropertyLightbox({
             onPress={onClose}
             style={({ pressed }) => [styles.lightboxCloseBtn, webPointer, pressed && styles.pressed]}
             accessibilityRole="button"
-            accessibilityLabel="Close gallery"
+            accessibilityLabel={t("propertyDetail.closeGallery")}
           >
             <X color="#FFFFFF" size={22} />
           </Pressable>
@@ -84,7 +89,7 @@ export function PropertyLightbox({
             <Pressable
               onPress={onPrev}
               style={({ pressed }) => [styles.lightboxNavBtn, styles.lightboxNavBtnLeft, webPointer, pressed && styles.pressed]}
-              accessibilityLabel="Previous photo"
+              accessibilityLabel={t("propertyDetail.prevPhoto")}
             >
               <ChevronLeft color="#FFFFFF" size={28} />
             </Pressable>
@@ -101,7 +106,7 @@ export function PropertyLightbox({
             <Pressable
               onPress={onNext}
               style={({ pressed }) => [styles.lightboxNavBtn, styles.lightboxNavBtnRight, webPointer, pressed && styles.pressed]}
-              accessibilityLabel="Next photo"
+              accessibilityLabel={t("propertyDetail.nextPhoto")}
             >
               <ChevronRight color="#FFFFFF" size={28} />
             </Pressable>
