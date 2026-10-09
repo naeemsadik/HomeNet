@@ -666,6 +666,10 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     color: "#04cf92",
   },
+  customSubtypeGroup: {
+    gap: 6,
+    marginTop: 4,
+  },
   unitSelectorRow: {
     flexDirection: "row",
     alignItems: "center",

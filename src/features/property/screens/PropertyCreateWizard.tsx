@@ -52,6 +52,9 @@ import { colorTokens, webPointer } from "@/theme";
 import type { Area, PropertyType, UpsertPropertyDto } from "@/types/api";
 import {
   PROPERTY_TYPE_CONFIGS,
+  cleanCustomSubtype,
+  initialSubtype,
+  validateSubtype,
 } from "../constants/propertyCategories";
 import {
   useCreateProperty,
@@ -108,7 +111,7 @@ export function PropertyCreateWizard() {
         ...(params.listing_type === "sale" || params.listing_type === "rent"
           ? { listingType: params.listing_type }
           : {}),
-        subtype: params.subtype || cfg.defaultSubtype,
+        subtype: initialSubtype(cfg, params.subtype),
         areaUnit: cfg.defaultUnit,
       });
     }
@@ -144,7 +147,7 @@ export function PropertyCreateWizard() {
     title: store.title.trim() || undefined,
     description: store.description.trim() || undefined,
     type: store.type,
-    subtype: store.subtype.trim() || undefined,
+    subtype: cleanCustomSubtype(store.subtype) || undefined,
     listing_type: store.listingType,
     price: store.price ? Number(store.price) : undefined,
     price_currency: "BDT",
@@ -179,6 +182,10 @@ export function PropertyCreateWizard() {
   const validateStep = (step: number) => {
     if (step === 1 && (!store.title.trim() || !store.description.trim())) {
       return "Add a title and description before continuing.";
+    }
+    if (step === 1) {
+      const subtypeProblem = validateSubtype(activeTypeConfig, store.subtype);
+      if (subtypeProblem) return subtypeProblem;
     }
     if (step === 2 && (!(Number(store.price) > 0) || !(Number(store.areaSize) > 0))) {
       return "Price and area must be greater than zero.";

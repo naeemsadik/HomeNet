@@ -30,6 +30,12 @@ export interface PropertyTypeConfig {
   description: string;
   defaultSubtype: string;
   subtypes: PropertySubtypeOption[];
+  /**
+   * Whether an owner may type a subtype that isn't listed. The API takes any
+   * text, except for parking, where it accepts only covered, open and garage
+   * (backend property.rules.ts).
+   */
+  allowsCustomSubtype: boolean;
   allowedUnits: ("sqft" | "katha" | "bigha" | "sqm")[];
   defaultUnit: "sqft" | "katha" | "bigha" | "sqm";
   amenities: AmenityOption[];
@@ -55,6 +61,7 @@ export const PROPERTY_TYPE_CONFIGS: Record<PropertyType, PropertyTypeConfig> = {
       { value: "penthouse", label: "Penthouse", description: "Top-floor luxury suite" },
       { value: "studio", label: "Studio", description: "Single-room open-plan living unit" },
     ],
+    allowsCustomSubtype: true,
     allowedUnits: ["sqft", "sqm"],
     defaultUnit: "sqft",
     hasBedrooms: true,
@@ -89,6 +96,7 @@ export const PROPERTY_TYPE_CONFIGS: Record<PropertyType, PropertyTypeConfig> = {
       { value: "warehouse", label: "Warehouse", description: "Storage or logistics depot" },
       { value: "building", label: "Commercial Building", description: "Full commercial building" },
     ],
+    allowsCustomSubtype: true,
     allowedUnits: ["sqft", "sqm"],
     defaultUnit: "sqft",
     hasBedrooms: false,
@@ -116,6 +124,7 @@ export const PROPERTY_TYPE_CONFIGS: Record<PropertyType, PropertyTypeConfig> = {
       { value: "plot", label: "General Plot", description: "Demarcated general land parcel" },
       { value: "agricultural", label: "Agricultural Land", description: "Farming, cultivation, or rural land" },
     ],
+    allowsCustomSubtype: true,
     allowedUnits: ["katha", "bigha", "sqft", "sqm"],
     defaultUnit: "katha",
     hasBedrooms: false,
@@ -140,6 +149,8 @@ export const PROPERTY_TYPE_CONFIGS: Record<PropertyType, PropertyTypeConfig> = {
       { value: "open", label: "Open Parking", description: "Open-air designated parking bay" },
       { value: "garage", label: "Enclosed Garage", description: "Private lockable garage enclosure" },
     ],
+    // The API rejects any other parking subtype.
+    allowsCustomSubtype: false,
     allowedUnits: ["sqft", "sqm"],
     defaultUnit: "sqft",
     hasBedrooms: false,
@@ -154,3 +165,71 @@ export const PROPERTY_TYPE_CONFIGS: Record<PropertyType, PropertyTypeConfig> = {
     ],
   },
 };
+
+// ─── Custom subtypes ───────────────────────────────────────────────────────────
+
+export const CUSTOM_SUBTYPE_MIN_LENGTH = 2;
+export const CUSTOM_SUBTYPE_MAX_LENGTH = 40;
+
+const squash = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+
+/** What an owner typed, tidied for storage: no control characters or angle brackets, single spaces, trimmed, capped. */
+export function cleanCustomSubtype(text: string): string {
+  return Array.from(text, (char) => {
+    const code = char.codePointAt(0) ?? 0;
+    return code < 32 || code === 127 || char === "<" || char === ">" ? " " : char;
+  })
+    .join("")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, CUSTOM_SUBTYPE_MAX_LENGTH);
+}
+
+/**
+ * The listed option that a typed subtype means, if any. "duplex", "Duplex" and
+ * "flat" (part of "Apartment / Flat") all match, so a custom entry never
+ * duplicates a listed subtype under a different spelling.
+ */
+export function findKnownSubtype(
+  config: PropertyTypeConfig,
+  text: string,
+): PropertySubtypeOption | undefined {
+  const needle = squash(text);
+  if (!needle) return undefined;
+  return config.subtypes.find((option) =>
+    [option.value, option.label, ...option.label.split("/")].some((name) => squash(name) === needle),
+  );
+}
+
+/** A subtype in words for review screens: the listed label, or the owner's own text. */
+export function subtypeLabel(config: PropertyTypeConfig, value: string): string {
+  return config.subtypes.find((option) => option.value === value)?.label ?? cleanCustomSubtype(value);
+}
+
+/** Why a subtype can't be used, in words for the owner; null when it is fine. */
+export function validateSubtype(config: PropertyTypeConfig, value: string): string | null {
+  const clean = cleanCustomSubtype(value);
+  if (!clean) {
+    return `Choose a subtype${config.allowsCustomSubtype ? ", or pick Other and type your own" : ""}.`;
+  }
+  if (config.subtypes.some((option) => option.value === value)) return null;
+  if (!config.allowsCustomSubtype) {
+    return `Choose one of the ${config.label.toLowerCase()} subtypes listed.`;
+  }
+  if (clean.length < CUSTOM_SUBTYPE_MIN_LENGTH) {
+    return `Enter at least ${CUSTOM_SUBTYPE_MIN_LENGTH} characters for the subtype.`;
+  }
+  return null;
+}
+
+/**
+ * The subtype to start the wizard with when a link or the AI suggests one:
+ * a listed value, a custom one where allowed, otherwise the category's default.
+ */
+export function initialSubtype(config: PropertyTypeConfig, suggested: string | undefined): string {
+  const clean = cleanCustomSubtype(suggested ?? "");
+  if (!clean) return config.defaultSubtype;
+  const listed = config.subtypes.find((option) => option.value === clean);
+  if (listed) return listed.value;
+  return config.allowsCustomSubtype ? clean : config.defaultSubtype;
+}
