@@ -1,7 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Bell, Building2, MapPinned, Settings, ShieldCheck, Users } from "lucide-react-native";
+import { Bell, Building2, MapPinned, Settings, ShieldCheck, Users } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
-import type { UserRole } from "../types/admin";
+import type { UserRole } from "../types/admin";
+
+import { hasPermission, isAdmin } from "@/lib/permissions";
+
 import { LiveText } from "@/components/LiveText";
 
 type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
@@ -30,17 +33,10 @@ const TABS: {
   { key: "settings", label: "Settings", icon: Settings },
 ];
 
-function hasPermission(userRoles: UserRole[], permission: string): boolean {
-  return userRoles.some((ur) =>
-    ur.role.role_permissions?.some((rp) => rp.permission.name === permission),
-  );
-}
-
-function isAdmin(userRoles: UserRole[]): boolean {
-  return userRoles.some((ur) => ur.role.name === "admin" || ur.role.name === "superadmin");
-}
+import { useTranslation } from "@/i18n";
 
 export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNavProps) {
+  const { t } = useTranslation();
   const visibleTabs = TABS.filter((tab) => {
     if (!tab.permissions) return true;
     return isAdmin(userRoles) || tab.permissions.some((permission) => hasPermission(userRoles, permission));
@@ -52,18 +48,19 @@ export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNav
         const Icon = tab.icon;
         const isActive = active === tab.key;
         const count = badges?.[tab.key] ?? 0;
+        const label = t(`admin.tabs.${tab.key}` as any) || tab.label;
         return (
           <Pressable
             key={tab.key}
             onPress={() => onChange(tab.key)}
             style={[styles.tab, isActive && styles.tabActive]}
-            accessibilityLabel={count > 0 ? `${tab.label} tab, ${count} unread` : `${tab.label} tab`}
+            accessibilityLabel={count > 0 ? `${label} tab, ${count} unread` : `${label} tab`}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
           >
             <Icon color={isActive ? colorTokens.onBrand : colorTokens.textSecondary} size={16} />
             <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
-              {tab.label}
+              {label}
             </Text>
             {count > 0 ? (
               <View style={[styles.count, isActive && styles.countActive]}>

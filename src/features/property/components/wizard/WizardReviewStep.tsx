@@ -1,6 +1,6 @@
-import { CheckCircle2 } from "lucide-react-native";
+import { CheckCircle2 } from "@/components/icons";
 import { Text, View } from "react-native";
-import type { PropertyTypeConfig } from "../../constants/propertyCategories";
+import { subtypeLabel, type PropertyTypeConfig } from "../../constants/propertyCategories";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
 
@@ -31,7 +31,7 @@ export function WizardReviewStep({ activeTypeConfig }: { activeTypeConfig: Prope
         <View style={styles.reviewCard}>
           <Text style={styles.reviewCardLabel}>Category & Subtype</Text>
           <Text style={styles.reviewCardValue}>
-            {activeTypeConfig.label} ({activeTypeConfig.subtypes.find((s) => s.value === store.subtype)?.label || store.subtype}) ·{" "}
+            {activeTypeConfig.label} ({subtypeLabel(activeTypeConfig, store.subtype)}) ·{" "}
             {store.listingType === "sale" ? "For Sale" : "For Rent"}
           </Text>
         </View>

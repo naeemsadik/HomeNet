@@ -8,9 +8,10 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Check, MapPin, Sparkles, X } from "lucide-react-native";
-import { colorTokens, fonts, webPointer } from "@/theme";
+import { Check, MapPin, Sparkles, X } from "@/components/icons";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
+import { useTranslation, translateAmenity, formatLocalizedNumber } from "@/i18n";
 
 export type FilterState = {
   location: string;
@@ -73,6 +74,7 @@ export function AdvancedFiltersModal({
   onReset?: () => void;
   resultCount?: number;
 }) {
+  const { t, language } = useTranslation();
   const [localFilters, setLocalFilters] = useState<FilterState>(filters);
 
   useEffect(() => {
@@ -113,14 +115,20 @@ export function AdvancedFiltersModal({
       onRequestClose={onClose}
     >
       <View style={styles.backdrop}>
-        <Pressable style={styles.backdropTouch} onPress={onClose} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("filters.close")}
+          style={styles.backdropTouch}
+          onPress={onClose}
+        />
 
         <View style={styles.modalCard}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Advanced filters</Text>
+            <Text style={styles.headerTitle}>{t("filters.title")}</Text>
             <Pressable
-              accessibilityLabel="Close advanced filters"
+              accessibilityRole="button"
+              accessibilityLabel={t("filters.close")}
               onPress={onClose}
               style={[styles.closeButton, webPointer]}
             >
@@ -138,14 +146,15 @@ export function AdvancedFiltersModal({
             <View style={styles.section}>
               <View style={styles.sectionTitleRow}>
                 <MapPin color="#0B1A17" size={16} />
-                <Text style={styles.sectionLabel}>Location</Text>
+                <Text style={styles.sectionLabel}>{t("filters.location")}</Text>
               </View>
               <View style={styles.inputContainer}>
                 <TextInput
                   onChangeText={(text) =>
                     setLocalFilters((prev) => ({ ...prev, location: text }))
                   }
-                  placeholder="Enter location (e.g. Gulshan, Dhaka)"
+                  placeholder={t("filters.locationPlaceholder")}
+                  accessibilityLabel={t("filters.location")}
                   placeholderTextColor="rgba(11, 26, 23, 0.4)"
                   style={styles.textInput}
                   value={localFilters.location}
@@ -155,7 +164,7 @@ export function AdvancedFiltersModal({
 
             {/* Price range (৳) */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Price range (৳)</Text>
+              <Text style={styles.sectionLabel}>{t("filters.priceRange")}</Text>
               <View style={styles.priceRow}>
                 <View style={styles.priceInputBox}>
                   <TextInput
@@ -163,7 +172,8 @@ export function AdvancedFiltersModal({
                     onChangeText={(val) =>
                       setLocalFilters((prev) => ({ ...prev, minPrice: val }))
                     }
-                    placeholder="Min"
+                    placeholder={t("filters.min")}
+                    accessibilityLabel={t("filters.minPrice")}
                     placeholderTextColor="rgba(11, 26, 23, 0.5)"
                     style={styles.priceInput}
                     value={localFilters.minPrice}
@@ -176,7 +186,8 @@ export function AdvancedFiltersModal({
                     onChangeText={(val) =>
                       setLocalFilters((prev) => ({ ...prev, maxPrice: val }))
                     }
-                    placeholder="Max"
+                    placeholder={t("filters.max")}
+                    accessibilityLabel={t("filters.maxPrice")}
                     placeholderTextColor="rgba(11, 26, 23, 0.5)"
                     style={styles.priceInput}
                     value={localFilters.maxPrice}
@@ -187,12 +198,19 @@ export function AdvancedFiltersModal({
 
             {/* Bedrooms */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Bedrooms</Text>
+              <Text style={styles.sectionLabel}>{t("filters.bedrooms")}</Text>
               <View style={styles.optionsRow}>
                 {BEDROOM_OPTIONS.map((opt) => {
                   const isSelected = localFilters.bedrooms === opt.value;
+                  const label =
+                    opt.value === null
+                      ? t("filters.any")
+                      : opt.value === 4
+                      ? `${formatLocalizedNumber(4, language)}+`
+                      : formatLocalizedNumber(opt.value, language);
                   return (
                     <Pressable
+                      accessibilityRole="button"
                       key={`bed-${opt.label}`}
                       onPress={() =>
                         setLocalFilters((prev) => ({
@@ -212,7 +230,7 @@ export function AdvancedFiltersModal({
                           isSelected && styles.pillOptionTextActive,
                         ]}
                       >
-                        {opt.label}
+                        {label}
                       </Text>
                     </Pressable>
                   );
@@ -222,12 +240,19 @@ export function AdvancedFiltersModal({
 
             {/* Bathrooms */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Bathrooms</Text>
+              <Text style={styles.sectionLabel}>{t("filters.bathrooms")}</Text>
               <View style={styles.optionsRow}>
                 {BATHROOM_OPTIONS.map((opt) => {
                   const isSelected = localFilters.bathrooms === opt.value;
+                  const label =
+                    opt.value === null
+                      ? t("filters.any")
+                      : opt.value === 3
+                      ? `${formatLocalizedNumber(3, language)}+`
+                      : formatLocalizedNumber(opt.value, language);
                   return (
                     <Pressable
+                      accessibilityRole="button"
                       key={`bath-${opt.label}`}
                       onPress={() =>
                         setLocalFilters((prev) => ({
@@ -247,7 +272,7 @@ export function AdvancedFiltersModal({
                           isSelected && styles.pillOptionTextActive,
                         ]}
                       >
-                        {opt.label}
+                        {label}
                       </Text>
                     </Pressable>
                   );
@@ -257,12 +282,13 @@ export function AdvancedFiltersModal({
 
             {/* Amenities */}
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>Amenities</Text>
+              <Text style={styles.sectionLabel}>{t("filters.amenities")}</Text>
               <View style={styles.amenitiesWrap}>
                 {AMENITY_OPTIONS.map((amenity) => {
                   const isSelected = localFilters.amenities.includes(amenity);
                   return (
                     <Pressable
+                      accessibilityRole="button"
                       key={amenity}
                       onPress={() => toggleAmenity(amenity)}
                       style={[
@@ -277,7 +303,7 @@ export function AdvancedFiltersModal({
                           isSelected && styles.amenityChipTextActive,
                         ]}
                       >
-                        {amenity}
+                        {translateAmenity(amenity, language)}
                       </Text>
                     </Pressable>
                   );
@@ -287,6 +313,7 @@ export function AdvancedFiltersModal({
 
             {/* Verified listings only */}
             <Pressable
+              accessibilityRole="button"
               onPress={() =>
                 setLocalFilters((prev) => ({
                   ...prev,
@@ -298,7 +325,7 @@ export function AdvancedFiltersModal({
               <View style={styles.verifiedRowLeft}>
                 <Sparkles color="#04cf92" size={16} />
                 <Text style={styles.verifiedRowLabel}>
-                  Verified listings only
+                  {t("filters.verifiedOnly")}
                 </Text>
               </View>
               <View
@@ -317,17 +344,21 @@ export function AdvancedFiltersModal({
           {/* Footer Actions */}
           <View style={styles.footer}>
             <Pressable
+              accessibilityRole="button"
               onPress={handleReset}
               style={[styles.resetButton, webPointer]}
             >
-              <Text style={styles.resetButtonText}>Reset</Text>
+              <Text style={styles.resetButtonText}>{t("filters.reset")}</Text>
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={handleApply}
               style={[styles.applyButton, webPointer]}
             >
               <LiveText style={styles.applyButtonText}>
-                Show {resultCount} results
+                {t("filters.showResults", {
+                  count: formatLocalizedNumber(resultCount, language),
+                })}
               </LiveText>
             </Pressable>
           </View>

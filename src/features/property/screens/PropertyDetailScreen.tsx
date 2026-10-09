@@ -19,7 +19,7 @@ import {
   Sparkles,
   TrendingUp,
   UserRound,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -46,6 +46,13 @@ import { BookVisitModal } from "../components/BookVisitModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
 import { PropertyLocationSection, type NearbyPlace } from "../components/PropertyLocationSection";
 import { WhatsAppIcon } from "../components/WhatsAppIcon";
+import { NoTranslateText } from "@/components/NoTranslateText";
+import {
+  useTranslation,
+  translateAmenity,
+  translatePropertyType,
+  formatLocalizedNumber,
+} from "@/i18n";
 
 type AiValuation = {
   estimatedValue: string;
@@ -54,6 +61,7 @@ type AiValuation = {
 };
 
 export function PropertyDetailScreen() {
+  const { t, language } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isPhone, isTablet } = useResponsive();
   const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(id ?? "");
@@ -317,7 +325,7 @@ export function PropertyDetailScreen() {
       <AppChrome active="property">
         <View style={styles.requestState}>
           <ActivityIndicator color="#04cf92" size="large" />
-          <Text style={styles.requestError}>Loading property details...</Text>
+          <Text style={styles.requestError}>{t("propertyDetail.loading")}</Text>
         </View>
       </AppChrome>
     );
@@ -327,10 +335,10 @@ export function PropertyDetailScreen() {
     return (
       <AppChrome active="property">
         <View style={styles.requestState}>
-          <Text style={styles.requestError}>{error instanceof Error ? error.message : "Property not found."}</Text>
+          <Text style={styles.requestError}>{error instanceof Error ? error.message : t("propertyDetail.notFound")}</Text>
           <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>
             <RotateCcw color={colorTokens.onBrand} size={16} />
-            <Text style={styles.retryText}>{error ? "Retry" : "Go Back"}</Text>
+            <Text style={styles.retryText}>{error ? t("propertyDetail.retry") : t("propertyDetail.goBack")}</Text>
           </Pressable>
         </View>
       </AppChrome>
@@ -359,14 +367,14 @@ export function PropertyDetailScreen() {
             style={({ pressed }) => [styles.backLink, webPointer, pressed && styles.pressed]}
           >
             <ArrowLeft color="#0B1A17" size={18} />
-            <Text style={styles.backLinkText}>Back</Text>
+            <Text style={styles.backLinkText}>{t("propertyDetail.back")}</Text>
           </Pressable>
 
           <View style={styles.actionHeaderBtns}>
             <Pressable
               onPress={handleShare}
               accessibilityRole="button"
-              accessibilityLabel="Share property"
+              accessibilityLabel={t("propertyDetail.shareProperty")}
               style={({ pressed }) => [styles.actionCircleBtn, webPointer, pressed && styles.pressed]}
             >
               <Share2 color="#0B1A17" size={18} />
@@ -375,7 +383,7 @@ export function PropertyDetailScreen() {
             <Pressable
               onPress={handleToggleSaved}
               accessibilityRole="button"
-              accessibilityLabel={isPropertySaved ? "Remove from saved" : "Save property"}
+              accessibilityLabel={isPropertySaved ? t("propertyDetail.removeFromSaved") : t("propertyDetail.saveProperty")}
               style={({ pressed }) => [styles.actionCircleBtn, webPointer, pressed && styles.pressed]}
             >
               <Heart
@@ -413,17 +421,18 @@ export function PropertyDetailScreen() {
                   }
                 }}
                 accessibilityRole="button"
-                accessibilityLabel="View full photo gallery"
+                accessibilityLabel={t("propertyDetail.viewAllPhotos", { count: formatLocalizedNumber(totalPhotos, language) })}
               >
                 {property.mediaImages.length ? (
                   <Image
                     source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
+                    accessibilityLabel={`${property.title}, photo ${activeImageIndex + 1}`}
                     style={styles.mainImage}
                   />
                 ) : (
                   <View style={styles.mediaPlaceholder}>
                     <Building2 color="#6B7D78" size={48} />
-                    <Text style={styles.mediaPlaceholderText}>No property media</Text>
+                    <Text style={styles.mediaPlaceholderText}>{t("propertyDetail.noPhotos")}</Text>
                   </View>
                 )}
 
@@ -432,12 +441,14 @@ export function PropertyDetailScreen() {
                   {property.isVerified ? (
                     <View style={styles.verifiedTag}>
                       <ShieldCheck color="#04cf92" size={14} />
-                      <Text style={styles.verifiedTagText}>Verified</Text>
+                      <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
                     </View>
                   ) : null}
 
                   <View style={styles.forRentTag}>
-                    <Text style={styles.forRentTagText}>{property.listingType}</Text>
+                    <Text style={styles.forRentTagText}>
+                      {apiDetail?.listing_type === "rent" ? t("propertyDetail.forRent") : t("propertyDetail.forSale")}
+                    </Text>
                   </View>
                 </View>
 
@@ -446,7 +457,10 @@ export function PropertyDetailScreen() {
                   <View style={[styles.photoCountPill, webPointer]}>
                     <Camera color="#FFFFFF" size={13} />
                     <Text style={styles.photoCountText}>
-                      {activeImageIndex + 1} / {property.mediaImages.length}
+                      {t("propertyDetail.photoOf", {
+                        current: formatLocalizedNumber(activeImageIndex + 1, language),
+                        total: formatLocalizedNumber(property.mediaImages.length, language),
+                      })}
                     </Text>
                     <Maximize2 color="rgba(255, 255, 255, 0.75)" size={12} style={{ marginLeft: 3 }} />
                   </View>
@@ -470,7 +484,7 @@ export function PropertyDetailScreen() {
                       webPointer,
                       pressed && styles.pressed,
                     ]}
-                    accessibilityLabel="Previous thumbnails"
+                    accessibilityLabel={t("propertyDetail.prevThumbnails")}
                   >
                     <ChevronLeft color="#FFFFFF" size={18} />
                   </Pressable>
@@ -507,10 +521,12 @@ export function PropertyDetailScreen() {
                           webPointer,
                         ]}
                       >
-                        <Image source={{ uri: img }} style={styles.thumbnailImg} />
+                        <Image source={{ uri: img }} accessibilityLabel={`${property.title}, photo ${idx + 1}`} style={styles.thumbnailImg} />
                         {showPlusBadge ? (
                           <View style={styles.moreImagesOverlay}>
-                            <Text style={styles.moreImagesText}>+{extraPhotosCount} images</Text>
+                            <Text style={styles.moreImagesText}>
+                              {t("propertyDetail.moreImages", { count: formatLocalizedNumber(extraPhotosCount, language) })}
+                            </Text>
                           </View>
                         ) : null}
                       </Pressable>
@@ -527,7 +543,7 @@ export function PropertyDetailScreen() {
                       webPointer,
                       pressed && styles.pressed,
                     ]}
-                    accessibilityLabel="More thumbnails"
+                    accessibilityLabel={t("propertyDetail.moreThumbnails")}
                   >
                     <ChevronRight color="#FFFFFF" size={18} />
                   </Pressable>
@@ -539,12 +555,12 @@ export function PropertyDetailScreen() {
             <View style={styles.overviewHeaderCard}>
               <View style={styles.titleCategoryRow}>
                 <View style={styles.categoryBadge}>
-                  <Text style={styles.categoryBadgeText}>{property.type}</Text>
+                  <Text style={styles.categoryBadgeText}>{translatePropertyType(property.type, language)}</Text>
                 </View>
                 {property.isVerified ? (
                   <View style={styles.verifiedSmallBadge}>
                     <ShieldCheck color="#04cf92" size={14} />
-                    <Text style={styles.verifiedSmallText}>Verified</Text>
+                    <Text style={styles.verifiedSmallText}>{t("propertyDetail.verifiedBadge")}</Text>
                   </View>
                 ) : null}
               </View>
@@ -560,21 +576,29 @@ export function PropertyDetailScreen() {
               <View style={styles.keySpecsRow}>
                 <View style={styles.specItem}>
                   <BedDouble color="#04cf92" size={18} />
-                  <Text style={styles.specText}>{property.bedrooms} Beds</Text>
+                  <Text style={styles.specText}>
+                    {formatLocalizedNumber(property.bedrooms, language)} {t("propertyDetail.beds")}
+                  </Text>
                 </View>
 
                 <View style={styles.specDivider} />
 
                 <View style={styles.specItem}>
                   <Bath color="#04cf92" size={18} />
-                  <Text style={styles.specText}>{property.bathrooms} Baths</Text>
+                  <Text style={styles.specText}>
+                    {formatLocalizedNumber(property.bathrooms, language)} {t("propertyDetail.baths")}
+                  </Text>
                 </View>
 
                 <View style={styles.specDivider} />
 
                 <View style={styles.specItem}>
                   <Maximize2 color="#04cf92" size={18} />
-                  <Text style={styles.specText}>{property.areaSqft} sqft</Text>
+                  <Text style={styles.specText}>
+                    {property.areaSqft
+                      ? t("propertyDetail.areaSqft", { count: formatLocalizedNumber(property.areaSqft, language) })
+                      : null}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -601,7 +625,7 @@ export function PropertyDetailScreen() {
 
             {/* About this property */}
             <View style={styles.sectionCard}>
-              <Text style={styles.sectionHeading}>About this property</Text>
+              <Text style={styles.sectionHeading}>{t("propertyDetail.aboutProperty")}</Text>
               <Text style={styles.descriptionParagraph}>{property.description}</Text>
 
               {/* Amenities Grid */}
@@ -609,7 +633,7 @@ export function PropertyDetailScreen() {
                 {property.amenities.map((am) => (
                   <View key={am} style={styles.amenityCheckItem}>
                     <Check color="#04cf92" size={16} />
-                    <Text style={styles.amenityCheckText}>{am}</Text>
+                    <Text style={styles.amenityCheckText}>{translateAmenity(am, language)}</Text>
                   </View>
                 ))}
               </View>
@@ -629,9 +653,9 @@ export function PropertyDetailScreen() {
             {property.similarProperties && property.similarProperties.length > 0 && (
             <View style={styles.sectionCard}>
               <View style={styles.sectionHeaderBetween}>
-                <Text style={styles.sectionHeading}>Similar properties</Text>
+                <Text style={styles.sectionHeading}>{t("propertyDetail.similarProperties")}</Text>
                 <AppLink href="/buy">
-                  <Text style={styles.seeAllLink}>See all</Text>
+                  <Text style={styles.seeAllLink}>{t("propertyDetail.seeAll")}</Text>
                 </AppLink>
               </View>
 
@@ -641,7 +665,8 @@ export function PropertyDetailScreen() {
                 <Pressable onPress={() => void refetchSimilar()} style={styles.similarRequestState}>
                   <RotateCcw color="#04cf92" size={15} />
                   <Text style={styles.similarLoc}>
-                    {similarError instanceof Error ? similarError.message : "Could not load similar listings."} Press to retry.
+                    {similarError instanceof Error ? similarError.message : t("propertyDetail.similarError")}{" "}
+                    {t("propertyDetail.pressToRetry")}
                   </Text>
                 </Pressable>
               ) : (
@@ -650,7 +675,7 @@ export function PropertyDetailScreen() {
                     {property.similarProperties.map((sim) => (
                       <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
                         {sim.imageUrl ? (
-                          <Image source={{ uri: sim.imageUrl }} style={styles.similarThumb} />
+                          <Image source={{ uri: sim.imageUrl }} accessibilityLabel={sim.title} style={styles.similarThumb} />
                         ) : (
                           <View style={[styles.similarThumb, styles.similarThumbPlaceholder]}>
                             <Building2 color="#6B7D78" size={24} />
@@ -673,7 +698,7 @@ export function PropertyDetailScreen() {
                       </AppLink>
                     ))}
                     {property.similarProperties.length === 0 ? (
-                      <Text style={styles.similarLoc}>No similar active listings found.</Text>
+                      <Text style={styles.similarLoc}>{t("propertyDetail.noSimilar")}</Text>
                     ) : null}
                   </View>
                 </ScrollView>
@@ -688,7 +713,7 @@ export function PropertyDetailScreen() {
             <View style={styles.sellerCard}>
               <View style={styles.sellerRow}>
                 {property.seller.avatarUrl ? (
-                  <Image source={{ uri: property.seller.avatarUrl }} style={styles.sellerAvatar} />
+                  <Image source={{ uri: property.seller.avatarUrl }} accessibilityLabel={property.seller.name} style={styles.sellerAvatar} />
                 ) : (
                   <View style={[styles.sellerAvatar, styles.sellerAvatarPlaceholder]}>
                     <UserRound color="#4F625D" size={24} />
@@ -705,7 +730,7 @@ export function PropertyDetailScreen() {
               {/* Asking Price Callout */}
               <View style={styles.priceCalloutWrap}>
                 <View style={styles.priceCalloutHeader}>
-                  <Text style={styles.priceCalloutLabel}>Asking price</Text>
+                  <Text style={styles.priceCalloutLabel}>{t("propertyDetail.askingPrice")}</Text>
                   {property.score ? (
                     <View style={styles.scoreBadge}>
                       <Sparkles color="#04cf92" size={14} />
@@ -713,16 +738,16 @@ export function PropertyDetailScreen() {
                     </View>
                   ) : null}
                 </View>
-                <Text style={styles.priceCalloutValue}>
+                <NoTranslateText style={styles.priceCalloutValue}>
                   {property.priceCurrency} {property.price}{" "}
                   <Text style={styles.priceCalloutPeriod}>{property.pricePeriod}</Text>
-                </Text>
+                </NoTranslateText>
               </View>
 
               {/* Action Buttons Row */}
               <View style={styles.sellerActionsRow}>
                 <Pressable
-                  accessibilityLabel="Call Seller"
+                  accessibilityLabel={t("propertyDetail.callSeller")}
                   disabled={!property.seller.phone}
                   onPress={handleCall}
                   style={({ pressed }) => [
@@ -733,11 +758,11 @@ export function PropertyDetailScreen() {
                   ]}
                 >
                   <Phone color="#0B1A17" size={16} />
-                  <Text style={styles.sellerActionText}>Call</Text>
+                  <Text style={styles.sellerActionText}>{t("propertyDetail.callSeller")}</Text>
                 </Pressable>
 
                 <Pressable
-                  accessibilityLabel="WhatsApp Message"
+                  accessibilityLabel={t("propertyDetail.whatsappAgent")}
                   disabled={!property.seller.phone}
                   onPress={handleWhatsApp}
                   style={({ pressed }) => [
@@ -748,7 +773,7 @@ export function PropertyDetailScreen() {
                   ]}
                 >
                   <WhatsAppIcon size={18} color="#25D366" />
-                  <Text style={styles.whatsAppActionText}>WhatsApp</Text>
+                  <Text style={styles.whatsAppActionText}>{t("propertyDetail.whatsappAgent")}</Text>
                 </Pressable>
               </View>
 
@@ -758,7 +783,7 @@ export function PropertyDetailScreen() {
                 style={({ pressed }) => [styles.bookVisitBtn, webPointer, pressed && styles.pressed]}
               >
                 <Calendar color={colorTokens.onAccent} size={18} />
-                <Text style={styles.bookVisitBtnText}>Book a visit</Text>
+                <Text style={styles.bookVisitBtnText}>{t("propertyDetail.bookViewing")}</Text>
               </Pressable>
             </View>
 

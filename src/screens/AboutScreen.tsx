@@ -5,7 +5,7 @@ import {
   HeartHandshake,
   ShieldCheck,
   type LucideIcon,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink, Eyebrow, FeatureCard } from "@/components/ui";

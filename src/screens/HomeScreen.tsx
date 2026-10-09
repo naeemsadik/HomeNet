@@ -6,7 +6,7 @@ import {
   ChevronRight,
   LandPlot,
   RotateCcw,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { memo, useMemo, useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import {
   ActivityIndicator,

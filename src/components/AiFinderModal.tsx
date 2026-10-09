@@ -7,14 +7,14 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { X } from "lucide-react-native";
+import { X } from "@/components/icons";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
 import { useResponsive } from "@/hooks/useResponsive";
 import { AiFinderWorkflow } from "./AiFinderWorkflow";
 import { shadow, webPointer } from "@/theme";
 
 export function AiFinderModal() {
-  const { visible, close } = useAiFinderModalStore();
+  const { visible, close, initialPrompt } = useAiFinderModalStore();
   const { isPhone, width } = useResponsive();
 
   if (!visible) return null;
@@ -68,7 +68,7 @@ export function AiFinderModal() {
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={true}
             >
-              <AiFinderWorkflow isModal onClose={close} />
+              <AiFinderWorkflow initialPrompt={initialPrompt} isModal onClose={close} />
             </ScrollView>
           </View>
         </View>

@@ -23,7 +23,7 @@ import {
   TrendingUp,
   User,
   Zap,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -59,8 +59,10 @@ import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerStatCard, type StatItem } from "../components/SellerStatCard";
 import { ToggleViewButton } from "../components/ToggleViewButton";
 import { Footer } from "@/components/Footer";
-import { styles } from "./SellerDashboardScreen.styles";
+import { styles } from "./SellerDashboardScreen.styles";
+
 import { LiveText } from "@/components/LiveText";
+import { useTranslation, formatLocalizedNumber } from "@/i18n";
 
 // Types
 export type SellerNavKey =
@@ -89,6 +91,7 @@ interface ActivityItem {
 }
 
 export function SellerDashboardScreen() {
+  const { t, language } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
   const { user } = useAuthStore();
   const logout = useAuthStore((s) => s.logout);
@@ -138,14 +141,11 @@ export function SellerDashboardScreen() {
   const totalViews = allMyListings.reduce((sum, p) => sum + (p.view_count || 0), 0);
 
   // Desktop stats grid (3x3 layout for laptop/PC viewports)
-  // Single source of truth for the stats grid — same data and colors on
-  // every breakpoint, only the layout (3x3 vs 2x2) differs. Trends are only
-  // shown when there is a real underlying change to report.
   const sellerStats: StatItem[] = [
     {
       id: "total",
-      label: "Total Listings",
-      value: String(totalCount),
+      label: t("dashboard.totalListings"),
+      value: formatLocalizedNumber(totalCount, language),
       trend: totalCount > 0 ? "+1" : undefined,
       icon: Building2,
       iconBg: colors.greenLight,
@@ -153,8 +153,8 @@ export function SellerDashboardScreen() {
     },
     {
       id: "active",
-      label: "Active Listings",
-      value: String(activeCount),
+      label: t("dashboard.activeListings"),
+      value: formatLocalizedNumber(activeCount, language),
       trend: activeCount > 0 ? "+1" : undefined,
       icon: CheckCircle2,
       iconBg: colors.greenLight,
@@ -162,56 +162,56 @@ export function SellerDashboardScreen() {
     },
     {
       id: "draft",
-      label: "Draft Listings",
-      value: String(draftCount),
+      label: t("dashboard.draftListings"),
+      value: formatLocalizedNumber(draftCount, language),
       icon: FileText,
       iconBg: "#F4F6F5",
       iconColor: colors.muted,
     },
     {
       id: "sold",
-      label: "Sold / Rented",
-      value: String(soldCount),
+      label: t("dashboard.soldRented"),
+      value: formatLocalizedNumber(soldCount, language),
       icon: Handshake,
       iconBg: colors.blueLight,
       iconColor: colors.blue,
     },
     {
       id: "verified",
-      label: "Verified Properties",
-      value: String(verifiedCount),
+      label: t("dashboard.verifiedProperties"),
+      value: formatLocalizedNumber(verifiedCount, language),
       icon: ShieldCheck,
       iconBg: colors.greenLight,
       iconColor: colors.green,
     },
     {
       id: "boosted",
-      label: "Boosted Listings",
-      value: "0",
+      label: t("dashboard.boostedListings"),
+      value: formatLocalizedNumber(0, language),
       icon: Zap,
       iconBg: colors.orangeLight,
       iconColor: colors.orange,
     },
     {
       id: "views",
-      label: "Total Views",
-      value: String(totalViews),
+      label: t("dashboard.totalViews"),
+      value: formatLocalizedNumber(totalViews, language),
       icon: Eye,
       iconBg: colors.blueLight,
       iconColor: colors.blue,
     },
     {
       id: "inquiries",
-      label: "Buyer Inquiries",
-      value: "0",
+      label: t("dashboard.buyerInquiries"),
+      value: formatLocalizedNumber(0, language),
       icon: MessageSquare,
       iconBg: colors.orangeLight,
       iconColor: colors.orange,
     },
     {
       id: "saved",
-      label: "Saved by Buyers",
-      value: "0",
+      label: t("dashboard.savedByBuyers"),
+      value: formatLocalizedNumber(0, language),
       icon: Heart,
       iconBg: colors.greenLight,
       iconColor: colors.green,
@@ -238,21 +238,21 @@ export function SellerDashboardScreen() {
     danger?: boolean;
     href?: string;
   }[] = [
-    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
-    { key: "listings", label: "My Listings", icon: Building2, href: "/my-properties" },
-    { key: "create", label: "Create Property", icon: PlusCircle, href: "/property/create" },
-    { key: "verification", label: "Verification", icon: ShieldCheck, href: "/verification" },
-    { key: "boost", label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights", label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics", label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments", label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile", label: "Profile", icon: User, href: "/seller/profile" },
-    { key: "help", label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout", label: "Logout", icon: LogOut, danger: true, href: "/" },
+    { key: "dashboard", label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
+    { key: "listings", label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties" },
+    { key: "create", label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
+    { key: "verification", label: t("dashboard.tabs.verification"), icon: ShieldCheck, href: "/verification" },
+    { key: "boost", label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
+    { key: "insights", label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "analytics", label: t("dashboard.tabs.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
+    { key: "payments", label: t("dashboard.tabs.payments"), icon: CreditCard, href: "/seller?tab=payments" },
+    { key: "profile", label: t("dashboard.tabs.profile"), icon: User, href: "/seller/profile" },
+    { key: "help", label: t("dashboard.tabs.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
+    { key: "logout", label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
   ];
 
   const activeTitle =
-    sidebarNavItems.find((i) => i.key === activeNav)?.label || "Dashboard";
+    sidebarNavItems.find((i) => i.key === activeNav)?.label || t("dashboard.tabs.dashboard");
 
   return (
     <View style={styles.outerContainer}>
@@ -264,7 +264,7 @@ export function SellerDashboardScreen() {
             <Brand />
 
             <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
+              <Text style={styles.sellerRoleText}>{t("dashboard.sellerDashboard")}</Text>
             </View>
           </View>
 

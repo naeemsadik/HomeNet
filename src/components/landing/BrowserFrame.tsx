@@ -1,6 +1,6 @@
 import React, { type ReactNode } from "react";
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
-import { Lock } from "lucide-react-native";
+import { Lock } from "@/components/icons";
 import { fonts } from "@/theme";
 
 interface BrowserFrameProps {

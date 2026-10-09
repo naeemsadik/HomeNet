@@ -1,4 +1,4 @@
-import { X } from "lucide-react-native";
+import { X } from "@/components/icons";
 import {
   Modal,
   Pressable,

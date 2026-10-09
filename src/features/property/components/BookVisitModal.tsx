@@ -1,6 +1,7 @@
-import { Phone, X } from "lucide-react-native";
+import { Phone, X } from "@/components/icons";
 import { Modal, Pressable, Text, View } from "react-native";
-import { colorTokens, fonts, webPointer } from "@/theme";
+import { colorTokens, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 import { styles } from "../screens/PropertyDetailScreen.styles";
 import { WhatsAppIcon } from "./WhatsAppIcon";
 
@@ -28,26 +29,26 @@ export function BookVisitModal({
   onRequestVisit,
   onCall,
 }: BookVisitModalProps) {
+  const { t } = useTranslation();
+
   return (
     <Modal animationType="fade" onRequestClose={onClose} transparent visible={visible}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Book a Property Visit</Text>
+            <Text style={styles.modalTitle}>{t("bookVisit.title")}</Text>
             <Pressable onPress={onClose} style={styles.closeBtn}>
               <X color="#0B1A17" size={20} />
             </Pressable>
           </View>
 
           <Text style={styles.modalBodyText}>
-            Ask {sellerName} to arrange an in-person viewing of{" "}
-            <Text style={{ fontFamily: fonts.bold }}>{propertyTitle}</Text>. WhatsApp opens with
-            your request already written.
+            {t("bookVisit.body", { sellerName, propertyTitle })}
           </Text>
 
           {sellerPhone ? null : (
             <Text style={styles.modalNoPhoneText}>
-              The owner hasn't shared a phone number, so a visit can't be requested yet.
+              {t("bookVisit.noPhone")}
             </Text>
           )}
 
@@ -61,16 +62,23 @@ export function BookVisitModal({
             style={[
               styles.confirmVisitBtn,
               webPointer,
-              !sellerPhone && styles.actionBtnDisabled,
+              !sellerPhone && styles.confirmVisitBtnDisabled,
             ]}
           >
-            <WhatsAppIcon size={18} color={colorTokens.onBrand} />
-            <Text style={styles.confirmVisitText}>Request visit on WhatsApp</Text>
+            <WhatsAppIcon size={18} color={sellerPhone ? colorTokens.onBrand : colorTokens.subtle} />
+            <Text
+              style={[
+                styles.confirmVisitText,
+                !sellerPhone && styles.confirmVisitTextDisabled,
+              ]}
+            >
+              {t("bookVisit.requestWhatsApp")}
+            </Text>
           </Pressable>
 
           <View style={styles.modalDivider}>
             <View style={styles.modalDividerLine} />
-            <Text style={styles.modalDividerText}>or call</Text>
+            <Text style={styles.modalDividerText}>{t("bookVisit.orCall")}</Text>
             <View style={styles.modalDividerLine} />
           </View>
 
@@ -84,11 +92,18 @@ export function BookVisitModal({
             style={[
               styles.modalCallBtn,
               webPointer,
-              !sellerPhone && styles.actionBtnDisabled,
+              !sellerPhone && styles.modalCallBtnDisabled,
             ]}
           >
-            <Phone size={18} color={colorTokens.ink} />
-            <Text style={styles.modalCallBtnText}>Call {sellerName}</Text>
+            <Phone size={18} color={sellerPhone ? colorTokens.ink : colorTokens.subtle} />
+            <Text
+              style={[
+                styles.modalCallBtnText,
+                !sellerPhone && styles.modalCallBtnTextDisabled,
+              ]}
+            >
+              {t("bookVisit.callSeller", { sellerName })}
+            </Text>
           </Pressable>
         </View>
       </View>

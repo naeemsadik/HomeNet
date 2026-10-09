@@ -1,8 +1,10 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Check, Eye, Trash2, UserRound, X } from "lucide-react-native";
+import { Check, Eye, Trash2, UserRound, X } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { PropertyStatusBadge } from "./StatusBadge";
 import type { PropertyAdminItem } from "../types/admin";
+import { NoTranslateText } from "@/components/NoTranslateText";
+import { useTranslation } from "@/i18n";
 
 interface PropertyAdminItemProps {
   item: PropertyAdminItem;
@@ -21,6 +23,7 @@ export function PropertyAdminItemRow({
   onView,
   isMutating = false,
 }: PropertyAdminItemProps) {
+  const { t } = useTranslation();
   const thumbnail = item.media?.[0]?.thumbnail_url ?? item.media?.[0]?.url;
 
   return (
@@ -28,7 +31,7 @@ export function PropertyAdminItemRow({
       <View style={styles.topRow}>
         <View style={styles.thumbnailWrap}>
           {thumbnail ? (
-            <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
+            <Image source={{ uri: thumbnail }} accessibilityLabel={item.title} style={styles.thumbnail} />
           ) : (
             <View style={styles.thumbnailPlaceholder}>
               <UserRound color={colorTokens.textMuted} size={20} />
@@ -37,9 +40,9 @@ export function PropertyAdminItemRow({
         </View>
         <View style={styles.info}>
           <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
-          <Text style={styles.price}>
+          <NoTranslateText style={styles.price}>
             {item.price_currency} {item.price.toLocaleString()}
-          </Text>
+          </NoTranslateText>
           {item.user ? (
             <Text style={styles.owner} numberOfLines={1}>by {item.user.full_name}</Text>
           ) : null}
@@ -61,7 +64,7 @@ export function PropertyAdminItemRow({
               disabled={isMutating}
             >
               <Check color={colorTokens.primary} size={14} />
-              <Text style={[styles.actionText, { color: colorTokens.primary }]}>Activate</Text>
+              <Text style={[styles.actionText, { color: colorTokens.primary }]}>{t("admin.actions.activate")}</Text>
             </Pressable>
             <Pressable
               onPress={() => onReject(item.id)}
@@ -70,7 +73,7 @@ export function PropertyAdminItemRow({
               disabled={isMutating}
             >
               <X color={colorTokens.warning} size={14} />
-              <Text style={[styles.actionText, { color: colorTokens.warning }]}>Move to draft</Text>
+              <Text style={[styles.actionText, { color: colorTokens.warning }]}>{t("admin.actions.moveToDraft")}</Text>
             </Pressable>
           </>
         ) : null}
@@ -80,7 +83,7 @@ export function PropertyAdminItemRow({
           accessibilityLabel="View property"
         >
           <Eye color={colorTokens.verified} size={14} />
-          <Text style={[styles.actionText, { color: colorTokens.verified }]}>View</Text>
+          <Text style={[styles.actionText, { color: colorTokens.verified }]}>{t("admin.actions.view")}</Text>
         </Pressable>
         <Pressable
           onPress={() => onDelete(item.id)}

@@ -10,8 +10,8 @@ import {
   Sparkles,
   WalletCards,
   type LucideIcon,
-} from "lucide-react-native";
-import React, { useMemo, useState } from "react";
+} from "@/components/icons";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -21,18 +21,33 @@ import {
   type DimensionValue,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useQuery } from "@tanstack/react-query";
 import { router, type Href } from "expo-router";
+import { AiDescribeSearch } from "@/components/AiDescribeSearch";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
 import { AppButton, Eyebrow } from "@/components/ui";
-import { getProperties } from "@/services/propertyApi";
+import { getPropertiesInAreas } from "@/services/propertyApi";
+import { useAllAreas } from "@/hooks/useAllAreas";
 import { useResponsive } from "@/hooks/useResponsive";
+import { AI_SEARCH_ENABLED } from "@/lib/features";
 import { useSavedStore } from "@/stores/savedStore";
+import type { Property } from "@/features/property/types/property";
+import { areaIdsFor, resolveArea } from "@/features/property/utils/aiSearchFilters";
 import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 
 const steps = ["Goal", "Location", "Budget", "Matches"];
+
+/** Neighbourhoods offered in the guided steps; each is matched to a real area by name. */
+const NEIGHBOURHOODS: [name: string, blurb: string][] = [
+  ["Gulshan", "Central, connected, established diplomatic hub"],
+  ["Banani", "Central, connected, established diplomatic hub"],
+  ["Baridhara", "Quiet tree-lined streets and premium security"],
+  ["Dhanmondi", "Lakeside culture, schools, and central city access"],
+  ["Uttara", "Planned sectors, metro access, and open residential space"],
+  ["Bashundhara", "Fast-growing community with modern complexes"],
+  ["Mirpur", "Connected, budget-friendly and rapidly developing"],
+];
 
 const budgetRanges: Record<string, { min_price?: number; max_price?: number }> = {
   "Under BDT 70k": { max_price: 70000 },
@@ -90,16 +105,27 @@ function Choice({
 export interface AiFinderWorkflowProps {
   isModal?: boolean;
   onClose?: () => void;
+  /** A search the seeker already typed; with AI search on, it runs straight away. */
+  initialPrompt?: string;
 }
 
-export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowProps) {
+export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" }: AiFinderWorkflowProps) {
   const { isPhone, isTablet } = useResponsive();
+  // Describing a search needs the AI endpoint; without it only the guided steps exist.
+  const [mode, setMode] = useState<"describe" | "guided">(AI_SEARCH_ENABLED ? "describe" : "guided");
   const [step, setStep] = useState(0);
   const [goal, setGoal] = useState("Buy a home");
-  const [area, setArea] = useState("Gulshan & Banani");
+  const [area, setArea] = useState("Gulshan");
   const [budget, setBudget] = useState("BDT 2–4 Cr");
 
   const { toggleSaved, isSaved } = useSavedStore();
+  const handleOpenMatch = useCallback(
+    (property: Property) => {
+      if (isModal && onClose) onClose();
+      router.push(`/property/${property.id}` as Href);
+    },
+    [isModal, onClose],
+  );
 
   const queryParams = useMemo(() => {
     const range = budgetRanges[budget] || {};
@@ -111,14 +137,24 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
     };
   }, [goal, budget]);
 
+  // The chosen neighbourhood, matched to the API's areas (and its sub-areas:
+  // listings sit under Gulshan-2, not Gulshan, and area_id matches one area only).
+  const areasQuery = useAllAreas({ enabled: mode === "guided" && step === 3 });
+  const areaIds = useMemo(() => {
+    const areas = areasQuery.data?.items ?? [];
+    const match = resolveArea(area, areas);
+    return match ? areaIdsFor(match, areas) : [];
+  }, [area, areasQuery.data]);
+
   const { data: matchesData, isLoading: matchesLoading } = useQuery({
-    queryKey: ["properties", "ai-finder", goal, budget],
-    queryFn: () => getProperties(queryParams),
-    enabled: step === 3,
+    queryKey: ["properties", "ai-finder", goal, budget, area, areaIds],
+    // No matching area (not loaded, or not in the data): search the name as text rather than drop the place.
+    queryFn: () => getPropertiesInAreas(areaIds.length ? queryParams : { ...queryParams, search: area }, areaIds),
+    enabled: mode === "guided" && step === 3 && !areasQuery.isLoading,
     staleTime: 5 * 60 * 1000,
   });
 
-  const matches = useMemo(() => matchesData?.data?.items ?? [], [matchesData]);
+  const matches = useMemo(() => matchesData?.items ?? [], [matchesData]);
 
   const choiceWidth: DimensionValue = isPhone
     ? "100%"
@@ -132,41 +168,59 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
           ? "48.5%"
           : "23.8%";
 
-  return (
-    <View style={[styles.container, isModal && styles.containerModal]}>
-      {/* Modal / Screen Header */}
-      <View style={[styles.headerRow, isModal && styles.headerRowModal]}>
-        <View style={styles.headerLeft}>
-          <View style={styles.aiPillBadge}>
-            <Sparkles color="#04cf92" size={14} />
-            <Text style={styles.aiPillText}>AI Property Matchmaker</Text>
-          </View>
-          <Text style={[styles.title, isPhone && styles.titlePhone]}>
-            Tell us what home feels right.
-          </Text>
-          <Text style={styles.subtitle}>
-            HomeNet ranks verified listings around your priorities and flags negotiated market opportunities.
-          </Text>
+  const header = (
+    <View style={[styles.headerRow, isModal && styles.headerRowModal]}>
+      <View style={styles.headerLeft}>
+        <View style={styles.aiPillBadge}>
+          <Sparkles color="#04cf92" size={14} />
+          <Text style={styles.aiPillText}>{AI_SEARCH_ENABLED ? "AI Property Finder" : "Property Finder"}</Text>
+        </View>
+        <Text style={[styles.title, isPhone && styles.titlePhone]}>
+          Tell us what home feels right.
+        </Text>
+        <Text style={styles.subtitle}>
+          {mode === "describe"
+            ? "Describe the home you want in your own words. We turn it into filters and show the listings that match."
+            : "Answer three quick questions and we'll show the listings that match."}
+        </Text>
+      </View>
+    </View>
+  );
+
+  if (mode === "describe") {
+    return (
+      <View style={[styles.container, isModal && styles.containerModal]}>
+        {header}
+        <View style={[styles.finderShell, isModal && styles.finderShellModal, styles.describeShell]}>
+          <AiDescribeSearch
+            initialPrompt={initialPrompt}
+            onClose={onClose}
+            onUseGuided={() => setMode("guided")}
+          />
+          <AppButton
+            label="Answer guided questions instead"
+            onPress={() => setMode("guided")}
+            style={styles.switchMode}
+            variant="ghost"
+          />
         </View>
       </View>
+    );
+  }
 
-      {/* ─── AI Market Insight Banner (From Image 1) ─── */}
-      <LinearGradient
-        colors={["#EEFAF5", "#E8F5F1"]}
-        end={{ x: 1, y: 0 }}
-        start={{ x: 0, y: 0 }}
-        style={styles.aiInsightBanner}
-      >
-        <View style={styles.aiInsightIcon}>
-          <Sparkles color={colorTokens.onBrand} size={18} />
-        </View>
-        <View style={styles.aiInsightCopyWrap}>
-          <Text style={styles.aiInsightTitle}>What this means for your search</Text>
-          <Text style={styles.aiInsightCopy}>
-            Prices are rising steadily, but verified listings in Uttara and Dhanmondi still show room to negotiate. HomeNet flags those opportunities in your results.
-          </Text>
-        </View>
-      </LinearGradient>
+  return (
+    <View style={[styles.container, isModal && styles.containerModal]}>
+      {header}
+
+      {AI_SEARCH_ENABLED ? (
+        <AppButton
+          icon={Sparkles}
+          label="Describe it in your own words instead"
+          onPress={() => setMode("describe")}
+          style={styles.switchMode}
+          variant="ghost"
+        />
+      ) : null}
 
       {/* ─── Main Finder Shell ─── */}
       <View style={[styles.finderShell, isModal && styles.finderShellModal]}>
@@ -267,7 +321,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
               {step === 0 ? (
                 <>
                   <Choice
-                    copy="Build equity in a place of your own with verified valuation"
+                    copy="Build equity in a place of your own"
                     icon={Home}
                     label="Buy a home"
                     onPress={() => setGoal("Buy a home")}
@@ -275,7 +329,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
                     width={choiceWidth}
                   />
                   <Choice
-                    copy="Stay flexible with a verified rental in top neighborhoods"
+                    copy="Stay flexible with a rental in the neighbourhood you want"
                     icon={KeyRound}
                     label="Rent a home"
                     onPress={() => setGoal("Rent a home")}
@@ -284,14 +338,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
                   />
                 </>
               ) : step === 1 ? (
-                [
-                  ["Gulshan & Banani", "Central, connected, established diplomatic hub"],
-                  ["Baridhara", "Quiet tree-lined streets and premium security"],
-                  ["Dhanmondi", "Lakeside culture, schools, and central city access"],
-                  ["Uttara", "Planned sectors, metro access, and open residential space"],
-                  ["Bashundhara", "Fast-growing community with modern complexes"],
-                  ["Mirpur", "Connected, budget-friendly and rapidly developing"],
-                ].map(([lbl, cpy]) => (
+                NEIGHBOURHOODS.map(([lbl, cpy]) => (
                   <Choice
                     copy={cpy}
                     icon={Building2}
@@ -309,7 +356,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
                 ).map((lbl) => (
                   <Choice
                     compact
-                    copy="Show homes tailored in this range"
+                    copy="Show homes in this range"
                     key={lbl}
                     label={lbl}
                     onPress={() => setBudget(lbl)}
@@ -329,13 +376,13 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
           >
             <View style={[styles.resultSummary, isPhone && styles.resultSummaryPhone]}>
               <View style={styles.resultIcon}>
-                <Sparkles color={colorTokens.onBrand} size={22} />
+                <Home color={colorTokens.onBrand} size={22} />
               </View>
               <View style={styles.resultCopyWrap}>
-                <Eyebrow style={styles.resultEyebrow}>Your strongest matches</Eyebrow>
-                <Text style={styles.resultTitle}>Homes aligned with your priorities</Text>
+                <Eyebrow style={styles.resultEyebrow}>Matching listings</Eyebrow>
+                <Text style={styles.resultTitle}>Homes that fit your answers</Text>
                 <Text style={styles.resultCopy}>
-                  {goal} around {area}, within {budget}. Ranked by AI value score, verification, and livability.
+                  {goal} around {area}, within {budget}.
                 </Text>
               </View>
               <AppButton
@@ -349,9 +396,7 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
             {matchesLoading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator color={colors.green} size="large" />
-                <Text style={styles.loadingText}>
-                  HomeNet AI is analyzing and scoring matches...
-                </Text>
+                <Text style={styles.loadingText}>Finding matching listings…</Text>
               </View>
             ) : matches.length === 0 ? (
               <View style={styles.emptyContainer}>
@@ -371,11 +416,8 @@ export function AiFinderWorkflow({ isModal = false, onClose }: AiFinderWorkflowP
                   {matches.map((property) => (
                     <PropertyCard
                       key={property.id}
-                      onPress={() => {
-                        if (isModal && onClose) onClose();
-                        router.push(`/property/${property.id}` as Href);
-                      }}
-                      onSave={() => toggleSaved(property)}
+                      onPress={handleOpenMatch}
+                      onSave={toggleSaved}
                       property={property}
                       saved={isSaved(property.id)}
                     />
@@ -487,42 +529,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  /* ─── AI Insight Banner (Image 1 replica) ─── */
-  aiInsightBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#CCEADA",
-    marginHorizontal: 4,
+  /* ─── Mode switch + describe shell ─── */
+  describeShell: {
+    padding: 20,
+    overflow: "visible",
   },
-  aiInsightIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: colors.green,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  aiInsightCopyWrap: {
-    flex: 1,
-  },
-  aiInsightTitle: {
-    color: colors.ink,
-    fontFamily: fonts.bold,
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  aiInsightCopy: {
-    color: "#475569",
-    fontFamily: fonts.regular,
-    fontSize: 12.5,
-    lineHeight: 18,
-    marginTop: 2,
+  switchMode: {
+    alignSelf: "flex-start",
+    marginBottom: 12,
   },
 
   /* ─── Main Shell ─── */

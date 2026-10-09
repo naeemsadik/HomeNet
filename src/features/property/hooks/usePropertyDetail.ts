@@ -51,6 +51,13 @@ export interface PropertyDetail {
   _count: { media: number };
 }
 
+// A pending listing is polled for its review result: quickly at first, then
+// slower, then not at all. Window focus refetches still pick up a late change.
+const INITIAL_POLL_INTERVAL_MS = 10_000;
+const BACKOFF_POLL_INTERVAL_MS = 30_000;
+const INITIAL_POLL_ATTEMPTS = 3; // fetches at the initial interval before backing off
+const MAX_POLL_ATTEMPTS = 10;
+
 export function usePropertyDetail(id: string) {
   return useQuery({
     queryKey: ["property", id],
@@ -60,7 +67,11 @@ export function usePropertyDetail(id: string) {
       return response.data as PropertyDetail;
     },
     enabled: !!id,
-    refetchInterval: (query) => query.state.data?.status === "pending" ? 10_000 : false,
+    refetchInterval: (query) => {
+      const attempts = query.state.dataUpdateCount;
+      if (query.state.data?.status !== "pending" || attempts >= MAX_POLL_ATTEMPTS) return false;
+      return attempts < INITIAL_POLL_ATTEMPTS ? INITIAL_POLL_INTERVAL_MS : BACKOFF_POLL_INTERVAL_MS;
+    },
   });
 }
 

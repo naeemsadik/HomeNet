@@ -1,7 +1,8 @@
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
-import { Sparkles } from "lucide-react-native";
+import { Sparkles } from "@/components/icons";
+import { useTranslation } from "@/i18n";
 import {
   Pressable,
   StyleSheet,
@@ -56,6 +57,7 @@ export interface FooterProps {
 }
 
 export function Footer({ style }: FooterProps = {}) {
+  const { t } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
 
   const resourcesLinks = [
@@ -169,9 +171,9 @@ export function Footer({ style }: FooterProps = {}) {
           {/* Individual Card on Top: Download the Homenet app */}
           <View style={styles.mobileDownloadCard}>
             <View style={styles.mobileDownloadTextWrap}>
-              <Text style={styles.mobileDownloadHeading}>Download the Homenet app</Text>
+              <Text style={styles.mobileDownloadHeading}>{t("footer.downloadHeading")}</Text>
               <Text style={styles.mobileDownloadSub}>
-                Browse verified listings and contact owners directly, on Android.
+                {t("footer.downloadSub")}
               </Text>
             </View>
             <View style={styles.mobileDownloadBtnWrap}>
@@ -183,7 +185,7 @@ export function Footer({ style }: FooterProps = {}) {
           <View style={styles.footer2x2Grid}>
             {/* 1. Resources */}
             <View style={styles.footer2x2Col}>
-              <Text style={styles.footerColHeading}>Resources</Text>
+              <Text style={styles.footerColHeading}>{t("footer.resources")}</Text>
               {resourcesLinks.map((item) => (
                 <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
                   <Text style={styles.footerLinkText}>{item.label}</Text>
@@ -193,7 +195,7 @@ export function Footer({ style }: FooterProps = {}) {
 
             {/* 2. Search */}
             <View style={styles.footer2x2Col}>
-              <Text style={styles.footerColHeading}>Search</Text>
+              <Text style={styles.footerColHeading}>{t("footer.search")}</Text>
               {searchLinks.map((item) => (
                 <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
                   <Text style={styles.footerLinkText}>{item.label}</Text>
@@ -203,7 +205,7 @@ export function Footer({ style }: FooterProps = {}) {
 
             {/* 3. Locations */}
             <View style={styles.footer2x2Col}>
-              <Text style={styles.footerColHeading}>Locations</Text>
+              <Text style={styles.footerColHeading}>{t("footer.locations")}</Text>
               {locationsLinks.map((item) => (
                 <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
                   <Text style={styles.footerLinkText}>{item.label}</Text>
@@ -213,7 +215,7 @@ export function Footer({ style }: FooterProps = {}) {
 
             {/* 4. Homenet */}
             <View style={styles.footer2x2Col}>
-              <Text style={styles.footerColHeading}>Homenet</Text>
+              <Text style={styles.footerColHeading}>{t("footer.homenet")}</Text>
               {homenetLinks.map((item) => (
                 <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
                   <Text style={styles.footerLinkText}>{item.label}</Text>
@@ -225,9 +227,9 @@ export function Footer({ style }: FooterProps = {}) {
           {/* Column: Professional / Pro Plan Benefits */}
           <View style={styles.mobileProCard}>
             <View style={styles.mobileProHeader}>
-              <Text style={styles.footerColHeading}>Professional</Text>
+              <Text style={styles.footerColHeading}>{t("footer.professional")}</Text>
               <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
-                <Text style={styles.proBadgeText}>Homenet Pro</Text>
+                <Text style={styles.proBadgeText}>{t("footer.homenetPro")}</Text>
                 <Sparkles color="#A7F3D0" size={13} />
               </AppLink>
             </View>
@@ -259,7 +261,7 @@ export function Footer({ style }: FooterProps = {}) {
 
           {/* Copyright notice */}
           <Text style={styles.footerCopyrightText}>
-            Copyright © 2026 HomeNet Group Limited. All rights reserved.
+            {t("footer.copyright")}
           </Text>
         </View>
       </View>
@@ -284,14 +286,14 @@ export function Footer({ style }: FooterProps = {}) {
           {/* Column 1: Download the Homenet app */}
           <View style={styles.footerDownloadCol}>
             <Text style={styles.footerDownloadHeading}>
-              Download the{"\n"}Homenet app
+              {t("footer.downloadHeading")}
             </Text>
             <GooglePlayButton />
           </View>
 
           {/* Column 2: Resources */}
           <View style={styles.footerCol}>
-            <Text style={styles.footerColHeading}>Resources</Text>
+            <Text style={styles.footerColHeading}>{t("footer.resources")}</Text>
             {resourcesLinks.map((item) => (
               <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
                 <Text style={styles.footerLinkText}>{item.label}</Text>
@@ -301,7 +303,7 @@ export function Footer({ style }: FooterProps = {}) {
 
           {/* Column 3: Search */}
           <View style={styles.footerCol}>
-            <Text style={styles.footerColHeading}>Search</Text>
+            <Text style={styles.footerColHeading}>{t("footer.search")}</Text>
             {searchLinks.map((item) => (
               <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
                 <Text style={styles.footerLinkText}>{item.label}</Text>
@@ -311,7 +313,7 @@ export function Footer({ style }: FooterProps = {}) {
 
           {/* Column 4: Locations */}
           <View style={styles.footerCol}>
-            <Text style={styles.footerColHeading}>Locations</Text>
+            <Text style={styles.footerColHeading}>{t("footer.locations")}</Text>
             {locationsLinks.map((item) => (
               <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
                 <Text style={styles.footerLinkText}>{item.label}</Text>
@@ -321,7 +323,7 @@ export function Footer({ style }: FooterProps = {}) {
 
           {/* Column 5: Homenet */}
           <View style={styles.footerCol}>
-            <Text style={styles.footerColHeading}>Homenet</Text>
+            <Text style={styles.footerColHeading}>{t("footer.homenet")}</Text>
             {homenetLinks.map((item) => (
               <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
                 <Text style={styles.footerLinkText}>{item.label}</Text>
@@ -331,9 +333,9 @@ export function Footer({ style }: FooterProps = {}) {
 
           {/* Column 6: Professional / Pro Plan Benefits */}
           <View style={[styles.footerCol, styles.footerProCol]}>
-            <Text style={styles.footerColHeading}>Professional</Text>
+            <Text style={styles.footerColHeading}>{t("footer.professional")}</Text>
             <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
-              <Text style={styles.proBadgeText}>Homenet Pro</Text>
+              <Text style={styles.proBadgeText}>{t("footer.homenetPro")}</Text>
               <Sparkles color="#A7F3D0" size={13} />
             </AppLink>
             {proBenefits.map((item) => (
@@ -368,7 +370,7 @@ export function Footer({ style }: FooterProps = {}) {
 
         {/* Copyright notice */}
         <Text style={styles.footerCopyrightText}>
-          Copyright © 2026 HomeNet Group Limited. All rights reserved.
+          {t("footer.copyright")}
         </Text>
       </View>
     </View>

@@ -1,4 +1,4 @@
-import { Eye, EyeOff, KeyRound, X } from "lucide-react-native";
+import { Eye, EyeOff, KeyRound, X } from "@/components/icons";
 import { useState } from "react";
 import { ActivityIndicator, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -6,6 +6,8 @@ import { notify } from "@/lib/alert";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens, webPointer } from "@/theme";
 import { styles } from "../screens/SellerProfileScreen.styles";
+
+const MIN_PASSWORD_LENGTH = 8;
 
 type SellerChangePasswordModalProps = {
   visible: boolean;
@@ -37,8 +39,8 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
       setPasswordError("Please enter your current password.");
       return;
     }
-    if (newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters.");
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+      setPasswordError(`New password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
       return;
     }
     if (newPassword !== confirmPassword) {

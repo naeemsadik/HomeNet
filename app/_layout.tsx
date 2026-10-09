@@ -1,18 +1,6 @@
 // First, so production is silent before anything else can log.
 import "@/lib/productionConsole";
 import { useEffect } from "react";
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_800ExtraBold,
-} from "@expo-google-fonts/inter";
-import {
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-  PlusJakartaSans_800ExtraBold,
-} from "@expo-google-fonts/plus-jakarta-sans";
 import { useFonts } from "expo-font";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
@@ -23,14 +11,14 @@ import { ToastHost } from "@/components/ToastHost";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
-import {
-  ensureGoogleTranslateScript,
-  restoreSavedLanguage,
-  restoreTranslateCookie,
-  shouldLoadTranslateOnBoot,
-} from "@/utils/language";
+import { appFonts } from "@/theme/appFonts";
+import { restoreSavedLanguage } from "@/i18n";
 import { PageMeta } from "@/components/PageMeta";
 import { queryClient } from "@/lib/queryClient";
+import { installDomGuard } from "@/lib/domGuard";
+
+// Before React renders: browser translation/extensions might rewrite text nodes.
+installDomGuard();
 
 // Keyboard focus ring. Not colorTokens.primary (#04cf92), which sits at 2.03:1
 // on white and fails the 3:1 WCAG 1.4.11 minimum for a focus indicator.
@@ -38,16 +26,8 @@ const FOCUS_RING_COLOR = colorTokens.primaryOnLight;
 
 
 export default function RootLayout() {
-  const [loaded] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    Inter_800ExtraBold,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
-  });
+  // Latin subsets with font-display: swap on web; full files on native.
+  const [loaded] = useFonts(appFonts);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -77,13 +57,6 @@ export default function RootLayout() {
       }
 
       restoreSavedLanguage();
-
-      // Only visitors who already read in Bangla pay for the translate
-      // widget up front; for everyone else it loads on first use.
-      if (shouldLoadTranslateOnBoot()) {
-        restoreTranslateCookie();
-        ensureGoogleTranslateScript();
-      }
     }
 
     setUnauthorizedHandler(() => {

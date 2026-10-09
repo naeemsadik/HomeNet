@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Pressable, ScrollView, Image, StyleSheet } from "react-native";
 import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";
-import { Camera, Trash2, Plus } from "lucide-react-native";
+import { Camera, Trash2, Plus } from "@/components/icons";
 import { colorTokens, fonts } from "@/theme";
 
 interface ImageUploaderProps {

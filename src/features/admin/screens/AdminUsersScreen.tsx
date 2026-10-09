@@ -10,11 +10,16 @@ import type { UserWithRoles } from "../types/admin";
 import { deleteUser } from "@/services/userApi";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { toApiError } from "@/services/apiClient";
+import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useTranslation } from "@/i18n";
 
 export function AdminUsersScreen() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [roleModalUser, setRoleModalUser] = useState<UserWithRoles | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserWithRoles | null>(null);
+  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
     mutationFn: deleteUser,
@@ -25,13 +30,17 @@ export function AdminUsersScreen() {
   });
 
   const { data, error, isLoading, refetch } = useAdminUsers({
-    search: search || undefined,
-    page: 1,
-    limit: 50,
+    search: debouncedSearch || undefined,
+    page,
   });
 
   const users = data?.items ?? [];
   const total = data?.total ?? 0;
+
+  function handleSearchChange(query: string) {
+    setSearch(query);
+    setPage(1);
+  }
 
   function handleView(userId: string) {
     router.push(`/users/${userId}` as never);
@@ -40,8 +49,8 @@ export function AdminUsersScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>User Management</Text>
-        <Text style={styles.subtitle}>Manage platform users and their roles.</Text>
+        <Text style={styles.title}>{t("admin.userManagement")}</Text>
+        <Text style={styles.subtitle}>{t("admin.userManagementSubtitle")}</Text>
       </View>
 
       <UserAdminList
@@ -49,10 +58,12 @@ export function AdminUsersScreen() {
         total={total}
         isLoading={isLoading}
         searchQuery={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         onManageRoles={setRoleModalUser}
         onView={handleView}
         onDelete={setDeleteTarget}
+        onLoadMore={() => setPage((current) => current + 1)}
+        hasMore={users.length < total}
       />
 
       <RoleAssignmentModal
@@ -68,9 +79,9 @@ export function AdminUsersScreen() {
       {deleteMutation.error ? <Text style={styles.errorText}>{toApiError(deleteMutation.error).message}</Text> : null}
       <ConfirmDialog
         visible={!!deleteTarget}
-        title="Delete User"
-        message={`Delete ${deleteTarget?.full_name ?? "this user"}? This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("admin.deleteUserTitle")}
+        message={t("admin.deleteUserMessage", { name: deleteTarget?.full_name ?? "this user" })}
+        confirmLabel={t("admin.actions.delete")}
         variant="danger"
         loading={deleteMutation.isPending}
         onCancel={() => setDeleteTarget(null)}

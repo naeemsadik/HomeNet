@@ -2,7 +2,7 @@ import React from "react";
 import { Controller, type Control, type FieldValues, type Path } from "react-hook-form";
 import { FloatingInput } from "./AuthFormFields";
 import type { KeyboardTypeOptions, StyleProp, ViewStyle } from "react-native";
-import type { LucideIcon } from "lucide-react-native";
+import type { LucideIcon } from "@/components/icons";
 
 interface FormFloatingInputProps<T extends FieldValues> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

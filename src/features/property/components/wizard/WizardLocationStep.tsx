@@ -1,4 +1,4 @@
-import { MapPin } from "lucide-react-native";
+import { MapPin } from "@/components/icons";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";

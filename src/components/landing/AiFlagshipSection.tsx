@@ -20,7 +20,7 @@ import {
   ShieldAlert,
   Sliders,
   Play,
-} from 'lucide-react-native';
+} from '@/components/icons';
 import { colors, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useAuthStore } from '../../stores/authStore';
@@ -34,7 +34,7 @@ import { styles } from "./AiFlagshipSection.styles";
 
 type DemoState = 'idle' | 'typing' | 'analyzing' | 'preview';
 
-export const AiFlagshipSection: React.FC = () => {
+export function AiFlagshipSection() {
   const router = useRouter();
   const { isTablet, isPhone } = useResponsive();
   const user = useAuthStore((s) => s.user);
@@ -515,4 +515,4 @@ export const AiFlagshipSection: React.FC = () => {
       </View>
     </View>
   );
-};
+}

@@ -24,10 +24,11 @@ import {
   Mail,
   User,
   X,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useAuthStore } from "@/stores/authStore";
 import { authModalSchema, type AuthModalFormData } from "@/lib/schemas/auth";
 import { colorTokens, fonts, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 
 const authBuildingImage = require("../../assets/auth-hero-building.png");
 
@@ -164,6 +165,7 @@ export function AuthCard({
   isModal = false,
   style,
 }: AuthCardProps) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -191,7 +193,7 @@ export function AuthCard({
   };
 
   const handleSocialClick = (provider: string) => {
-    notify(provider, `${provider} sign-in will be available soon.`);
+    notify(provider, t("auth.socialComingSoon", { provider }));
   };
 
   // There is no password-reset endpoint yet, so point people at the contact
@@ -199,8 +201,8 @@ export function AuthCard({
   // homenet.com, and "account settings" can't be reached while signed out).
   const handleForgotPassword = () => {
     notify(
-      "Forgot Password",
-      "Password reset isn't available in the app yet. Email hello@homenet.com.bd from the address on your account and we'll help you reset it."
+      t("auth.forgotPasswordTitle"),
+      t("auth.forgotPasswordMessage")
     );
   };
 
@@ -251,8 +253,8 @@ export function AuthCard({
           >
             {/* Optional Close Button (Node 282:81) */}
             {showClose && onClose ? (
-              <Pressable
-                accessibilityLabel="Close"
+              <Pressable accessibilityRole="button"
+                accessibilityLabel={t("auth.close")}
                 onPress={onClose}
                 style={[styles.closeButton, webPointer]}
               >
@@ -270,7 +272,7 @@ export function AuthCard({
 
             {/* Subtitle (Node 282:12) */}
             <Text style={styles.brandSubtitle}>
-              Property marketplace · Bangladesh
+              {t("auth.brandSubtitle")}
             </Text>
           </LinearGradient>
         </ImageBackground>
@@ -278,7 +280,7 @@ export function AuthCard({
 
       {/* ─── Mode Switcher Tabs (Node 282:13 - 50.4px height) ─── */}
       <View style={styles.tabSwitcher}>
-        <Pressable
+        <Pressable accessibilityRole="button"
           onPress={() => handleTabSwitch("signin")}
           style={[
             styles.tabItem,
@@ -292,11 +294,11 @@ export function AuthCard({
               mode === "signin" && styles.tabTextActive,
             ]}
           >
-            Sign In
+            {t("auth.signInTab")}
           </Text>
         </Pressable>
 
-        <Pressable
+        <Pressable accessibilityRole="button"
           onPress={() => handleTabSwitch("signup")}
           style={[
             styles.tabItem,
@@ -310,7 +312,7 @@ export function AuthCard({
               mode === "signup" && styles.tabTextActive,
             ]}
           >
-            Create Account
+            {t("auth.signUpTab")}
           </Text>
         </Pressable>
       </View>
@@ -319,7 +321,7 @@ export function AuthCard({
       <ContentWrapper {...(contentWrapperProps as any)}>
         {/* Social Buttons (Node 282:19 - 42.4px height, gap: 12px) */}
         <View style={styles.socialButtonsRow}>
-          <Pressable
+          <Pressable accessibilityRole="button"
             onPress={() => handleSocialClick("Google")}
             style={[styles.googleButton, webPointer]}
           >
@@ -327,7 +329,7 @@ export function AuthCard({
             <Text style={styles.googleButtonText}>Google</Text>
           </Pressable>
 
-          <Pressable
+          <Pressable accessibilityRole="button"
             onPress={() => handleSocialClick("Facebook")}
             style={[styles.facebookButton, webPointer]}
           >
@@ -339,7 +341,7 @@ export function AuthCard({
         {/* Divider (Node 282:31) */}
         <View style={styles.dividerRow}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or continue with email</Text>
+          <Text style={styles.dividerText}>{t("auth.orContinueWithEmail")}</Text>
           <View style={styles.dividerLine} />
         </View>
 
@@ -366,7 +368,8 @@ export function AuthCard({
                         onChange(val);
                         if (storeError) clearError();
                       }}
-                      placeholder="Full name"
+                      placeholder={t("auth.fullNamePlaceholder")}
+                      accessibilityLabel={t("auth.fullName")}
                       placeholderTextColor="rgba(11, 26, 23, 0.5)"
                       style={styles.textInput}
                       value={value ?? ""}
@@ -395,7 +398,8 @@ export function AuthCard({
                       onChange(val);
                       if (storeError) clearError();
                     }}
-                    placeholder="Email address"
+                    placeholder={t("auth.emailAddressPlaceholder")}
+                    accessibilityLabel={t("auth.email")}
                     placeholderTextColor="rgba(11, 26, 23, 0.5)"
                     style={styles.textInput}
                     value={value ?? ""}
@@ -422,7 +426,8 @@ export function AuthCard({
                       onChange(val);
                       if (storeError) clearError();
                     }}
-                    placeholder={mode === "signin" ? "Password" : "Create password"}
+                    placeholder={mode === "signin" ? t("auth.password") : t("auth.createPasswordPlaceholder")}
+                    accessibilityLabel={mode === "signin" ? t("auth.password") : t("auth.createPasswordPlaceholder")}
                     placeholderTextColor="rgba(11, 26, 23, 0.5)"
                     secureTextEntry={!showPassword}
                     style={styles.textInput}
@@ -430,10 +435,10 @@ export function AuthCard({
                   />
                 )}
               />
-              <Pressable
+              <Pressable accessibilityRole="button"
                 onPress={() => setShowPassword((prev) => !prev)}
                 style={styles.inputRightAction}
-                accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+                accessibilityLabel={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
               >
                 {showPassword ? (
                   <EyeOff color="#5C6B66" size={16} />
@@ -449,16 +454,16 @@ export function AuthCard({
 
           {mode === "signin" ? (
             <View style={styles.forgotPasswordRow}>
-              <Pressable onPress={handleForgotPassword} style={webPointer}>
+              <Pressable accessibilityRole="button" onPress={handleForgotPassword} style={webPointer}>
                 <Text style={styles.forgotPasswordText}>
-                  Forgot password?
+                  {t("auth.forgotPassword")}
                 </Text>
               </Pressable>
             </View>
           ) : null}
 
           {/* Submit Button (Node 282:60 - 44px height, rounded 20px) */}
-          <Pressable
+          <Pressable accessibilityRole="button"
             disabled={loading}
             onPress={handleSubmit(onSubmit)}
             style={[styles.submitButton, loading && { opacity: 0.7 }, webPointer]}
@@ -468,7 +473,7 @@ export function AuthCard({
             ) : (
               <>
                 <Text style={styles.submitButtonText}>
-                  {mode === "signin" ? "Sign In" : "Create Account"}
+                  {mode === "signin" ? t("auth.signInButton") : t("auth.createAccountButton")}
                 </Text>
                 <ArrowRight color={colorTokens.onBrand} size={16} strokeWidth={2.2} />
               </>
@@ -480,17 +485,17 @@ export function AuthCard({
         <View style={styles.bottomSwitchRow}>
           <Text style={styles.switchPromptText}>
             {mode === "signin"
-              ? "Don't have an account? "
-              : "Already have an account? "}
+              ? `${t("auth.dontHaveAccount")} `
+              : `${t("auth.alreadyHaveAccount")} `}
           </Text>
-          <Pressable
+          <Pressable accessibilityRole="button"
             onPress={() =>
               handleTabSwitch(mode === "signin" ? "signup" : "signin")
             }
             style={webPointer}
           >
             <Text style={styles.switchActionText}>
-              {mode === "signin" ? "Sign up free" : "Sign In"}
+              {mode === "signin" ? t("auth.signUpFree") : t("auth.signIn")}
             </Text>
           </Pressable>
         </View>
@@ -501,8 +506,7 @@ export function AuthCard({
             <FigmaSparkleIcon />
           </View>
           <Text style={styles.promoText}>
-            Listing a property? Paste a plain description and HomeNet fills the
-            details for you.
+            {t("auth.promoText")}
           </Text>
         </View>
       </ContentWrapper>

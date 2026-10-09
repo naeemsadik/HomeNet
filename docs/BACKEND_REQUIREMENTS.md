@@ -12,6 +12,11 @@
 
 ## 1. 🔒 POST /v1/ai/parse-property — Quick listing
 
+> **Status (2026-10-05): not implemented.** The `grok_api_key` branch has no
+> `/v1/ai/parse-property`. Its `smart-listing` does something different (§1d).
+> The "List with AI" sheet that calls this route therefore shows "Quick listing
+> isn't available right now" and offers the step-by-step form.
+
 Turns an owner's free-text description into structured listing fields. Used by
 the "List with AI" sheet (`src/features/property/components/AiListingSheet.tsx`
 → `src/services/aiApi.ts`).
@@ -66,6 +71,118 @@ fields that fail, so one bad value doesn't discard the rest.
 - Rate-limit per user (a daily quota → 429).
 - Validate the model output against the table above before returning it.
 - Don't log full descriptions at info level; they can contain phone numbers and addresses.
+
+---
+
+## 1b. POST /v1/properties/smart-search — AI search
+
+**Implemented on branch `grok_api_key`** (`modules/property/smart-searching`);
+the frontend is built against it (`src/services/aiApi.ts` → `smartSearch`,
+`src/components/AiDescribeSearch.tsx`). One call does everything: the model
+turns the query into filters, the API runs them over verified active listings,
+and the model writes up to three "why it matches" badges per listing.
+
+**Auth:** public. **Throttle:** 20 requests a minute. **Body:**
+`{ query: string (3–300), page?: 1–100, limit?: 1–20 }`.
+
+**Success 200** — `data`:
+
+| Field | Notes |
+|---|---|
+| `query` | The sanitised query. |
+| `filters` | `{ area, listing_type, type, min_price, max_price, bedrooms, bathrooms, amenities[] }`; `null` / `[]` when the query didn't say. Shown to the seeker as "What we understood". |
+| `listings[]` | A slim card (not a full Property): `id, title, type, subtype, listing_type, price, price_currency, area_size, area_unit, address, amenities, is_verified, published_at, area{id,name,city}, media[0]` plus `ai_badges: string[]` (empty if the model failed). |
+| `pagination` | `{ total, page, limit, total_pages }` — the app's "Show more". |
+
+The client validates every field on its own and drops only what fails; a
+malformed listing is skipped, not fatal. `listing_type` may be `short_let`; the
+app shows it as a rental.
+
+**Errors the app handles:** 400 (query too short or invalid) → asks for more
+words; 429 (throttle) → "Lots of people are searching right now…"; 503 / 502 /
+404 → "AI search is busy or unavailable" + a button to the guided questions.
+
+**Turning it on:** the finder shows the box only when the web build has
+`EXPO_PUBLIC_AI_SEARCH_ENABLED=true` (`src/lib/features.ts`). Once this route
+is live in production, set it in the web project's environment and redeploy —
+the web build is static, so it is fixed at build time.
+
+### Findings for the API team (read from the code, not yet run)
+
+1. **"Gulshan 2" finds nothing.** The area filter is
+   `a.name ILIKE '%<area>%'` and the area is stored as `Gulshan-2`. People type
+   "Gulshan 2", "Gulshan-2", "Gulshan2". Normalise both sides (strip spaces and
+   hyphens), or match by token.
+2. **"Uttara" misses its sectors.** Sub-areas are named `Sector-7` etc., which
+   don't contain "Uttara", so a search for Uttara returns only listings filed
+   under the parent itself (none today). Match a parent's children by
+   `parent_area_id`, as in §1c. (`Gulshan` and `Mirpur` do work, because their
+   children's names contain the parent's.)
+3. **The throttle is probably one bucket for the whole site.** Behind nginx
+   without `trust proxy`, every visitor shares one IP, so "20 a minute" is 20
+   AI searches a minute across all users. Set `trust proxy` and have nginx
+   overwrite `X-Forwarded-For`.
+4. **Badges can contain wrong numbers.** `SEARCH_BADGES_PROMPT` allows
+   examples like "12% under budget"; models are unreliable at arithmetic. Either
+   compute such badges in code, or forbid numeric claims in the prompt. The app
+   labels badges as AI-written.
+5. **A query with no recognisable filter returns every verified listing.** The
+   app hides them (an unfiltered list isn't an answer), but the API could return
+   an empty list or a flag.
+6. **Optional:** accept `filters` in the body to skip the model, so the app
+   could let a seeker remove a chip without a new AI call.
+7. `llm-client.service.ts` still explains its 25 s budget as "Vercel's 30 s
+   maxDuration"; the API is on a VPS now (the budget is still sensible).
+
+## 1c. `area_id` on GET /v1/properties doesn't include sub-areas
+
+Observed against `https://api.homenetbd.com` on 2026-10-05:
+
+| Request | `total` |
+|---|---|
+| `?status=active&area_id=<Gulshan>` | **0** |
+| `…&area_id=<Gulshan-1>` | 1 |
+| `…&area_id=<Gulshan-2>` | 1 |
+| `…&area_id=<Mirpur>` / `<Uttara>` | **0** (listings are under Mirpur-10, Sector-7…) |
+
+Listings are attached to the sub-area, so filtering by the parent a seeker
+actually names ("Gulshan") finds nothing. The app works around it by sending
+one request per sub-area and merging (`getPropertiesInAreas`,
+`src/services/propertyApi.ts`). Better: make a parent `area_id` match its
+children as well. The app's merge de-duplicates by id, so it keeps working
+either way.
+
+Also: `GET /v1/areas` returns six test rows ("Postman Area …", "Postman Geo
+…") in production data. Anything that lists all areas, such as the area picker, can show them.
+
+---
+
+## 1d. POST /v1/properties/smart-listing — listing copy
+
+**Implemented on branch `grok_api_key`; the frontend does not call it yet.**
+It is not the free-text parser of §1: it takes the facts the owner already
+filled in and writes the copy.
+
+🔒 Body: `{ area_id, type, listing_type, price (BDT), area_size (sqft),
+bedrooms?, bathrooms?, notes? (≤1000) }`. Returns `{ headline, description_en,
+description_bn, amenity_tags[], price_analysis{ your_price_per_sqft,
+area_avg_price_per_sqft, sample_size, diff_pct, summary } }`. Throttle 20 a minute.
+
+Planned use: a "Write my description with AI" button on the listing wizard's
+description step — English and Bangla drafts the owner can edit, plus the price
+comparison.
+
+Findings:
+
+1. **The price comparison needs a minimum sample.** `docs/AI_LAYER.md` says no
+   estimate below 5 comparables. The code compares against any `sample_size`
+   above 0, so one other listing becomes "the area average" (today the whole
+   site has 13 active listings). Return `area_avg_price_per_sqft: null` below the
+   threshold; the prompt already handles null.
+2. The comparison uses the exact `area_id`, so it ignores a parent's sub-areas
+   (§1c).
+3. **No per-user daily quota**, as §1 requires: any signed-in user can spend model
+   calls up to the throttle. See finding 3 under §1b.
 
 ---
 
@@ -151,5 +268,19 @@ endpoint skip or repair a bad row rather than fail the whole page.
   that is also what a `POST`-only route returns, so the route's existence
   can't be confirmed from outside. Until it responds, the app shows "Quick
   listing isn't available right now" and offers the step-by-step form.
+- **§1b `POST /v1/properties/smart-search`:** built on the `grok_api_key`
+  branch, not yet deployed. The finder hides its "describe it" box until the web
+  build sets `EXPO_PUBLIC_AI_SEARCH_ENABLED`.
 - **`/v1/guides`** returns 404. The app has `GUIDES_API_ENABLED` off and uses
   its curated guides, validated with the same schema the API response will be.
+
+
+---
+
+## 6. Custom subtypes
+
+The listing wizard lets an owner type a subtype that is not in the list (**Other**) for residential, commercial and land. The API already accepts any text there, which is what the app relies on. Three small asks:
+
+1. **Cap and tidy `subtype` in `UpsertPropertyDto`.** It is a bare `@IsString()` today, so a client can send megabytes. The app sends at most 40 characters, single-spaced, with no angle brackets. Suggested: `@MaxLength(50)` and the same `trim` transform `title` has.
+2. **Parking stays restricted** to `covered`, `open` and `garage` (`property.rules.ts`). The app does not offer Other for parking. If you want custom parking subtypes later, relax that rule and tell the app, which has a one-line flag per category (`allowsCustomSubtype`).
+3. **Optional: list the subtypes in use.** `GET /v1/properties?subtype=` matches one value, and Browse has no subtype filter yet (only categories), so a custom subtype is found under its category. When Browse gets a subtype filter, a `GET /v1/properties/subtypes?type=` returning the distinct values in use would let it offer the custom ones too.

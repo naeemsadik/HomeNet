@@ -11,8 +11,9 @@ import {
   UserRound,
   Users,
   XCircle,
-} from "lucide-react-native";
-import { useCallback, useEffect, useState } from "react";
+} from "@/components/icons";
+import { useCallback, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   FlatList,
   Image,
@@ -36,6 +37,11 @@ import { UserRoleBadges } from "@/features/admin/components/UserRoleBadges";
 import { RoleAssignmentModal } from "@/features/admin/components/RoleAssignmentModal";
 import { ConfirmDialog } from "@/features/admin/components/ConfirmDialog";
 import { useUserRoles } from "@/features/admin/hooks/useUserRoles";
+import type { UserRole } from "@/features/admin/types/admin";
+import { toApiError } from "@/services/apiClient";
+
+/** The list endpoint may embed each user's roles; rows fall back to a per-user query only when it does not. */
+type DirectoryUser = UserProfile & { user_roles?: UserRole[] };
 
 function ProviderIcon({ provider }: { provider: string }) {
   switch (provider) {
@@ -49,8 +55,10 @@ function ProviderIcon({ provider }: { provider: string }) {
   }
 }
 
-function UserRolesLoader({ userId }: { userId: string }) {
-  const { data: roles } = useUserRoles(userId);
+function UserRolesLoader({ user }: { user: DirectoryUser }) {
+  // An empty id disables the query, so embedded roles cost no request.
+  const { data: fetchedRoles } = useUserRoles(user.user_roles ? "" : user.id);
+  const roles = user.user_roles ?? fetchedRoles;
   if (!roles || roles.length === 0) return null;
   return <UserRoleBadges roles={roles} />;
 }
@@ -58,10 +66,7 @@ function UserRolesLoader({ userId }: { userId: string }) {
 export function UsersScreen() {
   const userRoles = useAuthStore((s) => s.userRoles);
   const currentUser = useAuthStore((s) => s.user);
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [roleModalUser, setRoleModalUser] = useState<UserProfile | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<UserProfile | null>(null);
@@ -76,44 +81,21 @@ export function UsersScreen() {
       ),
   );
 
-  useEffect(() => {
-    if (currentUser) void loadUsers();
-  }, [currentUser?.id]);
+  const usersQuery = useQuery({
+    queryKey: ["users", "directory"],
+    queryFn: async (): Promise<DirectoryUser[]> => (await listUsers()).data ?? [],
+    enabled: !!currentUser,
+  });
+  const loading = usersQuery.isPending;
+  const error = usersQuery.error ? toApiError(usersQuery.error).message : null;
 
-  async function loadUsers() {
-    try {
-      setLoading(true);
-      setError(null);
-      if (!useAuthStore.getState().user) {
-        setError("You must be logged in to view users.");
-        return;
-      }
-      const result = await listUsers();
-      const data = result.data || [];
-      setUsers(data);
-      setFilteredUsers(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load users");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function handleSearch(text: string) {
-    setSearchQuery(text);
-    if (!text.trim()) {
-      setFilteredUsers(users);
-      return;
-    }
-    const q = text.toLowerCase();
-    setFilteredUsers(
-      users.filter(
-        (u) =>
-          u.full_name.toLowerCase().includes(q) ||
-          u.auth_identities.some((i) => i.email?.toLowerCase().includes(q)),
-      ),
-    );
-  }
+  const q = searchQuery.trim().toLowerCase();
+  const filteredUsers = (usersQuery.data ?? []).filter(
+    (u) =>
+      !q ||
+      u.full_name.toLowerCase().includes(q) ||
+      u.auth_identities.some((i) => i.email?.toLowerCase().includes(q)),
+  );
 
   function handleUserPress(user: UserProfile) {
     router.push(`/users/${user.id}` as never);
@@ -124,18 +106,17 @@ export function UsersScreen() {
     setDeleting(true);
     try {
       await deleteUser(deleteTarget.id);
-      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-      setFilteredUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      await queryClient.invalidateQueries({ queryKey: ["users", "directory"] });
       setDeleteTarget(null);
     } catch (err) {
-      notify("Error", err instanceof Error ? err.message : "Failed to delete user");
+      notify("Error", toApiError(err).message);
     } finally {
       setDeleting(false);
     }
   }
 
   const renderUser = useCallback(
-    ({ item }: { item: UserProfile }) => {
+    ({ item }: { item: DirectoryUser }) => {
       const primaryIdentity = item.auth_identities?.[0];
       const isVerified = !!primaryIdentity?.verified_at;
 
@@ -180,7 +161,7 @@ export function UsersScreen() {
           </Pressable>
 
           <View style={styles.userRolesRow}>
-            <UserRolesLoader userId={item.id} />
+            <UserRolesLoader user={item} />
           </View>
 
           {canManageRoles ? (
@@ -229,7 +210,7 @@ export function UsersScreen() {
         <View style={styles.searchBox}>
           <Search color={colors.muted} size={16} />
           <TextInput
-            onChangeText={handleSearch}
+            onChangeText={setSearchQuery}
             placeholder="Search by name or email..."
             placeholderTextColor="#899790"
             style={styles.searchInput}

@@ -1,4 +1,4 @@
-import { Camera, Trash2, Video } from "lucide-react-native";
+import { Camera, Trash2, Video } from "@/components/icons";
 import { ActivityIndicator, Image, Pressable, Text, TextInput, View } from "react-native";
 import { webPointer } from "@/theme";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";

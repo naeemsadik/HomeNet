@@ -900,10 +900,18 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 8,
   },
+  confirmVisitBtnDisabled: {
+    backgroundColor: colorTokens.surfaceSunken,
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
+  },
   confirmVisitText: {
     color: colorTokens.onBrand,
     fontSize: 14,
     fontFamily: fonts.bold,
+  },
+  confirmVisitTextDisabled: {
+    color: colorTokens.subtle,
   },
   modalDivider: {
     flexDirection: "row",
@@ -932,9 +940,16 @@ export const styles = StyleSheet.create({
     borderColor: colorTokens.divider,
     backgroundColor: colorTokens.surface,
   },
+  modalCallBtnDisabled: {
+    backgroundColor: colorTokens.surfaceSunken,
+    borderColor: colorTokens.divider,
+  },
   modalCallBtnText: {
     fontSize: 14,
     fontFamily: fonts.bold,
     color: colorTokens.ink,
+  },
+  modalCallBtnTextDisabled: {
+    color: colorTokens.subtle,
   },
 });

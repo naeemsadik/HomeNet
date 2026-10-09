@@ -1,7 +1,7 @@
 import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import { useEffect, useRef } from "react";
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { AlertTriangle, Trash2, type LucideIcon } from "lucide-react-native";
+import { AlertTriangle, Trash2, type LucideIcon } from "@/components/icons";
 import { colorTokens, fontTokens, radiusTokens } from "@/theme";
 
 interface ConfirmDialogProps {

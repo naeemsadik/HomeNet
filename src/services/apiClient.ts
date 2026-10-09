@@ -56,11 +56,11 @@ export function toApiError(error: unknown): ApiError {
   return new ApiError(String(error));
 }
 
-export const VERCEL_API_BASE_URL = "https://homenet-api.vercel.app";
+export const PRODUCTION_API_BASE_URL = "https://api.homenetbd.com";
 export const LOCAL_API_BASE_URL = "http://localhost:3000/api";
 
 let apiBaseUrl = (
-  process.env.EXPO_PUBLIC_API_BASE_URL || VERCEL_API_BASE_URL
+  process.env.EXPO_PUBLIC_API_BASE_URL || PRODUCTION_API_BASE_URL
 ).replace(/\/$/, "");
 
 export function getApiBaseUrl(): string {
@@ -124,7 +124,7 @@ apiClient.interceptors.response.use(
       | (InternalAxiosRequestConfig & { _retry?: boolean; _fallbackTried?: boolean })
       | undefined;
 
-    // Auto-failover: If connecting to localhost failed because port 3000 is unavailable, switch to Vercel
+    // Auto-failover: if localhost:3000 is unreachable, switch to the production API.
     const isNetworkError =
       !error.response &&
       (error.code === "ECONNREFUSED" ||
@@ -140,17 +140,17 @@ apiClient.interceptors.response.use(
 
     if (isNetworkError && isTargetingLocalhost && !originalRequest?._fallbackTried) {
       if (__DEV__) console.warn(
-        `[apiClient] Local server at ${apiBaseUrl} is unavailable. Switching to Vercel endpoint: ${VERCEL_API_BASE_URL}`,
+        `[apiClient] Local server at ${apiBaseUrl} is unavailable. Switching to ${PRODUCTION_API_BASE_URL}`,
       );
-      setApiBaseUrl(VERCEL_API_BASE_URL);
+      setApiBaseUrl(PRODUCTION_API_BASE_URL);
 
       if (originalRequest) {
         originalRequest._fallbackTried = true;
-        originalRequest.baseURL = VERCEL_API_BASE_URL;
+        originalRequest.baseURL = PRODUCTION_API_BASE_URL;
         if (originalRequest.url?.includes("localhost:3000")) {
           originalRequest.url = originalRequest.url.replace(
             /http:\/\/(localhost|127\.0\.0\.1):3000/,
-            VERCEL_API_BASE_URL,
+            PRODUCTION_API_BASE_URL,
           );
         }
         return apiClient(originalRequest);

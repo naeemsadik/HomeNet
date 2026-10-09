@@ -1,4 +1,4 @@
-import { Eye, EyeOff, AlertCircle, type LucideIcon } from "lucide-react-native";
+import { Eye, EyeOff, AlertCircle, type LucideIcon } from "@/components/icons";
 import React, { useRef, useState, useEffect } from "react";
 import {
   Animated,

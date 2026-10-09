@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { ShieldCheck } from "lucide-react-native";
+import { ShieldCheck } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { useRoles } from "../hooks/useRoles";
 import { PermissionEditorModal } from "../components/PermissionEditorModal";

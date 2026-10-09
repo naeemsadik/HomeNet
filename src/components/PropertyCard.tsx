@@ -11,11 +11,11 @@ import {
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck } from "lucide-react-native";
+import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck } from "@/components/icons";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
-import { formatPrice } from "@/lib/format";
+import { useTranslation, formatLocalizedPrice, formatLocalizedNumber, type SupportedLanguage } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { useSavedStore } from "@/stores/savedStore";
 
@@ -35,25 +35,28 @@ export interface PropertyCardProps {
    */
   variant?: PropertyCardVariant;
   saved?: boolean;
-  onSave?: () => void;
-  onPress?: () => void;
+  /** Receives the card's property, so a list can pass one stable handler to every card. */
+  onSave?: (property: Property) => void;
+  onPress?: (property: Property) => void;
   imageHeight?: number;
   width?: number;
   style?: StyleProp<ViewStyle>;
 }
 
-function readSpecs(property: Property) {
+function readSpecs(property: Property, lang: SupportedLanguage) {
   const amenities = (property.amenities ?? {}) as Record<string, unknown>;
   const num = (v: unknown) => {
     const n = Number(v);
     return Number.isFinite(n) && n > 0 ? n : null;
   };
+  const bedsVal = num(property.bedrooms ?? amenities.bedrooms);
+  const bathsVal = num(property.bathrooms ?? amenities.bathrooms);
   return {
     // `land` and `parking` carry neither, so both legitimately come back null.
-    beds: num(property.bedrooms ?? amenities.bedrooms),
-    baths: num(property.bathrooms ?? amenities.bathrooms),
+    beds: bedsVal !== null ? formatLocalizedNumber(bedsVal, lang) : null,
+    baths: bathsVal !== null ? formatLocalizedNumber(bathsVal, lang) : null,
     area: property.area_size
-      ? `${property.area_size.toLocaleString("en-BD")} ${property.area_unit || "sqft"}`
+      ? `${formatLocalizedNumber(property.area_size.toLocaleString("en-BD"), lang)} ${property.area_unit || "sqft"}`
       : null,
   };
 }
@@ -68,6 +71,7 @@ function PropertyCardComponent({
   width,
   style,
 }: PropertyCardProps) {
+  const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
 
   const original =
@@ -78,15 +82,15 @@ function PropertyCardComponent({
   const location =
     [property.area?.name, property.area?.city].filter(Boolean).join(", ") ||
     property.address ||
-    "Location unavailable";
+    t("propertyCard.locationUnavailable");
 
   const isRent = property.listing_type === "rent";
-  const price = formatPrice(property.price, property.price_currency || "BDT");
-  const specs = readSpecs(property);
+  const price = formatLocalizedPrice(property.price, property.price_currency || "BDT", language);
+  const specs = readSpecs(property, language);
   const isFeature = variant === "feature";
 
   const open = () => {
-    if (onPress) onPress();
+    if (onPress) onPress(property);
     else if (property.id) router.push(`/property/${property.id}` as never);
   };
 
@@ -101,7 +105,7 @@ function PropertyCardComponent({
     <View style={styles.badgeRow} pointerEvents="none">
       <View style={styles.verifiedBadge}>
         <ShieldCheck color={colorTokens.info} size={13} strokeWidth={2.4} />
-        <Text style={styles.verifiedText}>Verified</Text>
+        <Text style={styles.verifiedText}>{t("propertyCard.verified")}</Text>
       </View>
     </View>
   ) : null;
@@ -114,7 +118,7 @@ function PropertyCardComponent({
       e.stopPropagation();
     }
     if (onSave) {
-      onSave();
+      onSave(property);
     } else if (property) {
       void useSavedStore.getState().toggleSaved(property);
     }
@@ -128,7 +132,11 @@ function PropertyCardComponent({
   const saveButton = (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={isCardSaved ? `Remove ${property.title} from saved` : `Save ${property.title}`}
+      accessibilityLabel={
+        isCardSaved
+          ? t("propertyCard.removeFromSaved", { title: property.title })
+          : t("propertyCard.saveProperty", { title: property.title })
+      }
       onPress={handleSave}
       style={({ hovered, pressed }: any) => [
         styles.saveButton,
@@ -148,7 +156,7 @@ function PropertyCardComponent({
   const placeholder = (
     <View style={styles.placeholder}>
       <LandPlot color={colorTokens.subtle} size={30} />
-      <Text style={styles.placeholderText}>No photo provided</Text>
+      <Text style={styles.placeholderText}>{t("propertyCard.noPhoto")}</Text>
     </View>
   );
 
@@ -158,7 +166,7 @@ function PropertyCardComponent({
       <View style={[styles.shell, width ? { width } : null, style]}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${property.title}, ${isRent ? "for rent" : "for sale"}, ${price}`}
+          accessibilityLabel={`${property.title}, ${isRent ? t("propertyCard.forRent") : t("propertyCard.forSale")}, ${price}`}
           onPress={open}
           style={({ hovered, pressed }: any) => [
             styles.card,
@@ -173,6 +181,7 @@ function PropertyCardComponent({
               <>
                 <Image
                   source={{ uri: photo }}
+                  accessibilityLabel={property.title}
                   style={StyleSheet.absoluteFill}
                   contentFit="cover"
                   cachePolicy="memory-disk"
@@ -194,7 +203,7 @@ function PropertyCardComponent({
                   <Text numberOfLines={2} style={styles.featureTitle}>{property.title}</Text>
                   <Text style={styles.featurePrice}>
                     {price}
-                    {isRent ? <Text style={styles.featurePriceSuffix}>/mo</Text> : null}
+                    {isRent ? <Text style={styles.featurePriceSuffix}>{t("propertyCard.perMonth")}</Text> : null}
                   </Text>
                 </View>
               </>
@@ -216,7 +225,7 @@ function PropertyCardComponent({
     <View style={[styles.shell, width ? { width } : null, style]}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${property.title}, ${isRent ? "for rent" : "for sale"}, ${price}`}
+        accessibilityLabel={`${property.title}, ${isRent ? t("propertyCard.forRent") : t("propertyCard.forSale")}, ${price}`}
         onPress={open}
         style={({ hovered, pressed }: any) => [
           styles.card,
@@ -229,6 +238,7 @@ function PropertyCardComponent({
           {photo ? (
             <Image
               source={{ uri: photo }}
+              accessibilityLabel={property.title}
               style={styles.fill}
               contentFit="cover"
               cachePolicy="memory-disk"
@@ -239,14 +249,14 @@ function PropertyCardComponent({
           )}
           {verifiedBadge}
           <View style={styles.intentTag}>
-            <Text style={styles.intentText}>{isRent ? "For rent" : "For sale"}</Text>
+            <Text style={styles.intentText}>{isRent ? t("propertyCard.forRent") : t("propertyCard.forSale")}</Text>
           </View>
         </View>
 
         <View style={styles.body}>
           <Text style={styles.price}>
             {price}
-            {isRent ? <Text style={styles.priceSuffix}>/mo</Text> : null}
+            {isRent ? <Text style={styles.priceSuffix}>{t("propertyCard.perMonth")}</Text> : null}
           </Text>
 
           <Text numberOfLines={2} style={styles.title}>{property.title}</Text>

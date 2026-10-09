@@ -24,7 +24,13 @@ module.exports = defineConfig([
       // src/lib/zod.ts configures Zod for our CSP before any schema exists.
       "no-restricted-imports": [
         "error",
-        { paths: [{ name: "zod", message: 'Import { z } from "@/lib/zod" so the CSP-safe config applies.' }] },
+        {
+          paths: [
+            { name: "zod", message: 'Import { z } from "@/lib/zod" so the CSP-safe config applies.' },
+            // The full icon library is ~1 MB of the web bundle (Metro does not tree-shake).
+            { name: "lucide-react-native", message: 'Import icons from "@/components/icons".' },
+          ],
+        },
       ],
       // React Compiler rules that eslint-config-expo enables as errors. The
       // existing code predates them (e.g. `useRef(new Animated.Value()).current`),

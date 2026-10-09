@@ -21,7 +21,7 @@ import {
   Trash2,
   User,
   Zap,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -43,8 +43,11 @@ import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDra
 import { Footer } from "@/components/Footer";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
-import { cdnImage } from "@/lib/cloudinaryImage";
+import { cdnImage } from "@/lib/cloudinaryImage";
+
 import { LiveText } from "@/components/LiveText";
+import { NoTranslateText } from "@/components/NoTranslateText";
+import { formatLocalizedNumber, translateListingStatus, useTranslation } from "@/i18n";
 
 export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
 
@@ -68,6 +71,7 @@ interface ListingItemData {
 
 export function MyPropertiesScreen() {
   const { isPhone, isTablet } = useResponsive();
+  const { t, language } = useTranslation();
   const [activeFilter, setActiveFilter] = useState<ListingFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -128,8 +132,8 @@ export function MyPropertiesScreen() {
   // Sidebar items
   const logout = useAuthStore((s) => s.logout);
   const handleLogout = async () => {
-    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
-      confirmLabel: "Log Out",
+    const confirmed = await confirmAction(t("dashboard.tabs.logout"), "Are you sure you want to log out of your account?", {
+      confirmLabel: t("dashboard.tabs.logout"),
       destructive: true,
     });
     if (!confirmed) return;
@@ -146,30 +150,34 @@ export function MyPropertiesScreen() {
     danger?: boolean;
     badgeCount?: number;
   }[] = [
-    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
-    { key: "listings", label: "My Listings", icon: Building2, href: "/my-properties", active: true },
-    { key: "create", label: "Create Property", icon: PlusCircle, href: "/property/create" },
-    { key: "verification", label: "Verification", icon: ShieldCheck, href: "/verification" },
-    { key: "boost", label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights", label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics", label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments", label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile", label: "Profile", icon: User, href: "/seller/profile" },
-    { key: "help", label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout", label: "Logout", icon: LogOut, danger: true, href: "/" },
+    { key: "dashboard", label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
+    { key: "listings", label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties", active: true },
+    { key: "create", label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
+    { key: "verification", label: t("dashboard.tabs.verification"), icon: ShieldCheck, href: "/verification" },
+    { key: "boost", label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
+    { key: "insights", label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "analytics", label: t("dashboard.tabs.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
+    { key: "payments", label: t("dashboard.tabs.payments"), icon: CreditCard, href: "/seller?tab=payments" },
+    { key: "profile", label: t("dashboard.tabs.profile"), icon: User, href: "/seller/profile" },
+    { key: "help", label: t("dashboard.tabs.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
+    { key: "logout", label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
   ];
 
   // Had no web branch, so deleting a listing was impossible on web.
   const handleDelete = async (id: string, title: string) => {
-    const confirmed = await confirmAction("Delete Property", `Are you sure you want to delete "${title}"?`, {
-      confirmLabel: "Delete",
-      destructive: true,
-    });
+    const confirmed = await confirmAction(
+      t("seller.deleteConfirmTitle"),
+      t("seller.deleteConfirmMessage", { title }),
+      {
+        confirmLabel: t("seller.actions.delete"),
+        destructive: true,
+      }
+    );
     if (!confirmed) return;
     try {
       await deleteMutation.mutateAsync(id);
     } catch (deleteError) {
-      notify("Delete failed", deleteError instanceof Error ? deleteError.message : "Request failed.");
+      notify(t("seller.deleteFailed"), deleteError instanceof Error ? deleteError.message : "Request failed.");
     }
   };
 
@@ -181,7 +189,7 @@ export function MyPropertiesScreen() {
           <View style={styles.sidebarHeader}>
             <Brand />
             <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
+              <Text style={styles.sellerRoleText}>{t("dashboard.sellerDashboard")}</Text>
             </View>
           </View>
 
@@ -236,7 +244,7 @@ export function MyPropertiesScreen() {
           onPressMenu={() => setMobileDrawerOpen(true)}
           onSearchQueryChange={setSearchQuery}
           searchQuery={searchQuery}
-          title="My Listings"
+          title={t("seller.myListings")}
         />
 
         {/* Listings Body */}
@@ -253,12 +261,12 @@ export function MyPropertiesScreen() {
               <View style={styles.pillsRow}>
                 {(
                   [
-                    ["all", "All", counts.all],
-                    ["active", "Active", counts.active],
-                    ["draft", "Draft", counts.draft],
-                    ["pending", "Pending", counts.pending],
-                    ["sold", "Sold", counts.sold],
-                    ["archived", "Archived", counts.archived],
+                    ["all", t("seller.filters.all"), counts.all],
+                    ["active", t("seller.filters.active"), counts.active],
+                    ["draft", t("seller.filters.draft"), counts.draft],
+                    ["pending", t("seller.filters.pending"), counts.pending],
+                    ["sold", t("seller.filters.sold"), counts.sold],
+                    ["archived", t("seller.filters.archived"), counts.archived],
                   ] as const
                 ).map(([key, label, count]) => {
                   const isSelected = activeFilter === key;
@@ -278,7 +286,7 @@ export function MyPropertiesScreen() {
                       </Text>
                       <View style={[styles.pillCountBg, isSelected && styles.pillCountBgActive]}>
                         <LiveText style={[styles.pillCountText, isSelected && styles.pillCountTextActive]}>
-                          {count}
+                          {formatLocalizedNumber(count, language)}
                         </LiveText>
                       </View>
                     </Pressable>
@@ -290,7 +298,7 @@ export function MyPropertiesScreen() {
             {/* Add Property Primary Button */}
             <AppLink href="/property/create" style={styles.addPropertyBtn}>
               <Plus color={colorTokens.onBrand} size={16} />
-              <Text style={styles.addPropertyBtnText}>Add new property</Text>
+              <Text style={styles.addPropertyBtnText}>{t("seller.addNewProperty")}</Text>
             </AppLink>
           </View>
 
@@ -299,36 +307,36 @@ export function MyPropertiesScreen() {
             {isLoading ? (
               <View style={styles.emptyContainer}>
                 <ActivityIndicator color="#04cf92" size="large" />
-                <Text style={styles.emptySub}>Loading your listings...</Text>
+                <Text style={styles.emptySub}>{t("dashboard.loadingListings")}</Text>
               </View>
             ) : error ? (
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyTitle}>Could not load listings</Text>
+                <Text style={styles.emptyTitle}>{t("dashboard.couldNotLoadListings")}</Text>
                 <Text style={styles.emptySub}>{error instanceof Error ? error.message : "Request failed."}</Text>
                 <Pressable onPress={() => void refetch()} style={styles.retryButton}>
                   <RotateCcw color={colorTokens.onBrand} size={16} />
-                  <Text style={styles.retryText}>Retry</Text>
+                  <Text style={styles.retryText}>{t("dashboard.retry")}</Text>
                 </Pressable>
               </View>
             ) : !isPhone ? (
               <View style={styles.table}>
                 {/* Table Header */}
                 <View style={styles.tableHeaderRow}>
-                  <Text style={[styles.thCell, { flex: 2.2 }]}>Property</Text>
-                  <Text style={[styles.thCell, { flex: 1 }]}>Type</Text>
-                  <Text style={[styles.thCell, { flex: 1.1 }]}>Price</Text>
-                  <Text style={[styles.thCell, { flex: 1.1 }]}>Status</Text>
-                  <Text style={[styles.thCell, { flex: 1 }]}>AI Value</Text>
-                  <Text style={[styles.thCell, { flex: 1.5 }]}>Performance</Text>
-                  <Text style={[styles.thCell, { width: 60, textAlign: "right" }]}>Actions</Text>
+                  <Text style={[styles.thCell, { flex: 2.2 }]}>{t("admin.columns.property")}</Text>
+                  <Text style={[styles.thCell, { flex: 1 }]}>{t("admin.columns.type")}</Text>
+                  <Text style={[styles.thCell, { flex: 1.1 }]}>{t("admin.columns.price")}</Text>
+                  <Text style={[styles.thCell, { flex: 1.1 }]}>{t("admin.columns.status")}</Text>
+                  <Text style={[styles.thCell, { flex: 1 }]}>{t("admin.columns.aiValue")}</Text>
+                  <Text style={[styles.thCell, { flex: 1.5 }]}>{t("admin.columns.performance")}</Text>
+                  <Text style={[styles.thCell, { width: 60, textAlign: "right" }]}>{t("admin.columns.actions")}</Text>
                 </View>
 
                 {/* Table Data Rows */}
                 {filteredListings.length === 0 ? (
                   <View style={styles.emptyContainer}>
                     <Building2 color="#5C6B66" size={40} />
-                    <Text style={styles.emptyTitle}>No listings found</Text>
-                    <Text style={styles.emptySub}>No properties match the selected filter.</Text>
+                    <Text style={styles.emptyTitle}>{t("dashboard.noListingsFound")}</Text>
+                    <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
                   </View>
                 ) : (
                   filteredListings.map((item) => (
@@ -336,7 +344,7 @@ export function MyPropertiesScreen() {
                       {/* Property Info (Thumbnail, Title, Verified, Boost, Location) */}
                       <View style={[styles.tdCell, { flex: 2.2, flexDirection: "row", gap: 12, alignItems: "center" }]}>
                         {item.imageUrl ? (
-                          <Image source={{ uri: item.imageUrl }} style={styles.propThumb} />
+                          <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.propThumb} />
                         ) : (
                           <View style={[styles.propThumb, styles.imagePlaceholder]}>
                             <Building2 color="#6B7D78" size={20} />
@@ -362,14 +370,14 @@ export function MyPropertiesScreen() {
 
                       {/* Price Column */}
                       <View style={[styles.tdCell, { flex: 1.1 }]}>
-                        <Text style={styles.priceText}>{item.price}</Text>
+                        <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
                       </View>
 
                       {/* Status Column */}
                       <View style={[styles.tdCell, { flex: 1.1, gap: 4 }]}>
                         <View style={[styles.statusBadge, getStatusStyle(item.status).bgStyle]}>
                           <Text style={[styles.statusBadgeText, getStatusStyle(item.status).textStyle]}>
-                            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                            {translateListingStatus(item.status, language)}
                           </Text>
                         </View>
                         {item.boostText ? (
@@ -418,15 +426,15 @@ export function MyPropertiesScreen() {
                 {filteredListings.length === 0 ? (
                   <View style={styles.emptyContainer}>
                     <Building2 color="#5C6B66" size={40} />
-                    <Text style={styles.emptyTitle}>No listings found</Text>
-                    <Text style={styles.emptySub}>No properties match the selected filter.</Text>
+                    <Text style={styles.emptyTitle}>{t("dashboard.noListingsFound")}</Text>
+                    <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
                   </View>
                 ) : (
                   filteredListings.map((item) => (
                     <View key={item.id} style={styles.mobileCard}>
                       <View style={styles.mobileCardHead}>
                         {item.imageUrl ? (
-                          <Image source={{ uri: item.imageUrl }} style={styles.mobileThumb} />
+                          <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.mobileThumb} />
                         ) : (
                           <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
                             <Building2 color="#6B7D78" size={20} />
@@ -441,7 +449,7 @@ export function MyPropertiesScreen() {
                           </View>
                           <View style={[styles.statusBadge, getStatusStyle(item.status).bgStyle]}>
                             <Text style={[styles.statusBadgeText, getStatusStyle(item.status).textStyle]}>
-                              {item.status}
+                              {translateListingStatus(item.status, language)}
                             </Text>
                           </View>
                         </View>
@@ -450,7 +458,7 @@ export function MyPropertiesScreen() {
 
                     <View style={styles.mobileCardBody}>
                       <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
-                        <Text style={styles.priceText}>{item.price}</Text>
+                        <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                           <Sparkles color="#04cf92" size={14} />
                           <Text style={styles.aiValueText}>{item.aiValue}</Text>
@@ -475,15 +483,15 @@ export function MyPropertiesScreen() {
                       <View style={styles.mobileActionsRow}>
                         <AppLink href={`/property/${item.id}`} style={styles.mobileActionBtn}>
                           <Eye color="#5C6B66" size={14} />
-                          <Text style={styles.mobileActionText}>View</Text>
+                          <Text style={styles.mobileActionText}>{t("seller.actions.view")}</Text>
                         </AppLink>
                         <AppLink href={`/property/edit?id=${item.id}`} style={styles.mobileActionBtn}>
                           <Edit color="#04cf92" size={14} />
-                          <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>Edit</Text>
+                          <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
                         </AppLink>
                         <Pressable onPress={() => handleDelete(item.id, item.title)} style={styles.mobileActionBtn}>
                           <Trash2 color="#D4183D" size={14} />
-                          <Text style={[styles.mobileActionText, { color: "#D4183D" }]}>Delete</Text>
+                          <Text style={[styles.mobileActionText, { color: "#D4183D" }]}>{t("seller.actions.delete")}</Text>
                         </Pressable>
                       </View>
                     </View>
@@ -498,7 +506,7 @@ export function MyPropertiesScreen() {
                 style={styles.loadMoreButton}
               >
                 {isFetchingNextPage ? <ActivityIndicator color="#04cf92" size="small" /> : null}
-                <Text style={styles.loadMoreText}>{isFetchingNextPage ? "Loading..." : "Load more"}</Text>
+                <Text style={styles.loadMoreText}>{isFetchingNextPage ? t("dashboard.loading") : t("dashboard.loadMore")}</Text>
               </Pressable>
             ) : null}
           </View>

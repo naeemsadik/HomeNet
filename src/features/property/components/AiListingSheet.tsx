@@ -6,7 +6,7 @@ import {
   RotateCcw,
   Sparkles,
   X,
-} from "lucide-react-native";
+} from "@/components/icons";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -31,6 +31,9 @@ import { useGeneratePropertyDescription } from "../hooks/useGeneratePropertyDesc
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 type SheetState = "idle" | "loading" | "preview";
+
+/** The API's cap on a description (docs/BACKEND_REQUIREMENTS.md §1). */
+const MAX_DESCRIPTION_LENGTH = 2000;
 
 interface AiListingSheetProps {
   visible: boolean;
@@ -258,6 +261,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                       accessibilityHint="Type your property details in plain text"
                       accessibilityLabel="Property description input"
                       editable={state !== "loading"}
+                      maxLength={MAX_DESCRIPTION_LENGTH}
                       multiline
                       numberOfLines={6}
                       onChangeText={setDescription}

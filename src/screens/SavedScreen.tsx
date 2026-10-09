@@ -1,7 +1,6 @@
-import { Bookmark, Heart } from "lucide-react-native";
-import { useEffect, useMemo } from "react";
+import { Bookmark, Heart } from "@/components/icons";
+import { useCallback, useEffect, useMemo } from "react";
 import {
-  ActivityIndicator,
   StyleSheet,
   Text,
   View,
@@ -16,10 +15,14 @@ import { colorTokens, fonts } from "@/theme";
 import { useSavedStore } from "@/stores/savedStore";
 import { useAuthStore } from "@/stores/authStore";
 import type { ApiResponse } from "@/types/api";
-import type { Property } from "@/features/property/types/property";
+import type { Property } from "@/features/property/types/property";
+
 import { LiveText } from "@/components/LiveText";
+import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
+import { useTranslation, formatLocalizedNumber } from "@/i18n";
 
 export function SavedScreen() {
+  const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
@@ -103,14 +106,18 @@ export function SavedScreen() {
     },
   });
 
-  const handleToggleSaved = (id: string | number) => {
-    const idStr = String(id);
-    if (user) {
-      unsaveMutation.mutate(idStr);
-    } else {
-      void useSavedStore.getState().removeSaved(idStr);
-    }
-  };
+  const { mutate: unsave } = unsaveMutation;
+  const handleUnsaveCard = useCallback(
+    (property: Property) => {
+      const idStr = String(property.id);
+      if (user) {
+        unsave(idStr);
+      } else {
+        void useSavedStore.getState().removeSaved(idStr);
+      }
+    },
+    [user, unsave],
+  );
 
   return (
     <AppChrome active="saved">
@@ -119,17 +126,17 @@ export function SavedScreen() {
       ───────────────────────────────────────────────────────────── */}
       <View style={[styles.headerRow, isPhone && styles.headerRowPhone]}>
         <View style={styles.headerTitleWrap}>
-          <Text style={styles.pageHeading}>Saved</Text>
+          <Text style={styles.pageHeading}>{t("saved.title")}</Text>
           <Text style={styles.pageSubtitle}>
             {!user && savedIds.length > 0
-              ? "Saved locally on this device · Sign in to sync across devices"
-              : "Your saved properties & bookmarks"}
+              ? t("saved.guestSubtitle")
+              : t("saved.subtitle")}
           </Text>
         </View>
 
         <View style={styles.headerActions}>
           <AppLink href="/buy" style={styles.exploreLink}>
-            <Text style={styles.exploreLinkText}>Browse more homes</Text>
+            <Text style={styles.exploreLinkText}>{t("saved.browseMore")}</Text>
           </AppLink>
         </View>
       </View>
@@ -141,26 +148,25 @@ export function SavedScreen() {
         <View style={styles.sectionHeader}>
           <View style={styles.titleWithIconRow}>
             <Bookmark color="#0B1A17" size={20} />
-            <LiveText style={styles.sectionTitle}>Saved properties ({savedListings.length})</LiveText>
+            <LiveText style={styles.sectionTitle}>
+              {savedListings.length === 1
+                ? t("saved.singleCount", { count: formatLocalizedNumber(1, language) })
+                : t("saved.count", { count: formatLocalizedNumber(savedListings.length, language) })}
+            </LiveText>
           </View>
         </View>
 
         {isLoading && savedListings.length === 0 ? (
-          <View style={{ padding: 48, alignItems: "center" }}>
-            <ActivityIndicator size="large" color="#04cf92" />
-            <Text style={{ marginTop: 12, color: "#5C6B66", fontFamily: fonts.medium }}>
-              Loading saved properties...
-            </Text>
-          </View>
+          <PropertySkeletonFeed />
         ) : savedListings.length === 0 ? (
           <View style={styles.emptySavedBox}>
             <Heart color="#899790" size={48} />
-            <Text style={styles.emptySavedTitle}>No saved properties yet</Text>
+            <Text style={styles.emptySavedTitle}>{t("saved.emptyTitle")}</Text>
             <Text style={styles.emptySavedText}>
-              Properties you save while browsing will appear here for easy comparison.
+              {t("saved.emptySubtitle")}
             </Text>
             <AppLink href="/buy" style={styles.browseButton}>
-              <Text style={styles.browseButtonText}>Explore properties</Text>
+              <Text style={styles.browseButtonText}>{t("saved.browseProperties")}</Text>
             </AppLink>
           </View>
         ) : (
@@ -171,7 +177,7 @@ export function SavedScreen() {
                 property={prop}
                 imageHeight={isPhone ? 180 : 220}
                 saved={true}
-                onSave={() => handleToggleSaved(prop.id)}
+                onSave={handleUnsaveCard}
                 style={[styles.savedCardItem, isPhone && styles.savedCardItemPhone]}
               />
             ))}

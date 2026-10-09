@@ -56,34 +56,9 @@ export default function Root({ children }: PropsWithChildren) {
             outline-style: none !important;
             box-shadow: none !important;
           }
-
-          /* ─── Google Translate UI Cleanup ──────────────────────────────── */
-          .goog-te-banner-frame.skiptranslate,
-          .goog-te-banner-frame,
-          .goog-te-balloon-frame,
-          #goog-gt-tt,
-          .goog-tooltip,
-          .goog-tooltip:hover {
-            display: none !important;
-            visibility: hidden !important;
-          }
-          body {
-            top: 0px !important;
-            position: static !important;
-          }
-          .skiptranslate iframe,
-          iframe.skiptranslate {
-            /* Google's own translate bar and floating button; the navbar has
-               the language toggle. The button otherwise covers the logo. */
-            display: none !important;
-          }
-          #google_translate_element {
-            display: none !important;
-          }
         ` }} />
       </head>
       <body>
-        <div id="google_translate_element" style={{ display: "none" }} />
         {children}
       </body>
     </html>

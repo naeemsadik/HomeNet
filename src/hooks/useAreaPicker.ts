@@ -1,11 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { Area } from "@/types/api";
-import { fetchAreaChildren, fetchAreas } from "@/services/areaApi";
+import { fetchAreaChildren } from "@/services/areaApi";
 import { toApiError } from "@/services/apiClient";
+import { filterAreas, useAllAreas } from "@/hooks/useAllAreas";
 
 export interface UseAreaPickerOptions {
   initialCity?: string;
-  limit?: number;
+  /** Fetch only while the picker is open; cached lists still show at once. */
+  enabled?: boolean;
 }
 
 const availableCities = [
@@ -21,44 +24,40 @@ const availableCities = [
   "Gazipur",
 ];
 
+/**
+ * City, search and top-level filtering happen on the shared all-areas list
+ * (see useAllAreas for why the API is not asked to filter). Drilling into an
+ * area uses its children endpoint, which the API caches per area.
+ */
 export function useAreaPicker(options: UseAreaPickerOptions = {}) {
-  const { initialCity, limit = 100 } = options;
+  const { initialCity, enabled = true } = options;
   const [selectedCity, setSelectedCity] = useState<string | null>(initialCity || null);
   const [navPath, setNavPath] = useState<Area[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [areas, setAreas] = useState<Area[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const currentParentId = navPath.at(-1)?.id;
+  const search = searchQuery.trim();
+  const showingChildren = Boolean(currentParentId) && !search;
 
-  const loadAreas = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      if (currentParentId && !searchQuery.trim()) {
-        const response = await fetchAreaChildren(currentParentId);
-        setAreas(response.data ?? []);
-      } else {
-        const response = await fetchAreas({
-          city: selectedCity || undefined,
-          search: searchQuery.trim() || undefined,
-          limit,
-        });
-        const items = response.data?.items ?? [];
-        setAreas(searchQuery.trim() ? items : items.filter((area) => !area.parent_area_id));
-      }
-    } catch (requestError) {
-      setAreas([]);
-      setError(toApiError(requestError).message);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentParentId, limit, searchQuery, selectedCity]);
+  const allAreas = useAllAreas({ enabled });
+  const children = useQuery({
+    queryKey: ["areas", "children", currentParentId],
+    queryFn: async () => (await fetchAreaChildren(currentParentId as string)).data ?? [],
+    enabled: enabled && showingChildren,
+  });
 
-  useEffect(() => {
-    const timer = setTimeout(loadAreas, searchQuery ? 300 : 0);
-    return () => clearTimeout(timer);
-  }, [loadAreas, searchQuery]);
+  const areas = useMemo(
+    () =>
+      showingChildren
+        ? children.data ?? []
+        : filterAreas(allAreas.data?.items ?? [], {
+            city: selectedCity,
+            search,
+            topLevelOnly: !search,
+          }),
+    [showingChildren, children.data, allAreas.data, selectedCity, search],
+  );
+
+  const active = showingChildren ? children : allAreas;
 
   const drillDown = useCallback((area: Area) => {
     setSearchQuery("");
@@ -93,8 +92,8 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
     searchQuery,
     setSearchQuery,
     areas,
-    loading,
-    error,
-    refresh: loadAreas,
+    loading: active.isLoading,
+    error: active.error ? toApiError(active.error).message : null,
+    refresh: () => void active.refetch(),
   };
 }
