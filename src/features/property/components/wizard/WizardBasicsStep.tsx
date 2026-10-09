@@ -1,10 +1,16 @@
-import { Check } from "@/components/icons";
+import { Check, Plus } from "@/components/icons";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 import { webPointer } from "@/theme";
 import type { PropertyType } from "@/types/api";
-import { PROPERTY_TYPE_CONFIGS, type PropertyTypeConfig } from "../../constants/propertyCategories";
+import {
+  CUSTOM_SUBTYPE_MAX_LENGTH,
+  PROPERTY_TYPE_CONFIGS,
+  cleanCustomSubtype,
+  findKnownSubtype,
+  type PropertyTypeConfig,
+} from "../../constants/propertyCategories";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
 
@@ -13,6 +19,24 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
   const { isPhone } = useResponsive();
   const store = usePropertyWizardStore();
   const [descFocused, setDescFocused] = useState(false);
+
+  // "Other": the owner types a subtype that isn't listed. It is also shown when
+  // a link or the AI already supplied one the list doesn't have.
+  const [otherPicked, setOtherPicked] = useState(false);
+  const isListed = activeTypeConfig.subtypes.some((sub) => sub.value === store.subtype);
+  const showOther =
+    activeTypeConfig.allowsCustomSubtype && (otherPicked || (store.subtype !== "" && !isListed));
+
+  /** A typed subtype that means a listed one ("duplex") becomes that option, so spellings don't split search. */
+  const settleCustomSubtype = () => {
+    const match = findKnownSubtype(activeTypeConfig, store.subtype);
+    if (match) {
+      store.setBasics({ subtype: match.value });
+      setOtherPicked(false);
+    } else {
+      store.setBasics({ subtype: cleanCustomSubtype(store.subtype) });
+    }
+  };
 
   return (
     <View style={styles.stepFormBody}>
@@ -47,6 +71,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
                 onPress={() => {
+                  setOtherPicked(false);
                   store.setBasics({
                     type: typeKey,
                     subtype: cfg.defaultSubtype,
@@ -109,7 +134,10 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                 key={sub.value}
                 accessibilityLabel={sub.label}
                 accessibilityRole="button"
-                onPress={() => store.setBasics({ subtype: sub.value })}
+                onPress={() => {
+                  setOtherPicked(false);
+                  store.setBasics({ subtype: sub.value });
+                }}
                 style={[
                   styles.subtypePill,
                   isSelected && styles.subtypePillSelected,
@@ -128,7 +156,57 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
               </Pressable>
             );
           })}
+          {activeTypeConfig.allowsCustomSubtype ? (
+            <Pressable
+              accessibilityHint="Type a subtype that is not in the list"
+              accessibilityLabel="Other subtype"
+              accessibilityRole="button"
+              accessibilityState={{ selected: showOther }}
+              onPress={() => {
+                setOtherPicked(true);
+                // Keep what is already typed; leave the field empty after a listed option.
+                if (isListed) store.setBasics({ subtype: "" });
+              }}
+              style={[
+                styles.subtypePill,
+                showOther && styles.subtypePillSelected,
+                webPointer,
+              ]}
+            >
+              {showOther ? <Check color="#04cf92" size={14} /> : <Plus color="#5C6B66" size={14} />}
+              <Text
+                style={[
+                  styles.subtypePillText,
+                  showOther && styles.subtypePillTextSelected,
+                ]}
+              >
+                Other
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
+        {showOther ? (
+          <View style={styles.customSubtypeGroup}>
+            <TextInput
+              accessibilityLabel="Your property subtype"
+              autoFocus={otherPicked}
+              maxLength={CUSTOM_SUBTYPE_MAX_LENGTH}
+              onBlur={settleCustomSubtype}
+              onChangeText={(v) => {
+                // Once the owner types, the field stays until they leave it, even if the text spells a listed option.
+                setOtherPicked(true);
+                store.setBasics({ subtype: v });
+              }}
+              placeholder="e.g. Farmhouse, Guest house, Co-working space"
+              placeholderTextColor="#899790"
+              style={styles.formInput}
+              value={store.subtype}
+            />
+            <Text style={styles.formHelperText}>
+              A short name buyers will recognise. {store.subtype.length}/{CUSTOM_SUBTYPE_MAX_LENGTH}
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       {/* Listing Purpose */}
@@ -184,6 +262,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
             </Pressable>
             <Pressable
               onPress={() => {
+                setOtherPicked(false);
                 store.setBasics({
                   listingType: "rent",
                   type: "residential",

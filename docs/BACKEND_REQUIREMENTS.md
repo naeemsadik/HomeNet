@@ -12,6 +12,11 @@
 
 ## 1. 🔒 POST /v1/ai/parse-property — Quick listing
 
+> **Status (2026-10-05): not implemented.** The `grok_api_key` branch has no
+> `/v1/ai/parse-property`. Its `smart-listing` does something different (§1d).
+> The "List with AI" sheet that calls this route therefore shows "Quick listing
+> isn't available right now" and offers the step-by-step form.
+
 Turns an owner's free-text description into structured listing fields. Used by
 the "List with AI" sheet (`src/features/property/components/AiListingSheet.tsx`
 → `src/services/aiApi.ts`).
@@ -69,96 +74,65 @@ fields that fail, so one bad value doesn't discard the rest.
 
 ---
 
-## 1b. POST /v1/ai/parse-search — AI search
+## 1b. POST /v1/properties/smart-search — AI search
 
-Turns a seeker's plain-words query into **search filters**. Used by the AI
-Finder's "describe it" box (`src/components/AiDescribeSearch.tsx` →
-`src/services/aiApi.ts`). The model only produces filters: the listings
-themselves come from the normal `GET /v1/properties` with those filters, so the
-AI never invents or ranks a listing. This is `parseSearchQuery` in
-`docs/AI_LAYER.md` (FR-08).
+**Implemented on branch `grok_api_key`** (`modules/property/smart-searching`);
+the frontend is built against it (`src/services/aiApi.ts` → `smartSearch`,
+`src/components/AiDescribeSearch.tsx`). One call does everything: the model
+turns the query into filters, the API runs them over verified active listings,
+and the model writes up to three "why it matches" badges per listing.
 
-**Auth:** optional. Seekers search before they sign in, so the route should be
-`@Public()`; if a token is sent, use it for the quota. Rate-limit per user, and
-per IP when anonymous (a daily quota → 429).
+**Auth:** public. **Throttle:** 20 requests a minute. **Body:**
+`{ query: string (3–300), page?: 1–100, limit?: 1–20 }`.
 
-### Request
+**Success 200** — `data`:
 
-```json
-{ "query": "3 bedroom flat for sale in Gulshan under 3 crore, near the metro" }
-```
+| Field | Notes |
+|---|---|
+| `query` | The sanitised query. |
+| `filters` | `{ area, listing_type, type, min_price, max_price, bedrooms, bathrooms, amenities[] }`; `null` / `[]` when the query didn't say. Shown to the seeker as "What we understood". |
+| `listings[]` | A slim card (not a full Property): `id, title, type, subtype, listing_type, price, price_currency, area_size, area_unit, address, amenities, is_verified, published_at, area{id,name,city}, media[0]` plus `ai_badges: string[]` (empty if the model failed). |
+| `pagination` | `{ total, page, limit, total_pages }` — the app's "Show more". |
 
-| Field | Type | Required | Constraints |
-|---|---|---|---|
-| `query` | string | Yes | The client sends 3–500 characters (`maxLength` on the box). Validate and cap server-side. |
+The client validates every field on its own and drops only what fails; a
+malformed listing is skipped, not fatal. `listing_type` may be `short_let`; the
+app shows it as a rental.
 
-The client allows a 20 s timeout.
+**Errors the app handles:** 400 (query too short or invalid) → asks for more
+words; 429 (throttle) → "Lots of people are searching right now…"; 503 / 502 /
+404 → "AI search is busy or unavailable" + a button to the guided questions.
 
-### Success — 200
+**Turning it on:** the finder shows the box only when the web build has
+`EXPO_PUBLIC_AI_SEARCH_ENABLED=true` (`src/lib/features.ts`). Once this route
+is live in production, set it in the web project's environment and redeploy —
+the web build is static, so it is fixed at build time.
 
-`data` holds any subset of these fields. **Omit what the query didn't say;
-never guess.** These are exactly the filters `GET /v1/properties` can apply.
+### Findings for the API team (read from the code, not yet run)
 
-| Field | Type | Notes |
-|---|---|---|
-| `listingType` | `sale` · `rent` | |
-| `type` | `residential` · `commercial` · `land` · `parking` | A flat, apartment or house is `residential`. |
-| `minPrice`, `maxPrice` | number, BDT | "under 2 crore" → `maxPrice: 20000000`. 1 crore = 10,000,000; 1 lakh = 100,000. |
-| `minArea`, `maxArea` | number, **sq ft** | Convert katha / bigha / sqm. See the open question below. |
-| `bedrooms`, `bathrooms` | integer | Treated as a minimum ("3+"). |
-| `areaName` | string | The place as the seeker said it ("Gulshan 2"). The app matches it to an area; send the name, not an id. |
-| `city` | string | Only if a city is named. |
-| `unmatched` | string[] | Parts of the query no filter can express ("near the metro", "south facing"). Shown to the seeker as "not applied". |
-| `summary` | string | One plain sentence of what was understood. |
-| `confidence` | `{ [field]: "high" \| "medium" \| "low" }` | Keyed by the field names above. `low` shows a "check this" flag. |
-
-The client validates each field on its own (zod, `aiApi.ts`) and drops only the
-ones that fail. Returning `{}` is valid: the app tells the seeker nothing was
-understood and does **not** list everything.
-
-**Example:** `"3 bhk flat rent Dhanmondi max 40k"` →
-
-```json
-{
-  "listingType": "rent", "type": "residential", "bedrooms": 3,
-  "maxPrice": 40000, "areaName": "Dhanmondi", "city": "Dhaka",
-  "summary": "A 3 bedroom flat to rent in Dhanmondi, up to ৳ 40,000.",
-  "confidence": { "bedrooms": "medium", "maxPrice": "high" }
-}
-```
-
-### Errors — same mapping as §1
-
-| Status | When | What the seeker sees |
-|---|---|---|
-| 401 | Only if the route is not public | "Please log in to use AI search." |
-| 429 | Quota used | Limit message + "Answer guided questions" button |
-| 400 / 422 | Empty, too long or unparseable | "We couldn't make sense of that…" with an example |
-| 404 / 5xx | Not deployed, or every provider down | "AI search isn't available right now" + "Answer guided questions" button |
-
-### Server requirements
-
-- Same as §1: key in server env only, validate the model output against the
-  table above, never echo a vendor error, don't log full queries at info level.
-- Accept Bangla and Banglish queries ("৩ বেডরুম ফ্ল্যাট গুলশানে"), not only English.
-- Cache by normalised query for ~5 minutes (`docs/AI_LAYER.md`).
-
-### Turning it on
-
-The finder shows the box only when the web build has
-`EXPO_PUBLIC_AI_SEARCH_ENABLED=true` (`src/lib/features.ts`). Until then it
-shows the guided questions alone. Once this route is live in production, set
-the variable in the web project's environment and redeploy — the web build is
-static, so it is fixed at build time.
-
-### Open questions for the API team
-
-1. Does `min_area` / `max_area` on `GET /v1/properties` compare against
-   `area_size` as stored, or in square feet? The client passes square feet.
-2. Is `bedrooms` an exact match or a minimum? The Browse screen and the finder
-   both treat it as a minimum ("3+").
-
----
+1. **"Gulshan 2" finds nothing.** The area filter is
+   `a.name ILIKE '%<area>%'` and the area is stored as `Gulshan-2`. People type
+   "Gulshan 2", "Gulshan-2", "Gulshan2". Normalise both sides (strip spaces and
+   hyphens), or match by token.
+2. **"Uttara" misses its sectors.** Sub-areas are named `Sector-7` etc., which
+   don't contain "Uttara", so a search for Uttara returns only listings filed
+   under the parent itself (none today). Match a parent's children by
+   `parent_area_id`, as in §1c. (`Gulshan` and `Mirpur` do work, because their
+   children's names contain the parent's.)
+3. **The throttle is probably one bucket for the whole site.** Behind nginx
+   without `trust proxy`, every visitor shares one IP, so "20 a minute" is 20
+   AI searches a minute across all users. Set `trust proxy` and have nginx
+   overwrite `X-Forwarded-For`.
+4. **Badges can contain wrong numbers.** `SEARCH_BADGES_PROMPT` allows
+   examples like "12% under budget"; models are unreliable at arithmetic. Either
+   compute such badges in code, or forbid numeric claims in the prompt. The app
+   labels badges as AI-written.
+5. **A query with no recognisable filter returns every verified listing.** The
+   app hides them (an unfiltered list isn't an answer), but the API could return
+   an empty list or a flag.
+6. **Optional:** accept `filters` in the body to skip the model, so the app
+   could let a seeker remove a chip without a new AI call.
+7. `llm-client.service.ts` still explains its 25 s budget as "Vercel's 30 s
+   maxDuration"; the API is on a VPS now (the budget is still sensible).
 
 ## 1c. `area_id` on GET /v1/properties doesn't include sub-areas
 
@@ -180,6 +154,35 @@ either way.
 
 Also: `GET /v1/areas` returns six test rows ("Postman Area …", "Postman Geo
 …") in production data. Anything that lists all areas, such as the area picker, can show them.
+
+---
+
+## 1d. POST /v1/properties/smart-listing — listing copy
+
+**Implemented on branch `grok_api_key`; the frontend does not call it yet.**
+It is not the free-text parser of §1: it takes the facts the owner already
+filled in and writes the copy.
+
+🔒 Body: `{ area_id, type, listing_type, price (BDT), area_size (sqft),
+bedrooms?, bathrooms?, notes? (≤1000) }`. Returns `{ headline, description_en,
+description_bn, amenity_tags[], price_analysis{ your_price_per_sqft,
+area_avg_price_per_sqft, sample_size, diff_pct, summary } }`. Throttle 20 a minute.
+
+Planned use: a "Write my description with AI" button on the listing wizard's
+description step — English and Bangla drafts the owner can edit, plus the price
+comparison.
+
+Findings:
+
+1. **The price comparison needs a minimum sample.** `docs/AI_LAYER.md` says no
+   estimate below 5 comparables. The code compares against any `sample_size`
+   above 0, so one other listing becomes "the area average" (today the whole
+   site has 13 active listings). Return `area_avg_price_per_sqft: null` below the
+   threshold; the prompt already handles null.
+2. The comparison uses the exact `area_id`, so it ignores a parent's sub-areas
+   (§1c).
+3. **No per-user daily quota**, as §1 requires: any signed-in user can spend model
+   calls up to the throttle. See finding 3 under §1b.
 
 ---
 
@@ -265,7 +268,19 @@ endpoint skip or repair a bad row rather than fail the whole page.
   that is also what a `POST`-only route returns, so the route's existence
   can't be confirmed from outside. Until it responds, the app shows "Quick
   listing isn't available right now" and offers the step-by-step form.
-- **§1b `POST /v1/ai/parse-search`:** same situation. The finder hides its
-  "describe it" box until the web build sets `EXPO_PUBLIC_AI_SEARCH_ENABLED`.
+- **§1b `POST /v1/properties/smart-search`:** built on the `grok_api_key`
+  branch, not yet deployed. The finder hides its "describe it" box until the web
+  build sets `EXPO_PUBLIC_AI_SEARCH_ENABLED`.
 - **`/v1/guides`** returns 404. The app has `GUIDES_API_ENABLED` off and uses
   its curated guides, validated with the same schema the API response will be.
+
+
+---
+
+## 6. Custom subtypes
+
+The listing wizard lets an owner type a subtype that is not in the list (**Other**) for residential, commercial and land. The API already accepts any text there, which is what the app relies on. Three small asks:
+
+1. **Cap and tidy `subtype` in `UpsertPropertyDto`.** It is a bare `@IsString()` today, so a client can send megabytes. The app sends at most 40 characters, single-spaced, with no angle brackets. Suggested: `@MaxLength(50)` and the same `trim` transform `title` has.
+2. **Parking stays restricted** to `covered`, `open` and `garage` (`property.rules.ts`). The app does not offer Other for parking. If you want custom parking subtypes later, relax that rule and tell the app, which has a one-line flag per category (`allowsCustomSubtype`).
+3. **Optional: list the subtypes in use.** `GET /v1/properties?subtype=` matches one value, and Browse has no subtype filter yet (only categories), so a custom subtype is found under its category. When Browse gets a subtype filter, a `GET /v1/properties/subtypes?type=` returning the distinct values in use would let it offer the custom ones too.
