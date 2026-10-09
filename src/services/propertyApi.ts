@@ -1,6 +1,8 @@
 import apiClient from "./apiClient";
 import { appendUpload, type UploadInput } from "./upload";
+import { upsertPropertyDtoSchema } from "@/lib/schemas/property";
 import type { ApiResponse, PropertyStatus, UpsertPropertyDto } from "@/types/api";
+
 import type {
   PaginatedResponse,
   Property,
@@ -67,9 +69,11 @@ export async function getPropertyById(id: string) {
 }
 
 export async function upsertProperty(dto: UpsertPropertyDto) {
-  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/v1/properties", dto);
+  const validated = upsertPropertyDtoSchema.parse(dto);
+  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/v1/properties", validated);
   return data;
 }
+
 
 export async function createProperty(dto: UpsertPropertyDto) {
   return upsertProperty(dto);

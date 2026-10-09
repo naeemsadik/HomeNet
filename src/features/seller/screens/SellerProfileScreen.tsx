@@ -38,6 +38,8 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
+import { toApiError } from "@/services/apiClient";
+import { editProfileSchema } from "@/lib/schemas/user";
 import type { UploadInput } from "@/services/upload";
 import { SellerChangePasswordModal } from "../components/SellerChangePasswordModal";
 import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
@@ -167,27 +169,28 @@ export function SellerProfileScreen() {
         notify("Success", "Profile photo updated successfully.");
       }
     } catch (err: any) {
-      notify("Error", err?.message || "Failed to update profile photo");
+      notify("Error", toApiError(err).message);
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleSaveChanges = async () => {
-    if (!fullName.trim()) {
-      notify("Validation", "Please enter your full name.");
+    const validation = editProfileSchema.safeParse({ full_name: fullName });
+    if (!validation.success) {
+      notify("Validation", validation.error.issues[0]?.message || "Please enter a valid full name.");
       return;
     }
 
     try {
       setIsSaving(true);
       if (user) {
-        await updateUser(user.id, { full_name: fullName.trim() });
+        await updateUser(user.id, { full_name: validation.data.full_name });
         await fetchMe();
       }
       notify("Success", "Profile changes saved successfully.");
     } catch (err: any) {
-      notify("Error", err?.message || "Failed to save profile changes");
+      notify("Error", toApiError(err).message);
     } finally {
       setIsSaving(false);
     }
@@ -204,7 +207,7 @@ export function SellerProfileScreen() {
         notify("Account Deleted", "Your account has been permanently deleted.");
         router.replace("/home");
       } catch (err: any) {
-        notify("Error", err?.message || "Failed to delete account. Please try again.");
+        notify("Error", toApiError(err).message);
       } finally {
         setIsDeletingAccount(false);
       }

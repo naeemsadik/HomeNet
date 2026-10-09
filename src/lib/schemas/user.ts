@@ -1,10 +1,17 @@
 import { z } from "@/lib/zod";
+import { nameBase } from "./auth";
 
-export const editProfileSchema = z.object({
-  full_name: z
-    .string()
-    .min(1, "Full name is required")
-    .transform((v) => v.trim()),
-});
+export const editProfileSchema = z
+  .object({
+    full_name: nameBase,
+  })
+  .strict();
 
 export type EditProfileFormData = z.infer<typeof editProfileSchema>;
+
+export const updateUserDtoSchema = z
+  .object({
+    full_name: nameBase.optional(),
+  })
+  .strict();
+

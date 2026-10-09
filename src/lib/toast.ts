@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { sanitizeErrorMessage } from "./errorSanitizer";
 
 /**
  * Non-blocking, transient feedback. Use `notify()` from `@/lib/alert` instead
@@ -36,7 +37,8 @@ export const useToastStore = create<ToastState>((set) => ({
 
   show: (message, options) => {
     if (hideTimer) clearTimeout(hideTimer);
-    set({ toast: { id: nextId++, message, action: options?.action } });
+    const safeMessage = sanitizeErrorMessage(message);
+    set({ toast: { id: nextId++, message: safeMessage, action: options?.action } });
     const duration = options?.durationMs ?? (options?.action ? 6000 : 4000);
     hideTimer = setTimeout(() => set({ toast: null }), duration);
   },

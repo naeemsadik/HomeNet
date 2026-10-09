@@ -12,6 +12,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { sanitizeErrorMessage } from "@/lib/errorSanitizer";
 import { colorTokens, colors, fonts, webPointer } from "@/theme";
 
 // ─── Floating-Label Input ──────────────────────────────────────────────────
@@ -164,10 +165,11 @@ interface ErrorBannerProps {
 
 export function ErrorBanner({ message, style }: ErrorBannerProps) {
   if (!message) return null;
+  const safeMessage = sanitizeErrorMessage(message);
   return (
     <View style={[styles.errorBanner, style]}>
       <AlertCircle size={16} color={colors.coral} />
-      <Text style={styles.errorBannerText}>{message}</Text>
+      <Text style={styles.errorBannerText}>{safeMessage}</Text>
     </View>
   );
 }

@@ -3,7 +3,9 @@ import { useState } from "react";
 import { ActivityIndicator, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
+import { changePasswordSchema } from "@/lib/schemas/auth";
 import { useAuthStore } from "@/stores/authStore";
+import { toApiError } from "@/services/apiClient";
 import { colorTokens, webPointer } from "@/theme";
 import { styles } from "../screens/SellerProfileScreen.styles";
 
@@ -35,16 +37,13 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
 
   const handleChangePasswordSubmit = async () => {
     setPasswordError(null);
-    if (!currentPassword) {
-      setPasswordError("Please enter your current password.");
-      return;
-    }
-    if (newPassword.length < MIN_PASSWORD_LENGTH) {
-      setPasswordError(`New password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordError("New passwords do not match.");
+    const validation = changePasswordSchema.safeParse({
+      current_password: currentPassword,
+      new_password: newPassword,
+      confirmPassword: confirmPassword,
+    });
+    if (!validation.success) {
+      setPasswordError(validation.error.issues[0]?.message || "Invalid password details.");
       return;
     }
 
@@ -65,7 +64,7 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
         setPasswordError("Failed to change password. Please check your current password.");
       }
     } catch (err: any) {
-      setPasswordError(err?.message || "Failed to update password.");
+      setPasswordError(toApiError(err).message);
     } finally {
       setIsChangingPassword(false);
     }

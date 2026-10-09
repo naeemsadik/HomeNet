@@ -8,6 +8,7 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthModal } from "@/components/AuthModal";
 import { ToastHost } from "@/components/ToastHost";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
@@ -72,17 +73,19 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        {/* Default document title. Routes that render their own PageMeta
+        <ErrorBoundary>
+          {/* Default document title. Routes that render their own PageMeta
             override this; without it, any route lacking one would ship the
             empty <title> that Expo Router emits by default. */}
-        <PageMeta
-          title="HomeNet — Verified Property Listings in Bangladesh"
-          description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
-        />
-        <StatusBar style="dark" />
-        <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
-        <AuthModal />
-        <ToastHost />
+          <PageMeta
+            title="HomeNet — Verified Property Listings in Bangladesh"
+            description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
+          />
+          <StatusBar style="dark" />
+          <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
+          <AuthModal />
+          <ToastHost />
+        </ErrorBoundary>
       </SafeAreaProvider>
     </QueryClientProvider>
   );

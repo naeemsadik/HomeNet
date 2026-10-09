@@ -10,6 +10,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, fonts } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
 import { getPropertyById } from "@/services/propertyApi";
+import { toApiError } from "@/services/apiClient";
 
 export function PropertyEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -40,7 +41,7 @@ export function PropertyEditScreen() {
 
       notify("Success", "Property updated successfully.", { onConfirm: () => router.back() });
     } catch (err: any) {
-      notify("Error", err?.message || "Failed to update property");
+      notify("Error", toApiError(err).message);
     }
   };
 
@@ -59,7 +60,7 @@ export function PropertyEditScreen() {
       <AppChrome active="sell">
         <View style={styles.center}>
           <Text style={styles.errorText}>
-            {propertyError instanceof Error ? propertyError.message : "Property not found."}
+            {propertyError ? toApiError(propertyError).message : "Property not found."}
           </Text>
         </View>
       </AppChrome>
@@ -99,7 +100,7 @@ export function PropertyEditScreen() {
           onSubmit={handleSubmit}
           onCancel={() => router.back()}
           loading={updateProperty.isPending || uploadMedia.isPending}
-          error={updateProperty.error?.message || null}
+          error={updateProperty.error ? toApiError(updateProperty.error).message : null}
         />
       </View>
     </AppChrome>

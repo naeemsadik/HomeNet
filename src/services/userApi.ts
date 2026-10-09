@@ -1,5 +1,6 @@
 import apiClient from "./apiClient";
 import { appendUpload, type UploadInput } from "./upload";
+import { updateUserDtoSchema } from "@/lib/schemas/user";
 import type { ApiResponse, UpdateUserDto, UserProfile } from "@/types/api";
 
 export async function listUsers() {
@@ -13,9 +14,12 @@ export async function getUser(id: string) {
 }
 
 export async function updateUser(id: string, dto: UpdateUserDto) {
-  const { data } = await apiClient.patch<ApiResponse<UserProfile>>(`/v1/users/${id}`, dto);
+
+  const validated = updateUserDtoSchema.parse(dto);
+  const { data } = await apiClient.patch<ApiResponse<UserProfile>>(`/v1/users/${id}`, validated);
   return data;
 }
+
 
 export async function deleteUser(id: string) {
   const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/users/${id}`);
