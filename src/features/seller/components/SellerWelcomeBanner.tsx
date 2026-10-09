@@ -139,7 +139,7 @@ export function SellerWelcomeBanner({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#0B2B23",
+    backgroundColor: "#04cf92",
     borderRadius: 24,
     padding: 24,
     position: "relative",
