@@ -13,6 +13,7 @@ import { Eyebrow } from "@/components/ui";
 import { useAuthStore } from "@/stores/authStore";
 import { useUpdateUserProfile, useUploadAvatar, useDeleteAvatar } from "../hooks/useUserMutations";
 import { editProfileSchema, type EditProfileFormData } from "@/lib/schemas/user";
+import { toApiError } from "@/services/apiClient";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import type { UploadInput } from "@/services/upload";
 
@@ -45,7 +46,7 @@ export function EditProfileScreen() {
       await fetchMe();
       notify("Success", "Profile updated.", { onConfirm: () => router.back() });
     } catch (err: any) {
-      setServerError(err?.message || "Failed to update profile");
+      setServerError(toApiError(err).message);
     }
   };
 
@@ -74,7 +75,7 @@ export function EditProfileScreen() {
       await fetchMe();
       notify("Success", "Avatar updated.");
     } catch (err: any) {
-      setServerError(err?.message || "Failed to upload avatar");
+      setServerError(toApiError(err).message);
     }
   };
 
@@ -84,7 +85,7 @@ export function EditProfileScreen() {
       await fetchMe();
       notify("Success", "Avatar removed.");
     } catch (err: any) {
-      setServerError(err?.message || "Failed to remove avatar");
+      setServerError(toApiError(err).message);
     }
   };
 

@@ -2,9 +2,14 @@ import { z } from "@/lib/zod";
 import apiClient, { toApiError } from "@/services/apiClient";
 import type { ApiResponse } from "@/types/api";
 import {
+  aiParsePropertyInputSchema,
+  smartSearchInputSchema,
+} from "@/lib/schemas/ai";
+import {
   AiParseError,
   type AiParsedProperty,
 } from "@/features/property/types/aiListing";
+
 import type {
   SmartSearchFilters,
   SmartSearchListing,
@@ -53,6 +58,10 @@ const NETWORK_MESSAGE = "Couldn't connect. Check your internet connection and tr
 
 function toAiParseError(error: unknown, copy: AiErrorCopy): AiParseError {
   if (error instanceof AiParseError) return error;
+  if (error instanceof z.ZodError) {
+    const message = error.issues[0]?.message || copy.unreadable;
+    return new AiParseError(message, "UNREADABLE");
+  }
   const { status } = toApiError(error);
 
   switch (status) {
@@ -70,6 +79,7 @@ function toAiParseError(error: unknown, copy: AiErrorCopy): AiParseError {
       return new AiParseError(copy.unavailable, "UNAVAILABLE");
   }
 }
+
 
 // ─── Quick listing ─────────────────────────────────────────────────────────────
 
@@ -110,9 +120,10 @@ export async function generatePropertyDescription(
   description: string,
 ): Promise<AiParsedProperty> {
   try {
+    const validated = aiParsePropertyInputSchema.parse({ description });
     const { data } = await apiClient.post<ApiResponse<unknown>>(
       "/v1/ai/parse-property",
-      { description },
+      { description: validated.description },
       // Model calls are slower than ordinary reads; the API allows 30 s.
       { timeout: 30_000 },
     );
@@ -125,6 +136,7 @@ export async function generatePropertyDescription(
     throw toAiParseError(error, LISTING_COPY);
   }
 }
+
 
 // ─── AI search ─────────────────────────────────────────────────────────────────
 
@@ -223,9 +235,10 @@ export interface SmartSearchParams {
  */
 export async function smartSearch({ query, page = 1, limit = 12 }: SmartSearchParams): Promise<SmartSearchResult> {
   try {
+    const validated = smartSearchInputSchema.parse({ query, page, limit });
     const { data } = await apiClient.post<ApiResponse<unknown>>(
       "/v1/properties/smart-search",
-      { query, page, limit },
+      { query: validated.query, page: validated.page, limit: validated.limit },
       // Two model calls (filters, then badges) of up to 8 s each, plus the database.
       { timeout: 30_000 },
     );
@@ -234,3 +247,4 @@ export async function smartSearch({ query, page = 1, limit = 12 }: SmartSearchPa
     throw toAiParseError(error, SEARCH_COPY);
   }
 }
+

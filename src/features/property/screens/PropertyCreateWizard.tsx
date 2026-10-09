@@ -180,20 +180,45 @@ export function PropertyCreateWizard() {
   };
 
   const validateStep = (step: number) => {
-    if (step === 1 && (!store.title.trim() || !store.description.trim())) {
-      return "Add a title and description before continuing.";
-    }
     if (step === 1) {
+      const title = store.title.trim();
+      const desc = store.description.trim();
+      if (!title || !desc) {
+        return "Add a title and description before continuing.";
+      }
+      if (title.length < 3 || title.length > 150) {
+        return "Title must be between 3 and 150 characters.";
+      }
+      if (/[<>{}\x00-\x1F]/.test(title)) {
+        return "Title contains invalid characters.";
+      }
+      if (desc.length > 5000) {
+        return "Description cannot exceed 5,000 characters.";
+      }
+      if (/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(desc)) {
+        return "Description contains invalid characters.";
+      }
       const subtypeProblem = validateSubtype(activeTypeConfig, store.subtype);
       if (subtypeProblem) return subtypeProblem;
     }
-    if (step === 2 && (!(Number(store.price) > 0) || !(Number(store.areaSize) > 0))) {
-      return "Price and area must be greater than zero.";
+    if (step === 2) {
+      const priceNum = Number(store.price);
+      const areaNum = Number(store.areaSize);
+      if (!(priceNum > 0) || !(areaNum > 0)) {
+        return "Price and area must be greater than zero.";
+      }
+      if (!Number.isFinite(priceNum) || priceNum > 1_000_000_000_000) {
+        return "Enter a valid price amount up to 1,000,000,000,000.";
+      }
+      if (!Number.isFinite(areaNum) || areaNum > 1_000_000) {
+        return "Enter a valid area size up to 1,000,000.";
+      }
     }
-    if (
-      step === 3 &&
-      (!store.areaId ||
-        !store.address.trim() ||
+    if (step === 3) {
+      const addr = store.address.trim();
+      if (
+        !store.areaId ||
+        !addr ||
         store.locationLat === null ||
         !Number.isFinite(store.locationLat) ||
         store.locationLat < -90 ||
@@ -201,12 +226,17 @@ export function PropertyCreateWizard() {
         store.locationLng === null ||
         !Number.isFinite(store.locationLng) ||
         store.locationLng < -180 ||
-        store.locationLng > 180)
-    ) {
-      return "Select an API area and enter the address, latitude, and longitude.";
+        store.locationLng > 180
+      ) {
+        return "Select an API area and enter the address, latitude, and longitude.";
+      }
+      if (addr.length > 300 || /[<>{}\x00-\x1F]/.test(addr)) {
+        return "Address cannot exceed 300 characters or contain invalid characters.";
+      }
     }
     return null;
   };
+
 
   const handleNext = async () => {
     const validationError = validateStep(store.currentStep);

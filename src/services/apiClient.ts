@@ -11,18 +11,25 @@ import {
   saveTokens,
 } from "./tokenStorage";
 
+import { sanitizeErrorMessage } from "@/lib/errorSanitizer";
+import { reportError } from "@/lib/errorLogger";
+
 export class ApiError extends Error {
   public readonly error_code: number | null;
+  public readonly rawMessage: string;
 
   constructor(
     message: string,
     public readonly status: number | null = null,
     public readonly errorCode: number | null = null,
     public readonly validationErrors: string[] = [],
+    rawMessage?: string,
   ) {
-    super(message);
+    const safeMessage = sanitizeErrorMessage(message, status);
+    super(safeMessage);
     this.name = "ApiError";
     this.error_code = errorCode;
+    this.rawMessage = rawMessage || message;
   }
 }
 
@@ -38,23 +45,36 @@ export async function notifyUnauthorized() {
 }
 
 export function toApiError(error: unknown): ApiError {
+  reportError(error);
+
   if (error instanceof ApiError) return error;
 
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<ApiResponse<unknown>>;
     const payload = axiosError.response?.data;
     const validationData = payload?.data as ApiValidationData | null;
+    const status = axiosError.response?.status ?? null;
+    const rawMsg = payload?.message || axiosError.message || "Request failed";
+    const sanitizedMsg = sanitizeErrorMessage(rawMsg, status);
+
     return new ApiError(
-      payload?.message || axiosError.message || "Request failed",
-      axiosError.response?.status ?? null,
+      sanitizedMsg,
+      status,
       payload?.error_code ?? null,
-      validationData?.errors ?? [],
+      (validationData?.errors ?? []).map((err) => sanitizeErrorMessage(err, status)),
+      rawMsg,
     );
   }
 
-  if (error instanceof Error) return new ApiError(error.message);
-  return new ApiError(String(error));
+  if (error instanceof Error) {
+    const sanitized = sanitizeErrorMessage(error.message);
+    return new ApiError(sanitized, null, null, [], error.message);
+  }
+
+  const str = String(error);
+  return new ApiError(sanitizeErrorMessage(str), null, null, [], str);
 }
+
 
 export const PRODUCTION_API_BASE_URL = "https://api.homenetbd.com";
 export const LOCAL_API_BASE_URL = "http://localhost:3000/api";

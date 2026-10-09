@@ -7,6 +7,7 @@ import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow } from "@/theme";
 import { getUser, type UserProfile } from "@/services/userApi";
+import { toApiError } from "@/services/apiClient";
 
 export function UserDetailScreen({ userId }: { userId: string }) {
   const { isPhone } = useResponsive();
@@ -25,7 +26,7 @@ export function UserDetailScreen({ userId }: { userId: string }) {
       const result = await getUser(userId);
       setUser(result.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load user");
+      setError(toApiError(err).message);
     } finally {
       setLoading(false);
     }

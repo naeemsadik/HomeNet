@@ -43,6 +43,7 @@ import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDra
 import { Footer } from "@/components/Footer";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
+import { toApiError } from "@/services/apiClient";
 import { cdnImage } from "@/lib/cloudinaryImage";
 
 import { LiveText } from "@/components/LiveText";
@@ -177,7 +178,7 @@ export function MyPropertiesScreen() {
     try {
       await deleteMutation.mutateAsync(id);
     } catch (deleteError) {
-      notify(t("seller.deleteFailed"), deleteError instanceof Error ? deleteError.message : "Request failed.");
+      notify(t("seller.deleteFailed"), toApiError(deleteError).message);
     }
   };
 
@@ -312,7 +313,7 @@ export function MyPropertiesScreen() {
             ) : error ? (
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyTitle}>{t("dashboard.couldNotLoadListings")}</Text>
-                <Text style={styles.emptySub}>{error instanceof Error ? error.message : "Request failed."}</Text>
+                <Text style={styles.emptySub}>{toApiError(error).message}</Text>
                 <Pressable onPress={() => void refetch()} style={styles.retryButton}>
                   <RotateCcw color={colorTokens.onBrand} size={16} />
                   <Text style={styles.retryText}>{t("dashboard.retry")}</Text>

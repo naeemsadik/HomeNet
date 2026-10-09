@@ -1,4 +1,5 @@
 import { Alert, Platform } from "react-native";
+import { sanitizeErrorMessage } from "./errorSanitizer";
 
 /**
  * Cross-platform replacements for `Alert.alert`, which is a no-op on
@@ -22,17 +23,19 @@ type ConfirmOptions = {
 };
 
 function asBody(title: string, message?: string) {
-  return message ? `${title}\n\n${message}` : title;
+  const safeMessage = message ? sanitizeErrorMessage(message) : undefined;
+  return safeMessage ? `${title}\n\n${safeMessage}` : title;
 }
 
 export function notify(title: string, message?: string, options?: NotifyOptions) {
+  const safeMessage = message ? sanitizeErrorMessage(message) : undefined;
   if (Platform.OS === "web") {
-    window.alert(asBody(title, message));
+    window.alert(asBody(title, safeMessage));
     options?.onConfirm?.();
     return;
   }
 
-  Alert.alert(title, message, [
+  Alert.alert(title, safeMessage, [
     { text: options?.confirmLabel ?? "OK", onPress: options?.onConfirm },
   ]);
 }
@@ -48,14 +51,15 @@ export function confirmAction(
   message?: string,
   options?: ConfirmOptions,
 ): Promise<boolean> {
+  const safeMessage = message ? sanitizeErrorMessage(message) : undefined;
   if (Platform.OS === "web") {
-    return Promise.resolve(window.confirm(asBody(title, message)));
+    return Promise.resolve(window.confirm(asBody(title, safeMessage)));
   }
 
   return new Promise((resolve) => {
     Alert.alert(
       title,
-      message,
+      safeMessage,
       [
         { text: options?.cancelLabel ?? "Cancel", style: "cancel", onPress: () => resolve(false) },
         {

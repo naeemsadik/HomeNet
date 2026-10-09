@@ -41,6 +41,7 @@ import { cdnImage } from "@/lib/cloudinaryImage";
 import { colorTokens, webPointer } from "@/theme";
 import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
 import { useSavedStore } from "@/stores/savedStore";
+import { toApiError } from "@/services/apiClient";
 import { styles } from "./PropertyDetailScreen.styles";
 import { BookVisitModal } from "../components/BookVisitModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
@@ -335,7 +336,7 @@ export function PropertyDetailScreen() {
     return (
       <AppChrome active="property">
         <View style={styles.requestState}>
-          <Text style={styles.requestError}>{error instanceof Error ? error.message : t("propertyDetail.notFound")}</Text>
+          <Text style={styles.requestError}>{error ? toApiError(error).message : t("propertyDetail.notFound")}</Text>
           <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>
             <RotateCcw color={colorTokens.onBrand} size={16} />
             <Text style={styles.retryText}>{error ? t("propertyDetail.retry") : t("propertyDetail.goBack")}</Text>
@@ -665,7 +666,7 @@ export function PropertyDetailScreen() {
                 <Pressable onPress={() => void refetchSimilar()} style={styles.similarRequestState}>
                   <RotateCcw color="#04cf92" size={15} />
                   <Text style={styles.similarLoc}>
-                    {similarError instanceof Error ? similarError.message : t("propertyDetail.similarError")}{" "}
+                    {similarError ? toApiError(similarError).message : t("propertyDetail.similarError")}{" "}
                     {t("propertyDetail.pressToRetry")}
                   </Text>
                 </Pressable>

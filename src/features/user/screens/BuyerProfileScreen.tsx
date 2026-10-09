@@ -29,6 +29,9 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
+import { editProfileSchema } from "@/lib/schemas/user";
+import { changePasswordSchema } from "@/lib/schemas/auth";
+import { toApiError } from "@/services/apiClient";
 import type { UploadInput } from "@/services/upload";
 import { styles } from "./BuyerProfileScreen.styles";
 
@@ -130,15 +133,21 @@ export function BuyerProfileScreen() {
       return;
     }
 
+    const validation = editProfileSchema.safeParse({ full_name: fullName });
+    if (!validation.success) {
+      notify("Validation", validation.error.issues[0]?.message || "Please enter a valid full name.");
+      return;
+    }
+
     try {
       setIsSaving(true);
       await updateUser(user.id, {
-        full_name: fullName.trim() || user.full_name,
+        full_name: validation.data.full_name,
       });
       await fetchMe();
       notify("Saved", "Your profile details have been updated.");
     } catch (err: any) {
-      notify("Error", err?.message || "Failed to save profile changes.");
+      notify("Error", toApiError(err).message);
     } finally {
       setIsSaving(false);
     }
@@ -146,16 +155,13 @@ export function BuyerProfileScreen() {
 
   const handleChangePasswordSubmit = async () => {
     setPasswordError(null);
-    if (!currentPassword) {
-      setPasswordError("Please enter your current password.");
-      return;
-    }
-    if (!newPassword || newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters long.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordError("New passwords do not match.");
+    const validation = changePasswordSchema.safeParse({
+      current_password: currentPassword,
+      new_password: newPassword,
+      confirmPassword: confirmPassword,
+    });
+    if (!validation.success) {
+      setPasswordError(validation.error.issues[0]?.message || "Invalid password details.");
       return;
     }
 
@@ -171,7 +177,7 @@ export function BuyerProfileScreen() {
       setConfirmPassword("");
       notify("Success", "Your password has been changed successfully.");
     } catch (err: any) {
-      setPasswordError(err?.message || "Failed to change password. Please check your current password.");
+      setPasswordError(toApiError(err).message);
     } finally {
       setIsChangingPassword(false);
     }
@@ -191,7 +197,7 @@ export function BuyerProfileScreen() {
         router.replace("/home");
         notify("Account Deleted", "Your account has been permanently removed.");
       } catch (err: any) {
-        notify("Error", err?.message || "Failed to delete account. Please try again.");
+        notify("Error", toApiError(err).message);
       } finally {
         setIsDeletingAccount(false);
       }

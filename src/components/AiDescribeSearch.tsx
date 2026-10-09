@@ -18,6 +18,7 @@ import { useSmartSearch } from "@/features/property/hooks/useSmartSearch";
 import type { Property } from "@/features/property/types/property";
 import { describeFilters, toCardProperty } from "@/features/property/utils/aiSearchFilters";
 import { useSavedStore } from "@/stores/savedStore";
+import { sanitizeErrorMessage } from "@/lib/errorSanitizer";
 import { colorTokens, colors, fonts, webPointer } from "@/theme";
 
 /** The API's limit on a query (3–300 characters). */
@@ -129,7 +130,7 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
       {error ? (
         <View style={styles.errorBanner}>
           <AlertTriangle color={colorTokens.warningText} size={16} />
-          <Text style={styles.errorText}>{error.message}</Text>
+          <Text style={styles.errorText}>{sanitizeErrorMessage(error.message)}</Text>
           {offerGuided ? (
             <Pressable
               accessibilityRole="button"
