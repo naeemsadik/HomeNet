@@ -71,6 +71,7 @@ export { default as LayoutDashboard } from "lucide-react-native/icons/layout-das
 export { default as LineChart } from "lucide-react-native/icons/chart-line";
 export { default as List } from "lucide-react-native/icons/list";
 export { default as LoaderCircle } from "lucide-react-native/icons/loader-circle";
+export { default as LocateFixed } from "lucide-react-native/icons/locate-fixed";
 export { default as Lock } from "lucide-react-native/icons/lock";
 export { default as LogOut } from "lucide-react-native/icons/log-out";
 export { default as Mail } from "lucide-react-native/icons/mail";

@@ -56,6 +56,7 @@ import {
   initialSubtype,
   validateSubtype,
 } from "../constants/propertyCategories";
+import { coordinateProblem } from "../utils/coordinates";
 import {
   useCreateProperty,
   useDeleteMedia,
@@ -216,20 +217,13 @@ export function PropertyCreateWizard() {
     }
     if (step === 3) {
       const addr = store.address.trim();
-      if (
-        !store.areaId ||
-        !addr ||
-        store.locationLat === null ||
-        !Number.isFinite(store.locationLat) ||
-        store.locationLat < -90 ||
-        store.locationLat > 90 ||
-        store.locationLng === null ||
-        !Number.isFinite(store.locationLng) ||
-        store.locationLng < -180 ||
-        store.locationLng > 180
-      ) {
-        return "Select an API area and enter the address, latitude, and longitude.";
+      // The spot comes first on screen: the map pin, the device location or a Google Maps link.
+      // Owners never type coordinates, and the address and area fill in from the pin.
+      if (coordinateProblem(store.locationLat, store.locationLng) !== null) {
+        return "Pin the property's exact spot on the map, or paste a Google Maps link.";
       }
+      if (!addr) return "Enter the property address.";
+      if (!store.areaId) return "Choose the area or neighbourhood from the list.";
       if (addr.length > 300 || /[<>{}\x00-\x1F]/.test(addr)) {
         return "Address cannot exceed 300 characters or contain invalid characters.";
       }
