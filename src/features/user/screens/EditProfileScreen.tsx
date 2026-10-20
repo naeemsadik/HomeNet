@@ -51,11 +51,9 @@ export function EditProfileScreen() {
   };
 
   const handleAvatarUpload = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      notify("Permission needed", "Allow access to your photo library.");
-      return;
-    }
+    // No permission request: the system photo picker needs none. On Android 11-12 the
+    // request asked for WRITE_EXTERNAL_STORAGE, which cannot be granted there, and
+    // blocked every upload.
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,

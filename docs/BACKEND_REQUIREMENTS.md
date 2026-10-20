@@ -277,6 +277,11 @@ endpoint skip or repair a bad row rather than fail the whole page.
 
 ---
 
+> **Status of §6–§9 (2026-10-12): built on the backend branch
+> `feat/maps-link-resolver-reverse-geocode-area-centres`, not yet merged or deployed.**
+> The shipped contract is in the backend's `apps/api/docs/maps-api.md`. Where it differs
+> from what is written below, **it wins**; the differences are called out in each section.
+
 ## 6. Custom subtypes
 
 The listing wizard lets an owner type a subtype that is not in the list (**Other**) for residential, commercial and land. The API already accepts any text there, which is what the app relies on. Three small asks:
@@ -301,6 +306,16 @@ For the product, exact coordinates are what make the radius search and the map t
 ---
 
 ## 8. 🔒 POST /v1/maps/resolve-link — follow a short Google Maps link
+
+**Built.** Verified against real Google links. One finding changes what the form can
+promise: a link to a **named place** (a shop, a restaurant) redirects to
+`google.com/maps?q=<name>&ftid=…` with **no coordinates**, and the page behind it
+centres on where the request came from, not on the place. The API therefore answers
+**422 / 1701** for those, and only links that carry a point resolve: a place Google
+knows by area or address, and a **dropped pin**. The form's "This link names a place
+but not its exact spot…" message is correct and stays. Errors: 400 / 1700 not a short
+link, 422 / 1701 no exact spot, 502 / 1702 Google didn't answer, 429 over 10 a minute
+per user.
 
 Owners paste a Google Maps link to say where their property is. A long link
 (`google.com/maps/…@23.81,90.41…`) is read in the app. But **the Share button in
@@ -346,6 +361,16 @@ full address from the browser's address bar, or tap the map.
 
 ## 9. 🔒 GET /v1/maps/reverse — what is at a pin (address and area)
 
+**Built, with these differences from the text below:** the response uses snake_case,
+`{ address, area: { id, name, city, parent_area_id } | null, area_source: "name" |
+"nearest" | null }`. There is no `boundary` source: no polygon data exists yet, only
+**centres**, so an area is chosen by the neighbourhood names around the pin, else the
+nearest top-level area within 2 km. `Area` gained nullable `center_lat` / `center_lng`
+(returned by `GET /v1/areas`), backfilled for the 12 listed neighbourhoods; sub-areas
+have none and use their parent's. When the address lookup is down the route still
+answers with the nearest area and `address: null`. The app can now drop the hard-coded
+`areaCenters.ts` and `https://nominatim.openstreetmap.org` in `connect-src`.
+
 Owners pin their property on a map or paste a Google Maps link, and the listing
 form then fills in the **address** and **area** from that pin so they have
 nothing else to enter (`WizardLocationStep.tsx`). Today the browser asks
@@ -388,3 +413,27 @@ for the other two, and lets the owner change it.
 
 When this exists, the app swaps `reverseGeocode` for this call and drops
 `https://nominatim.openstreetmap.org` from `connect-src` in `vercel.json`.
+
+---
+
+## 10. Deleting an account must delete the uploaded files too
+
+`DELETE /v1/users/:id` removes the user row, and the database cascades remove the
+auth identities, roles, refresh tokens, the user's properties (and their
+`PropertyMedia` rows), saved properties, notifications and `UserAsset` rows. It does
+**not** delete the files at Cloudinary: the avatar (`UserAsset.asset_id`) and every
+listing photo or video (`PropertyMedia.public_id`) stay there, reachable by URL, with no
+database row left pointing at them.
+
+Google Play's account-deletion policy expects the data tied to an account to be
+deleted with it, and the privacy page currently has to say that files may remain until
+we erase them by hand.
+
+**Ask:** before deleting the user, read `UserAsset.asset_id` and the
+`PropertyMedia.public_id` of that user's properties, delete each from Cloudinary
+(best effort: log a failure, do not block the deletion), then delete the user. The
+same applies to a hard delete of a single property. When this ships, change the
+"Photos and videos are stored with our media provider..." paragraphs in
+`src/content/legal.ts` (Privacy Policy, *How long we keep it*, and the Delete account
+page, *What may remain*) and remove the "may stay with the provider" test in
+`src/content/__tests__/legal.test.ts`.

@@ -55,6 +55,7 @@ export { default as FileCheck2 } from "lucide-react-native/icons/file-check-corn
 export { default as FileEdit } from "lucide-react-native/icons/file-pen";
 export { default as FileText } from "lucide-react-native/icons/file-text";
 export { default as Filter } from "lucide-react-native/icons/funnel";
+export { default as Flag } from "lucide-react-native/icons/flag";
 export { default as Globe } from "lucide-react-native/icons/globe";
 export { default as Grid2X2 } from "lucide-react-native/icons/grid-2x2";
 export { default as Handshake } from "lucide-react-native/icons/handshake";

@@ -1,4 +1,6 @@
 import { useCallback } from "react";
+import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { en } from "./locales/en";
 import { bn } from "./locales/bn";
@@ -45,11 +47,21 @@ export function translate(
   return interpolate(raw, params);
 }
 
+/** A saved value is trusted only if it names a language we have. */
+function asLanguage(saved: string | null): SupportedLanguage | null {
+  return saved === "bn" || saved === "en" ? saved : null;
+}
+
+/**
+ * The language saved in the browser. Synchronous, so the first paint is already
+ * in the right language. On a phone there is no localStorage: this is "en" there,
+ * and restoreSavedLanguage() reads the real value from AsyncStorage.
+ */
 export function getInitialLanguage(): SupportedLanguage {
-  if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+  if (Platform.OS === "web" && typeof window !== "undefined" && typeof localStorage !== "undefined") {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === "bn" || saved === "en") return saved;
+      const saved = asLanguage(localStorage.getItem(STORAGE_KEY));
+      if (saved) return saved;
     } catch {
       // ignore storage access restrictions
     }
@@ -70,7 +82,10 @@ export const useLanguageStore = create<LanguageState>((set, get) => ({
   language: initialLang,
   currentLanguage: initialLang,
   setLanguage: (lang: SupportedLanguage) => {
-    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+    if (Platform.OS !== "web") {
+      // The screen changes now; saving is best effort and must never block that.
+      AsyncStorage.setItem(STORAGE_KEY, lang).catch(() => {});
+    } else if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
       try {
         localStorage.setItem(STORAGE_KEY, lang);
       } catch {
@@ -85,9 +100,23 @@ export const useLanguageStore = create<LanguageState>((set, get) => ({
   },
 }));
 
-export function restoreSavedLanguage() {
-  const initial = getInitialLanguage();
-  useLanguageStore.setState({ language: initial, currentLanguage: initial });
+/**
+ * Applies the language saved on this device. In a browser this is immediate; on a
+ * phone it waits for AsyncStorage. Never rejects: a storage failure leaves the
+ * current language as it is.
+ */
+export async function restoreSavedLanguage(): Promise<void> {
+  let initial: SupportedLanguage | null;
+  if (Platform.OS === "web") {
+    initial = getInitialLanguage();
+  } else {
+    try {
+      initial = asLanguage(await AsyncStorage.getItem(STORAGE_KEY));
+    } catch {
+      initial = null;
+    }
+  }
+  if (initial) useLanguageStore.setState({ language: initial, currentLanguage: initial });
 }
 
 export function useTranslation() {

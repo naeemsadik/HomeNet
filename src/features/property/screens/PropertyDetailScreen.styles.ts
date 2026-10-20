@@ -825,6 +825,20 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: fonts.bold,
   },
+  reportBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    minHeight: 44,
+    paddingHorizontal: 12,
+  },
+  reportBtnText: {
+    color: "#4F625D",
+    fontSize: 13,
+    fontFamily: fonts.medium,
+    textDecorationLine: "underline",
+  },
   aiRecCard: {
     backgroundColor: "#E6FAF4",
     borderRadius: 24,

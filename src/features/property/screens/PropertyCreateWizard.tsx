@@ -295,11 +295,9 @@ export function PropertyCreateWizard() {
       setLocalError(`You can upload up to ${maxCount} ${mediaType === "image" ? "images" : "videos"}.`);
       return;
     }
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      setLocalError("Media library permission is required to upload property media.");
-      return;
-    }
+    // No permission request: the system photo picker needs none. On Android 11-12 the
+    // request asked for WRITE_EXTERNAL_STORAGE, which cannot be granted there, and
+    // blocked every upload.
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: [mediaType === "image" ? "images" : "videos"],
       quality: mediaType === "image" ? 0.85 : undefined,

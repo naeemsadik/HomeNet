@@ -14,12 +14,9 @@ interface ImageUploaderProps {
 
 export function ImageUploader({ images, onAdd, onRemove, maxImages = 10 }: ImageUploaderProps) {
   const handlePick = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      notify("Permission needed", "Allow access to your photo library to upload images.");
-      return;
-    }
-
+    // No permission request: the system photo picker needs none. On Android 11-12 the
+    // request asked for WRITE_EXTERNAL_STORAGE, which cannot be granted there, and
+    // blocked every upload.
     const remaining = maxImages - images.length;
     if (remaining <= 0) {
       notify("Limit reached", `You can upload up to ${maxImages} images.`);

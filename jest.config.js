@@ -6,5 +6,5 @@ module.exports = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   setupFiles: ["<rootDir>/jest.setup.js"],
-  testPathIgnorePatterns: ["/node_modules/", "/dist/", "/.expo/"],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/", "/.expo/", "\\.native\\.test\\."],
 };
