@@ -1,0 +1,21 @@
+# HomeNet Robots Configuration
+User-agent: *
+Allow: /
+
+# Private & User Account Routes
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /seller
+Disallow: /seller/*
+Disallow: /dashboard
+Disallow: /my-properties
+Disallow: /profile
+Disallow: /profile/*
+Disallow: /settings
+Disallow: /notifications
+Disallow: /saved
+Disallow: /delete-account
+Disallow: /verification
+
+# Sitemap
+Sitemap: https://www.homenetbd.com/sitemap.xml
