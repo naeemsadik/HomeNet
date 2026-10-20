@@ -46,6 +46,19 @@
         "backgroundImage": "./assets/adaptive-icon-background.png",
         "monochromeImage": "./assets/adaptive-icon-monochrome.png"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "www.homenetbd.com", "pathPrefix": "/property/" },
+            { "scheme": "https", "host": "www.homenetbd.com", "pathPrefix": "/buy" },
+            { "scheme": "https", "host": "www.homenetbd.com", "pathPrefix": "/rent" },
+            { "scheme": "https", "host": "www.homenetbd.com", "pathPrefix": "/guides" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "predictiveBackGestureEnabled": false,
       "allowBackup": false,
       "blockedPermissions": [

@@ -29,6 +29,7 @@ export const en = {
       rent: "Rent",
       shortLet: "Short-let",
       sold: "Sold",
+      instantValuation: "Instant valuation",
     },
     placeholders: {
       buyRent: "Gulshan, Banani, Dhanmondi, or area…",
