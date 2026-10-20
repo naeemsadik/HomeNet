@@ -78,12 +78,12 @@
       "headers": [
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(self), browsing-topics=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'sha256-67fhrP0+BkBqmgGGXTtgiVO/9EQs3QruYNU/7fnRkI8=' 'sha256-R6kjt5FwTd5vAw94Q08NLDZsSaGTzg4NsdIfKtECSp0=' https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://translate.googleapis.com https://www.gstatic.com https://fonts.googleapis.com; img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://tile.openstreetmap.org https://*.gstatic.com https://translate.googleapis.com https://translate.google.com https://www.google.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.homenetbd.com https://nominatim.openstreetmap.org https://translate.googleapis.com https://translate-pa.googleapis.com; frame-src https://translate.google.com https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+          "value": "default-src 'self'; script-src 'self' https://accounts.google.com/gsi/client 'sha256-67fhrP0+BkBqmgGGXTtgiVO/9EQs3QruYNU/7fnRkI8=' 'sha256-R6kjt5FwTd5vAw94Q08NLDZsSaGTzg4NsdIfKtECSp0=' https://translate.google.com https://translate.googleapis.com https://translate-pa.googleapis.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style https://translate.googleapis.com https://www.gstatic.com https://fonts.googleapis.com; img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://tile.openstreetmap.org https://*.gstatic.com https://translate.googleapis.com https://translate.google.com https://www.google.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.homenetbd.com https://accounts.google.com/gsi/ https://nominatim.openstreetmap.org https://translate.googleapis.com https://translate-pa.googleapis.com; frame-src https://accounts.google.com/gsi/ https://translate.google.com https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
         }
       ]
     }
