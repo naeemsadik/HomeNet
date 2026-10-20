@@ -13,7 +13,9 @@ import {
   View,
   ViewStyle,
 } from "react-native";
+import { router } from "expo-router";
 import { notify } from "@/lib/alert";
+import { SOCIAL_LOGIN_VISIBLE } from "@/lib/features";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { ClipPath, Defs, Path, Rect } from "react-native-svg";
 import {
@@ -196,6 +198,12 @@ export function AuthCard({
     notify(provider, t("auth.socialComingSoon", { provider }));
   };
 
+  // The sign-up form can be a modal over the page: close it so the page that opens is seen.
+  const openLegalPage = (path: "/terms" | "/privacy") => {
+    onClose?.();
+    router.push(path);
+  };
+
   // There is no password-reset endpoint yet, so point people at the contact
   // address the About page publishes (the old one was on a different domain,
   // homenet.com, and "account settings" can't be reached while signed out).
@@ -319,31 +327,35 @@ export function AuthCard({
 
       {/* ─── Form Body (Node 282:18 - px: 32px, py: 24px) ─── */}
       <ContentWrapper {...(contentWrapperProps as any)}>
-        {/* Social Buttons (Node 282:19 - 42.4px height, gap: 12px) */}
-        <View style={styles.socialButtonsRow}>
-          <Pressable accessibilityRole="button"
-            onPress={() => handleSocialClick("Google")}
-            style={[styles.googleButton, webPointer]}
-          >
-            <GoogleIcon />
-            <Text style={styles.googleButtonText}>Google</Text>
-          </Pressable>
+        {SOCIAL_LOGIN_VISIBLE ? (
+          <>
+            {/* Social Buttons (Node 282:19 - 42.4px height, gap: 12px) */}
+            <View style={styles.socialButtonsRow}>
+              <Pressable accessibilityRole="button"
+                onPress={() => handleSocialClick("Google")}
+                style={[styles.googleButton, webPointer]}
+              >
+                <GoogleIcon />
+                <Text style={styles.googleButtonText}>Google</Text>
+              </Pressable>
 
-          <Pressable accessibilityRole="button"
-            onPress={() => handleSocialClick("Facebook")}
-            style={[styles.facebookButton, webPointer]}
-          >
-            <FacebookIcon />
-            <Text style={styles.facebookButtonText}>Facebook</Text>
-          </Pressable>
-        </View>
+              <Pressable accessibilityRole="button"
+                onPress={() => handleSocialClick("Facebook")}
+                style={[styles.facebookButton, webPointer]}
+              >
+                <FacebookIcon />
+                <Text style={styles.facebookButtonText}>Facebook</Text>
+              </Pressable>
+            </View>
 
-        {/* Divider (Node 282:31) */}
-        <View style={styles.dividerRow}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>{t("auth.orContinueWithEmail")}</Text>
-          <View style={styles.dividerLine} />
-        </View>
+            {/* Divider (Node 282:31) */}
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>{t("auth.orContinueWithEmail")}</Text>
+              <View style={styles.dividerLine} />
+            </View>
+          </>
+        ) : null}
 
         {/* Server-side error; field errors render inline below each input. */}
         {storeError ? (
@@ -479,6 +491,23 @@ export function AuthCard({
               </>
             )}
           </Pressable>
+
+          {mode === "signup" ? (
+            // Terms and privacy acceptance: Google Play requires apps with
+            // user-generated content (listings, photos) to put terms in front of
+            // the user before they create anything.
+            <Text style={styles.consentText}>
+              {t("auth.consentPrefix")}
+              <Text accessibilityRole="link" onPress={() => openLegalPage("/terms")} style={styles.consentLink}>
+                {t("footer.termsOfUse")}
+              </Text>
+              {t("auth.consentAnd")}
+              <Text accessibilityRole="link" onPress={() => openLegalPage("/privacy")} style={styles.consentLink}>
+                {t("footer.privacyPolicy")}
+              </Text>
+              {t("auth.consentSuffix")}
+            </Text>
+          ) : null}
         </View>
 
         {/* Bottom Switch Link (Node 282:65) */}
@@ -715,6 +744,20 @@ const styles = StyleSheet.create({
   inputWrapError: {
     borderColor: "#DC2626",
     backgroundColor: "#FEF2F2",
+  },
+  consentText: {
+    marginTop: 12,
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: "center",
+  },
+  consentLink: {
+    // brandText, not the #04cf92 fill: the fill is 2:1 on white and fails for text.
+    color: colorTokens.brandText,
+    fontFamily: fonts.semiBold,
+    textDecorationLine: "underline",
   },
   fieldError: {
     marginTop: 6,

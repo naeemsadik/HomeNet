@@ -40,7 +40,6 @@ const DEFAULT_AVATAR =
 // Sample values shown (greyed out) in signed-out preview. Never a real person.
 const DEFAULT_NAME = "Your name";
 const DEFAULT_EMAIL = "you@example.com";
-const DEFAULT_PHONE = "+880 1700-000000";
 
 export function BuyerProfileScreen() {
   const { isPhone } = useResponsive();
@@ -49,7 +48,6 @@ export function BuyerProfileScreen() {
   // Form State
   const [fullName, setFullName] = useState(user?.full_name || DEFAULT_NAME);
   const [email, setEmail] = useState(user?.email || DEFAULT_EMAIL);
-  const [phone, setPhone] = useState(DEFAULT_PHONE);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     user?.avatar_url || DEFAULT_AVATAR
   );
@@ -82,15 +80,9 @@ export function BuyerProfileScreen() {
 
   const handleAvatarUpload = async () => {
     try {
-      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        notify(
-          "Permission Required",
-          "Please grant photo library access to change your profile picture."
-        );
-        return;
-      }
-
+      // No permission request: the system photo picker needs none. On Android 11-12 the
+      // request asked for WRITE_EXTERNAL_STORAGE, which cannot be granted there, and
+      // blocked every upload.
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
@@ -380,40 +372,6 @@ export function BuyerProfileScreen() {
                     accessibilityRole="button"
                     hitSlop={8}
                     onPress={() => setEmail("")}
-                    style={[styles.clearBtn, webPointer]}
-                  >
-                    <X color="rgba(11,26,23,0.4)" size={16} />
-                  </Pressable>
-                )}
-              </View>
-            </View>
-
-            <View style={[styles.formGroup, styles.formGroupSpacing]}>
-              <Text style={styles.fieldLabel}>Phone</Text>
-              <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
-                <TextInput
-                  keyboardType="phone-pad"
-                  onChangeText={setPhone}
-                  onFocus={() => {
-                    if (phone === DEFAULT_PHONE) {
-                      setPhone("");
-                    }
-                  }}
-                  placeholder={DEFAULT_PHONE}
-                  placeholderTextColor="rgba(11,26,23,0.35)"
-                  selectTextOnFocus
-                  style={[
-                    styles.textInput,
-                    isNormalText(phone, DEFAULT_PHONE) && styles.textInputNormal,
-                  ]}
-                  value={phone}
-                />
-                {phone.length > 0 && (
-                  <Pressable
-                    accessibilityLabel="Clear phone"
-                    accessibilityRole="button"
-                    hitSlop={8}
-                    onPress={() => setPhone("")}
                     style={[styles.clearBtn, webPointer]}
                   >
                     <X color="rgba(11,26,23,0.4)" size={16} />

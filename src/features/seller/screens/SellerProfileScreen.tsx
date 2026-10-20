@@ -53,9 +53,7 @@ const DEFAULT_AVATAR =
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop";
 // Sample values shown (greyed out) in signed-out preview. Never a real person.
 const DEFAULT_NAME = "Your name";
-const DEFAULT_AGENCY = "Homenet Verified Partner";
 const DEFAULT_EMAIL = "you@example.com";
-const DEFAULT_PHONE = "+880 1700-000000";
 
 export function SellerProfileScreen() {
   const { isPhone, isTablet } = useResponsive();
@@ -65,9 +63,7 @@ export function SellerProfileScreen() {
 
   // Form State
   const [fullName, setFullName] = useState(user?.full_name || DEFAULT_NAME);
-  const [agency, setAgency] = useState(DEFAULT_AGENCY);
   const [email, setEmail] = useState(user?.email || DEFAULT_EMAIL);
-  const [phone, setPhone] = useState(DEFAULT_PHONE);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     user?.avatar_url || DEFAULT_AVATAR
   );
@@ -136,15 +132,9 @@ export function SellerProfileScreen() {
 
   const handleAvatarUpload = async () => {
     try {
-      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        notify(
-          "Permission needed",
-          "Allow access to your photo library to change your profile picture."
-        );
-        return;
-      }
-
+      // No permission request: the system photo picker needs none. On Android 11-12 the
+      // request asked for WRITE_EXTERNAL_STORAGE, which cannot be granted there, and
+      // blocked every upload.
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
@@ -481,40 +471,6 @@ export function SellerProfileScreen() {
                   )}
                 </View>
               </View>
-
-              {/* Form Field: Agency */}
-              <View style={[styles.formGroup, styles.formGroupSpacing]}>
-                <Text style={styles.fieldLabel}>Agency</Text>
-                <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
-                  <TextInput
-                    onChangeText={setAgency}
-                    onFocus={() => {
-                      if (agency === DEFAULT_AGENCY) {
-                        setAgency("");
-                      }
-                    }}
-                    placeholder={DEFAULT_AGENCY}
-                    placeholderTextColor="rgba(11,26,23,0.35)"
-                    selectTextOnFocus
-                    style={[
-                      styles.textInput,
-                      isNormalText(agency, DEFAULT_AGENCY) && styles.textInputNormal,
-                    ]}
-                    value={agency}
-                  />
-                  {agency.length > 0 && (
-                    <Pressable
-                      accessibilityLabel="Clear agency"
-                      accessibilityRole="button"
-                      hitSlop={8}
-                      onPress={() => setAgency("")}
-                      style={[styles.clearBtn, webPointer]}
-                    >
-                      <X color="rgba(11,26,23,0.4)" size={16} />
-                    </Pressable>
-                  )}
-                </View>
-              </View>
             </View>
 
             {/* Section 2: Contact Information */}
@@ -550,40 +506,6 @@ export function SellerProfileScreen() {
                       accessibilityRole="button"
                       hitSlop={8}
                       onPress={() => setEmail("")}
-                      style={[styles.clearBtn, webPointer]}
-                    >
-                      <X color="rgba(11,26,23,0.4)" size={16} />
-                    </Pressable>
-                  )}
-                </View>
-              </View>
-
-              <View style={[styles.formGroup, styles.formGroupSpacing]}>
-                <Text style={styles.fieldLabel}>Phone</Text>
-                <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
-                  <TextInput
-                    keyboardType="phone-pad"
-                    onChangeText={setPhone}
-                    onFocus={() => {
-                      if (phone === DEFAULT_PHONE) {
-                        setPhone("");
-                      }
-                    }}
-                    placeholder={DEFAULT_PHONE}
-                    placeholderTextColor="rgba(11,26,23,0.35)"
-                    selectTextOnFocus
-                    style={[
-                      styles.textInput,
-                      isNormalText(phone, DEFAULT_PHONE) && styles.textInputNormal,
-                    ]}
-                    value={phone}
-                  />
-                  {phone.length > 0 && (
-                    <Pressable
-                      accessibilityLabel="Clear phone"
-                      accessibilityRole="button"
-                      hitSlop={8}
-                      onPress={() => setPhone("")}
                       style={[styles.clearBtn, webPointer]}
                     >
                       <X color="rgba(11,26,23,0.4)" size={16} />

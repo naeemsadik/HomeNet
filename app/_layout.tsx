@@ -56,9 +56,10 @@ export default function RootLayout() {
         `;
         document.head.appendChild(style);
       }
-
-      restoreSavedLanguage();
     }
+
+    // Browser and phone alike: the language the user picked last time.
+    void restoreSavedLanguage();
 
     setUnauthorizedHandler(() => {
       useAuthStore.getState().resetSession();

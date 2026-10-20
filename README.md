@@ -26,6 +26,11 @@ npm run android
 npm run ios
 npm run typecheck
 npm run export:web
+npm run check            # typecheck, lint, tests, Android-runtime tests, release preflight
 ```
 
 The production web export is written to `dist/`.
+
+## Releasing the Android app
+
+See [RELEASE_ANDROID.md](./RELEASE_ANDROID.md): build, test on a phone, and the Google Play steps. The store listing text and graphics are in [store/](./store).

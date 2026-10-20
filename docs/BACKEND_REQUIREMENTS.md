@@ -413,3 +413,27 @@ for the other two, and lets the owner change it.
 
 When this exists, the app swaps `reverseGeocode` for this call and drops
 `https://nominatim.openstreetmap.org` from `connect-src` in `vercel.json`.
+
+---
+
+## 10. Deleting an account must delete the uploaded files too
+
+`DELETE /v1/users/:id` removes the user row, and the database cascades remove the
+auth identities, roles, refresh tokens, the user's properties (and their
+`PropertyMedia` rows), saved properties, notifications and `UserAsset` rows. It does
+**not** delete the files at Cloudinary: the avatar (`UserAsset.asset_id`) and every
+listing photo or video (`PropertyMedia.public_id`) stay there, reachable by URL, with no
+database row left pointing at them.
+
+Google Play's account-deletion policy expects the data tied to an account to be
+deleted with it, and the privacy page currently has to say that files may remain until
+we erase them by hand.
+
+**Ask:** before deleting the user, read `UserAsset.asset_id` and the
+`PropertyMedia.public_id` of that user's properties, delete each from Cloudinary
+(best effort: log a failure, do not block the deletion), then delete the user. The
+same applies to a hard delete of a single property. When this ships, change the
+"Photos and videos are stored with our media provider..." paragraphs in
+`src/content/legal.ts` (Privacy Policy, *How long we keep it*, and the Delete account
+page, *What may remain*) and remove the "may stay with the provider" test in
+`src/content/__tests__/legal.test.ts`.

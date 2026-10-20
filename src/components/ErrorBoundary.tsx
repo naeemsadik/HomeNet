@@ -1,5 +1,5 @@
 import React, { Component, type ReactNode } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
 import { router } from "expo-router";
 import { AlertTriangle, RotateCcw, Home } from "@/components/icons";
 import { reportError } from "@/lib/errorLogger";
@@ -40,7 +40,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     try {
       router.replace("/home");
     } catch {
-      if (typeof window !== "undefined") {
+      // A browser can reload the site root. On a phone `window.location` does not
+      // exist, and this runs while the app is already failing, so it must not throw.
+      if (Platform.OS === "web" && typeof window !== "undefined" && window.location) {
         window.location.href = "/";
       }
     }

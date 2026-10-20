@@ -9,6 +9,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Flag,
   Heart,
   MapPin,
   Maximize2,
@@ -36,6 +37,8 @@ import { PageMeta } from "@/components/PageMeta";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
+import { SUPPORT_EMAIL } from "@/content/legal";
+import { reportListingMailto } from "@/lib/reportListing";
 import { shareLink } from "@/lib/share";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { colorTokens, webPointer } from "@/theme";
@@ -211,6 +214,15 @@ export function PropertyDetailScreen() {
   const handleShare = () => {
     if (!property) return;
     void shareLink({ title: property.title });
+  };
+
+  // Google Play requires a way to report user-generated content from inside the app.
+  // This opens a prepared email to us; if the phone has no mail app, it says where to write.
+  const handleReport = () => {
+    if (!property || !id) return;
+    Linking.openURL(reportListingMailto({ id, title: property.title })).catch(() => {
+      notify("Report this listing", `Write to ${SUPPORT_EMAIL} and include the listing ID: ${id}.`);
+    });
   };
 
   // Guests get a "saved on this device" toast from the saved store.
@@ -785,6 +797,16 @@ export function PropertyDetailScreen() {
               >
                 <Calendar color={colorTokens.onAccent} size={18} />
                 <Text style={styles.bookVisitBtnText}>{t("propertyDetail.bookViewing")}</Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("propertyDetail.reportListing")}
+                onPress={handleReport}
+                style={({ pressed }) => [styles.reportBtn, webPointer, pressed && styles.pressed]}
+              >
+                <Flag color="#4F625D" size={14} />
+                <Text style={styles.reportBtnText}>{t("propertyDetail.reportListing")}</Text>
               </Pressable>
             </View>
 

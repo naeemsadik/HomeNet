@@ -30,6 +30,16 @@ const CONSOLE_METHODS = [
   "groupEnd",
 ] as const;
 
+/**
+ * True only in a real browser. On Android and iOS React Native defines `window`
+ * too, but it is not a browser window: it has no addEventListener, localStorage
+ * or location. Checking for `window` alone made this module throw at startup in
+ * every release build of the app, before the first screen.
+ */
+function inBrowser(): boolean {
+  return typeof window !== "undefined" && typeof window.addEventListener === "function";
+}
+
 function debugRequested(): boolean {
   try {
     return window.localStorage.getItem(DEBUG_FLAG) === "1";
@@ -39,7 +49,7 @@ function debugRequested(): boolean {
 }
 
 export function silenceConsoleInProduction(): void {
-  if (__DEV__ || typeof window === "undefined" || debugRequested()) return;
+  if (__DEV__ || !inBrowser() || debugRequested()) return;
 
   const noop = () => {};
   const target = console as unknown as Record<string, unknown>;
