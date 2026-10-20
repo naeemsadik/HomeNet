@@ -7,10 +7,10 @@ export default function Root({ children }: PropsWithChildren) {
       <head>
         <meta charSet="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
-        <meta content="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet." name="description" />
-        {/* The title is supplied per route via PageMeta (expo-router/head),
-            which fills Expo Router's own react-helmet tag. A static <title>
-            here would be a second, competing title element. */}
+        {/* The title and description are supplied per route via PageMeta
+            (expo-router/head), which fills Expo Router's own react-helmet tags.
+            A static <title> or description here would be a second, competing
+            copy: crawlers would see two. */}
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         {/* The homepage hero preload lives in app/index.tsx: every page shares

@@ -1,0 +1,10 @@
+# Everything public may be crawled. Signed-in pages are kept out of search
+# results with a noindex tag (see src/lib/seo.ts), not with Disallow: a page that
+# is blocked here can never be crawled, so Google would never see its noindex.
+# /admin is the exception: nobody has a reason to crawl it at all.
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /_sitemap
+
+Sitemap: https://www.homenetbd.com/sitemap.xml
