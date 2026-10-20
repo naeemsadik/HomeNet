@@ -9,7 +9,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "build": "node scripts/generate-sitemap.mjs && expo export --platform web && node -e \"require('fs').copyFileSync('dist/+not-found.html', 'dist/404.html')\" && node scripts/check-csp.mjs",
+    "build": "node scripts/generate-sitemap.mjs && expo export --platform web && node -e \"const fs=require('fs');fs.copyFileSync('dist/+not-found.html', 'dist/404.html');fs.rmSync('dist/_sitemap.html',{force:true})\" && node scripts/check-csp.mjs",
     "export:web": "expo export --platform web",
     "sitemap": "node scripts/generate-sitemap.mjs",
     "smoke:api": "node scripts/api-smoke.mjs",
