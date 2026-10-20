@@ -4,6 +4,7 @@ import {
   changePassword as changePasswordRequest,
   getCurrentUser,
   loginUser,
+  loginWithGoogle,
   logoutUser,
   registerUser,
 } from "@/services/authApi";
@@ -27,6 +28,8 @@ interface AuthState {
   userRoles: UserRole[];
   register: (dto: RegisterDto) => Promise<boolean>;
   login: (dto: LoginDto) => Promise<boolean>;
+  /** Signs in or up with the credential (ID token) Google Identity Services returns. */
+  googleLogin: (idToken: string) => Promise<boolean>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
   fetchUserRoles: (userId: string) => Promise<void>;
@@ -70,6 +73,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const response = await loginUser(dto);
       if (!response.data) throw new Error(response.message || "Login failed");
+      await saveTokens(response.data.access_token, response.data.refresh_token);
+      set({ user: response.data.user, loading: false });
+      await get().fetchUserRoles(response.data.user.id);
+      void useSavedStore.getState().syncGuestSaves();
+      return true;
+    } catch (error) {
+      set({ loading: false, ...authError(error) });
+      return false;
+    }
+  },
+
+  googleLogin: async (idToken) => {
+    set({ loading: true, error: null, errorCode: null });
+    try {
+      const response = await loginWithGoogle(idToken);
+      if (!response.data) throw new Error(response.message || "Google sign-in failed");
       await saveTokens(response.data.access_token, response.data.refresh_token);
       set({ user: response.data.user, loading: false });
       await get().fetchUserRoles(response.data.user.id);

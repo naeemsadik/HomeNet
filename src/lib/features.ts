@@ -15,11 +15,21 @@ import { Platform } from "react-native";
 export const AI_SEARCH_ENABLED = process.env.EXPO_PUBLIC_AI_SEARCH_ENABLED === "true";
 
 /**
- * Google and Facebook sign-in buttons. The API has no social-login routes yet,
- * so a tap only says "coming soon". That is tolerable on the website, which is
- * unchanged, but a store reviewer reads a button that does nothing as broken, so
- * the Android app hides them. Set EXPO_PUBLIC_SOCIAL_LOGIN_ENABLED=true in the
- * build environment once the routes exist.
+ * Google sign-in (POST /v1/auth/google). A Google OAuth *client id* is public
+ * and is read from EXPO_PUBLIC_GOOGLE_CLIENT_ID at build time. The client secret
+ * is never used by this flow and must not be set anywhere in this project.
+ *
+ * The button is shown only on the website and only when the id is present and
+ * well-formed, so a deploy without it simply has no Google button. Android has
+ * none yet: it needs its own client id and a native sign-in.
+ *
+ * There is no Facebook sign-in: the API has no route for it.
  */
-export const SOCIAL_LOGIN_VISIBLE =
-  Platform.OS === "web" || process.env.EXPO_PUBLIC_SOCIAL_LOGIN_ENABLED === "true";
+const GOOGLE_CLIENT_ID_PATTERN = /^\d+-[a-z0-9]+\.apps\.googleusercontent\.com$/;
+
+export const GOOGLE_CLIENT_ID = (() => {
+  const id = (process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ?? "").trim();
+  return GOOGLE_CLIENT_ID_PATTERN.test(id) ? id : null;
+})();
+
+export const GOOGLE_SIGN_IN_AVAILABLE = Platform.OS === "web" && GOOGLE_CLIENT_ID !== null;
