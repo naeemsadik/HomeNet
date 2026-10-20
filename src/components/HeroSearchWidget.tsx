@@ -7,11 +7,14 @@ import {
   Search,
   SlidersHorizontal,
   Sparkles,
+  TrendingUp,
   X,
 } from "@/components/icons";
-import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
+import { useInstantValuationStore } from "@/features/valuation/stores/useInstantValuationStore";
+import type { ValuationPropertyType, ValuationPurpose } from "@/features/valuation/types/valuationTypes";
 import { useTranslation } from "@/i18n";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
 import { AreaPicker } from "./AreaPicker";
@@ -45,6 +48,12 @@ export function HeroSearchWidget({
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(defaultFilterState);
 
+  // Instant Valuation Morph State
+  const [valuationPurpose, setValuationPurpose] = useState<ValuationPurpose>("sale");
+  const [valuationType, setValuationType] = useState<ValuationPropertyType>("apartment");
+
+  const isValuationMode = activeTab === "instant-valuation";
+
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (filters.minPrice) count++;
@@ -77,7 +86,38 @@ export function HeroSearchWidget({
     router.push((qs ? `/ai-finder?${qs}` : "/ai-finder") as never);
   };
 
+  const handleValuationSubmit = () => {
+    const areaName = selectedArea?.name || "Gulshan";
+    const areaId = selectedArea?.id || "gulshan-2-dhaka";
+    const road = query.trim();
+
+    useInstantValuationStore.getState().setInitialFromHero({
+      areaName,
+      areaId,
+      purpose: valuationPurpose,
+      propertyType: valuationType,
+    });
+
+    if (road) {
+      useInstantValuationStore.getState().setFormField("roadOrBlock", road);
+    }
+
+    const params = new URLSearchParams();
+    params.set("area", areaName);
+    params.set("areaId", areaId);
+    params.set("purpose", valuationPurpose);
+    params.set("type", valuationType);
+    if (road) params.set("query", road);
+
+    router.push(`/instant-valuation?${params.toString()}` as never);
+  };
+
   const handleSearch = () => {
+    if (isValuationMode) {
+      handleValuationSubmit();
+      return;
+    }
+
     if (onSearch) {
       onSearch(query, activeTab, selectedArea);
       return;
@@ -97,8 +137,9 @@ export function HeroSearchWidget({
     router.push((qs ? `${target}?${qs}` : target) as never);
   };
 
-  const placeholder =
-    activeTab === "short-let"
+  const placeholder = isValuationMode
+    ? "Enter road, block, sector, or building name (e.g. Road 92)..."
+    : activeTab === "short-let"
       ? t("hero.placeholders.shortLet")
       : activeTab === "sold"
         ? t("hero.placeholders.sold")
@@ -110,15 +151,96 @@ export function HeroSearchWidget({
 
       <View style={styles.rule} />
 
+      {isValuationMode && (
+        <View style={[styles.valuationBar, isPhone && styles.valuationBarPhone]}>
+          {/* Quick Purpose Toggle */}
+          <View style={styles.valuationToggle}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setValuationPurpose("sale")}
+              style={[
+                styles.valuationTab,
+                valuationPurpose === "sale" && styles.valuationTabActive,
+                webPointer,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.valuationTabText,
+                  valuationPurpose === "sale" && styles.valuationTabTextActive,
+                ]}
+              >
+                Sale Valuation
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setValuationPurpose("rent")}
+              style={[
+                styles.valuationTab,
+                valuationPurpose === "rent" && styles.valuationTabActive,
+                webPointer,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.valuationTabText,
+                  valuationPurpose === "rent" && styles.valuationTabTextActive,
+                ]}
+              >
+                Rental Valuation
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Quick Property Type Chips */}
+          <View style={styles.valuationTypeGroup}>
+            {[
+              { key: "apartment" as const, label: "Apartment" },
+              { key: "house" as const, label: "Duplex / House" },
+              { key: "commercial" as const, label: "Commercial" },
+              { key: "land" as const, label: "Plot / Land" },
+            ].map((pt) => {
+              const isSelected = valuationType === pt.key;
+              return (
+                <Pressable
+                  key={pt.key}
+                  accessibilityRole="button"
+                  onPress={() => setValuationType(pt.key)}
+                  style={[
+                    styles.typeChip,
+                    isSelected && styles.typeChipSelected,
+                    webPointer,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.typeChipText,
+                      isSelected && styles.typeChipTextSelected,
+                    ]}
+                  >
+                    {pt.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      )}
+
       <View style={[styles.inputRow, isPhone && styles.inputRowPhone]}>
         <View style={[styles.field, isPhone && styles.fieldPhone]}>
-          <Search color={colors.muted} size={19} strokeWidth={2} />
+          {isValuationMode ? (
+            <MapPin color={colors.greenOnLight} size={19} strokeWidth={2.2} />
+          ) : (
+            <Search color={colors.muted} size={19} strokeWidth={2} />
+          )}
           <TextInput
             onChangeText={setQuery}
             onSubmitEditing={handleSearch}
             placeholder={placeholder}
             placeholderTextColor={colors.muted}
-            returnKeyType="search"
+            returnKeyType={isValuationMode ? "go" : "search"}
             style={[styles.input, isPhone && styles.inputPhone]}
             value={query}
           />
@@ -131,32 +253,34 @@ export function HeroSearchWidget({
               <X color={colors.muted} size={16} />
             </Pressable>
           ) : null}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              hasActiveFilters
-                ? t("hero.openFiltersWithCount", { count: activeFilterCount })
-                : t("hero.openFilters")
-            }
-            onPress={() => setFilterModalOpen(true)}
-            style={({ hovered }: any) => [
-              styles.filterButton,
-              hasActiveFilters && styles.filterButtonActive,
-              hovered && styles.filterButtonHovered,
-              webPointer,
-            ]}
-          >
-            <SlidersHorizontal
-              color={hasActiveFilters ? colorTokens.brandText : colors.muted}
-              size={18}
-              strokeWidth={2}
-            />
-            {hasActiveFilters ? (
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
-              </View>
-            ) : null}
-          </Pressable>
+          {!isValuationMode && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                hasActiveFilters
+                  ? t("hero.openFiltersWithCount", { count: activeFilterCount })
+                  : t("hero.openFilters")
+              }
+              onPress={() => setFilterModalOpen(true)}
+              style={({ hovered }: any) => [
+                styles.filterButton,
+                hasActiveFilters && styles.filterButtonActive,
+                hovered && styles.filterButtonHovered,
+                webPointer,
+              ]}
+            >
+              <SlidersHorizontal
+                color={hasActiveFilters ? colorTokens.brandText : colors.muted}
+                size={18}
+                strokeWidth={2}
+              />
+              {hasActiveFilters ? (
+                <View style={styles.filterBadge}>
+                  <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+                </View>
+              ) : null}
+            </Pressable>
+          )}
         </View>
 
         <Pressable
@@ -184,7 +308,7 @@ export function HeroSearchWidget({
             numberOfLines={1}
             style={[styles.areaLabel, selectedArea && styles.areaLabelActive]}
           >
-            {selectedArea ? selectedArea.name : t("hero.allLocations")}
+            {selectedArea ? selectedArea.name : isValuationMode ? "Dhaka (Select Area)" : t("hero.allLocations")}
           </Text>
           {selectedArea ? (
             <Pressable
@@ -204,32 +328,53 @@ export function HeroSearchWidget({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Search properties"
+          accessibilityLabel={isValuationMode ? "Get instant valuation" : "Search properties"}
           onPress={handleSearch}
           style={({ hovered, pressed }: any) => [
             styles.searchButton,
+            isValuationMode && styles.valuationButton,
             isPhone && styles.searchButtonPhone,
             hovered && styles.searchButtonHovered,
             pressed && styles.searchButtonPressed,
             webPointer,
           ]}
         >
-          <Search color={colorTokens.onBrand} size={17} strokeWidth={2.4} />
-          <Text style={styles.searchLabel}>{t("hero.search")}</Text>
+          {isValuationMode ? (
+            <TrendingUp color={colorTokens.onBrand} size={18} strokeWidth={2.4} />
+          ) : (
+            <Search color={colorTokens.onBrand} size={17} strokeWidth={2.4} />
+          )}
+          <Text style={styles.searchLabel}>
+            {isValuationMode ? "Get instant valuation" : t("hero.search")}
+          </Text>
         </Pressable>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Search with AI"
-        onPress={handleAiSearch}
-        style={({ hovered }: any) => [styles.aiLink, hovered && styles.aiLinkHovered, webPointer]}
-      >
-        <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.2} />
-        <Text style={styles.aiText}>
-          {t("hero.aiPrompt")}
-        </Text>
-      </Pressable>
+      {isValuationMode ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Learn about instant valuation"
+          onPress={handleValuationSubmit}
+          style={({ hovered }: any) => [styles.aiLink, hovered && styles.aiLinkHovered, webPointer]}
+        >
+          <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.2} />
+          <Text style={styles.aiText}>
+            Data-backed Dhaka property valuation · 100% Free · No broker commissions
+          </Text>
+        </Pressable>
+      ) : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Search with AI"
+          onPress={handleAiSearch}
+          style={({ hovered }: any) => [styles.aiLink, hovered && styles.aiLinkHovered, webPointer]}
+        >
+          <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.2} />
+          <Text style={styles.aiText}>
+            {t("hero.aiPrompt")}
+          </Text>
+        </Pressable>
+      )}
 
       <AreaPicker
         visible={areaPickerOpen}
@@ -418,4 +563,75 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     ...(Platform.OS === "web" ? { textUnderlineOffset: 3 } : {}),
   } as any,
+
+  // ─── Instant Valuation Morph Bar Styles ─────────────────────────────
+  valuationBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  valuationBarPhone: {
+    flexDirection: "column",
+    alignItems: "stretch",
+  },
+  valuationToggle: {
+    flexDirection: "row",
+    backgroundColor: colorTokens.surfaceSunken,
+    borderRadius: radius.md,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  valuationTab: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.sm,
+  },
+  valuationTabActive: {
+    backgroundColor: colorTokens.brand,
+    ...shadow,
+  },
+  valuationTabText: {
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    color: colors.muted,
+  },
+  valuationTabTextActive: {
+    color: colorTokens.onBrand,
+    fontFamily: fonts.bold,
+  },
+  valuationTypeGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  typeChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.surfaceSunken,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  typeChipSelected: {
+    backgroundColor: colorTokens.brandSurface,
+    borderColor: colorTokens.brand,
+  },
+  typeChipText: {
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    color: colors.muted,
+  },
+  typeChipTextSelected: {
+    color: colorTokens.brandText,
+    fontFamily: fonts.bold,
+  },
+  valuationButton: {
+    backgroundColor: colorTokens.brand,
+    paddingHorizontal: 24,
+  },
 });

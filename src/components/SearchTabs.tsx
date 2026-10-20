@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, fonts, webPointer } from "@/theme";
 import { useTranslation, type TranslationKey } from "@/i18n";
 
-export type SearchTabType = "buy" | "rent" | "short-let" | "sold";
+export type SearchTabType = "buy" | "rent" | "short-let" | "sold" | "instant-valuation";
 
 interface SearchTabsProps {
   activeTab: SearchTabType;
@@ -17,59 +17,68 @@ const TABS: { key: SearchTabType; translationKey: TranslationKey }[] = [
   { key: "short-let", translationKey: "hero.tabs.shortLet" },
   // Sold is a research intent, not a buying one — it trails the live tabs.
   { key: "sold", translationKey: "hero.tabs.sold" },
+  { key: "instant-valuation", translationKey: "hero.tabs.instantValuation" },
 ];
 
 export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {
   const { t } = useTranslation();
 
   return (
-    <View accessibilityRole="tablist" style={styles.row}>
-      {TABS.map((tab) => {
-        const isActive = activeTab === tab.key;
-        const label = t(tab.translationKey);
-        return (
-          <Pressable
-            key={tab.key}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: isActive }}
-            accessibilityLabel={`${label} properties`}
-            onPress={() => onChange(tab.key)}
-            style={({ hovered }: any) => [
-              styles.tab,
-              compact && styles.tabCompact,
-              webPointer,
-              hovered && !isActive && styles.tabHovered,
-            ]}
-          >
-            <Text
-              style={[
-                styles.label,
-                compact && styles.labelCompact,
-                isActive && styles.labelActive,
+    <View accessibilityRole="tablist" style={styles.scrollWrapper}>
+      <View style={styles.row}>
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.key;
+          const label = t(tab.translationKey);
+          return (
+            <Pressable
+              key={tab.key}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+              accessibilityLabel={`${label} properties`}
+              onPress={() => onChange(tab.key)}
+              style={({ hovered }: any) => [
+                styles.tab,
+                compact && styles.tabCompact,
+                webPointer,
+                hovered && !isActive && styles.tabHovered,
               ]}
             >
-              {label}
-            </Text>
-            <View style={[styles.rule, isActive && styles.ruleActive]} />
-          </Pressable>
-        );
-      })}
+              <Text
+                style={[
+                  styles.label,
+                  compact && styles.labelCompact,
+                  isActive && styles.labelActive,
+                ]}
+              >
+                {label}
+              </Text>
+              <View style={[styles.rule, isActive && styles.ruleActive]} />
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollWrapper: {
+    width: "100%",
+    overflow: "hidden",
+  },
   row: {
     flexDirection: "row",
     alignItems: "flex-end",
+    flexWrap: "wrap",
+    rowGap: 8,
   },
   tab: {
     paddingTop: 4,
     paddingBottom: 0,
-    marginRight: 32,
+    marginRight: 28,
   },
   tabCompact: {
-    marginRight: 22,
+    marginRight: 16,
   },
   tabHovered: {
     opacity: 0.7,

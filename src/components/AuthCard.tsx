@@ -201,7 +201,7 @@ export function AuthCard({
   // The sign-up form can be a modal over the page: close it so the page that opens is seen.
   const openLegalPage = (path: "/terms" | "/privacy") => {
     onClose?.();
-    router.push(path);
+    router.push(path as never);
   };
 
   // There is no password-reset endpoint yet, so point people at the contact
