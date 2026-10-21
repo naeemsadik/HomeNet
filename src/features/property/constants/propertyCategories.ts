@@ -11,6 +11,9 @@ import {
   LucideIcon,
 } from "@/components/icons";
 import type { PropertyType } from "@/types/api";
+import { HOLIDAY_STAY_LABEL } from "./holidayStay";
+
+export { HOLIDAY_STAY_LABEL, displaySubtype } from "./holidayStay";
 
 export interface PropertySubtypeOption {
   value: string;
@@ -57,7 +60,7 @@ export const PROPERTY_TYPE_CONFIGS: Record<PropertyType, PropertyTypeConfig> = {
       { value: "house", label: "Independent House", description: "Standalone house, bungalow, or villa" },
       { value: "duplex", label: "Duplex", description: "Two-story independent or semi-detached residential unit" },
       { value: "condo", label: "Condominium", description: "Condominium unit with shared community amenities" },
-      { value: "short-let", label: "Short Let / Serviced", description: "Furnished serviced apartments for daily/monthly stays" },
+      { value: "short-let", label: `${HOLIDAY_STAY_LABEL} / Serviced`, description: "Furnished serviced apartments for daily/monthly stays" },
       { value: "penthouse", label: "Penthouse", description: "Top-floor luxury suite" },
       { value: "studio", label: "Studio", description: "Single-room open-plan living unit" },
     ],

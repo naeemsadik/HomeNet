@@ -75,7 +75,7 @@ export const OWNER_INTENT_OPTIONS: OwnerIntentOption[] = [
   },
   {
     id: "short_let",
-    label: "Short let",
+    label: "Holiday stay",
     badge: "High demand",
     icon: CalendarCheck,
     listingType: "rent",
