@@ -7,6 +7,7 @@ import { changePasswordSchema } from "@/lib/schemas/auth";
 import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
 import { colorTokens, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 import { styles } from "../screens/SellerProfileScreen.styles";
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -18,6 +19,7 @@ type SellerChangePasswordModalProps = {
 
 /** Change-password dialog for the seller profile. Owns its form state. */
 export function SellerChangePasswordModal({ visible, onClose }: SellerChangePasswordModalProps) {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
   const changePassword = useAuthStore((s) => s.changePassword);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -43,7 +45,7 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
       confirmPassword: confirmPassword,
     });
     if (!validation.success) {
-      setPasswordError(validation.error.issues[0]?.message || "Invalid password details.");
+      setPasswordError(validation.error.issues[0]?.message || t("seller.changePassword.invalidDetails"));
       return;
     }
 
@@ -59,9 +61,9 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        notify("Success", "Your password has been changed successfully.");
+        notify(t("seller.changePassword.successTitle"), t("seller.changePassword.successMessage"));
       } else {
-        setPasswordError("Failed to change password. Please check your current password.");
+        setPasswordError(t("seller.changePassword.failed"));
       }
     } catch (err: any) {
       setPasswordError(toApiError(err).message);
@@ -90,13 +92,13 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
               <KeyRound color="#03a675" size={20} />
             </View>
             <View style={styles.modalTitleWrap}>
-              <Text style={styles.modalTitle}>Change Password</Text>
+              <Text style={styles.modalTitle}>{t("seller.changePassword.title")}</Text>
               <Text style={styles.modalSubtitle}>
-                Enter your current password and a new secure password.
+                {t("seller.changePassword.subtitle")}
               </Text>
             </View>
             <Pressable
-              accessibilityLabel="Close"
+              accessibilityLabel={t("seller.changePassword.closeAria")}
               hitSlop={10}
               onPress={handleClose}
               style={[styles.modalCloseBtn, webPointer]}
@@ -113,7 +115,7 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
 
           {/* Current Password */}
           <View style={styles.modalInputGroup}>
-            <Text style={styles.modalFieldLabel}>Current password</Text>
+            <Text style={styles.modalFieldLabel}>{t("seller.changePassword.currentPassword")}</Text>
             <View style={styles.modalInputWrap}>
               <TextInput
                 autoCapitalize="none"
@@ -121,14 +123,14 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
                   setCurrentPassword(val);
                   setPasswordError(null);
                 }}
-                placeholder="Enter current password"
+                placeholder={t("seller.changePassword.currentPasswordPlaceholder")}
                 placeholderTextColor="rgba(11,26,23,0.35)"
                 secureTextEntry={!showCurrentPassword}
                 style={styles.modalTextInput}
                 value={currentPassword}
               />
               <Pressable
-                accessibilityLabel="Toggle show password"
+                accessibilityLabel={t("seller.changePassword.toggleShowPassword")}
                 onPress={() => setShowCurrentPassword(!showCurrentPassword)}
                 style={[styles.eyeBtn, webPointer]}
               >
@@ -143,7 +145,7 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
 
           {/* New Password */}
           <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
-            <Text style={styles.modalFieldLabel}>New password</Text>
+            <Text style={styles.modalFieldLabel}>{t("seller.changePassword.newPassword")}</Text>
             <View style={styles.modalInputWrap}>
               <TextInput
                 autoCapitalize="none"
@@ -151,14 +153,14 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
                   setNewPassword(val);
                   setPasswordError(null);
                 }}
-                placeholder="At least 6 characters"
+                placeholder={t("seller.changePassword.newPasswordPlaceholder")}
                 placeholderTextColor="rgba(11,26,23,0.35)"
                 secureTextEntry={!showNewPassword}
                 style={styles.modalTextInput}
                 value={newPassword}
               />
               <Pressable
-                accessibilityLabel="Toggle show password"
+                accessibilityLabel={t("seller.changePassword.toggleShowPassword")}
                 onPress={() => setShowNewPassword(!showNewPassword)}
                 style={[styles.eyeBtn, webPointer]}
               >
@@ -173,7 +175,7 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
 
           {/* Confirm New Password */}
           <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
-            <Text style={styles.modalFieldLabel}>Confirm new password</Text>
+            <Text style={styles.modalFieldLabel}>{t("seller.changePassword.confirmNewPassword")}</Text>
             <View style={styles.modalInputWrap}>
               <TextInput
                 autoCapitalize="none"
@@ -181,14 +183,14 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
                   setConfirmPassword(val);
                   setPasswordError(null);
                 }}
-                placeholder="Re-enter new password"
+                placeholder={t("seller.changePassword.confirmPasswordPlaceholder")}
                 placeholderTextColor="rgba(11,26,23,0.35)"
                 secureTextEntry={!showConfirmPassword}
                 style={styles.modalTextInput}
                 value={confirmPassword}
               />
               <Pressable
-                accessibilityLabel="Toggle show password"
+                accessibilityLabel={t("seller.changePassword.toggleShowPassword")}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                 style={[styles.eyeBtn, webPointer]}
               >
@@ -211,7 +213,7 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.modalCancelBtnText}>Cancel</Text>
+              <Text style={styles.modalCancelBtnText}>{t("seller.changePassword.cancelBtn")}</Text>
             </Pressable>
 
             <Pressable
@@ -227,7 +229,7 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
               {isChangingPassword ? (
                 <ActivityIndicator color={colorTokens.onBrand} size="small" />
               ) : (
-                <Text style={styles.modalSubmitBtnText}>Update password</Text>
+                <Text style={styles.modalSubmitBtnText}>{t("seller.changePassword.submitBtn")}</Text>
               )}
             </Pressable>
           </View>

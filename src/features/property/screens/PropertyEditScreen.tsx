@@ -7,12 +7,14 @@ import { PropertyForm } from "../components/PropertyForm";
 import { useUpdateProperty, useUploadMedia } from "../hooks/usePropertyMutations";
 import type { UpsertPropertyDto } from "@/types/api";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { colorTokens, fonts } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
 import { getPropertyById } from "@/services/propertyApi";
 import { toApiError } from "@/services/apiClient";
 
 export function PropertyEditScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isPhone } = useResponsive();
   const updateProperty = useUpdateProperty();
@@ -39,9 +41,9 @@ export function PropertyEditScreen() {
         }
       }
 
-      notify("Success", "Property updated successfully.", { onConfirm: () => router.back() });
+      notify(t("common.success"), t("property.updateSuccess"), { onConfirm: () => router.back() });
     } catch (err: any) {
-      notify("Error", toApiError(err).message);
+      notify(t("common.error"), toApiError(err).message);
     }
   };
 
@@ -60,7 +62,7 @@ export function PropertyEditScreen() {
       <AppChrome active="sell">
         <View style={styles.center}>
           <Text style={styles.errorText}>
-            {propertyError ? toApiError(propertyError).message : "Property not found."}
+            {propertyError ? toApiError(propertyError).message : t("property.notFound")}
           </Text>
         </View>
       </AppChrome>

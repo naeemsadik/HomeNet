@@ -9,7 +9,10 @@ import { colors, fonts, shadow } from "@/theme";
 import { getUser, type UserProfile } from "@/services/userApi";
 import { toApiError } from "@/services/apiClient";
 
+import { useTranslation } from "@/i18n";
+
 export function UserDetailScreen({ userId }: { userId: string }) {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +41,7 @@ export function UserDetailScreen({ userId }: { userId: string }) {
   if (loading) {
     return (
       <AppChrome active="users">
-        <View style={styles.center}><LoaderCircle color={colors.green} size={24} /><Text style={styles.loadingText}>Loading user…</Text></View>
+        <View style={styles.center}><LoaderCircle color={colors.green} size={24} /><Text style={styles.loadingText}>{t("userDirectory.detail.loading")}</Text></View>
       </AppChrome>
     );
   }
@@ -48,7 +51,7 @@ export function UserDetailScreen({ userId }: { userId: string }) {
       <AppChrome active="users">
         <View style={styles.center}>
           <XCircle color={colors.coral} size={32} />
-          <Text style={styles.errorText}>{error || "User not found"}</Text>
+          <Text style={styles.errorText}>{error || t("userDirectory.detail.notFound")}</Text>
         </View>
       </AppChrome>
     );
@@ -69,26 +72,26 @@ export function UserDetailScreen({ userId }: { userId: string }) {
             )}
           </View>
           <View style={styles.heroContent}>
-            <Eyebrow light>User profile</Eyebrow>
+            <Eyebrow light>{t("userDirectory.detail.eyebrow")}</Eyebrow>
             <Text style={styles.title}>{user.full_name}</Text>
             <View style={styles.badgeRow}>
               <View style={[styles.badge, isVerified && styles.badgeVerified]}>
                 <ShieldCheck color={colors.white} size={14} />
-                <Text style={styles.badgeText}>{isVerified ? "Verified" : "Unverified"}</Text>
+                <Text style={styles.badgeText}>{isVerified ? t("userDirectory.detail.verified") : t("userDirectory.detail.unverified")}</Text>
               </View>
             </View>
           </View>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Account information</Text>
+          <Text style={styles.sectionTitle}>{t("userDirectory.detail.accountInfo")}</Text>
 
           <View style={styles.detailRow}>
             <View style={styles.detailIcon}><Mail color={colors.green} size={16} /></View>
             <View style={styles.detailInfo}>
-              <Text style={styles.detailLabel}>Email</Text>
+              <Text style={styles.detailLabel}>{t("userDirectory.detail.email")}</Text>
               <Pressable onPress={() => identity?.email && Linking.openURL(`mailto:${identity.email}`)}>
-                <Text style={styles.detailValue}>{identity?.email ?? "N/A"}</Text>
+                <Text style={styles.detailValue}>{identity?.email ?? t("userDirectory.detail.na")}</Text>
               </Pressable>
             </View>
           </View>
@@ -96,27 +99,27 @@ export function UserDetailScreen({ userId }: { userId: string }) {
           <View style={styles.detailRow}>
             <View style={styles.detailIcon}><ShieldCheck color={colors.green} size={16} /></View>
             <View style={styles.detailInfo}>
-              <Text style={styles.detailLabel}>Provider</Text>
-              <Text style={styles.detailValue}>{identity?.provider ?? "N/A"}</Text>
+              <Text style={styles.detailLabel}>{t("userDirectory.detail.provider")}</Text>
+              <Text style={styles.detailValue}>{identity?.provider ?? t("userDirectory.detail.na")}</Text>
             </View>
           </View>
 
           <View style={styles.detailRow}>
             <View style={styles.detailIcon}><ShieldCheck color={colors.green} size={16} /></View>
             <View style={styles.detailInfo}>
-              <Text style={styles.detailLabel}>Verified at</Text>
-              <Text style={styles.detailValue}>{identity?.verified_at ? new Date(identity.verified_at).toLocaleString() : "Not verified"}</Text>
+              <Text style={styles.detailLabel}>{t("userDirectory.detail.verifiedAt")}</Text>
+              <Text style={styles.detailValue}>{identity?.verified_at ? new Date(identity.verified_at).toLocaleString() : t("userDirectory.detail.notVerified")}</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Timeline</Text>
+          <Text style={styles.sectionTitle}>{t("userDirectory.detail.timeline")}</Text>
 
           <View style={styles.detailRow}>
             <View style={styles.detailIcon}><UserRound color={colors.green} size={16} /></View>
             <View style={styles.detailInfo}>
-              <Text style={styles.detailLabel}>Created</Text>
+              <Text style={styles.detailLabel}>{t("userDirectory.detail.created")}</Text>
               <Text style={styles.detailValue}>{new Date(user.created_at).toLocaleString()}</Text>
             </View>
           </View>
@@ -124,7 +127,7 @@ export function UserDetailScreen({ userId }: { userId: string }) {
           <View style={styles.detailRow}>
             <View style={styles.detailIcon}><UserRound color={colors.green} size={16} /></View>
             <View style={styles.detailInfo}>
-              <Text style={styles.detailLabel}>Updated</Text>
+              <Text style={styles.detailLabel}>{t("userDirectory.detail.updated")}</Text>
               <Text style={styles.detailValue}>{new Date(user.updated_at).toLocaleString()}</Text>
             </View>
           </View>

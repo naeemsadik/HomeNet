@@ -46,6 +46,7 @@ import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
 import { SellerTopHeader } from "../components/SellerTopHeader";
 import { ToggleViewButton } from "../components/ToggleViewButton";
 import { Footer } from "@/components/Footer";
+import { useTranslation } from "@/i18n";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 import { styles } from "./SellerProfileScreen.styles";
 
@@ -56,13 +57,16 @@ const DEFAULT_NAME = "Your name";
 const DEFAULT_EMAIL = "you@example.com";
 
 export function SellerProfileScreen() {
+  const { t } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
   const { user, logout, fetchMe } = useAuthStore();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const defaultName = t("seller.profile.defaultName");
+
   // Form State
-  const [fullName, setFullName] = useState(user?.full_name || DEFAULT_NAME);
+  const [fullName, setFullName] = useState(user?.full_name || defaultName);
   const [email, setEmail] = useState(user?.email || DEFAULT_EMAIL);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     user?.avatar_url || DEFAULT_AVATAR
@@ -92,42 +96,42 @@ export function SellerProfileScreen() {
   const handleBadgePress = async () => {
     if (isVerified) {
       const view = await confirmAction(
-        "Verified Account",
-        "Your identity and credentials have been verified by HomeNet. View your verification details?",
-        { confirmLabel: "View Verification", cancelLabel: "OK" },
+        t("seller.profile.verifiedAlertTitle"),
+        t("seller.profile.verifiedAlertMessage"),
+        { confirmLabel: t("seller.profile.viewVerificationBtn"), cancelLabel: t("common.ok") },
       );
       if (view) router.push("/verification" as any);
     } else if (!user) {
       // Verification needs an account (the route is behind RequireAuth), so
       // signing in is the only step to offer.
       const signIn = await confirmAction(
-        "Sign In Required",
-        "You are currently viewing a preview profile. Sign in, then complete verification to get your verified badge. Sign in now?",
-        { confirmLabel: "Sign In" },
+        t("seller.profile.signInRequiredTitle"),
+        t("seller.profile.signInRequiredMessage"),
+        { confirmLabel: t("seller.profile.signInBtn") },
       );
       if (signIn) router.push("/profile" as any);
     } else {
       const go = await confirmAction(
-        "Verification Pending",
-        "Your account is not verified yet. Submit your documents in the Verification Center to get verified. Go there now?",
-        { confirmLabel: "Go to Verification" },
+        t("seller.profile.verificationPendingTitle"),
+        t("seller.profile.verificationPendingMessage"),
+        { confirmLabel: t("seller.profile.goToVerificationBtn") },
       );
       if (go) router.push("/verification" as any);
     }
   };
 
   const sidebarNavItems = [
-    { key: "dashboard" as SellerNavKey, label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
-    { key: "listings" as SellerNavKey, label: "My Listings", icon: Building2, href: "/my-properties" },
-    { key: "create" as SellerNavKey, label: "Create Property", icon: PlusCircle, href: "/property/create" },
-    { key: "verification" as SellerNavKey, label: "Verification", icon: ShieldCheck, href: "/verification" },
-    { key: "boost" as SellerNavKey, label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights" as SellerNavKey, label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics" as SellerNavKey, label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments" as SellerNavKey, label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile" as SellerNavKey, label: "Profile", icon: User, href: "/seller/profile", active: true },
-    { key: "help" as SellerNavKey, label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout" as SellerNavKey, label: "Logout", icon: LogOut, danger: true, href: "/" },
+    { key: "dashboard" as SellerNavKey, label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
+    { key: "listings" as SellerNavKey, label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties" },
+    { key: "create" as SellerNavKey, label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
+    { key: "verification" as SellerNavKey, label: t("dashboard.tabs.verification"), icon: ShieldCheck, href: "/verification" },
+    { key: "boost" as SellerNavKey, label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
+    { key: "insights" as SellerNavKey, label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "analytics" as SellerNavKey, label: t("dashboard.tabs.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
+    { key: "payments" as SellerNavKey, label: t("dashboard.tabs.payments"), icon: CreditCard, href: "/seller?tab=payments" },
+    { key: "profile" as SellerNavKey, label: t("dashboard.tabs.profile"), icon: User, href: "/seller/profile", active: true },
+    { key: "help" as SellerNavKey, label: t("dashboard.tabs.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
+    { key: "logout" as SellerNavKey, label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
   ];
 
   const handleAvatarUpload = async () => {
@@ -156,10 +160,10 @@ export function SellerProfileScreen() {
         };
         await uploadAvatar(file, asset.fileName || "avatar.jpg");
         await fetchMe();
-        notify("Success", "Profile photo updated successfully.");
+        notify(t("common.success"), t("seller.profile.photoUpdated"));
       }
     } catch (err: any) {
-      notify("Error", toApiError(err).message);
+      notify(t("common.error"), toApiError(err).message);
     } finally {
       setIsUploading(false);
     }
@@ -168,7 +172,7 @@ export function SellerProfileScreen() {
   const handleSaveChanges = async () => {
     const validation = editProfileSchema.safeParse({ full_name: fullName });
     if (!validation.success) {
-      notify("Validation", validation.error.issues[0]?.message || "Please enter a valid full name.");
+      notify(t("common.error"), validation.error.issues[0]?.message || t("seller.profile.invalidName"));
       return;
     }
 
@@ -178,9 +182,9 @@ export function SellerProfileScreen() {
         await updateUser(user.id, { full_name: validation.data.full_name });
         await fetchMe();
       }
-      notify("Success", "Profile changes saved successfully.");
+      notify(t("common.success"), t("seller.profile.changesSaved"));
     } catch (err: any) {
-      notify("Error", toApiError(err).message);
+      notify(t("common.error"), toApiError(err).message);
     } finally {
       setIsSaving(false);
     }
@@ -194,19 +198,19 @@ export function SellerProfileScreen() {
           await deleteUser(user.id);
           await logout();
         }
-        notify("Account Deleted", "Your account has been permanently deleted.");
+        notify(t("seller.profile.accountDeletedTitle"), t("seller.profile.accountDeletedMessage"));
         router.replace("/home");
       } catch (err: any) {
-        notify("Error", toApiError(err).message);
+        notify(t("common.error"), toApiError(err).message);
       } finally {
         setIsDeletingAccount(false);
       }
     };
 
     const confirmed = await confirmAction(
-      "Permanently Delete Account",
-      "Warning: This action cannot be undone. All your listings, saved properties, and account data will be permanently deleted. Are you sure you want to proceed?",
-      { confirmLabel: "Delete Permanently", destructive: true },
+      t("seller.profile.deleteAccountConfirmTitle"),
+      t("seller.profile.deleteAccountConfirmMessage"),
+      { confirmLabel: t("seller.profile.deletePermanentlyBtn"), destructive: true },
     );
     if (confirmed) await doDelete();
   };
@@ -221,8 +225,8 @@ export function SellerProfileScreen() {
       router.replace("/home");
     };
 
-    const confirmed = await confirmAction("Logout", "Are you sure you want to log out?", {
-      confirmLabel: "Logout",
+    const confirmed = await confirmAction(t("seller.profile.logoutConfirmTitle"), t("seller.profile.logoutConfirmMessage"), {
+      confirmLabel: t("seller.profile.logoutBtn"),
       destructive: true,
     });
     if (confirmed) await doLogout();
@@ -237,7 +241,7 @@ export function SellerProfileScreen() {
             <Brand />
 
             <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
+              <Text style={styles.sellerRoleText}>{t("seller.drawer.rolePill")}</Text>
             </View>
           </View>
 
@@ -306,19 +310,19 @@ export function SellerProfileScreen() {
             hasUnreadNotifications
             onPressMenu={() => setMobileDrawerOpen(true)}
             showViewSite={false}
-            title="Profile"
+            title={t("seller.profile.title")}
           />
         ) : (
           /* Desktop Header */
           <View style={styles.topHeader}>
-            <Text style={styles.headerTitle}>Profile</Text>
+            <Text style={styles.headerTitle}>{t("seller.profile.title")}</Text>
 
             <View style={styles.headerActions}>
               <View style={styles.searchContainer}>
                 <Search color="rgba(11,26,23,0.5)" size={16} />
                 <TextInput
                   onChangeText={setSearchQuery}
-                  placeholder="Search listings…"
+                  placeholder={t("seller.header.searchPlaceholder")}
                   placeholderTextColor="rgba(11,26,23,0.5)"
                   selectTextOnFocus
                   style={[
@@ -329,7 +333,7 @@ export function SellerProfileScreen() {
                 />
                 {searchQuery.length > 0 && (
                   <Pressable
-                    accessibilityLabel="Clear search"
+                    accessibilityLabel={t("seller.header.clearSearchAria")}
                     accessibilityRole="button"
                     hitSlop={8}
                     onPress={() => setSearchQuery("")}
@@ -341,7 +345,7 @@ export function SellerProfileScreen() {
               </View>
 
               <Pressable
-                accessibilityLabel="Notifications"
+                accessibilityLabel={t("seller.header.notificationsAria")}
                 accessibilityRole="button"
                 style={({ pressed }) => [
                   styles.iconCircleBtn,
@@ -374,7 +378,7 @@ export function SellerProfileScreen() {
             <View style={[styles.card, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
                 <User color="#0B1A17" size={20} />
-                <Text style={styles.cardTitle}>Personal information</Text>
+                <Text style={styles.cardTitle}>{t("seller.profile.personalInfoTitle")}</Text>
               </View>
 
               {/* Avatar and Name Row */}
@@ -399,7 +403,9 @@ export function SellerProfileScreen() {
 
                     <Pressable
                       accessibilityLabel={
-                        isVerified ? "Verified seller account" : "Account unverified"
+                        isVerified
+                          ? t("seller.profile.verifiedSellerAria")
+                          : t("seller.profile.unverifiedAria")
                       }
                       accessibilityRole="button"
                       onPress={handleBadgePress}
@@ -412,19 +418,19 @@ export function SellerProfileScreen() {
                       {isVerified ? (
                         <>
                           <CheckCircle2 color="#0F6D55" size={14} />
-                          <Text style={styles.verifiedText}>Verified</Text>
+                          <Text style={styles.verifiedText}>{t("seller.profile.verifiedBadge")}</Text>
                         </>
                       ) : (
                         <>
                           <ShieldAlert color="#D97706" size={14} />
-                          <Text style={styles.unverifiedText}>Unverified</Text>
+                          <Text style={styles.unverifiedText}>{t("seller.profile.unverifiedBadge")}</Text>
                         </>
                       )}
                     </Pressable>
                   </View>
 
                   <Pressable
-                    accessibilityLabel="Change photo"
+                    accessibilityLabel={t("seller.profile.changePhoto")}
                     accessibilityRole="button"
                     onPress={handleAvatarUpload}
                     style={({ pressed }) => [
@@ -433,14 +439,14 @@ export function SellerProfileScreen() {
                       pressed && styles.pressed,
                     ]}
                   >
-                    <Text style={styles.changePhotoText}>Change photo</Text>
+                    <Text style={styles.changePhotoText}>{t("seller.profile.changePhoto")}</Text>
                   </Pressable>
                 </View>
               </View>
 
               {/* Form Field: Full Name */}
               <View style={styles.formGroup}>
-                <Text style={styles.fieldLabel}>Full name</Text>
+                <Text style={styles.fieldLabel}>{t("seller.profile.fullNameLabel")}</Text>
                 <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                   <TextInput
                     onChangeText={setFullName}
@@ -460,7 +466,7 @@ export function SellerProfileScreen() {
                   />
                   {fullName.length > 0 && (
                     <Pressable
-                      accessibilityLabel="Clear full name"
+                      accessibilityLabel={t("seller.profile.clearFullNameAria")}
                       accessibilityRole="button"
                       hitSlop={8}
                       onPress={() => setFullName("")}
@@ -476,11 +482,11 @@ export function SellerProfileScreen() {
             {/* Section 2: Contact Information */}
             <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardTitle}>Contact information</Text>
+                <Text style={styles.cardTitle}>{t("seller.profile.contactInfoTitle")}</Text>
               </View>
 
               <View style={styles.formGroup}>
-                <Text style={styles.fieldLabel}>Email</Text>
+                <Text style={styles.fieldLabel}>{t("seller.profile.emailLabel")}</Text>
                 <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                   <TextInput
                     autoCapitalize="none"
@@ -502,7 +508,7 @@ export function SellerProfileScreen() {
                   />
                   {email.length > 0 && (
                     <Pressable
-                      accessibilityLabel="Clear email"
+                      accessibilityLabel={t("seller.profile.clearEmailAria")}
                       accessibilityRole="button"
                       hitSlop={8}
                       onPress={() => setEmail("")}
@@ -519,20 +525,20 @@ export function SellerProfileScreen() {
             <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
                 <Shield color="#0B1A17" size={20} />
-                <Text style={styles.cardTitle}>Account security</Text>
+                <Text style={styles.cardTitle}>{t("seller.profile.accountSecurityTitle")}</Text>
               </View>
 
               {/* Change Password Option */}
               <View style={[styles.securityRow, isPhone && styles.securityRowPhone]}>
                 <View style={styles.securityInfoCol}>
-                  <Text style={styles.securityTitle}>Password</Text>
+                  <Text style={styles.securityTitle}>{t("seller.profile.passwordTitle")}</Text>
                   <Text style={styles.securityDesc}>
-                    •••••••••••• &nbsp;·&nbsp; Keep your account protected with a strong password
+                    {t("seller.profile.passwordDesc")}
                   </Text>
                 </View>
 
                 <Pressable
-                  accessibilityLabel="Change password"
+                  accessibilityLabel={t("seller.profile.changePasswordBtn")}
                   accessibilityRole="button"
                   onPress={() => setChangePasswordModalOpen(true)}
                   style={({ pressed }) => [
@@ -543,7 +549,7 @@ export function SellerProfileScreen() {
                   ]}
                 >
                   <KeyRound color="#03a675" size={15} />
-                  <Text style={styles.changePasswordBtnText}>Change password</Text>
+                  <Text style={styles.changePasswordBtnText}>{t("seller.profile.changePasswordBtn")}</Text>
                 </Pressable>
               </View>
 
@@ -553,15 +559,15 @@ export function SellerProfileScreen() {
               <View style={[styles.securityRow, isPhone && styles.securityRowPhone]}>
                 <View style={styles.securityInfoCol}>
                   <Text style={[styles.securityTitle, { color: "#D4183D" }]}>
-                    Permanently delete account
+                    {t("seller.profile.deleteAccountTitle")}
                   </Text>
                   <Text style={styles.securityDesc}>
-                    Once deleted, your profile, listings, saved properties, and account data will be permanently removed.
+                    {t("seller.profile.deleteAccountDesc")}
                   </Text>
                 </View>
 
                 <Pressable
-                  accessibilityLabel="Permanently delete account"
+                  accessibilityLabel={t("seller.profile.deleteAccountBtn")}
                   accessibilityRole="button"
                   disabled={isDeletingAccount}
                   onPress={handleDeleteAccount}
@@ -578,7 +584,7 @@ export function SellerProfileScreen() {
                   ) : (
                     <>
                       <Trash2 color="#D4183D" size={15} />
-                      <Text style={styles.deleteAccountBtnText}>Permanently delete account</Text>
+                      <Text style={styles.deleteAccountBtnText}>{t("seller.profile.deleteAccountBtn")}</Text>
                     </>
                   )}
                 </Pressable>
@@ -589,7 +595,7 @@ export function SellerProfileScreen() {
             <View style={[styles.actionRow, isPhone && styles.actionRowPhone]}>
               {/* Save changes Button */}
               <Pressable
-                accessibilityLabel="Save changes"
+                accessibilityLabel={t("seller.profile.saveChangesBtn")}
                 accessibilityRole="button"
                 disabled={isSaving}
                 onPress={handleSaveChanges}
@@ -604,7 +610,7 @@ export function SellerProfileScreen() {
                 {isSaving ? (
                   <ActivityIndicator color={colorTokens.onBrand} size="small" />
                 ) : (
-                  <Text style={styles.saveBtnText}>Save changes</Text>
+                  <Text style={styles.saveBtnText}>{t("seller.profile.saveChangesBtn")}</Text>
                 )}
               </Pressable>
             </View>

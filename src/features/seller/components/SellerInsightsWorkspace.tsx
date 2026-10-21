@@ -3,11 +3,14 @@ import { Text, View } from "react-native";
 import { AiFinderWorkflow } from "@/components/AiFinderWorkflow";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors } from "@/theme";
+import { useTranslation } from "@/i18n";
 import { styles } from "../screens/SellerDashboardScreen.styles";
 
 /** AI Insights tab. */
 export function SellerInsightsWorkspace() {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
+
   return (
     <>
       <View style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}>
@@ -17,10 +20,10 @@ export function SellerInsightsWorkspace() {
           </View>
           <View style={styles.tabHeroTextWrap}>
             <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
-              AI Market & Property Match Insights
+              {t("seller.insights.heroTitle")}
             </Text>
             <Text style={[styles.tabHeroSubtitle, isPhone && styles.tabHeroSubtitlePhone]}>
-              Intelligent AI algorithms connecting your listings with high-intent buyers, optimizing pricing, and suggesting listing improvements.
+              {t("seller.insights.heroSubtitle")}
             </Text>
           </View>
         </View>
@@ -28,8 +31,8 @@ export function SellerInsightsWorkspace() {
 
       <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
         <View style={styles.tabCardHeader}>
-          <Text style={styles.tabCardTitle}>Live Portfolio Intelligence</Text>
-          <Text style={styles.tabCardSub}>Sample insights illustrating what HomeNet's AI matching engine surfaces once it has enough activity on your listings</Text>
+          <Text style={styles.tabCardTitle}>{t("seller.insights.portfolioTitle")}</Text>
+          <Text style={styles.tabCardSub}>{t("seller.insights.portfolioSubtitle")}</Text>
         </View>
 
         <View style={styles.insightsCardsGrid}>
@@ -37,12 +40,12 @@ export function SellerInsightsWorkspace() {
             <View style={[styles.insightCardIcon, { backgroundColor: colors.greenLight }]}>
               <TrendingUp color={colors.green} size={20} />
             </View>
-            <Text style={styles.insightCardTitle}>High Buyer Demand in Gulshan</Text>
+            <Text style={styles.insightCardTitle}>{t("seller.insights.demandCardTitle")}</Text>
             <Text style={styles.insightCardDesc}>
-              Over 48 verified buyers searched for 3-4 bedroom apartments in Gulshan and Banani in the past 7 days. Listings in this range receive 3x more contact requests.
+              {t("seller.insights.demandCardDesc")}
             </Text>
             <View style={styles.insightPill}>
-              <Text style={styles.insightPillText}>Demand Surge: +34%</Text>
+              <Text style={styles.insightPillText}>{t("seller.insights.demandCardPill")}</Text>
             </View>
           </View>
 
@@ -50,12 +53,12 @@ export function SellerInsightsWorkspace() {
             <View style={[styles.insightCardIcon, { backgroundColor: colors.blueLight }]}>
               <BarChart2 color={colors.blue} size={20} />
             </View>
-            <Text style={styles.insightCardTitle}>Competitive Price Guidance</Text>
+            <Text style={styles.insightCardTitle}>{t("seller.insights.priceCardTitle")}</Text>
             <Text style={styles.insightCardDesc}>
-              Properties priced between BDT 1.6 Cr – 2.2 Cr in central Dhaka have closed 2.4x faster than above-market peers this quarter. Review your listing pricing.
+              {t("seller.insights.priceCardDesc")}
             </Text>
             <View style={[styles.insightPill, { backgroundColor: colors.blueLight }]}>
-              <Text style={[styles.insightPillText, { color: colors.blue }]}>Optimal Closing Range</Text>
+              <Text style={[styles.insightPillText, { color: colors.blue }]}>{t("seller.insights.priceCardPill")}</Text>
             </View>
           </View>
 
@@ -63,12 +66,12 @@ export function SellerInsightsWorkspace() {
             <View style={[styles.insightCardIcon, { backgroundColor: colors.orangeLight }]}>
               <CheckCircle2 color={colors.orange} size={20} />
             </View>
-            <Text style={styles.insightCardTitle}>Listing Quality Score</Text>
+            <Text style={styles.insightCardTitle}>{t("seller.insights.qualityCardTitle")}</Text>
             <Text style={styles.insightCardDesc}>
-              Listings with verified floorplans, high-res photos, and complete amenity tags retain buyers 42% longer on page. Submit documents in Verification Center.
+              {t("seller.insights.qualityCardDesc")}
             </Text>
             <View style={[styles.insightPill, { backgroundColor: colors.orangeLight }]}>
-              <Text style={[styles.insightPillText, { color: colors.orange }]}>Verification Priority</Text>
+              <Text style={[styles.insightPillText, { color: colors.orange }]}>{t("seller.insights.qualityCardPill")}</Text>
             </View>
           </View>
         </View>
@@ -76,8 +79,8 @@ export function SellerInsightsWorkspace() {
 
       <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
         <View style={styles.tabCardHeader}>
-          <Text style={styles.tabCardTitle}>Interactive AI Property Matcher</Text>
-          <Text style={styles.tabCardSub}>Explore buyer preferences or match properties live</Text>
+          <Text style={styles.tabCardTitle}>{t("seller.insights.matcherTitle")}</Text>
+          <Text style={styles.tabCardSub}>{t("seller.insights.matcherSubtitle")}</Text>
         </View>
         <AiFinderWorkflow />
       </View>

@@ -18,6 +18,7 @@ import {
 import { AreaPicker } from "@/components/AreaPicker";
 import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 import type { ValuationPropertyType } from "../types/valuationTypes";
 import type { Area } from "@/types/api";
@@ -33,42 +34,43 @@ const DHAKA_POPULAR_NEIGHBORHOODS = [
   "Baridhara",
 ];
 
-const PROPERTY_TYPES: {
-  key: ValuationPropertyType;
-  label: string;
-  sub: string;
-  icon: typeof Building2;
-}[] = [
-  {
-    key: "apartment",
-    label: "Apartment / Flat",
-    sub: "Residential unit in multistoried building",
-    icon: Building2,
-  },
-  {
-    key: "house",
-    label: "Independent House",
-    sub: "Duplex, triplex, or detached building",
-    icon: Home,
-  },
-  {
-    key: "commercial",
-    label: "Commercial Space",
-    sub: "Office floor, showroom, or retail",
-    icon: Building2,
-  },
-  {
-    key: "land",
-    label: "Land / Plot",
-    sub: "Residential or commercial plot (Katha)",
-    icon: LandPlot,
-  },
-];
-
 export function Step1LocationDetails() {
+  const { t } = useTranslation();
   const { form, setFormField, nextStep, isStep1Valid } = useInstantValuation();
   const { isPhone } = useResponsive();
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
+
+  const propertyTypes: {
+    key: ValuationPropertyType;
+    label: string;
+    sub: string;
+    icon: typeof Building2;
+  }[] = [
+    {
+      key: "apartment",
+      label: t("valuation.step1.types.apartment"),
+      sub: t("valuation.step1.types.apartmentSub"),
+      icon: Building2,
+    },
+    {
+      key: "house",
+      label: t("valuation.step1.types.house"),
+      sub: t("valuation.step1.types.houseSub"),
+      icon: Home,
+    },
+    {
+      key: "commercial",
+      label: t("valuation.step1.types.commercial"),
+      sub: t("valuation.step1.types.commercialSub"),
+      icon: Building2,
+    },
+    {
+      key: "land",
+      label: t("valuation.step1.types.land"),
+      sub: t("valuation.step1.types.landSub"),
+      icon: LandPlot,
+    },
+  ];
 
   const handleSelectArea = (area: Area | null) => {
     if (area) {
@@ -81,15 +83,15 @@ export function Step1LocationDetails() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Where is your property located?</Text>
+        <Text style={styles.title}>{t("valuation.step1.title")}</Text>
         <Text style={styles.subtitle}>
-          Dhaka property values vary significantly by neighborhood, sector, and road frontage.
+          {t("valuation.step1.subtitle")}
         </Text>
       </View>
 
       {/* Purpose Toggle: Sale vs Rent */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Valuation Purpose</Text>
+        <Text style={styles.sectionLabel}>{t("valuation.step1.purposeLabel")}</Text>
         <View style={styles.purposeToggleRow}>
           <Pressable
             accessibilityRole="button"
@@ -111,7 +113,7 @@ export function Step1LocationDetails() {
                 form.purpose === "sale" && styles.purposeTabTextActive,
               ]}
             >
-              Sale Valuation
+              {t("valuation.step1.saleValuation")}
             </Text>
           </Pressable>
 
@@ -135,7 +137,7 @@ export function Step1LocationDetails() {
                 form.purpose === "rent" && styles.purposeTabTextActive,
               ]}
             >
-              Rental Valuation
+              {t("valuation.step1.rentValuation")}
             </Text>
           </Pressable>
         </View>
@@ -143,16 +145,16 @@ export function Step1LocationDetails() {
 
       {/* Property Type Grid */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Property Type</Text>
+        <Text style={styles.sectionLabel}>{t("valuation.step1.propertyTypeLabel")}</Text>
         <View style={[styles.typesGrid, isPhone && styles.typesGridPhone]}>
-          {PROPERTY_TYPES.map((t) => {
-            const isSelected = form.propertyType === t.key;
-            const Icon = t.icon;
+          {propertyTypes.map((item) => {
+            const isSelected = form.propertyType === item.key;
+            const Icon = item.icon;
             return (
               <Pressable
-                key={t.key}
+                key={item.key}
                 accessibilityRole="button"
-                onPress={() => setFormField("propertyType", t.key)}
+                onPress={() => setFormField("propertyType", item.key)}
                 style={({ hovered }: any) => [
                   styles.typeCard,
                   isPhone && styles.typeCardPhone,
@@ -180,10 +182,10 @@ export function Step1LocationDetails() {
                       isSelected && styles.typeLabelSelected,
                     ]}
                   >
-                    {t.label}
+                    {item.label}
                   </Text>
                   <Text style={styles.typeSub} numberOfLines={1}>
-                    {t.sub}
+                    {item.sub}
                   </Text>
                 </View>
               </Pressable>
@@ -194,7 +196,7 @@ export function Step1LocationDetails() {
 
       {/* Dhaka Area Selector */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Dhaka Neighborhood / Thana</Text>
+        <Text style={styles.sectionLabel}>{t("valuation.step1.areaLabel")}</Text>
 
         <Pressable
           accessibilityRole="button"
@@ -208,7 +210,7 @@ export function Step1LocationDetails() {
           <View style={styles.areaLeft}>
             <MapPin color={colors.greenOnLight} size={18} strokeWidth={2.2} />
             <Text style={styles.areaValueText}>
-              {form.areaName || "Select Area in Dhaka (e.g. Gulshan, Dhanmondi)"}
+              {form.areaName || t("valuation.step1.areaPlaceholder")}
             </Text>
           </View>
           <ChevronDown color={colors.muted} size={18} strokeWidth={2} />
@@ -249,27 +251,27 @@ export function Step1LocationDetails() {
 
       {/* Address Details: Road / Sector / Plot */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Road, Sector, or Block (Crucial for micro-pricing)</Text>
+        <Text style={styles.sectionLabel}>{t("valuation.step1.roadLabel")}</Text>
         <TextInput
           onChangeText={(v) => {
             setFormField("roadOrBlock", v);
             setFormField("address", `${v ? `${v}, ` : ""}${form.areaName}, Dhaka`);
           }}
-          placeholder="e.g. Road 92, Sector 4, Block D, Avenue 3"
+          placeholder={t("valuation.step1.roadPlaceholder")}
           placeholderTextColor={colors.muted}
           style={styles.textInput}
           value={form.roadOrBlock}
         />
         <Text style={styles.inputHelper}>
-          In Gulshan, Banani, and Uttara, specific blocks or avenues can impact price by 15–20%.
+          {t("valuation.step1.roadHelper")}
         </Text>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Building or Project Name (Optional)</Text>
+        <Text style={styles.sectionLabel}>{t("valuation.step1.buildingLabel")}</Text>
         <TextInput
           onChangeText={(v) => setFormField("buildingName", v)}
-          placeholder="e.g. Shanta Forum, Concord Tower, Private Residence"
+          placeholder={t("valuation.step1.buildingPlaceholder")}
           placeholderTextColor={colors.muted}
           style={styles.textInput}
           value={form.buildingName}
@@ -290,7 +292,7 @@ export function Step1LocationDetails() {
             webPointer,
           ]}
         >
-          <Text style={styles.continueButtonText}>Continue to Property Specs</Text>
+          <Text style={styles.continueButtonText}>{t("valuation.step1.continueCTA")}</Text>
           <ArrowRight color={colorTokens.onBrand} size={18} strokeWidth={2.4} />
         </Pressable>
       </View>

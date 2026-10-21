@@ -11,15 +11,11 @@ import {
 import { NotificationItem } from "./NotificationItem";
 import { colorTokens, fonts } from "@/theme";
 
-import { Bell } from "@/components/icons";
+import { Bell } from "@/components/icons";
+
 import { LiveText } from "@/components/LiveText";
 
-// Says only what the system actually sends. Messaging (FR-12) is out of
-// scope, so nothing here may promise messages.
-const EMPTY_COPY: Record<NotificationAudience, string> = {
-  user: "You'll hear here when your listing is approved, or when a property you saved sells or drops in price.",
-  admin: "New listings waiting for review will appear here.",
-};
+import { useTranslation } from "@/i18n";
 
 interface NotificationListProps {
   /** "user" in the app, "admin" in the admin panel. */
@@ -29,6 +25,7 @@ interface NotificationListProps {
 }
 
 export function NotificationList({ audience = "user", onPressItem }: NotificationListProps) {
+  const { t } = useTranslation();
   const {
     data,
     fetchNextPage,
@@ -70,9 +67,9 @@ export function NotificationList({ audience = "user", onPressItem }: Notificatio
         <View style={styles.emptyIconWrap}>
           <Bell color={colorTokens.textMuted} size={40} />
         </View>
-        <Text style={styles.emptyTitle}>No notifications yet</Text>
+        <Text style={styles.emptyTitle}>{t("notifications.emptyTitle")}</Text>
         <Text style={styles.emptySubtitle}>
-          {EMPTY_COPY[audience]}
+          {audience === "admin" ? t("notifications.emptyAdmin") : t("notifications.emptyUser")}
         </Text>
       </View>
     );
@@ -82,13 +79,15 @@ export function NotificationList({ audience = "user", onPressItem }: Notificatio
     <View style={styles.listContainer}>
       {totalUnread > 0 ? (
         <View style={styles.header}>
-          <LiveText style={styles.unreadText}>{totalUnread} unread</LiveText>
+          <LiveText style={styles.unreadText}>
+            {t("notifications.unreadCount", { count: totalUnread })}
+          </LiveText>
           <Pressable
             onPress={() => markAll.mutate()}
             style={styles.markAllBtn}
-            accessibilityLabel="Mark all notifications as read"
+            accessibilityLabel={t("notifications.markAllReadAria")}
           >
-            <Text style={styles.markAllText}>Mark all read</Text>
+            <Text style={styles.markAllText}>{t("notifications.markAllRead")}</Text>
           </Pressable>
         </View>
       ) : null}
