@@ -27,13 +27,13 @@ export const en = {
     tabs: {
       buy: "Buy",
       rent: "Rent",
-      shortLet: "Short-let",
+      shortLet: "Holiday stay",
       sold: "Sold",
       instantValuation: "Instant valuation",
     },
     placeholders: {
       buyRent: "Gulshan, Banani, Dhanmondi, or area…",
-      shortLet: "Search short-let and serviced flats",
+      shortLet: "Search holiday stays and serviced flats",
       sold: "See what sold in an area…",
     },
     allLocations: "All locations",

@@ -1,7 +1,9 @@
 import {
   CUSTOM_SUBTYPE_MAX_LENGTH,
+  HOLIDAY_STAY_LABEL,
   PROPERTY_TYPE_CONFIGS,
   cleanCustomSubtype,
+  displaySubtype,
   findKnownSubtype,
   initialSubtype,
   subtypeLabel,
@@ -128,5 +130,44 @@ describe("initialSubtype", () => {
   it("drops a custom suggestion for parking", () => {
     expect(initialSubtype(parking, "rooftop")).toBe("covered");
     expect(initialSubtype(parking, "garage")).toBe("garage");
+  });
+});
+
+// The words on screen are "Holiday stay"; the stored value, which the API, saved
+// listings and the ?subtype=short-let links use, must not change.
+describe("holiday stay", () => {
+  const option = residential.subtypes.find((o) => o.value === "short-let");
+
+  it("is shown as Holiday stay but still stored as short-let", () => {
+    expect(HOLIDAY_STAY_LABEL).toBe("Holiday stay");
+    expect(option?.value).toBe("short-let");
+    expect(option?.label).toBe("Holiday stay / Serviced");
+    expect(subtypeLabel(residential, "short-let")).toBe("Holiday stay / Serviced");
+  });
+
+  it.each(["short-let", "short let", "Short Let", "SHORT_LET", "holiday stay", "Holiday Stay", "serviced"])(
+    "is still found when typed as %s",
+    (text) => {
+      expect(findKnownSubtype(residential, text)?.value).toBe("short-let");
+    },
+  );
+
+  it.each(["short-let", "short let", "Short-let", " SHORT_LET "])(
+    "shows a listing stored as %p as Holiday stay",
+    (stored) => {
+      expect(displaySubtype(stored)).toBe("Holiday stay");
+    },
+  );
+
+  it("leaves every other subtype exactly as stored", () => {
+    expect(displaySubtype("apartment")).toBe("apartment");
+    expect(displaySubtype("Farm house")).toBe("Farm house");
+    expect(displaySubtype("short-lease")).toBe("short-lease");
+  });
+
+  it("gives nothing for a missing subtype", () => {
+    expect(displaySubtype(null)).toBe("");
+    expect(displaySubtype(undefined)).toBe("");
+    expect(displaySubtype("")).toBe("");
   });
 });

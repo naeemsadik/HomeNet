@@ -29,13 +29,13 @@ export const bn: TranslationSchema = {
     tabs: {
       buy: "কিনুন",
       rent: "ভাড়া",
-      shortLet: "শর্ট-লেট",
+      shortLet: "হলিডে স্টে",
       sold: "বিক্রি হয়েছে",
       instantValuation: "তাৎক্ষণিক মূল্যায়ন",
     },
     placeholders: {
       buyRent: "গুলশান, বনানী, ধানমন্ডি, বা এলাকা…",
-      shortLet: "শর্ট-লেট ও সার্ভিস ফ্ল্যাট খুঁজুন",
+      shortLet: "হলিডে স্টে ও সার্ভিস ফ্ল্যাট খুঁজুন",
       sold: "এলাকায় কী কী বিক্রি হয়েছে দেখুন…",
     },
     allLocations: "সকল এলাকা",

@@ -35,6 +35,7 @@ import {
 import { AppChrome } from "@/components/AppChrome";
 import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
+import { displaySubtype } from "../constants/holidayStay";
 import { breadcrumbSchema, listingCrumbs, listingSchema } from "@/lib/schema";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -123,7 +124,7 @@ export function PropertyDetailScreen() {
       address: apiDetail.address || location || "Address unavailable",
       latitude: apiDetail.location_lat,
       longitude: apiDetail.location_lng,
-      type: apiDetail.subtype || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
+      type: displaySubtype(apiDetail.subtype) || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
       listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
       price: typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
       priceCurrency: apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),

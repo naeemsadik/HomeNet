@@ -74,7 +74,7 @@ export const OWNER_INTENT_OPTIONS: OwnerIntentOption[] = [
   },
   {
     id: "short_let",
-    label: "Short let",
+    label: "Holiday stay",
     badge: "High demand",
     icon: CalendarCheck,
     listingType: "rent",
@@ -244,7 +244,7 @@ export function OwnerListPropertySection() {
 
                 {/* Subcopy */}
                 <Text style={[styles.subcopy, isPhone && styles.subcopyPhone]}>
-                  Sell, rent, or short-let with confidence. List flats, houses, plots,
+                  Sell, rent, or list a holiday stay with confidence. List flats, houses, plots,
                   garages, parking spaces, or commercial units across Bangladesh — completely
                   free to start.
                 </Text>

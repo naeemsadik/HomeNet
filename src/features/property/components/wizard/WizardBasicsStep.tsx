@@ -6,6 +6,7 @@ import { webPointer } from "@/theme";
 import type { PropertyType } from "@/types/api";
 import {
   CUSTOM_SUBTYPE_MAX_LENGTH,
+  HOLIDAY_STAY_LABEL,
   PROPERTY_TYPE_CONFIGS,
   cleanCustomSubtype,
   findKnownSubtype,
@@ -282,7 +283,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                   store.subtype === "short-let" && styles.toggleBtnTextActive,
                 ]}
               >
-                Short-let
+                {HOLIDAY_STAY_LABEL}
               </Text>
             </Pressable>
           </View>
