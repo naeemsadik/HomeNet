@@ -51,12 +51,31 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            { "scheme": "https", "host": "www.homenetbd.com", "pathPrefix": "/property/" },
-            { "scheme": "https", "host": "www.homenetbd.com", "pathPrefix": "/buy" },
-            { "scheme": "https", "host": "www.homenetbd.com", "pathPrefix": "/rent" },
-            { "scheme": "https", "host": "www.homenetbd.com", "pathPrefix": "/guides" }
+            {
+              "scheme": "https",
+              "host": "www.homenetbd.com",
+              "pathPrefix": "/property/"
+            },
+            {
+              "scheme": "https",
+              "host": "www.homenetbd.com",
+              "pathPrefix": "/buy"
+            },
+            {
+              "scheme": "https",
+              "host": "www.homenetbd.com",
+              "pathPrefix": "/rent"
+            },
+            {
+              "scheme": "https",
+              "host": "www.homenetbd.com",
+              "pathPrefix": "/guides"
+            }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "predictiveBackGestureEnabled": false,
@@ -80,6 +99,13 @@
     },
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "48a8f857-63d4-45c7-882b-5608f2c33d39"
+      }
+    },
+    "owner": "ejaz-uddin-swarons-team"
   }
 }
