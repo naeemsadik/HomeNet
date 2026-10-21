@@ -3,11 +3,53 @@ import { Pressable, Text, View } from "react-native";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, webPointer } from "@/theme";
+import { useTranslation, formatLocalizedNumber } from "@/i18n";
 import { styles } from "../screens/SellerDashboardScreen.styles";
 
 /** Boost tab: packages and boosted listings. */
 export function SellerBoostWorkspace({ onOpenBoost }: { onOpenBoost: (packageId?: string) => void }) {
+  const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
+
+  const packages = [
+    {
+      id: "featured",
+      name: t("seller.boost.packages.featured.name"),
+      price: t("seller.boost.packages.featured.price"),
+      badge: t("seller.boost.packages.featured.badge"),
+      popular: false,
+      bullets: [
+        t("seller.boost.packages.featured.bullet1"),
+        t("seller.boost.packages.featured.bullet2"),
+        t("seller.boost.packages.featured.bullet3"),
+      ],
+    },
+    {
+      id: "ai_priority",
+      name: t("seller.boost.packages.aiPriority.name"),
+      price: t("seller.boost.packages.aiPriority.price"),
+      badge: t("seller.boost.packages.aiPriority.badge"),
+      popular: true,
+      bullets: [
+        t("seller.boost.packages.aiPriority.bullet1"),
+        t("seller.boost.packages.aiPriority.bullet2"),
+        t("seller.boost.packages.aiPriority.bullet3"),
+      ],
+    },
+    {
+      id: "omni_blast",
+      name: t("seller.boost.packages.omniBlast.name"),
+      price: t("seller.boost.packages.omniBlast.price"),
+      badge: t("seller.boost.packages.omniBlast.badge"),
+      popular: false,
+      bullets: [
+        t("seller.boost.packages.omniBlast.bullet1"),
+        t("seller.boost.packages.omniBlast.bullet2"),
+        t("seller.boost.packages.omniBlast.bullet3"),
+      ],
+    },
+  ];
+
   return (
     <>
       <View style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}>
@@ -17,10 +59,10 @@ export function SellerBoostWorkspace({ onOpenBoost }: { onOpenBoost: (packageId?
           </View>
           <View style={styles.tabHeroTextWrap}>
             <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
-              Boost Listings & Maximize Reach
+              {t("seller.boost.workspace.heroTitle")}
             </Text>
             <Text style={[styles.tabHeroSubtitle, isPhone && styles.tabHeroSubtitlePhone]}>
-              Promote your properties to reach up to 10x more verified buyers across Dhaka with top search placement.
+              {t("seller.boost.workspace.heroSubtitle")}
             </Text>
           </View>
         </View>
@@ -33,77 +75,44 @@ export function SellerBoostWorkspace({ onOpenBoost }: { onOpenBoost: (packageId?
           ]}
         >
           <Rocket color={colors.ink} size={16} />
-          <Text style={styles.tabHeroActionText}>Boost a Property</Text>
+          <Text style={styles.tabHeroActionText}>{t("seller.boost.workspace.boostPropertyBtn")}</Text>
         </Pressable>
       </View>
 
       <View style={styles.kpiRow}>
         <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
-          <Text style={[styles.kpiValue, { color: colors.green }]}>0</Text>
-          <Text style={styles.kpiLabel}>Active Boosts</Text>
-          <Text style={styles.kpiSub}>Currently promoted</Text>
+          <Text style={[styles.kpiValue, { color: colors.green }]}>{formatLocalizedNumber(0, language)}</Text>
+          <Text style={styles.kpiLabel}>{t("seller.boost.workspace.activeBoosts")}</Text>
+          <Text style={styles.kpiSub}>{t("seller.boost.workspace.currentlyPromoted")}</Text>
         </View>
       </View>
 
       <View style={styles.boostBenchmarkRow}>
         {[
-          { label: "Typical impression lift", value: "up to 3x", icon: TrendingUp },
-          { label: "Typical inquiry lift", value: "up to 5x", icon: MessageSquare },
-        ].map((item) => (
-          <View key={item.label} style={styles.boostBenchmarkItem}>
+          {
+            text: t("seller.boost.workspace.benchmarkImpressions", { value: "up to 3x" }),
+            icon: TrendingUp,
+          },
+          {
+            text: t("seller.boost.workspace.benchmarkInquiries", { value: "up to 5x" }),
+            icon: MessageSquare,
+          },
+        ].map((item, idx) => (
+          <View key={idx} style={styles.boostBenchmarkItem}>
             <item.icon color={colors.muted} size={14} />
-            <Text style={styles.boostBenchmarkText}>
-              <Text style={styles.boostBenchmarkValue}>{item.value}</Text> {item.label} reported across boosted listings
-            </Text>
+            <Text style={styles.boostBenchmarkText}>{item.text}</Text>
           </View>
         ))}
       </View>
 
       <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
         <View style={styles.tabCardHeader}>
-          <Text style={styles.tabCardTitle}>Available Boost Packages</Text>
-          <Text style={styles.tabCardSub}>Choose a tailored tier to supercharge visibility for your listings</Text>
+          <Text style={styles.tabCardTitle}>{t("seller.boost.workspace.packagesTitle")}</Text>
+          <Text style={styles.tabCardSub}>{t("seller.boost.workspace.packagesSubtitle")}</Text>
         </View>
 
         <View style={styles.boostPackagesGrid}>
-          {[
-            {
-              id: "featured",
-              name: "Featured Spotlight",
-              price: "৳ 1,500 / 7 days",
-              badge: "Quick Sales",
-              popular: false,
-              bullets: [
-                "Top placement in search results",
-                "Featured badge on property card",
-                "Priority indexing for 7 days",
-              ],
-            },
-            {
-              id: "ai_priority",
-              name: "AI Recommendation Priority",
-              price: "৳ 2,500 / 14 days",
-              badge: "Most Popular",
-              popular: true,
-              bullets: [
-                "Ranked #1 in Homenet AI Matchmaker",
-                "Instant SMS alerts to active buyers",
-                "Featured across area landing pages",
-              ],
-            },
-            {
-              id: "omni_blast",
-              name: "VIP Omni-Channel Blast",
-              price: "৳ 4,500 / 30 days",
-              badge: "Maximum Visibility",
-              popular: false,
-              bullets: [
-                "Homepage hero showcase banner",
-                "Weekly buyer newsletter highlight",
-                "Dedicated WhatsApp partner advisor",
-              ],
-            },
-          ].map((pkg) => (
+          {packages.map((pkg) => (
             <View
               key={pkg.id}
               style={[
@@ -148,7 +157,7 @@ export function SellerBoostWorkspace({ onOpenBoost }: { onOpenBoost: (packageId?
                     pkg.popular && styles.selectPkgBtnTextPopular,
                   ]}
                 >
-                  Select Plan
+                  {t("seller.boost.workspace.selectPlan")}
                 </Text>
               </Pressable>
             </View>
@@ -158,20 +167,20 @@ export function SellerBoostWorkspace({ onOpenBoost }: { onOpenBoost: (packageId?
 
       <View style={[styles.tabCard, isPhone && styles.tabCardPhone]}>
         <View style={styles.tabCardHeader}>
-          <Text style={styles.tabCardTitle}>Your Boosted Properties</Text>
-          <Text style={styles.tabCardSub}>Track live promotions, impressions, and expiry schedules</Text>
+          <Text style={styles.tabCardTitle}>{t("seller.boost.workspace.boostedPropertiesTitle")}</Text>
+          <Text style={styles.tabCardSub}>{t("seller.boost.workspace.boostedPropertiesSubtitle")}</Text>
         </View>
 
         <View style={styles.emptyStateContainer}>
           <View style={styles.emptyIconWrap}>
             <Rocket color={colors.green} size={26} />
           </View>
-          <Text style={styles.emptyTitle}>No Active Boosts</Text>
+          <Text style={styles.emptyTitle}>{t("seller.boost.workspace.noActiveBoostsTitle")}</Text>
           <Text style={styles.emptyDesc}>
-            None of your properties are currently boosted. Select a listing from your inventory to launch a campaign.
+            {t("seller.boost.workspace.noActiveBoostsDesc")}
           </Text>
           <AppLink href="/my-properties" style={styles.emptyActionBtn}>
-            <Text style={styles.emptyActionBtnText}>Manage My Listings</Text>
+            <Text style={styles.emptyActionBtnText}>{t("seller.boost.workspace.manageListings")}</Text>
           </AppLink>
         </View>
       </View>

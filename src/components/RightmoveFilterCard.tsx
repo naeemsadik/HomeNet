@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { Check, ChevronDown, Edit3 } from "@/components/icons";
+import { useTranslation } from "@/i18n";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 
@@ -177,10 +178,77 @@ export function RightmoveFilterCard({
   locationName = "Dhaka",
   totalResults,
 }: RightmoveFilterCardProps) {
+  const { t } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [customLocation, setCustomLocation] = useState(filters.query || locationName);
   const isDesktop = !isPhone && !isTablet;
+
+  const radiusOptions = useMemo(
+    () => [
+      { label: t("search.rightmove.radiusOptions.thisArea"), value: "" },
+      { label: t("search.rightmove.radiusOptions.plus1"), value: "1" },
+      { label: t("search.rightmove.radiusOptions.plus3"), value: "3" },
+      { label: t("search.rightmove.radiusOptions.plus5"), value: "5" },
+      { label: t("search.rightmove.radiusOptions.plus10"), value: "10" },
+      { label: t("search.rightmove.radiusOptions.plus20"), value: "20" },
+    ],
+    [t],
+  );
+
+  const propertyTypeOptions = useMemo(
+    () => [
+      { label: t("search.rightmove.typeOptions.any"), value: "all" },
+      { label: t("search.rightmove.typeOptions.residential"), value: "residential" },
+      { label: t("search.rightmove.typeOptions.commercial"), value: "commercial" },
+      { label: t("search.rightmove.typeOptions.land"), value: "land" },
+      { label: t("search.rightmove.typeOptions.parking"), value: "parking" },
+    ],
+    [t],
+  );
+
+  const addedToSiteOptions = useMemo(
+    () => [
+      { label: t("search.rightmove.addedOptions.anytime"), value: "" },
+      { label: t("search.rightmove.addedOptions.last24h"), value: "24h" },
+      { label: t("search.rightmove.addedOptions.last3d"), value: "3d" },
+      { label: t("search.rightmove.addedOptions.last7d"), value: "7d" },
+      { label: t("search.rightmove.addedOptions.last14d"), value: "14d" },
+    ],
+    [t],
+  );
+
+  const minPriceOptions = useMemo(
+    () => [
+      { label: t("search.rightmove.noMin"), value: "" },
+      ...MIN_PRICE_OPTIONS.slice(1),
+    ],
+    [t],
+  );
+
+  const maxPriceOptions = useMemo(
+    () => [
+      { label: t("search.rightmove.noMax"), value: "" },
+      ...MAX_PRICE_OPTIONS.slice(1),
+    ],
+    [t],
+  );
+
+  const minBedOptions = useMemo(
+    () => [
+      { label: t("search.rightmove.noMin"), value: "" },
+      ...MIN_BED_OPTIONS.slice(1),
+    ],
+    [t],
+  );
+
+  const maxBedOptions = useMemo(
+    () => [
+      { label: t("search.rightmove.noMax"), value: "" },
+      ...MAX_BED_OPTIONS.slice(1),
+    ],
+    [t],
+  );
 
   const handleUpdate = (patch: Partial<RightmoveFilters>) => {
     const updated = { ...filters, ...patch };
@@ -196,16 +264,11 @@ export function RightmoveFilterCard({
   const getHeading = () => {
     const place = filters.query?.trim() || locationName || "Bangladesh";
     // Sold is a lookup, not a search — the verb changes with it.
-    if (filters.purpose === "sold") return `Recently sold in ${place}`;
-    const purposeText =
-      filters.purpose === "short-let"
-        ? "for short-let"
-        : filters.purpose === "rent"
-        ? "to rent"
-        : filters.purpose === "sale"
-        ? "for sale"
-        : "for sale & rent";
-    return `Find property ${purposeText} in ${place}`;
+    if (filters.purpose === "sold") return t("search.rightmove.headingSold", { location: place });
+    if (filters.purpose === "short-let") return t("search.rightmove.headingShortLet", { location: place });
+    if (filters.purpose === "rent") return t("search.rightmove.headingRent", { location: place });
+    if (filters.purpose === "sale") return t("search.rightmove.headingSale", { location: place });
+    return t("search.rightmove.headingAll", { location: place });
   };
 
   return (
@@ -218,7 +281,7 @@ export function RightmoveFilterCard({
               value={customLocation}
               onChangeText={setCustomLocation}
               onSubmitEditing={handleLocationSubmit}
-              placeholder="Enter location, area or project..."
+              placeholder={t("search.rightmove.locationPlaceholder")}
               placeholderTextColor="#5C6B66"
               style={styles.editTitleInput}
               autoFocus
@@ -227,7 +290,7 @@ export function RightmoveFilterCard({
               onPress={handleLocationSubmit}
               style={[styles.saveTitleBtn, webPointer]}
             >
-              <Text style={styles.saveTitleBtnText}>Update</Text>
+              <Text style={styles.saveTitleBtnText}>{t("search.rightmove.update")}</Text>
             </Pressable>
           </View>
         ) : (
@@ -235,7 +298,7 @@ export function RightmoveFilterCard({
             onPress={() => setIsEditingTitle(true)}
             style={[styles.titlePressable, webPointer]}
             accessibilityRole="button"
-            accessibilityLabel="Click to edit location"
+            accessibilityLabel={t("search.rightmove.editLocationAria")}
           >
             <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>
               {getHeading()}
@@ -249,30 +312,30 @@ export function RightmoveFilterCard({
       <View style={[styles.grid, isDesktop && styles.gridDesktop, !isDesktop && styles.gridResponsive]}>
         {/* ROW 1, COL 1: Search radius */}
         <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
-          <Text style={styles.fieldLabel}>Search radius</Text>
+          <Text style={styles.fieldLabel}>{t("search.rightmove.searchRadius")}</Text>
           <NativeSelect
             value={filters.radius}
-            options={RADIUS_OPTIONS}
+            options={radiusOptions}
             onChange={(val) => handleUpdate({ radius: val })}
           />
         </View>
 
         {/* ROW 1, COL 2: Property types */}
         <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
-          <Text style={styles.fieldLabel}>Property types</Text>
+          <Text style={styles.fieldLabel}>{t("search.rightmove.propertyTypes")}</Text>
           <NativeSelect
             value={filters.propertyType}
-            options={PROPERTY_TYPE_OPTIONS}
+            options={propertyTypeOptions}
             onChange={(val) => handleUpdate({ propertyType: val })}
           />
         </View>
 
         {/* ROW 1, COL 3: Added to site & Checkbox */}
         <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
-          <Text style={styles.fieldLabel}>Added to site</Text>
+          <Text style={styles.fieldLabel}>{t("search.rightmove.addedToSite")}</Text>
           <NativeSelect
             value={filters.addedToSite}
-            options={ADDED_TO_SITE_OPTIONS}
+            options={addedToSiteOptions}
             onChange={(val) => handleUpdate({ addedToSite: val })}
           />
 
@@ -295,7 +358,7 @@ export function RightmoveFilterCard({
                 ) : null}
               </View>
               <Text style={styles.checkboxLabel}>
-                Include Under Offer, Sold STC
+                {t("search.rightmove.includeSold")}
               </Text>
               <Text style={styles.helpBadge}>(?)</Text>
             </Pressable>
@@ -304,18 +367,18 @@ export function RightmoveFilterCard({
 
         {/* ROW 2, COL 1: Price range (৳) */}
         <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
-          <Text style={styles.fieldLabel}>Price range (৳)</Text>
+          <Text style={styles.fieldLabel}>{t("search.rightmove.priceRange")}</Text>
           <View style={styles.rangeRow}>
             <NativeSelect
               value={filters.minPrice}
-              options={MIN_PRICE_OPTIONS}
+              options={minPriceOptions}
               onChange={(val) => handleUpdate({ minPrice: val })}
               style={styles.rangeSelect}
             />
             <Text style={styles.rangeDash}>-</Text>
             <NativeSelect
               value={filters.maxPrice}
-              options={MAX_PRICE_OPTIONS}
+              options={maxPriceOptions}
               onChange={(val) => handleUpdate({ maxPrice: val })}
               style={styles.rangeSelect}
             />
@@ -324,18 +387,18 @@ export function RightmoveFilterCard({
 
         {/* ROW 2, COL 2: No. of bedrooms */}
         <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
-          <Text style={styles.fieldLabel}>No. of bedrooms</Text>
+          <Text style={styles.fieldLabel}>{t("search.rightmove.bedrooms")}</Text>
           <View style={styles.rangeRow}>
             <NativeSelect
               value={filters.minBedrooms}
-              options={MIN_BED_OPTIONS}
+              options={minBedOptions}
               onChange={(val) => handleUpdate({ minBedrooms: val })}
               style={styles.rangeSelect}
             />
             <Text style={styles.rangeDash}>-</Text>
             <NativeSelect
               value={filters.maxBedrooms}
-              options={MAX_BED_OPTIONS}
+              options={maxBedOptions}
               onChange={(val) => handleUpdate({ maxBedrooms: val })}
               style={styles.rangeSelect}
             />
@@ -352,9 +415,9 @@ export function RightmoveFilterCard({
               pressed && { opacity: 0.88, transform: [{ scale: 0.99 }] },
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Search properties"
+            accessibilityLabel={t("search.rightmove.searchBtn")}
           >
-            <Text style={styles.searchBtnText}>Search properties</Text>
+            <Text style={styles.searchBtnText}>{t("search.rightmove.searchBtn")}</Text>
           </Pressable>
         </View>
       </View>

@@ -1,15 +1,16 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ArrowRight, PlusCircle, Search } from "@/components/icons";
 import { router } from "expo-router";
 import { AppButton } from "@/components/ui";
+import { useTranslation } from "@/i18n";
 import { fonts } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
-import { landingCopy } from "@/content/landingCopy";
 
 export function JourneyTrack() {
+  const { t } = useTranslation();
   const { isTablet } = useResponsive();
   const user = useAuthStore((s) => s.user);
 
@@ -23,7 +24,41 @@ export function JourneyTrack() {
     }
   };
 
-  const { seekers, owners } = landingCopy.howItWorks;
+  const seekerSteps = useMemo(() => [
+    {
+      num: 1,
+      title: t("landing.journey.step1Seeker"),
+      desc: t("landing.journey.step1SeekerDesc"),
+    },
+    {
+      num: 2,
+      title: t("landing.journey.step2Seeker"),
+      desc: t("landing.journey.step2SeekerDesc"),
+    },
+    {
+      num: 3,
+      title: t("landing.journey.step3Seeker"),
+      desc: t("landing.journey.step3SeekerDesc"),
+    },
+  ], [t]);
+
+  const ownerSteps = useMemo(() => [
+    {
+      num: 1,
+      title: t("landing.journey.step1Owner"),
+      desc: t("landing.journey.step1OwnerDesc"),
+    },
+    {
+      num: 2,
+      title: t("landing.journey.step2Owner"),
+      desc: t("landing.journey.step2OwnerDesc"),
+    },
+    {
+      num: 3,
+      title: t("landing.journey.step3Owner"),
+      desc: t("landing.journey.step3OwnerDesc"),
+    },
+  ], [t]);
 
   return (
     <View style={[styles.container, isTablet && styles.containerTablet]}>
@@ -33,17 +68,17 @@ export function JourneyTrack() {
           <View style={styles.trackIconWrap}>
             <Search color="#0F6D55" size={18} strokeWidth={2.2} />
           </View>
-          <Text style={styles.trackTitle}>{seekers.title}</Text>
+          <Text style={styles.trackTitle}>{t("landing.journey.seekersTitle")}</Text>
         </View>
 
         <View style={styles.stepsList}>
-          {seekers.steps.map((step, idx) => (
+          {seekerSteps.map((step, idx) => (
             <View key={step.num} style={styles.stepItem}>
               <View style={styles.nodeColumn}>
                 <View style={styles.stepNode}>
                   <Text style={styles.stepNodeNum}>{step.num}</Text>
                 </View>
-                {idx < seekers.steps.length - 1 && <View style={styles.connectLine} />}
+                {idx < seekerSteps.length - 1 && <View style={styles.connectLine} />}
               </View>
               <View style={styles.stepContent}>
                 <Text style={styles.stepTitle}>{step.title}</Text>
@@ -56,7 +91,7 @@ export function JourneyTrack() {
         <View style={styles.trackCta}>
           <AppButton
             icon={Search}
-            label="Explore properties"
+            label={t("landing.journey.exploreProperties")}
             onPress={() => router.push("/buy" as any)}
             trailingIcon={ArrowRight}
             variant="secondary"
@@ -70,17 +105,17 @@ export function JourneyTrack() {
           <View style={styles.trackIconWrap}>
             <PlusCircle color="#0F6D55" size={18} strokeWidth={2.2} />
           </View>
-          <Text style={styles.trackTitle}>{owners.title}</Text>
+          <Text style={styles.trackTitle}>{t("landing.journey.ownersTitle")}</Text>
         </View>
 
         <View style={styles.stepsList}>
-          {owners.steps.map((step, idx) => (
+          {ownerSteps.map((step, idx) => (
             <View key={step.num} style={styles.stepItem}>
               <View style={styles.nodeColumn}>
                 <View style={styles.stepNode}>
                   <Text style={styles.stepNodeNum}>{step.num}</Text>
                 </View>
-                {idx < owners.steps.length - 1 && <View style={styles.connectLine} />}
+                {idx < ownerSteps.length - 1 && <View style={styles.connectLine} />}
               </View>
               <View style={styles.stepContent}>
                 <Text style={styles.stepTitle}>{step.title}</Text>
@@ -93,7 +128,7 @@ export function JourneyTrack() {
         <View style={styles.trackCta}>
           <AppButton
             icon={PlusCircle}
-            label="List your property"
+            label={t("landing.journey.listYourProperty")}
             onPress={handleListProperty}
             trailingIcon={ArrowRight}
             variant="primary"

@@ -1,6 +1,7 @@
 import { TrendingUp } from "@/components/icons";
 import { Platform, StyleSheet, Text, View } from "react-native";
-import { fonts } from "@/theme";
+import { fonts } from "@/theme";
+
 import { LiveText } from "@/components/LiveText";
 
 export interface StatItem {

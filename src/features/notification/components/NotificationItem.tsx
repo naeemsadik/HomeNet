@@ -5,26 +5,29 @@ import type { Notification } from "@/types/api";
 import { colorTokens , fonts } from "@/theme";
 
 
+import { useTranslation } from "@/i18n";
+
 interface NotificationItemProps {
   notification: Notification;
   onPress?: (notification: Notification) => void;
 }
 
-function formatTimeAgo(dateString: string): string {
+function formatTimeAgo(dateString: string, t: ReturnType<typeof useTranslation>["t"]): string {
   const now = Date.now();
   const then = new Date(dateString).getTime();
   const diffMs = now - then;
   const minutes = Math.floor(diffMs / 60_000);
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return t("notifications.timeAgo.justNow");
+  if (minutes < 60) return t("notifications.timeAgo.minutes", { count: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t("notifications.timeAgo.hours", { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return t("notifications.timeAgo.days", { count: days });
   return new Date(dateString).toLocaleDateString();
 }
 
 export function NotificationItem({ notification, onPress }: NotificationItemProps) {
+  const { t } = useTranslation();
   return (
     <Pressable
       onPress={() => onPress?.(notification)}
@@ -34,7 +37,7 @@ export function NotificationItem({ notification, onPress }: NotificationItemProp
         pressed && styles.pressed,
       ]}
       accessibilityRole="button"
-      accessibilityLabel={`Notification: ${notification.title}`}
+      accessibilityLabel={t("notifications.itemAria", { title: notification.title })}
     >
       <View style={[styles.iconWrap, !notification.read && styles.iconWrapUnread]}>
         <Bell color={!notification.read ? colorTokens.primary : colorTokens.textMuted} size={18} />
@@ -48,7 +51,7 @@ export function NotificationItem({ notification, onPress }: NotificationItemProp
         </Text>
         <View style={styles.metaRow}>
           <Clock color={colorTokens.textMuted} size={12} />
-          <Text style={styles.time}>{formatTimeAgo(notification.created_at)}</Text>
+          <Text style={styles.time}>{formatTimeAgo(notification.created_at, t)}</Text>
           {!notification.read ? (
             <View style={styles.unreadDot} />
           ) : (

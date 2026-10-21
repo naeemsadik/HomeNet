@@ -33,6 +33,7 @@ import { editProfileSchema } from "@/lib/schemas/user";
 import { changePasswordSchema } from "@/lib/schemas/auth";
 import { toApiError } from "@/services/apiClient";
 import type { UploadInput } from "@/services/upload";
+import { useTranslation } from "@/i18n";
 import { styles } from "./BuyerProfileScreen.styles";
 
 const DEFAULT_AVATAR =
@@ -42,6 +43,7 @@ const DEFAULT_NAME = "Your name";
 const DEFAULT_EMAIL = "you@example.com";
 
 export function BuyerProfileScreen() {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
   const { user, logout, fetchMe, changePassword } = useAuthStore();
 
@@ -104,11 +106,11 @@ export function BuyerProfileScreen() {
         };
         await uploadAvatar(file, asset.fileName || "profile.jpg");
         await fetchMe();
-        notify("Success", "Profile photo updated successfully.");
+        notify("Success", t("userProfile.photoUpdated"));
       }
     } catch (err: any) {
       if (__DEV__) console.warn("Avatar upload error:", err);
-      notify("Notice", "Photo selected. Save changes to keep it.");
+      notify("Notice", t("userProfile.photoNotice"));
     } finally {
       setIsUploading(false);
     }
@@ -117,9 +119,9 @@ export function BuyerProfileScreen() {
   const handleSaveChanges = async () => {
     if (!user) {
       const signIn = await confirmAction(
-        "Preview Mode",
-        "Sign in to sync your profile updates across all your devices. Sign in now?",
-        { confirmLabel: "Sign In", cancelLabel: "Not now" },
+        t("userProfile.previewTitle"),
+        t("userProfile.previewMessage"),
+        { confirmLabel: t("userProfile.signIn"), cancelLabel: t("userProfile.notNow") },
       );
       if (signIn) router.push("/profile" as any);
       return;
@@ -127,7 +129,7 @@ export function BuyerProfileScreen() {
 
     const validation = editProfileSchema.safeParse({ full_name: fullName });
     if (!validation.success) {
-      notify("Validation", validation.error.issues[0]?.message || "Please enter a valid full name.");
+      notify(t("userProfile.validation"), validation.error.issues[0]?.message || t("userProfile.invalidName"));
       return;
     }
 
@@ -137,7 +139,7 @@ export function BuyerProfileScreen() {
         full_name: validation.data.full_name,
       });
       await fetchMe();
-      notify("Saved", "Your profile details have been updated.");
+      notify(t("userProfile.saved"), t("userProfile.profileUpdated"));
     } catch (err: any) {
       notify("Error", toApiError(err).message);
     } finally {
@@ -153,7 +155,7 @@ export function BuyerProfileScreen() {
       confirmPassword: confirmPassword,
     });
     if (!validation.success) {
-      setPasswordError(validation.error.issues[0]?.message || "Invalid password details.");
+      setPasswordError(validation.error.issues[0]?.message || t("userProfile.invalidPasswordDetails"));
       return;
     }
 
@@ -167,7 +169,7 @@ export function BuyerProfileScreen() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      notify("Success", "Your password has been changed successfully.");
+      notify("Success", t("userProfile.passwordChangeSuccess"));
     } catch (err: any) {
       setPasswordError(toApiError(err).message);
     } finally {
@@ -177,7 +179,7 @@ export function BuyerProfileScreen() {
 
   const handleDeleteAccount = async () => {
     if (!user) {
-      notify("Notice", "No authenticated account to delete in preview mode.");
+      notify("Notice", t("userProfile.noAuthAccountToDelete"));
       return;
     }
 
@@ -187,7 +189,7 @@ export function BuyerProfileScreen() {
         await deleteUser(user.id);
         await logout();
         router.replace("/home");
-        notify("Account Deleted", "Your account has been permanently removed.");
+        notify(t("userProfile.accountDeletedTitle"), t("userProfile.accountDeletedMessage"));
       } catch (err: any) {
         notify("Error", toApiError(err).message);
       } finally {
@@ -196,9 +198,9 @@ export function BuyerProfileScreen() {
     };
 
     const confirmed = await confirmAction(
-      "Permanently Delete Account",
-      "Are you sure you want to delete your account? All your personal information, saved listings, and history will be permanently erased. This cannot be undone.",
-      { confirmLabel: "Delete Permanently", destructive: true },
+      t("userProfile.deleteModalTitle"),
+      t("userProfile.deleteModalMessage"),
+      { confirmLabel: t("userProfile.deleteModalConfirm"), destructive: true },
     );
     if (confirmed) await doDelete();
   };
@@ -213,8 +215,8 @@ export function BuyerProfileScreen() {
       router.replace("/home");
     };
 
-    const confirmed = await confirmAction("Logout", "Are you sure you want to log out?", {
-      confirmLabel: "Logout",
+    const confirmed = await confirmAction(t("userProfile.logoutConfirmTitle"), t("userProfile.logoutConfirmMessage"), {
+      confirmLabel: t("userProfile.logoutBtn"),
       destructive: true,
     });
     if (confirmed) await doLogout();
@@ -233,7 +235,7 @@ export function BuyerProfileScreen() {
           {/* Header Title & Back Button */}
           <View style={[styles.pageHeader, isPhone && styles.pageHeaderPhone]}>
             <Pressable
-              accessibilityLabel="Go back"
+              accessibilityLabel={t("userProfile.back")}
               accessibilityRole="button"
               onPress={() => {
                 if (router.canGoBack()) {
@@ -250,17 +252,17 @@ export function BuyerProfileScreen() {
               ]}
             >
               <ArrowLeft color="#0B1A17" size={17} strokeWidth={2.2} />
-              <Text style={styles.backBtnText}>Back</Text>
+              <Text style={styles.backBtnText}>{t("userProfile.back")}</Text>
             </Pressable>
 
-            <Text style={[styles.pageTitle, isPhone && styles.pageTitlePhone]}>Profile</Text>
+            <Text style={[styles.pageTitle, isPhone && styles.pageTitlePhone]}>{t("userProfile.pageTitle")}</Text>
           </View>
 
           {/* Section 1: Personal Information */}
           <View style={[styles.card, isPhone && styles.cardPhone]}>
             <View style={styles.cardHeaderRow}>
               <User color="#0B1A17" size={20} />
-              <Text style={styles.cardTitle}>Personal information</Text>
+              <Text style={styles.cardTitle}>{t("userProfile.personalInfoTitle")}</Text>
             </View>
 
             {/* Avatar and Name Row */}
@@ -285,12 +287,12 @@ export function BuyerProfileScreen() {
 
                   <View style={styles.buyerBadge}>
                     <CheckCircle2 color="#04cf92" size={14} />
-                    <Text style={styles.buyerBadgeText}>Buyer</Text>
+                    <Text style={styles.buyerBadgeText}>{t("userProfile.buyerBadge")}</Text>
                   </View>
                 </View>
 
                 <Pressable
-                  accessibilityLabel="Change photo"
+                  accessibilityLabel={t("userProfile.changePhoto")}
                   accessibilityRole="button"
                   onPress={handleAvatarUpload}
                   style={({ pressed }) => [
@@ -299,14 +301,14 @@ export function BuyerProfileScreen() {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={styles.changePhotoText}>Change photo</Text>
+                  <Text style={styles.changePhotoText}>{t("userProfile.changePhoto")}</Text>
                 </Pressable>
               </View>
             </View>
 
             {/* Form Field: Full Name */}
             <View style={styles.formGroup}>
-              <Text style={styles.fieldLabel}>Full name</Text>
+              <Text style={styles.fieldLabel}>{t("userProfile.fullNameLabel")}</Text>
               <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                 <TextInput
                   onChangeText={setFullName}
@@ -326,7 +328,7 @@ export function BuyerProfileScreen() {
                 />
                 {fullName.length > 0 && (
                   <Pressable
-                    accessibilityLabel="Clear full name"
+                    accessibilityLabel={t("userProfile.clearFullNameAria")}
                     accessibilityRole="button"
                     hitSlop={8}
                     onPress={() => setFullName("")}
@@ -342,11 +344,11 @@ export function BuyerProfileScreen() {
           {/* Section 2: Contact Information */}
           <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
             <View style={styles.cardHeaderRow}>
-              <Text style={styles.cardTitle}>Contact information</Text>
+              <Text style={styles.cardTitle}>{t("userProfile.contactInfoTitle")}</Text>
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.fieldLabel}>Email</Text>
+              <Text style={styles.fieldLabel}>{t("userProfile.emailLabel")}</Text>
               <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                 <TextInput
                   autoCapitalize="none"
@@ -368,7 +370,7 @@ export function BuyerProfileScreen() {
                 />
                 {email.length > 0 && (
                   <Pressable
-                    accessibilityLabel="Clear email"
+                    accessibilityLabel={t("userProfile.clearEmailAria")}
                     accessibilityRole="button"
                     hitSlop={8}
                     onPress={() => setEmail("")}
@@ -385,20 +387,18 @@ export function BuyerProfileScreen() {
           <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
             <View style={styles.cardHeaderRow}>
               <Shield color="#0B1A17" size={20} />
-              <Text style={styles.cardTitle}>Account security</Text>
+              <Text style={styles.cardTitle}>{t("userProfile.accountSecurityTitle")}</Text>
             </View>
 
             {/* Change Password Option */}
             <View style={[styles.securityRow, isPhone && styles.securityRowPhone]}>
               <View style={styles.securityInfoCol}>
-                <Text style={styles.securityTitle}>Password</Text>
-                <Text style={styles.securityDesc}>
-                  •••••••••••• &nbsp;·&nbsp; Keep your account protected with a strong password
-                </Text>
+                <Text style={styles.securityTitle}>{t("userProfile.passwordLabel")}</Text>
+                <Text style={styles.securityDesc}>{t("userProfile.passwordHint")}</Text>
               </View>
 
               <Pressable
-                accessibilityLabel="Change password"
+                accessibilityLabel={t("userProfile.changePasswordBtn")}
                 accessibilityRole="button"
                 onPress={() => {
                   setPasswordError(null);
@@ -412,7 +412,7 @@ export function BuyerProfileScreen() {
                 ]}
               >
                 <KeyRound color="#03a675" size={15} />
-                <Text style={styles.changePasswordBtnText}>Change password</Text>
+                <Text style={styles.changePasswordBtnText}>{t("userProfile.changePasswordBtn")}</Text>
               </Pressable>
             </View>
 
@@ -422,15 +422,15 @@ export function BuyerProfileScreen() {
             <View style={[styles.securityRow, isPhone && styles.securityRowPhone]}>
               <View style={styles.securityInfoCol}>
                 <Text style={[styles.securityTitle, { color: "#D4183D" }]}>
-                  Permanently delete account
+                  {t("userProfile.deleteAccountTitle")}
                 </Text>
                 <Text style={styles.securityDesc}>
-                  Once deleted, your profile, saved properties, and account data will be permanently removed.
+                  {t("userProfile.deleteAccountDesc")}
                 </Text>
               </View>
 
               <Pressable
-                accessibilityLabel="Permanently delete account"
+                accessibilityLabel={t("userProfile.deleteAccountBtn")}
                 accessibilityRole="button"
                 disabled={isDeletingAccount}
                 onPress={handleDeleteAccount}
@@ -447,7 +447,7 @@ export function BuyerProfileScreen() {
                 ) : (
                   <>
                     <Trash2 color="#D4183D" size={15} />
-                    <Text style={styles.deleteAccountBtnText}>Permanently delete account</Text>
+                    <Text style={styles.deleteAccountBtnText}>{t("userProfile.deleteAccountBtn")}</Text>
                   </>
                 )}
               </Pressable>
@@ -458,7 +458,7 @@ export function BuyerProfileScreen() {
           <View style={[styles.actionRow, isPhone && styles.actionRowPhone]}>
             {/* Logout Button */}
             <Pressable
-              accessibilityLabel="Logout"
+              accessibilityLabel={t("userProfile.logoutBtn")}
               accessibilityRole="button"
               onPress={handleLogout}
               style={({ pressed }) => [
@@ -469,12 +469,12 @@ export function BuyerProfileScreen() {
               ]}
             >
               <LogOut color="#D4183D" size={16} />
-              <Text style={styles.logoutBtnText}>Logout</Text>
+              <Text style={styles.logoutBtnText}>{t("userProfile.logoutBtn")}</Text>
             </Pressable>
 
             {/* Save changes Button with website theme color */}
             <Pressable
-              accessibilityLabel="Save changes"
+              accessibilityLabel={t("userProfile.saveChanges")}
               accessibilityRole="button"
               disabled={isSaving}
               onPress={handleSaveChanges}
@@ -489,7 +489,7 @@ export function BuyerProfileScreen() {
               {isSaving ? (
                 <ActivityIndicator color={colorTokens.onBrand} size="small" />
               ) : (
-                <Text style={styles.saveBtnText}>Save changes</Text>
+                <Text style={styles.saveBtnText}>{t("userProfile.saveChanges")}</Text>
               )}
             </Pressable>
           </View>
@@ -516,13 +516,13 @@ export function BuyerProfileScreen() {
                 <KeyRound color="#03a675" size={20} />
               </View>
               <View style={styles.modalTitleWrap}>
-                <Text style={styles.modalTitle}>Change Password</Text>
+                <Text style={styles.modalTitle}>{t("userProfile.changePasswordModalTitle")}</Text>
                 <Text style={styles.modalSubtitle}>
-                  Enter your current password and a new secure password.
+                  {t("userProfile.changePasswordModalSubtitle")}
                 </Text>
               </View>
               <Pressable
-                accessibilityLabel="Close"
+                accessibilityLabel={t("auth.close")}
                 hitSlop={10}
                 onPress={() => setChangePasswordModalOpen(false)}
                 style={[styles.modalCloseBtn, webPointer]}
@@ -539,7 +539,7 @@ export function BuyerProfileScreen() {
 
             {/* Current Password */}
             <View style={styles.modalInputGroup}>
-              <Text style={styles.modalFieldLabel}>Current password</Text>
+              <Text style={styles.modalFieldLabel}>{t("userProfile.currentPasswordLabel")}</Text>
               <View style={styles.modalInputWrap}>
                 <TextInput
                   autoCapitalize="none"
@@ -547,14 +547,14 @@ export function BuyerProfileScreen() {
                     setCurrentPassword(val);
                     setPasswordError(null);
                   }}
-                  placeholder="Enter current password"
+                  placeholder={t("userProfile.currentPasswordPlaceholder")}
                   placeholderTextColor="rgba(11,26,23,0.35)"
                   secureTextEntry={!showCurrentPassword}
                   style={styles.modalTextInput}
                   value={currentPassword}
                 />
                 <Pressable
-                  accessibilityLabel="Toggle show password"
+                  accessibilityLabel={showCurrentPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                   onPress={() => setShowCurrentPassword(!showCurrentPassword)}
                   style={[styles.eyeBtn, webPointer]}
                 >
@@ -569,7 +569,7 @@ export function BuyerProfileScreen() {
 
             {/* New Password */}
             <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
-              <Text style={styles.modalFieldLabel}>New password</Text>
+              <Text style={styles.modalFieldLabel}>{t("userProfile.newPasswordLabel")}</Text>
               <View style={styles.modalInputWrap}>
                 <TextInput
                   autoCapitalize="none"
@@ -577,14 +577,14 @@ export function BuyerProfileScreen() {
                     setNewPassword(val);
                     setPasswordError(null);
                   }}
-                  placeholder="At least 6 characters"
+                  placeholder={t("userProfile.newPasswordPlaceholder")}
                   placeholderTextColor="rgba(11,26,23,0.35)"
                   secureTextEntry={!showNewPassword}
                   style={styles.modalTextInput}
                   value={newPassword}
                 />
                 <Pressable
-                  accessibilityLabel="Toggle show new password"
+                  accessibilityLabel={showNewPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                   onPress={() => setShowNewPassword(!showNewPassword)}
                   style={[styles.eyeBtn, webPointer]}
                 >
@@ -599,7 +599,7 @@ export function BuyerProfileScreen() {
 
             {/* Confirm New Password */}
             <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
-              <Text style={styles.modalFieldLabel}>Confirm new password</Text>
+              <Text style={styles.modalFieldLabel}>{t("userProfile.confirmNewPasswordLabel")}</Text>
               <View style={styles.modalInputWrap}>
                 <TextInput
                   autoCapitalize="none"
@@ -607,14 +607,14 @@ export function BuyerProfileScreen() {
                     setConfirmPassword(val);
                     setPasswordError(null);
                   }}
-                  placeholder="Confirm new password"
+                  placeholder={t("userProfile.confirmNewPasswordPlaceholder")}
                   placeholderTextColor="rgba(11,26,23,0.35)"
                   secureTextEntry={!showConfirmPassword}
                   style={styles.modalTextInput}
                   value={confirmPassword}
                 />
                 <Pressable
-                  accessibilityLabel="Toggle show confirm password"
+                  accessibilityLabel={showConfirmPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={[styles.eyeBtn, webPointer]}
                 >
@@ -630,7 +630,7 @@ export function BuyerProfileScreen() {
             {/* Modal Actions */}
             <View style={styles.modalActionRow}>
               <Pressable
-                accessibilityLabel="Cancel"
+                accessibilityLabel={t("userProfile.cancel")}
                 disabled={isChangingPassword}
                 onPress={() => setChangePasswordModalOpen(false)}
                 style={({ pressed }) => [
@@ -639,11 +639,11 @@ export function BuyerProfileScreen() {
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+                <Text style={styles.modalCancelBtnText}>{t("userProfile.cancel")}</Text>
               </Pressable>
 
               <Pressable
-                accessibilityLabel="Save password"
+                accessibilityLabel={t("userProfile.savePassword")}
                 disabled={isChangingPassword}
                 onPress={handleChangePasswordSubmit}
                 style={({ pressed }) => [
@@ -656,7 +656,7 @@ export function BuyerProfileScreen() {
                 {isChangingPassword ? (
                   <ActivityIndicator color={colorTokens.onBrand} size="small" />
                 ) : (
-                  <Text style={styles.modalSubmitBtnText}>Save password</Text>
+                  <Text style={styles.modalSubmitBtnText}>{t("userProfile.savePassword")}</Text>
                 )}
               </Pressable>
             </View>

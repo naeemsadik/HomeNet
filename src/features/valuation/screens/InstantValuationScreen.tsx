@@ -14,11 +14,13 @@ import {
 import { AppChrome } from "@/components/AppChrome";
 import { colorTokens, colors, fonts, radius, shadow } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 import { InstantValuationWizard } from "../components/InstantValuationWizard";
 import type { ValuationPropertyType, ValuationPurpose } from "../types/valuationTypes";
 
 export function InstantValuationScreen() {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
   const { setInitialFromHero } = useInstantValuation();
   const params = useLocalSearchParams<{
@@ -47,28 +49,28 @@ export function InstantValuationScreen() {
         <View style={styles.heroIntro}>
           <View style={styles.eyebrow}>
             <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.4} />
-            <Text style={styles.eyebrowText}>DHAKA REAL ESTATE VALUATION ENGINE</Text>
+            <Text style={styles.eyebrowText}>{t("valuation.engineEyebrow")}</Text>
           </View>
           <Text style={[styles.mainHeading, isPhone && styles.mainHeadingPhone]}>
-            Instant Property Valuation
+            {t("valuation.title")}
           </Text>
           <Text style={styles.subHeading}>
-            Get a verified, data-backed estimate of your property’s sale price and rental yield in under a minute — powered by verified transactions across 26 Dhaka wards.
+            {t("valuation.subtitle")}
           </Text>
 
           {/* Trust Value Badges */}
           <View style={[styles.trustBadgeRow, isPhone && styles.trustBadgeRowPhone]}>
             <View style={styles.trustBadge}>
               <ShieldCheck color={colorTokens.brandText} size={16} strokeWidth={2.2} />
-              <Text style={styles.trustBadgeText}>100% Free · No Broker Inquiries</Text>
+              <Text style={styles.trustBadgeText}>{t("valuation.badges.free")}</Text>
             </View>
             <View style={styles.trustBadge}>
               <TrendingUp color={colorTokens.brandText} size={16} strokeWidth={2.2} />
-              <Text style={styles.trustBadgeText}>Dhaka Market Dynamics Included</Text>
+              <Text style={styles.trustBadgeText}>{t("valuation.badges.dynamics")}</Text>
             </View>
             <View style={styles.trustBadge}>
               <FileCheck2 color={colorTokens.brandText} size={16} strokeWidth={2.2} />
-              <Text style={styles.trustBadgeText}>Verified Comparable Listings</Text>
+              <Text style={styles.trustBadgeText}>{t("valuation.badges.comparable")}</Text>
             </View>
           </View>
         </View>
@@ -80,29 +82,29 @@ export function InstantValuationScreen() {
 
         {/* Informational Guidance Section: How Valuation Works in Dhaka */}
         <View style={[styles.infoSection, isPhone && styles.infoSectionPhone]}>
-          <Text style={styles.infoSectionTitle}>How HomeNet Calculates Property Valuations</Text>
+          <Text style={styles.infoSectionTitle}>{t("valuation.howItWorksTitle")}</Text>
           <View style={[styles.infoGrid, isPhone && styles.infoGridPhone]}>
             <View style={styles.infoCard}>
               <Text style={styles.infoCardNumber}>01</Text>
-              <Text style={styles.infoCardTitle}>Ward & Subzone Baselines</Text>
+              <Text style={styles.infoCardTitle}>{t("valuation.howItWorks1Title")}</Text>
               <Text style={styles.infoCardDesc}>
-                We track price-per-sqft data across Gulshan, Banani, Dhanmondi, Uttara, Bashundhara, and 21 other zones, adjusted for road width and sector access.
+                {t("valuation.howItWorks1Desc")}
               </Text>
             </View>
 
             <View style={styles.infoCard}>
               <Text style={styles.infoCardNumber}>02</Text>
-              <Text style={styles.infoCardTitle}>Micro-Factors & Utilities</Text>
+              <Text style={styles.infoCardTitle}>{t("valuation.howItWorks2Title")}</Text>
               <Text style={styles.infoCardDesc}>
-                South-facing orientation (+6%), sweet-spot floors (4th–8th), dedicated parking bays, and standby backup generators are mathematically accounted for.
+                {t("valuation.howItWorks2Desc")}
               </Text>
             </View>
 
             <View style={styles.infoCard}>
               <Text style={styles.infoCardNumber}>03</Text>
-              <Text style={styles.infoCardTitle}>Active Inventory Benchmark</Text>
+              <Text style={styles.infoCardTitle}>{t("valuation.howItWorks3Title")}</Text>
               <Text style={styles.infoCardDesc}>
-                Your valuation is cross-checked against actively listed and recently sold verified properties on HomeNet to generate high-confidence estimates.
+                {t("valuation.howItWorks3Desc")}
               </Text>
             </View>
           </View>
