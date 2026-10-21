@@ -11,6 +11,7 @@ import { Check, ChevronDown, Edit3 } from "@/components/icons";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { OptionPicker } from "@/components/OptionPicker";
 
 export interface RightmoveFilters {
   /** The place: a city ("Dhaka") or an area name ("Gulshan"); "" is everywhere. */
@@ -171,16 +172,8 @@ function NativeSelect({
     );
   }
 
-  // Fallback for native Android/iOS
-  const current = options.find((o) => o.value === value) || options[0];
-  return (
-    <View style={[styles.nativeSelectWrap, style]}>
-      <Text style={styles.nativeSelectText} numberOfLines={1}>
-        {current.label}
-      </Text>
-      <ChevronDown color="#0B1A17" size={16} strokeWidth={2.2} />
-    </View>
-  );
+  // Android and iOS: a tap opens a sheet of options.
+  return <OptionPicker value={value} options={options} onChange={onChange} disabled={disabled} style={style} />;
 }
 
 export function RightmoveFilterCard({

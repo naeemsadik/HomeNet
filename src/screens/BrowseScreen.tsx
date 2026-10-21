@@ -26,6 +26,7 @@ import { RightmoveFilterCard, type RightmoveFilters } from "@/components/Rightmo
 import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
 import { useAreas } from "@/features/property/hooks/useAreas";
 import { useBrowseFeed } from "@/features/property/hooks/useBrowseFeed";
+import { filterAddedSince } from "@/features/property/utils/addedToSite";
 import { areaOptions, fallbackAreaOptions, isCityName, resolveScope } from "@/features/property/utils/areaScope";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
@@ -216,7 +217,9 @@ export function BrowseScreen({
         ? undefined
         : ("active" as const),
       is_verified: rightmoveFilters.verifiedOnly ? true : undefined,
-      limit: 20,
+      // "Added to site" is applied here (the API has no such filter), so ask for
+      // a full page and let the filter below decide what is shown.
+      limit: rightmoveFilters.addedToSite ? 100 : 20,
     };
   }, [rightmoveFilters]);
 
@@ -260,9 +263,10 @@ export function BrowseScreen({
   // sales would be a lie, so the client re-asserts the filter: if the server
   // did not honour it, this empties out and the honest gate below shows.
   const isSoldView = rightmoveFilters.purpose === "sold";
-  const results = isSoldView ? feed.filter((p) => p.status === "sold") : feed;
+  const soldChecked = isSoldView ? feed.filter((p) => p.status === "sold") : feed;
+  const results = filterAddedSince(soldChecked, rightmoveFilters.addedToSite);
   // The API total ignores the client-side sold filter, so the sold view counts what it shows.
-  const totalCount = isSoldView ? results.length : (total ?? results.length);
+  const totalCount = isSoldView || rightmoveFilters.addedToSite ? results.length : (total ?? results.length);
 
   const handleResetFilters = () => {
     setRightmoveFilters({

@@ -27,7 +27,6 @@ import { useResponsive } from '../../hooks/useResponsive';
 import { useAuthStore } from '../../stores/authStore';
 import { useAuthModalStore } from '../../stores/useAuthModalStore';
 import {
-  landingCopy,
   AI_DEMO_SCRIPT,
   MARKET_POSITION_CLAIM,
 } from '../../content/landingCopy';
