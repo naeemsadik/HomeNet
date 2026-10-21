@@ -41,6 +41,7 @@ import { colorTokens, fonts, webPointer } from "@/theme";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { Footer } from "@/components/Footer";
+import { displaySubtype } from "../constants/holidayStay";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
 import { toApiError } from "@/services/apiClient";
@@ -91,7 +92,7 @@ export function MyPropertiesScreen() {
         700,
         460,
       ),
-      type: p.subtype || p.type || "Apartment",
+      type: displaySubtype(p.subtype) || p.type || "Apartment",
       listingType: p.listing_type === "rent" ? "For Rent" : "For Sale",
       price: `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${p.listing_type === "rent" ? "/mo" : ""}`,
       status: p.status,

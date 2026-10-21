@@ -34,6 +34,7 @@ import {
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { PageMeta } from "@/components/PageMeta";
+import { displaySubtype } from "../constants/holidayStay";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
@@ -121,7 +122,7 @@ export function PropertyDetailScreen() {
       address: apiDetail.address || location || "Address unavailable",
       latitude: apiDetail.location_lat,
       longitude: apiDetail.location_lng,
-      type: apiDetail.subtype || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
+      type: displaySubtype(apiDetail.subtype) || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
       listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
       price: typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
       priceCurrency: apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),

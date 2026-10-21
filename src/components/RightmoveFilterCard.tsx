@@ -199,7 +199,7 @@ export function RightmoveFilterCard({
     if (filters.purpose === "sold") return `Recently sold in ${place}`;
     const purposeText =
       filters.purpose === "short-let"
-        ? "for short-let"
+        ? "for a holiday stay"
         : filters.purpose === "rent"
         ? "to rent"
         : filters.purpose === "sale"

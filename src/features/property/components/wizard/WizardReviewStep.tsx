@@ -1,6 +1,6 @@
 import { CheckCircle2 } from "@/components/icons";
 import { Text, View } from "react-native";
-import { subtypeLabel, type PropertyTypeConfig } from "../../constants/propertyCategories";
+import { HOLIDAY_STAY_LABEL, subtypeLabel, type PropertyTypeConfig } from "../../constants/propertyCategories";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
 
@@ -40,7 +40,7 @@ export function WizardReviewStep({ activeTypeConfig }: { activeTypeConfig: Prope
           <Text style={styles.reviewCardLabel}>Price</Text>
           <Text style={styles.reviewCardValue}>
             BDT {Number(store.price).toLocaleString()}
-            {store.subtype === "short-let" ? " (Short-let rate)" : store.listingType === "rent" ? "/mo" : ""}
+            {store.subtype === "short-let" ? ` (${HOLIDAY_STAY_LABEL} rate)` : store.listingType === "rent" ? "/mo" : ""}
           </Text>
         </View>
 
