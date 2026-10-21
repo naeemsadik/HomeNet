@@ -185,7 +185,7 @@ export function HomeScreen() {
               ]}
             >
               <Text style={[styles.heroHeading, heroType]}>
-                Find Your Home With Trust
+                Find Your Dream With Trust
               </Text>
             </View>
           </ImageBackground>

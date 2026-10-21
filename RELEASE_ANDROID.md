@@ -80,7 +80,7 @@ compiles, but **Play rejects it**: upload only an EAS build.
 | Deploy the backend branch `feat/maps-link-resolver-reverse-geocode-area-centres` | Pasting a short Google Maps link, and the address and area from a pin. Without it the app shows "We can't open short links yet" and everything else works. | backend repo |
 | **Delete Cloudinary files when an account is deleted** | Deleting an account removes the database rows (listings, saved items, sessions) but **not the photos stored at Cloudinary**. The privacy policy says so honestly; Play expects deletion to remove user data. | `docs/BACKEND_REQUIREMENTS.md` §10 |
 | A **reviewer account** with a few listings | Play's reviewer must sign in. Put its email and password in *App content → App access*. | you |
-| Social sign-in routes | The Google and Facebook buttons are hidden in the Android app until these exist (`EXPO_PUBLIC_SOCIAL_LOGIN_ENABLED=true` shows them). | backend |
+| Google sign-in on Android | The website has Google sign-in (see `GOOGLE_SIGN_IN.md`); the Android app does not show the button yet. It needs an Android OAuth client (package + Play signing SHA-1) and a native sign-in. Facebook sign-in does not exist. | you / backend |
 
 ## 5. Test the build on a phone (you)
 

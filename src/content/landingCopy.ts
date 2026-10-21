@@ -281,7 +281,7 @@ export const landingCopy = {
   },
   seekersSection: {
     eyebrow: "For Seekers",
-    title: "Find Your Home With Trust, without the runaround",
+    title: "Find Your Dream With Trust, without the runaround",
     benefits: [
       "Comprehensive search across residential, commercial, plots, and parking",
       "Every single photo and the exact location on the map before you visit",

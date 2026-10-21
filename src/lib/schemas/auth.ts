@@ -42,6 +42,18 @@ export const loginSchema = z
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 
+// ─── Google ────────────────────────────────────────────────────────────────
+
+/** The credential Google Identity Services returns is a JWT. */
+export const googleLoginSchema = z
+  .object({
+    id_token: z
+      .string()
+      .max(4096, "Google sign-in token is too long")
+      .regex(/^[\w-]+\.[\w-]+\.[\w-]+$/, "Google sign-in token is not valid"),
+  })
+  .strict();
+
 // ─── Register ──────────────────────────────────────────────────────────────
 
 export const registerSchema = z

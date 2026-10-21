@@ -31,6 +31,7 @@ export const bn: TranslationSchema = {
       rent: "ভাড়া",
       shortLet: "হলিডে স্টে",
       sold: "বিক্রি হয়েছে",
+      instantValuation: "তাৎক্ষণিক মূল্যায়ন",
     },
     placeholders: {
       buyRent: "গুলশান, বনানী, ধানমন্ডি, বা এলাকা…",

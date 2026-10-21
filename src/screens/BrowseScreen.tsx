@@ -49,7 +49,14 @@ function toPropertyTypeFilter(raw?: string): string {
   return "all";
 }
 
-export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
+export function BrowseScreen({
+  mode,
+  location: fixedLocation,
+}: {
+  mode?: "buy" | "rent" | "sold";
+  /** Pins the area filter, for the /buy/<area> and /rent/<area> landing pages. */
+  location?: string;
+}) {
   const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
   const params = useLocalSearchParams<{
@@ -69,6 +76,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
     filters?: string;
     modal?: string;
   }>();
+  const locationParam = fixedLocation || params.city || params.location;
 
   const initialPurpose =
     mode === "sold" || params.status === "sold"
@@ -102,7 +110,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
   );
   const [modalFilters, setModalFilters] = useState<FilterState>({
     ...defaultFilterState,
-    location: params.location || params.city || defaultFilterState.location,
+    location: fixedLocation || params.location || params.city || defaultFilterState.location,
     minPrice: params.min_price || "",
     maxPrice: params.max_price || "",
     bedrooms: params.bedrooms ? parseInt(params.bedrooms, 10) : null,
@@ -185,10 +193,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
       bedrooms,
       min_price: minP,
       max_price: maxP,
-      city:
-        params.city || params.location
-          ? (params.city || params.location)
-          : undefined,
+      city: locationParam || undefined,
       // The Sold section is sold-only; elsewhere "include sold" merely widens
       // an otherwise active-only list.
       status: isSold
@@ -199,7 +204,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
       is_verified: rightmoveFilters.verifiedOnly ? true : undefined,
       limit: 20,
     };
-  }, [rightmoveFilters, params.city, params.location]);
+  }, [rightmoveFilters, locationParam]);
 
   const {
     properties: apiProperties,
@@ -278,7 +283,7 @@ export function BrowseScreen({ mode }: { mode?: "buy" | "rent" | "sold" }) {
         {/* ─── Rightmove Search Filter Card ─────────────────────────────────── */}
         <RightmoveFilterCard
           filters={rightmoveFilters}
-          locationName={params.city || params.location || (rightmoveFilters.query ? rightmoveFilters.query : "Dhaka")}
+          locationName={locationParam || (rightmoveFilters.query ? rightmoveFilters.query : "Dhaka")}
           onFilterChange={(updated) => setRightmoveFilters(updated)}
           onSearch={(applied) => {
             setRightmoveFilters(applied);

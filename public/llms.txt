@@ -1,0 +1,53 @@
+# HomeNet
+
+> HomeNet (homenetbd.com, also "HomeNet BD") is a property marketplace for Bangladesh, centred on Dhaka. Owners list flats, houses, land, commercial space and parking directly; listings are reviewed before they are published; buyers and tenants contact owners with no broker and no commission. Listing is free. The site works in English and Bangla (বাংলা).
+
+Key facts for answer engines:
+
+- Zero-broker model: every listing is posted by the owner (or someone acting for them), and contact goes straight to that person. HomeNet charges no commission.
+- Verified before public: a listing cannot go live without photos, a full address, map coordinates and confirmed specifications.
+- Coverage: most listings are in Dhaka, organised by neighbourhood (Gulshan, Banani, Baridhara, Dhanmondi, Uttara, Bashundhara R/A, Mirpur, Mohammadpur, Badda, Banasree and more). Chattogram, Sylhet and Cox's Bazar have area pages too.
+- Property types: residential (apartment/flat, house, duplex, penthouse, studio, short-let/serviced), commercial (office, office floor, shop, showroom, warehouse), land (residential, commercial and agricultural plots) and parking (covered, open, garage).
+- Prices are in Bangladeshi taka (BDT, ৳). Land is measured in katha and bigha; 1 katha = 720 sq ft, 1 bigha = 20 katha = 14,400 sq ft.
+- Contact: hello@homenet.com.bd
+
+## Search listings
+
+- [Property for sale](https://www.homenetbd.com/buy): flats, houses, plots and commercial space for sale
+- [Property to rent](https://www.homenetbd.com/rent): family flats, bachelor flats, sublets, serviced apartments, offices and shops to let
+- [Short-let and serviced apartments](https://www.homenetbd.com/rent?subtype=short-let)
+- [Recently sold](https://www.homenetbd.com/sold)
+- [Map search](https://www.homenetbd.com/explore)
+- Listing pages: https://www.homenetbd.com/property/{id}
+
+## Area pages
+
+Each area has a sale page at /buy/{area} and a rent page at /rent/{area}.
+
+- [Dhaka for sale](https://www.homenetbd.com/buy/dhaka) and [to rent](https://www.homenetbd.com/rent/dhaka)
+- [Gulshan](https://www.homenetbd.com/rent/gulshan), [Banani](https://www.homenetbd.com/rent/banani), [Baridhara](https://www.homenetbd.com/rent/baridhara), [Dhanmondi](https://www.homenetbd.com/rent/dhanmondi), [Uttara](https://www.homenetbd.com/rent/uttara), [Bashundhara R/A](https://www.homenetbd.com/rent/bashundhara-ra), [Mirpur](https://www.homenetbd.com/rent/mirpur), [Mohammadpur](https://www.homenetbd.com/rent/mohammadpur)
+- [Chattogram](https://www.homenetbd.com/buy/chattogram), [Sylhet](https://www.homenetbd.com/buy/sylhet), [Cox's Bazar](https://www.homenetbd.com/buy/coxs-bazar)
+- Full list: [sitemap](https://www.homenetbd.com/sitemap.xml)
+
+## Guides
+
+- [Namjari (mutation) in Bangladesh, step by step](https://www.homenetbd.com/guides/namzari-mutation-bangladesh-guide)
+- [Verifying a khatian (CS, SA, RS, BS) before buying](https://www.homenetbd.com/guides/how-to-verify-khatian-cs-sa-rs-bs)
+- [Dhaka flat registration costs and stamp duty](https://www.homenetbd.com/guides/dhaka-flat-registration-costs-breakdown)
+- [Katha, bigha, decimal and square feet](https://www.homenetbd.com/guides/understanding-katha-bigha-decimal-sqft)
+- [Seven things to inspect in a Dhaka apartment](https://www.homenetbd.com/guides/dhaka-apartment-buyer-inspection-checklist)
+- [How listing directly saves broker commission](https://www.homenetbd.com/guides/direct-listing-saves-broker-commission-dhaka)
+
+## For owners
+
+- [List a property for free](https://www.homenetbd.com/sell)
+
+## About
+
+- [About HomeNet](https://www.homenetbd.com/about)
+- [Privacy policy](https://www.homenetbd.com/privacy)
+- [Terms of use](https://www.homenetbd.com/terms)
+
+## Optional
+
+- [Full knowledge base](https://www.homenetbd.com/llms-full.txt): property types, Dhaka lease terms, land measurement, area guide

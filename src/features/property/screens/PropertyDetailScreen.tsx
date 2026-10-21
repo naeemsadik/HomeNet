@@ -33,8 +33,10 @@ import {
   View,
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
+import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
 import { displaySubtype } from "../constants/holidayStay";
+import { breadcrumbSchema, listingCrumbs, listingSchema } from "@/lib/schema";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
@@ -367,6 +369,9 @@ export function PropertyDetailScreen() {
         title={`${property.title} — ${property.location} | HomeNet`}
         description={`${property.listingType} at ${property.priceCurrency}${property.price}${property.pricePeriod}. ${property.address}.`}
       />
+      {apiDetail ? (
+        <JsonLd nodes={[listingSchema(apiDetail), breadcrumbSchema(listingCrumbs(apiDetail))]} />
+      ) : null}
       <ScrollView
         contentContainerStyle={[
           styles.scrollBody,
