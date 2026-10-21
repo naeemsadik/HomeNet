@@ -36,6 +36,7 @@ import { AppChrome } from "@/components/AppChrome";
 import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
 import { displaySubtype } from "../constants/holidayStay";
+import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
 import { breadcrumbSchema, listingCrumbs, listingSchema } from "@/lib/schema";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -125,10 +126,10 @@ export function PropertyDetailScreen() {
       latitude: apiDetail.location_lat,
       longitude: apiDetail.location_lng,
       type: displaySubtype(apiDetail.subtype) || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
-      listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
+      listingType: listingTypeLabel(apiDetail.listing_type),
       price: typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
       priceCurrency: apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),
-      pricePeriod: apiDetail.listing_type === "rent" ? "/mo" : "",
+      pricePeriod: pricePeriodFor(apiDetail.listing_type),
       isVerified: Boolean(apiDetail.is_verified),
       isBoosted: false,
       score: (apiDetail as any).score ?? null,
@@ -366,7 +367,7 @@ export function PropertyDetailScreen() {
       {/* The listing itself is the page title — that is what a search result
           for this URL should read. */}
       <PageMeta
-        title={`${property.title} — ${property.location} | HomeNet`}
+        title={`${property.title} — ${property.location} | HomeNet BD`}
         description={`${property.listingType} at ${property.priceCurrency}${property.price}${property.pricePeriod}. ${property.address}.`}
       />
       {apiDetail ? (

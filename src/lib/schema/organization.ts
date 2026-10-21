@@ -12,6 +12,7 @@ export function organizationSchema(): SchemaNode {
     "@id": ORGANIZATION_ID,
     name: BRAND.name,
     alternateName: BRAND.alternateName,
+    disambiguatingDescription: BRAND.disambiguatingDescription,
     url: BRAND.url,
     logo: { "@type": "ImageObject", url: BRAND.logo, width: 1024, height: 1024 },
     image: BRAND.logo,

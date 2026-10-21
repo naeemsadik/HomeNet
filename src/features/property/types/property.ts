@@ -82,7 +82,10 @@ export interface PropertyFilters {
   sort_by?: "price_asc" | "price_desc" | "created_at_asc" | "created_at_desc" | "view_count_desc";
   lat?: number;
   lng?: number;
+  /** Kilometres, 1 to 50. Needs lat and lng. */
   radius?: number;
+  min_bedrooms?: number;
+  max_bedrooms?: number;
   page?: number;
   limit?: number;
 }

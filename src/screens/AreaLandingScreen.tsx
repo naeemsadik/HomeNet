@@ -18,12 +18,12 @@ export function areaPageMeta(area: SeoArea, intent: ListingIntent): { title: str
   const place = placeLabel(area);
   if (intent === "rent") {
     return {
-      title: `Flat & House Rent in ${place} | ${area.nameBn} বাসা ভাড়া | HomeNet`,
+      title: `Flat & House Rent in ${place} | ${area.nameBn} বাসা ভাড়া | HomeNet BD`,
       description: `Family flats, bachelor flats, sublets and furnished apartments to rent in ${place}. Contact owners directly on HomeNet, with no broker. ${area.nameBn} বাসা ভাড়া, টু-লেট ও সাবলেট।`,
     };
   }
   return {
-    title: `Flats, Houses & Land for Sale in ${place} | ${area.nameBn} ফ্ল্যাট বিক্রয় | HomeNet`,
+    title: `Flats, Houses & Land for Sale in ${place} | ${area.nameBn} ফ্ল্যাট বিক্রয় | HomeNet BD`,
     description: `Ready and under-construction flats, houses, plots and commercial space for sale in ${place}. Deal directly with owners on HomeNet, with no broker fee. ${area.nameBn} ফ্ল্যাট ও জমি বিক্রয়।`,
   };
 }

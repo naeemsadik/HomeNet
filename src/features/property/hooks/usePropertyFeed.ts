@@ -3,9 +3,10 @@ import { getProperties } from "@/services/propertyApi";
 import { toApiError } from "@/services/apiClient";
 import type { PropertyFilters } from "../types/property";
 
-export function usePropertyFeed(filters: PropertyFilters) {
+export function usePropertyFeed(filters: PropertyFilters, options: { enabled?: boolean } = {}) {
   const query = useInfiniteQuery({
     queryKey: ["properties", filters],
+    enabled: options.enabled ?? true,
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       getProperties({ ...filters, page: pageParam, limit: filters.limit ?? 20 }),

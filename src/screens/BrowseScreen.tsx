@@ -24,7 +24,9 @@ import {
 } from "@/components/AdvancedFiltersModal";
 import { RightmoveFilterCard, type RightmoveFilters } from "@/components/RightmoveFilterCard";
 import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
-import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
+import { useAreas } from "@/features/property/hooks/useAreas";
+import { useBrowseFeed } from "@/features/property/hooks/useBrowseFeed";
+import { areaOptions, fallbackAreaOptions, isCityName, resolveScope } from "@/features/property/utils/areaScope";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
@@ -91,6 +93,7 @@ export function BrowseScreen({
 
   // Rightmove Filter state
   const [rightmoveFilters, setRightmoveFilters] = useState<RightmoveFilters>({
+    area: locationParam || "",
     radius: "",
     propertyType: toPropertyTypeFilter(params.type),
     addedToSite: "",
@@ -136,7 +139,7 @@ export function BrowseScreen({
         ...prev,
         purpose: "sold",
       }));
-    } else if (params.subtype === "short-let") {
+    } else if (params.subtype === "short-let" || params.listing_type === "short_let") {
       setRightmoveFilters((prev) => ({
         ...prev,
         purpose: "short-let",
@@ -153,6 +156,11 @@ export function BrowseScreen({
       }));
     }
   }, [params.query, params.search, params.listing_type, params.subtype, params.status, mode]);
+
+  // A link to a place (the footer, an area page) picks that place.
+  useEffect(() => {
+    if (locationParam) setRightmoveFilters((prev) => ({ ...prev, area: locationParam, radius: "" }));
+  }, [locationParam]);
 
   // Helper to parse price string to number
   const parsePriceToNumber = (val: string): number | undefined => {
@@ -174,26 +182,32 @@ export function BrowseScreen({
   const apiFilters = useMemo(() => {
     const minP = parsePriceToNumber(rightmoveFilters.minPrice);
     const maxP = parsePriceToNumber(rightmoveFilters.maxPrice);
-    const bedrooms = rightmoveFilters.minBedrooms ? parseInt(rightmoveFilters.minBedrooms, 10) : undefined;
+    const minBedrooms = rightmoveFilters.minBedrooms ? parseInt(rightmoveFilters.minBedrooms, 10) : undefined;
+    const maxBedrooms = rightmoveFilters.maxBedrooms ? parseInt(rightmoveFilters.maxBedrooms, 10) : undefined;
     const isShortLet = rightmoveFilters.purpose === "short-let";
     const isSold = rightmoveFilters.purpose === "sold";
 
     return {
+      // A holiday stay is its own listing type in the API (`short_let`), not a
+      // rental whose text mentions it: asking for rent + the words "short-let"
+      // missed real holiday stays and, once anything was typed, returned every rental.
       listing_type:
         rightmoveFilters.purpose === "sale"
           ? ("sale" as const)
-          : rightmoveFilters.purpose === "rent" || isShortLet
+          : rightmoveFilters.purpose === "rent"
           ? ("rent" as const)
+          : isShortLet
+          ? ("short_let" as const)
           : undefined,
-      search: rightmoveFilters.query.trim() || (isShortLet ? "short-let" : undefined),
+      search: rightmoveFilters.query.trim() || undefined,
       type:
         rightmoveFilters.propertyType === "all"
           ? undefined
           : (rightmoveFilters.propertyType.toLowerCase() as PropertyType),
-      bedrooms,
+      min_bedrooms: minBedrooms,
+      max_bedrooms: maxBedrooms,
       min_price: minP,
       max_price: maxP,
-      city: locationParam || undefined,
       // The Sold section is sold-only; elsewhere "include sold" merely widens
       // an otherwise active-only list.
       status: isSold
@@ -204,7 +218,28 @@ export function BrowseScreen({
       is_verified: rightmoveFilters.verifiedOnly ? true : undefined,
       limit: 20,
     };
-  }, [rightmoveFilters, locationParam]);
+  }, [rightmoveFilters]);
+
+  // Where to look: the chosen place, and how far around it.
+  const { areas: fetchedAreas, ready: areasReady, complete: areasComplete } = useAreas();
+  // A partial list (see useAreas) is worse than none: use the site's own place list instead.
+  const areas = areasComplete ? fetchedAreas : [];
+  const { scope, radiusAvailable } = useMemo(
+    () =>
+      resolveScope({
+        name: rightmoveFilters.area,
+        radiusKm: rightmoveFilters.radius ? parseInt(rightmoveFilters.radius, 10) : 0,
+        areas,
+      }),
+    [rightmoveFilters.area, rightmoveFilters.radius, areas],
+  );
+  const placeOptions = useMemo(
+    () =>
+      areasComplete ? areaOptions(areas, t("search.rightmove.allAreas")) : fallbackAreaOptions(t("search.rightmove.allAreas")),
+    [areas, areasComplete, t],
+  );
+  // A city needs no area list; any other place waits for it.
+  const feedReady = !rightmoveFilters.area || isCityName(rightmoveFilters.area) || areasReady;
 
   const {
     properties: apiProperties,
@@ -215,7 +250,7 @@ export function BrowseScreen({
     fetchingNextPage,
     loadMore,
     refresh,
-  } = usePropertyFeed(apiFilters);
+  } = useBrowseFeed(apiFilters, scope, feedReady);
 
   // PropertyCard consumes the API shape directly — no adapter needed.
   const feed = apiProperties ?? [];
@@ -231,6 +266,7 @@ export function BrowseScreen({
 
   const handleResetFilters = () => {
     setRightmoveFilters({
+      area: fixedLocation || "",
       radius: "",
       propertyType: "all",
       addedToSite: "",
@@ -283,7 +319,14 @@ export function BrowseScreen({
         {/* ─── Rightmove Search Filter Card ─────────────────────────────────── */}
         <RightmoveFilterCard
           filters={rightmoveFilters}
-          locationName={locationParam || (rightmoveFilters.query ? rightmoveFilters.query : "Dhaka")}
+          locationName={rightmoveFilters.area || (rightmoveFilters.query ? rightmoveFilters.query : "Dhaka")}
+          areaOptions={placeOptions}
+          radiusAvailable={radiusAvailable}
+          radiusHint={
+            scope.kind === "areas"
+              ? t("search.rightmove.radiusUnavailable")
+              : t("search.rightmove.pickNeighbourhood")
+          }
           onFilterChange={(updated) => setRightmoveFilters(updated)}
           onSearch={(applied) => {
             setRightmoveFilters(applied);

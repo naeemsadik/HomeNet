@@ -9,6 +9,7 @@ interface FormSelectFieldProps<T extends FieldValues> {
   name: Path<T>;
   options: string[];
   style?: StyleProp<ViewStyle>;
+  formatOption?: (option: string) => string;
 }
 
 /**
@@ -25,6 +26,7 @@ export function FormSelectField<T extends FieldValues>({
   name,
   options,
   style,
+  formatOption,
 }: FormSelectFieldProps<T>) {
   return (
     <Controller
@@ -36,6 +38,7 @@ export function FormSelectField<T extends FieldValues>({
           options={options}
           onChange={onChange}
           style={style}
+          formatOption={formatOption}
         />
       )}
     />

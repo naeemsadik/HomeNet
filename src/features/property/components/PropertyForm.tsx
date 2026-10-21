@@ -10,6 +10,7 @@ import { FormSelectField } from "@/components/FormSelectField";
 import { ErrorBanner, AuthButton } from "@/components/AuthFormFields";
 import { AreaPicker } from "@/components/AreaPicker";
 import { ImageUploader } from "./ImageUploader";
+import { HOLIDAY_STAY_LABEL } from "../constants/holidayStay";
 import {
   propertyFormSchema,
   PROPERTY_STEP_FIELDS,
@@ -160,7 +161,8 @@ export function PropertyForm({
                 <FormSelectField
                   control={control}
                   name="listing_type"
-                  options={["sale", "rent"]}
+                  options={["sale", "rent", "short_let"]}
+                  formatOption={(option) => (option === "short_let" ? HOLIDAY_STAY_LABEL : option)}
                 />
               </View>
             </View>

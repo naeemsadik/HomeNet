@@ -248,18 +248,22 @@ export function SelectField({
   options,
   onChange,
   style,
+  formatOption,
 }: {
   value: string;
   options: string[];
   onChange: (value: string) => void;
   style?: StyleProp<ViewStyle>;
+  /** How a stored value is shown, when it is not fit to read as it is. */
+  formatOption?: (option: string) => string;
 }) {
   const [open, setOpen] = useState(false);
+  const show = (option: string) => (formatOption ? formatOption(option) : option);
 
   return (
     <View style={[styles.selectWrap, style]}>
       <Pressable accessibilityLabel={`Select ${value}`} onPress={() => setOpen(true)} style={[styles.selectButton, webPointer]}>
-        <Text numberOfLines={1} style={styles.selectValue}>{value}</Text>
+        <Text numberOfLines={1} style={styles.selectValue}>{show(value)}</Text>
         <ChevronDown color={colors.green} size={14} />
       </Pressable>
       <Modal animationType="fade" onRequestClose={() => setOpen(false)} transparent visible={open}>
@@ -277,7 +281,7 @@ export function SelectField({
                   }}
                   style={[styles.selectOption, selected && styles.selectOptionActive, webPointer]}
                 >
-                  <Text style={[styles.selectOptionText, selected && styles.selectOptionTextActive]}>{option}</Text>
+                  <Text style={[styles.selectOptionText, selected && styles.selectOptionTextActive]}>{show(option)}</Text>
                   {selected ? <Check color={colors.green} size={15} /> : null}
                 </Pressable>
               );

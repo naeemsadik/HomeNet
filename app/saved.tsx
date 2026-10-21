@@ -5,7 +5,7 @@ import { SavedScreen } from "@/screens/SavedScreen";
 export default function SavedRoute() {
   return (
     <RequireAuth active="saved">
-      <PageMeta title="Saved Properties | HomeNet" />
+      <PageMeta title="Saved Properties | HomeNet BD" />
       <SavedScreen />
     </RequireAuth>
   );

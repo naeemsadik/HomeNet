@@ -5,7 +5,7 @@ export default function SoldRoute() {
   return (
     <>
       <PageMeta
-        title="Recently Sold Property Prices | HomeNet"
+        title="Recently Sold Property Prices | HomeNet BD"
         description="See confirmed sale prices for properties across Dhaka and Bangladesh."
       />
       <BrowseScreen mode="sold" />

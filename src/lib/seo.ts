@@ -1,6 +1,7 @@
 /** The public address of the website. The apex domain redirects here. */
 export const SITE_URL = "https://www.homenetbd.com";
-export const SITE_NAME = "HomeNet";
+/** The name people and search engines should use: other companies are also called "HomeNet". */
+export const SITE_NAME = "HomeNet BD";
 /** Shown when a link is shared (WhatsApp, Facebook, X). Lives in `public/`. */
 export const SITE_SHARE_IMAGE = `${SITE_URL}/og-image.png`;
 
