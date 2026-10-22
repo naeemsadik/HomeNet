@@ -26,6 +26,7 @@ Last reviewed: 20 October 2026. Figures described as indicative are broad market
 | Map search | https://www.homenetbd.com/explore |
 | Guides | https://www.homenetbd.com/guides |
 | List a property | https://www.homenetbd.com/sell |
+| Instant property valuation | https://www.homenetbd.com/instant-valuation |
 
 Search takes free text: https://www.homenetbd.com/buy?query={words}
 

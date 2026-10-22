@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   FlatList,
   Pressable,
@@ -6,7 +6,8 @@ import {
   Text,
   View,
 } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
 import {
   Grid2X2,
   List,
@@ -17,37 +18,29 @@ import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard, CARD_HEIGHT } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
 import { AppButton } from "@/components/ui";
-import {
-  AdvancedFiltersModal,
-  defaultFilterState,
-  type FilterState,
-} from "@/components/AdvancedFiltersModal";
-import { RightmoveFilterCard, type RightmoveFilters } from "@/components/RightmoveFilterCard";
+import { AdvancedFiltersModal } from "@/components/AdvancedFiltersModal";
+import { RightmoveFilterCard } from "@/components/RightmoveFilterCard";
 import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
 import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
+import { getProperties } from "@/services/propertyApi";
+import {
+  applyClientFilters,
+  countActiveFilters,
+  FILTER_PARAM_KEYS,
+  filtersFromParams,
+  filtersToParamPatch,
+  hasClientFilters,
+  isFiltersModalRequested,
+  resetSearchFilters,
+  toApiFilters,
+  type SearchFilters,
+} from "@/features/property/utils/searchFilters";
+import { useAllAreas } from "@/hooks/useAllAreas";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import type { PropertyType } from "@/types/api";
 import { LiveText } from "@/components/LiveText";
 import { useTranslation, formatLocalizedNumber } from "@/i18n";
-
-/**
- * Maps a `?type=` URL value onto the API's PropertyType enum. Older links and
- * bookmarks carry the subtype names "apartment" and "house", which the API
- * rejects as a type; they are folded into "residential" so those links still
- * open a working search instead of an error.
- */
-const API_PROPERTY_TYPES = ["residential", "commercial", "land", "parking"];
-const LEGACY_RESIDENTIAL_TYPES = ["apartment", "flat", "house", "villa"];
-
-function toPropertyTypeFilter(raw?: string): string {
-  const value = raw?.toLowerCase();
-  if (!value) return "all";
-  if (API_PROPERTY_TYPES.includes(value)) return value;
-  if (LEGACY_RESIDENTIAL_TYPES.includes(value)) return "residential";
-  return "all";
-}
 
 export function BrowseScreen({
   mode,
@@ -59,152 +52,74 @@ export function BrowseScreen({
 }) {
   const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
-  const params = useLocalSearchParams<{
-    query?: string;
-    search?: string;
-    type?: string;
-    subtype?: string;
-    status?: string;
-    listing_type?: string;
-    city?: string;
-    location?: string;
-    min_price?: string;
-    max_price?: string;
-    bedrooms?: string;
-    bathrooms?: string;
-    is_verified?: string;
-    filters?: string;
-    modal?: string;
-  }>();
-  const locationParam = fixedLocation || params.city || params.location;
+  const params = useLocalSearchParams();
 
-  const initialPurpose =
-    mode === "sold" || params.status === "sold"
-      ? "sold"
-      : params.subtype === "short-let"
-      ? "short-let"
-      : params.listing_type === "rent" || mode === "rent"
-      ? "rent"
-      : params.listing_type === "sale" || mode === "buy"
-      ? "sale"
-      : "all";
+  const areas = useAllAreas();
+  const areaItems = React.useMemo(() => areas.data?.items ?? [], [areas.data]);
+  const areaOptions = React.useMemo(() => {
+    if (fixedLocation) return undefined;
+    return [
+      { value: "", label: t("filters.allAreas") },
+      // The value is the area's id: the API filters on that, not on a name.
+      ...areaItems.map((area) => ({ value: area.id, label: area.name })),
+    ];
+  }, [areaItems, fixedLocation, t]);
 
-  // Rightmove Filter state
-  const [rightmoveFilters, setRightmoveFilters] = useState<RightmoveFilters>({
-    radius: "",
-    propertyType: toPropertyTypeFilter(params.type),
-    addedToSite: "",
-    includeSold: params.status === "sold",
-    verifiedOnly: params.is_verified === "true",
-    minPrice: params.min_price || "",
-    maxPrice: params.max_price || "",
-    minBedrooms: params.bedrooms || "",
-    maxBedrooms: "",
-    query: params.query || params.search || "",
-    purpose: initialPurpose,
-  });
+  // A /buy/<area> page names its area in the route, so its id has to be looked
+  // up before the feed can be filtered by it.
+  const fixedAreaId = React.useMemo(() => {
+    if (!fixedLocation) return "";
+    const match = areaItems.find(
+      (area) => area.name.toLowerCase() === fixedLocation.toLowerCase()
+    );
+    return match?.id ?? "";
+  }, [areaItems, fixedLocation]);
 
-  // Advanced modal state (for deep granular attributes if triggered)
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(
-    params.filters === "open" || params.filters === "true" || params.modal === "filters"
+  /**
+   * The URL is the only filter state. Refresh, Back and a shared link all land
+   * on the same search, and nothing has to be kept in sync with anything else.
+   */
+  // Memoised on the params themselves: a fresh object every render would
+  // re-key the feed query and re-seed the modal on each one.
+  const paramKey = JSON.stringify(
+    FILTER_PARAM_KEYS.map((key) => (params as Record<string, unknown>)[key] ?? "")
   );
-  const [modalFilters, setModalFilters] = useState<FilterState>({
-    ...defaultFilterState,
-    location: fixedLocation || params.location || params.city || defaultFilterState.location,
-    minPrice: params.min_price || "",
-    maxPrice: params.max_price || "",
-    bedrooms: params.bedrooms ? parseInt(params.bedrooms, 10) : null,
-    bathrooms: params.bathrooms ? parseInt(params.bathrooms, 10) : null,
-    verifiedOnly: params.is_verified === "true" || false,
-  });
+  const filters = React.useMemo(
+    () => filtersFromParams(params, { mode, fixedLocation, fixedAreaId }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [paramKey, mode, fixedLocation, fixedAreaId]
+  );
+  const locationParam = filters.area || undefined;
+  const activeFilterCount = countActiveFilters(filters);
 
-  // View mode & Saved properties store
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(() =>
+    isFiltersModalRequested(params)
+  );
+  const [previewFilters, setPreviewFilters] = useState<SearchFilters | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { savedIds, toggleSaved, isSaved } = useSavedStore();
 
-  // Sync params when URL changes (e.g. from hero search widget)
-  useEffect(() => {
-    const q = params.query || params.search;
-    if (q !== undefined) {
-      setRightmoveFilters((prev) => ({
-        ...prev,
-        query: q,
-      }));
-    }
-    if (mode === "sold" || params.status === "sold") {
-      setRightmoveFilters((prev) => ({
-        ...prev,
-        purpose: "sold",
-      }));
-    } else if (params.subtype === "short-let") {
-      setRightmoveFilters((prev) => ({
-        ...prev,
-        purpose: "short-let",
-      }));
-    } else if (params.listing_type || mode) {
-      setRightmoveFilters((prev) => ({
-        ...prev,
-        purpose:
-          params.listing_type === "rent" || mode === "rent"
-            ? "rent"
-            : params.listing_type === "sale" || mode === "buy"
-            ? "sale"
-            : "all",
-      }));
-    }
-  }, [params.query, params.search, params.listing_type, params.subtype, params.status, mode]);
+  const applyFilters = useCallback(
+    (next: SearchFilters) => {
+      router.setParams(filtersToParamPatch(next, { fixedLocation, current: params }));
+    },
+    [fixedLocation, params]
+  );
 
-  // Helper to parse price string to number
-  const parsePriceToNumber = (val: string): number | undefined => {
-    if (!val || !val.trim()) return undefined;
-    const clean = val.toLowerCase().replace(/[,৳\s]/g, "");
-    if (clean.endsWith("cr") || clean.endsWith("crore")) {
-      const num = parseFloat(clean.replace(/cr|crore/, ""));
-      return !isNaN(num) ? num * 10000000 : undefined;
+  const closeFilterModal = useCallback(() => {
+    setIsFilterModalOpen(false);
+    setPreviewFilters(null);
+    // Otherwise ?filters=open reopens the modal on the next render.
+    if (isFiltersModalRequested(params)) {
+      router.setParams({ filters: "", modal: "" });
     }
-    if (clean.endsWith("lakh") || clean.endsWith("lac") || clean.endsWith("l")) {
-      const num = parseFloat(clean.replace(/lakh|lac|l/, ""));
-      return !isNaN(num) ? num * 100000 : undefined;
-    }
-    const parsed = parseFloat(clean);
-    return !isNaN(parsed) ? parsed : undefined;
-  };
+  }, [params]);
 
-  // Prepare API filters
-  const apiFilters = useMemo(() => {
-    const minP = parsePriceToNumber(rightmoveFilters.minPrice);
-    const maxP = parsePriceToNumber(rightmoveFilters.maxPrice);
-    const bedrooms = rightmoveFilters.minBedrooms ? parseInt(rightmoveFilters.minBedrooms, 10) : undefined;
-    const isShortLet = rightmoveFilters.purpose === "short-let";
-    const isSold = rightmoveFilters.purpose === "sold";
+  const handleResetFilters = useCallback(() => {
+    applyFilters(resetSearchFilters(filters, { fixedLocation }));
+  }, [applyFilters, filters, fixedLocation]);
 
-    return {
-      listing_type:
-        rightmoveFilters.purpose === "sale"
-          ? ("sale" as const)
-          : rightmoveFilters.purpose === "rent" || isShortLet
-          ? ("rent" as const)
-          : undefined,
-      search: rightmoveFilters.query.trim() || (isShortLet ? "short-let" : undefined),
-      type:
-        rightmoveFilters.propertyType === "all"
-          ? undefined
-          : (rightmoveFilters.propertyType.toLowerCase() as PropertyType),
-      bedrooms,
-      min_price: minP,
-      max_price: maxP,
-      city: locationParam || undefined,
-      // The Sold section is sold-only; elsewhere "include sold" merely widens
-      // an otherwise active-only list.
-      status: isSold
-        ? ("sold" as const)
-        : rightmoveFilters.includeSold
-        ? undefined
-        : ("active" as const),
-      is_verified: rightmoveFilters.verifiedOnly ? true : undefined,
-      limit: 20,
-    };
-  }, [rightmoveFilters, locationParam]);
+  const apiFilters = toApiFilters(filters);
 
   const {
     properties: apiProperties,
@@ -219,32 +134,34 @@ export function BrowseScreen({
 
   // PropertyCard consumes the API shape directly — no adapter needed.
   const feed = apiProperties ?? [];
+  const isSoldView = filters.purpose === "sold";
 
-  // The API currently ignores `status` when `listing_type` is set, so a sold
-  // query comes back full of active listings. Presenting those as completed
-  // sales would be a lie, so the client re-asserts the filter: if the server
-  // did not honour it, this empties out and the honest gate below shows.
-  const isSoldView = rightmoveFilters.purpose === "sold";
-  const results = isSoldView ? feed.filter((p) => p.status === "sold") : feed;
-  // The API total ignores the client-side sold filter, so the sold view counts what it shows.
-  const totalCount = isSoldView ? results.length : (total ?? results.length);
+  // Everything the API cannot filter: the sold re-check, the added-to-site
+  // window, amenities and the room ceilings.
+  const results = applyClientFilters(feed, filters);
 
-  const handleResetFilters = () => {
-    setRightmoveFilters({
-      radius: "",
-      propertyType: "all",
-      addedToSite: "",
-      includeSold: false,
-      verifiedOnly: false,
-      minPrice: "",
-      maxPrice: "",
-      minBedrooms: "",
-      maxBedrooms: "",
-      query: "",
-      purpose: "all",
-    });
-  };
+  // A client-side pass has narrowed the list, so the API's total is no longer
+  // the number on screen. Count what is actually shown.
+  const totalCount = hasClientFilters(filters) || isSoldView
+    ? results.length
+    : (total ?? results.length);
 
+  /**
+   * The count the modal's pending filters would return, for its apply button.
+   * `limit: 1` keeps it to a count — the listings themselves are not needed.
+   */
+  const previewQuery = useQuery({
+    queryKey: ["properties", "preview", previewFilters && toApiFilters(previewFilters)],
+    queryFn: () => getProperties({ ...toApiFilters(previewFilters as SearchFilters), limit: 1 }),
+    enabled: Boolean(previewFilters) && isFilterModalOpen,
+  });
+  const previewCount = previewFilters
+    ? previewQuery.data?.data?.total
+    : totalCount;
+
+  // The area list feeds both the bar and the modal, from the app-wide areas
+  // cache the picker already fills. A /buy/<area> page pins its area in the
+  // route, so it offers no chooser.
   const handleToggleSaved = useCallback(
     (property: (typeof results)[number] | string) => {
       void toggleSaved(property);
@@ -282,11 +199,13 @@ export function BrowseScreen({
       <View style={styles.container}>
         {/* ─── Rightmove Search Filter Card ─────────────────────────────────── */}
         <RightmoveFilterCard
-          filters={rightmoveFilters}
-          locationName={locationParam || (rightmoveFilters.query ? rightmoveFilters.query : "Dhaka")}
-          onFilterChange={(updated) => setRightmoveFilters(updated)}
+          areaOptions={areaOptions}
+          filters={filters}
+          locationName={locationParam || (filters.query ? filters.query : "Dhaka")}
+          onFilterChange={applyFilters}
+          onOpenMoreFilters={() => setIsFilterModalOpen(true)}
           onSearch={(applied) => {
-            setRightmoveFilters(applied);
+            applyFilters(applied);
             void refresh();
           }}
           totalResults={totalCount}
@@ -294,15 +213,27 @@ export function BrowseScreen({
 
         {/* ─── 4. Results Count & View Toggle Toolbar ─────────────────────── */}
         <View style={styles.toolbar}>
-          <LiveText style={styles.resultCountText}>
-            {totalCount === 1
-              ? t("browse.propertyFound", {
-                  count: formatLocalizedNumber(totalCount, language),
-                })
-              : t("browse.propertiesFound", {
-                  count: formatLocalizedNumber(totalCount, language),
-                })}
-          </LiveText>
+          <View style={styles.toolbarLeft}>
+            <LiveText style={styles.resultCountText}>
+              {totalCount === 1
+                ? t("browse.propertyFound", {
+                    count: formatLocalizedNumber(totalCount, language),
+                  })
+                : t("browse.propertiesFound", {
+                    count: formatLocalizedNumber(totalCount, language),
+                  })}
+            </LiveText>
+
+            {activeFilterCount > 0 ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={handleResetFilters}
+                style={[styles.resetFiltersBtn, webPointer]}
+              >
+                <Text style={styles.resetFiltersText}>{t("browse.resetFilters")}</Text>
+              </Pressable>
+            ) : null}
+          </View>
 
           <View style={styles.viewToggleWrap}>
             <Pressable
@@ -315,7 +246,7 @@ export function BrowseScreen({
               ]}
             >
               <Grid2X2
-                color={viewMode === "grid" ? colorTokens.onBrand : "#5C6B66"}
+                color={viewMode === "grid" ? colorTokens.onBrand : colorTokens.muted}
                 size={16}
               />
             </Pressable>
@@ -330,7 +261,7 @@ export function BrowseScreen({
               ]}
             >
               <List
-                color={viewMode === "list" ? colorTokens.onBrand : "#5C6B66"}
+                color={viewMode === "list" ? colorTokens.onBrand : colorTokens.muted}
                 size={16}
               />
             </Pressable>
@@ -416,11 +347,14 @@ export function BrowseScreen({
 
         {/* ─── 6. Advanced Filters Modal ───────────────────────────────────── */}
         <AdvancedFiltersModal
-          filters={modalFilters}
-          onApply={(updated) => setModalFilters(updated)}
-          onClose={() => setIsFilterModalOpen(false)}
-          onReset={() => setModalFilters(defaultFilterState)}
-          resultCount={totalCount}
+          areaOptions={areaOptions}
+          filters={filters}
+          fixedLocation={fixedLocation}
+          onApply={applyFilters}
+          onClose={closeFilterModal}
+          onPreviewCount={setPreviewFilters}
+          resultCount={previewCount}
+          showLocation
           visible={isFilterModalOpen}
         />
       </View>
@@ -442,22 +376,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 6,
+    gap: 12,
+  },
+  toolbarLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    flexShrink: 1,
   },
   resultCountText: {
-    color: "#0B1A17",
+    color: colorTokens.ink,
     fontFamily: fonts.semiBold,
     fontSize: 15,
+    fontWeight: "600",
+  },
+  resetFiltersBtn: {
+    paddingVertical: 2,
+  },
+  resetFiltersText: {
+    color: colorTokens.brandText,
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
     fontWeight: "600",
   },
   viewToggleWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: colorTokens.surfaceSunken,
     borderRadius: 10,
     padding: 3,
     gap: 3,
     borderWidth: 1.2,
-    borderColor: "rgba(11, 26, 23, 0.08)",
+    borderColor: colorTokens.divider,
   },
   viewToggleBtn: {
     width: 32,
@@ -467,7 +417,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   viewToggleBtnActive: {
-    backgroundColor: "#04cf92",
+    backgroundColor: colorTokens.brand,
   },
 
   /* 5. Properties Grid */
@@ -498,10 +448,10 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     minHeight: 340,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     borderRadius: 20,
     borderWidth: 1.2,
-    borderColor: "rgba(11, 26, 23, 0.08)",
+    borderColor: colorTokens.divider,
     borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",
@@ -509,13 +459,13 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   emptyTitle: {
-    color: "#0B1A17",
+    color: colorTokens.ink,
     fontFamily: fonts.headingBold,
     fontSize: 18,
     fontWeight: "700",
   },
   emptySubtitle: {
-    color: "#5C6B66",
+    color: colorTokens.muted,
     fontFamily: fonts.regular,
     fontSize: 14,
     textAlign: "center",
@@ -524,7 +474,7 @@ const styles = StyleSheet.create({
   },
   clearAllBtn: {
     marginTop: 8,
-    backgroundColor: "#04cf92",
+    backgroundColor: colorTokens.brand,
     borderRadius: 999,
     paddingHorizontal: 20,
     paddingVertical: 10,

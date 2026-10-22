@@ -1,6 +1,6 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, fonts, webPointer } from "@/theme";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { colorTokens, colors, fonts, webPointer } from "@/theme";
 import { useTranslation, type TranslationKey } from "@/i18n";
 
 export type SearchTabType = "buy" | "rent" | "short-let" | "sold" | "instant-valuation";
@@ -24,7 +24,15 @@ export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsP
   const { t } = useTranslation();
 
   return (
-    <View accessibilityRole="tablist" style={styles.scrollWrapper}>
+    // Five tabs do not fit 360 px. They scroll sideways rather than wrapping
+    // onto a second line that pushes the search field down the screen.
+    <ScrollView
+      accessibilityRole="tablist"
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.scrollWrapper}
+      contentContainerStyle={styles.scrollContent}
+    >
       <View style={styles.row}>
         {TABS.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -34,7 +42,7 @@ export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsP
               key={tab.key}
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
-              accessibilityLabel={`${label} properties`}
+              accessibilityLabel={t("hero.tabLabel", { label })}
               onPress={() => onChange(tab.key)}
               style={({ hovered }: any) => [
                 styles.tab,
@@ -57,20 +65,20 @@ export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsP
           );
         })}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   scrollWrapper: {
     width: "100%",
-    overflow: "hidden",
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   row: {
     flexDirection: "row",
     alignItems: "flex-end",
-    flexWrap: "wrap",
-    rowGap: 8,
   },
   tab: {
     paddingTop: 4,
@@ -104,7 +112,8 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: "transparent",
   },
+  // The rule is a fill, not text, so it carries the brand green itself.
   ruleActive: {
-    backgroundColor: colors.greenOnLight,
+    backgroundColor: colorTokens.brand,
   },
 });

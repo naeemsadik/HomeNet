@@ -4,6 +4,7 @@ import type { Area } from "@/types/api";
 import { fetchAreaChildren } from "@/services/areaApi";
 import { toApiError } from "@/services/apiClient";
 import { filterAreas, useAllAreas } from "@/hooks/useAllAreas";
+import { useDebouncedValue, SEARCH_DEBOUNCE_MS } from "@/hooks/useDebouncedValue";
 
 export interface UseAreaPickerOptions {
   initialCity?: string;
@@ -35,7 +36,9 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
   const [navPath, setNavPath] = useState<Area[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const currentParentId = navPath.at(-1)?.id;
-  const search = searchQuery.trim();
+  // The input stays immediate; only the filtering waits, so typing in a list of
+  // every area does not re-filter on each keystroke.
+  const search = useDebouncedValue(searchQuery.trim(), SEARCH_DEBOUNCE_MS);
   const showingChildren = Boolean(currentParentId) && !search;
 
   const allAreas = useAllAreas({ enabled });
@@ -91,6 +94,8 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
     resetNav,
     searchQuery,
     setSearchQuery,
+    /** True while a search term is narrowing the list. */
+    isSearching: Boolean(search),
     areas,
     loading: active.isLoading,
     error: active.error ? toApiError(active.error).message : null,
