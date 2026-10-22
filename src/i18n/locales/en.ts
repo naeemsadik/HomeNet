@@ -504,7 +504,7 @@ export const en = {
       archived: "Archived",
     },
     deleteConfirmTitle: "Delete Property",
-    deleteConfirmMessage: "Are you sure you want to delete \"{{title}}\"?",
+    deleteConfirmMessage: "Are you sure you want to delete \"{{title}}\"? This permanently removes the listing and its photos and cannot be undone.",
     deleteFailed: "Delete failed",
     toggleView: {
       aria: "Toggle view to live site",
