@@ -29,7 +29,7 @@ export interface PropertyDetail {
   description: string | null;
   type: "residential" | "commercial" | "land" | "parking";
   subtype: string | null;
-  listing_type: "sale" | "rent";
+  listing_type: "sale" | "rent" | "short_let";
   price: number;
   price_currency: string;
   area_size: number | null;

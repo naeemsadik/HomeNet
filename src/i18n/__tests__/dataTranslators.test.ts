@@ -4,6 +4,9 @@ import {
   translateAmenity,
   translatePropertyType,
   translateListingStatus,
+  translateFacing,
+  translateCompletionStatus,
+  translateAreaUnit,
 } from "@/i18n/dataTranslators";
 
 describe("dataTranslators", () => {
@@ -133,6 +136,66 @@ describe("dataTranslators", () => {
       expect(translateAmenity("" as any, "bn")).toBe("");
       expect(translateAmenity(null as any, "bn")).toBe("");
       expect(translateAmenity(undefined as any, "bn")).toBe("");
+    });
+  });
+
+  describe("translateFacing", () => {
+    it("returns raw string in English", () => {
+      expect(translateFacing("South", "en")).toBe("South");
+      expect(translateFacing("North-Facing", "en")).toBe("North-Facing");
+    });
+
+    it("translates known facing directions into authentic Bengali", () => {
+      expect(translateFacing("South", "bn")).toBe("দক্ষিণমুখী");
+      expect(translateFacing("south-facing", "bn")).toBe("দক্ষিণমুখী");
+      expect(translateFacing("North", "bn")).toBe("উত্তরমুখী");
+      expect(translateFacing("East", "bn")).toBe("পূর্বমুখী");
+      expect(translateFacing("West", "bn")).toBe("পশ্চিমমুখী");
+      expect(translateFacing("north-east", "bn")).toBe("উত্তর-পূর্বমুখী");
+    });
+
+    it("handles null, undefined, empty string safely", () => {
+      expect(translateFacing("" as any, "bn")).toBe("");
+      expect(translateFacing(null as any, "bn")).toBe("");
+      expect(translateFacing(undefined as any, "bn")).toBe("");
+    });
+  });
+
+  describe("translateCompletionStatus", () => {
+    it("returns raw string in English", () => {
+      expect(translateCompletionStatus("ready", "en")).toBe("ready");
+      expect(translateCompletionStatus("under_construction", "en")).toBe("under_construction");
+    });
+
+    it("translates completion status into authentic Bengali standard", () => {
+      expect(translateCompletionStatus("ready", "bn")).toBe("রেডি ফ্ল্যাট");
+      expect(translateCompletionStatus("under_construction", "bn")).toBe("নির্মাণাধীন");
+      expect(translateCompletionStatus("ongoing", "bn")).toBe("চলমান");
+    });
+
+    it("handles null, undefined, empty string safely", () => {
+      expect(translateCompletionStatus("" as any, "bn")).toBe("");
+      expect(translateCompletionStatus(null as any, "bn")).toBe("");
+      expect(translateCompletionStatus(undefined as any, "bn")).toBe("");
+    });
+  });
+
+  describe("translateAreaUnit", () => {
+    it("returns raw string in English", () => {
+      expect(translateAreaUnit("sqft", "en")).toBe("sqft");
+      expect(translateAreaUnit("katha", "en")).toBe("katha");
+    });
+
+    it("translates measurement units into Bengali", () => {
+      expect(translateAreaUnit("sqft", "bn")).toBe("বর্গফুট");
+      expect(translateAreaUnit("katha", "bn")).toBe("কাঠা");
+      expect(translateAreaUnit("bigha", "bn")).toBe("বিঘা");
+      expect(translateAreaUnit("sqm", "bn")).toBe("বর্গমিটার");
+    });
+
+    it("handles null and undefined gracefully", () => {
+      expect(translateAreaUnit(null, "bn")).toBe("বর্গফুট");
+      expect(translateAreaUnit(undefined, "en")).toBe("sqft");
     });
   });
 });

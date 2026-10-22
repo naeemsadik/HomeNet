@@ -104,9 +104,9 @@ describe("describeFilters", () => {
     expect(label({ max_price: 20_000_000 })).toBe("Up to ৳ 2 Cr");
   });
 
-  it("names short-lets and bathrooms", () => {
+  it("names holiday stays and bathrooms", () => {
     expect(describeFilters({ ...noFilters, listing_type: "short_let", bathrooms: 2 }).map((c) => c.label)).toEqual([
-      "Short-let",
+      "Holiday stay",
       "2+ bathrooms",
     ]);
   });

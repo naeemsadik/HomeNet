@@ -5,8 +5,11 @@ import type { Notification } from "@/types/api";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useMarkAsRead, useNotifications } from "../hooks/useNotifications";
 
+import { useTranslation } from "@/i18n";
+
 /** The newest user notifications, for the dropdown under the header bell. */
 export function NotificationPreview({ onNavigate }: { onNavigate: () => void }) {
+  const { t } = useTranslation();
   const { data, isLoading, isError } = useNotifications("user", { limit: 5 });
   const { mutate: markRead } = useMarkAsRead();
   const items = data?.pages[0]?.data?.items ?? [];
@@ -29,15 +32,19 @@ export function NotificationPreview({ onNavigate }: { onNavigate: () => void }) 
   if (isLoading) {
     body = <ActivityIndicator color={colorTokens.brandText} style={styles.state} />;
   } else if (isError) {
-    body = <Text style={styles.state}>Couldn't load notifications.</Text>;
+    body = <Text style={styles.state}>{t("notifications.errorLoading")}</Text>;
   } else if (items.length === 0) {
-    body = <Text style={styles.state}>You have no notifications yet.</Text>;
+    body = <Text style={styles.state}>{t("notifications.emptyState")}</Text>;
   } else {
     body = items.map((notification) => (
       <Pressable
         key={notification.id}
         accessibilityRole="button"
-        accessibilityLabel={`${notification.read ? "" : "Unread: "}${notification.title}. ${notification.message}`}
+        accessibilityLabel={
+          notification.read
+            ? t("notifications.previewAriaRead", { title: notification.title, message: notification.message })
+            : t("notifications.previewAriaUnread", { title: notification.title, message: notification.message })
+        }
         onPress={() => open(notification)}
         style={(state) => [
           styles.row,
@@ -60,10 +67,10 @@ export function NotificationPreview({ onNavigate }: { onNavigate: () => void }) 
 
   return (
     <View>
-      <Text style={styles.heading}>Notifications</Text>
+      <Text style={styles.heading}>{t("notifications.heading")}</Text>
       {body}
       <Pressable accessibilityRole="link" onPress={seeAll} style={[styles.seeAll, webPointer]}>
-        <Text style={styles.seeAllText}>See all notifications</Text>
+        <Text style={styles.seeAllText}>{t("notifications.seeAll")}</Text>
       </Pressable>
     </View>
   );

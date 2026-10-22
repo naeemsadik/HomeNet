@@ -11,31 +11,36 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { openExternalUrl } from "@/lib/safeUrl";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { colors, fonts, radius, webPointer } from "@/theme";
 import { usePropertyGuides } from "../hooks/usePropertyGuides";
 import type { PropertyGuide } from "../types/news";
 import { GUIDE_FALLBACK_IMAGE, resolveGuideImage } from "../utils/guideImageStrategy";
+import {
+  formatReadTime,
+  getGuideCategoryLabel,
+  getLocalizedGuideExcerpt,
+  getLocalizedGuideTitle,
+} from "../utils/guideTranslators";
 
 /** Category switcher tabs requested for the homepage section. */
 type GuideTab = "All" | "Market News" | "Legal & Docs" | "Buyer & Seller";
-const GUIDE_TABS: GuideTab[] = [
-  "All",
-  "Market News",
-  "Legal & Docs",
-  "Buyer & Seller",
-];
-
-/** Topics the section will carry once the guides source is connected. */
-const PLANNED_TOPICS = [
-  "Registering a property for the first time",
-  "What to check before you buy",
-  "What to check before you rent",
-  "Understanding katha, bigha and sqft",
+const GUIDE_TABS: { key: GuideTab; labelKey: "all" | "marketNews" | "legalDocs" | "buyerSeller" }[] = [
+  { key: "All", labelKey: "all" },
+  { key: "Market News", labelKey: "marketNews" },
+  { key: "Legal & Docs", labelKey: "legalDocs" },
+  { key: "Buyer & Seller", labelKey: "buyerSeller" },
 ];
 
 const GuideCard = memo(function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boolean }) {
+  const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
   const isRss = guide.sourceType === "rss";
+
+  const title = getLocalizedGuideTitle(guide, language);
+  const excerpt = getLocalizedGuideExcerpt(guide, language);
+  const categoryLabel = getGuideCategoryLabel(guide.category, t);
+  const readTimeLabel = formatReadTime(guide.readTime, t, language);
 
   const resolvedUrl = useMemo(
     () => guide.imageUrl || resolveGuideImage(guide),
@@ -61,10 +66,18 @@ const GuideCard = memo(function GuideCard({ guide, featured }: { guide: Property
     router.push(guide.href as never);
   }, [isRss, guide.sourceUrl, guide.href]);
 
+  const sourceLabel = isRss
+    ? guide.sourceName || t("guides.externalNews")
+    : t("guides.homeNetGuide");
+
   return (
     <Pressable
       accessibilityRole="link"
-      accessibilityLabel={`${isRss ? guide.sourceName || "External News" : "HomeNet Guide"} - ${guide.category}: ${guide.title}`}
+      accessibilityLabel={t("guides.cardAria", {
+        source: sourceLabel,
+        category: categoryLabel,
+        title,
+      })}
       onPress={handlePress}
       style={({ pressed, hovered }: any) => [
         styles.card,
@@ -96,34 +109,34 @@ const GuideCard = memo(function GuideCard({ guide, featured }: { guide: Property
           {isRss ? (
             <View style={styles.rssSourcePill}>
               <Text numberOfLines={1} style={styles.rssSourceText}>
-                {guide.sourceName || "Market News"}
+                {guide.sourceName || t("guides.marketNewsSource")}
               </Text>
               <ExternalLink color="#1D4ED8" size={11} strokeWidth={2.2} />
             </View>
           ) : (
             <View style={styles.homeNetPill}>
-              <Text style={styles.homeNetPillText}>HomeNet Guide</Text>
+              <Text style={styles.homeNetPillText}>{t("guides.homeNetGuide")}</Text>
             </View>
           )}
 
           {/* Category Pill */}
           <View style={styles.categoryPill}>
-            <Text style={styles.categoryText}>{guide.category}</Text>
+            <Text style={styles.categoryText}>{categoryLabel}</Text>
           </View>
 
-          <Text style={styles.readTime}>{guide.readTime}</Text>
+          <Text style={styles.readTime}>{readTimeLabel}</Text>
         </View>
 
         <Text
           numberOfLines={2}
           style={[styles.cardTitle, featured && !isPhone && styles.cardTitleFeatured]}
         >
-          {guide.title}
+          {title}
         </Text>
 
-        {featured && !isPhone && guide.excerpt ? (
+        {featured && !isPhone && excerpt ? (
           <Text numberOfLines={3} style={styles.cardExcerpt}>
-            {guide.excerpt}
+            {excerpt}
           </Text>
         ) : null}
       </View>
@@ -134,9 +147,17 @@ const GuideCard = memo(function GuideCard({ guide, featured }: { guide: Property
 const GUIDES_LIMIT = 12;
 
 export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
+  const { t } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
   const [activeTab, setActiveTab] = useState<GuideTab>("All");
   const { data, isLoading, isError } = usePropertyGuides(GUIDES_LIMIT);
+
+  const plannedTopics = [
+    t("guides.plannedTopics.topic1"),
+    t("guides.plannedTopics.topic2"),
+    t("guides.plannedTopics.topic3"),
+    t("guides.plannedTopics.topic4"),
+  ];
 
   const allItems = data?.items ?? [];
 
@@ -177,9 +198,9 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
     <View style={styles.section}>
       <View style={[styles.header, isPhone && styles.headerPhone]}>
         <View style={styles.headerCopy}>
-          <Text style={styles.eyebrow}>Blogs & Real Estate News</Text>
+          <Text style={styles.eyebrow}>{t("guides.eyebrow")}</Text>
           <Text style={[styles.title, isPhone && styles.titlePhone]}>
-            Property advice & market updates
+            {t("guides.title")}
           </Text>
         </View>
 
@@ -189,7 +210,7 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
             onPress={() => router.push("/guides" as never)}
             style={({ hovered }: any) => [styles.seeAll, hovered && { opacity: 0.7 }, webPointer]}
           >
-            <Text style={styles.seeAllText}>See all guides</Text>
+            <Text style={styles.seeAllText}>{t("guides.seeAll")}</Text>
             <ArrowRight color={colors.greenOnLight} size={15} />
           </Pressable>
         ) : null}
@@ -197,12 +218,21 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
 
       {/* Category Switcher Tabs */}
       <View style={[styles.tabBar, isPhone && styles.tabBarPhone]}>
-        {GUIDE_TABS.map((tab) => {
-          const isActive = activeTab === tab;
+        {GUIDE_TABS.map((tabObj) => {
+          const isActive = activeTab === tabObj.key;
+          const tabLabel =
+            tabObj.labelKey === "all"
+              ? t("guides.tabs.all")
+              : tabObj.labelKey === "marketNews"
+              ? t("guides.tabs.marketNews")
+              : tabObj.labelKey === "legalDocs"
+              ? t("guides.tabs.legalDocs")
+              : t("guides.tabs.buyerSeller");
+
           return (
             <Pressable
-              key={tab}
-              onPress={() => setActiveTab(tab)}
+              key={tabObj.key}
+              onPress={() => setActiveTab(tabObj.key)}
               style={({ hovered }: any) => [
                 styles.tabChip,
                 isActive && styles.tabChipActive,
@@ -210,7 +240,7 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
                 webPointer,
               ]}
               accessibilityRole="button"
-              accessibilityLabel={`Filter by ${tab}`}
+              accessibilityLabel={t("guides.filterByTab", { tab: tabLabel })}
               accessibilityState={{ selected: isActive }}
             >
               <Text
@@ -219,7 +249,7 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
                   isActive && styles.tabChipTextActive,
                 ]}
               >
-                {tab}
+                {tabLabel}
               </Text>
             </Pressable>
           );
@@ -236,13 +266,12 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
           <View style={styles.emptyIconWell}>
             <BookOpen color={colors.greenOnLight} size={22} />
           </View>
-          <Text style={styles.emptyTitle}>Guides are on the way</Text>
+          <Text style={styles.emptyTitle}>{t("guides.emptyTitle")}</Text>
           <Text style={styles.emptyCopy}>
-            Practical, Bangladesh-specific advice for buying, renting, selling
-            and registering property — written by the HomeNet team.
+            {t("guides.emptyCopy")}
           </Text>
           <View style={styles.topicWrap}>
-            {PLANNED_TOPICS.map((topic) => (
+            {plannedTopics.map((topic) => (
               <View key={topic} style={styles.topicChip}>
                 <Text style={styles.topicText}>{topic}</Text>
               </View>
@@ -252,9 +281,9 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
       ) : !hasItems ? (
         // Empty state when filtering a tab with 0 results
         <View style={styles.emptyFilteredPanel}>
-          <Text style={styles.emptyFilteredTitle}>No articles in this category yet</Text>
+          <Text style={styles.emptyFilteredTitle}>{t("guides.emptyFilteredTitle")}</Text>
           <Text style={styles.emptyFilteredCopy}>
-            We are actively preparing new market reports and guides for this section.
+            {t("guides.emptyFilteredCopy")}
           </Text>
           <Pressable
             onPress={() => setActiveTab("All")}
@@ -264,7 +293,7 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
               webPointer,
             ]}
           >
-            <Text style={styles.resetTabBtnText}>Show all guides & news</Text>
+            <Text style={styles.resetTabBtnText}>{t("guides.showAllBtn")}</Text>
           </Pressable>
         </View>
       ) : (

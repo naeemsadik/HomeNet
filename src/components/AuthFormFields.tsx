@@ -12,6 +12,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { useTranslation } from "@/i18n";
 import { sanitizeErrorMessage } from "@/lib/errorSanitizer";
 import { colorTokens, colors, fonts, webPointer } from "@/theme";
 
@@ -44,6 +45,7 @@ export function FloatingInput({
   style,
   editable = true,
 }: FloatingInputProps) {
+  const { t } = useTranslation();
   const [focused, setFocused] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const labelAnim = useRef(new Animated.Value(value ? 1 : 0)).current;
@@ -135,7 +137,7 @@ export function FloatingInput({
           <Pressable
             onPress={() => setPasswordVisible((v) => !v)}
             style={[styles.toggleButton, webPointer]}
-            accessibilityLabel={passwordVisible ? "Hide password" : "Show password"}
+            accessibilityLabel={passwordVisible ? t("auth.hidePassword") : t("auth.showPassword")}
           >
             {passwordVisible ? (
               <EyeOff size={18} color={colors.muted} />

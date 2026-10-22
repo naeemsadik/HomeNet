@@ -17,7 +17,10 @@ import { toApiError } from "@/services/apiClient";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import type { UploadInput } from "@/services/upload";
 
+import { useTranslation } from "@/i18n";
+
 export function EditProfileScreen() {
+  const { t } = useTranslation();
   const { user, fetchMe } = useAuthStore();
   const updateProfile = useUpdateUserProfile();
   const uploadAvatar = useUploadAvatar();
@@ -44,7 +47,7 @@ export function EditProfileScreen() {
     try {
       await updateProfile.mutateAsync({ id: user.id, data: { full_name: data.full_name } });
       await fetchMe();
-      notify("Success", "Profile updated.", { onConfirm: () => router.back() });
+      notify(t("common.success"), t("userProfile.profileUpdated"), { onConfirm: () => router.back() });
     } catch (err: any) {
       setServerError(toApiError(err).message);
     }
@@ -71,7 +74,7 @@ export function EditProfileScreen() {
       };
       await uploadAvatar.mutateAsync(file);
       await fetchMe();
-      notify("Success", "Avatar updated.");
+      notify(t("common.success"), t("userProfile.avatarUpdated"));
     } catch (err: any) {
       setServerError(toApiError(err).message);
     }
@@ -81,7 +84,7 @@ export function EditProfileScreen() {
     try {
       await deleteAvatar.mutateAsync();
       await fetchMe();
-      notify("Success", "Avatar removed.");
+      notify(t("common.success"), t("userProfile.avatarRemoved"));
     } catch (err: any) {
       setServerError(toApiError(err).message);
     }
@@ -91,8 +94,8 @@ export function EditProfileScreen() {
     <AppChrome active="profile">
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.headerSection}>
-          <Eyebrow>Edit Profile</Eyebrow>
-          <Text style={styles.title}>Your profile</Text>
+          <Eyebrow>{t("userProfile.editProfileEyebrow")}</Eyebrow>
+          <Text style={styles.title}>{t("userProfile.editProfileTitle")}</Text>
         </View>
 
         <ErrorBanner message={serverError} />
@@ -110,7 +113,7 @@ export function EditProfileScreen() {
               <Pressable
                 onPress={handleAvatarUpload}
                 style={[styles.avatarAction, webPointer]}
-                accessibilityLabel="Upload avatar"
+                accessibilityLabel={t("userProfile.uploadAvatarAria")}
               >
                 {uploadAvatar.isPending ? (
                   <ActivityIndicator color={colorTokens.onBrand} size={12} />
@@ -123,10 +126,10 @@ export function EditProfileScreen() {
               <Pressable
                 onPress={handleAvatarDelete}
                 style={[styles.removeAvatarBtn, webPointer]}
-                accessibilityLabel="Remove avatar"
+                accessibilityLabel={t("userProfile.removeAvatarAria")}
               >
                 <Trash2 color={colorTokens.error} size={14} />
-                <Text style={styles.removeAvatarText}>Remove</Text>
+                <Text style={styles.removeAvatarText}>{t("userProfile.removeAvatar")}</Text>
               </Pressable>
             ) : null}
           </View>
@@ -134,14 +137,14 @@ export function EditProfileScreen() {
           <FormFloatingInput
             control={control}
             name="full_name"
-            label="Full Name"
+            label={t("userProfile.fullNameLabel")}
             autoCapitalize="words"
           />
 
           <Text style={styles.emailLabel}>{user?.email}</Text>
 
           <AuthButton
-            label="Save changes"
+            label={t("userProfile.saveChanges")}
             onPress={handleSubmit(onSubmit)}
             loading={updateProfile.isPending}
             disabled={!isValid || !isDirty}

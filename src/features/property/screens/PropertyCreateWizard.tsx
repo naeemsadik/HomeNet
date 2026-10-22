@@ -21,6 +21,7 @@ import {
   User,
 } from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/i18n";
 import {
   ActivityIndicator,
   Pressable,
@@ -71,8 +72,10 @@ import { WizardDetailsStep } from "../components/wizard/WizardDetailsStep";
 import { WizardLocationStep } from "../components/wizard/WizardLocationStep";
 import { WizardMediaStep } from "../components/wizard/WizardMediaStep";
 import { WizardReviewStep } from "../components/wizard/WizardReviewStep";
+import { storedListingTypeFor } from "../utils/listingType";
 
 export function PropertyCreateWizard() {
+  const { t } = useTranslation();
   const { isPhone, isTablet, width } = useResponsive();
   const isNarrowPhone = isPhone && width <= 360;
   const store = usePropertyWizardStore();
@@ -112,7 +115,9 @@ export function PropertyCreateWizard() {
         ...(params.listing_type === "sale" || params.listing_type === "rent"
           ? { listingType: params.listing_type }
           : {}),
-        subtype: initialSubtype(cfg, params.subtype),
+        // A holiday stay is "rent" in the form; it is saved as short_let (see storedListingTypeFor).
+        ...(params.listing_type === "short_let" ? { listingType: "rent" as const, subtype: "short-let" } : {}),
+        subtype: params.listing_type === "short_let" ? "short-let" : initialSubtype(cfg, params.subtype),
         areaUnit: cfg.defaultUnit,
       });
     }
@@ -136,11 +141,11 @@ export function PropertyCreateWizard() {
     : null;
 
   const steps = [
-    { num: 1, title: "Basics" },
-    { num: 2, title: "Details" },
-    { num: 3, title: "Location" },
-    { num: 4, title: "Media" },
-    { num: 5, title: "Review" },
+    { num: 1, title: t("wizard.steps.basics") },
+    { num: 2, title: t("wizard.steps.details") },
+    { num: 3, title: t("wizard.steps.location") },
+    { num: 4, title: t("wizard.steps.media") },
+    { num: 5, title: t("wizard.steps.review") },
   ];
 
   const buildDto = (): UpsertPropertyDto => ({
@@ -149,7 +154,7 @@ export function PropertyCreateWizard() {
     description: store.description.trim() || undefined,
     type: store.type,
     subtype: cleanCustomSubtype(store.subtype) || undefined,
-    listing_type: store.listingType,
+    listing_type: storedListingTypeFor(store.listingType, cleanCustomSubtype(store.subtype) || undefined),
     price: store.price ? Number(store.price) : undefined,
     price_currency: "BDT",
     area_size: store.areaSize ? Number(store.areaSize) : undefined,
@@ -185,19 +190,19 @@ export function PropertyCreateWizard() {
       const title = store.title.trim();
       const desc = store.description.trim();
       if (!title || !desc) {
-        return "Add a title and description before continuing.";
+        return t("wizard.validation.titleDescRequired");
       }
       if (title.length < 3 || title.length > 150) {
-        return "Title must be between 3 and 150 characters.";
+        return t("wizard.validation.titleLength");
       }
       if (/[<>{}\x00-\x1F]/.test(title)) {
-        return "Title contains invalid characters.";
+        return t("wizard.validation.titleInvalid");
       }
       if (desc.length > 5000) {
-        return "Description cannot exceed 5,000 characters.";
+        return t("wizard.validation.descLength");
       }
       if (/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(desc)) {
-        return "Description contains invalid characters.";
+        return t("wizard.validation.descInvalid");
       }
       const subtypeProblem = validateSubtype(activeTypeConfig, store.subtype);
       if (subtypeProblem) return subtypeProblem;
@@ -206,13 +211,13 @@ export function PropertyCreateWizard() {
       const priceNum = Number(store.price);
       const areaNum = Number(store.areaSize);
       if (!(priceNum > 0) || !(areaNum > 0)) {
-        return "Price and area must be greater than zero.";
+        return t("wizard.validation.priceAreaPositive");
       }
       if (!Number.isFinite(priceNum) || priceNum > 1_000_000_000_000) {
-        return "Enter a valid price amount up to 1,000,000,000,000.";
+        return t("wizard.validation.priceMax");
       }
       if (!Number.isFinite(areaNum) || areaNum > 1_000_000) {
-        return "Enter a valid area size up to 1,000,000.";
+        return t("wizard.validation.areaMax");
       }
     }
     if (step === 3) {
@@ -220,12 +225,12 @@ export function PropertyCreateWizard() {
       // The spot comes first on screen: the map pin, the device location or a Google Maps link.
       // Owners never type coordinates, and the address and area fill in from the pin.
       if (coordinateProblem(store.locationLat, store.locationLng) !== null) {
-        return "Pin the property's exact spot on the map, or paste a Google Maps link.";
+        return t("wizard.validation.pinRequired");
       }
-      if (!addr) return "Enter the property address.";
-      if (!store.areaId) return "Choose the area or neighbourhood from the list.";
+      if (!addr) return t("wizard.validation.addressRequired");
+      if (!store.areaId) return t("wizard.validation.areaRequired");
       if (addr.length > 300 || /[<>{}\x00-\x1F]/.test(addr)) {
-        return "Address cannot exceed 300 characters or contain invalid characters.";
+        return t("wizard.validation.addressLength");
       }
     }
     return null;
@@ -270,8 +275,8 @@ export function PropertyCreateWizard() {
       store.setIsSubmitting(true);
       setLocalError(null);
       await upsertDraft();
-      notify("Draft saved", "Your latest property details were saved.", {
-        confirmLabel: "View my listings",
+      notify(t("wizard.toast.draftSavedTitle"), t("wizard.toast.draftSavedMessage"), {
+        confirmLabel: t("wizard.toast.viewMyListings"),
         onConfirm: () => {
           store.reset();
           router.replace("/my-properties" as never);
@@ -286,13 +291,13 @@ export function PropertyCreateWizard() {
 
   const handlePickMedia = async (mediaType: "image" | "video") => {
     if (!store.propertyId) {
-      setLocalError("Complete Location first so the draft can be created before media upload.");
+      setLocalError(t("wizard.validation.locationFirst"));
       return;
     }
     const existingCount = store.media.filter((media) => media.mediaType === mediaType).length;
     const maxCount = mediaType === "image" ? 20 : 3;
     if (existingCount >= maxCount) {
-      setLocalError(`You can upload up to ${maxCount} ${mediaType === "image" ? "images" : "videos"}.`);
+      setLocalError(t("wizard.validation.uploadLimit", { count: maxCount, type: mediaType === "image" ? "images" : "videos" }));
       return;
     }
     // No permission request: the system photo picker needs none. On Android 11-12 the
@@ -311,14 +316,18 @@ export function PropertyCreateWizard() {
     if (asset.mimeType && !allowedTypes.includes(asset.mimeType)) {
       setLocalError(
         mediaType === "image"
-          ? "Images must be JPEG, PNG, or WebP."
-          : "Videos must be MP4 or WebM.",
+          ? t("wizard.validation.imagesAllowed")
+          : t("wizard.validation.videosAllowed"),
       );
       return;
     }
     const maxBytes = mediaType === "image" ? 10 * 1024 * 1024 : 100 * 1024 * 1024;
     if (asset.fileSize && asset.fileSize > maxBytes) {
-      setLocalError(`${mediaType === "image" ? "Images" : "Videos"} must be under ${mediaType === "image" ? "10 MB" : "100 MB"}.`);
+      setLocalError(
+        mediaType === "image"
+          ? t("wizard.validation.imageSizeLimit")
+          : t("wizard.validation.videoSizeLimit"),
+      );
       return;
     }
 
@@ -359,7 +368,7 @@ export function PropertyCreateWizard() {
 
   const handleSubmit = async () => {
     const errors = [validateStep(1), validateStep(2), validateStep(3)].filter(Boolean);
-    if (!store.media.some((media) => media.mediaType === "image")) errors.push("Upload at least one property image.");
+    if (!store.media.some((media) => media.mediaType === "image")) errors.push(t("wizard.validation.oneImageRequired"));
     if (errors.length) {
       setLocalError(errors[0] as string);
       return;
@@ -369,8 +378,8 @@ export function PropertyCreateWizard() {
       setLocalError(null);
       const propertyId = await upsertDraft();
       await submitMutation.mutateAsync(propertyId);
-      notify("Submitted for verification", "Your listing is pending review.", {
-        confirmLabel: "View my listings",
+      notify(t("wizard.toast.submittedTitle"), t("wizard.toast.submittedMessage"), {
+        confirmLabel: t("wizard.toast.viewMyListings"),
         onConfirm: () => {
           store.reset();
           router.replace("/my-properties" as never);
@@ -385,8 +394,8 @@ export function PropertyCreateWizard() {
 
   const logout = useAuthStore((s) => s.logout);
   const handleLogout = async () => {
-    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
-      confirmLabel: "Log Out",
+    const confirmed = await confirmAction(t("wizard.logoutConfirm.title"), t("wizard.logoutConfirm.message"), {
+      confirmLabel: t("wizard.logoutConfirm.confirm"),
       destructive: true,
     });
     if (!confirmed) return;
@@ -404,17 +413,17 @@ export function PropertyCreateWizard() {
     danger?: boolean;
     badgeCount?: number;
   }[] = [
-    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
-    { key: "listings", label: "My Listings", icon: Building2, href: "/my-properties" },
-    { key: "create", label: "Create Property", icon: PlusCircle, href: "/property/create", active: true },
-    { key: "verification", label: "Verification", icon: ShieldCheck, href: "/verification" },
-    { key: "boost", label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights", label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics", label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments", label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile", label: "Profile", icon: User, href: "/seller/profile" },
-    { key: "help", label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout", label: "Logout", icon: LogOut, danger: true, href: "/" },
+    { key: "dashboard", label: t("wizard.nav.dashboard"), icon: LayoutDashboard, href: "/seller" },
+    { key: "listings", label: t("wizard.nav.myListings"), icon: Building2, href: "/my-properties" },
+    { key: "create", label: t("wizard.nav.createProperty"), icon: PlusCircle, href: "/property/create", active: true },
+    { key: "verification", label: t("wizard.nav.verification"), icon: ShieldCheck, href: "/verification" },
+    { key: "boost", label: t("wizard.nav.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
+    { key: "insights", label: t("wizard.nav.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "analytics", label: t("wizard.nav.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
+    { key: "payments", label: t("wizard.nav.payments"), icon: CreditCard, href: "/seller?tab=payments" },
+    { key: "profile", label: t("wizard.nav.profile"), icon: User, href: "/seller/profile" },
+    { key: "help", label: t("wizard.nav.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
+    { key: "logout", label: t("wizard.nav.logout"), icon: LogOut, danger: true, href: "/" },
   ];
 
   return (
@@ -426,7 +435,7 @@ export function PropertyCreateWizard() {
           <View style={styles.sidebarHeader}>
             <Brand />
             <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
+              <Text style={styles.sellerRoleText}>{t("wizard.header.sellerDashboard")}</Text>
             </View>
           </View>
 
@@ -482,14 +491,14 @@ export function PropertyCreateWizard() {
             onPressMenu={() => setMobileDrawerOpen(true)}
             onSearchQueryChange={setSearchQuery}
             searchQuery={searchQuery}
-            title="Create Property"
+            title={t("wizard.header.title")}
           />
         ) : (
           <View style={styles.topHeader}>
             <View>
-              <Text style={styles.headerTitle}>Create Property</Text>
+              <Text style={styles.headerTitle}>{t("wizard.header.title")}</Text>
               <Text style={styles.headerSubtitle}>
-                Follow the 5 steps to list your property across Bangladesh
+                {t("wizard.header.subtitle")}
               </Text>
             </View>
 
@@ -498,7 +507,7 @@ export function PropertyCreateWizard() {
                 <Search color="rgba(11,26,23,0.5)" size={16} />
                 <TextInput
                   onChangeText={setSearchQuery}
-                  placeholder="Search listings…"
+                  placeholder={t("wizard.header.searchPlaceholder")}
                   placeholderTextColor="rgba(11,26,23,0.5)"
                   style={styles.searchInput}
                   value={searchQuery}
@@ -508,7 +517,7 @@ export function PropertyCreateWizard() {
               {/* Notification Bell with live functionalities & popover */}
               <View style={styles.notificationWrap}>
                 <Pressable
-                  accessibilityLabel="Notifications"
+                  accessibilityLabel={t("wizard.notifications.ariaLabel")}
                   accessibilityRole="button"
                   onPress={() => setNotificationsOpen((prev) => !prev)}
                   style={({ pressed }) => [
@@ -537,11 +546,11 @@ export function PropertyCreateWizard() {
                   <View style={styles.notificationDropdown}>
                     <View style={styles.dropdownHeader}>
                       <View style={styles.dropdownHeaderLeft}>
-                        <Text style={styles.dropdownTitle}>Notifications</Text>
+                        <Text style={styles.dropdownTitle}>{t("wizard.notifications.title")}</Text>
                         {unreadCount > 0 && (
                           <View style={styles.unreadCountPill}>
                             <Text style={styles.unreadCountPillText}>
-                              {unreadCount} new
+                              {t("wizard.notifications.newCount", { count: unreadCount })}
                             </Text>
                           </View>
                         )}
@@ -558,7 +567,7 @@ export function PropertyCreateWizard() {
                           ]}
                         >
                           <Text style={styles.markAllReadText}>
-                            {markAllReadMutation.isPending ? "Marking..." : "Mark all read"}
+                            {markAllReadMutation.isPending ? t("wizard.notifications.marking") : t("wizard.notifications.markAllRead")}
                           </Text>
                         </Pressable>
                       )}
@@ -571,12 +580,12 @@ export function PropertyCreateWizard() {
                     >
                       {notificationsLoading ? (
                         <View style={styles.dropdownEmpty}>
-                          <Text style={styles.dropdownEmptyText}>Loading notifications...</Text>
+                          <Text style={styles.dropdownEmptyText}>{t("wizard.notifications.loading")}</Text>
                         </View>
                       ) : notificationsList.length === 0 ? (
                         <View style={styles.dropdownEmpty}>
                           <Bell color="rgba(11,26,23,0.3)" size={32} />
-                          <Text style={styles.dropdownEmptyText}>No notifications yet</Text>
+                          <Text style={styles.dropdownEmptyText}>{t("wizard.notifications.empty")}</Text>
                         </View>
                       ) : (
                         notificationsList.slice(0, 8).map((notification) => (
@@ -596,7 +605,7 @@ export function PropertyCreateWizard() {
                         style={styles.viewAllNotificationsBtn}
                       >
                         <Text style={styles.viewAllNotificationsText}>
-                          View all notifications →
+                          {t("wizard.notifications.viewAll")}
                         </Text>
                       </AppLink>
                     </View>
@@ -713,7 +722,7 @@ export function PropertyCreateWizard() {
                   ]}
                 >
                   <ChevronLeft color="#5C6B66" size={16} strokeWidth={2} />
-                  <Text style={[styles.backBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>Back</Text>
+                  <Text style={[styles.backBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>{t("wizard.actions.back")}</Text>
                 </Pressable>
               ) : store.currentStep > 1 ? (
                 <Pressable
@@ -721,7 +730,7 @@ export function PropertyCreateWizard() {
                   style={({ pressed }) => [styles.backBtn, webPointer, pressed && styles.pressed]}
                 >
                   <ArrowLeft color="#0B1A17" size={16} />
-                  <Text style={styles.backBtnText}>Back</Text>
+                  <Text style={styles.backBtnText}>{t("wizard.actions.back")}</Text>
                 </Pressable>
               ) : (
                 <View />
@@ -741,7 +750,7 @@ export function PropertyCreateWizard() {
                 >
                   <Save color="#0B1A17" size={14} />
                   <Text style={[styles.saveDraftText, isPhone && styles.saveDraftTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
-                    {isNarrowPhone ? "Save" : "Save draft"}
+                    {isNarrowPhone ? t("wizard.actions.save") : t("wizard.actions.saveDraft")}
                   </Text>
                 </Pressable>
 
@@ -757,7 +766,7 @@ export function PropertyCreateWizard() {
                       pressed && styles.pressed,
                     ]}
                   >
-                    <Text style={[styles.nextBtnText, isPhone && styles.nextBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>Next</Text>
+                    <Text style={[styles.nextBtnText, isPhone && styles.nextBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>{t("wizard.actions.next")}</Text>
                     <ChevronRight color={colorTokens.onBrand} size={15} strokeWidth={2} />
                   </Pressable>
                 ) : (
@@ -778,7 +787,7 @@ export function PropertyCreateWizard() {
                       <Send color={colorTokens.onBrand} size={14} />
                     )}
                     <Text style={[styles.publishBtnText, isPhone && styles.publishBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
-                      {isPhone ? "Submit" : "Submit for verification"}
+                      {isPhone ? t("wizard.actions.submit") : t("wizard.actions.submitVerification")}
                     </Text>
                   </Pressable>
                 )}

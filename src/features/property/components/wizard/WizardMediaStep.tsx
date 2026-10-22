@@ -1,5 +1,6 @@
 import { Camera, Trash2, Video } from "@/components/icons";
 import { ActivityIndicator, Image, Pressable, Text, TextInput, View } from "react-native";
+import { useTranslation } from "@/i18n";
 import { webPointer } from "@/theme";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
@@ -12,18 +13,19 @@ type WizardMediaStepProps = {
 
 /** Step 4: photos and video. */
 export function WizardMediaStep({ isUploading, onPickMedia, onDeleteMedia }: WizardMediaStepProps) {
+  const { t } = useTranslation();
   const store = usePropertyWizardStore();
 
   return (
     <View style={styles.stepFormBody}>
-      <Text style={styles.formLabel}>Property images</Text>
+      <Text style={styles.formLabel}>{t("wizard.media.imagesLabel")}</Text>
       <View style={styles.mediaGrid}>
         {store.media.filter((media) => media.mediaType === "image").map((media, idx) => (
           <View key={media.id} style={styles.mediaCard}>
             <Image source={{ uri: media.url }} style={styles.mediaImg} />
             {idx === 0 ? (
               <View style={styles.coverBadge}>
-                <Text style={styles.coverBadgeText}>Cover</Text>
+                <Text style={styles.coverBadgeText}>{t("wizard.media.coverBadge")}</Text>
               </View>
             ) : null}
             <Pressable onPress={() => void onDeleteMedia(media.id)} style={styles.removeMediaButton}>
@@ -42,13 +44,13 @@ export function WizardMediaStep({ isUploading, onPickMedia, onDeleteMedia }: Wiz
           ) : (
             <Camera color="#5C6B66" size={28} />
           )}
-          <Text style={styles.addMediaText}>Add image</Text>
+          <Text style={styles.addMediaText}>{t("wizard.media.addImage")}</Text>
         </Pressable>
       </View>
-      <Text style={styles.uploadHint}>JPEG, PNG, or WebP. Up to 20 images, 10 MB each.</Text>
+      <Text style={styles.uploadHint}>{t("wizard.media.uploadHintImages")}</Text>
 
       <View style={{ marginTop: 16 }}>
-        <Text style={styles.formLabel}>Property video (optional)</Text>
+        <Text style={styles.formLabel}>{t("wizard.media.videoLabel")}</Text>
         {store.media.filter((media) => media.mediaType === "video").map((media) => (
           <View key={media.id} style={styles.uploadedVideoRow}>
             <Video color="#04cf92" size={20} />
@@ -64,18 +66,18 @@ export function WizardMediaStep({ isUploading, onPickMedia, onDeleteMedia }: Wiz
           style={styles.videoDropzone}
         >
           <Video color="#5C6B66" size={24} />
-          <Text style={styles.videoDropzoneText}>Upload a walkthrough video</Text>
+          <Text style={styles.videoDropzoneText}>{t("wizard.media.uploadVideo")}</Text>
         </Pressable>
-        <Text style={styles.uploadHint}>MP4 or WebM. Up to 3 videos, 100 MB each.</Text>
+        <Text style={styles.uploadHint}>{t("wizard.media.uploadHintVideos")}</Text>
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.formLabel}>Virtual tour URL (optional)</Text>
+        <Text style={styles.formLabel}>{t("wizard.media.virtualTourLabel")}</Text>
         <TextInput
           autoCapitalize="none"
           keyboardType="url"
           onChangeText={store.setVirtualTourUrl}
-          placeholder="https://example.com/virtual-tour"
+          placeholder={t("wizard.media.virtualTourPlaceholder")}
           placeholderTextColor="#899790"
           style={styles.formInput}
           value={store.virtualTourUrl}

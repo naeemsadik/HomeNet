@@ -26,11 +26,21 @@ import { openExternalUrl } from "@/lib/safeUrl";
 import { shareLink } from "@/lib/share";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
 import { usePropertyGuide, usePropertyGuides } from "../hooks/usePropertyGuides";
 import type { PropertyGuide } from "../types/news";
 import { GUIDE_FALLBACK_IMAGE, resolveGuideImage } from "../utils/guideImageStrategy";
+import {
+  formatGuideDate,
+  formatReadTime,
+  getGuideCategoryLabel,
+  getLocalizedGuideContent,
+  getLocalizedGuideExcerpt,
+  getLocalizedGuideTags,
+  getLocalizedGuideTitle,
+} from "../utils/guideTranslators";
 
 interface GuideDetailScreenProps {
   slug: string;
@@ -56,7 +66,12 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
 }: {
   guide: PropertyGuide;
 }) {
+  const { t, language } = useTranslation();
   const isRss = guide.sourceType === "rss";
+  const title = getLocalizedGuideTitle(guide, language);
+  const categoryLabel = getGuideCategoryLabel(guide.category, t);
+  const readTimeLabel = formatReadTime(guide.readTime, t, language);
+
   const resolvedUrl = useMemo(
     () => guide.imageUrl || resolveGuideImage(guide),
     [guide.imageUrl, guide.id, guide.slug, guide.category, guide.title, guide.sourceType],
@@ -80,7 +95,7 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
     <Pressable
       onPress={handlePress}
       accessibilityRole="link"
-      accessibilityLabel={guide.title}
+      accessibilityLabel={title}
       style={({ hovered, pressed }: any) => [
         styles.relatedItem,
         hovered && styles.relatedItemHovered,
@@ -100,12 +115,12 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
       </View>
       <View style={styles.relatedContent}>
         <View style={styles.relatedMetaRow}>
-          <Text style={styles.relatedCategory}>{guide.category}</Text>
+          <Text style={styles.relatedCategory}>{categoryLabel}</Text>
           <Text style={styles.relatedDot}>•</Text>
-          <Text style={styles.relatedReadTime}>{guide.readTime}</Text>
+          <Text style={styles.relatedReadTime}>{readTimeLabel}</Text>
         </View>
         <Text numberOfLines={2} style={styles.relatedTitle}>
-          {guide.title}
+          {title}
         </Text>
       </View>
     </Pressable>
@@ -113,6 +128,7 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
 });
 
 export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
+  const { t, language } = useTranslation();
   const { isPhone, isWide, width } = useResponsive();
   const isMobile = isPhone || width < 900;
 
@@ -120,6 +136,12 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
   const { data: allGuidesData } = usePropertyGuides({ limit: 6 });
 
   const isRss = guide?.sourceType === "rss";
+  const guideTitle = getLocalizedGuideTitle(guide, language);
+  const guideExcerpt = getLocalizedGuideExcerpt(guide, language);
+  const guideContent = getLocalizedGuideContent(guide, language);
+  const guideTags = getLocalizedGuideTags(guide, language);
+  const categoryLabel = getGuideCategoryLabel(guide?.category, t);
+  const readTimeLabel = formatReadTime(guide?.readTime, t, language);
 
   // Resolve cover image with fallback state handling
   const resolvedCoverUrl = useMemo(
@@ -150,7 +172,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
 
   const handleShare = () => {
     if (!guide) return;
-    void shareLink({ title: guide.title });
+    void shareLink({ title: guideTitle });
   };
 
   return (
@@ -166,7 +188,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
         <View style={styles.topNavRow}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Back to Guides"
+            accessibilityLabel={t("guides.detail.backToGuidesAria")}
             onPress={() => router.push("/guides" as never)}
             style={({ hovered }: any) => [
               styles.backBtn,
@@ -175,7 +197,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
             ]}
           >
             <ArrowLeft color={colors.greenOnLight} size={16} />
-            <Text style={styles.backBtnText}>All Guides & News</Text>
+            <Text style={styles.backBtnText}>{t("guides.detail.allGuidesNav")}</Text>
           </Pressable>
 
           {Platform.OS === "web" && (
@@ -186,10 +208,10 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                 hovered && { opacity: 0.7 },
                 webPointer,
               ]}
-              accessibilityLabel="Share article"
+              accessibilityLabel={t("guides.detail.shareAria")}
             >
               <Share2 color={colors.muted} size={15} />
-              <Text style={styles.shareBtnText}>Share</Text>
+              <Text style={styles.shareBtnText}>{t("guides.detail.share")}</Text>
             </Pressable>
           )}
         </View>
@@ -198,20 +220,20 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
         {isLoading ? (
           <View style={styles.stateBox}>
             <ActivityIndicator color={colors.green} size="large" />
-            <Text style={styles.stateText}>Loading guide...</Text>
+            <Text style={styles.stateText}>{t("guides.detail.loading")}</Text>
           </View>
         ) : isError || !guide ? (
           <View style={styles.notFoundPanel}>
             <BookOpen color={colors.muted} size={32} />
-            <Text style={styles.notFoundTitle}>Guide not found</Text>
+            <Text style={styles.notFoundTitle}>{t("guides.detail.notFoundTitle")}</Text>
             <Text style={styles.notFoundCopy}>
-              The property guide you are looking for may have been moved or updated.
+              {t("guides.detail.notFoundCopy")}
             </Text>
             <Pressable
               onPress={() => router.push("/guides" as never)}
               style={[styles.primaryActionBtn, webPointer]}
             >
-              <Text style={styles.primaryActionBtnText}>Browse all guides</Text>
+              <Text style={styles.primaryActionBtnText}>{t("guides.detail.browseAll")}</Text>
             </Pressable>
           </View>
         ) : (
@@ -240,22 +262,21 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                     <View style={styles.syndicationLeft}>
                       <View style={styles.syndicationPill}>
                         <Text style={styles.syndicationPillText}>
-                          External Real Estate News
+                          {t("guides.detail.externalNewsBadge")}
                         </Text>
                       </View>
                       <Text style={styles.syndicationNotice}>
-                        Syndicated from{" "}
-                        <Text style={styles.publisherHighlight}>
-                          {guide.sourceName || "Publisher"}
-                        </Text>
+                        {t("guides.detail.syndicatedFrom", {
+                          source: guide.sourceName || t("guides.detail.source"),
+                        })}
                       </Text>
                     </View>
-                    <Text style={styles.categoryBadge}>{guide.category}</Text>
+                    <Text style={styles.categoryBadge}>{categoryLabel}</Text>
                   </View>
 
                   {/* Title & Metadata */}
                   <Text style={[styles.articleTitle, isMobile && styles.articleTitlePhone]}>
-                    {guide.title}
+                    {guideTitle}
                   </Text>
 
                   <View style={styles.metaRow}>
@@ -263,13 +284,13 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                       <View style={styles.metaItem}>
                         <Calendar color={colors.muted} size={14} />
                         <Text style={styles.metaItemText}>
-                          {formatDate(guide.publishedAt)}
+                          {formatGuideDate(guide.publishedAt, language)}
                         </Text>
                       </View>
                     ) : null}
                     <View style={styles.metaItem}>
                       <Clock color={colors.muted} size={14} />
-                      <Text style={styles.metaItemText}>{guide.readTime}</Text>
+                      <Text style={styles.metaItemText}>{readTimeLabel}</Text>
                     </View>
                   </View>
 
@@ -294,20 +315,20 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
 
                   {/* Summary / Excerpt */}
                   <View style={styles.rssExcerptBox}>
-                    <Text style={styles.rssExcerptHeading}>Report Summary</Text>
-                    <Text style={styles.rssExcerptCopy}>{guide.excerpt}</Text>
+                    <Text style={styles.rssExcerptHeading}>{t("guides.detail.reportSummary")}</Text>
+                    <Text style={styles.rssExcerptCopy}>{guideExcerpt}</Text>
                   </View>
 
                   {/* Outbound Link CTA */}
                   <View style={styles.externalCtaBox}>
                     <Text style={styles.externalCtaNotice}>
-                      HomeNet respects publisher copyrights and syndicates headlines
-                      only. You can read the complete, original report directly on the
-                      publisher's website:
+                      {t("guides.detail.outboundNotice")}
                     </Text>
                     <Pressable
                       accessibilityRole="link"
-                      accessibilityLabel={`Read full article on ${guide.sourceName || "publisher"}`}
+                      accessibilityLabel={t("guides.detail.readFullOnAria", {
+                        source: guide.sourceName || t("guides.detail.source"),
+                      })}
                       onPress={handleExternalRead}
                       style={({ pressed, hovered }: any) => [
                         styles.readExternalBtn,
@@ -317,7 +338,9 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                       ]}
                     >
                       <Text style={styles.readExternalBtnText}>
-                        Read Full Article on {guide.sourceName || "Publisher"}
+                        {t("guides.detail.readFullOn", {
+                          source: guide.sourceName || t("guides.detail.source"),
+                        })}
                       </Text>
                       <ExternalLink color={colors.white} size={16} strokeWidth={2.2} />
                     </Pressable>
@@ -327,11 +350,10 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                   <View style={styles.verifiedCtaBanner}>
                     <View style={styles.verifiedCtaCopy}>
                       <Text style={styles.verifiedCtaTitle}>
-                        Looking for verified property in Dhaka?
+                        {t("guides.detail.verifiedCtaTitle")}
                       </Text>
                       <Text style={styles.verifiedCtaSub}>
-                        Direct contact with owners, complete specs, and zero broker
-                        commissions.
+                        {t("guides.detail.verifiedCtaSub")}
                       </Text>
                     </View>
                     <Pressable
@@ -342,7 +364,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                         webPointer,
                       ]}
                     >
-                      <Text style={styles.verifiedCtaBtnText}>Browse Properties</Text>
+                      <Text style={styles.verifiedCtaBtnText}>{t("guides.detail.browseProperties")}</Text>
                       <ArrowRight color={colors.ink} size={15} />
                     </Pressable>
                   </View>
@@ -357,20 +379,20 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                   <View style={styles.guideMetaTop}>
                     <View style={styles.homeNetBadge}>
                       <ShieldCheck color={colors.greenOnLight} size={13} />
-                      <Text style={styles.homeNetBadgeText}>HomeNet Guide</Text>
+                      <Text style={styles.homeNetBadgeText}>{t("guides.detail.homeNetGuideBadge")}</Text>
                     </View>
                     <View style={styles.categoryPill}>
-                      <Text style={styles.categoryText}>{guide.category}</Text>
+                      <Text style={styles.categoryText}>{categoryLabel}</Text>
                     </View>
                     <View style={styles.metaItem}>
                       <Clock color={colors.muted} size={14} />
-                      <Text style={styles.metaItemText}>{guide.readTime}</Text>
+                      <Text style={styles.metaItemText}>{readTimeLabel}</Text>
                     </View>
                     {guide.publishedAt ? (
                       <View style={styles.metaItem}>
                         <Calendar color={colors.muted} size={14} />
                         <Text style={styles.metaItemText}>
-                          {formatDate(guide.publishedAt)}
+                          {formatGuideDate(guide.publishedAt, language)}
                         </Text>
                       </View>
                     ) : null}
@@ -378,7 +400,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
 
                   {/* Article Title */}
                   <Text style={[styles.articleTitle, isMobile && styles.articleTitlePhone]}>
-                    {guide.title}
+                    {guideTitle}
                   </Text>
 
                   {/* Author Attribution Card */}
@@ -418,15 +440,15 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                   {/* Markdown Body Content */}
                   <View style={styles.markdownWrapper}>
                     <MarkdownRenderer
-                      content={guide.contentMarkdown || guide.excerpt}
+                      content={guideContent}
                     />
                   </View>
 
                   {/* Tags Footer */}
-                  {guide.tags && guide.tags.length > 0 ? (
+                  {guideTags && guideTags.length > 0 ? (
                     <View style={styles.tagWrap}>
-                      <Text style={styles.tagWrapLabel}>Tags:</Text>
-                      {guide.tags.map((tag) => (
+                      <Text style={styles.tagWrapLabel}>{t("guides.detail.tags")}</Text>
+                      {guideTags.map((tag) => (
                         <View key={tag} style={styles.tagPill}>
                           <Text style={styles.tagPillText}>#{tag}</Text>
                         </View>
@@ -438,11 +460,10 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                   <View style={styles.verifiedCtaBanner}>
                     <View style={styles.verifiedCtaCopy}>
                       <Text style={styles.verifiedCtaTitle}>
-                        Ready to explore properties in Bangladesh?
+                        {t("guides.detail.exploreTitle")}
                       </Text>
                       <Text style={styles.verifiedCtaSub}>
-                        Search thousands of verified flats, houses, and plots with
-                        direct owner contacts and zero intermediary fees.
+                        {t("guides.detail.exploreSub")}
                       </Text>
                     </View>
                     <View style={styles.ctaButtonGroup}>
@@ -454,7 +475,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                           webPointer,
                         ]}
                       >
-                        <Text style={styles.verifiedCtaBtnText}>Browse Properties</Text>
+                        <Text style={styles.verifiedCtaBtnText}>{t("guides.detail.browseProperties")}</Text>
                         <ArrowRight color={colors.ink} size={15} />
                       </Pressable>
                       <Pressable
@@ -465,7 +486,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                           webPointer,
                         ]}
                       >
-                        <Text style={styles.secondaryCtaBtnText}>List Property Free</Text>
+                        <Text style={styles.secondaryCtaBtnText}>{t("guides.detail.listPropertyFree")}</Text>
                       </Pressable>
                     </View>
                   </View>
@@ -484,37 +505,37 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
               <View style={styles.sidebarCard}>
                 <View style={styles.sidebarCardHeader}>
                   <Layers color={colors.greenOnLight} size={18} />
-                  <Text style={styles.sidebarCardTitle}>Guide Overview</Text>
+                  <Text style={styles.sidebarCardTitle}>{t("guides.detail.overviewTitle")}</Text>
                 </View>
                 <View style={styles.factList}>
                   <View style={styles.factRow}>
-                    <Text style={styles.factLabel}>Category</Text>
-                    <Text style={styles.factValue}>{guide.category}</Text>
+                    <Text style={styles.factLabel}>{t("guides.detail.category")}</Text>
+                    <Text style={styles.factValue}>{categoryLabel}</Text>
                   </View>
                   <View style={styles.factRow}>
-                    <Text style={styles.factLabel}>Reading Time</Text>
-                    <Text style={styles.factValue}>{guide.readTime}</Text>
+                    <Text style={styles.factLabel}>{t("guides.detail.readingTime")}</Text>
+                    <Text style={styles.factValue}>{readTimeLabel}</Text>
                   </View>
                   {guide.publishedAt ? (
                     <View style={styles.factRow}>
-                      <Text style={styles.factLabel}>Published</Text>
+                      <Text style={styles.factLabel}>{t("guides.detail.published")}</Text>
                       <Text style={styles.factValue}>
-                        {formatDate(guide.publishedAt)}
+                        {formatGuideDate(guide.publishedAt, language)}
                       </Text>
                     </View>
                   ) : null}
                   {guide.updatedAt ? (
                     <View style={styles.factRow}>
-                      <Text style={styles.factLabel}>Last reviewed</Text>
+                      <Text style={styles.factLabel}>{t("guides.detail.lastReviewed")}</Text>
                       <Text style={styles.factValue}>
-                        {formatDate(guide.updatedAt)}
+                        {formatGuideDate(guide.updatedAt, language)}
                       </Text>
                     </View>
                   ) : null}
                   <View style={styles.factRow}>
-                    <Text style={styles.factLabel}>Source</Text>
+                    <Text style={styles.factLabel}>{t("guides.detail.source")}</Text>
                     <Text style={styles.factValue}>
-                      {isRss ? guide.sourceName || "External News" : "HomeNet Research"}
+                      {isRss ? guide.sourceName || t("guides.detail.externalNews") : t("guides.detail.homeNetResearch")}
                     </Text>
                   </View>
                 </View>
@@ -525,7 +546,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                 <View style={styles.sidebarCard}>
                   <View style={styles.sidebarCardHeader}>
                     <BookOpen color={colors.greenOnLight} size={18} />
-                    <Text style={styles.sidebarCardTitle}>Related Insights</Text>
+                    <Text style={styles.sidebarCardTitle}>{t("guides.detail.relatedInsights")}</Text>
                   </View>
                   <View style={styles.relatedList}>
                     {relatedGuides.map((relGuide) => (
@@ -540,10 +561,9 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                 <View style={styles.actionIconBox}>
                   <Sparkles color="#FFFFFF" size={20} />
                 </View>
-                <Text style={styles.actionCardTitle}>Need Property Guidance?</Text>
+                <Text style={styles.actionCardTitle}>{t("guides.detail.guidanceTitle")}</Text>
                 <Text style={styles.actionCardCopy}>
-                  Browse 100% verified flats and plots across Dhaka with direct owner
-                  contacts.
+                  {t("guides.detail.guidanceCopy")}
                 </Text>
                 <Pressable
                   onPress={() => router.push("/buy" as never)}
@@ -553,7 +573,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                     webPointer,
                   ]}
                 >
-                  <Text style={styles.actionBtnText}>Explore Listings</Text>
+                  <Text style={styles.actionBtnText}>{t("guides.detail.exploreListings")}</Text>
                   <ArrowRight color={colors.ink} size={14} />
                 </Pressable>
               </View>

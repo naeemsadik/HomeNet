@@ -35,6 +35,8 @@ import {
 import { AppChrome } from "@/components/AppChrome";
 import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
+import { displaySubtype } from "../constants/holidayStay";
+import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
 import { breadcrumbSchema, listingCrumbs, listingSchema } from "@/lib/schema";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -49,15 +51,18 @@ import { useSavedStore } from "@/stores/savedStore";
 import { toApiError } from "@/services/apiClient";
 import { styles } from "./PropertyDetailScreen.styles";
 import { BookVisitModal } from "../components/BookVisitModal";
+import { ReportListingModal } from "../components/ReportListingModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
 import { PropertyLocationSection, type NearbyPlace } from "../components/PropertyLocationSection";
 import { WhatsAppIcon } from "../components/WhatsAppIcon";
 import { NoTranslateText } from "@/components/NoTranslateText";
+import { isHolidayStayType } from "../utils/listingType";
 import {
   useTranslation,
   translateAmenity,
   translatePropertyType,
   formatLocalizedNumber,
+  translateAreaUnit,
 } from "@/i18n";
 
 type AiValuation = {
@@ -86,6 +91,7 @@ export function PropertyDetailScreen() {
   const isPropertySaved = useSavedStore((s) => s.isSaved(id ?? ""));
   const toggleSaved = useSavedStore((s) => s.toggleSaved);
   const [bookModalVisible, setBookModalVisible] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
   const [thumbScrollX, setThumbScrollX] = useState(0);
   const [maxThumbScroll, setMaxThumbScroll] = useState(448);
   const [thumbContainerWidth, setThumbContainerWidth] = useState(884);
@@ -116,18 +122,25 @@ export function PropertyDetailScreen() {
     const identity = apiDetail.user?.auth_identities?.[0];
     const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
 
+    const isHoliday = isHolidayStayType(apiDetail.listing_type);
+    const listingTypeStr = isHoliday
+      ? t("propertyCard.holidayStay")
+      : apiDetail.listing_type === "rent"
+      ? t("propertyDetail.forRent")
+      : t("propertyDetail.forSale");
+
     return {
       id: apiDetail.id,
       title: apiDetail.title,
-      location: location || apiDetail.address || "Location unavailable",
-      address: apiDetail.address || location || "Address unavailable",
+      location: location || apiDetail.address || t("propertyCard.locationUnavailable"),
+      address: apiDetail.address || location || t("propertyDetail.addressUnavailable"),
       latitude: apiDetail.location_lat,
       longitude: apiDetail.location_lng,
-      type: apiDetail.subtype || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
-      listingType: apiDetail.listing_type === "rent" ? "For Rent" : "For Sale",
+      type: displaySubtype(apiDetail.subtype) || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
+      listingType: listingTypeStr,
       price: typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
       priceCurrency: apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),
-      pricePeriod: apiDetail.listing_type === "rent" ? "/mo" : "",
+      pricePeriod: isHoliday ? "" : apiDetail.listing_type === "rent" ? (language === "bn" ? "/মাস" : "/mo") : "",
       isVerified: Boolean(apiDetail.is_verified),
       isBoosted: false,
       score: (apiDetail as any).score ?? null,
@@ -137,11 +150,11 @@ export function PropertyDetailScreen() {
       // Placeholder: the API has no valuation yet, so the card below never
       // renders. Wire this up when the backend ships one.
       aiValuation: null as AiValuation | null,
-      description: apiDetail.description || "No description provided.",
+      description: apiDetail.description || t("propertyDetail.noDescription"),
       amenities: amenityList,
       mediaImages: images,
       seller: {
-        name: apiDetail.user?.full_name || "Verified Seller",
+        name: apiDetail.user?.full_name || t("propertyDetail.verifiedSeller"),
         agency: null as string | null,
         isVerified: Boolean(apiDetail.is_verified),
         avatarUrl: apiDetail.user?.avatar_url || null,
@@ -154,28 +167,36 @@ export function PropertyDetailScreen() {
       nearbyPlaces: [] as NearbyPlace[],
       similarProperties: similarProperties.map((sim) => {
         const simAmenities = (sim.amenities as Record<string, any>) || {};
+        const simBeds = Number(simAmenities.bedrooms ?? 0);
+        const simBaths = Number(simAmenities.bathrooms ?? 0);
+        const simArea = sim.area_size ? formatLocalizedNumber(sim.area_size.toLocaleString("en-BD"), language) : null;
+        const simUnit = translateAreaUnit(sim.area_unit, language);
+        const specParts: string[] = [];
+        if (simBeds > 0) specParts.push(`${formatLocalizedNumber(simBeds, language)} ${t("propertyDetail.beds")}`);
+        if (simBaths > 0) specParts.push(`${formatLocalizedNumber(simBaths, language)} ${t("propertyDetail.baths")}`);
+        if (simArea) specParts.push(`${simArea} ${simUnit}`);
         return {
           id: sim.id,
           title: sim.title,
           location: [sim.area?.name, (sim.area as any)?.city].filter(Boolean).join(", ") || sim.address || "Dhaka",
-          price: `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? sim.price.toLocaleString() : sim.price}`,
-          specs: `${Number(simAmenities.bedrooms ?? 0)} Beds · ${Number(simAmenities.bathrooms ?? 0)} Baths · ${sim.area_size?.toLocaleString() ?? "N/A"} ${sim.area_unit || "sqft"}`,
+          price: `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? formatLocalizedNumber(sim.price.toLocaleString("en-BD"), language) : sim.price}`,
+          specs: specParts.join(" · "),
           imageUrl: cdnImage(
-        sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
-        700,
-        460,
-      ),
+            sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
+            700,
+            460,
+          ),
           status: sim.status,
           views: (sim.view_count || 0).toLocaleString(),
           score: (sim as any).score ?? null,
         };
       }),
     };
-  }, [apiDetail, similarProperties]);
+  }, [apiDetail, similarProperties, language, t]);
 
   const handleCall = () => {
     if (!property?.seller.phone) {
-      notify("Phone unavailable", "The property owner has not shared a phone number.");
+      notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;
     }
     void Linking.openURL(`tel:${property.seller.phone}`);
@@ -184,32 +205,38 @@ export function PropertyDetailScreen() {
   const openWhatsApp = (message: string) => {
     const rawPhone = property?.seller.phone;
     if (!rawPhone) {
-      notify("Phone unavailable", "The property owner has not shared a phone number.");
+      notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;
     }
     const cleanPhone = rawPhone.replace(/[^\d]/g, "");
     const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     void Linking.openURL(whatsappUrl).catch(() => {
       notify(
-        "WhatsApp",
-        `Could not launch WhatsApp. You can message the seller directly at ${rawPhone}.`,
+        t("propertyDetail.whatsappUnavailableTitle"),
+        t("propertyDetail.whatsappUnavailableBody", { phone: rawPhone }),
       );
     });
   };
 
   const handleWhatsApp = () => {
-    openWhatsApp(
-      `Hello ${property?.seller.name || "Seller"}, I'm interested in your property "${property?.title || "Property"}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) on Homenet. Is this property currently available?`,
-    );
+    const defaultSeller = language === "bn" ? "মালিক" : "Seller";
+    const defaultProp = language === "bn" ? "প্রোপার্টি" : "Property";
+    const greeting = language === "bn"
+      ? `আসসালামু আলাইকুম ${property?.seller.name || defaultSeller}, আমি HomeNet-এ আপনার প্রোপার্টি "${property?.title || defaultProp}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) সম্পর্কে জানতে আগ্রহী। প্রোপার্টিটি কি এখনো পাওয়া যাচ্ছে?`
+      : `Hello ${property?.seller.name || defaultSeller}, I'm interested in your property "${property?.title || defaultProp}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) on HomeNet. Is this property currently available?`;
+    openWhatsApp(greeting);
   };
 
   // There is no visit-booking API, so the request goes to the seller directly
   // instead of a confirmation screen promising a callback nobody schedules.
   const handleRequestVisit = () => {
     const link = Platform.OS === "web" && typeof window !== "undefined" ? ` (${window.location.href})` : "";
-    openWhatsApp(
-      `Hello ${property?.seller.name || "Seller"}, I'd like to visit your property "${property?.title || "Property"}" listed on Homenet${link}. When would be a good time to see it?`,
-    );
+    const defaultSeller = language === "bn" ? "মালিক" : "Seller";
+    const defaultProp = language === "bn" ? "প্রোপার্টি" : "Property";
+    const visitMsg = language === "bn"
+      ? `আসসালামু আলাইকুম ${property?.seller.name || defaultSeller}, আমি HomeNet-এ তালিকাভুক্ত আপনার প্রোপার্টি "${property?.title || defaultProp}"${link} সরাসরি পরিদর্শন করতে চাই। কখন ভিজিট করা সুবিধাজনক হবে?`
+      : `Hello ${property?.seller.name || defaultSeller}, I'd like to visit your property "${property?.title || defaultProp}" listed on HomeNet${link}. When would be a good time to see it?`;
+    openWhatsApp(visitMsg);
   };
 
   // Used to claim the link was copied without copying anything.
@@ -219,12 +246,10 @@ export function PropertyDetailScreen() {
   };
 
   // Google Play requires a way to report user-generated content from inside the app.
-  // This opens a prepared email to us; if the phone has no mail app, it says where to write.
+  // This opens a prepared modal with localized reasons and confirmation.
   const handleReport = () => {
     if (!property || !id) return;
-    Linking.openURL(reportListingMailto({ id, title: property.title })).catch(() => {
-      notify("Report this listing", `Write to ${SUPPORT_EMAIL} and include the listing ID: ${id}.`);
-    });
+    setReportModalVisible(true);
   };
 
   // Guests get a "saved on this device" toast from the saved store.
@@ -365,7 +390,7 @@ export function PropertyDetailScreen() {
       {/* The listing itself is the page title — that is what a search result
           for this URL should read. */}
       <PageMeta
-        title={`${property.title} — ${property.location} | HomeNet`}
+        title={`${property.title} — ${property.location} | HomeNet BD`}
         description={`${property.listingType} at ${property.priceCurrency}${property.price}${property.pricePeriod}. ${property.address}.`}
       />
       {apiDetail ? (
@@ -465,7 +490,11 @@ export function PropertyDetailScreen() {
 
                   <View style={styles.forRentTag}>
                     <Text style={styles.forRentTagText}>
-                      {apiDetail?.listing_type === "rent" ? t("propertyDetail.forRent") : t("propertyDetail.forSale")}
+                      {isHolidayStayType(apiDetail?.listing_type)
+                        ? t("propertyCard.holidayStay")
+                        : apiDetail?.listing_type === "rent"
+                        ? t("propertyDetail.forRent")
+                        : t("propertyDetail.forSale")}
                     </Text>
                   </View>
                 </View>
@@ -626,7 +655,7 @@ export function PropertyDetailScreen() {
             <View style={styles.aiValuationCard}>
               <View style={styles.aiValuationHeader}>
                 <Sparkles color="#04cf92" size={20} />
-                <Text style={styles.aiValuationTitle}>AI Property Valuation</Text>
+                <Text style={styles.aiValuationTitle}>{t("propertyDetail.aiValuationTitle")}</Text>
               </View>
 
               <Text style={styles.aiValuationDesc}>
@@ -820,7 +849,7 @@ export function PropertyDetailScreen() {
             <View style={styles.aiRecCard}>
               <View style={styles.aiRecHeader}>
                 <Sparkles color="#04cf92" size={18} />
-                <Text style={styles.aiRecTitle}>AI Recommendation</Text>
+                <Text style={styles.aiRecTitle}>{t("propertyDetail.aiRecTitle")}</Text>
               </View>
 
               <Text style={styles.aiRecBody}>{property.aiRecommendation}</Text>
@@ -850,6 +879,13 @@ export function PropertyDetailScreen() {
         thumbScrollRef={lightboxThumbScrollRef}
         title={property.title}
         visible={lightboxVisible}
+      />
+
+      <ReportListingModal
+        onClose={() => setReportModalVisible(false)}
+        propertyId={property.id}
+        propertyTitle={property.title}
+        visible={reportModalVisible}
       />
     </AppChrome>
   );

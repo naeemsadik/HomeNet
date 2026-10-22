@@ -54,7 +54,11 @@ export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNav
             key={tab.key}
             onPress={() => onChange(tab.key)}
             style={[styles.tab, isActive && styles.tabActive]}
-            accessibilityLabel={count > 0 ? `${label} tab, ${count} unread` : `${label} tab`}
+            accessibilityLabel={
+              count > 0
+                ? t("admin.tabs.tabAriaWithCount", { name: label, count })
+                : t("admin.tabs.tabAria", { name: label })
+            }
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
           >

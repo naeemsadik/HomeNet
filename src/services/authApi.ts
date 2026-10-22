@@ -1,6 +1,7 @@
 import apiClient from "./apiClient";
 import {
   changePasswordDtoSchema,
+  googleLoginSchema,
   loginSchema,
   registerDtoSchema,
 } from "@/lib/schemas/auth";
@@ -22,6 +23,12 @@ export async function registerUser(dto: RegisterDto) {
 export async function loginUser(dto: LoginDto) {
   const validated = loginSchema.parse(dto);
   const { data } = await apiClient.post<ApiResponse<AuthResponse>>("/v1/auth/login", validated);
+  return data;
+}
+
+export async function loginWithGoogle(idToken: string) {
+  const validated = googleLoginSchema.parse({ id_token: idToken });
+  const { data } = await apiClient.post<ApiResponse<AuthResponse>>("/v1/auth/google", validated);
   return data;
 }
 

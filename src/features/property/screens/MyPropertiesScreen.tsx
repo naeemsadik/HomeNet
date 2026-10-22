@@ -41,6 +41,8 @@ import { colorTokens, fonts, webPointer } from "@/theme";
 import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
 import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
 import { Footer } from "@/components/Footer";
+import { displaySubtype } from "../constants/holidayStay";
+import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
 import { useMyProperties } from "../hooks/useMyProperties";
 import { useDeleteProperty } from "../hooks/usePropertyMutations";
 import { toApiError } from "@/services/apiClient";
@@ -58,7 +60,7 @@ interface ListingItemData {
   location: string;
   imageUrl?: string;
   type: string;
-  listingType: "For Sale" | "For Rent";
+  listingType: string;
   price: string;
   status: "active" | "draft" | "pending" | "sold" | "archived";
   boostText?: string;
@@ -91,9 +93,9 @@ export function MyPropertiesScreen() {
         700,
         460,
       ),
-      type: p.subtype || p.type || "Apartment",
-      listingType: p.listing_type === "rent" ? "For Rent" : "For Sale",
-      price: `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${p.listing_type === "rent" ? "/mo" : ""}`,
+      type: displaySubtype(p.subtype) || p.type || "Apartment",
+      listingType: listingTypeLabel(p.listing_type),
+      price: `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${pricePeriodFor(p.listing_type)}`,
       status: p.status,
       isVerified: p.is_verified,
       isBoosted: false,

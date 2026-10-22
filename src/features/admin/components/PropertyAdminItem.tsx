@@ -60,7 +60,7 @@ export function PropertyAdminItemRow({
             <Pressable
               onPress={() => onApprove(item.id)}
               style={[styles.actionBtn, { backgroundColor: colorTokens.primaryLight }]}
-              accessibilityLabel="Activate property"
+              accessibilityLabel={t("admin.actions.activateAria")}
               disabled={isMutating}
             >
               <Check color={colorTokens.primary} size={14} />
@@ -69,7 +69,7 @@ export function PropertyAdminItemRow({
             <Pressable
               onPress={() => onReject(item.id)}
               style={[styles.actionBtn, { backgroundColor: colorTokens.warningLight }]}
-              accessibilityLabel="Move property to draft"
+              accessibilityLabel={t("admin.actions.moveToDraftAria")}
               disabled={isMutating}
             >
               <X color={colorTokens.warning} size={14} />
@@ -80,7 +80,7 @@ export function PropertyAdminItemRow({
         <Pressable
           onPress={() => onView(item.id)}
           style={[styles.actionBtn, { backgroundColor: colorTokens.verifiedLight }]}
-          accessibilityLabel="View property"
+          accessibilityLabel={t("admin.actions.viewAria")}
         >
           <Eye color={colorTokens.verified} size={14} />
           <Text style={[styles.actionText, { color: colorTokens.verified }]}>{t("admin.actions.view")}</Text>
@@ -88,7 +88,7 @@ export function PropertyAdminItemRow({
         <Pressable
           onPress={() => onDelete(item.id)}
           style={[styles.actionBtn, { backgroundColor: colorTokens.errorLight }]}
-          accessibilityLabel="Delete property"
+          accessibilityLabel={t("admin.actions.deleteAria")}
           disabled={isMutating}
         >
           <Trash2 color={colorTokens.error} size={14} />

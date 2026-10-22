@@ -53,7 +53,7 @@ export function PropertyAdminList({
               key={status}
               onPress={() => onStatusChange(status)}
               style={[styles.filterChip, activeStatus === status && styles.filterChipActive]}
-              accessibilityLabel={`Filter by ${status}`}
+              accessibilityLabel={t("admin.filters.filterByAria", { status: label })}
             >
               <Text style={[styles.filterText, activeStatus === status && styles.filterTextActive]}>
                 {label}
@@ -71,7 +71,7 @@ export function PropertyAdminList({
           placeholder={t("admin.searchPropertiesPlaceholder")}
           placeholderTextColor={colorTokens.textMuted}
           style={styles.searchInput}
-          accessibilityLabel="Search properties"
+          accessibilityLabel={t("admin.searchPropertiesPlaceholder")}
         />
       </View>
 
@@ -111,7 +111,7 @@ export function PropertyAdminList({
           }
           ListFooterComponent={
             hasMore ? (
-              <Pressable onPress={onLoadMore} style={styles.loadMore} accessibilityLabel="Load more properties">
+              <Pressable onPress={onLoadMore} style={styles.loadMore} accessibilityLabel={t("admin.loadMore")}>
                 <Text style={styles.loadMoreText}>{t("admin.loadMore")}</Text>
               </Pressable>
             ) : null

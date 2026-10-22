@@ -6,7 +6,7 @@ export default function PrivacyRoute() {
   return (
     <>
       <PageMeta
-        title="Privacy Policy — HomeNet"
+        title="Privacy Policy — HomeNet BD"
         description="What HomeNet collects, why, who can see it, and how to have it deleted."
       />
       <LegalScreen document={PRIVACY_POLICY} />
