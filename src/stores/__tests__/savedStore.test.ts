@@ -68,6 +68,16 @@ describe("savedStore.toggleSaved", () => {
     expect(toast?.action?.label).toBe("Sign in");
   });
 
+  it("localizes guest save toast into authentic Bengali when language is bn", async () => {
+    const { useLanguageStore } = require("@/i18n");
+    useLanguageStore.getState().setLanguage("bn");
+    await useSavedStore.getState().toggleSaved("6");
+    const toast = useToastStore.getState().toast;
+    expect(toast?.message).toBe("এই ডিভাইসে সংরক্ষিত হয়েছে। সব ডিভাইসে সিঙ্ক করতে লগইন করুন।");
+    expect(toast?.action?.label).toBe("লগইন করুন");
+    useLanguageStore.getState().setLanguage("en");
+  });
+
   it("shows no device-only toast for a signed-in save", async () => {
     mockUser.current = { id: "u1" };
     mockSave.mockResolvedValue(undefined);

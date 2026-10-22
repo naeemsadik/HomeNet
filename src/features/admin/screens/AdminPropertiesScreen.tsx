@@ -61,7 +61,7 @@ export function AdminPropertiesScreen() {
       />
       {error ? (
         <Text onPress={() => void refetch()} style={styles.errorText}>
-          {toApiError(error).message} Press to retry.
+          {toApiError(error).message} {t("admin.roles.retry")}
         </Text>
       ) : null}
       {approveProperty.error || rejectProperty.error || deleteProperty.error ? (

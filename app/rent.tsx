@@ -1,13 +1,16 @@
 import { PageMeta } from "@/components/PageMeta";
+import { useTranslation } from "@/i18n";
 import { BrowseScreen } from "@/screens/BrowseScreen";
 
 export default function RentRoute() {
+  const { t } = useTranslation();
   return (
     <>
       <PageMeta
-        title="Property to Rent in Dhaka | HomeNet BD"
-        description="Browse verified apartments and houses to rent across Dhaka and Bangladesh."
+        title={t("seo.rent.title")}
+        description={t("seo.rent.description")}
       />
+      {/* title="Property to Rent in Dhaka | HomeNet BD" */}
       <BrowseScreen mode="rent" />
     </>
   );

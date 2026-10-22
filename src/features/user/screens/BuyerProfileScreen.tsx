@@ -106,11 +106,11 @@ export function BuyerProfileScreen() {
         };
         await uploadAvatar(file, asset.fileName || "profile.jpg");
         await fetchMe();
-        notify("Success", t("userProfile.photoUpdated"));
+        notify(t("common.success"), t("userProfile.photoUpdated"));
       }
     } catch (err: any) {
       if (__DEV__) console.warn("Avatar upload error:", err);
-      notify("Notice", t("userProfile.photoNotice"));
+      notify(t("common.notice"), t("userProfile.photoNotice"));
     } finally {
       setIsUploading(false);
     }
@@ -141,7 +141,7 @@ export function BuyerProfileScreen() {
       await fetchMe();
       notify(t("userProfile.saved"), t("userProfile.profileUpdated"));
     } catch (err: any) {
-      notify("Error", toApiError(err).message);
+      notify(t("common.error"), toApiError(err).message);
     } finally {
       setIsSaving(false);
     }
@@ -169,7 +169,7 @@ export function BuyerProfileScreen() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      notify("Success", t("userProfile.passwordChangeSuccess"));
+      notify(t("common.success"), t("userProfile.passwordChangeSuccess"));
     } catch (err: any) {
       setPasswordError(toApiError(err).message);
     } finally {
@@ -179,7 +179,7 @@ export function BuyerProfileScreen() {
 
   const handleDeleteAccount = async () => {
     if (!user) {
-      notify("Notice", t("userProfile.noAuthAccountToDelete"));
+      notify(t("common.notice"), t("userProfile.noAuthAccountToDelete"));
       return;
     }
 
@@ -191,7 +191,7 @@ export function BuyerProfileScreen() {
         router.replace("/home");
         notify(t("userProfile.accountDeletedTitle"), t("userProfile.accountDeletedMessage"));
       } catch (err: any) {
-        notify("Error", toApiError(err).message);
+        notify(t("common.error"), toApiError(err).message);
       } finally {
         setIsDeletingAccount(false);
       }

@@ -47,7 +47,7 @@ export function EditProfileScreen() {
     try {
       await updateProfile.mutateAsync({ id: user.id, data: { full_name: data.full_name } });
       await fetchMe();
-      notify("Success", t("userProfile.profileUpdated"), { onConfirm: () => router.back() });
+      notify(t("common.success"), t("userProfile.profileUpdated"), { onConfirm: () => router.back() });
     } catch (err: any) {
       setServerError(toApiError(err).message);
     }
@@ -74,7 +74,7 @@ export function EditProfileScreen() {
       };
       await uploadAvatar.mutateAsync(file);
       await fetchMe();
-      notify("Success", t("userProfile.avatarUpdated"));
+      notify(t("common.success"), t("userProfile.avatarUpdated"));
     } catch (err: any) {
       setServerError(toApiError(err).message);
     }
@@ -84,7 +84,7 @@ export function EditProfileScreen() {
     try {
       await deleteAvatar.mutateAsync();
       await fetchMe();
-      notify("Success", t("userProfile.avatarRemoved"));
+      notify(t("common.success"), t("userProfile.avatarRemoved"));
     } catch (err: any) {
       setServerError(toApiError(err).message);
     }

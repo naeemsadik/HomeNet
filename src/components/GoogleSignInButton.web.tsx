@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "@/i18n";
 
 import type { GoogleSignInButtonProps } from "@/components/GoogleSignInButton";
 import { GOOGLE_CLIENT_ID } from "@/lib/features";
@@ -90,6 +91,7 @@ function initializeOnce(api: GoogleAccountsId, clientId: string) {
  * is drawn and the email form below still works.
  */
 export function GoogleSignInButton({ mode, onCredential, disabled }: GoogleSignInButtonProps) {
+  const { t } = useTranslation();
   const slot = useRef<HTMLDivElement | null>(null);
   // The latest handler, without redrawing Google's button when it changes.
   const onCredentialRef = useRef(onCredential);
@@ -135,6 +137,7 @@ export function GoogleSignInButton({ mode, onCredential, disabled }: GoogleSignI
     <div
       ref={slot}
       data-testid="google-sign-in"
+      aria-label={t("auth.continueWithGoogle")}
       style={{
         display: "flex",
         justifyContent: "center",

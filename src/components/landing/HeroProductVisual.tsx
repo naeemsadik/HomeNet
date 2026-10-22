@@ -49,7 +49,7 @@ export function HeroProductVisual() {
         <View style={[styles.compositionWrap, isLargeScreen && styles.compositionWrapLarge]}>
           {/* Main Desktop Browser Frame */}
           <BrowserFrame
-            url="homenet.com.bd/buy?city=Dhaka"
+            url={t("landing.browserFrame.dhakaUrl")}
             style={[
               styles.browserFrame,
               isCompact && styles.browserFrameCompact,
