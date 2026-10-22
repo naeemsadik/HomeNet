@@ -1,11 +1,59 @@
-import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { memo, useCallback, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Check, Copy } from "@/components/icons";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
-import { colors, fonts, radius } from "@/theme";
+import { useTranslation } from "@/i18n";
+import { colors, fonts, radius, webPointer } from "@/theme";
 
 interface MarkdownRendererProps {
   content: string;
 }
+
+const CodeBlock = memo(function CodeBlock({ code }: { code: string }) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(async () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // Safe fallback
+      }
+    }
+  }, [code]);
+
+  return (
+    <View style={styles.codeContainer}>
+      <View style={styles.codeHeader}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={copied ? t("guides.markdown.copied") : t("guides.markdown.copyCode")}
+          onPress={handleCopy}
+          style={({ pressed, hovered }: any) => [
+            styles.copyBtn,
+            hovered && { opacity: 0.8 },
+            webPointer,
+          ]}
+        >
+          {copied ? (
+            <Check color="#04cf92" size={13} strokeWidth={2.5} />
+          ) : (
+            <Copy color={colors.muted} size={13} strokeWidth={2} />
+          )}
+          <Text style={[styles.copyBtnText, copied && { color: "#04cf92" }]}>
+            {copied ? t("guides.markdown.copied") : t("guides.markdown.copyCode")}
+          </Text>
+        </Pressable>
+      </View>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.codeScroll}>
+        <Text style={styles.codeText}>{code}</Text>
+      </ScrollView>
+    </View>
+  );
+});
 
 /**
  * Parses inline formatting like **bold**, *italic*, and [link](url).
@@ -64,6 +112,7 @@ function renderInlineText(text: string, keyPrefix: string) {
  * with React Native primitives to render guides cleanly across Web, iOS, and Android.
  */
 export function MarkdownRenderer({ content }: MarkdownRendererProps) {
+  const { t } = useTranslation();
   if (!content) return null;
 
   const rawLines = content.split("\n");
@@ -118,6 +167,19 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       continue;
     }
 
+    // Code block detection (```)
+    if (trimmed.startsWith("```")) {
+      const codeLines: string[] = [];
+      index++;
+      while (index < rawLines.length && !rawLines[index].trim().startsWith("```")) {
+        codeLines.push(rawLines[index]);
+        index++;
+      }
+      if (index < rawLines.length) index++;
+      elements.push(<CodeBlock key={`code-${index}`} code={codeLines.join("\n")} />);
+      continue;
+    }
+
     // 4. Blockquote / Alert
     if (trimmed.startsWith("> ")) {
       const quoteLines: string[] = [];
@@ -126,7 +188,12 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
         index++;
       }
       elements.push(
-        <View key={`quote-${index}`} style={styles.blockquote}>
+        <View
+          key={`quote-${index}`}
+          style={styles.blockquote}
+          accessibilityRole="alert"
+          accessibilityLabel={t("guides.markdown.noteAria")}
+        >
           <Text style={styles.blockquoteText}>
             {renderInlineText(quoteLines.join(" "), `quote-inner-${index}`)}
           </Text>
@@ -421,6 +488,43 @@ const styles = StyleSheet.create({
     color: "#2C3E38",
     fontFamily: fonts.regular,
     fontSize: 13.5,
+    lineHeight: 20,
+  },
+  codeContainer: {
+    width: "100%",
+    backgroundColor: "#1E2925",
+    borderRadius: radius.sm,
+    overflow: "hidden",
+    marginVertical: 10,
+  },
+  codeHeader: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.08)",
+  },
+  copyBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: radius.xs,
+  },
+  copyBtnText: {
+    color: colors.muted,
+    fontFamily: fonts.medium,
+    fontSize: 12,
+  },
+  codeScroll: {
+    padding: 14,
+  },
+  codeText: {
+    color: "#E2E8F0",
+    fontFamily: fonts.regular,
+    fontSize: 13,
     lineHeight: 20,
   },
 });
