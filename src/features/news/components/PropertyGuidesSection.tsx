@@ -16,6 +16,12 @@ import { colors, fonts, radius, webPointer } from "@/theme";
 import { usePropertyGuides } from "../hooks/usePropertyGuides";
 import type { PropertyGuide } from "../types/news";
 import { GUIDE_FALLBACK_IMAGE, resolveGuideImage } from "../utils/guideImageStrategy";
+import {
+  formatReadTime,
+  getGuideCategoryLabel,
+  getLocalizedGuideExcerpt,
+  getLocalizedGuideTitle,
+} from "../utils/guideTranslators";
 
 /** Category switcher tabs requested for the homepage section. */
 type GuideTab = "All" | "Market News" | "Legal & Docs" | "Buyer & Seller";
@@ -27,9 +33,14 @@ const GUIDE_TABS: { key: GuideTab; labelKey: "all" | "marketNews" | "legalDocs" 
 ];
 
 const GuideCard = memo(function GuideCard({ guide, featured }: { guide: PropertyGuide; featured?: boolean }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
   const isRss = guide.sourceType === "rss";
+
+  const title = getLocalizedGuideTitle(guide, language);
+  const excerpt = getLocalizedGuideExcerpt(guide, language);
+  const categoryLabel = getGuideCategoryLabel(guide.category, t);
+  const readTimeLabel = formatReadTime(guide.readTime, t, language);
 
   const resolvedUrl = useMemo(
     () => guide.imageUrl || resolveGuideImage(guide),
@@ -64,8 +75,8 @@ const GuideCard = memo(function GuideCard({ guide, featured }: { guide: Property
       accessibilityRole="link"
       accessibilityLabel={t("guides.cardAria", {
         source: sourceLabel,
-        category: guide.category,
-        title: guide.title,
+        category: categoryLabel,
+        title,
       })}
       onPress={handlePress}
       style={({ pressed, hovered }: any) => [
@@ -110,22 +121,22 @@ const GuideCard = memo(function GuideCard({ guide, featured }: { guide: Property
 
           {/* Category Pill */}
           <View style={styles.categoryPill}>
-            <Text style={styles.categoryText}>{guide.category}</Text>
+            <Text style={styles.categoryText}>{categoryLabel}</Text>
           </View>
 
-          <Text style={styles.readTime}>{guide.readTime}</Text>
+          <Text style={styles.readTime}>{readTimeLabel}</Text>
         </View>
 
         <Text
           numberOfLines={2}
           style={[styles.cardTitle, featured && !isPhone && styles.cardTitleFeatured]}
         >
-          {guide.title}
+          {title}
         </Text>
 
-        {featured && !isPhone && guide.excerpt ? (
+        {featured && !isPhone && excerpt ? (
           <Text numberOfLines={3} style={styles.cardExcerpt}>
-            {guide.excerpt}
+            {excerpt}
           </Text>
         ) : null}
       </View>

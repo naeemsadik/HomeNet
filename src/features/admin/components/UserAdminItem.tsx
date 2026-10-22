@@ -31,20 +31,20 @@ export function UserAdminItemRow({ item, onManageRoles, onView, onDelete }: User
         </View>
         <View style={styles.info}>
           <Text style={styles.name} numberOfLines={1}>{item.full_name}</Text>
-          <Text style={styles.email} numberOfLines={1}>{email ?? "No email"}</Text>
+          <Text style={styles.email} numberOfLines={1}>{email ?? t("admin.users.noEmail")}</Text>
         </View>
         <RoleBadge role={primaryRole} />
       </View>
 
       <Text style={styles.date}>
-        Joined {new Date(item.created_at).toLocaleDateString()}
+        {t("admin.users.joinedDate", { date: new Date(item.created_at).toLocaleDateString() })}
       </Text>
 
       <View style={styles.actions}>
         <Pressable
           onPress={() => onManageRoles(item)}
           style={[styles.actionBtn, { backgroundColor: colorTokens.primaryLight }]}
-          accessibilityLabel="Manage roles"
+          accessibilityLabel={t("admin.roles.manageRoles")}
         >
           <Settings color={colorTokens.primary} size={14} />
           <Text style={[styles.actionText, { color: colorTokens.primary }]}>{t("admin.actions.roles")}</Text>
@@ -52,7 +52,7 @@ export function UserAdminItemRow({ item, onManageRoles, onView, onDelete }: User
         <Pressable
           onPress={() => onDelete(item)}
           style={[styles.actionBtn, { backgroundColor: colorTokens.errorLight }]}
-          accessibilityLabel={`Delete ${item.full_name}`}
+          accessibilityLabel={t("admin.users.deleteAria", { name: item.full_name })}
         >
           <Trash2 color={colorTokens.error} size={14} />
           <Text style={[styles.actionText, { color: colorTokens.error }]}>{t("admin.actions.delete")}</Text>
@@ -60,7 +60,7 @@ export function UserAdminItemRow({ item, onManageRoles, onView, onDelete }: User
         <Pressable
           onPress={() => onView(item.id)}
           style={[styles.actionBtn, { backgroundColor: colorTokens.verifiedLight }]}
-          accessibilityLabel="View user"
+          accessibilityLabel={t("admin.users.viewAria")}
         >
           <Text style={[styles.actionText, { color: colorTokens.verified }]}>{t("admin.actions.view")}</Text>
         </Pressable>

@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { AlertTriangle, Trash2, type LucideIcon } from "@/components/icons";
 import { colorTokens, fontTokens, radiusTokens } from "@/theme";
+import { useTranslation } from "@/i18n";
 
 interface ConfirmDialogProps {
   visible: boolean;
@@ -21,14 +22,17 @@ export function ConfirmDialog({
   visible,
   title,
   message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   variant = "danger",
   icon: Icon,
   onConfirm,
   onCancel,
   loading = false,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+  const effectiveConfirm = confirmLabel ?? t("common.confirm");
+  const effectiveCancel = cancelLabel ?? t("common.cancel");
   const scale = useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
@@ -56,19 +60,19 @@ export function ConfirmDialog({
             <Pressable
               onPress={onCancel}
               style={styles.cancelBtn}
-              accessibilityLabel={cancelLabel}
+              accessibilityLabel={effectiveCancel}
               disabled={loading}
             >
-              <Text style={styles.cancelText}>{cancelLabel}</Text>
+              <Text style={styles.cancelText}>{effectiveCancel}</Text>
             </Pressable>
             <Pressable
               onPress={onConfirm}
               style={[styles.confirmBtn, variant === "danger" ? styles.confirmDanger : styles.confirmWarning, loading && styles.confirmDisabled]}
-              accessibilityLabel={confirmLabel}
+              accessibilityLabel={effectiveConfirm}
               disabled={loading}
             >
               <Text style={[styles.confirmText, variant === "danger" ? styles.confirmTextDanger : styles.confirmTextWarning]}>
-                {loading ? "Processing..." : confirmLabel}
+                {loading ? t("common.processing") : effectiveConfirm}
               </Text>
             </Pressable>
           </View>

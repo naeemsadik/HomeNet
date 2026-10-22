@@ -26,6 +26,13 @@ import { colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { usePropertyGuides } from "../hooks/usePropertyGuides";
 import type { PropertyGuide } from "../types/news";
 import { GUIDE_FALLBACK_IMAGE, resolveGuideImage } from "../utils/guideImageStrategy";
+import {
+  formatReadTime,
+  getGuideCategoryLabel,
+  getLocalizedGuideExcerpt,
+  getLocalizedGuideTags,
+  getLocalizedGuideTitle,
+} from "../utils/guideTranslators";
 
 type ArchiveTab = "All" | "Market News" | "Legal & Docs" | "Buyer & Seller";
 const ARCHIVE_TABS: ArchiveTab[] = [
@@ -36,8 +43,14 @@ const ARCHIVE_TABS: ArchiveTab[] = [
 ];
 
 const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const isRss = guide.sourceType === "rss";
+
+  const title = getLocalizedGuideTitle(guide, language);
+  const excerpt = getLocalizedGuideExcerpt(guide, language);
+  const categoryLabel = getGuideCategoryLabel(guide.category, t);
+  const readTimeLabel = formatReadTime(guide.readTime, t, language);
+  const tags = getLocalizedGuideTags(guide, language);
 
   const resolvedUrl = useMemo(
     () => guide.imageUrl || resolveGuideImage(guide),
@@ -70,7 +83,7 @@ const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: Prop
   return (
     <Pressable
       accessibilityRole="link"
-      accessibilityLabel={`${sourceLabel} - ${guide.title}`}
+      accessibilityLabel={`${sourceLabel} - ${title}`}
       onPress={handlePress}
       style={({ pressed, hovered }: any) => [
         styles.card,
@@ -106,23 +119,23 @@ const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: Prop
           )}
 
           <View style={styles.categoryPill}>
-            <Text style={styles.categoryText}>{guide.category}</Text>
+            <Text style={styles.categoryText}>{categoryLabel}</Text>
           </View>
 
-          <Text style={styles.readTimeText}>{guide.readTime}</Text>
+          <Text style={styles.readTimeText}>{readTimeLabel}</Text>
         </View>
 
         <Text numberOfLines={2} style={styles.cardTitle}>
-          {guide.title}
+          {title}
         </Text>
 
         <Text numberOfLines={3} style={styles.cardExcerpt}>
-          {guide.excerpt}
+          {excerpt}
         </Text>
 
-        {guide.tags && guide.tags.length > 0 ? (
+        {tags && tags.length > 0 ? (
           <View style={styles.tagsRow}>
-            {guide.tags.slice(0, 3).map((tag) => (
+            {tags.slice(0, 3).map((tag) => (
               <View key={tag} style={styles.tagChip}>
                 <Text style={styles.tagText}>#{tag}</Text>
               </View>
@@ -174,8 +187,11 @@ export function GuidesArchiveScreen() {
       result = result.filter(
         (g) =>
           g.title.toLowerCase().includes(q) ||
+          (g.titleBn && g.titleBn.toLowerCase().includes(q)) ||
           g.excerpt.toLowerCase().includes(q) ||
+          (g.excerptBn && g.excerptBn.toLowerCase().includes(q)) ||
           g.tags?.some((t) => t.toLowerCase().includes(q)) ||
+          g.tagsBn?.some((t) => t.toLowerCase().includes(q)) ||
           g.category.toLowerCase().includes(q),
       );
     }

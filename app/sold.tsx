@@ -1,13 +1,16 @@
 import { PageMeta } from "@/components/PageMeta";
+import { useTranslation } from "@/i18n";
 import { BrowseScreen } from "@/screens/BrowseScreen";
 
 export default function SoldRoute() {
+  const { t } = useTranslation();
   return (
     <>
       <PageMeta
-        title="Recently Sold Property Prices | HomeNet BD"
-        description="See confirmed sale prices for properties across Dhaka and Bangladesh."
+        title={t("seo.sold.title")}
+        description={t("seo.sold.description")}
       />
+      {/* title="Recently Sold Property Prices | HomeNet BD" */}
       <BrowseScreen mode="sold" />
     </>
   );

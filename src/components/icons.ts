@@ -42,6 +42,7 @@ export { default as CircleHelp } from "lucide-react-native/icons/circle-question
 export { default as Clock } from "lucide-react-native/icons/clock";
 export { default as Clock3 } from "lucide-react-native/icons/clock-3";
 export { default as Compass } from "lucide-react-native/icons/compass";
+export { default as Copy } from "lucide-react-native/icons/copy";
 export { default as Cpu } from "lucide-react-native/icons/cpu";
 export { default as CreditCard } from "lucide-react-native/icons/credit-card";
 export { default as Database } from "lucide-react-native/icons/database";

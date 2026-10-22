@@ -14,6 +14,7 @@ import { useRoleDetail } from "../hooks/useRoles";
 import { usePermissionMutations } from "../hooks/useRoleMutations";
 import type { RoleWithPermissions } from "../types/admin";
 import { toApiError } from "@/services/apiClient";
+import { useTranslation } from "@/i18n";
 
 interface PermissionEditorModalProps {
   visible: boolean;
@@ -22,18 +23,19 @@ interface PermissionEditorModalProps {
 }
 
 const ALL_PERMISSIONS = [
-  { id: "perm-001", name: "view_roles", label: "View Roles" },
-  { id: "perm-002", name: "manage_roles", label: "Manage Roles" },
-  { id: "perm-003", name: "create_listing", label: "Create Listing" },
-  { id: "perm-004", name: "moderate_listing", label: "Moderate Listing" },
-  { id: "perm-005", name: "manage_users", label: "Manage Users" },
-  { id: "perm-006", name: "review_verification", label: "Review Verification" },
-  { id: "perm-007", name: "manage_content", label: "Manage Content" },
-  { id: "perm-008", name: "manage_areas", label: "Manage Areas" },
-  { id: "perm-009", name: "manage_properties", label: "Manage Properties" },
-];
+  { id: "perm-001", name: "view_roles", key: "viewRoles" },
+  { id: "perm-002", name: "manage_roles", key: "manageRoles" },
+  { id: "perm-003", name: "create_listing", key: "createListing" },
+  { id: "perm-004", name: "moderate_listing", key: "moderateListing" },
+  { id: "perm-005", name: "manage_users", key: "manageUsers" },
+  { id: "perm-006", name: "review_verification", key: "reviewVerification" },
+  { id: "perm-007", name: "manage_content", key: "manageContent" },
+  { id: "perm-008", name: "manage_areas", key: "manageAreas" },
+  { id: "perm-009", name: "manage_properties", key: "manageProperties" },
+] as const;
 
 export function PermissionEditorModal({ visible, role, onClose }: PermissionEditorModalProps) {
+  const { t } = useTranslation();
   const { data: roleDetail, isLoading } = useRoleDetail(role?.id ?? "");
   const { assignPermission, revokePermission } = usePermissionMutations(role?.id);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -79,12 +81,12 @@ export function PermissionEditorModal({ visible, role, onClose }: PermissionEdit
         <View style={styles.dialog}>
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>Permissions</Text>
+              <Text style={styles.title}>{t("admin.permissions.title")}</Text>
               {role ? (
                 <Text style={styles.subtitle}>{role.name}</Text>
               ) : null}
             </View>
-            <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel="Close">
+            <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel={t("common.close")}>
               <X color={colorTokens.textSecondary} size={18} />
             </Pressable>
           </View>
@@ -102,26 +104,31 @@ export function PermissionEditorModal({ visible, role, onClose }: PermissionEdit
               renderItem={({ item }) => {
                 const assigned = isAssigned(item.name);
                 const isProcessing = processing === item.id;
+                const label = t(`admin.permissions.${item.key}`);
                 return (
                   <Pressable
                     onPress={() => togglePermission(item)}
                     style={[styles.permRow, assigned && styles.permRowActive]}
-                    accessibilityLabel={`${assigned ? "Remove" : "Assign"} ${item.label} permission`}
+                    accessibilityLabel={
+                      assigned
+                        ? t("admin.permissions.removeAria", { name: label })
+                        : t("admin.permissions.assignAria", { name: label })
+                    }
                     disabled={isProcessing}
                   >
                     <Text style={[styles.permName, assigned && styles.permNameActive]}>
-                      {item.label}
+                      {label}
                     </Text>
                     {isProcessing ? (
                       <ActivityIndicator color={colorTokens.primary} size="small" />
                     ) : assigned ? (
                       <View style={styles.checkChip}>
                         <Check color={colorTokens.onBrand} size={12} />
-                        <Text style={styles.checkText}>Assigned</Text>
+                        <Text style={styles.checkText}>{t("admin.permissions.assigned")}</Text>
                       </View>
                     ) : (
                       <View style={styles.addChip}>
-                        <Text style={styles.addText}>Add</Text>
+                        <Text style={styles.addText}>{t("admin.permissions.add")}</Text>
                       </View>
                     )}
                   </Pressable>

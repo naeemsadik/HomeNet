@@ -28,7 +28,11 @@ export interface PropertyGuide {
   slug: string;
   category: GuideCategory;
   title: string;
+  /** Optional Bengali title for native reader localization. */
+  titleBn?: string;
   excerpt: string;
+  /** Optional Bengali excerpt. */
+  excerptBn?: string;
   /** Human-readable, e.g. "5 min read". */
   readTime: string;
   /** Absolute URL. Null renders the neutral placeholder, never a stock photo. */
@@ -47,8 +51,12 @@ export interface PropertyGuide {
   sourceUrl?: string | null;
   /** Optional topic tags for search and categorization. */
   tags?: string[];
+  /** Optional localized Bengali topic tags. */
+  tagsBn?: string[];
   /** Full markdown content for in-house guides. */
   contentMarkdown?: string | null;
+  /** Optional localized Bengali markdown content. */
+  contentMarkdownBn?: string | null;
   /** Author information. */
   author?: GuideAuthor | null;
 }

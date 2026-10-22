@@ -15,7 +15,7 @@ import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck } from "@/compone
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
-import { useTranslation, formatLocalizedPrice, formatLocalizedNumber, type SupportedLanguage } from "@/i18n";
+import { useTranslation, formatLocalizedPrice, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { isHolidayStayType } from "@/features/property/utils/listingType";
 import { useSavedStore } from "@/stores/savedStore";
@@ -57,7 +57,7 @@ function readSpecs(property: Property, lang: SupportedLanguage) {
     beds: bedsVal !== null ? formatLocalizedNumber(bedsVal, lang) : null,
     baths: bathsVal !== null ? formatLocalizedNumber(bathsVal, lang) : null,
     area: property.area_size
-      ? `${formatLocalizedNumber(property.area_size.toLocaleString("en-BD"), lang)} ${property.area_unit || "sqft"}`
+      ? `${formatLocalizedNumber(property.area_size.toLocaleString("en-BD"), lang)} ${translateAreaUnit(property.area_unit, lang)}`
       : null,
   };
 }

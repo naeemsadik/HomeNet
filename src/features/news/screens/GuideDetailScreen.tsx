@@ -32,6 +32,15 @@ import { MarkdownRenderer } from "../components/MarkdownRenderer";
 import { usePropertyGuide, usePropertyGuides } from "../hooks/usePropertyGuides";
 import type { PropertyGuide } from "../types/news";
 import { GUIDE_FALLBACK_IMAGE, resolveGuideImage } from "../utils/guideImageStrategy";
+import {
+  formatGuideDate,
+  formatReadTime,
+  getGuideCategoryLabel,
+  getLocalizedGuideContent,
+  getLocalizedGuideExcerpt,
+  getLocalizedGuideTags,
+  getLocalizedGuideTitle,
+} from "../utils/guideTranslators";
 
 interface GuideDetailScreenProps {
   slug: string;
@@ -57,7 +66,12 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
 }: {
   guide: PropertyGuide;
 }) {
+  const { t, language } = useTranslation();
   const isRss = guide.sourceType === "rss";
+  const title = getLocalizedGuideTitle(guide, language);
+  const categoryLabel = getGuideCategoryLabel(guide.category, t);
+  const readTimeLabel = formatReadTime(guide.readTime, t, language);
+
   const resolvedUrl = useMemo(
     () => guide.imageUrl || resolveGuideImage(guide),
     [guide.imageUrl, guide.id, guide.slug, guide.category, guide.title, guide.sourceType],
@@ -81,7 +95,7 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
     <Pressable
       onPress={handlePress}
       accessibilityRole="link"
-      accessibilityLabel={guide.title}
+      accessibilityLabel={title}
       style={({ hovered, pressed }: any) => [
         styles.relatedItem,
         hovered && styles.relatedItemHovered,
@@ -101,12 +115,12 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
       </View>
       <View style={styles.relatedContent}>
         <View style={styles.relatedMetaRow}>
-          <Text style={styles.relatedCategory}>{guide.category}</Text>
+          <Text style={styles.relatedCategory}>{categoryLabel}</Text>
           <Text style={styles.relatedDot}>•</Text>
-          <Text style={styles.relatedReadTime}>{guide.readTime}</Text>
+          <Text style={styles.relatedReadTime}>{readTimeLabel}</Text>
         </View>
         <Text numberOfLines={2} style={styles.relatedTitle}>
-          {guide.title}
+          {title}
         </Text>
       </View>
     </Pressable>
@@ -114,7 +128,7 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
 });
 
 export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { isPhone, isWide, width } = useResponsive();
   const isMobile = isPhone || width < 900;
 
@@ -122,6 +136,12 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
   const { data: allGuidesData } = usePropertyGuides({ limit: 6 });
 
   const isRss = guide?.sourceType === "rss";
+  const guideTitle = getLocalizedGuideTitle(guide, language);
+  const guideExcerpt = getLocalizedGuideExcerpt(guide, language);
+  const guideContent = getLocalizedGuideContent(guide, language);
+  const guideTags = getLocalizedGuideTags(guide, language);
+  const categoryLabel = getGuideCategoryLabel(guide?.category, t);
+  const readTimeLabel = formatReadTime(guide?.readTime, t, language);
 
   // Resolve cover image with fallback state handling
   const resolvedCoverUrl = useMemo(
@@ -152,7 +172,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
 
   const handleShare = () => {
     if (!guide) return;
-    void shareLink({ title: guide.title });
+    void shareLink({ title: guideTitle });
   };
 
   return (
@@ -251,12 +271,12 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                         })}
                       </Text>
                     </View>
-                    <Text style={styles.categoryBadge}>{guide.category}</Text>
+                    <Text style={styles.categoryBadge}>{categoryLabel}</Text>
                   </View>
 
                   {/* Title & Metadata */}
                   <Text style={[styles.articleTitle, isMobile && styles.articleTitlePhone]}>
-                    {guide.title}
+                    {guideTitle}
                   </Text>
 
                   <View style={styles.metaRow}>
@@ -264,13 +284,13 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                       <View style={styles.metaItem}>
                         <Calendar color={colors.muted} size={14} />
                         <Text style={styles.metaItemText}>
-                          {formatDate(guide.publishedAt)}
+                          {formatGuideDate(guide.publishedAt, language)}
                         </Text>
                       </View>
                     ) : null}
                     <View style={styles.metaItem}>
                       <Clock color={colors.muted} size={14} />
-                      <Text style={styles.metaItemText}>{guide.readTime}</Text>
+                      <Text style={styles.metaItemText}>{readTimeLabel}</Text>
                     </View>
                   </View>
 
@@ -296,7 +316,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                   {/* Summary / Excerpt */}
                   <View style={styles.rssExcerptBox}>
                     <Text style={styles.rssExcerptHeading}>{t("guides.detail.reportSummary")}</Text>
-                    <Text style={styles.rssExcerptCopy}>{guide.excerpt}</Text>
+                    <Text style={styles.rssExcerptCopy}>{guideExcerpt}</Text>
                   </View>
 
                   {/* Outbound Link CTA */}
@@ -362,17 +382,17 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                       <Text style={styles.homeNetBadgeText}>{t("guides.detail.homeNetGuideBadge")}</Text>
                     </View>
                     <View style={styles.categoryPill}>
-                      <Text style={styles.categoryText}>{guide.category}</Text>
+                      <Text style={styles.categoryText}>{categoryLabel}</Text>
                     </View>
                     <View style={styles.metaItem}>
                       <Clock color={colors.muted} size={14} />
-                      <Text style={styles.metaItemText}>{guide.readTime}</Text>
+                      <Text style={styles.metaItemText}>{readTimeLabel}</Text>
                     </View>
                     {guide.publishedAt ? (
                       <View style={styles.metaItem}>
                         <Calendar color={colors.muted} size={14} />
                         <Text style={styles.metaItemText}>
-                          {formatDate(guide.publishedAt)}
+                          {formatGuideDate(guide.publishedAt, language)}
                         </Text>
                       </View>
                     ) : null}
@@ -380,7 +400,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
 
                   {/* Article Title */}
                   <Text style={[styles.articleTitle, isMobile && styles.articleTitlePhone]}>
-                    {guide.title}
+                    {guideTitle}
                   </Text>
 
                   {/* Author Attribution Card */}
@@ -420,15 +440,15 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                   {/* Markdown Body Content */}
                   <View style={styles.markdownWrapper}>
                     <MarkdownRenderer
-                      content={guide.contentMarkdown || guide.excerpt}
+                      content={guideContent}
                     />
                   </View>
 
                   {/* Tags Footer */}
-                  {guide.tags && guide.tags.length > 0 ? (
+                  {guideTags && guideTags.length > 0 ? (
                     <View style={styles.tagWrap}>
                       <Text style={styles.tagWrapLabel}>{t("guides.detail.tags")}</Text>
-                      {guide.tags.map((tag) => (
+                      {guideTags.map((tag) => (
                         <View key={tag} style={styles.tagPill}>
                           <Text style={styles.tagPillText}>#{tag}</Text>
                         </View>
@@ -490,17 +510,17 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                 <View style={styles.factList}>
                   <View style={styles.factRow}>
                     <Text style={styles.factLabel}>{t("guides.detail.category")}</Text>
-                    <Text style={styles.factValue}>{guide.category}</Text>
+                    <Text style={styles.factValue}>{categoryLabel}</Text>
                   </View>
                   <View style={styles.factRow}>
                     <Text style={styles.factLabel}>{t("guides.detail.readingTime")}</Text>
-                    <Text style={styles.factValue}>{guide.readTime}</Text>
+                    <Text style={styles.factValue}>{readTimeLabel}</Text>
                   </View>
                   {guide.publishedAt ? (
                     <View style={styles.factRow}>
                       <Text style={styles.factLabel}>{t("guides.detail.published")}</Text>
                       <Text style={styles.factValue}>
-                        {formatDate(guide.publishedAt)}
+                        {formatGuideDate(guide.publishedAt, language)}
                       </Text>
                     </View>
                   ) : null}
@@ -508,7 +528,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                     <View style={styles.factRow}>
                       <Text style={styles.factLabel}>{t("guides.detail.lastReviewed")}</Text>
                       <Text style={styles.factValue}>
-                        {formatDate(guide.updatedAt)}
+                        {formatGuideDate(guide.updatedAt, language)}
                       </Text>
                     </View>
                   ) : null}

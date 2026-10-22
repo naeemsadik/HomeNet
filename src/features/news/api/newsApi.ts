@@ -43,7 +43,9 @@ const guideSchema = z.object({
     "Developments",
   ]),
   title: z.string().min(1),
+  titleBn: z.string().optional(),
   excerpt: z.string(),
+  excerptBn: z.string().optional(),
   readTime: z.string(),
   imageUrl: z.string().nullable(),
   publishedAt: z.string().nullable(),
@@ -53,7 +55,9 @@ const guideSchema = z.object({
   sourceName: z.string().nullable().optional(),
   sourceUrl: z.string().nullable().optional(),
   tags: z.array(z.string()).optional(),
+  tagsBn: z.array(z.string()).optional(),
   contentMarkdown: z.string().nullable().optional(),
+  contentMarkdownBn: z.string().nullable().optional(),
   author: z
     .object({
       name: z.string().min(1),
@@ -126,7 +130,9 @@ function normalizeGuide(raw: any): PropertyGuide {
     slug,
     category,
     title,
+    titleBn: raw.title_bn ?? raw.titleBn ?? undefined,
     excerpt: raw.excerpt || "",
+    excerptBn: raw.excerpt_bn ?? raw.excerptBn ?? undefined,
     readTime: raw.read_time || raw.readTime || "4 min read",
     imageUrl,
     publishedAt: raw.published_at || raw.publishedAt || null,
@@ -138,7 +144,9 @@ function normalizeGuide(raw: any): PropertyGuide {
     sourceName: raw.source_name ?? raw.sourceName ?? null,
     sourceUrl,
     tags,
+    tagsBn: Array.isArray(raw.tags_bn ?? raw.tagsBn) ? (raw.tags_bn ?? raw.tagsBn) : undefined,
     contentMarkdown: raw.content_markdown ?? raw.contentMarkdown ?? null,
+    contentMarkdownBn: raw.content_markdown_bn ?? raw.contentMarkdownBn ?? null,
     author,
   };
 }
@@ -164,8 +172,11 @@ function filterCuratedGuides(params: FetchPropertyGuidesParams): PropertyGuideLi
     filtered = filtered.filter(
       (item) =>
         item.title.toLowerCase().includes(q) ||
+        (item.titleBn && item.titleBn.toLowerCase().includes(q)) ||
         item.excerpt.toLowerCase().includes(q) ||
-        item.tags?.some((t) => t.toLowerCase().includes(q)),
+        (item.excerptBn && item.excerptBn.toLowerCase().includes(q)) ||
+        item.tags?.some((t) => t.toLowerCase().includes(q)) ||
+        item.tagsBn?.some((t) => t.toLowerCase().includes(q)),
     );
   }
 
