@@ -8,7 +8,7 @@ export default function GuideDetailRoute() {
   return (
     <>
       <PageMeta
-        title="Property Guide & Market Report | HomeNet Bangladesh"
+        title="Property Guide & Market Report | HomeNet BD"
         description="Detailed property advice, land verification procedures, and Dhaka market updates."
       />
       <GuideDetailScreen slug={String(slug || "")} />

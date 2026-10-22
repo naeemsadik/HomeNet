@@ -72,6 +72,7 @@ import { WizardDetailsStep } from "../components/wizard/WizardDetailsStep";
 import { WizardLocationStep } from "../components/wizard/WizardLocationStep";
 import { WizardMediaStep } from "../components/wizard/WizardMediaStep";
 import { WizardReviewStep } from "../components/wizard/WizardReviewStep";
+import { storedListingTypeFor } from "../utils/listingType";
 
 export function PropertyCreateWizard() {
   const { t } = useTranslation();
@@ -114,7 +115,9 @@ export function PropertyCreateWizard() {
         ...(params.listing_type === "sale" || params.listing_type === "rent"
           ? { listingType: params.listing_type }
           : {}),
-        subtype: initialSubtype(cfg, params.subtype),
+        // A holiday stay is "rent" in the form; it is saved as short_let (see storedListingTypeFor).
+        ...(params.listing_type === "short_let" ? { listingType: "rent" as const, subtype: "short-let" } : {}),
+        subtype: params.listing_type === "short_let" ? "short-let" : initialSubtype(cfg, params.subtype),
         areaUnit: cfg.defaultUnit,
       });
     }
@@ -151,7 +154,7 @@ export function PropertyCreateWizard() {
     description: store.description.trim() || undefined,
     type: store.type,
     subtype: cleanCustomSubtype(store.subtype) || undefined,
-    listing_type: store.listingType,
+    listing_type: storedListingTypeFor(store.listingType, cleanCustomSubtype(store.subtype) || undefined),
     price: store.price ? Number(store.price) : undefined,
     price_currency: "BDT",
     area_size: store.areaSize ? Number(store.areaSize) : undefined,

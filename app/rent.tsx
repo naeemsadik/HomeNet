@@ -5,7 +5,7 @@ export default function RentRoute() {
   return (
     <>
       <PageMeta
-        title="Property to Rent in Dhaka | HomeNet"
+        title="Property to Rent in Dhaka | HomeNet BD"
         description="Browse verified apartments and houses to rent across Dhaka and Bangladesh."
       />
       <BrowseScreen mode="rent" />

@@ -11,9 +11,12 @@ import { Check, ChevronDown, Edit3 } from "@/components/icons";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { OptionPicker } from "@/components/OptionPicker";
 
 export interface RightmoveFilters {
-  radius: string; // "0", "1", "3", "5", "10", "20"
+  /** The place: a city ("Dhaka") or an area name ("Gulshan"); "" is everywhere. */
+  area: string;
+  radius: string; // "" (this area only), "1", "3", "5", "10", "20" kilometres
   propertyType: string; // "all" or an API PropertyType: "residential", "commercial", "land", "parking"
   addedToSite: string; // "", "24h", "3d", "7d", "14d"
   includeSold: boolean;
@@ -33,6 +36,12 @@ interface RightmoveFilterCardProps {
   onSearch: (filters: RightmoveFilters) => void;
   locationName?: string;
   totalResults?: number;
+  /** Places to choose from. Without them the Area dropdown is not shown. */
+  areaOptions?: { label: string; value: string }[];
+  /** False when there is no neighbourhood with a known centre, so "+ N km" cannot be applied. */
+  radiusAvailable?: boolean;
+  /** Why distance is off, shown under the radius dropdown. */
+  radiusHint?: string;
 }
 
 const RADIUS_OPTIONS = [
@@ -113,11 +122,13 @@ function NativeSelect({
   options,
   onChange,
   style,
+  disabled,
 }: {
   value: string;
   options: { label: string; value: string }[];
   onChange: (val: string) => void;
   style?: any;
+  disabled?: boolean;
 }) {
   if (Platform.OS === "web") {
     return (
@@ -125,6 +136,7 @@ function NativeSelect({
         {/* @ts-ignore Web-only select element for native browser dropdown support */}
         <select
           value={value}
+          disabled={disabled}
           onChange={(e: any) => onChange(e.target.value)}
           style={{
             width: "100%",
@@ -142,7 +154,8 @@ function NativeSelect({
             appearance: "none",
             WebkitAppearance: "none",
             outline: "none",
-            cursor: "pointer",
+            cursor: disabled ? "not-allowed" : "pointer",
+            opacity: disabled ? 0.55 : 1,
             boxSizing: "border-box",
           }}
         >
@@ -159,16 +172,8 @@ function NativeSelect({
     );
   }
 
-  // Fallback for native Android/iOS
-  const current = options.find((o) => o.value === value) || options[0];
-  return (
-    <View style={[styles.nativeSelectWrap, style]}>
-      <Text style={styles.nativeSelectText} numberOfLines={1}>
-        {current.label}
-      </Text>
-      <ChevronDown color="#0B1A17" size={16} strokeWidth={2.2} />
-    </View>
-  );
+  // Android and iOS: a tap opens a sheet of options.
+  return <OptionPicker value={value} options={options} onChange={onChange} disabled={disabled} style={style} />;
 }
 
 export function RightmoveFilterCard({
@@ -177,6 +182,9 @@ export function RightmoveFilterCard({
   onSearch,
   locationName = "Dhaka",
   totalResults,
+  areaOptions,
+  radiusAvailable = true,
+  radiusHint,
 }: RightmoveFilterCardProps) {
   const { t } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
@@ -312,12 +320,27 @@ export function RightmoveFilterCard({
       <View style={[styles.grid, isDesktop && styles.gridDesktop, !isDesktop && styles.gridResponsive]}>
         {/* ROW 1, COL 1: Search radius */}
         <View style={[styles.col, isDesktop ? styles.colDesktop : styles.colResponsive]}>
+          {areaOptions && areaOptions.length > 1 ? (
+            <>
+              <Text style={styles.fieldLabel}>{t("search.rightmove.area")}</Text>
+              <NativeSelect
+                value={filters.area}
+                options={areaOptions}
+                // A new place starts with "this area only": a distance chosen
+                // for the last place says nothing about this one.
+                onChange={(val) => handleUpdate({ area: val, radius: "" })}
+              />
+              <View style={styles.areaSpacer} />
+            </>
+          ) : null}
           <Text style={styles.fieldLabel}>{t("search.rightmove.searchRadius")}</Text>
           <NativeSelect
-            value={filters.radius}
+            value={radiusAvailable ? filters.radius : ""}
             options={radiusOptions}
+            disabled={!radiusAvailable}
             onChange={(val) => handleUpdate({ radius: val })}
           />
+          {!radiusAvailable && radiusHint ? <Text style={styles.radiusHint}>{radiusHint}</Text> : null}
         </View>
 
         {/* ROW 1, COL 2: Property types */}
@@ -426,6 +449,14 @@ export function RightmoveFilterCard({
 }
 
 const styles = StyleSheet.create({
+  areaSpacer: { height: 10 },
+  radiusHint: {
+    marginTop: 6,
+    color: "#5C6B66",
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    lineHeight: 16,
+  },
   card: {
     backgroundColor: "#F4F5F8",
     borderRadius: 16,

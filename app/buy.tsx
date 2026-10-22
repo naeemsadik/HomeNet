@@ -5,7 +5,7 @@ export default function BuyRoute() {
   return (
     <>
       <PageMeta
-        title="Property for Sale in Dhaka | HomeNet"
+        title="Property for Sale in Dhaka | HomeNet BD"
         description="Browse verified apartments, houses and land for sale across Dhaka and Bangladesh."
       />
       <BrowseScreen mode="buy" />
