@@ -506,7 +506,7 @@ export const bn: TranslationSchema = {
       archived: "সংরক্ষিত",
     },
     deleteConfirmTitle: "প্রপার্টি মুছুন",
-    deleteConfirmMessage: "আপনি কি নিশ্চিত যে \"{{title}}\" মুছে ফেলতে চান?",
+    deleteConfirmMessage: "আপনি কি নিশ্চিত যে \"{{title}}\" মুছে ফেলতে চান? এর ফলে লিস্টিং ও এর ছবিগুলো স্থায়ীভাবে মুছে যাবে এবং আর ফেরানো যাবে না।",
     deleteFailed: "মুছে ফেলা ব্যর্থ হয়েছে",
     toggleView: {
       aria: "ওয়েবসাইট ভিউ পরিবর্তন করুন",
