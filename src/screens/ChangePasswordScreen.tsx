@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View, ScrollView } from "react-native";
-import { Lock, ArrowLeft } from "lucide-react-native";
+import { Lock, ArrowLeft } from "@/components/icons";
 import { router } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +11,10 @@ import { ErrorBanner, AuthButton } from "@/components/AuthFormFields";
 import { AppChrome } from "@/components/AppChrome";
 import { colors, fonts } from "@/theme";
 
+import { useTranslation } from "@/i18n";
+
 export function ChangePasswordScreen() {
+  const { t } = useTranslation();
   const { changePassword, loading, error, clearError } = useAuthStore();
 
   const { control, handleSubmit, reset, formState: { isValid } } = useForm<ChangePasswordFormData>({
@@ -36,15 +39,15 @@ export function ChangePasswordScreen() {
     <AppChrome active="profile">
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.card}>
-          <Text style={styles.title}>Change Password</Text>
-          <Text style={styles.subtitle}>Enter your current password and your new password</Text>
+          <Text style={styles.title}>{t("changePasswordScreen.title")}</Text>
+          <Text style={styles.subtitle}>{t("changePasswordScreen.subtitle")}</Text>
 
           <ErrorBanner message={error} />
 
           <FormFloatingInput
             control={control}
             name="current_password"
-            label="Current Password"
+            label={t("changePasswordScreen.currentPassword")}
             secureTextEntry
             autoCapitalize="none"
             autoCorrect={false}
@@ -54,7 +57,7 @@ export function ChangePasswordScreen() {
           <FormFloatingInput
             control={control}
             name="new_password"
-            label="New Password"
+            label={t("changePasswordScreen.newPassword")}
             secureTextEntry
             autoCapitalize="none"
             autoCorrect={false}
@@ -64,7 +67,7 @@ export function ChangePasswordScreen() {
           <FormFloatingInput
             control={control}
             name="confirmPassword"
-            label="Confirm New Password"
+            label={t("changePasswordScreen.confirmPassword")}
             secureTextEntry
             autoCapitalize="none"
             autoCorrect={false}
@@ -72,7 +75,7 @@ export function ChangePasswordScreen() {
           />
 
           <AuthButton
-            label="Update Password"
+            label={t("changePasswordScreen.updatePassword")}
             onPress={handleSubmit(onSubmit)}
             loading={loading}
             disabled={!isValid}
@@ -80,7 +83,7 @@ export function ChangePasswordScreen() {
           />
 
           <AuthButton
-            label="Back to Profile"
+            label={t("changePasswordScreen.backToProfile")}
             onPress={() => {
               clearError();
               router.back();

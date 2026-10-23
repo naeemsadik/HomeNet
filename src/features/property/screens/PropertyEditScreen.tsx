@@ -1,16 +1,20 @@
 import React from "react";
-import { View, StyleSheet, Alert, ActivityIndicator, Text } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
+import { notify } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyForm } from "../components/PropertyForm";
 import { useUpdateProperty, useUploadMedia } from "../hooks/usePropertyMutations";
 import type { UpsertPropertyDto } from "@/types/api";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { colorTokens, fonts } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
 import { getPropertyById } from "@/services/propertyApi";
+import { toApiError } from "@/services/apiClient";
 
 export function PropertyEditScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isPhone } = useResponsive();
   const updateProperty = useUpdateProperty();
@@ -25,7 +29,7 @@ export function PropertyEditScreen() {
     enabled: !!id,
   });
 
-  const handleSubmit = async (dto: UpsertPropertyDto, images: Array<{ uri: string; file?: Blob | File }>) => {
+  const handleSubmit = async (dto: UpsertPropertyDto, images: { uri: string; file?: Blob | File }[]) => {
     if (!id) return;
     try {
       const result = await updateProperty.mutateAsync({ id, dto });
@@ -37,11 +41,9 @@ export function PropertyEditScreen() {
         }
       }
 
-      Alert.alert("Success", "Property updated successfully.", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      notify(t("common.success"), t("property.updateSuccess"), { onConfirm: () => router.back() });
     } catch (err: any) {
-      Alert.alert("Error", err?.message || "Failed to update property");
+      notify(t("common.error"), toApiError(err).message);
     }
   };
 
@@ -60,7 +62,7 @@ export function PropertyEditScreen() {
       <AppChrome active="sell">
         <View style={styles.center}>
           <Text style={styles.errorText}>
-            {propertyError instanceof Error ? propertyError.message : "Property not found."}
+            {propertyError ? toApiError(propertyError).message : t("property.notFound")}
           </Text>
         </View>
       </AppChrome>
@@ -100,7 +102,7 @@ export function PropertyEditScreen() {
           onSubmit={handleSubmit}
           onCancel={() => router.back()}
           loading={updateProperty.isPending || uploadMedia.isPending}
-          error={updateProperty.error?.message || null}
+          error={updateProperty.error ? toApiError(updateProperty.error).message : null}
         />
       </View>
     </AppChrome>

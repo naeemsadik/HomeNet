@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Home } from "lucide-react-native";
+import { Home } from "@/components/icons";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { colors, fonts } from "@/theme";
 import { AppLink } from "./ui";

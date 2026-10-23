@@ -28,13 +28,19 @@ export interface PropertyGuide {
   slug: string;
   category: GuideCategory;
   title: string;
+  /** Optional Bengali title for native reader localization. */
+  titleBn?: string;
   excerpt: string;
+  /** Optional Bengali excerpt. */
+  excerptBn?: string;
   /** Human-readable, e.g. "5 min read". */
   readTime: string;
   /** Absolute URL. Null renders the neutral placeholder, never a stock photo. */
   imageUrl: string | null;
   /** ISO 8601. Null hides the date rather than inventing one. */
   publishedAt: string | null;
+  /** ISO 8601. When the content (and any figures in it) was last checked. */
+  updatedAt?: string | null;
   /** In-app route or external URL. */
   href: string;
   /** Whether the guide is an in-house HomeNet guide or syndicated via external RSS. */
@@ -45,8 +51,12 @@ export interface PropertyGuide {
   sourceUrl?: string | null;
   /** Optional topic tags for search and categorization. */
   tags?: string[];
+  /** Optional localized Bengali topic tags. */
+  tagsBn?: string[];
   /** Full markdown content for in-house guides. */
   contentMarkdown?: string | null;
+  /** Optional localized Bengali markdown content. */
+  contentMarkdownBn?: string | null;
   /** Author information. */
   author?: GuideAuthor | null;
 }

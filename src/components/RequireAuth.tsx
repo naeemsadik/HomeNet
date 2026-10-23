@@ -1,16 +1,22 @@
 import { useEffect, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { Lock, ShieldAlert } from "lucide-react-native";
+import { Lock, ShieldAlert } from "@/components/icons";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
-import { hasAnyAdminPermission } from "@/lib/permissions";
-import { colors, fonts, radius, webPointer } from "@/theme";
+import { hasAnyAdminPermission, hasPermission } from "@/lib/permissions";
+import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
 import { AppChrome, type ActivePage } from "./AppChrome";
+import { useTranslation } from "@/i18n";
 
 interface RequireAuthProps {
   children: ReactNode;
   /** Also require an admin role or any admin-level permission. */
   admin?: boolean;
+  /**
+   * Also require this permission. Pass the one the page's API calls need, so
+   * the page never renders for someone whose requests would be refused.
+   */
+  permission?: string;
   /** Nav highlight for the gate's chrome. Children supply their own chrome. */
   active?: ActivePage;
 }
@@ -25,8 +31,10 @@ interface RequireAuthProps {
 export function RequireAuth({
   children,
   admin = false,
+  permission,
   active = "home",
 }: RequireAuthProps) {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const hydrated = useAuthStore((s) => s.hydrated);
   const userRoles = useAuthStore((s) => s.userRoles);
@@ -56,33 +64,34 @@ export function RequireAuth({
         <View style={styles.iconWell}>
           <Lock color={colors.greenOnLight} size={24} />
         </View>
-        <Text style={styles.title}>Sign in to continue</Text>
+        <Text style={styles.title}>{t("auth.signInToContinue")}</Text>
         <Text style={styles.copy}>
-          This page is only available to signed-in accounts.
+          {t("auth.signInRequiredDesc")}
         </Text>
         <Pressable
           accessibilityRole="button"
           onPress={() => useAuthModalStore.getState().open()}
           style={({ pressed }) => [styles.cta, webPointer, pressed && styles.pressed]}
         >
-          <Text style={styles.ctaText}>Sign in</Text>
+          <Text style={styles.ctaText}>{t("auth.signIn")}</Text>
         </Pressable>
       </View>
       </AppChrome>
     );
   }
 
-  if (admin && !hasAnyAdminPermission(userRoles)) {
+  const lacksAdmin = admin && !hasAnyAdminPermission(userRoles);
+  const lacksPermission = permission !== undefined && !hasPermission(userRoles, permission);
+  if (lacksAdmin || lacksPermission) {
     return (
       <AppChrome active={active}>
       <View style={styles.center}>
         <View style={[styles.iconWell, styles.iconWellWarn]}>
           <ShieldAlert color={colors.orange} size={24} />
         </View>
-        <Text style={styles.title}>You don't have access</Text>
+        <Text style={styles.title}>{t("auth.accessDenied")}</Text>
         <Text style={styles.copy}>
-          This area needs an administrator role. Ask an admin if you think this
-          is wrong.
+          {t("auth.adminRequiredDesc")}
         </Text>
       </View>
       </AppChrome>
@@ -139,7 +148,7 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.85 },
   ctaText: {
-    color: colors.white,
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 14,
   },

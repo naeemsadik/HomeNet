@@ -1,8 +1,10 @@
-import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, View } from "react-native";
-import { Search, Users } from "lucide-react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Search, Users } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { UserAdminItemRow } from "./UserAdminItem";
 import type { UserWithRoles } from "../types/admin";
+import { LiveText } from "@/components/LiveText";
+import { useTranslation, formatLocalizedNumber } from "@/i18n";
 
 interface UserAdminListProps {
   users: UserWithRoles[];
@@ -13,6 +15,8 @@ interface UserAdminListProps {
   onManageRoles: (user: UserWithRoles) => void;
   onView: (userId: string) => void;
   onDelete: (user: UserWithRoles) => void;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
 }
 
 export function UserAdminList({
@@ -24,7 +28,11 @@ export function UserAdminList({
   onManageRoles,
   onView,
   onDelete,
+  onLoadMore,
+  hasMore = false,
 }: UserAdminListProps) {
+  const { t, language } = useTranslation();
+
   return (
     <View style={styles.container}>
       <View style={styles.searchRow}>
@@ -32,14 +40,19 @@ export function UserAdminList({
         <TextInput
           value={searchQuery}
           onChangeText={onSearchChange}
-          placeholder="Search users by name or email..."
+          placeholder={t("admin.searchUsersPlaceholder")}
           placeholderTextColor={colorTokens.textMuted}
           style={styles.searchInput}
-          accessibilityLabel="Search users"
+          accessibilityLabel={t("admin.searchUsersPlaceholder")}
         />
       </View>
 
-      <Text style={styles.count}>Showing {users.length} of {total} users</Text>
+      <LiveText style={styles.count}>
+        {t("admin.showingUserCount", {
+          count: formatLocalizedNumber(users.length, language),
+          total: formatLocalizedNumber(total, language),
+        })}
+      </LiveText>
 
       {isLoading ? (
         <View style={styles.center}>
@@ -63,8 +76,15 @@ export function UserAdminList({
           ListEmptyComponent={
             <View style={styles.empty}>
               <Users color={colorTokens.textMuted} size={40} />
-              <Text style={styles.emptyText}>No users found</Text>
+              <Text style={styles.emptyText}>{t("admin.noUsersFound")}</Text>
             </View>
+          }
+          ListFooterComponent={
+            hasMore ? (
+              <Pressable onPress={onLoadMore} style={styles.loadMore} accessibilityRole="button" accessibilityLabel={t("admin.loadMore")}>
+                <Text style={styles.loadMoreText}>{t("admin.loadMore")}</Text>
+              </Pressable>
+            ) : null
           }
         />
       )}
@@ -113,5 +133,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fontTokens.semiBold,
     color: colorTokens.textMuted,
+  },
+  loadMore: {
+    alignItems: "center",
+    paddingVertical: 14,
+    marginTop: 8,
+    borderRadius: 12,
+    backgroundColor: colorTokens.backgroundAlt,
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
+  },
+  loadMoreText: {
+    fontSize: 13,
+    fontFamily: fontTokens.bold,
+    color: colorTokens.primary,
   },
 });

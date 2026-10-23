@@ -1,8 +1,9 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Settings, Trash2, UserRound } from "lucide-react-native";
+import { Settings, Trash2, UserRound } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { RoleBadge } from "./StatusBadge";
 import type { UserWithRoles } from "../types/admin";
+import { useTranslation } from "@/i18n";
 
 interface UserAdminItemProps {
   item: UserWithRoles;
@@ -12,6 +13,7 @@ interface UserAdminItemProps {
 }
 
 export function UserAdminItemRow({ item, onManageRoles, onView, onDelete }: UserAdminItemProps) {
+  const { t } = useTranslation();
   const email = item.auth_identities?.[0]?.email;
   const primaryRole = item.user_roles?.[0]?.role?.name ?? "buyer_seller";
 
@@ -29,38 +31,38 @@ export function UserAdminItemRow({ item, onManageRoles, onView, onDelete }: User
         </View>
         <View style={styles.info}>
           <Text style={styles.name} numberOfLines={1}>{item.full_name}</Text>
-          <Text style={styles.email} numberOfLines={1}>{email ?? "No email"}</Text>
+          <Text style={styles.email} numberOfLines={1}>{email ?? t("admin.users.noEmail")}</Text>
         </View>
         <RoleBadge role={primaryRole} />
       </View>
 
       <Text style={styles.date}>
-        Joined {new Date(item.created_at).toLocaleDateString()}
+        {t("admin.users.joinedDate", { date: new Date(item.created_at).toLocaleDateString() })}
       </Text>
 
       <View style={styles.actions}>
         <Pressable
           onPress={() => onManageRoles(item)}
           style={[styles.actionBtn, { backgroundColor: colorTokens.primaryLight }]}
-          accessibilityLabel="Manage roles"
+          accessibilityLabel={t("admin.roles.manageRoles")}
         >
           <Settings color={colorTokens.primary} size={14} />
-          <Text style={[styles.actionText, { color: colorTokens.primary }]}>Roles</Text>
+          <Text style={[styles.actionText, { color: colorTokens.primary }]}>{t("admin.actions.roles")}</Text>
         </Pressable>
         <Pressable
           onPress={() => onDelete(item)}
           style={[styles.actionBtn, { backgroundColor: colorTokens.errorLight }]}
-          accessibilityLabel={`Delete ${item.full_name}`}
+          accessibilityLabel={t("admin.users.deleteAria", { name: item.full_name })}
         >
           <Trash2 color={colorTokens.error} size={14} />
-          <Text style={[styles.actionText, { color: colorTokens.error }]}>Delete</Text>
+          <Text style={[styles.actionText, { color: colorTokens.error }]}>{t("admin.actions.delete")}</Text>
         </Pressable>
         <Pressable
           onPress={() => onView(item.id)}
           style={[styles.actionBtn, { backgroundColor: colorTokens.verifiedLight }]}
-          accessibilityLabel="View user"
+          accessibilityLabel={t("admin.users.viewAria")}
         >
-          <Text style={[styles.actionText, { color: colorTokens.verified }]}>View</Text>
+          <Text style={[styles.actionText, { color: colorTokens.verified }]}>{t("admin.actions.view")}</Text>
         </Pressable>
       </View>
     </View>

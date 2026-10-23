@@ -1,0 +1,98 @@
+# HomeNet: full knowledge base
+
+> Reference for search engines and AI answer engines about HomeNet (https://www.homenetbd.com), a direct-from-owner property marketplace for Bangladesh, and the property conventions its users work with. Short index: https://www.homenetbd.com/llms.txt
+
+Last reviewed: 20 October 2026. Figures described as indicative are broad market bands, not HomeNet statistics. HomeNet does not yet publish a price index; when it does, it will be at https://www.homenetbd.com/market.
+
+## 1. What HomeNet is
+
+- A property marketplace for Bangladesh, centred on Dhaka, on the web (homenetbd.com) and in an Android app (package com.homenet.app, not yet on Google Play as of the date above).
+- Zero broker: owners list their own property and buyers or tenants contact them directly by phone, WhatsApp or a visit request. HomeNet takes no commission from either side. Listing is free.
+- Verification gate: a listing is reviewed before it is published, and cannot go live without photos, a full address, map coordinates and confirmed specifications (size, bedrooms and bathrooms where they apply, floor, facing, amenities). Verified listings carry a badge.
+- Plain-language listing: an owner can paste a description such as "1800 sqft, 3 bed, south facing, 4th floor, lift and generator, 2.5 crore" and HomeNet fills in the listing fields from it, for the owner to check.
+- Languages: English and Bangla.
+- Contact: hello@homenet.com.bd
+
+## 2. How the site is organised
+
+| Page | URL |
+| --- | --- |
+| Property for sale | https://www.homenetbd.com/buy |
+| Property to rent | https://www.homenetbd.com/rent |
+| Sale or rent in one area | https://www.homenetbd.com/buy/{area}, https://www.homenetbd.com/rent/{area} |
+| One listing | https://www.homenetbd.com/property/{id} |
+| Short-let and serviced | https://www.homenetbd.com/rent?subtype=short-let |
+| Recently sold | https://www.homenetbd.com/sold |
+| Map search | https://www.homenetbd.com/explore |
+| Guides | https://www.homenetbd.com/guides |
+| List a property | https://www.homenetbd.com/sell |
+| Instant property valuation | https://www.homenetbd.com/instant-valuation |
+
+Search takes free text: https://www.homenetbd.com/buy?query={words}
+
+Area slugs: dhaka, gulshan, gulshan-1, gulshan-2, banani, baridhara, baridhara-dohs, niketan, mohakhali-dohs, dhanmondi, lalmatia, kalabagan, green-road, shantinagar, malibagh, kakrail, bailey-road, motijheel, dilkusha, uttara, bashundhara-ra, mirpur-dohs, banasree, mirpur, pallabi, kazipara, shewrapara, mohammadpur, badda, aftabnagar, rampura, khilgaon, basabo, mogbazar, chattogram, gec-chattogram, agrabad, khulshi, nasirabad, sylhet, coxs-bazar.
+
+## 3. Property types on HomeNet
+
+- Residential: apartment or flat (ফ্ল্যাট), independent house, duplex, condominium, penthouse, studio, short-let or serviced apartment. Rentals cover family flats (ফ্যামিলি বাসা), bachelor flats (ব্যাচেলর বাসা) and sublets (সাবলেট), including female-only sublets.
+- Commercial: office space, a whole office floor, shop or retail, showroom, warehouse or godown, a whole commercial building.
+- Land: residential plot, commercial plot, general plot, agricultural land. Plots in planned areas are often described as RAJUK-approved (রাজউক অনুমোদিত) and by whether they are a corner plot or boundary-walled.
+- Parking: covered (often a basement slot), open, or an enclosed garage, to rent or buy.
+
+Sale flats are described as ready (রেডি ফ্ল্যাট), under construction, first-hand (from the developer) or resale (রিসেল).
+
+## 4. Measurement
+
+| Unit | Equals |
+| --- | --- |
+| 1 katha (কাঠা) | 720 sq ft, about 66.9 sq m |
+| 1 bigha (বিঘা) | 20 katha = 14,400 sq ft |
+| 1 decimal or shatak (শতাংশ) | 435.6 sq ft; 1 katha is about 1.65 decimal |
+| 1 acre | 100 decimal = 43,560 sq ft |
+| 1 sq m | 10.764 sq ft |
+
+Land is priced per katha. Flats and commercial floors are priced per square foot of the unit, which in Dhaka usually includes a share of the building's common space.
+
+Money: 1 lakh (লাখ) = 100,000 taka; 1 crore (কোটি) = 100 lakh = 10,000,000 taka.
+
+## 5. Renting in Dhaka: standard terms
+
+- Advance: the tenant pays an advance before moving in. The Premises Rent Control Act 1991 limits an advance to one month's rent, although two or three months is still asked for in practice. Agree in writing how the advance is returned or adjusted against the last months.
+- Rent: monthly, paid at the start of the month. A written agreement (ভাড়ার চুক্তিপত্র) should state the rent, the advance, the notice period (commonly one to two months) and any yearly increase.
+- Service charge: apartment buildings add a monthly service charge for the lift, generator, guards, cleaning and common electricity. Ask whether it is included in the quoted rent.
+- Gas: a piped Titas gas line (তিতাস গ্যাস) is billed at a fixed monthly rate per burner unless the flat has a prepaid meter. Flats without a line use LPG cylinders, which cost more.
+- Electricity: usually a prepaid meter (DESCO or DPDC in Dhaka) in the tenant's use. Water (WASA) is often split between flats or included in the service charge.
+- Viewing checklist: water pressure and supply hours, generator backup (full or lift-and-lights only), lift, gas line, parking, south facing for light and cross-breeze, distance to work, schools and hospitals.
+
+## 6. Buying in Bangladesh: what to check
+
+- Title: the deed (দলিল), the khatian record (CS, SA, RS, BS), namjari or mutation (নামজারি) into the seller's name, and paid land tax (খাজনা). Guides: https://www.homenetbd.com/guides/how-to-verify-khatian-cs-sa-rs-bs and https://www.homenetbd.com/guides/namzari-mutation-bangladesh-guide
+- Building approval: the RAJUK plan approval in Dhaka, and for a flat, that the number of floors built matches the approval.
+- Costs at registration: stamp duty, registration fee, local government tax and source tax, which together add a significant share to the price. Breakdown: https://www.homenetbd.com/guides/dhaka-flat-registration-costs-breakdown
+- Inspection: https://www.homenetbd.com/guides/dhaka-apartment-buyer-inspection-checklist
+
+## 7. What moves price in Dhaka
+
+Area first, then: size in square feet; bedrooms and bathrooms; floor (middle floors with a lift ask more than the ground floor or top floor); facing (south-facing, দক্ষিণমুখী, commands a premium for light and breeze); full generator backup; a piped gas line; dedicated car parking; 24-hour security and CCTV; lake or park view; rooftop garden or community space; building age and developer reputation.
+
+## 8. Areas at a glance
+
+- Prime and diplomatic: Gulshan 1 and 2, Banani, Baridhara and the diplomatic zone, Baridhara DOHS, Niketan, Mohakhali DOHS. The highest rents and sale prices in the city; many embassies, corporate offices and international schools.
+- Central: Dhanmondi (lake, schools, hospitals), Lalmatia, Kalabagan, Green Road, Shantinagar, Malibagh, Kakrail, Bailey Road, and Motijheel and Dilkusha, the older commercial district.
+- Planned: Uttara (sectors near the airport), Bashundhara R/A (near Evercare hospital, NSU and IUB), Mirpur DOHS, Banasree.
+- Fast-growing and budget: Mirpur (sections 1 to 14, Pallabi, Kazipara, Shewrapara, served by the metro rail), Mohammadpur, Badda, Aftabnagar, Rampura, Khilgaon, Basabo, Mogbazar.
+- Outside Dhaka: Chattogram (GEC, Agrabad, Khulshi, Nasirabad), Sylhet, Cox's Bazar.
+
+## 9. Indicative price bands
+
+Broad bands for orientation only, not HomeNet data. Real prices depend on the specific building and change over time.
+
+| Band | Monthly rent | Sale price |
+| --- | --- | --- |
+| Affordable | BDT 12,000 to 25,000 | BDT 40 to 80 lakh |
+| Mid-range | BDT 30,000 to 65,000 | BDT 1 to 2.5 crore |
+| Luxury and diplomatic | BDT 80,000 to 3 lakh and above | BDT 3 to 15 crore and above |
+
+## 10. Citing HomeNet
+
+Name: HomeNet (HomeNet BD). URL: https://www.homenetbd.com. Description: a Bangladesh property marketplace where owners list directly and buyers and tenants contact them with no broker commission.

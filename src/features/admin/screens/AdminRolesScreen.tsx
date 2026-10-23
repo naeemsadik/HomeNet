@@ -1,21 +1,23 @@
 import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { ShieldCheck } from "lucide-react-native";
+import { ShieldCheck } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { useRoles } from "../hooks/useRoles";
 import { PermissionEditorModal } from "../components/PermissionEditorModal";
 import type { RoleWithPermissions } from "../types/admin";
 import { toApiError } from "@/services/apiClient";
+import { useTranslation } from "@/i18n";
 
 export function AdminRolesScreen() {
+  const { t } = useTranslation();
   const { data: roles = [], error, isLoading, refetch } = useRoles();
   const [editRole, setEditRole] = useState<RoleWithPermissions | null>(null);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Role Management</Text>
-        <Text style={styles.subtitle}>Manage roles and their permissions.</Text>
+        <Text style={styles.title}>{t("admin.roles.managementTitle")}</Text>
+        <Text style={styles.subtitle}>{t("admin.roles.managementSubtitle")}</Text>
       </View>
 
       {isLoading ? (
@@ -24,7 +26,7 @@ export function AdminRolesScreen() {
         </View>
       ) : error ? (
         <Text onPress={() => void refetch()} style={styles.errorText}>
-          {toApiError(error).message} Press to retry.
+          {toApiError(error).message} {t("admin.roles.retry")}
         </Text>
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
@@ -42,7 +44,7 @@ export function AdminRolesScreen() {
                 </View>
                 <View style={styles.permCount}>
                   <Text style={styles.permCountText}>
-                    {role.role_permissions?.length ?? 0} permissions
+                    {t("admin.roles.permissionsCount", { count: role.role_permissions?.length ?? 0 })}
                   </Text>
                 </View>
               </View>
@@ -56,7 +58,9 @@ export function AdminRolesScreen() {
                   ))}
                   {role.role_permissions.length > 6 ? (
                     <View style={styles.permChip}>
-                      <Text style={styles.permChipText}>+{role.role_permissions.length - 6} more</Text>
+                      <Text style={styles.permChipText}>
+                        {t("admin.roles.morePermissions", { count: role.role_permissions.length - 6 })}
+                      </Text>
                     </View>
                   ) : null}
                 </View>
@@ -65,9 +69,9 @@ export function AdminRolesScreen() {
               <Pressable
                 onPress={() => setEditRole(role)}
                 style={styles.manageBtn}
-                accessibilityLabel={`Manage permissions for ${role.name}`}
+                accessibilityLabel={t("admin.roles.managePermissionsAria", { name: role.name })}
               >
-                <Text style={styles.manageBtnText}>Manage Permissions</Text>
+                <Text style={styles.manageBtnText}>{t("admin.roles.managePermissions")}</Text>
               </Pressable>
             </View>
           ))}

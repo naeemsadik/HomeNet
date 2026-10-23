@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { Globe } from "lucide-react-native";
-import { useLanguageStore } from "@/utils/language";
+import { Globe } from "@/components/icons";
+import { useTranslation } from "@/i18n";
 import { fonts, webPointer } from "@/theme";
 
 interface LanguageToggleProps {
@@ -13,23 +13,12 @@ export function LanguageToggle({
   compact = false,
   variant = "default",
 }: LanguageToggleProps) {
-  const { currentLanguage, toggleLanguage } = useLanguageStore();
-  const isBangla = currentLanguage === "bn";
+  const { language, toggleLanguage, t } = useTranslation();
+  const isBangla = language === "bn";
   const isCrystal = variant === "crystal";
-  const toggleRef = useRef<View>(null);
-
-  // React Native Web strips className and translate props, so we set them
-  // directly on the DOM node via a ref after mount.
-  useEffect(() => {
-    if (Platform.OS !== "web" || !toggleRef.current) return;
-    const el = toggleRef.current as unknown as HTMLElement;
-    el.setAttribute("translate", "no");
-    el.classList.add("notranslate");
-  }, []);
 
   return (
     <Pressable
-      ref={toggleRef}
       onPress={toggleLanguage}
       style={({ pressed, hovered }: any) => [
         styles.button,
@@ -61,7 +50,7 @@ export function LanguageToggle({
           isCrystal && styles.labelCrystal,
         ]}
       >
-        {isBangla ? "বাংলা" : "English"}
+        {isBangla ? t("common.bangla") : t("common.english")}
       </Text>
     </Pressable>
   );

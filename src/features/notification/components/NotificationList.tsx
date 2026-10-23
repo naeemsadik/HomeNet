@@ -1,17 +1,31 @@
-import React from "react";
-import { FlatList, RefreshControl, View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import type { Notification } from "@/types/api";
-import { useNotifications, useMarkAllRead } from "../hooks/useNotifications";
+import React, { useCallback } from "react";
+import { FlatList, RefreshControl, View, Text, StyleSheet, ActivityIndicator , Pressable } from "react-native";
+import { router } from "expo-router";
+import type { Notification, NotificationAudience } from "@/types/api";
+import {
+  useMarkAllRead,
+  useMarkAsRead,
+  useNotifications,
+  useUnreadCount,
+} from "../hooks/useNotifications";
 import { NotificationItem } from "./NotificationItem";
 import { colorTokens, fonts } from "@/theme";
-import { Pressable } from "react-native";
-import { Bell } from "lucide-react-native";
+
+import { Bell } from "@/components/icons";
+
+import { LiveText } from "@/components/LiveText";
+
+import { useTranslation } from "@/i18n";
 
 interface NotificationListProps {
+  /** "user" in the app, "admin" in the admin panel. */
+  audience?: NotificationAudience;
+  /** Overrides the default: mark as read, then open the notification's link. */
   onPressItem?: (notification: Notification) => void;
 }
 
-export function NotificationList({ onPressItem }: NotificationListProps) {
+export function NotificationList({ audience = "user", onPressItem }: NotificationListProps) {
+  const { t } = useTranslation();
   const {
     data,
     fetchNextPage,
@@ -20,12 +34,24 @@ export function NotificationList({ onPressItem }: NotificationListProps) {
     isLoading,
     isRefetching,
     refetch,
-  } = useNotifications();
-
-  const markAll = useMarkAllRead();
+  } = useNotifications(audience);
+  const { data: unreadData } = useUnreadCount(audience);
+  const markAll = useMarkAllRead(audience);
+  const { mutate: markOneRead } = useMarkAsRead();
 
   const notifications = data?.pages.flatMap((page) => page.data?.items ?? []) ?? [];
-  const totalUnread = notifications.filter((n) => !n.read).length;
+  // The server's count covers pages not loaded yet.
+  const totalUnread =
+    unreadData?.data?.count ?? notifications.filter((n) => !n.read).length;
+
+  const openNotification = useCallback(
+    (notification: Notification) => {
+      if (!notification.read) markOneRead(notification.id);
+      if (onPressItem) onPressItem(notification);
+      else if (notification.link) router.push(notification.link as never);
+    },
+    [markOneRead, onPressItem],
+  );
 
   if (isLoading) {
     return (
@@ -41,9 +67,9 @@ export function NotificationList({ onPressItem }: NotificationListProps) {
         <View style={styles.emptyIconWrap}>
           <Bell color={colorTokens.textMuted} size={40} />
         </View>
-        <Text style={styles.emptyTitle}>No notifications yet</Text>
+        <Text style={styles.emptyTitle}>{t("notifications.emptyTitle")}</Text>
         <Text style={styles.emptySubtitle}>
-          You'll see property updates, messages, and verification status here.
+          {audience === "admin" ? t("notifications.emptyAdmin") : t("notifications.emptyUser")}
         </Text>
       </View>
     );
@@ -53,13 +79,15 @@ export function NotificationList({ onPressItem }: NotificationListProps) {
     <View style={styles.listContainer}>
       {totalUnread > 0 ? (
         <View style={styles.header}>
-          <Text style={styles.unreadText}>{totalUnread} unread</Text>
+          <LiveText style={styles.unreadText}>
+            {t("notifications.unreadCount", { count: totalUnread })}
+          </LiveText>
           <Pressable
             onPress={() => markAll.mutate()}
             style={styles.markAllBtn}
-            accessibilityLabel="Mark all notifications as read"
+            accessibilityLabel={t("notifications.markAllReadAria")}
           >
-            <Text style={styles.markAllText}>Mark all read</Text>
+            <Text style={styles.markAllText}>{t("notifications.markAllRead")}</Text>
           </Pressable>
         </View>
       ) : null}
@@ -67,7 +95,7 @@ export function NotificationList({ onPressItem }: NotificationListProps) {
         data={notifications}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <NotificationItem notification={item} onPress={onPressItem} />
+          <NotificationItem notification={item} onPress={openNotification} />
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}

@@ -1,5 +1,7 @@
+import { z } from "@/lib/zod";
 import apiClient from "@/services/apiClient";
 import type { ApiResponse } from "@/types/api";
+import { isSafeLinkUrl } from "@/lib/safeUrl";
 import { CURATED_PROPERTY_GUIDES } from "@/content/curatedGuides";
 import type {
   FetchPropertyGuidesParams,
@@ -27,6 +29,62 @@ function normalizeCategory(rawCat?: string | null): GuideCategory {
   return map[rawCat.toLowerCase()] || "Market";
 }
 
+const guideSchema = z.object({
+  id: z.string().min(1),
+  slug: z.string().min(1),
+  category: z.enum([
+    "Market",
+    "Buying",
+    "Renting",
+    "Selling",
+    "Legal",
+    "Ownership",
+    "Investment",
+    "Developments",
+  ]),
+  title: z.string().min(1),
+  titleBn: z.string().optional(),
+  excerpt: z.string(),
+  excerptBn: z.string().optional(),
+  readTime: z.string(),
+  imageUrl: z.string().nullable(),
+  publishedAt: z.string().nullable(),
+  updatedAt: z.string().nullable().optional(),
+  href: z.string().min(1),
+  sourceType: z.enum(["internal", "rss"]),
+  sourceName: z.string().nullable().optional(),
+  sourceUrl: z.string().nullable().optional(),
+  tags: z.array(z.string()).optional(),
+  tagsBn: z.array(z.string()).optional(),
+  contentMarkdown: z.string().nullable().optional(),
+  contentMarkdownBn: z.string().nullable().optional(),
+  author: z
+    .object({
+      name: z.string().min(1),
+      role: z.string().optional(),
+      avatarUrl: z.string().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
+}) satisfies z.ZodType<PropertyGuide>;
+
+/**
+ * Normalizes a live API guide and checks the result, so a malformed record
+ * is dropped instead of reaching the guide screens with missing fields.
+ */
+export function parseGuide(raw: unknown): PropertyGuide | null {
+  if (!raw || typeof raw !== "object") return null;
+  const result = guideSchema.safeParse(normalizeGuide(raw));
+  return result.success ? result.data : null;
+}
+
+/** An in-app route ("/guides/…") or an external URL with a safe scheme; anything else is dropped. */
+function safeHref(href: unknown): string | null {
+  if (typeof href !== "string" || !href) return null;
+  if (href.startsWith("/") && !href.startsWith("//")) return href;
+  return isSafeLinkUrl(href) ? href : null;
+}
+
 /**
  * Normalizes backend snake_case guide payload to the frontend PropertyGuide interface.
  */
@@ -38,6 +96,7 @@ function normalizeGuide(raw: any): PropertyGuide {
   const title = raw.title || "";
   const tags = Array.isArray(raw.tags) ? raw.tags : [];
   const rawImageUrl = raw.image_url || raw.imageUrl || null;
+  const sourceUrl = safeHref(raw.source_url ?? raw.sourceUrl);
 
   // Resolve editorial photography separate from content:
   // - external RSS never scrapes publisher images (uses reliable category/topic editorial photos)
@@ -52,7 +111,7 @@ function normalizeGuide(raw: any): PropertyGuide {
     imageUrl: sourceType === "rss" ? null : rawImageUrl,
   });
 
-  const author = raw.author
+  const author = raw.author && (raw.author.name || raw.author.full_name)
     ? {
         name: raw.author.name || raw.author.full_name,
         role: raw.author.role,
@@ -71,20 +130,23 @@ function normalizeGuide(raw: any): PropertyGuide {
     slug,
     category,
     title,
+    titleBn: raw.title_bn ?? raw.titleBn ?? undefined,
     excerpt: raw.excerpt || "",
+    excerptBn: raw.excerpt_bn ?? raw.excerptBn ?? undefined,
     readTime: raw.read_time || raw.readTime || "4 min read",
     imageUrl,
     publishedAt: raw.published_at || raw.publishedAt || null,
+    updatedAt: raw.updated_at || raw.updatedAt || null,
     href:
-      raw.href ||
-      (sourceType === "rss"
-        ? raw.source_url || raw.sourceUrl || "#"
-        : `/guides/${slug}`),
+      safeHref(raw.href) ??
+      (sourceType === "rss" ? (sourceUrl ?? "#") : `/guides/${slug}`),
     sourceType,
     sourceName: raw.source_name ?? raw.sourceName ?? null,
-    sourceUrl: raw.source_url ?? raw.sourceUrl ?? null,
+    sourceUrl,
     tags,
+    tagsBn: Array.isArray(raw.tags_bn ?? raw.tagsBn) ? (raw.tags_bn ?? raw.tagsBn) : undefined,
     contentMarkdown: raw.content_markdown ?? raw.contentMarkdown ?? null,
+    contentMarkdownBn: raw.content_markdown_bn ?? raw.contentMarkdownBn ?? null,
     author,
   };
 }
@@ -110,8 +172,11 @@ function filterCuratedGuides(params: FetchPropertyGuidesParams): PropertyGuideLi
     filtered = filtered.filter(
       (item) =>
         item.title.toLowerCase().includes(q) ||
+        (item.titleBn && item.titleBn.toLowerCase().includes(q)) ||
         item.excerpt.toLowerCase().includes(q) ||
-        item.tags?.some((t) => t.toLowerCase().includes(q)),
+        (item.excerptBn && item.excerptBn.toLowerCase().includes(q)) ||
+        item.tags?.some((t) => t.toLowerCase().includes(q)) ||
+        item.tagsBn?.some((t) => t.toLowerCase().includes(q)),
     );
   }
 
@@ -132,6 +197,13 @@ function filterCuratedGuides(params: FetchPropertyGuidesParams): PropertyGuideLi
 }
 
 /**
+ * The API has no `/v1/guides` module yet. Asking anyway logged a 404 in the
+ * browser console on every home and guides page view before the curated
+ * fallback kicked in. Flip this once the backend ships the endpoint.
+ */
+const GUIDES_API_ENABLED = false;
+
+/**
  * Fetches the property guides and news feed.
  *
  * Tries the backend `/v1/guides` endpoint first. If the backend module is not yet deployed,
@@ -142,6 +214,8 @@ export async function fetchPropertyGuides(
 ): Promise<PropertyGuideList> {
   const params: FetchPropertyGuidesParams =
     typeof options === "number" ? { limit: options } : options || {};
+
+  if (!GUIDES_API_ENABLED) return filterCuratedGuides(params);
 
   try {
     const apiParams: Record<string, any> = {
@@ -166,7 +240,9 @@ export async function fetchPropertyGuides(
 
     if (data?.data && Array.isArray(data.data.items) && data.data.items.length > 0) {
       return {
-        items: data.data.items.map(normalizeGuide),
+        items: data.data.items
+          .map(parseGuide)
+          .filter((guide: PropertyGuide | null): guide is PropertyGuide => guide !== null),
         total: data.data.total ?? data.data.items.length,
         page: data.data.page ?? params.page ?? 1,
         limit: data.data.limit ?? params.limit ?? 10,
@@ -190,16 +266,17 @@ export async function fetchPropertyGuideBySlug(
 ): Promise<PropertyGuide | null> {
   if (!slug) return null;
 
-  try {
-    const { data } = await apiClient.get<ApiResponse<any>>(`/v1/guides/${slug}`, {
-      timeout: 5000,
-    });
+  if (GUIDES_API_ENABLED) {
+    try {
+      const { data } = await apiClient.get<ApiResponse<any>>(`/v1/guides/${slug}`, {
+        timeout: 5000,
+      });
 
-    if (data?.data) {
-      return normalizeGuide(data.data);
+      const guide = parseGuide(data?.data);
+      if (guide) return guide;
+    } catch {
+      // Ignore and check curated fallback
     }
-  } catch {
-    // Ignore and check curated fallback
   }
 
   const fallback = CURATED_PROPERTY_GUIDES.find((g) => g.slug === slug);

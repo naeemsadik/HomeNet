@@ -1,4 +1,4 @@
-import { Bell, Menu, Search, X } from "lucide-react-native";
+import { Bell, Menu, Search, X } from "@/components/icons";
 import {
   Platform,
   Pressable,
@@ -11,6 +11,7 @@ import { AppLink } from "@/components/ui";
 import { ToggleViewButton } from "./ToggleViewButton";
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 
 export interface SellerTopHeaderProps {
   title?: string;
@@ -35,7 +36,7 @@ export interface SellerTopHeaderProps {
  *   - Right: Search input + Notification bell + "View site" quick link.
  */
 export function SellerTopHeader({
-  title = "Dashboard",
+  title,
   onPressMenu,
   searchQuery,
   onSearchQueryChange,
@@ -43,14 +44,16 @@ export function SellerTopHeader({
   showViewSite = true,
   hasUnreadNotifications = true,
 }: SellerTopHeaderProps) {
+  const { t } = useTranslation();
   const { isTablet } = useResponsive();
+  const displayTitle = title ?? t("seller.header.dashboard");
 
   return (
     <View style={[styles.header, isTablet ? styles.headerMobile : styles.headerDesktop]}>
       {/* 3-bar Hamburger Button: strictly for mobile / small screen devices */}
       {isTablet && (
         <Pressable
-          accessibilityLabel="Open navigation menu"
+          accessibilityLabel={t("seller.header.openMenuAria")}
           accessibilityRole="button"
           onPress={onPressMenu}
           style={({ pressed }) => [
@@ -66,7 +69,7 @@ export function SellerTopHeader({
       {/* Screen Title */}
       <View style={styles.titleContainer}>
         <Text numberOfLines={1} style={styles.headerTitle}>
-          {title}
+          {displayTitle}
         </Text>
       </View>
 
@@ -78,7 +81,7 @@ export function SellerTopHeader({
             <Search color="rgba(11,26,23,0.5)" size={16} />
             <TextInput
               onChangeText={onSearchQueryChange}
-              placeholder="Search listings…"
+              placeholder={t("seller.header.searchPlaceholder")}
               placeholderTextColor="rgba(11,26,23,0.5)"
               selectTextOnFocus
               style={styles.searchInput}
@@ -86,7 +89,7 @@ export function SellerTopHeader({
             />
             {Boolean(searchQuery && searchQuery.length > 0) && (
               <Pressable
-                accessibilityLabel="Clear search query"
+                accessibilityLabel={t("seller.header.clearSearchAria")}
                 accessibilityRole="button"
                 hitSlop={8}
                 onPress={() => onSearchQueryChange("")}
@@ -100,7 +103,7 @@ export function SellerTopHeader({
 
         {/* Notification Bell Button with orange badge */}
         <AppLink
-          accessibilityLabel="Notifications"
+          accessibilityLabel={t("seller.header.notificationsAria")}
           href="/notifications"
           style={[styles.iconCircleBtn, webPointer]}
         >

@@ -7,14 +7,16 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { X } from "lucide-react-native";
+import { X } from "@/components/icons";
+import { useTranslation } from "@/i18n";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
 import { useResponsive } from "@/hooks/useResponsive";
 import { AiFinderWorkflow } from "./AiFinderWorkflow";
 import { shadow, webPointer } from "@/theme";
 
 export function AiFinderModal() {
-  const { visible, close } = useAiFinderModalStore();
+  const { t } = useTranslation();
+  const { visible, close, initialPrompt } = useAiFinderModalStore();
   const { isPhone, width } = useResponsive();
 
   if (!visible) return null;
@@ -32,7 +34,7 @@ export function AiFinderModal() {
       <View style={styles.overlay}>
         {/* Backdrop clickable area with blur effect */}
         <Pressable
-          accessibilityLabel="Close AI search dialog"
+          accessibilityLabel={t("search.aiFinder.closeDialogAria")}
           onPress={close}
           style={styles.backdrop}
         />
@@ -47,7 +49,7 @@ export function AiFinderModal() {
         >
           {/* Floating Close Button positioned at the red mark (outside top-right) */}
           <Pressable
-            accessibilityLabel="Close AI search dialog"
+            accessibilityLabel={t("search.aiFinder.closeDialogAria")}
             accessibilityRole="button"
             onPress={close}
             style={({ pressed, hovered }: any) => [
@@ -68,7 +70,7 @@ export function AiFinderModal() {
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={true}
             >
-              <AiFinderWorkflow isModal onClose={close} />
+              <AiFinderWorkflow initialPrompt={initialPrompt} isModal onClose={close} />
             </ScrollView>
           </View>
         </View>

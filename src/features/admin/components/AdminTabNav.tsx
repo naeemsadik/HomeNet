@@ -1,14 +1,20 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Building2, MapPinned, Settings, ShieldCheck, Users } from "lucide-react-native";
+import { Bell, Building2, MapPinned, Settings, ShieldCheck, Users } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import type { UserRole } from "../types/admin";
 
-type AdminTab = "properties" | "users" | "roles" | "areas" | "settings";
+import { hasPermission, isAdmin } from "@/lib/permissions";
+
+import { LiveText } from "@/components/LiveText";
+
+type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
 
 interface AdminTabNavProps {
   active: AdminTab;
   onChange: (tab: AdminTab) => void;
   userRoles: UserRole[];
+  /** Counts shown beside a tab's label, e.g. unread notifications. */
+  badges?: Partial<Record<AdminTab, number>>;
 }
 
 const TABS: {
@@ -18,23 +24,19 @@ const TABS: {
   permissions?: string[];
 }[] = [
   { key: "properties", label: "Properties", icon: Building2, permissions: ["manage_properties", "moderate_listing", "review_verification"] },
+  // The API sends admin notifications to holders of moderate_listing. Not
+  // manage_properties: every buyer_seller account has that one.
+  { key: "notifications", label: "Notifications", icon: Bell, permissions: ["moderate_listing"] },
   { key: "users", label: "Users", icon: Users, permissions: ["manage_users"] },
   { key: "roles", label: "Roles", icon: ShieldCheck, permissions: ["view_roles", "manage_roles"] },
   { key: "areas", label: "Areas", icon: MapPinned, permissions: ["manage_areas"] },
   { key: "settings", label: "Settings", icon: Settings },
 ];
 
-function hasPermission(userRoles: UserRole[], permission: string): boolean {
-  return userRoles.some((ur) =>
-    ur.role.role_permissions?.some((rp) => rp.permission.name === permission),
-  );
-}
+import { useTranslation } from "@/i18n";
 
-function isAdmin(userRoles: UserRole[]): boolean {
-  return userRoles.some((ur) => ur.role.name === "admin" || ur.role.name === "superadmin");
-}
-
-export function AdminTabNav({ active, onChange, userRoles }: AdminTabNavProps) {
+export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNavProps) {
+  const { t } = useTranslation();
   const visibleTabs = TABS.filter((tab) => {
     if (!tab.permissions) return true;
     return isAdmin(userRoles) || tab.permissions.some((permission) => hasPermission(userRoles, permission));
@@ -45,19 +47,32 @@ export function AdminTabNav({ active, onChange, userRoles }: AdminTabNavProps) {
       {visibleTabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = active === tab.key;
+        const count = badges?.[tab.key] ?? 0;
+        const label = t(`admin.tabs.${tab.key}` as any) || tab.label;
         return (
           <Pressable
             key={tab.key}
             onPress={() => onChange(tab.key)}
             style={[styles.tab, isActive && styles.tabActive]}
-            accessibilityLabel={`${tab.label} tab`}
+            accessibilityLabel={
+              count > 0
+                ? t("admin.tabs.tabAriaWithCount", { name: label, count })
+                : t("admin.tabs.tabAria", { name: label })
+            }
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
           >
-            <Icon color={isActive ? colorTokens.textInverse : colorTokens.textSecondary} size={16} />
+            <Icon color={isActive ? colorTokens.onBrand : colorTokens.textSecondary} size={16} />
             <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
-              {tab.label}
+              {label}
             </Text>
+            {count > 0 ? (
+              <View style={[styles.count, isActive && styles.countActive]}>
+                <LiveText style={[styles.countText, isActive && styles.countTextActive]}>
+                  {count > 99 ? "99+" : count}
+                </LiveText>
+              </View>
+            ) : null}
           </Pressable>
         );
       })}
@@ -66,6 +81,22 @@ export function AdminTabNav({ active, onChange, userRoles }: AdminTabNavProps) {
 }
 
 const styles = StyleSheet.create({
+  count: {
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colorTokens.errorText,
+  },
+  countActive: { backgroundColor: colorTokens.surface },
+  countText: {
+    color: colorTokens.onDanger,
+    fontFamily: fontTokens.bold,
+    fontSize: 10.5,
+  },
+  countTextActive: { color: colorTokens.errorText },
   container: {
     flexDirection: "row",
     gap: 6,
@@ -92,6 +123,6 @@ const styles = StyleSheet.create({
     color: colorTokens.textSecondary,
   },
   tabTextActive: {
-    color: colorTokens.textInverse,
+    color: colorTokens.onBrand,
   },
 });

@@ -10,26 +10,32 @@ import { AdminPropertiesScreen } from "./AdminPropertiesScreen";
 import { AdminUsersScreen } from "./AdminUsersScreen";
 import { AdminRolesScreen } from "./AdminRolesScreen";
 import { AdminAreasScreen } from "./AdminAreasScreen";
-import { hasAnyAdminPermission } from "@/lib/permissions";
+import { hasAnyAdminPermission, isAdmin } from "@/lib/permissions";
+import { NotificationList } from "@/features/notification/components/NotificationList";
+import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
+import { useTranslation } from "@/i18n";
 
-type AdminTab = "properties" | "users" | "roles" | "areas" | "settings";
+type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
 
 export function AdminDashboardScreen() {
+  const { t } = useTranslation();
   const { isPhone, contentPadding } = useResponsive();
   const userRoles = useAuthStore((s) => s.userRoles);
   const [activeTab, setActiveTab] = useState<AdminTab>("properties");
+  const { data: adminUnread } = useUnreadCount("admin");
 
   const hasAccess = hasAnyAdminPermission(userRoles);
-  const isFullAdmin = userRoles.some((userRole) => ["admin", "superadmin"].includes(userRole.role.name));
+  const isFullAdmin = isAdmin(userRoles);
   const permissionNames = new Set(
     userRoles.flatMap((userRole) =>
       userRole.role.role_permissions?.map((rolePermission) => rolePermission.permission.name) ?? [],
     ),
   );
   const allowedTabs: AdminTab[] = isFullAdmin
-    ? ["properties", "users", "roles", "areas", "settings"]
+    ? ["properties", "notifications", "users", "roles", "areas", "settings"]
     : [
         ...(["manage_properties", "moderate_listing", "review_verification"].some((name) => permissionNames.has(name)) ? ["properties" as const] : []),
+        ...(permissionNames.has("moderate_listing") ? ["notifications" as const] : []),
         ...(permissionNames.has("manage_users") ? ["users" as const] : []),
         ...(["view_roles", "manage_roles"].some((name) => permissionNames.has(name)) ? ["roles" as const] : []),
         ...(permissionNames.has("manage_areas") ? ["areas" as const] : []),
@@ -41,9 +47,9 @@ export function AdminDashboardScreen() {
     return (
       <AppChrome active="home">
         <View style={styles.denied}>
-          <Text style={styles.deniedTitle}>Access Denied</Text>
+          <Text style={styles.deniedTitle}>{t("admin.accessDenied")}</Text>
           <Text style={styles.deniedText}>
-            You don't have permission to access the admin dashboard.
+            {t("admin.accessDeniedDesc")}
           </Text>
         </View>
       </AppChrome>
@@ -57,21 +63,27 @@ export function AdminDashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerSection}>
-          <Eyebrow>Admin</Eyebrow>
-          <Text style={styles.title}>Admin Dashboard</Text>
-          <Text style={styles.subtitle}>Manage properties, users, and roles.</Text>
+          <Eyebrow>{t("admin.eyebrow")}</Eyebrow>
+          <Text style={styles.title}>{t("admin.dashboardTitle")}</Text>
+          <Text style={styles.subtitle}>{t("admin.dashboardSubtitle")}</Text>
         </View>
 
-        <AdminTabNav active={visibleTab} onChange={setActiveTab} userRoles={userRoles} />
+        <AdminTabNav
+          active={visibleTab}
+          onChange={setActiveTab}
+          userRoles={userRoles}
+          badges={{ notifications: adminUnread?.data?.count ?? 0 }}
+        />
 
         <View style={styles.tabContent}>
           {visibleTab === "properties" && <AdminPropertiesScreen />}
+          {visibleTab === "notifications" && <NotificationList audience="admin" />}
           {visibleTab === "users" && <AdminUsersScreen />}
           {visibleTab === "roles" && <AdminRolesScreen />}
           {visibleTab === "areas" && <AdminAreasScreen />}
           {visibleTab === "settings" && (
             <View style={styles.settingsPlaceholder}>
-              <Text style={styles.settingsText}>Settings coming soon.</Text>
+              <Text style={styles.settingsText}>{t("admin.settingsComingSoon")}</Text>
             </View>
           )}
         </View>

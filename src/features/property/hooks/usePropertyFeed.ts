@@ -3,9 +3,10 @@ import { getProperties } from "@/services/propertyApi";
 import { toApiError } from "@/services/apiClient";
 import type { PropertyFilters } from "../types/property";
 
-export function usePropertyFeed(filters: PropertyFilters) {
+export function usePropertyFeed(filters: PropertyFilters, options: { enabled?: boolean } = {}) {
   const query = useInfiniteQuery({
     queryKey: ["properties", filters],
+    enabled: options.enabled ?? true,
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
       getProperties({ ...filters, page: pageParam, limit: filters.limit ?? 20 }),
@@ -17,6 +18,7 @@ export function usePropertyFeed(filters: PropertyFilters) {
   });
 
   return {
+    total: query.data?.pages[0]?.data?.total,
     properties: query.data?.pages.flatMap((page) => page.data?.items ?? []) ?? [],
     // isPending stays true from mount until the first settle, including between
     // retry attempts, so an unresolved feed can never look like an empty one.

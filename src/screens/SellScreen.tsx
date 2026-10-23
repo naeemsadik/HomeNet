@@ -10,62 +10,72 @@ import {
   ShieldCheck,
   Sparkles,
   type LucideIcon,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, AppLink, Eyebrow, FeatureCard, SectionHeader, SelectField } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, shadow } from "@/theme";
+import { colorTokens, colors, fonts, shadow } from "@/theme";
+
+import { useTranslation } from "@/i18n";
 
 export function SellScreen() {
+  const { t } = useTranslation();
   const { isPhone, isTablet, isCompact } = useResponsive();
   const [address, setAddress] = useState("");
   const [propertyType, setPropertyType] = useState("Apartment");
   const [submitted, setSubmitted] = useState(false);
 
+  const propertyTypeOptions = [
+    t("sellScreen.propertyTypes.apartment"),
+    t("sellScreen.propertyTypes.house"),
+    t("sellScreen.propertyTypes.condo"),
+    t("sellScreen.propertyTypes.commercial"),
+  ];
+
   return (
     <AppChrome active="sell">
       <LinearGradient colors={["#075C46", "#086B55", "#365FB7"]} end={{ x: 1, y: 0 }} style={[styles.hero, isTablet && styles.heroTablet, isPhone && styles.heroPhone]}>
         <View style={styles.heroCopyWrap}>
-          <View style={styles.heroKicker}><Sparkles color="rgba(255,255,255,0.82)" size={14} /><Eyebrow light>AI-assisted selling</Eyebrow></View>
-          <Text style={[styles.heroTitle, isPhone && styles.heroTitlePhone]}>Sell with a price buyers can trust.</Text>
-          <Text style={styles.heroCopy}>Get a clear valuation, reach verified buyers, and manage every step from one place.</Text>
+          <View style={styles.heroKicker}><Sparkles color="rgba(255,255,255,0.82)" size={14} /><Eyebrow light>{t("sellScreen.kicker")}</Eyebrow></View>
+          <Text style={[styles.heroTitle, isPhone && styles.heroTitlePhone]}>{t("sellScreen.heroTitle")}</Text>
+          <Text style={styles.heroCopy}>{t("sellScreen.heroCopy")}</Text>
           <View style={styles.proofRow}>
-            <View style={styles.proofItem}><ShieldCheck color="rgba(255,255,255,0.86)" size={16} /><Text style={styles.proofText}>Verified inquiries</Text></View>
-            <View style={styles.proofItem}><Clock3 color="rgba(255,255,255,0.86)" size={16} /><Text style={styles.proofText}>Faster shortlists</Text></View>
+            <View style={styles.proofItem}><ShieldCheck color="rgba(255,255,255,0.86)" size={16} /><Text style={styles.proofText}>{t("sellScreen.verifiedInquiries")}</Text></View>
+            <View style={styles.proofItem}><Clock3 color="rgba(255,255,255,0.86)" size={16} /><Text style={styles.proofText}>{t("sellScreen.fasterShortlists")}</Text></View>
           </View>
         </View>
         <View style={[styles.valuationCard, isPhone && styles.valuationCardPhone]}>
           <View style={styles.valuationHead}>
-            <View style={styles.valuationIcon}><BarChart3 color={colors.white} size={20} /></View>
-            <View><Text style={styles.valuationTitle}>Start with a free valuation</Text><Text style={styles.valuationCopy}>See a data-backed range in under a minute.</Text></View>
+            <View style={styles.valuationIcon}><BarChart3 color={colorTokens.onBrand} size={20} /></View>
+            <View><Text style={styles.valuationTitle}>{t("sellScreen.valuationTitle")}</Text><Text style={styles.valuationCopy}>{t("sellScreen.valuationCopy")}</Text></View>
           </View>
           <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Property address</Text>
-            <View style={styles.inputShell}><MapPin color={colors.green} size={16} /><TextInput onChangeText={setAddress} placeholder="Area, road, or building" placeholderTextColor="#899790" style={styles.input} value={address} /></View>
+            <Text style={styles.formLabel}>{t("sellScreen.addressLabel")}</Text>
+            <View style={styles.inputShell}><MapPin color={colors.green} size={16} /><TextInput onChangeText={setAddress} placeholder={t("sellScreen.addressPlaceholder")} placeholderTextColor="#899790" style={styles.input} value={address} /></View>
           </View>
           <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Property type</Text>
-            <View style={styles.inputShell}><Building2 color={colors.green} size={16} /><SelectField onChange={setPropertyType} options={["Apartment", "House", "Condo", "Commercial"]} style={styles.propertySelect} value={propertyType} /></View>
+            <Text style={styles.formLabel}>{t("sellScreen.propertyTypeLabel")}</Text>
+            <View style={styles.inputShell}><Building2 color={colors.green} size={16} /><SelectField onChange={setPropertyType} options={propertyTypeOptions} style={styles.propertySelect} value={propertyType} /></View>
           </View>
           <AppButton
-            label="Get my estimate"
+            label={t("sellScreen.getEstimate")}
             onPress={() => setSubmitted(true)}
             trailingIcon={ArrowRight}
             style={styles.submitButton}
           />
-          {submitted ? <View style={styles.valuationResult}><CheckCircle2 color={colors.greenDark} size={15} /><Text style={styles.valuationResultText}>We found recent matches near {address || "your property"}. Your valuation is ready for review.</Text></View> : null}
+          {submitted ? <View style={styles.valuationResult}><CheckCircle2 color={colors.greenDark} size={15} /><Text style={styles.valuationResultText}>{t("sellScreen.valuationResult", { address: address || t("sellScreen.defaultProperty") })}</Text></View> : null}
         </View>
       </LinearGradient>
 
       <View style={styles.processSection}>
-        <SectionHeader eyebrow="A clearer path to sold" right={<View />} title="How HomeNet helps" />
+        <SectionHeader eyebrow={t("sellScreen.processEyebrow")} right={<View />} title={t("sellScreen.processTitle")} />
         <View style={[styles.stepGrid, isPhone && styles.stepGridPhone]}>
           {[
-            [BarChart3, "Price with evidence", "Compare recent sales, location demand, and property condition."],
-            [BadgeCheck, "Publish a verified listing", "Present complete details that serious buyers can rely on."],
-            [ShieldCheck, "Meet qualified buyers", "Organize viewings and offers from identity-checked prospects."],
+            [BarChart3, t("sellScreen.step1Title"), t("sellScreen.step1Copy")],
+            [BadgeCheck, t("sellScreen.step2Title"), t("sellScreen.step2Copy")],
+            [ShieldCheck, t("sellScreen.step3Title"), t("sellScreen.step3Copy")],
           ].map(([Icon, title, copy], index) => (
             <FeatureCard
               key={title as string}
@@ -86,16 +96,16 @@ export function SellScreen() {
 
       <LinearGradient colors={["#EEF8F3", "#EFF3FB"]} end={{ x: 1, y: 0 }} style={[styles.insightCard, isCompact && styles.insightCardCompact, isPhone && styles.insightCardPhone]}>
         <View style={styles.insightCopyWrap}>
-          <Eyebrow style={styles.insightEyebrow}>Seller intelligence</Eyebrow>
-          <Text style={styles.insightTitle}>Know what is moving in your neighborhood</Text>
-          <Text style={styles.insightCopy}>Track comparable listings, buyer interest, and average time on market before choosing your launch price.</Text>
-          <AppLink href="/market" style={styles.insightLink}><Text style={styles.insightLinkText}>Open market insights</Text><ArrowRight color={colors.green} size={15} /></AppLink>
+          <Eyebrow style={styles.insightEyebrow}>{t("sellScreen.intelEyebrow")}</Eyebrow>
+          <Text style={styles.insightTitle}>{t("sellScreen.intelTitle")}</Text>
+          <Text style={styles.insightCopy}>{t("sellScreen.intelCopy")}</Text>
+          <AppLink href="/market" style={styles.insightLink}><Text style={styles.insightLinkText}>{t("sellScreen.openMarket")}</Text><ArrowRight color={colors.green} size={15} /></AppLink>
         </View>
         <View style={[styles.stats, isPhone && styles.statsPhone]}>
           {[
-            ["Listing fee", "0 BDT", "No commission, ever"],
-            ["Verification", "Required", "Before any listing goes live"],
-            ["Owner contact", "Direct", "No broker in between"],
+            [t("sellScreen.statFee"), t("sellScreen.statFeeVal"), t("sellScreen.statFeeSub")],
+            [t("sellScreen.statVerif"), t("sellScreen.statVerifVal"), t("sellScreen.statVerifSub")],
+            [t("sellScreen.statContact"), t("sellScreen.statContactVal"), t("sellScreen.statContactSub")],
           ].map(([label, value, detail]) => <View key={label} style={[styles.statCard, isPhone && styles.statCardPhone]}><Text style={styles.statLabel}>{label}</Text><Text style={styles.statValue}>{value}</Text><Text style={styles.statDetail}>{detail}</Text></View>)}
         </View>
       </LinearGradient>

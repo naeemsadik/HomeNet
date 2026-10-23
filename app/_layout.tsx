@@ -1,55 +1,34 @@
+// First, so production is silent before anything else can log.
+import "@/lib/productionConsole";
 import { useEffect } from "react";
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_800ExtraBold,
-} from "@expo-google-fonts/inter";
-import {
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold,
-  PlusJakartaSans_800ExtraBold,
-} from "@expo-google-fonts/plus-jakarta-sans";
 import { useFonts } from "expo-font";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthModal } from "@/components/AuthModal";
+import { ToastHost } from "@/components/ToastHost";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens } from "@/theme";
-import { ensureGoogleTranslateScript, shouldLoadTranslateOnBoot } from "@/utils/language";
+import { appFonts } from "@/theme/appFonts";
+import { restoreSavedLanguage } from "@/i18n";
 import { PageMeta } from "@/components/PageMeta";
+import { queryClient } from "@/lib/queryClient";
+import { installDomGuard } from "@/lib/domGuard";
+
+// Before React renders: browser translation/extensions might rewrite text nodes.
+installDomGuard();
 
 // Keyboard focus ring. Not colorTokens.primary (#04cf92), which sits at 2.03:1
 // on white and fails the 3:1 WCAG 1.4.11 minimum for a focus indicator.
 const FOCUS_RING_COLOR = colorTokens.primaryOnLight;
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      staleTime: 5 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
-    },
-  },
-});
 
 export default function RootLayout() {
-  const [loaded] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    Inter_800ExtraBold,
-    PlusJakartaSans_600SemiBold,
-    PlusJakartaSans_700Bold,
-    PlusJakartaSans_800ExtraBold,
-  });
+  // Latin subsets with font-display: swap on web; full files on native.
+  const [loaded] = useFonts(appFonts);
 
   useEffect(() => {
     if (typeof document !== "undefined") {
@@ -77,27 +56,10 @@ export default function RootLayout() {
         `;
         document.head.appendChild(style);
       }
-
-      // Self-XSS console warning (Facebook-style)
-      console.log(
-        "%cStop!",
-        "color: red; font-size: 60px; font-weight: bold; text-shadow: 2px 2px 0 rgba(0,0,0,0.2);",
-      );
-      console.log(
-        "%cThis is a browser feature intended for developers. If someone told you to copy and paste something here to enable a HomeNet feature or \"hack\" someone's account, it's a scam and will give them access to your HomeNet account.",
-        "font-size: 16px; color: #FFFFFF;",
-      );
-      console.log(
-        "%cSee https://homenetbd.com/self-xss for more information.",
-        "font-size: 16px; color: #3b82f6;",
-      );
-
-      // Only visitors who already read in Bangla pay for the translate
-      // widget up front; for everyone else it loads on first use.
-      if (shouldLoadTranslateOnBoot()) {
-        ensureGoogleTranslateScript();
-      }
     }
+
+    // Browser and phone alike: the language the user picked last time.
+    void restoreSavedLanguage();
 
     setUnauthorizedHandler(() => {
       useAuthStore.getState().resetSession();
@@ -112,16 +74,19 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        {/* Default document title. Routes that render their own PageMeta
+        <ErrorBoundary>
+          {/* Default document title. Routes that render their own PageMeta
             override this; without it, any route lacking one would ship the
             empty <title> that Expo Router emits by default. */}
-        <PageMeta
-          title="HomeNet — Verified Property Listings in Bangladesh"
-          description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
-        />
-        <StatusBar style="dark" />
-        <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
-        <AuthModal />
+          <PageMeta
+            title="HomeNet BD — Verified Property Listings in Bangladesh"
+            description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
+          />
+          <StatusBar style="dark" />
+          <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
+          <AuthModal />
+          <ToastHost />
+        </ErrorBoundary>
       </SafeAreaProvider>
     </QueryClientProvider>
   );

@@ -2,30 +2,37 @@ import {
   ArrowLeft,
   BookOpen,
   ExternalLink,
-  ImageOff,
   RotateCcw,
   Search,
   X,
-} from "lucide-react-native";
-import { useEffect, useMemo, useState } from "react";
+} from "@/components/icons";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
-  Linking,
-  Platform,
+  FlatList,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { router } from "expo-router";
+import { openExternalUrl } from "@/lib/safeUrl";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { usePropertyGuides } from "../hooks/usePropertyGuides";
 import type { PropertyGuide } from "../types/news";
 import { GUIDE_FALLBACK_IMAGE, resolveGuideImage } from "../utils/guideImageStrategy";
+import {
+  formatReadTime,
+  getGuideCategoryLabel,
+  getLocalizedGuideExcerpt,
+  getLocalizedGuideTags,
+  getLocalizedGuideTitle,
+} from "../utils/guideTranslators";
 
 type ArchiveTab = "All" | "Market News" | "Legal & Docs" | "Buyer & Seller";
 const ARCHIVE_TABS: ArchiveTab[] = [
@@ -35,8 +42,15 @@ const ARCHIVE_TABS: ArchiveTab[] = [
   "Buyer & Seller",
 ];
 
-function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
+const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
+  const { t, language } = useTranslation();
   const isRss = guide.sourceType === "rss";
+
+  const title = getLocalizedGuideTitle(guide, language);
+  const excerpt = getLocalizedGuideExcerpt(guide, language);
+  const categoryLabel = getGuideCategoryLabel(guide.category, t);
+  const readTimeLabel = formatReadTime(guide.readTime, t, language);
+  const tags = getLocalizedGuideTags(guide, language);
 
   const resolvedUrl = useMemo(
     () => guide.imageUrl || resolveGuideImage(guide),
@@ -48,29 +62,28 @@ function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
     setImgUri(resolvedUrl);
   }, [resolvedUrl]);
 
-  const handleImageError = () => {
+  const handleImageError = useCallback(() => {
     if (imgUri !== GUIDE_FALLBACK_IMAGE) {
       setImgUri(GUIDE_FALLBACK_IMAGE);
     }
-  };
+  }, [imgUri]);
 
-  const handlePress = () => {
-    if (isRss && (guide.sourceUrl || guide.href)) {
-      const targetUrl = guide.sourceUrl || guide.href;
-      if (Platform.OS === "web" && typeof window !== "undefined") {
-        window.open(targetUrl, "_blank", "noopener,noreferrer");
-      } else {
-        void Linking.openURL(targetUrl);
-      }
+  const handlePress = useCallback(() => {
+    if (isRss) {
+      openExternalUrl(guide.sourceUrl || guide.href);
       return;
     }
     router.push(guide.href as never);
-  };
+  }, [isRss, guide.sourceUrl, guide.href]);
+
+  const sourceLabel = isRss
+    ? guide.sourceName || t("guides.externalNews")
+    : t("guides.homeNetGuide");
 
   return (
     <Pressable
       accessibilityRole="link"
-      accessibilityLabel={`${isRss ? guide.sourceName || "External News" : "HomeNet Guide"} - ${guide.title}`}
+      accessibilityLabel={`${sourceLabel} - ${title}`}
       onPress={handlePress}
       style={({ pressed, hovered }: any) => [
         styles.card,
@@ -83,7 +96,9 @@ function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
         <Image
           source={{ uri: imgUri }}
           style={styles.cardImage}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          transition={200}
           onError={handleImageError}
         />
       </View>
@@ -93,34 +108,34 @@ function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
           {isRss ? (
             <View style={styles.rssBadge}>
               <Text numberOfLines={1} style={styles.rssBadgeText}>
-                {guide.sourceName || "Market News"}
+                {guide.sourceName || t("guides.marketNewsSource")}
               </Text>
               <ExternalLink color="#1D4ED8" size={11} strokeWidth={2.2} />
             </View>
           ) : (
             <View style={styles.homeNetBadge}>
-              <Text style={styles.homeNetBadgeText}>HomeNet Guide</Text>
+              <Text style={styles.homeNetBadgeText}>{t("guides.homeNetGuide")}</Text>
             </View>
           )}
 
           <View style={styles.categoryPill}>
-            <Text style={styles.categoryText}>{guide.category}</Text>
+            <Text style={styles.categoryText}>{categoryLabel}</Text>
           </View>
 
-          <Text style={styles.readTimeText}>{guide.readTime}</Text>
+          <Text style={styles.readTimeText}>{readTimeLabel}</Text>
         </View>
 
         <Text numberOfLines={2} style={styles.cardTitle}>
-          {guide.title}
+          {title}
         </Text>
 
         <Text numberOfLines={3} style={styles.cardExcerpt}>
-          {guide.excerpt}
+          {excerpt}
         </Text>
 
-        {guide.tags && guide.tags.length > 0 ? (
+        {tags && tags.length > 0 ? (
           <View style={styles.tagsRow}>
-            {guide.tags.slice(0, 3).map((tag) => (
+            {tags.slice(0, 3).map((tag) => (
               <View key={tag} style={styles.tagChip}>
                 <Text style={styles.tagText}>#{tag}</Text>
               </View>
@@ -130,10 +145,11 @@ function ArchiveGuideCard({ guide }: { guide: PropertyGuide }) {
       </View>
     </Pressable>
   );
-}
+});
 
 export function GuidesArchiveScreen() {
-  const { isPhone, isTablet, isDesktop } = useResponsive();
+  const { t } = useTranslation();
+  const { isPhone, isTablet, width } = useResponsive();
   const [activeTab, setActiveTab] = useState<ArchiveTab>("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -171,14 +187,36 @@ export function GuidesArchiveScreen() {
       result = result.filter(
         (g) =>
           g.title.toLowerCase().includes(q) ||
+          (g.titleBn && g.titleBn.toLowerCase().includes(q)) ||
           g.excerpt.toLowerCase().includes(q) ||
+          (g.excerptBn && g.excerptBn.toLowerCase().includes(q)) ||
           g.tags?.some((t) => t.toLowerCase().includes(q)) ||
+          g.tagsBn?.some((t) => t.toLowerCase().includes(q)) ||
           g.category.toLowerCase().includes(q),
       );
     }
 
     return result;
   }, [allGuides, activeTab, searchQuery]);
+
+  const numColumns = isPhone ? 1 : width < 1000 ? 2 : 3;
+
+  const renderGuideItem = useCallback(
+    ({ item }: { item: PropertyGuide }) => (
+      <View
+        style={[
+          styles.gridItem,
+          isTablet && styles.gridItemTablet,
+          isPhone && styles.gridItemPhone,
+        ]}
+      >
+        <ArchiveGuideCard guide={item} />
+      </View>
+    ),
+    [isTablet, isPhone],
+  );
+
+  const keyExtractor = useCallback((item: PropertyGuide) => item.id, []);
 
   return (
     <AppChrome active="home">
@@ -187,7 +225,7 @@ export function GuidesArchiveScreen() {
         <View style={styles.header}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Back to Home"
+            accessibilityLabel={t("guides.archive.backToHomeAria")}
             onPress={() => router.push("/" as never)}
             style={({ hovered }: any) => [
               styles.backLink,
@@ -196,16 +234,15 @@ export function GuidesArchiveScreen() {
             ]}
           >
             <ArrowLeft color={colors.greenOnLight} size={16} />
-            <Text style={styles.backLinkText}>Home</Text>
+            <Text style={styles.backLinkText}>{t("guides.archive.home")}</Text>
           </Pressable>
 
-          <Text style={styles.eyebrow}>HomeNet Knowledge Hub</Text>
+          <Text style={styles.eyebrow}>{t("guides.archive.eyebrow")}</Text>
           <Text style={[styles.title, isPhone && styles.titlePhone]}>
-            Bangladesh Property Guides & News
+            {t("guides.archive.title")}
           </Text>
           <Text style={[styles.subtitle, isPhone && styles.subtitlePhone]}>
-            Practical advice for buyers, sellers, and landlords in Bangladesh —
-            from Namzari and Khatian verification to latest Dhaka market updates.
+            {t("guides.archive.subtitle")}
           </Text>
         </View>
 
@@ -216,7 +253,7 @@ export function GuidesArchiveScreen() {
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
-              placeholder="Search guides, topics (e.g. Namzari, Katha, Stamp duty)..."
+              placeholder={t("guides.archive.searchPlaceholder")}
               placeholderTextColor="#899790"
               style={styles.searchInput}
               clearButtonMode="while-editing"
@@ -225,7 +262,7 @@ export function GuidesArchiveScreen() {
               <Pressable
                 onPress={() => setSearchQuery("")}
                 style={[styles.clearBtn, webPointer]}
-                accessibilityLabel="Clear search"
+                accessibilityLabel={t("guides.archive.clearSearchAria")}
               >
                 <X color={colors.muted} size={16} />
               </Pressable>
@@ -235,6 +272,14 @@ export function GuidesArchiveScreen() {
           <View style={styles.tabRow}>
             {ARCHIVE_TABS.map((tab) => {
               const isActive = activeTab === tab;
+              const tabLabel =
+                tab === "All"
+                  ? t("guides.tabs.all")
+                  : tab === "Market News"
+                  ? t("guides.tabs.marketNews")
+                  : tab === "Legal & Docs"
+                  ? t("guides.tabs.legalDocs")
+                  : t("guides.tabs.buyerSeller");
               return (
                 <Pressable
                   key={tab}
@@ -246,7 +291,7 @@ export function GuidesArchiveScreen() {
                     webPointer,
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel={`Filter by ${tab}`}
+                  accessibilityLabel={t("guides.archive.filterByTabAria", { tab: tabLabel })}
                   accessibilityState={{ selected: isActive }}
                 >
                   <Text
@@ -255,7 +300,7 @@ export function GuidesArchiveScreen() {
                       isActive && styles.tabChipTextActive,
                     ]}
                   >
-                    {tab}
+                    {tabLabel}
                   </Text>
                 </Pressable>
               );
@@ -267,20 +312,20 @@ export function GuidesArchiveScreen() {
         {isLoading ? (
           <View style={styles.stateContainer}>
             <ActivityIndicator color={colors.green} size="large" />
-            <Text style={styles.stateText}>Loading guides and market news...</Text>
+            <Text style={styles.stateText}>{t("guides.archive.loading")}</Text>
           </View>
         ) : isError ? (
           <View style={styles.errorPanel}>
-            <Text style={styles.errorTitle}>Could not load guides</Text>
+            <Text style={styles.errorTitle}>{t("guides.archive.errorTitle")}</Text>
             <Text style={styles.errorCopy}>
-              Something went wrong while retrieving property insights.
+              {t("guides.archive.errorCopy")}
             </Text>
             <Pressable
               onPress={() => void refetch()}
               style={[styles.retryBtn, webPointer]}
             >
               <RotateCcw color={colors.white} size={15} />
-              <Text style={styles.retryBtnText}>Retry</Text>
+              <Text style={styles.retryBtnText}>{t("guides.archive.retry")}</Text>
             </Pressable>
           </View>
         ) : filteredGuides.length === 0 ? (
@@ -288,11 +333,11 @@ export function GuidesArchiveScreen() {
             <View style={styles.emptyIconWell}>
               <BookOpen color={colors.greenOnLight} size={24} />
             </View>
-            <Text style={styles.emptyTitle}>No matching guides found</Text>
+            <Text style={styles.emptyTitle}>{t("guides.archive.emptyTitle")}</Text>
             <Text style={styles.emptyCopy}>
               {searchQuery
-                ? `No articles matched "${searchQuery}". Try a different search term or category.`
-                : "No articles are available in this category yet."}
+                ? t("guides.archive.emptyWithQuery", { query: searchQuery })
+                : t("guides.archive.emptyNoQuery")}
             </Text>
             <Pressable
               onPress={() => {
@@ -301,30 +346,23 @@ export function GuidesArchiveScreen() {
               }}
               style={[styles.resetBtn, webPointer]}
             >
-              <Text style={styles.resetBtnText}>Clear filters</Text>
+              <Text style={styles.resetBtnText}>{t("guides.archive.clearFilters")}</Text>
             </Pressable>
           </View>
         ) : (
-          <View
-            style={[
-              styles.grid,
-              isTablet && styles.gridTablet,
-              isPhone && styles.gridPhone,
-            ]}
-          >
-            {filteredGuides.map((guide) => (
-              <View
-                key={guide.id}
-                style={[
-                  styles.gridItem,
-                  isTablet && styles.gridItemTablet,
-                  isPhone && styles.gridItemPhone,
-                ]}
-              >
-                <ArchiveGuideCard guide={guide} />
-              </View>
-            ))}
-          </View>
+          <FlatList
+            key={`guides-grid-${numColumns}`}
+            data={filteredGuides}
+            renderItem={renderGuideItem}
+            keyExtractor={keyExtractor}
+            numColumns={numColumns}
+            initialNumToRender={6}
+            maxToRenderPerBatch={8}
+            windowSize={5}
+            scrollEnabled={false}
+            columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
+            contentContainerStyle={styles.listContainer}
+          />
         )}
       </View>
     </AppChrome>
@@ -334,7 +372,7 @@ export function GuidesArchiveScreen() {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    maxWidth: 1140,
+    maxWidth: 1320,
     alignSelf: "center",
     paddingTop: 32,
     paddingBottom: 72,
@@ -374,12 +412,12 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
   },
   titlePhone: {
-    fontSize: 26,
+    fontSize: 25,
     lineHeight: 32,
-    letterSpacing: -0.6,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    maxWidth: 720,
+    maxWidth: 760,
     color: colors.muted,
     fontFamily: fonts.regular,
     fontSize: 15.5,
@@ -450,28 +488,23 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
   },
 
-  /* Grid Layout */
-  grid: {
+  /* FlatList Grid Layout */
+  listContainer: {
+    width: "100%",
+  },
+  gridRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 20,
-  },
-  gridTablet: {
-    gap: 16,
-  },
-  gridPhone: {
-    flexDirection: "column",
-    gap: 16,
+    gap: 22,
+    marginBottom: 22,
   },
   gridItem: {
-    width: "calc(33.333% - 14px)",
-  } as any,
-  gridItemTablet: {
-    width: "calc(50% - 8px)",
-  } as any,
+    flex: 1,
+  },
+  gridItemTablet: {},
   gridItemPhone: {
     width: "100%",
-  } as any,
+    marginBottom: 16,
+  },
 
   /* Card */
   card: {
@@ -493,18 +526,12 @@ const styles = StyleSheet.create({
   },
   cardThumb: {
     width: "100%",
-    height: 170,
+    height: 190,
     backgroundColor: colors.soft,
   },
   cardImage: {
     width: "100%",
     height: "100%",
-  },
-  cardPlaceholder: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.soft,
   },
   cardBody: {
     padding: 16,

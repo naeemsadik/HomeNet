@@ -1,18 +1,38 @@
-import { useEffect, useState } from "react";
-import { useWindowDimensions } from "react-native";
+import { useSyncExternalStore } from "react";
+import { Dimensions } from "react-native";
+
+/**
+ * The size every page is pre-rendered at (expo export has no window). While
+ * React hydrates that HTML, the first render must use the same size, or phones
+ * produce different markup and React throws "Minified React error #418" and
+ * discards the whole pre-rendered page.
+ *
+ * useSyncExternalStore does this by design: it renders with the server
+ * snapshot while hydrating, then re-renders with the real window size.
+ * Components that mount later, and native apps, get the real size at once.
+ */
+const STATIC_RENDER_WIDTH = 1200;
+const STATIC_RENDER_HEIGHT = 800;
+
+function subscribe(onChange: () => void) {
+  const subscription = Dimensions.addEventListener("change", onChange);
+  return () => subscription.remove();
+}
+
+const getWidth = () => Dimensions.get("window").width;
+const getHeight = () => Dimensions.get("window").height;
+const getStaticWidth = () => STATIC_RENDER_WIDTH;
+const getStaticHeight = () => STATIC_RENDER_HEIGHT;
+
+/** Window size, hydration-safe. Prefer this to useWindowDimensions in anything that renders on web. */
+export function useWindowSize() {
+  const width = useSyncExternalStore(subscribe, getWidth, getStaticWidth);
+  const height = useSyncExternalStore(subscribe, getHeight, getStaticHeight);
+  return { width, height };
+}
 
 export function useResponsive() {
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // On client web, window dimensions are available immediately so responsive states are accurate on initial render
-  const isClientWeb = typeof window !== "undefined";
-  const width = isClientWeb ? windowWidth : (mounted ? windowWidth : 1200);
-  const height = isClientWeb ? windowHeight : (mounted ? windowHeight : 800);
+  const { width, height } = useWindowSize();
 
   const isPhone = width <= 600;
   const isTablet = width <= 820;

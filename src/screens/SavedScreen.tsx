@@ -1,19 +1,6 @@
-import { LinearGradient } from "expo-linear-gradient";
+import { Bookmark, Heart } from "@/components/icons";
+import { useCallback, useEffect, useMemo } from "react";
 import {
-  Bookmark,
-  Building2,
-  Eye,
-  GitCompare,
-  Heart,
-  Plus,
-  Share2,
-} from "lucide-react-native";
-import { useState } from "react";
-import {
-  ActivityIndicator,
-  ImageBackground,
-  Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -22,32 +9,115 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
 import { AppLink } from "@/components/ui";
-import { getSavedProperties, unsaveProperty } from "@/services/propertyApi";
+import { getPropertyById, getSavedProperties, unsaveProperty } from "@/services/propertyApi";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts } from "@/theme";
+import { useSavedStore } from "@/stores/savedStore";
+import { useAuthStore } from "@/stores/authStore";
+import type { ApiResponse } from "@/types/api";
+import type { Property } from "@/features/property/types/property";
+
+import { LiveText } from "@/components/LiveText";
+import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
+import { useTranslation, formatLocalizedNumber } from "@/i18n";
 
 export function SavedScreen() {
-  const { isPhone, isTablet, width } = useResponsive();
+  const { t, language } = useTranslation();
+  const { isPhone } = useResponsive();
   const queryClient = useQueryClient();
+  const user = useAuthStore((s) => s.user);
 
-  const { data: savedData, isLoading } = useQuery({
+  // Server saved properties for authenticated user
+  const { data: savedData, isLoading: isServerLoading } = useQuery({
     queryKey: ["properties", "saved"],
     queryFn: getSavedProperties,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 60 * 1000,
+    enabled: !!user,
   });
 
-  const savedListings = savedData?.data ?? [];
+  const savedIds = useSavedStore((s) => s.savedIds);
 
+  // Guest saved properties (when not logged in, fetched by savedIds)
+  const { data: guestProperties, isLoading: isGuestLoading } = useQuery({
+    queryKey: ["properties", "guest", savedIds],
+    queryFn: async () => {
+      const results = await Promise.allSettled(
+        savedIds.map((id) => getPropertyById(id))
+      );
+      return results
+        .filter(
+          (r): r is PromiseFulfilledResult<ApiResponse<Property>> =>
+            r.status === "fulfilled" && !!r.value?.data
+        )
+        .map((r) => r.value.data);
+    },
+    enabled: !user && savedIds.length > 0,
+    staleTime: 60 * 1000,
+  });
+
+  // Sync server saved IDs into savedStore so cards show red hearts across pages
+  useEffect(() => {
+    if (user && savedData?.data && Array.isArray(savedData.data)) {
+      const serverIds = savedData.data.map((p) => String(p.id));
+      useSavedStore.getState().setSavedIds(serverIds);
+    }
+  }, [user, savedData]);
+
+  // Server state via TanStack Query (no full property objects stored in Zustand)
+  const savedListings = useMemo(() => {
+    const list = user ? (savedData?.data ?? []) : (guestProperties ?? []);
+    return list.filter((p): p is Property => Boolean(p && p.id));
+  }, [user, savedData?.data, guestProperties]);
+
+  const isLoading = user ? isServerLoading : (!user && savedIds.length > 0 && isGuestLoading);
+
+  // Optimistic unsave mutation for authenticated users
   const unsaveMutation = useMutation({
     mutationFn: (id: string) => unsaveProperty(id),
-    onSuccess: () => {
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ["properties", "saved"] });
+      const previousData = queryClient.getQueryData<ApiResponse<Property[]>>(["properties", "saved"]);
+
+      if (previousData?.data) {
+        queryClient.setQueryData<ApiResponse<Property[]>>(["properties", "saved"], {
+          ...previousData,
+          data: previousData.data.filter((p) => String(p.id) !== String(id)),
+        });
+      }
+
+      const previousIds = useSavedStore.getState().savedIds;
+      useSavedStore.setState({
+        savedIds: previousIds.filter((itemId) => String(itemId) !== String(id)),
+      });
+
+      return { previousData, previousIds };
+    },
+    onError: (err, id, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(["properties", "saved"], context.previousData);
+      }
+      if (context?.previousIds) {
+        useSavedStore.setState({ savedIds: context.previousIds });
+      }
+      if (__DEV__) console.error("[SavedScreen] Failed to unsave property on server, rolling back:", err);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["properties", "saved"] });
     },
   });
 
-  function handleToggleSaved(id: string | number) {
-    unsaveMutation.mutate(String(id));
-  }
+  const { mutate: unsave } = unsaveMutation;
+  const handleUnsaveCard = useCallback(
+    (property: Property) => {
+      const idStr = String(property.id);
+      if (user) {
+        unsave(idStr);
+      } else {
+        void useSavedStore.getState().removeSaved(idStr);
+      }
+    },
+    [user, unsave],
+  );
 
   return (
     <AppChrome active="saved">
@@ -56,15 +126,17 @@ export function SavedScreen() {
       ───────────────────────────────────────────────────────────── */}
       <View style={[styles.headerRow, isPhone && styles.headerRowPhone]}>
         <View style={styles.headerTitleWrap}>
-          <Text style={styles.pageHeading}>Saved</Text>
+          <Text style={styles.pageHeading}>{t("saved.title")}</Text>
           <Text style={styles.pageSubtitle}>
-            Your saved properties &amp; bookmarks
+            {!user && savedIds.length > 0
+              ? t("saved.guestSubtitle")
+              : t("saved.subtitle")}
           </Text>
         </View>
 
         <View style={styles.headerActions}>
           <AppLink href="/buy" style={styles.exploreLink}>
-            <Text style={styles.exploreLinkText}>Browse more homes</Text>
+            <Text style={styles.exploreLinkText}>{t("saved.browseMore")}</Text>
           </AppLink>
         </View>
       </View>
@@ -76,26 +148,25 @@ export function SavedScreen() {
         <View style={styles.sectionHeader}>
           <View style={styles.titleWithIconRow}>
             <Bookmark color="#0B1A17" size={20} />
-            <Text style={styles.sectionTitle}>Saved properties ({savedListings.length})</Text>
+            <LiveText style={styles.sectionTitle}>
+              {savedListings.length === 1
+                ? t("saved.singleCount", { count: formatLocalizedNumber(1, language) })
+                : t("saved.count", { count: formatLocalizedNumber(savedListings.length, language) })}
+            </LiveText>
           </View>
         </View>
 
-        {isLoading ? (
-          <View style={{ padding: 48, alignItems: "center" }}>
-            <ActivityIndicator size="large" color="#04cf92" />
-            <Text style={{ marginTop: 12, color: "#5C6B66", fontFamily: fonts.medium }}>
-              Loading saved properties...
-            </Text>
-          </View>
+        {isLoading && savedListings.length === 0 ? (
+          <PropertySkeletonFeed />
         ) : savedListings.length === 0 ? (
           <View style={styles.emptySavedBox}>
             <Heart color="#899790" size={48} />
-            <Text style={styles.emptySavedTitle}>No saved properties yet</Text>
+            <Text style={styles.emptySavedTitle}>{t("saved.emptyTitle")}</Text>
             <Text style={styles.emptySavedText}>
-              Properties you save while browsing will appear here for easy comparison.
+              {t("saved.emptySubtitle")}
             </Text>
             <AppLink href="/buy" style={styles.browseButton}>
-              <Text style={styles.browseButtonText}>Explore properties</Text>
+              <Text style={styles.browseButtonText}>{t("saved.browseProperties")}</Text>
             </AppLink>
           </View>
         ) : (
@@ -106,7 +177,7 @@ export function SavedScreen() {
                 property={prop}
                 imageHeight={isPhone ? 180 : 220}
                 saved={true}
-                onSave={() => handleToggleSaved(prop.id)}
+                onSave={handleUnsaveCard}
                 style={[styles.savedCardItem, isPhone && styles.savedCardItemPhone]}
               />
             ))}
@@ -154,104 +225,8 @@ const styles = StyleSheet.create({
     gap: 8,
     height: 40,
   },
-  shareBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 16.8,
-    paddingVertical: 8.8,
-    borderRadius: 999,
-    borderWidth: 0.8,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    backgroundColor: "#FFFFFF",
-  },
-  shareBtnText: {
-    color: "#0B1A17",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
-  compareBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 999,
-    backgroundColor: "#04cf92",
-  },
-  compareBtnText: {
-    color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
 
   /* 2. Folders Row */
-  foldersSection: {
-    marginTop: 32,
-    width: "100%",
-  },
-  foldersRow: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  folderCard: {
-    width: 176,
-    height: 132,
-    borderRadius: 20,
-    overflow: "hidden",
-    borderWidth: 1.6,
-    borderColor: "transparent",
-  },
-  folderCardActive: {
-    borderColor: "#04cf92",
-  },
-  folderBg: {
-    width: "100%",
-    height: "100%",
-    justifyContent: "flex-end",
-  },
-  folderContent: {
-    padding: 12,
-    gap: 2,
-  },
-  folderName: {
-    marginTop: 4,
-    color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontSize: 16,
-    fontWeight: "600",
-    lineHeight: 24,
-  },
-  folderCount: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    fontWeight: "600",
-    lineHeight: 16,
-  },
-  newFolderCard: {
-    width: 176,
-    height: 132,
-    borderRadius: 20,
-    borderWidth: 1.6,
-    borderStyle: "dashed",
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 4,
-  },
-  newFolderText: {
-    color: "#5C6B66",
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-    lineHeight: 20,
-  },
 
   /* Common Section Header */
   sectionSpacing: {
@@ -300,27 +275,6 @@ const styles = StyleSheet.create({
   },
 
   /* 4. Recently Viewed (3 Columns) */
-  recentlyViewedGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 16,
-    width: "100%",
-    alignItems: "flex-start",
-  },
-  recentlyViewedGridPhone: {
-    flexDirection: "column",
-    alignItems: "stretch",
-  },
-  recentCardItem: {
-    flex: 1,
-    minWidth: 260,
-  },
-  recentCardItemPhone: {
-    flex: 0,
-    flexGrow: 0,
-    minWidth: 0,
-    width: "100%",
-  },
   exploreLink: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -364,7 +318,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#04cf92",
   },
   browseButtonText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
   },

@@ -1,16 +1,19 @@
+import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
+import { useTranslation } from "@/i18n";
 import { colorTokens, radius } from "@/theme";
 
 /** Mirrors PropertyCard's standard geometry so the swap to real content is calm. */
 export function PropertySkeleton() {
+  const { t } = useTranslation();
   const pulse = useRef(new Animated.Value(0.45)).current;
 
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.9, duration: 750, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0.45, duration: 750, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.9, duration: 750, useNativeDriver: USE_NATIVE_DRIVER }),
+        Animated.timing(pulse, { toValue: 0.45, duration: 750, useNativeDriver: USE_NATIVE_DRIVER }),
       ]),
     );
     loop.start();
@@ -18,7 +21,7 @@ export function PropertySkeleton() {
   }, [pulse]);
 
   return (
-    <View style={styles.card} accessibilityLabel="Loading property">
+    <View style={styles.card} accessibilityLabel={t("property.loadingProperty")}>
       <Animated.View style={[styles.image, { opacity: pulse }]} />
       <View style={styles.body}>
         <Animated.View style={[styles.price, { opacity: pulse }]} />

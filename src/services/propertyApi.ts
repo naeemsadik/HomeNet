@@ -1,6 +1,8 @@
 import apiClient from "./apiClient";
 import { appendUpload, type UploadInput } from "./upload";
+import { upsertPropertyDtoSchema } from "@/lib/schemas/property";
 import type { ApiResponse, PropertyStatus, UpsertPropertyDto } from "@/types/api";
+
 import type {
   PaginatedResponse,
   Property,
@@ -12,6 +14,35 @@ export type PropertyMutationResult = Pick<Property, "id"> & Partial<Property>;
 
 export async function getProperties(params: PropertyFilters = {}) {
   const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>("/v1/properties", {
+    params,
+  });
+  return data;
+}
+
+/**
+ * Properties across several areas — a parent area plus its sub-areas.
+ *
+ * `area_id` takes one id and matches that area only, so one request goes out per
+ * id. The results are merged newest first, de-duplicated, and cut to the page
+ * size; `total` is the number of distinct listings found.
+ */
+export async function getPropertiesInAreas(filters: PropertyFilters, areaIds: string[]) {
+  if (areaIds.length <= 1) {
+    const response = await getProperties(areaIds.length ? { ...filters, area_id: areaIds[0] } : filters);
+    return { items: response.data?.items ?? [], total: response.data?.total ?? 0 };
+  }
+
+  const responses = await Promise.all(areaIds.map((id) => getProperties({ ...filters, area_id: id })));
+  const seen = new Set<string>();
+  const merged = responses
+    .flatMap((response) => response.data?.items ?? [])
+    .filter((property) => !seen.has(property.id) && seen.add(property.id))
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+  return { items: merged.slice(0, filters.limit ?? merged.length), total: merged.length };
+}
+
+export async function getSoldProperties(params: PropertyFilters = {}) {
+  const { data } = await apiClient.get<ApiResponse<PaginatedResponse<Property>>>("/v1/properties/sold", {
     params,
   });
   return data;
@@ -38,9 +69,11 @@ export async function getPropertyById(id: string) {
 }
 
 export async function upsertProperty(dto: UpsertPropertyDto) {
-  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/v1/properties", dto);
+  const validated = upsertPropertyDtoSchema.parse(dto);
+  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/v1/properties", validated);
   return data;
 }
+
 
 export async function createProperty(dto: UpsertPropertyDto) {
   return upsertProperty(dto);
@@ -58,8 +91,9 @@ export async function legacyPatchProperty(id: string, dto: UpsertPropertyDto) {
   return data;
 }
 
+/** Owner-only permanent delete, any listing status or category (removes the row and its media). */
 export async function deleteProperty(id: string) {
-  const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/properties/${id}`);
+  const { data } = await apiClient.delete<ApiResponse<{ id: string }>>(`/v1/property-delete/${id}`);
   return data;
 }
 

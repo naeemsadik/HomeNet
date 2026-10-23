@@ -34,10 +34,11 @@ export class AiParseError extends Error {
   constructor(
     message: string,
     public readonly code:
-      | "MISSING_API_KEY"
       | "NETWORK_ERROR"
-      | "INVALID_RESPONSE"
-      | "BAD_JSON"
+      | "UNAVAILABLE"
+      | "UNAUTHENTICATED"
+      | "QUOTA_EXCEEDED"
+      | "UNREADABLE"
       | "UNKNOWN" = "UNKNOWN",
   ) {
     super(message);

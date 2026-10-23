@@ -9,8 +9,8 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, MapPinned, Pencil, Plus, Trash2, X } from "lucide-react-native";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight, MapPinned, Pencil, Plus, Trash2, X } from "@/components/icons";
 import { AreaPicker } from "@/components/AreaPicker";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import {
@@ -18,12 +18,17 @@ import {
   deleteArea,
   fetchArea,
   fetchAreaChildren,
-  fetchAreas,
   updateArea,
 } from "@/services/areaApi";
 import { toApiError } from "@/services/apiClient";
 import type { Area, AreaDetail, CreateAreaDto } from "@/types/api";
 import { colorTokens, fontTokens, webPointer } from "@/theme";
+import { LiveText } from "@/components/LiveText";
+import { allAreasQuery, filterAreas, pageAreas } from "@/hooks/useAllAreas";
+import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useTranslation } from "@/i18n";
+
+const ADMIN_AREAS_PAGE_SIZE = 20;
 
 interface AreaFormProps {
   visible: boolean;
@@ -34,20 +39,31 @@ interface AreaFormProps {
   onSubmit: (dto: CreateAreaDto) => void;
 }
 
-function areaErrorMessage(error: unknown) {
+/** A finite number within ±limit, or null. Empty or partly numeric text ("12abc") is rejected. */
+function parseCoordinate(text: string, limit: number): number | null {
+  const trimmed = text.trim();
+  if (!/^-?\d+(\.\d+)?$/.test(trimmed)) return null;
+  const value = Number(trimmed);
+  return Math.abs(value) <= limit ? value : null;
+}
+
+function areaErrorMessage(error: unknown, t: (key: any) => string) {
   const apiError = toApiError(error);
-  if (apiError.errorCode === 1402) return "This area cannot be deleted while it has active listings.";
-  if (apiError.status === 409) return apiError.message || "An area with this name already exists.";
-  if (apiError.status === 403) return apiError.message || "You do not have permission to manage areas.";
-  if (apiError.status === 404) return apiError.message || "The requested area no longer exists.";
+  if (apiError.errorCode === 1402) return t("admin.areas.cannotDeleteWithListings");
+  if (apiError.status === 409) return apiError.message || t("admin.areas.nameExists");
+  if (apiError.status === 403) return apiError.message || t("admin.areas.permissionDenied");
+  if (apiError.status === 404) return apiError.message || t("admin.areas.notFound");
   return apiError.message;
 }
 
 function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaFormProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [city, setCity] = useState("Dhaka");
   const [boundary, setBoundary] = useState("");
   const [centroid, setCentroid] = useState("");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
   const [advanced, setAdvanced] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [parent, setParent] = useState<Area | null>(null);
@@ -58,6 +74,8 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
     setCity(initial?.city ?? "Dhaka");
     setBoundary(initial?.boundary ?? "");
     setCentroid(initial?.centroid ?? "");
+    setLat(initial?.center_lat != null ? String(initial.center_lat) : "");
+    setLng(initial?.center_lng != null ? String(initial.center_lng) : "");
     setAdvanced(Boolean(initial?.boundary || initial?.centroid));
     setParent(
       initial?.parent
@@ -70,10 +88,16 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
     );
   }, [initial, visible]);
 
+  const centerLat = parseCoordinate(lat, 90);
+  const centerLng = parseCoordinate(lng, 180);
+  const coordinatesValid = centerLat !== null && centerLng !== null;
+
   function submit() {
-    if (!name.trim()) return;
+    if (!name.trim() || centerLat === null || centerLng === null) return;
     onSubmit({
       name: name.trim(),
+      center_lat: centerLat,
+      center_lng: centerLng,
       city: city.trim() || "Dhaka",
       parent_area_id: parent?.id ?? null,
       boundary: boundary.trim() || undefined,
@@ -87,63 +111,85 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
         <View style={styles.overlay}>
           <View style={styles.formDialog}>
             <View style={styles.formHeader}>
-              <Text style={styles.formTitle}>{initial ? "Edit Area" : "Create Area"}</Text>
-              <Pressable onPress={onClose} style={styles.iconButton} accessibilityLabel="Close area form">
+              <Text style={styles.formTitle}>{initial ? t("admin.areas.editTitle") : t("admin.areas.createTitle")}</Text>
+              <Pressable onPress={onClose} style={styles.iconButton} accessibilityLabel={t("admin.areas.closeFormAria")}>
                 <X color={colorTokens.textSecondary} size={18} />
               </Pressable>
             </View>
 
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-            <Text style={styles.label}>Name</Text>
+            <Text style={styles.label}>{t("admin.areas.nameLabel")}</Text>
             <TextInput
               value={name}
               onChangeText={setName}
-              placeholder="Area name"
+              placeholder={t("admin.areas.namePlaceholder")}
               placeholderTextColor={colorTokens.textMuted}
               style={styles.input}
             />
 
-            <Text style={styles.label}>City</Text>
+            <Text style={styles.label}>{t("admin.areas.cityLabel")}</Text>
             <TextInput
               value={city}
               onChangeText={setCity}
-              placeholder="Dhaka"
+              placeholder={t("admin.areas.cityPlaceholder")}
               placeholderTextColor={colorTokens.textMuted}
               style={styles.input}
             />
 
-            <Text style={styles.label}>Parent area</Text>
+            <Text style={styles.label}>{t("admin.areas.latLabel")}</Text>
+            <TextInput
+              value={lat}
+              onChangeText={setLat}
+              keyboardType="numbers-and-punctuation"
+              placeholder="23.8103"
+              placeholderTextColor={colorTokens.textMuted}
+              style={styles.input}
+            />
+            <Text style={styles.label}>{t("admin.areas.lngLabel")}</Text>
+            <TextInput
+              value={lng}
+              onChangeText={setLng}
+              keyboardType="numbers-and-punctuation"
+              placeholder="90.4125"
+              placeholderTextColor={colorTokens.textMuted}
+              style={styles.input}
+            />
+            {!coordinatesValid && (lat !== "" || lng !== "") ? (
+              <Text style={styles.errorText}>{t("admin.areas.coordinatesInvalid")}</Text>
+            ) : null}
+
+            <Text style={styles.label}>{t("admin.areas.parentLabel")}</Text>
             <Pressable onPress={() => setPickerOpen(true)} style={styles.parentButton}>
               <MapPinned color={colorTokens.primary} size={16} />
-              <Text style={styles.parentText}>{parent?.name ?? "No parent"}</Text>
+              <Text style={styles.parentText}>{parent?.name ?? t("admin.areas.noParent")}</Text>
             </Pressable>
             {parent ? (
               <Pressable onPress={() => setParent(null)} style={styles.clearParentButton}>
-                <Text style={styles.advancedText}>Remove parent</Text>
+                <Text style={styles.advancedText}>{t("admin.areas.removeParent")}</Text>
               </Pressable>
             ) : null}
 
             <Pressable onPress={() => setAdvanced((value) => !value)} style={styles.advancedButton}>
-              <Text style={styles.advancedText}>{advanced ? "Hide advanced fields" : "Show advanced fields"}</Text>
+              <Text style={styles.advancedText}>{advanced ? t("admin.areas.hideAdvanced") : t("admin.areas.showAdvanced")}</Text>
             </Pressable>
 
             {advanced ? (
               <View style={styles.advancedFields}>
-                <Text style={styles.label}>Boundary</Text>
+                <Text style={styles.label}>{t("admin.areas.boundaryLabel")}</Text>
                 <TextInput
                   value={boundary}
                   onChangeText={setBoundary}
                   multiline
-                  placeholder="GeoJSON boundary"
+                  placeholder={t("admin.areas.boundaryPlaceholder")}
                   placeholderTextColor={colorTokens.textMuted}
                   style={[styles.input, styles.multiline]}
                 />
-                <Text style={styles.label}>Centroid</Text>
+                <Text style={styles.label}>{t("admin.areas.centroidLabel")}</Text>
                 <TextInput
                   value={centroid}
                   onChangeText={setCentroid}
-                  placeholder="GeoJSON centroid"
+                  placeholder={t("admin.areas.centroidPlaceholder")}
                   placeholderTextColor={colorTokens.textMuted}
                   style={styles.input}
                 />
@@ -152,17 +198,17 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
 
             <View style={styles.formActions}>
               <Pressable onPress={onClose} style={styles.secondaryButton}>
-                <Text style={styles.secondaryButtonText}>Cancel</Text>
+                <Text style={styles.secondaryButtonText}>{t("common.cancel")}</Text>
               </Pressable>
               <Pressable
                 onPress={submit}
-                disabled={loading || !name.trim() || parent?.id === initial?.id}
-                style={[styles.primaryButton, (loading || !name.trim()) && styles.disabled]}
+                disabled={loading || !name.trim() || !coordinatesValid || parent?.id === initial?.id}
+                style={[styles.primaryButton, (loading || !name.trim() || !coordinatesValid) && styles.disabled]}
               >
                 {loading ? (
-                  <ActivityIndicator color={colorTokens.textInverse} size="small" />
+                  <ActivityIndicator color={colorTokens.onBrand} size="small" />
                 ) : (
-                  <Text style={styles.primaryButtonText}>{initial ? "Save" : "Create"}</Text>
+                  <Text style={styles.primaryButtonText}>{initial ? t("common.save") : t("admin.areas.create")}</Text>
                 )}
               </Pressable>
             </View>
@@ -182,6 +228,7 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
 }
 
 export function AdminAreasScreen() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -192,17 +239,21 @@ export function AdminAreasScreen() {
   const [deleteTarget, setDeleteTarget] = useState<Area | null>(null);
   const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null);
   const parentId = path.at(-1)?.id;
+  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
 
   const areasQuery = useQuery({
-    queryKey: ["areas", "admin", search, page, parentId],
+    queryKey: ["areas", "admin", debouncedSearch, page, parentId],
     queryFn: async () => {
-      if (parentId && !search.trim()) {
+      if (parentId && !debouncedSearch.trim()) {
         const response = await fetchAreaChildren(parentId);
         return { items: response.data ?? [], total: response.data?.length ?? 0, total_pages: 1 };
       }
-      const response = await fetchAreas({ search: search.trim() || undefined, page, limit: 20 });
-      return response.data ?? { items: [], total: 0, total_pages: 0 };
+      // Search and paging run on the shared all-areas list: the API answers
+      // every areas query from one cache entry (see useAllAreas).
+      const all = await queryClient.fetchQuery(allAreasQuery);
+      return pageAreas(filterAreas(all.items, { search: debouncedSearch }), page, ADMIN_AREAS_PAGE_SIZE);
     },
+    placeholderData: keepPreviousData,
   });
 
   const saveMutation = useMutation({
@@ -214,7 +265,7 @@ export function AdminAreasScreen() {
       setEditing(null);
       setFormError(null);
     },
-    onError: (error) => setFormError(areaErrorMessage(error)),
+    onError: (error) => setFormError(areaErrorMessage(error, t)),
   });
 
   const deleteMutation = useMutation({
@@ -225,7 +276,7 @@ export function AdminAreasScreen() {
     },
     onError: (error) => {
       setDeleteTarget(null);
-      setFormError(areaErrorMessage(error));
+      setFormError(areaErrorMessage(error, t));
     },
   });
 
@@ -234,11 +285,11 @@ export function AdminAreasScreen() {
     setDetailLoadingId(area.id);
     try {
       const response = await fetchArea(area.id);
-      if (!response.data) throw new Error("Area not found");
+      if (!response.data) throw new Error(t("admin.areas.notFound"));
       setEditing(response.data);
       setFormOpen(true);
     } catch (error) {
-      setFormError(areaErrorMessage(error));
+      setFormError(areaErrorMessage(error, t));
     } finally {
       setDetailLoadingId(null);
     }
@@ -251,8 +302,8 @@ export function AdminAreasScreen() {
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
         <View>
-          <Text style={styles.title}>Area Management</Text>
-          <Text style={styles.subtitle}>Manage location hierarchy used by property listings.</Text>
+          <Text style={styles.title}>{t("admin.areas.managementTitle")}</Text>
+          <Text style={styles.subtitle}>{t("admin.areas.managementSubtitle")}</Text>
         </View>
         <Pressable
           onPress={() => {
@@ -262,8 +313,8 @@ export function AdminAreasScreen() {
           }}
           style={[styles.addButton, webPointer]}
         >
-          <Plus color={colorTokens.textInverse} size={16} />
-          <Text style={styles.addButtonText}>Add Area</Text>
+          <Plus color={colorTokens.onBrand} size={16} />
+          <Text style={styles.addButtonText}>{t("admin.areas.addArea")}</Text>
         </Pressable>
       </View>
 
@@ -274,7 +325,7 @@ export function AdminAreasScreen() {
             setSearch(value);
             setPage(1);
           }}
-          placeholder="Search areas"
+          placeholder={t("admin.areas.searchPlaceholder")}
           placeholderTextColor={colorTokens.textMuted}
           style={styles.searchInput}
         />
@@ -293,9 +344,9 @@ export function AdminAreasScreen() {
         <View style={styles.center}><ActivityIndicator color={colorTokens.primary} size="large" /></View>
       ) : areasQuery.isError ? (
         <View style={styles.center}>
-          <Text style={styles.errorText}>{areaErrorMessage(areasQuery.error)}</Text>
+          <Text style={styles.errorText}>{areaErrorMessage(areasQuery.error, t)}</Text>
           <Pressable onPress={() => areasQuery.refetch()} style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>Retry</Text>
+            <Text style={styles.secondaryButtonText}>{t("admin.roles.retry")}</Text>
           </Pressable>
         </View>
       ) : (
@@ -304,7 +355,7 @@ export function AdminAreasScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListEmptyComponent={<View style={styles.center}><Text style={styles.emptyText}>No areas found</Text></View>}
+          ListEmptyComponent={<View style={styles.center}><Text style={styles.emptyText}>{t("admin.areas.noAreasFound")}</Text></View>}
           renderItem={({ item }) => (
             <View style={styles.areaRow}>
               <Pressable
@@ -314,18 +365,18 @@ export function AdminAreasScreen() {
                 <MapPinned color={colorTokens.primary} size={18} />
                 <View style={styles.areaCopy}>
                   <Text style={styles.areaName}>{item.name}</Text>
-                  <Text style={styles.areaMeta}>{item.city || "No city"} · {item._count?.children ?? 0} children</Text>
+                  <Text style={styles.areaMeta}>{item.city || t("admin.areas.noCity")} · {t("admin.areas.childrenCount", { count: item._count?.children ?? 0 })}</Text>
                 </View>
                 {item._count?.children ? <ChevronRight color={colorTokens.textMuted} size={16} /> : null}
               </Pressable>
-              <Pressable disabled={detailLoadingId === item.id} onPress={() => void openEdit(item)} style={styles.iconButton} accessibilityLabel={`Edit ${item.name}`}>
+              <Pressable disabled={detailLoadingId === item.id} onPress={() => void openEdit(item)} style={styles.iconButton} accessibilityLabel={t("admin.areas.editAria", { name: item.name })}>
                 {detailLoadingId === item.id ? (
                   <ActivityIndicator color={colorTokens.primary} size="small" />
                 ) : (
                   <Pencil color={colorTokens.primary} size={15} />
                 )}
               </Pressable>
-              <Pressable onPress={() => setDeleteTarget(item)} style={styles.iconButton} accessibilityLabel={`Delete ${item.name}`}>
+              <Pressable onPress={() => setDeleteTarget(item)} style={styles.iconButton} accessibilityLabel={t("admin.areas.deleteAria", { name: item.name })}>
                 <Trash2 color={colorTokens.error} size={15} />
               </Pressable>
             </View>
@@ -336,11 +387,11 @@ export function AdminAreasScreen() {
       {totalPages > 1 ? (
         <View style={styles.pagination}>
           <Pressable disabled={page === 1} onPress={() => setPage((value) => value - 1)} style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>Previous</Text>
+            <Text style={styles.secondaryButtonText}>{t("admin.areas.prev")}</Text>
           </Pressable>
-          <Text style={styles.pageText}>{page} / {totalPages}</Text>
+          <LiveText style={styles.pageText}>{page} / {totalPages}</LiveText>
           <Pressable disabled={page >= totalPages} onPress={() => setPage((value) => value + 1)} style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>Next</Text>
+            <Text style={styles.secondaryButtonText}>{t("admin.areas.next")}</Text>
           </Pressable>
         </View>
       ) : null}
@@ -356,9 +407,10 @@ export function AdminAreasScreen() {
 
       <ConfirmDialog
         visible={!!deleteTarget}
-        title="Delete Area"
-        message={`Delete ${deleteTarget?.name ?? "this area"}? Areas with active listings cannot be deleted.`}
-        confirmLabel="Delete"
+        title={t("admin.areas.deleteTitle")}
+        message={t("admin.areas.deleteMessage", { name: deleteTarget?.name ?? t("admin.areas.thisArea") })}
+        confirmLabel={t("admin.actions.delete")}
+        cancelLabel={t("common.cancel")}
         variant="danger"
         loading={deleteMutation.isPending}
         onCancel={() => setDeleteTarget(null)}
@@ -374,7 +426,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontFamily: fontTokens.extraBold, color: colorTokens.textPrimary },
   subtitle: { fontSize: 13, fontFamily: fontTokens.regular, color: colorTokens.textSecondary, marginTop: 4 },
   addButton: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: 10, backgroundColor: colorTokens.primary, paddingHorizontal: 14, paddingVertical: 10 },
-  addButtonText: { color: colorTokens.textInverse, fontFamily: fontTokens.bold, fontSize: 13 },
+  addButtonText: { color: colorTokens.onBrand, fontFamily: fontTokens.bold, fontSize: 13 },
   searchRow: { borderRadius: 12, borderWidth: 1, borderColor: colorTokens.divider, backgroundColor: colorTokens.backgroundAlt, paddingHorizontal: 12 },
   searchInput: { minHeight: 42, color: colorTokens.textPrimary, fontFamily: fontTokens.regular },
   backButton: { flexDirection: "row", alignItems: "center", gap: 6 },
@@ -407,7 +459,7 @@ const styles = StyleSheet.create({
   advancedFields: { gap: 8 },
   formActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginTop: 10 },
   primaryButton: { minWidth: 90, minHeight: 40, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: colorTokens.primary, paddingHorizontal: 14 },
-  primaryButtonText: { color: colorTokens.textInverse, fontFamily: fontTokens.bold, fontSize: 13 },
+  primaryButtonText: { color: colorTokens.onBrand, fontFamily: fontTokens.bold, fontSize: 13 },
   secondaryButton: { minHeight: 38, alignItems: "center", justifyContent: "center", borderRadius: 10, borderWidth: 1, borderColor: colorTokens.divider, paddingHorizontal: 14 },
   secondaryButtonText: { color: colorTokens.textSecondary, fontFamily: fontTokens.semiBold, fontSize: 12 },
   disabled: { opacity: 0.5 },

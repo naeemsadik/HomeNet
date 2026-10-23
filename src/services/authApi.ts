@@ -1,4 +1,10 @@
 import apiClient from "./apiClient";
+import {
+  changePasswordDtoSchema,
+  googleLoginSchema,
+  loginSchema,
+  registerDtoSchema,
+} from "@/lib/schemas/auth";
 import type {
   ApiResponse,
   AuthMeResponse,
@@ -9,12 +15,20 @@ import type {
 } from "@/types/api";
 
 export async function registerUser(dto: RegisterDto) {
-  const { data } = await apiClient.post<ApiResponse<AuthResponse>>("/v1/auth/register", dto);
+  const validated = registerDtoSchema.parse(dto);
+  const { data } = await apiClient.post<ApiResponse<AuthResponse>>("/v1/auth/register", validated);
   return data;
 }
 
 export async function loginUser(dto: LoginDto) {
-  const { data } = await apiClient.post<ApiResponse<AuthResponse>>("/v1/auth/login", dto);
+  const validated = loginSchema.parse(dto);
+  const { data } = await apiClient.post<ApiResponse<AuthResponse>>("/v1/auth/login", validated);
+  return data;
+}
+
+export async function loginWithGoogle(idToken: string) {
+  const validated = googleLoginSchema.parse({ id_token: idToken });
+  const { data } = await apiClient.post<ApiResponse<AuthResponse>>("/v1/auth/google", validated);
   return data;
 }
 
@@ -38,6 +52,8 @@ export async function logoutUser(refreshToken: string) {
 }
 
 export async function changePassword(dto: ChangePasswordDto) {
-  const { data } = await apiClient.patch<ApiResponse<null>>("/v1/auth/change-password", dto);
+  const validated = changePasswordDtoSchema.parse(dto);
+  const { data } = await apiClient.patch<ApiResponse<null>>("/v1/auth/change-password", validated);
   return data;
 }
+

@@ -3,7 +3,7 @@ import { AdminRolesScreen } from "@/features/admin/screens/AdminRolesScreen";
 
 export default function AdminRolesRoute() {
   return (
-    <RequireAuth admin active="home">
+    <RequireAuth admin permission="view_roles" active="home">
       <AdminRolesScreen />
     </RequireAuth>
   );

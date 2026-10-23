@@ -1,17 +1,15 @@
+import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import React, { useState, useEffect } from "react";
 import {
   Modal,
   Pressable,
   Platform,
-  StyleSheet,
   Text,
   TextInput,
   View,
   ScrollView,
   FlatList,
-  ActivityIndicator,
   Animated,
-  useWindowDimensions,
 } from "react-native";
 import {
   MapPin,
@@ -21,11 +19,13 @@ import {
   X,
   Check,
   Building,
-  Navigation,
-} from "lucide-react-native";
-import { colors, fonts, shadow, webPointer } from "@/theme";
+} from "@/components/icons";
+import { colorTokens, colors, webPointer } from "@/theme";
 import { useAreaPicker } from "@/hooks/useAreaPicker";
+import { useWindowSize } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import type { Area } from "@/types/api";
+import { styles } from "./AreaPicker.styles";
 
 export interface AreaPickerProps {
   visible: boolean;
@@ -46,12 +46,12 @@ function AreaSkeleton() {
         Animated.timing(pulseAnim, {
           toValue: 0.9,
           duration: 800,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
         Animated.timing(pulseAnim, {
           toValue: 0.4,
           duration: 800,
-          useNativeDriver: true,
+          useNativeDriver: USE_NATIVE_DRIVER,
         }),
       ])
     ).start();
@@ -85,7 +85,8 @@ export function AreaPicker({
   selectedArea,
   initialCity,
 }: AreaPickerProps) {
-  const { width } = useWindowDimensions();
+  const { t } = useTranslation();
+  const { width } = useWindowSize();
   const isPhone = width <= 600;
 
   const {
@@ -97,12 +98,13 @@ export function AreaPicker({
     availableCities,
     searchQuery,
     setSearchQuery,
+    isSearching,
     drillDown,
     drillUp,
     navigateToBreadcrumb,
     resetNav,
     selectCity,
-  } = useAreaPicker({ initialCity });
+  } = useAreaPicker({ initialCity, enabled: visible });
 
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const flatListRef = React.useRef<FlatList>(null);
@@ -160,7 +162,7 @@ export function AreaPicker({
           animated: true,
           viewPosition: 0.5,
         });
-      } catch (err) {
+      } catch {
         // Safe catch for cases where the FlatList is not fully rendered
       }
     }
@@ -224,7 +226,12 @@ export function AreaPicker({
       onRequestClose={onClose}
     >
       <View style={[styles.modalOverlay, !isPhone && styles.modalOverlayDesktop]}>
-        <Pressable style={styles.backdropPressable} onPress={onClose} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("areaPicker.close")}
+          style={styles.backdropPressable}
+          onPress={onClose}
+        />
         
         <View 
           style={[styles.sheetContent, isPhone ? styles.sheetPhone : styles.sheetTablet]}
@@ -244,21 +251,23 @@ export function AreaPicker({
               <View style={styles.headerIconCircle}>
                 <MapPin size={16} color="#04cf92" strokeWidth={2.2} />
               </View>
-              <Text style={styles.headerTitle}>Select Location</Text>
+              <Text style={styles.headerTitle}>{t("areaPicker.title")}</Text>
             </View>
             <View style={styles.headerActions}>
               {selectedArea ? (
                 <Pressable
+                  accessibilityRole="button"
                   onPress={handleClearSelection}
                   style={[styles.clearSelectBtn, webPointer]}
                 >
-                  <Text style={styles.clearSelectText}>Clear Selected</Text>
+                  <Text style={styles.clearSelectText}>{t("areaPicker.clearSelected")}</Text>
                 </Pressable>
               ) : null}
               <Pressable
+                accessibilityRole="button"
                 onPress={onClose}
                 style={[styles.closeButton, webPointer]}
-                accessibilityLabel="Close location picker"
+                accessibilityLabel={t("areaPicker.close")}
               >
                 <X size={17} color="#5C6B66" strokeWidth={2} />
               </Pressable>
@@ -273,6 +282,7 @@ export function AreaPicker({
               contentContainerStyle={styles.chipsScroll}
             >
               <Pressable
+                accessibilityRole="button"
                 onPress={() => selectCity(null)}
                 style={[
                   styles.chip,
@@ -286,7 +296,7 @@ export function AreaPicker({
                     selectedCity === null && styles.chipTextActive,
                   ]}
                 >
-                  All Cities
+                  {t("areaPicker.allCities")}
                 </Text>
               </Pressable>
 
@@ -294,6 +304,7 @@ export function AreaPicker({
                 const isActive = selectedCity === city;
                 return (
                   <Pressable
+                    accessibilityRole="button"
                     key={city}
                     onPress={() => selectCity(city)}
                     style={[
@@ -323,15 +334,20 @@ export function AreaPicker({
               <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholder="Search zones, neighborhoods or areas..."
+                placeholder={t("areaPicker.searchPlaceholder")}
                 placeholderTextColor="#8B9892"
                 style={styles.searchInput}
                 autoCorrect={false}
                 clearButtonMode="while-editing"
+                // Typing is the fastest way through 33 areas on a keyboard. On a
+                // phone an autofocus would open the keyboard over the list.
+                autoFocus={Platform.OS === "web" && !isPhone}
               />
               {searchQuery.length > 0 ? (
                 <Pressable
+                  accessibilityRole="button"
                   onPress={() => setSearchQuery("")}
+                  accessibilityLabel={t("areaPicker.clearSearch")}
                   style={[styles.clearSearchBtn, webPointer]}
                 >
                   <X size={16} color={colors.muted} />
@@ -349,16 +365,18 @@ export function AreaPicker({
                 contentContainerStyle={styles.breadcrumbScroll}
               >
                 <Pressable
+                  accessibilityRole="button"
                   onPress={resetNav}
                   style={[styles.breadcrumbBtn, webPointer]}
                 >
-                  <Text style={styles.breadcrumbTextHome}>Root</Text>
+                  <Text style={styles.breadcrumbTextHome}>{t("areaPicker.root")}</Text>
                 </Pressable>
 
                 {selectedCity ? (
                   <>
                     <ChevronRight size={12} color={colors.muted} style={styles.breadDivider} />
                     <Pressable
+                      accessibilityRole="button"
                       onPress={resetNav}
                       style={[styles.breadcrumbBtn, webPointer]}
                     >
@@ -371,6 +389,7 @@ export function AreaPicker({
                   <React.Fragment key={item.id}>
                     <ChevronRight size={12} color={colors.muted} style={styles.breadDivider} />
                     <Pressable
+                      accessibilityRole="button"
                       onPress={() => navigateToBreadcrumb(index)}
                       disabled={index === navPath.length - 1}
                       style={[
@@ -394,11 +413,12 @@ export function AreaPicker({
 
               {navPath.length > 0 ? (
                 <Pressable
+                  accessibilityRole="button"
                   onPress={drillUp}
                   style={[styles.backStepBtn, webPointer]}
                 >
                   <ChevronLeft size={16} color={colors.green} />
-                  <Text style={styles.backStepText}>Back</Text>
+                  <Text style={styles.backStepText}>{t("areaPicker.back")}</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -408,7 +428,7 @@ export function AreaPicker({
           {navPath.length > 0 && !searchQuery ? (
             <View style={styles.selectionBanner}>
               <Text style={styles.selectionBannerLabel}>
-                Current level:{" "}
+                {t("areaPicker.currentLevel")}{" "}
                 <Text style={styles.selectionBannerValue}>
                   {navPath.length > 0
                     ? navPath[navPath.length - 1].name
@@ -416,11 +436,12 @@ export function AreaPicker({
                 </Text>
               </Text>
               <Pressable
+                accessibilityRole="button"
                 onPress={handleSelectCurrentLevel}
                 style={[styles.selectionBannerBtn, webPointer]}
               >
-                <Check size={14} color="#FFFFFF" />
-                <Text style={styles.selectionBannerBtnText}>Confirm This Level</Text>
+                <Check size={14} color={colorTokens.onBrand} />
+                <Text style={styles.selectionBannerBtnText}>{t("areaPicker.confirmThisLevel")}</Text>
               </Pressable>
             </View>
           ) : null}
@@ -433,18 +454,21 @@ export function AreaPicker({
               <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{error}</Text>
                 <Pressable
+                  accessibilityRole="button"
                   onPress={resetNav}
                   style={[styles.retryButton, webPointer]}
                 >
-                  <Text style={styles.retryButtonText}>Go to Root</Text>
+                  <Text style={styles.retryButtonText}>{t("areaPicker.goToRoot")}</Text>
                 </Pressable>
               </View>
             ) : areas.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Building size={40} color={colors.line} style={styles.emptyIcon} />
-                <Text style={styles.emptyTitle}>No locations found</Text>
+                <Text style={styles.emptyTitle}>
+                  {isSearching ? t("areaPicker.noMatches") : t("areaPicker.noLocationsFound")}
+                </Text>
                 <Text style={styles.emptySubtitle}>
-                  Try clearing your search or checking another city.
+                  {t("areaPicker.emptySubtitle")}
                 </Text>
               </View>
             ) : (
@@ -475,6 +499,7 @@ export function AreaPicker({
                     >
                       {/* Left: Tapping name/row selects it if leaf, or drills down if parent */}
                       <Pressable
+                        accessibilityRole="button"
                         style={({ pressed }) => [
                           styles.areaInfoPressable,
                           webPointer,
@@ -509,7 +534,7 @@ export function AreaPicker({
                           <Text style={styles.areaCity}>
                             {item.city
                               ? item.city.charAt(0).toUpperCase() + item.city.slice(1).toLowerCase()
-                              : "Area"}
+                              : t("areaPicker.areaFallback")}
                           </Text>
                         </View>
                       </Pressable>
@@ -519,6 +544,7 @@ export function AreaPicker({
                         {/* If it is a parent node, offer a direct select button */}
                         {!isLeaf ? (
                           <Pressable
+                            accessibilityRole="button"
                             onPress={() => handleSelectArea(item)}
                             style={({ pressed }) => [
                               styles.directSelectBtn,
@@ -526,12 +552,12 @@ export function AreaPicker({
                               webPointer,
                               pressed && { opacity: 0.8 },
                             ]}
-                            accessibilityLabel={`Select ${item.name}`}
+                            accessibilityLabel={t("areaPicker.selectArea", { name: item.name })}
                           >
                             {isSelected ? (
-                              <Check size={13} color="#FFFFFF" strokeWidth={2.5} />
+                              <Check size={13} color={colorTokens.onBrand} strokeWidth={2.5} />
                             ) : (
-                              <Text style={styles.directSelectText}>Select</Text>
+                              <Text style={styles.directSelectText}>{t("areaPicker.select")}</Text>
                             )}
                           </Pressable>
                         ) : isSelected ? (
@@ -543,6 +569,7 @@ export function AreaPicker({
                         {/* Drill Down arrow (if parent and not searching) */}
                         {!isLeaf && !searchQuery ? (
                           <Pressable
+                            accessibilityRole="button"
                             onPress={() => drillDown(item)}
                             style={({ pressed }) => [
                               styles.drillBtn,
@@ -569,454 +596,3 @@ export function AreaPicker({
 }
 
 // ─── Styles ────────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(19, 40, 32, 0.45)",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  modalOverlayDesktop: {
-    justifyContent: "flex-start",
-    paddingTop: 80,
-  },
-  backdropPressable: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  sheetContent: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    width: "100%",
-    maxHeight: "90%",
-    ...shadow,
-  },
-  sheetPhone: {
-    height: "85%",
-  },
-  sheetTablet: {
-    height: 560,
-    width: 480,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    overflow: "hidden",
-  },
-  dragHandleContainer: {
-    width: "100%",
-    alignItems: "center",
-    paddingVertical: 10,
-  },
-  dragHandle: {
-    width: 38,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: colors.line,
-  },
-  
-  // Header
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(11, 26, 23, 0.06)",
-  },
-  headerTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 9,
-  },
-  headerIconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#E6FAF4",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontFamily: fonts.bold,
-    color: "#0B1A17",
-    letterSpacing: -0.3,
-  },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  clearSelectBtn: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  clearSelectText: {
-    fontSize: 12,
-    fontFamily: fonts.bold,
-    color: colors.coral,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F3F5F4",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  // City selection chips
-  chipsSection: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(11, 26, 23, 0.06)",
-    backgroundColor: "#FFFFFF",
-  },
-  chipsScroll: {
-    paddingHorizontal: 20,
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 15,
-    paddingVertical: 7,
-    borderRadius: 999,
-    backgroundColor: "#F3F5F4",
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  chipActive: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
-  },
-  chipText: {
-    fontSize: 13,
-    fontFamily: fonts.medium,
-    color: "#4A5B55",
-  },
-  chipTextActive: {
-    color: "#FFFFFF",
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-  },
-
-  // Search input
-  searchSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F8FAF9",
-    borderWidth: 1.2,
-    borderColor: "rgba(11, 26, 23, 0.1)",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    height: 44,
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    height: "100%",
-    fontSize: 14,
-    fontFamily: fonts.regular,
-    color: "#0B1A17",
-    outlineStyle: "none",
-  } as any,
-  clearSearchBtn: {
-    padding: 4,
-  },
-
-  // Breadcrumbs Navigation
-  breadcrumbBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.soft,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.line,
-  },
-  breadcrumbScroll: {
-    alignItems: "center",
-    gap: 4,
-  },
-  breadcrumbBtn: {
-    paddingVertical: 4,
-  },
-  breadcrumbBtnDisabled: {
-    opacity: 0.8,
-  },
-  breadcrumbTextHome: {
-    fontSize: 12,
-    fontFamily: fonts.bold,
-    color: colors.green,
-  },
-  breadcrumbText: {
-    fontSize: 12,
-    fontFamily: fonts.semiBold,
-    color: colors.muted,
-  },
-  breadcrumbTextActive: {
-    color: colors.greenDark,
-    fontFamily: fonts.bold,
-  },
-  breadDivider: {
-    marginHorizontal: 2,
-  },
-  backStepBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-    paddingLeft: 12,
-    borderLeftWidth: 1,
-    borderLeftColor: colors.line,
-  },
-  backStepText: {
-    fontSize: 12,
-    fontFamily: fonts.bold,
-    color: colors.green,
-  },
-
-  // Selection Banner
-  selectionBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: colors.greenLight,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.line,
-  },
-  selectionBannerLabel: {
-    fontSize: 13,
-    fontFamily: fonts.medium,
-    color: colors.greenDark,
-    flex: 1,
-    marginRight: 10,
-  },
-  selectionBannerValue: {
-    fontFamily: fonts.bold,
-  },
-  selectionBannerBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: colors.green,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  selectionBannerBtnText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontFamily: fonts.bold,
-  },
-
-  // Main List Layout
-  listContainer: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-  areaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    marginVertical: 2,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "transparent",
-  },
-  areaRowSelected: {
-    backgroundColor: "#F0F7F4",
-    borderColor: "rgba(15, 109, 85, 0.2)",
-  },
-  areaRowFocused: {
-    backgroundColor: "#F4F7F5",
-    borderColor: "rgba(11, 26, 23, 0.08)",
-  },
-  pinCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F0F4F2",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  pinCircleSelected: {
-    backgroundColor: "#DCEEE8",
-  },
-  areaInfoPressable: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    paddingRight: 10,
-    paddingVertical: 3,
-  },
-  areaRowIcon: {
-    marginRight: 12,
-  },
-  areaTextContainer: {
-    flex: 1,
-  },
-  areaName: {
-    fontSize: 14.5,
-    fontFamily: fonts.semiBold,
-    color: "#0B1A17",
-    letterSpacing: -0.2,
-  },
-  areaNameSelected: {
-    color: "#04cf92",
-    fontWeight: "700",
-  },
-  areaCity: {
-    fontSize: 12,
-    fontFamily: fonts.regular,
-    color: "#6D7E78",
-    marginTop: 1.5,
-  },
-  actionCol: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  directSelectBtn: {
-    paddingHorizontal: 11,
-    paddingVertical: 5.5,
-    borderRadius: 7,
-    borderWidth: 1,
-    borderColor: "rgba(4, 207, 146, 0.25)",
-    backgroundColor: "#FFFFFF",
-    minWidth: 54,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  directSelectBtnActive: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
-  },
-  directSelectText: {
-    fontSize: 12,
-    fontFamily: fonts.semiBold,
-    color: "#04cf92",
-  },
-  selectedCheckBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "#E6FAF4",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  drillBtn: {
-    padding: 6,
-    borderRadius: 6,
-  },
-
-  // Skeletons
-  skeletonContainer: {
-    paddingTop: 10,
-  },
-  skeletonItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.line,
-  },
-  skeletonIcon: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: colors.soft,
-    marginRight: 12,
-  },
-  skeletonTextWrap: {
-    flex: 1,
-    gap: 6,
-  },
-  skeletonLineLong: {
-    width: "60%",
-    height: 12,
-    borderRadius: 4,
-    backgroundColor: colors.soft,
-  },
-  skeletonLineShort: {
-    width: "30%",
-    height: 8,
-    borderRadius: 3,
-    backgroundColor: colors.soft,
-  },
-  skeletonArrow: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: colors.soft,
-  },
-
-  // Errors / Empty
-  errorContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 40,
-    gap: 16,
-  },
-  errorText: {
-    fontSize: 14,
-    fontFamily: fonts.medium,
-    color: colors.coral,
-    textAlign: "center",
-  },
-  retryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: colors.soft,
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
-  retryButtonText: {
-    fontSize: 13,
-    fontFamily: fonts.bold,
-    color: colors.green,
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-    gap: 10,
-  },
-  emptyIcon: {
-    marginBottom: 8,
-  },
-  emptyTitle: {
-    fontSize: 15,
-    fontFamily: fonts.bold,
-    color: colors.ink,
-  },
-  emptySubtitle: {
-    fontSize: 12,
-    fontFamily: fonts.regular,
-    color: colors.muted,
-    textAlign: "center",
-    paddingHorizontal: 20,
-  },
-});
-

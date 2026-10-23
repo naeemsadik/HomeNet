@@ -1,5 +1,5 @@
 import { router, type Href } from "expo-router";
-import { ArrowRight, Check, ChevronDown, type LucideIcon } from "lucide-react-native";
+import { ArrowRight, Check, ChevronDown, type LucideIcon } from "@/components/icons";
 import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
@@ -64,13 +64,14 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
  * destructive — deletes or cannot be undone
  *
  * Foreground colours are brand-TEXT (#0F6D55), never brand-fill (#04cf92),
- * which measures 2.03:1 on white.
+ * which measures 2.03:1 on white. Text on the brand fill is ink (`onBrand`,
+ * 8.8:1) — white on #04cf92 is 2.03:1 and fails WCAG AA.
  */
 const VARIANT_FG: Record<ButtonVariant, string> = {
   primary: colorTokens.onBrand,
   secondary: colorTokens.ink,
   ghost: colorTokens.brandText,
-  destructive: colorTokens.onBrand,
+  destructive: colorTokens.onDanger,
 };
 
 export function AppButton({
@@ -247,18 +248,22 @@ export function SelectField({
   options,
   onChange,
   style,
+  formatOption,
 }: {
   value: string;
   options: string[];
   onChange: (value: string) => void;
   style?: StyleProp<ViewStyle>;
+  /** How a stored value is shown, when it is not fit to read as it is. */
+  formatOption?: (option: string) => string;
 }) {
   const [open, setOpen] = useState(false);
+  const show = (option: string) => (formatOption ? formatOption(option) : option);
 
   return (
     <View style={[styles.selectWrap, style]}>
       <Pressable accessibilityLabel={`Select ${value}`} onPress={() => setOpen(true)} style={[styles.selectButton, webPointer]}>
-        <Text numberOfLines={1} style={styles.selectValue}>{value}</Text>
+        <Text numberOfLines={1} style={styles.selectValue}>{show(value)}</Text>
         <ChevronDown color={colors.green} size={14} />
       </Pressable>
       <Modal animationType="fade" onRequestClose={() => setOpen(false)} transparent visible={open}>
@@ -276,7 +281,7 @@ export function SelectField({
                   }}
                   style={[styles.selectOption, selected && styles.selectOptionActive, webPointer]}
                 >
-                  <Text style={[styles.selectOptionText, selected && styles.selectOptionTextActive]}>{option}</Text>
+                  <Text style={[styles.selectOptionText, selected && styles.selectOptionTextActive]}>{show(option)}</Text>
                   {selected ? <Check color={colors.green} size={15} /> : null}
                 </Pressable>
               );

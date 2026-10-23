@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Image,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -9,15 +8,13 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import {
-  Compass,
   Mail,
   MapPin,
-  Phone,
   Search,
   ShieldCheck,
-  Sparkles,
-} from "lucide-react-native";
-import { fonts, webPointer } from "@/theme";
+} from "@/components/icons";
+import { colorTokens, fonts, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { BrowserFrame } from "./BrowserFrame";
@@ -26,7 +23,8 @@ import { previewProperties } from "@/data/landingPreview";
 import { PropertyCard } from "@/components/PropertyCard";
 
 export function HeroProductVisual() {
-  const { isPhone, isTablet, isCompact, isLargeScreen, isTall } = useResponsive();
+  const { t } = useTranslation();
+  const { isPhone, isCompact, isLargeScreen, isTall } = useResponsive();
 
   const handleOpenApp = () => {
     router.push("/buy" as any);
@@ -39,7 +37,7 @@ export function HeroProductVisual() {
     <Pressable
       onPress={handleOpenApp}
       accessibilityRole="link"
-      accessibilityLabel="Open live properties in HomeNet"
+      accessibilityLabel={t("landing.heroVisual.openAppAria")}
       style={[
         styles.container,
         (isLargeScreen || isTall) && styles.containerLarge,
@@ -51,7 +49,7 @@ export function HeroProductVisual() {
         <View style={[styles.compositionWrap, isLargeScreen && styles.compositionWrapLarge]}>
           {/* Main Desktop Browser Frame */}
           <BrowserFrame
-            url="homenet.com.bd/buy?city=Dhaka"
+            url={t("landing.browserFrame.dhakaUrl")}
             style={[
               styles.browserFrame,
               isCompact && styles.browserFrameCompact,
@@ -64,15 +62,15 @@ export function HeroProductVisual() {
               <View style={styles.searchReplicaInput}>
                 <Search color="#5C6B66" size={16} strokeWidth={2} />
                 <Text numberOfLines={1} style={styles.searchReplicaPlaceholder}>
-                  Gulshan, Banani, Dhanmondi, or area...
+                  {t("landing.heroVisual.searchPlaceholder")}
                 </Text>
               </View>
               <View style={styles.searchReplicaAreaBtn}>
                 <MapPin color="#0F6D55" size={14} strokeWidth={2} />
-                <Text style={styles.searchReplicaAreaText}>Dhaka</Text>
+                <Text style={styles.searchReplicaAreaText}>{t("landing.heroVisual.city")}</Text>
               </View>
               <View style={styles.searchReplicaBtn}>
-                <Text style={styles.searchReplicaBtnText}>Search</Text>
+                <Text style={styles.searchReplicaBtnText}>{t("landing.heroVisual.searchBtn")}</Text>
               </View>
             </View>
 
@@ -99,7 +97,7 @@ export function HeroProductVisual() {
                   />
                   <View style={styles.mobileDetailBadge}>
                     <ShieldCheck color="#2251D6" size={12} strokeWidth={2.5} />
-                    <Text style={styles.mobileDetailBadgeText}>Verified</Text>
+                    <Text style={styles.mobileDetailBadgeText}>{t("landing.heroVisual.verifiedBadge")}</Text>
                   </View>
                 </View>
 
@@ -114,7 +112,7 @@ export function HeroProductVisual() {
 
                   <View style={styles.mobileContactBtn}>
                     <Mail color="#FFFFFF" size={13} strokeWidth={2} />
-                    <Text style={styles.mobileContactBtnText}>Contact Owner Directly</Text>
+                    <Text style={styles.mobileContactBtnText}>{t("landing.heroVisual.contactDirect")}</Text>
                   </View>
                 </View>
               </View>
@@ -134,7 +132,7 @@ export function HeroProductVisual() {
                 />
                 <View style={styles.mobileDetailBadge}>
                   <ShieldCheck color="#2251D6" size={12} strokeWidth={2.5} />
-                  <Text style={styles.mobileDetailBadgeText}>Verified</Text>
+                  <Text style={styles.mobileDetailBadgeText}>{t("landing.heroVisual.verifiedBadge")}</Text>
                 </View>
               </View>
 
@@ -149,7 +147,7 @@ export function HeroProductVisual() {
 
                 <View style={styles.mobileContactBtn}>
                   <Mail color="#FFFFFF" size={13} strokeWidth={2} />
-                  <Text style={styles.mobileContactBtnText}>Contact Owner Directly</Text>
+                  <Text style={styles.mobileContactBtnText}>{t("landing.heroVisual.contactDirect")}</Text>
                 </View>
               </View>
             </View>
@@ -237,7 +235,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   searchReplicaBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 13,
     fontWeight: "700",

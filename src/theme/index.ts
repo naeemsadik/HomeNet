@@ -2,17 +2,17 @@
  * Theme barrel – single import point for the design-token system.
  */
 
-export { colorTokens, type ColorTokens } from "./colors";
-export { fontTokens, type FontTokens } from "./fonts";
-export { radiusTokens, type RadiusTokens } from "./radius";
-export { layoutTokens, type LayoutTokens } from "./layout";
-export { ThemeProvider, useTheme, type Theme, type ThemeProviderProps } from "./ThemeProvider";
-
 import { colorTokens } from "./colors";
 import { fontTokens } from "./fonts";
 import { radiusTokens } from "./radius";
 import { layoutTokens } from "./layout";
 import { Platform, type TextStyle, type ViewStyle } from "react-native";
+
+export { colorTokens, type ColorTokens } from "./colors";
+export { fontTokens, type FontTokens } from "./fonts";
+export { radiusTokens, type RadiusTokens } from "./radius";
+export { layoutTokens, type LayoutTokens } from "./layout";
+export { ThemeProvider, useTheme, type Theme, type ThemeProviderProps } from "./ThemeProvider";
 
 /**
  * Shorthand aliases over `colorTokens`. Same roles, shorter names.

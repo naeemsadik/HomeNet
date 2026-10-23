@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
-import { View, Text, Image, Pressable, ScrollView, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import { View, Text, Image, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";
-import { Camera, Trash2, UserRound } from "lucide-react-native";
+import { Camera, Trash2, UserRound } from "@/components/icons";
 import { router } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,18 +13,20 @@ import { Eyebrow } from "@/components/ui";
 import { useAuthStore } from "@/stores/authStore";
 import { useUpdateUserProfile, useUploadAvatar, useDeleteAvatar } from "../hooks/useUserMutations";
 import { editProfileSchema, type EditProfileFormData } from "@/lib/schemas/user";
-import { colorTokens, fonts, shadow, webPointer } from "@/theme";
-import { useResponsive } from "@/hooks/useResponsive";
+import { toApiError } from "@/services/apiClient";
+import { colorTokens, fonts, webPointer } from "@/theme";
 import type { UploadInput } from "@/services/upload";
 
+import { useTranslation } from "@/i18n";
+
 export function EditProfileScreen() {
-  const { isPhone } = useResponsive();
+  const { t } = useTranslation();
   const { user, fetchMe } = useAuthStore();
   const updateProfile = useUpdateUserProfile();
   const uploadAvatar = useUploadAvatar();
   const deleteAvatar = useDeleteAvatar();
 
-  const { control, handleSubmit, reset, watch, formState: { isValid, isDirty, errors } } = useForm<EditProfileFormData>({
+  const { control, handleSubmit, reset, formState: { isValid, isDirty } } = useForm<EditProfileFormData>({
     resolver: zodResolver(editProfileSchema),
     defaultValues: { full_name: user?.full_name ?? "" },
     mode: "onChange",
@@ -44,18 +47,16 @@ export function EditProfileScreen() {
     try {
       await updateProfile.mutateAsync({ id: user.id, data: { full_name: data.full_name } });
       await fetchMe();
-      Alert.alert("Success", "Profile updated.", [{ text: "OK", onPress: () => router.back() }]);
+      notify(t("common.success"), t("userProfile.profileUpdated"), { onConfirm: () => router.back() });
     } catch (err: any) {
-      setServerError(err?.message || "Failed to update profile");
+      setServerError(toApiError(err).message);
     }
   };
 
   const handleAvatarUpload = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Permission needed", "Allow access to your photo library.");
-      return;
-    }
+    // No permission request: the system photo picker needs none. On Android 11-12 the
+    // request asked for WRITE_EXTERNAL_STORAGE, which cannot be granted there, and
+    // blocked every upload.
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsEditing: true,
@@ -73,9 +74,9 @@ export function EditProfileScreen() {
       };
       await uploadAvatar.mutateAsync(file);
       await fetchMe();
-      Alert.alert("Success", "Avatar updated.");
+      notify(t("common.success"), t("userProfile.avatarUpdated"));
     } catch (err: any) {
-      setServerError(err?.message || "Failed to upload avatar");
+      setServerError(toApiError(err).message);
     }
   };
 
@@ -83,9 +84,9 @@ export function EditProfileScreen() {
     try {
       await deleteAvatar.mutateAsync();
       await fetchMe();
-      Alert.alert("Success", "Avatar removed.");
+      notify(t("common.success"), t("userProfile.avatarRemoved"));
     } catch (err: any) {
-      setServerError(err?.message || "Failed to remove avatar");
+      setServerError(toApiError(err).message);
     }
   };
 
@@ -93,8 +94,8 @@ export function EditProfileScreen() {
     <AppChrome active="profile">
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.headerSection}>
-          <Eyebrow>Edit Profile</Eyebrow>
-          <Text style={styles.title}>Your profile</Text>
+          <Eyebrow>{t("userProfile.editProfileEyebrow")}</Eyebrow>
+          <Text style={styles.title}>{t("userProfile.editProfileTitle")}</Text>
         </View>
 
         <ErrorBanner message={serverError} />
@@ -106,18 +107,18 @@ export function EditProfileScreen() {
                 <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <UserRound color={colorTokens.textInverse} size={34} />
+                  <UserRound color={colorTokens.brandText} size={34} />
                 </View>
               )}
               <Pressable
                 onPress={handleAvatarUpload}
                 style={[styles.avatarAction, webPointer]}
-                accessibilityLabel="Upload avatar"
+                accessibilityLabel={t("userProfile.uploadAvatarAria")}
               >
                 {uploadAvatar.isPending ? (
-                  <ActivityIndicator color={colorTokens.textInverse} size={12} />
+                  <ActivityIndicator color={colorTokens.onBrand} size={12} />
                 ) : (
-                  <Camera color={colorTokens.textInverse} size={15} />
+                  <Camera color={colorTokens.onBrand} size={15} />
                 )}
               </Pressable>
             </View>
@@ -125,10 +126,10 @@ export function EditProfileScreen() {
               <Pressable
                 onPress={handleAvatarDelete}
                 style={[styles.removeAvatarBtn, webPointer]}
-                accessibilityLabel="Remove avatar"
+                accessibilityLabel={t("userProfile.removeAvatarAria")}
               >
                 <Trash2 color={colorTokens.error} size={14} />
-                <Text style={styles.removeAvatarText}>Remove</Text>
+                <Text style={styles.removeAvatarText}>{t("userProfile.removeAvatar")}</Text>
               </Pressable>
             ) : null}
           </View>
@@ -136,14 +137,14 @@ export function EditProfileScreen() {
           <FormFloatingInput
             control={control}
             name="full_name"
-            label="Full Name"
+            label={t("userProfile.fullNameLabel")}
             autoCapitalize="words"
           />
 
           <Text style={styles.emailLabel}>{user?.email}</Text>
 
           <AuthButton
-            label="Save changes"
+            label={t("userProfile.saveChanges")}
             onPress={handleSubmit(onSubmit)}
             loading={updateProfile.isPending}
             disabled={!isValid || !isDirty}

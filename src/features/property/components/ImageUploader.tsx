@@ -1,27 +1,28 @@
 import React from "react";
-import { View, Text, Pressable, ScrollView, Image, StyleSheet, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Image, StyleSheet } from "react-native";
+import { useTranslation } from "@/i18n";
+import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";
-import { Camera, Trash2, Plus } from "lucide-react-native";
+import { Camera, Trash2, Plus } from "@/components/icons";
 import { colorTokens, fonts } from "@/theme";
 
 interface ImageUploaderProps {
-  images: Array<{ uri: string; file?: Blob | File }>;
-  onAdd: (images: Array<{ uri: string; file?: Blob | File }>) => void;
+  images: { uri: string; file?: Blob | File }[];
+  onAdd: (images: { uri: string; file?: Blob | File }[]) => void;
   onRemove: (index: number) => void;
   maxImages?: number;
 }
 
 export function ImageUploader({ images, onAdd, onRemove, maxImages = 10 }: ImageUploaderProps) {
-  const handlePick = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert("Permission needed", "Allow access to your photo library to upload images.");
-      return;
-    }
+  const { t } = useTranslation();
 
+  const handlePick = async () => {
+    // No permission request: the system photo picker needs none. On Android 11-12 the
+    // request asked for WRITE_EXTERNAL_STORAGE, which cannot be granted there, and
+    // blocked every upload.
     const remaining = maxImages - images.length;
     if (remaining <= 0) {
-      Alert.alert("Limit reached", `You can upload up to ${maxImages} images.`);
+      notify(t("wizard.media.limitReachedTitle"), t("wizard.media.limitReachedDesc", { count: maxImages }));
       return;
     }
 
@@ -59,8 +60,8 @@ export function ImageUploader({ images, onAdd, onRemove, maxImages = 10 }: Image
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Property Images</Text>
-      <Text style={styles.hint}>Upload up to {maxImages} images ({images.length}/{maxImages})</Text>
+      <Text style={styles.label}>{t("wizard.media.imagesLabel")}</Text>
+      <Text style={styles.hint}>{t("wizard.media.imagesCountHint", { max: maxImages, current: images.length })}</Text>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollArea}>
         <View style={styles.imageRow}>
@@ -70,7 +71,7 @@ export function ImageUploader({ images, onAdd, onRemove, maxImages = 10 }: Image
               <Pressable
                 onPress={() => onRemove(index)}
                 style={styles.removeBtn}
-                accessibilityLabel={`Remove image ${index + 1}`}
+                accessibilityLabel={t("wizard.media.removeImageAria", { index: index + 1 })}
               >
                 <Trash2 color={colorTokens.textInverse} size={14} />
               </Pressable>
@@ -80,11 +81,11 @@ export function ImageUploader({ images, onAdd, onRemove, maxImages = 10 }: Image
             <Pressable
               onPress={handlePick}
               style={styles.addBtn}
-              accessibilityLabel="Add images"
+              accessibilityLabel={t("wizard.media.addImagesAria")}
             >
               <Plus color={colorTokens.textMuted} size={24} />
               <Camera color={colorTokens.textMuted} size={16} />
-              <Text style={styles.addBtnText}>Add</Text>
+              <Text style={styles.addBtnText}>{t("wizard.media.addBtn")}</Text>
             </Pressable>
           ) : null}
         </View>

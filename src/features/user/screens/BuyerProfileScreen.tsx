@@ -1,7 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import {
   ArrowLeft,
-  Bell,
   CheckCircle2,
   Eye,
   EyeOff,
@@ -11,43 +10,46 @@ import {
   Trash2,
   User,
   X,
-} from "lucide-react-native";
+} from "@/components/icons";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Modal,
-  Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { confirmAction, notify } from "@/lib/alert";
 import { router } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
+import { editProfileSchema } from "@/lib/schemas/user";
+import { changePasswordSchema } from "@/lib/schemas/auth";
+import { toApiError } from "@/services/apiClient";
 import type { UploadInput } from "@/services/upload";
+import { useTranslation } from "@/i18n";
+import { styles } from "./BuyerProfileScreen.styles";
 
 const DEFAULT_AVATAR =
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop";
-const DEFAULT_NAME = "Fuad Abrar";
-const DEFAULT_EMAIL = "fowadabrar10112002@icloud.com";
-const DEFAULT_PHONE = "+880 1700-000000";
+// Sample values shown (greyed out) in signed-out preview. Never a real person.
+const DEFAULT_NAME = "Your name";
+const DEFAULT_EMAIL = "you@example.com";
 
 export function BuyerProfileScreen() {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
   const { user, logout, fetchMe, changePassword } = useAuthStore();
 
   // Form State
   const [fullName, setFullName] = useState(user?.full_name || DEFAULT_NAME);
   const [email, setEmail] = useState(user?.email || DEFAULT_EMAIL);
-  const [phone, setPhone] = useState(DEFAULT_PHONE);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     user?.avatar_url || DEFAULT_AVATAR
   );
@@ -80,15 +82,9 @@ export function BuyerProfileScreen() {
 
   const handleAvatarUpload = async () => {
     try {
-      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permission.granted) {
-        Alert.alert(
-          "Permission Required",
-          "Please grant photo library access to change your profile picture."
-        );
-        return;
-      }
-
+      // No permission request: the system photo picker needs none. On Android 11-12 the
+      // request asked for WRITE_EXTERNAL_STORAGE, which cannot be granted there, and
+      // blocked every upload.
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
@@ -110,11 +106,11 @@ export function BuyerProfileScreen() {
         };
         await uploadAvatar(file, asset.fileName || "profile.jpg");
         await fetchMe();
-        Alert.alert("Success", "Profile photo updated successfully.");
+        notify(t("common.success"), t("userProfile.photoUpdated"));
       }
     } catch (err: any) {
-      console.warn("Avatar upload error:", err);
-      Alert.alert("Notice", "Photo selected. Save changes to keep it.");
+      if (__DEV__) console.warn("Avatar upload error:", err);
+      notify(t("common.notice"), t("userProfile.photoNotice"));
     } finally {
       setIsUploading(false);
     }
@@ -122,26 +118,30 @@ export function BuyerProfileScreen() {
 
   const handleSaveChanges = async () => {
     if (!user) {
-      Alert.alert(
-        "Preview Mode",
-        "Sign in to sync your profile updates across all your devices.",
-        [
-          { text: "Sign In", onPress: () => router.push("/profile" as any) },
-          { text: "OK", style: "cancel" },
-        ]
+      const signIn = await confirmAction(
+        t("userProfile.previewTitle"),
+        t("userProfile.previewMessage"),
+        { confirmLabel: t("userProfile.signIn"), cancelLabel: t("userProfile.notNow") },
       );
+      if (signIn) router.push("/profile" as any);
+      return;
+    }
+
+    const validation = editProfileSchema.safeParse({ full_name: fullName });
+    if (!validation.success) {
+      notify(t("userProfile.validation"), validation.error.issues[0]?.message || t("userProfile.invalidName"));
       return;
     }
 
     try {
       setIsSaving(true);
       await updateUser(user.id, {
-        full_name: fullName.trim() || user.full_name,
+        full_name: validation.data.full_name,
       });
       await fetchMe();
-      Alert.alert("Saved", "Your profile details have been updated.");
+      notify(t("userProfile.saved"), t("userProfile.profileUpdated"));
     } catch (err: any) {
-      Alert.alert("Error", err?.message || "Failed to save profile changes.");
+      notify(t("common.error"), toApiError(err).message);
     } finally {
       setIsSaving(false);
     }
@@ -149,16 +149,13 @@ export function BuyerProfileScreen() {
 
   const handleChangePasswordSubmit = async () => {
     setPasswordError(null);
-    if (!currentPassword) {
-      setPasswordError("Please enter your current password.");
-      return;
-    }
-    if (!newPassword || newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters long.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordError("New passwords do not match.");
+    const validation = changePasswordSchema.safeParse({
+      current_password: currentPassword,
+      new_password: newPassword,
+      confirmPassword: confirmPassword,
+    });
+    if (!validation.success) {
+      setPasswordError(validation.error.issues[0]?.message || t("userProfile.invalidPasswordDetails"));
       return;
     }
 
@@ -172,9 +169,9 @@ export function BuyerProfileScreen() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      Alert.alert("Success", "Your password has been changed successfully.");
+      notify(t("common.success"), t("userProfile.passwordChangeSuccess"));
     } catch (err: any) {
-      setPasswordError(err?.message || "Failed to change password. Please check your current password.");
+      setPasswordError(toApiError(err).message);
     } finally {
       setIsChangingPassword(false);
     }
@@ -182,7 +179,7 @@ export function BuyerProfileScreen() {
 
   const handleDeleteAccount = async () => {
     if (!user) {
-      Alert.alert("Notice", "No authenticated account to delete in preview mode.");
+      notify(t("common.notice"), t("userProfile.noAuthAccountToDelete"));
       return;
     }
 
@@ -192,35 +189,20 @@ export function BuyerProfileScreen() {
         await deleteUser(user.id);
         await logout();
         router.replace("/home");
-        Alert.alert("Account Deleted", "Your account has been permanently removed.");
+        notify(t("userProfile.accountDeletedTitle"), t("userProfile.accountDeletedMessage"));
       } catch (err: any) {
-        Alert.alert("Error", err?.message || "Failed to delete account. Please try again.");
+        notify(t("common.error"), toApiError(err).message);
       } finally {
         setIsDeletingAccount(false);
       }
     };
 
-    if (Platform.OS === "web") {
-      const confirmed =
-        typeof window !== "undefined"
-          ? window.confirm(
-              "Are you sure you want to permanently delete your account? This action cannot be undone."
-            )
-          : true;
-      if (confirmed) {
-        await doDelete();
-      }
-      return;
-    }
-
-    Alert.alert(
-      "Permanently Delete Account",
-      "Are you sure you want to delete your account? All your personal information, saved listings, and history will be permanently erased.",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete Permanently", style: "destructive", onPress: doDelete },
-      ]
+    const confirmed = await confirmAction(
+      t("userProfile.deleteModalTitle"),
+      t("userProfile.deleteModalMessage"),
+      { confirmLabel: t("userProfile.deleteModalConfirm"), destructive: true },
     );
+    if (confirmed) await doDelete();
   };
 
   const handleLogout = async () => {
@@ -228,25 +210,16 @@ export function BuyerProfileScreen() {
       try {
         await logout();
       } catch (err) {
-        console.warn("Logout error:", err);
+        if (__DEV__) console.warn("Logout error:", err);
       }
       router.replace("/home");
     };
 
-    if (Platform.OS === "web") {
-      const confirmed =
-        typeof window !== "undefined"
-          ? window.confirm("Are you sure you want to log out?")
-          : true;
-      if (!confirmed) return;
-      await doLogout();
-      return;
-    }
-
-    Alert.alert("Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Logout", style: "destructive", onPress: doLogout },
-    ]);
+    const confirmed = await confirmAction(t("userProfile.logoutConfirmTitle"), t("userProfile.logoutConfirmMessage"), {
+      confirmLabel: t("userProfile.logoutBtn"),
+      destructive: true,
+    });
+    if (confirmed) await doLogout();
   };
 
   return (
@@ -262,7 +235,7 @@ export function BuyerProfileScreen() {
           {/* Header Title & Back Button */}
           <View style={[styles.pageHeader, isPhone && styles.pageHeaderPhone]}>
             <Pressable
-              accessibilityLabel="Go back"
+              accessibilityLabel={t("userProfile.back")}
               accessibilityRole="button"
               onPress={() => {
                 if (router.canGoBack()) {
@@ -279,17 +252,17 @@ export function BuyerProfileScreen() {
               ]}
             >
               <ArrowLeft color="#0B1A17" size={17} strokeWidth={2.2} />
-              <Text style={styles.backBtnText}>Back</Text>
+              <Text style={styles.backBtnText}>{t("userProfile.back")}</Text>
             </Pressable>
 
-            <Text style={[styles.pageTitle, isPhone && styles.pageTitlePhone]}>Profile</Text>
+            <Text style={[styles.pageTitle, isPhone && styles.pageTitlePhone]}>{t("userProfile.pageTitle")}</Text>
           </View>
 
           {/* Section 1: Personal Information */}
           <View style={[styles.card, isPhone && styles.cardPhone]}>
             <View style={styles.cardHeaderRow}>
               <User color="#0B1A17" size={20} />
-              <Text style={styles.cardTitle}>Personal information</Text>
+              <Text style={styles.cardTitle}>{t("userProfile.personalInfoTitle")}</Text>
             </View>
 
             {/* Avatar and Name Row */}
@@ -314,12 +287,12 @@ export function BuyerProfileScreen() {
 
                   <View style={styles.buyerBadge}>
                     <CheckCircle2 color="#04cf92" size={14} />
-                    <Text style={styles.buyerBadgeText}>Buyer</Text>
+                    <Text style={styles.buyerBadgeText}>{t("userProfile.buyerBadge")}</Text>
                   </View>
                 </View>
 
                 <Pressable
-                  accessibilityLabel="Change photo"
+                  accessibilityLabel={t("userProfile.changePhoto")}
                   accessibilityRole="button"
                   onPress={handleAvatarUpload}
                   style={({ pressed }) => [
@@ -328,14 +301,14 @@ export function BuyerProfileScreen() {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={styles.changePhotoText}>Change photo</Text>
+                  <Text style={styles.changePhotoText}>{t("userProfile.changePhoto")}</Text>
                 </Pressable>
               </View>
             </View>
 
             {/* Form Field: Full Name */}
             <View style={styles.formGroup}>
-              <Text style={styles.fieldLabel}>Full name</Text>
+              <Text style={styles.fieldLabel}>{t("userProfile.fullNameLabel")}</Text>
               <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                 <TextInput
                   onChangeText={setFullName}
@@ -355,7 +328,7 @@ export function BuyerProfileScreen() {
                 />
                 {fullName.length > 0 && (
                   <Pressable
-                    accessibilityLabel="Clear full name"
+                    accessibilityLabel={t("userProfile.clearFullNameAria")}
                     accessibilityRole="button"
                     hitSlop={8}
                     onPress={() => setFullName("")}
@@ -371,11 +344,11 @@ export function BuyerProfileScreen() {
           {/* Section 2: Contact Information */}
           <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
             <View style={styles.cardHeaderRow}>
-              <Text style={styles.cardTitle}>Contact information</Text>
+              <Text style={styles.cardTitle}>{t("userProfile.contactInfoTitle")}</Text>
             </View>
 
             <View style={styles.formGroup}>
-              <Text style={styles.fieldLabel}>Email</Text>
+              <Text style={styles.fieldLabel}>{t("userProfile.emailLabel")}</Text>
               <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
                 <TextInput
                   autoCapitalize="none"
@@ -397,44 +370,10 @@ export function BuyerProfileScreen() {
                 />
                 {email.length > 0 && (
                   <Pressable
-                    accessibilityLabel="Clear email"
+                    accessibilityLabel={t("userProfile.clearEmailAria")}
                     accessibilityRole="button"
                     hitSlop={8}
                     onPress={() => setEmail("")}
-                    style={[styles.clearBtn, webPointer]}
-                  >
-                    <X color="rgba(11,26,23,0.4)" size={16} />
-                  </Pressable>
-                )}
-              </View>
-            </View>
-
-            <View style={[styles.formGroup, styles.formGroupSpacing]}>
-              <Text style={styles.fieldLabel}>Phone</Text>
-              <View style={[styles.inputWrap, isPhone && styles.inputWrapPhone]}>
-                <TextInput
-                  keyboardType="phone-pad"
-                  onChangeText={setPhone}
-                  onFocus={() => {
-                    if (phone === DEFAULT_PHONE) {
-                      setPhone("");
-                    }
-                  }}
-                  placeholder={DEFAULT_PHONE}
-                  placeholderTextColor="rgba(11,26,23,0.35)"
-                  selectTextOnFocus
-                  style={[
-                    styles.textInput,
-                    isNormalText(phone, DEFAULT_PHONE) && styles.textInputNormal,
-                  ]}
-                  value={phone}
-                />
-                {phone.length > 0 && (
-                  <Pressable
-                    accessibilityLabel="Clear phone"
-                    accessibilityRole="button"
-                    hitSlop={8}
-                    onPress={() => setPhone("")}
                     style={[styles.clearBtn, webPointer]}
                   >
                     <X color="rgba(11,26,23,0.4)" size={16} />
@@ -448,20 +387,18 @@ export function BuyerProfileScreen() {
           <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
             <View style={styles.cardHeaderRow}>
               <Shield color="#0B1A17" size={20} />
-              <Text style={styles.cardTitle}>Account security</Text>
+              <Text style={styles.cardTitle}>{t("userProfile.accountSecurityTitle")}</Text>
             </View>
 
             {/* Change Password Option */}
             <View style={[styles.securityRow, isPhone && styles.securityRowPhone]}>
               <View style={styles.securityInfoCol}>
-                <Text style={styles.securityTitle}>Password</Text>
-                <Text style={styles.securityDesc}>
-                  •••••••••••• &nbsp;·&nbsp; Keep your account protected with a strong password
-                </Text>
+                <Text style={styles.securityTitle}>{t("userProfile.passwordLabel")}</Text>
+                <Text style={styles.securityDesc}>{t("userProfile.passwordHint")}</Text>
               </View>
 
               <Pressable
-                accessibilityLabel="Change password"
+                accessibilityLabel={t("userProfile.changePasswordBtn")}
                 accessibilityRole="button"
                 onPress={() => {
                   setPasswordError(null);
@@ -475,7 +412,7 @@ export function BuyerProfileScreen() {
                 ]}
               >
                 <KeyRound color="#03a675" size={15} />
-                <Text style={styles.changePasswordBtnText}>Change password</Text>
+                <Text style={styles.changePasswordBtnText}>{t("userProfile.changePasswordBtn")}</Text>
               </Pressable>
             </View>
 
@@ -485,15 +422,15 @@ export function BuyerProfileScreen() {
             <View style={[styles.securityRow, isPhone && styles.securityRowPhone]}>
               <View style={styles.securityInfoCol}>
                 <Text style={[styles.securityTitle, { color: "#D4183D" }]}>
-                  Permanently delete account
+                  {t("userProfile.deleteAccountTitle")}
                 </Text>
                 <Text style={styles.securityDesc}>
-                  Once deleted, your profile, saved properties, and account data will be permanently removed.
+                  {t("userProfile.deleteAccountDesc")}
                 </Text>
               </View>
 
               <Pressable
-                accessibilityLabel="Permanently delete account"
+                accessibilityLabel={t("userProfile.deleteAccountBtn")}
                 accessibilityRole="button"
                 disabled={isDeletingAccount}
                 onPress={handleDeleteAccount}
@@ -510,7 +447,7 @@ export function BuyerProfileScreen() {
                 ) : (
                   <>
                     <Trash2 color="#D4183D" size={15} />
-                    <Text style={styles.deleteAccountBtnText}>Permanently delete account</Text>
+                    <Text style={styles.deleteAccountBtnText}>{t("userProfile.deleteAccountBtn")}</Text>
                   </>
                 )}
               </Pressable>
@@ -521,7 +458,7 @@ export function BuyerProfileScreen() {
           <View style={[styles.actionRow, isPhone && styles.actionRowPhone]}>
             {/* Logout Button */}
             <Pressable
-              accessibilityLabel="Logout"
+              accessibilityLabel={t("userProfile.logoutBtn")}
               accessibilityRole="button"
               onPress={handleLogout}
               style={({ pressed }) => [
@@ -532,12 +469,12 @@ export function BuyerProfileScreen() {
               ]}
             >
               <LogOut color="#D4183D" size={16} />
-              <Text style={styles.logoutBtnText}>Logout</Text>
+              <Text style={styles.logoutBtnText}>{t("userProfile.logoutBtn")}</Text>
             </Pressable>
 
             {/* Save changes Button with website theme color */}
             <Pressable
-              accessibilityLabel="Save changes"
+              accessibilityLabel={t("userProfile.saveChanges")}
               accessibilityRole="button"
               disabled={isSaving}
               onPress={handleSaveChanges}
@@ -550,9 +487,9 @@ export function BuyerProfileScreen() {
               ]}
             >
               {isSaving ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
+                <ActivityIndicator color={colorTokens.onBrand} size="small" />
               ) : (
-                <Text style={styles.saveBtnText}>Save changes</Text>
+                <Text style={styles.saveBtnText}>{t("userProfile.saveChanges")}</Text>
               )}
             </Pressable>
           </View>
@@ -579,13 +516,13 @@ export function BuyerProfileScreen() {
                 <KeyRound color="#03a675" size={20} />
               </View>
               <View style={styles.modalTitleWrap}>
-                <Text style={styles.modalTitle}>Change Password</Text>
+                <Text style={styles.modalTitle}>{t("userProfile.changePasswordModalTitle")}</Text>
                 <Text style={styles.modalSubtitle}>
-                  Enter your current password and a new secure password.
+                  {t("userProfile.changePasswordModalSubtitle")}
                 </Text>
               </View>
               <Pressable
-                accessibilityLabel="Close"
+                accessibilityLabel={t("auth.close")}
                 hitSlop={10}
                 onPress={() => setChangePasswordModalOpen(false)}
                 style={[styles.modalCloseBtn, webPointer]}
@@ -602,7 +539,7 @@ export function BuyerProfileScreen() {
 
             {/* Current Password */}
             <View style={styles.modalInputGroup}>
-              <Text style={styles.modalFieldLabel}>Current password</Text>
+              <Text style={styles.modalFieldLabel}>{t("userProfile.currentPasswordLabel")}</Text>
               <View style={styles.modalInputWrap}>
                 <TextInput
                   autoCapitalize="none"
@@ -610,14 +547,14 @@ export function BuyerProfileScreen() {
                     setCurrentPassword(val);
                     setPasswordError(null);
                   }}
-                  placeholder="Enter current password"
+                  placeholder={t("userProfile.currentPasswordPlaceholder")}
                   placeholderTextColor="rgba(11,26,23,0.35)"
                   secureTextEntry={!showCurrentPassword}
                   style={styles.modalTextInput}
                   value={currentPassword}
                 />
                 <Pressable
-                  accessibilityLabel="Toggle show password"
+                  accessibilityLabel={showCurrentPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                   onPress={() => setShowCurrentPassword(!showCurrentPassword)}
                   style={[styles.eyeBtn, webPointer]}
                 >
@@ -632,7 +569,7 @@ export function BuyerProfileScreen() {
 
             {/* New Password */}
             <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
-              <Text style={styles.modalFieldLabel}>New password</Text>
+              <Text style={styles.modalFieldLabel}>{t("userProfile.newPasswordLabel")}</Text>
               <View style={styles.modalInputWrap}>
                 <TextInput
                   autoCapitalize="none"
@@ -640,14 +577,14 @@ export function BuyerProfileScreen() {
                     setNewPassword(val);
                     setPasswordError(null);
                   }}
-                  placeholder="At least 6 characters"
+                  placeholder={t("userProfile.newPasswordPlaceholder")}
                   placeholderTextColor="rgba(11,26,23,0.35)"
                   secureTextEntry={!showNewPassword}
                   style={styles.modalTextInput}
                   value={newPassword}
                 />
                 <Pressable
-                  accessibilityLabel="Toggle show new password"
+                  accessibilityLabel={showNewPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                   onPress={() => setShowNewPassword(!showNewPassword)}
                   style={[styles.eyeBtn, webPointer]}
                 >
@@ -662,7 +599,7 @@ export function BuyerProfileScreen() {
 
             {/* Confirm New Password */}
             <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
-              <Text style={styles.modalFieldLabel}>Confirm new password</Text>
+              <Text style={styles.modalFieldLabel}>{t("userProfile.confirmNewPasswordLabel")}</Text>
               <View style={styles.modalInputWrap}>
                 <TextInput
                   autoCapitalize="none"
@@ -670,14 +607,14 @@ export function BuyerProfileScreen() {
                     setConfirmPassword(val);
                     setPasswordError(null);
                   }}
-                  placeholder="Confirm new password"
+                  placeholder={t("userProfile.confirmNewPasswordPlaceholder")}
                   placeholderTextColor="rgba(11,26,23,0.35)"
                   secureTextEntry={!showConfirmPassword}
                   style={styles.modalTextInput}
                   value={confirmPassword}
                 />
                 <Pressable
-                  accessibilityLabel="Toggle show confirm password"
+                  accessibilityLabel={showConfirmPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={[styles.eyeBtn, webPointer]}
                 >
@@ -693,7 +630,7 @@ export function BuyerProfileScreen() {
             {/* Modal Actions */}
             <View style={styles.modalActionRow}>
               <Pressable
-                accessibilityLabel="Cancel"
+                accessibilityLabel={t("userProfile.cancel")}
                 disabled={isChangingPassword}
                 onPress={() => setChangePasswordModalOpen(false)}
                 style={({ pressed }) => [
@@ -702,11 +639,11 @@ export function BuyerProfileScreen() {
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+                <Text style={styles.modalCancelBtnText}>{t("userProfile.cancel")}</Text>
               </Pressable>
 
               <Pressable
-                accessibilityLabel="Save password"
+                accessibilityLabel={t("userProfile.savePassword")}
                 disabled={isChangingPassword}
                 onPress={handleChangePasswordSubmit}
                 style={({ pressed }) => [
@@ -717,9 +654,9 @@ export function BuyerProfileScreen() {
                 ]}
               >
                 {isChangingPassword ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={colorTokens.onBrand} size="small" />
                 ) : (
-                  <Text style={styles.modalSubmitBtnText}>Save password</Text>
+                  <Text style={styles.modalSubmitBtnText}>{t("userProfile.savePassword")}</Text>
                 )}
               </Pressable>
             </View>
@@ -729,491 +666,3 @@ export function BuyerProfileScreen() {
     </AppChrome>
   );
 }
-
-const styles = StyleSheet.create({
-  scrollBody: {
-    paddingVertical: 32,
-    paddingHorizontal: 24,
-    alignItems: "center",
-  },
-  scrollBodyPhone: {
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-  },
-  contentWrap: {
-    width: "100%",
-    maxWidth: 680,
-  },
-  pageHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    marginBottom: 22,
-  },
-  pageHeaderPhone: {
-    gap: 12,
-    marginBottom: 18,
-  },
-  backBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    height: 38,
-    paddingHorizontal: 14,
-    borderRadius: 999,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    ...(Platform.OS === "web"
-      ? {
-          boxShadow: "0 1px 3px rgba(11, 26, 23, 0.04)",
-          transition: "all 0.15s ease",
-        }
-      : {
-          elevation: 1,
-        }),
-  },
-  backBtnPhone: {
-    height: 36,
-    paddingHorizontal: 12,
-  },
-  backBtnText: {
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: "#0B1A17",
-  },
-  pageTitle: {
-    fontSize: 26,
-    fontFamily: fonts.headingBold,
-    fontWeight: "700",
-    color: "#0B1A17",
-  },
-  pageTitlePhone: {
-    fontSize: 22,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    padding: 24,
-    ...(Platform.OS === "web"
-      ? {
-          boxShadow: "0 1px 3px rgba(11, 26, 23, 0.03)",
-        }
-      : {
-          elevation: 1,
-        }),
-  },
-  cardPhone: {
-    padding: 16,
-    borderRadius: 20,
-  },
-  sectionSpacing: {
-    marginTop: 20,
-  },
-  cardHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 20,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontFamily: fonts.headingBold,
-    fontWeight: "700",
-    color: "#0B1A17",
-  },
-  profileRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 18,
-    marginBottom: 24,
-  },
-  profileRowPhone: {
-    gap: 14,
-    marginBottom: 20,
-  },
-  avatarWrap: {
-    width: 76,
-    height: 76,
-    borderRadius: 22,
-    overflow: "hidden",
-    position: "relative",
-    backgroundColor: "#E6FAF4",
-  },
-  avatarWrapPhone: {
-    width: 68,
-    height: 68,
-    borderRadius: 18,
-  },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
-  },
-  uploadingOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(11, 26, 23, 0.5)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  profileInfoCol: {
-    flex: 1,
-    gap: 5,
-  },
-  nameBadgeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flexWrap: "wrap",
-  },
-  profileName: {
-    fontSize: 17,
-    fontFamily: fonts.headingBold,
-    fontWeight: "700",
-    color: "#0B1A17",
-  },
-  buyerBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-    borderRadius: 999,
-    backgroundColor: "rgba(4, 207, 146, 0.12)",
-  },
-  buyerBadgeText: {
-    fontSize: 12,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: "#03a675",
-  },
-  changePhotoBtn: {
-    alignSelf: "flex-start",
-  },
-  changePhotoText: {
-    fontSize: 13.5,
-    fontFamily: fonts.medium,
-    color: "#04cf92",
-    fontWeight: "600",
-  },
-  formGroup: {
-    width: "100%",
-  },
-  formGroupSpacing: {
-    marginTop: 16,
-  },
-  fieldLabel: {
-    fontSize: 13,
-    fontFamily: fonts.medium,
-    fontWeight: "500",
-    color: "#0B1A17",
-    marginBottom: 7,
-  },
-  inputWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F4F6F5",
-    borderRadius: 14,
-    height: 48,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.04)",
-  },
-  inputWrapPhone: {
-    height: 46,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-  },
-  textInput: {
-    flex: 1,
-    height: "100%",
-    fontSize: 14.5,
-    fontFamily: fonts.regular,
-    fontWeight: "300",
-    color: "rgba(11, 26, 23, 0.45)",
-    paddingVertical: 0,
-    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
-  },
-  textInputNormal: {
-    fontWeight: "400",
-    color: "#0B1A17",
-  },
-  clearBtn: {
-    padding: 6,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  // Security Section
-  securityRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 16,
-    paddingVertical: 6,
-  },
-  securityRowPhone: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  securityInfoCol: {
-    flex: 1,
-  },
-  securityTitle: {
-    fontSize: 14.5,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: "#0B1A17",
-  },
-  securityDesc: {
-    fontSize: 12.5,
-    fontFamily: fonts.regular,
-    color: "#5C6B66",
-    marginTop: 3,
-    lineHeight: 18,
-  },
-  securityDivider: {
-    height: 1,
-    backgroundColor: "rgba(11,26,23,0.06)",
-    marginVertical: 14,
-  },
-  changePasswordBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 999,
-    borderWidth: 1.2,
-    borderColor: "rgba(4, 207, 146, 0.35)",
-    backgroundColor: "rgba(4, 207, 146, 0.12)",
-  },
-  changePasswordBtnText: {
-    fontSize: 13.5,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: "#03a675",
-  },
-  deleteAccountBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 999,
-    borderWidth: 1.2,
-    borderColor: "rgba(212, 24, 61, 0.3)",
-    backgroundColor: "#FFF5F6",
-  },
-  deleteAccountBtnText: {
-    fontSize: 13.5,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: "#D4183D",
-  },
-  fullWidthBtnPhone: {
-    alignSelf: "stretch",
-    justifyContent: "center",
-  },
-  // Bottom Action Row
-  actionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 24,
-    paddingBottom: 40,
-    width: "100%",
-    gap: 12,
-  },
-  actionRowPhone: {
-    paddingTop: 20,
-    paddingBottom: 32,
-  },
-  logoutBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 999,
-    borderWidth: 1.13,
-    borderColor: "rgba(212,24,61,0.3)",
-    backgroundColor: "#FFFFFF",
-  },
-  logoutBtnPhone: {
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-  },
-  logoutBtnText: {
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: "#D4183D",
-  },
-  saveBtn: {
-    backgroundColor: "#04cf92",
-    paddingHorizontal: 24,
-    paddingVertical: 11,
-    borderRadius: 999,
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 130,
-  },
-  saveBtnPhone: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    minWidth: 110,
-  },
-  btnDisabled: {
-    opacity: 0.7,
-  },
-  saveBtnText: {
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-  // Change Password Modal
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: "rgba(11, 26, 23, 0.45)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-    zIndex: 100,
-  },
-  modalCard: {
-    width: "100%",
-    maxWidth: 440,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    ...(Platform.OS === "web"
-      ? {
-          boxShadow: "0 20px 45px -10px rgba(11, 26, 23, 0.25)",
-        }
-      : {
-          elevation: 10,
-        }),
-  },
-  modalCardPhone: {
-    padding: 18,
-    borderRadius: 20,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    marginBottom: 18,
-  },
-  modalIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "rgba(4, 207, 146, 0.14)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalTitleWrap: {
-    flex: 1,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontFamily: fonts.headingBold,
-    fontWeight: "700",
-    color: "#0B1A17",
-  },
-  modalSubtitle: {
-    fontSize: 13,
-    fontFamily: fonts.regular,
-    color: "#5C6B66",
-    marginTop: 2,
-    lineHeight: 18,
-  },
-  modalCloseBtn: {
-    padding: 4,
-  },
-  modalErrorBanner: {
-    backgroundColor: "#FFF5F6",
-    borderWidth: 1,
-    borderColor: "rgba(212, 24, 61, 0.2)",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 14,
-  },
-  modalErrorText: {
-    fontSize: 13,
-    fontFamily: fonts.medium,
-    color: "#D4183D",
-  },
-  modalInputGroup: {
-    width: "100%",
-  },
-  modalFieldLabel: {
-    fontSize: 13,
-    fontFamily: fonts.medium,
-    fontWeight: "500",
-    color: "#0B1A17",
-    marginBottom: 6,
-  },
-  modalInputWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F4F6F5",
-    borderRadius: 12,
-    height: 44,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-    borderColor: "rgba(11,26,23,0.06)",
-  },
-  modalTextInput: {
-    flex: 1,
-    height: "100%",
-    fontSize: 14,
-    fontFamily: fonts.regular,
-    color: "#0B1A17",
-    paddingVertical: 0,
-    ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
-  },
-  eyeBtn: {
-    padding: 6,
-  },
-  modalActionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    gap: 10,
-    marginTop: 22,
-  },
-  modalCancelBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 999,
-    backgroundColor: "#F4F6F5",
-  },
-  modalCancelBtnText: {
-    fontSize: 13.5,
-    fontFamily: fonts.medium,
-    color: "#5C6B66",
-  },
-  modalSubmitBtn: {
-    paddingHorizontal: 20,
-    paddingVertical: 9,
-    borderRadius: 999,
-    backgroundColor: "#04cf92",
-  },
-  modalSubmitBtnText: {
-    fontSize: 13.5,
-    fontFamily: fonts.semiBold,
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-});

@@ -9,9 +9,10 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { RefreshCw } from "lucide-react-native";
+import { RefreshCw } from "@/components/icons";
 import { router, type Href } from "expo-router";
 import { colors, fonts, radius, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 
 export interface ToggleViewButtonProps {
   href?: string;
@@ -30,6 +31,7 @@ export function ToggleViewButton({
   style,
   size = "md",
 }: ToggleViewButtonProps) {
+  const { t } = useTranslation();
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const [isHovered, setIsHovered] = useState(false);
 
@@ -58,7 +60,7 @@ export function ToggleViewButton({
 
   return (
     <Pressable
-      accessibilityLabel="Toggle view to live site"
+      accessibilityLabel={t("seller.toggleView.aria")}
       accessibilityRole="link"
       onHoverIn={() => {
         setIsHovered(true);
@@ -83,7 +85,7 @@ export function ToggleViewButton({
         />
       </Animated.View>
       <Text style={[styles.text, size === "sm" && styles.textSm]}>
-        Toggle view
+        {t("seller.toggleView.label")}
       </Text>
     </Pressable>
   );

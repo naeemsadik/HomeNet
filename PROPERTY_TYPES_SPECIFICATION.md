@@ -55,6 +55,14 @@ The database stores `subtype` as an open string (`String?`), allowing flexible c
 * **`open`** — Open-air parking lot slot
 * **`garage`** — Enclosed private garage
 
+### 2.5 Custom Subtypes
+
+For residential, commercial and land, the listing wizard also offers **Other**: the owner types their own subtype (for example "Farmhouse" or "Guest house"). The app stores it as typed, tidied to single spaces and at most 40 characters, with no angle brackets or control characters. A typed value that means a listed subtype ("duplex", "flat") is stored as the listed value, so one subtype is not spelled two ways.
+
+**Parking is the exception.** The API accepts only `covered`, `open` and `garage` for parking (`property.rules.ts`), so the wizard does not offer Other there.
+
+Custom subtypes are matched case-insensitively by the API's `subtype` filter. The Browse screen filters by category only (plus the `?subtype=short-let` link), so a listing with a custom subtype is found under its category.
+
 ---
 
 ## 3. Listing Types (`listing_type`)

@@ -1,7 +1,8 @@
 import React, { type ReactNode } from "react";
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
-import { Lock } from "lucide-react-native";
+import { Lock } from "@/components/icons";
 import { fonts } from "@/theme";
+import { useTranslation } from "@/i18n";
 
 interface BrowserFrameProps {
   children: ReactNode;
@@ -12,10 +13,13 @@ interface BrowserFrameProps {
 
 export function BrowserFrame({
   children,
-  url = "homenet.com.bd/buy",
+  url,
   style,
   contentStyle,
 }: BrowserFrameProps) {
+  const { t } = useTranslation();
+  const displayUrl = url ?? t("landing.browserFrame.url");
+
   return (
     <View style={[styles.browser, style]}>
       {/* Chrome Top Bar */}
@@ -29,7 +33,7 @@ export function BrowserFrame({
         <View style={styles.addressBar}>
           <Lock color="#5C6B66" size={11} strokeWidth={2.5} />
           <Text numberOfLines={1} style={styles.addressText}>
-            {url}
+            {displayUrl}
           </Text>
         </View>
 

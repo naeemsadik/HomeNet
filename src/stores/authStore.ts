@@ -4,11 +4,13 @@ import {
   changePassword as changePasswordRequest,
   getCurrentUser,
   loginUser,
+  loginWithGoogle,
   logoutUser,
   registerUser,
 } from "@/services/authApi";
 import { getUserRoles } from "@/services/roleApi";
 import { notifyUnauthorized, toApiError } from "@/services/apiClient";
+import { useSavedStore } from "@/stores/savedStore";
 import type {
   AuthUser,
   ChangePasswordDto,
@@ -26,6 +28,8 @@ interface AuthState {
   userRoles: UserRole[];
   register: (dto: RegisterDto) => Promise<boolean>;
   login: (dto: LoginDto) => Promise<boolean>;
+  /** Signs in or up with the credential (ID token) Google Identity Services returns. */
+  googleLogin: (idToken: string) => Promise<boolean>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
   fetchUserRoles: (userId: string) => Promise<void>;
@@ -56,6 +60,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await saveTokens(response.data.access_token, response.data.refresh_token);
       set({ user: response.data.user, loading: false });
       await get().fetchUserRoles(response.data.user.id);
+      void useSavedStore.getState().syncGuestSaves();
       return true;
     } catch (error) {
       set({ loading: false, ...authError(error) });
@@ -71,6 +76,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await saveTokens(response.data.access_token, response.data.refresh_token);
       set({ user: response.data.user, loading: false });
       await get().fetchUserRoles(response.data.user.id);
+      void useSavedStore.getState().syncGuestSaves();
+      return true;
+    } catch (error) {
+      set({ loading: false, ...authError(error) });
+      return false;
+    }
+  },
+
+  googleLogin: async (idToken) => {
+    set({ loading: true, error: null, errorCode: null });
+    try {
+      const response = await loginWithGoogle(idToken);
+      if (!response.data) throw new Error(response.message || "Google sign-in failed");
+      await saveTokens(response.data.access_token, response.data.refresh_token);
+      set({ user: response.data.user, loading: false });
+      await get().fetchUserRoles(response.data.user.id);
+      void useSavedStore.getState().syncGuestSaves();
       return true;
     } catch (error) {
       set({ loading: false, ...authError(error) });
@@ -85,6 +107,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (refreshToken) await logoutUser(refreshToken).catch(() => undefined);
     } finally {
       await clearTokens();
+      useSavedStore.getState().clearSaved();
       get().resetSession();
       await notifyUnauthorized();
     }
@@ -141,7 +164,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   hydrate: async () => {
     if (get().hydrated) return;
     try {
-      if (await getAccessToken()) await get().fetchMe();
+      if (await getAccessToken()) {
+        await get().fetchMe();
+        void useSavedStore.getState().syncGuestSaves();
+      }
     } catch {
       await clearTokens();
       get().resetSession();
@@ -150,16 +176,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  resetSession: () =>
+  resetSession: () => {
+    useSavedStore.getState().clearSaved();
     set({
       user: null,
       loading: false,
       error: null,
       errorCode: null,
       userRoles: [],
-    }),
+    });
+  },
 }));
 
-if (typeof window !== "undefined") {
+// A console handle for debugging. Never in production, where it would hand
+// login, logout and resetSession to any script on the page.
+if (__DEV__ && typeof window !== "undefined") {
   (window as any).__authStore = useAuthStore;
 }

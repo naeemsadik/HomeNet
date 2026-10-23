@@ -1,6 +1,5 @@
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { PropsWithChildren } from "react";
-import { HERO_IMAGE_URL } from "@/lib/heroImage";
 
 export default function Root({ children }: PropsWithChildren) {
   return (
@@ -8,25 +7,16 @@ export default function Root({ children }: PropsWithChildren) {
       <head>
         <meta charSet="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
-        <meta content="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet." name="description" />
-        {/* The title is supplied per route via PageMeta (expo-router/head),
-            which fills Expo Router's own react-helmet tag. A static <title>
-            here would be a second, competing title element. */}
+        {/* The title and description are supplied per route via PageMeta
+            (expo-router/head), which fills Expo Router's own react-helmet tags.
+            A static <title> or description here would be a second, competing
+            copy: crawlers would see two. */}
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        {/*
-          The homepage LCP element is a CSS background image, which the preload
-          scanner cannot see until the bundle has rendered. Announcing it here
-          starts the download in parallel with the JS instead of after it.
-          The URL must stay identical to HomeScreen's — hence the shared constant.
-        */}
+        {/* The homepage hero preload lives in app/index.tsx: every page shares
+            this file, and on the others an unused preload logs a console
+            warning. */}
         <link rel="preconnect" href="https://images.unsplash.com" />
-        <link
-          rel="preload"
-          as="image"
-          fetchPriority="high"
-          href={HERO_IMAGE_URL}
-        />
         <ScrollViewStyleReset />
         {/*
           Inter and Plus Jakarta Sans are bundled and registered by useFonts in
@@ -66,31 +56,9 @@ export default function Root({ children }: PropsWithChildren) {
             outline-style: none !important;
             box-shadow: none !important;
           }
-
-          /* ─── Google Translate UI Cleanup ──────────────────────────────── */
-          .goog-te-banner-frame.skiptranslate,
-          .goog-te-banner-frame,
-          .goog-te-balloon-frame,
-          #goog-gt-tt,
-          .goog-tooltip,
-          .goog-tooltip:hover {
-            display: none !important;
-            visibility: hidden !important;
-          }
-          body {
-            top: 0px !important;
-            position: static !important;
-          }
-          .skiptranslate iframe {
-            display: none !important;
-          }
-          #google_translate_element {
-            display: none !important;
-          }
         ` }} />
       </head>
       <body>
-        <div id="google_translate_element" style={{ display: "none" }} />
         {children}
       </body>
     </html>
