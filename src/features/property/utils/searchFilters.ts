@@ -367,6 +367,8 @@ function roomCountOf(property: Property, key: "bedrooms" | "bathrooms"): number 
  */
 export function applyClientFilters(items: Property[], filters: SearchFilters): Property[] {
   let results = items;
+  const [, maxBedrooms] = orderedPair(filters.minBedrooms, filters.maxBedrooms);
+  const [, maxBathrooms] = orderedPair(filters.minBathrooms, filters.maxBathrooms);
 
   // The API ignores `status` when `listing_type` is set, so a sold query comes
   // back full of active listings. Presenting those as completed sales would be
@@ -387,7 +389,7 @@ export function applyClientFilters(items: Property[], filters: SearchFilters): P
 
   // The API's `bedrooms` / `bathrooms` are minimums, so both ceilings are ours.
   for (const key of ["bedrooms", "bathrooms"] as const) {
-    const ceiling = num(key === "bedrooms" ? filters.maxBedrooms : filters.maxBathrooms);
+    const ceiling = key === "bedrooms" ? maxBedrooms : maxBathrooms;
     if (ceiling === undefined) continue;
     results = results.filter((property) => {
       const count = roomCountOf(property, key);

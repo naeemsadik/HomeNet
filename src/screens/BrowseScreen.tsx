@@ -23,13 +23,15 @@ import { RightmoveFilterCard } from "@/components/RightmoveFilterCard";
 import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
 import { useAreas } from "@/features/property/hooks/useAreas";
 import { useBrowseFeed } from "@/features/property/hooks/useBrowseFeed";
+import type { Property } from "@/features/property/types/property";
 import {
   areaOptions as buildAreaOptions,
+  type AreaScope,
   fallbackAreaOptions,
   isCityName,
   resolveScope,
 } from "@/features/property/utils/areaScope";
-import { getProperties } from "@/services/propertyApi";
+import { getProperties, getPropertiesInAreas } from "@/services/propertyApi";
 import {
   applyClientFilters,
   countActiveFilters,
@@ -47,6 +49,20 @@ import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
 import { useTranslation, formatLocalizedNumber } from "@/i18n";
+
+function scopedPreviewFilters(filters: ReturnType<typeof toApiFilters>, scope: AreaScope) {
+  if (scope.kind === "city" || scope.kind === "text") {
+    const place = scope.kind === "city" ? scope.city : scope.text;
+    return {
+      ...filters,
+      search: filters.search ? `${place} ${filters.search}`.trim() : place,
+    };
+  }
+  if (scope.kind === "radius") {
+    return { ...filters, lat: scope.lat, lng: scope.lng, radius: scope.radius };
+  }
+  return filters;
+}
 
 export function BrowseScreen({
   mode,
@@ -157,15 +173,53 @@ export function BrowseScreen({
 
   /**
    * The count the modal's pending filters would return, for its apply button.
-   * `limit: 1` keeps it to a count — the listings themselves are not needed.
+   * It follows the same scope + client-side filtering path as the main feed.
    */
+  const previewScope = React.useMemo(
+    () =>
+      previewFilters
+        ? resolveScope({
+            name: previewFilters.area,
+            radiusKm: previewFilters.radius ? parseInt(previewFilters.radius, 10) : 0,
+            areas,
+          })
+        : null,
+    [areas, previewFilters]
+  );
+  const previewReady = Boolean(previewFilters)
+    && (!previewFilters?.area || isCityName(previewFilters.area) || areasReady);
   const previewQuery = useQuery({
-    queryKey: ["properties", "preview", previewFilters && toApiFilters(previewFilters)],
-    queryFn: () => getProperties({ ...toApiFilters(previewFilters as SearchFilters), limit: 1 }),
-    enabled: Boolean(previewFilters) && isFilterModalOpen,
+    queryKey: ["properties", "preview", previewFilters, previewScope?.scope],
+    queryFn: async () => {
+      const pending = previewFilters as SearchFilters;
+      const scope: AreaScope = previewScope?.scope ?? { kind: "none" };
+      const pendingApiFilters = toApiFilters(pending);
+      const scopedFilters = scopedPreviewFilters(pendingApiFilters, scope);
+
+      let items: Property[];
+      let total: number;
+      if (scope.kind === "areas") {
+        const response = await getPropertiesInAreas(
+          { ...scopedFilters, limit: pendingApiFilters.limit ?? 20 },
+          scope.ids
+        );
+        items = response.items;
+        total = response.total;
+      } else {
+        const response = await getProperties(scopedFilters);
+        items = response.data?.items ?? [];
+        total = response.data?.total ?? 0;
+      }
+      const filtered = applyClientFilters(items, pending);
+
+      return hasClientFilters(pending) || pending.purpose === "sold"
+        ? filtered.length
+        : total;
+    },
+    enabled: previewReady && isFilterModalOpen,
   });
   const previewCount = previewFilters
-    ? previewQuery.data?.data?.total
+    ? previewQuery.data
     : totalCount;
 
   // The area list feeds both the bar and the modal, from the app-wide areas

@@ -268,6 +268,18 @@ describe("toApiFilters", () => {
     expect(api.max_price).toBe(10000000);
   });
 
+  it("swaps inverted bedroom and bathroom bounds before API minimums", () => {
+    const api = toApiFilters({
+      ...defaultSearchFilters,
+      minBedrooms: "5",
+      maxBedrooms: "2",
+      minBathrooms: "4",
+      maxBathrooms: "1",
+    });
+    expect(api.bedrooms).toBe(2);
+    expect(api.bathrooms).toBe(1);
+  });
+
   it("keeps the short-let, sold and verified behaviour", () => {
     // A holiday stay is its own listing type in the API, not rent plus a text
     // search for the words, which also matched ordinary rentals saying them.
@@ -359,6 +371,21 @@ describe("applyClientFilters", () => {
       maxBathrooms: "3",
     });
     expect(results.map((p) => p.id)).toEqual(["two"]);
+  });
+
+  it("normalizes inverted room bounds before client-side ceilings", () => {
+    const two = property({ id: "two", bedrooms: 2, bathrooms: 2 });
+    const four = property({ id: "four", bedrooms: 4, bathrooms: 4 });
+    const six = property({ id: "six", bedrooms: 6, bathrooms: 6 });
+
+    const results = applyClientFilters([two, four, six], {
+      ...defaultSearchFilters,
+      minBedrooms: "5",
+      maxBedrooms: "2",
+      minBathrooms: "5",
+      maxBathrooms: "2",
+    });
+    expect(results.map((p) => p.id)).toEqual(["two", "four"]);
   });
 
   it("reads a bathroom count kept on amenities", () => {
