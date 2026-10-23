@@ -1,4 +1,4 @@
-import { LinearGradient } from "expo-linear-gradient";
+﻿import { LinearGradient } from "expo-linear-gradient";
 import {
   ArrowRight,
   DatabaseZap,
@@ -62,7 +62,7 @@ export function AboutScreen() {
       </View>
 
       <LinearGradient
-        colors={["#EAF7F1", "#EEF3FB"]}
+        colors={["#F9F4EB", "#EEF3FB"]}
         end={{ x: 1, y: 0 }}
         style={[styles.contactCard, isPhone && styles.contactCardPhone]}
       >
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: "rgba(15, 109, 85, 0.2)",
+    borderColor: "rgba(117, 72, 11, 0.2)",
     ...shadow,
   },
   contactLinkPhone: {

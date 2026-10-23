@@ -1,4 +1,4 @@
-import { USE_NATIVE_DRIVER } from "@/lib/animation";
+﻿import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -249,7 +249,7 @@ export function AreaPicker({
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
               <View style={styles.headerIconCircle}>
-                <MapPin size={16} color="#04cf92" strokeWidth={2.2} />
+                <MapPin size={16} color="#8D5C12" strokeWidth={2.2} />
               </View>
               <Text style={styles.headerTitle}>{t("areaPicker.title")}</Text>
             </View>
@@ -269,7 +269,7 @@ export function AreaPicker({
                 style={[styles.closeButton, webPointer]}
                 accessibilityLabel={t("areaPicker.close")}
               >
-                <X size={17} color="#5C6B66" strokeWidth={2} />
+                <X size={17} color="#6E6458" strokeWidth={2} />
               </Pressable>
             </View>
           </View>
@@ -518,7 +518,7 @@ export function AreaPicker({
                         <View style={[styles.pinCircle, isSelected && styles.pinCircleSelected]}>
                           <MapPin
                             size={15}
-                            color={isSelected ? "#04cf92" : "#60716B"}
+                            color={isSelected ? "#8D5C12" : "#60716B"}
                             strokeWidth={isSelected ? 2.2 : 1.8}
                           />
                         </View>
@@ -562,7 +562,7 @@ export function AreaPicker({
                           </Pressable>
                         ) : isSelected ? (
                           <View style={styles.selectedCheckBadge}>
-                            <Check size={13} color="#04cf92" strokeWidth={2.5} />
+                            <Check size={13} color="#8D5C12" strokeWidth={2.5} />
                           </View>
                         ) : null}
 

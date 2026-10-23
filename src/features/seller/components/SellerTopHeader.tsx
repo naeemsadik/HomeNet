@@ -1,4 +1,4 @@
-import { Bell, Menu, Search, X } from "@/components/icons";
+﻿import { Bell, Menu, Search, X } from "@/components/icons";
 import {
   Platform,
   Pressable,
@@ -62,7 +62,7 @@ export function SellerTopHeader({
             pressed && styles.pressed,
           ]}
         >
-          <Menu color="#0B1A17" size={20} strokeWidth={1.8} />
+          <Menu color="#1A1612" size={20} strokeWidth={1.8} />
         </Pressable>
       )}
 
@@ -107,7 +107,7 @@ export function SellerTopHeader({
           href="/notifications"
           style={[styles.iconCircleBtn, webPointer]}
         >
-          <Bell color="#0B1A17" size={20} strokeWidth={1.8} />
+          <Bell color="#1A1612" size={20} strokeWidth={1.8} />
           {hasUnreadNotifications && <View style={styles.notificationDot} />}
         </AppLink>
 
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     fontSize: 19.2,
     lineHeight: 26,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.384,
   },
   headerActions: {
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 999,
     borderWidth: 0.8,
     borderColor: "rgba(11,26,23,0.08)",

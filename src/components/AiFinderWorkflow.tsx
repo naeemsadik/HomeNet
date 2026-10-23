@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowLeft,
   ArrowRight,
   Building2,
@@ -197,7 +197,7 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
     <View style={[styles.headerRow, isModal && styles.headerRowModal]}>
       <View style={styles.headerLeft}>
         <View style={styles.aiPillBadge}>
-          <Sparkles color="#04cf92" size={14} />
+          <Sparkles color="#8D5C12" size={14} />
           <Text style={styles.aiPillText}>
             {AI_SEARCH_ENABLED ? t("search.aiFinder.aiFinderBadge") : t("search.aiFinder.finderBadge")}
           </Text>
@@ -522,14 +522,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     alignSelf: "flex-start",
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
     marginBottom: 8,
   },
   aiPillText: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.bold,
     fontSize: 12,
     fontWeight: "700",
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
   stepConnectorLine: {
     width: "100%",
     height: 2,
-    backgroundColor: "#DFEAE4",
+    backgroundColor: "#EBE3D7",
     borderRadius: 999,
   },
   stepConnectorLineActive: {
@@ -818,7 +818,7 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: 28,
     alignItems: "center",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderRadius: 16,
   },
   emptyTitle: {

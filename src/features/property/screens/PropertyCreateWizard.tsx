@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+﻿import { router, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
   BarChart2,
@@ -458,7 +458,7 @@ export function PropertyCreateWizard() {
                   ]}
                 >
                   <IconComp
-                    color={item.danger ? "#D4183D" : item.active ? "#04cf92" : "#5C6B66"}
+                    color={item.danger ? "#D4183D" : item.active ? "#8D5C12" : "#6E6458"}
                     size={20}
                   />
                   <Text
@@ -528,7 +528,7 @@ export function PropertyCreateWizard() {
                   ]}
                 >
                   <Bell
-                    color={notificationsOpen ? "#04cf92" : "#0B1A17"}
+                    color={notificationsOpen ? "#8D5C12" : "#1A1612"}
                     size={20}
                     strokeWidth={1.8}
                   />
@@ -721,7 +721,7 @@ export function PropertyCreateWizard() {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <ChevronLeft color="#5C6B66" size={16} strokeWidth={2} />
+                  <ChevronLeft color="#6E6458" size={16} strokeWidth={2} />
                   <Text style={[styles.backBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>{t("wizard.actions.back")}</Text>
                 </Pressable>
               ) : store.currentStep > 1 ? (
@@ -729,7 +729,7 @@ export function PropertyCreateWizard() {
                   onPress={handleBack}
                   style={({ pressed }) => [styles.backBtn, webPointer, pressed && styles.pressed]}
                 >
-                  <ArrowLeft color="#0B1A17" size={16} />
+                  <ArrowLeft color="#1A1612" size={16} />
                   <Text style={styles.backBtnText}>{t("wizard.actions.back")}</Text>
                 </Pressable>
               ) : (
@@ -748,7 +748,7 @@ export function PropertyCreateWizard() {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Save color="#0B1A17" size={14} />
+                  <Save color="#1A1612" size={14} />
                   <Text style={[styles.saveDraftText, isPhone && styles.saveDraftTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
                     {isNarrowPhone ? t("wizard.actions.save") : t("wizard.actions.saveDraft")}
                   </Text>

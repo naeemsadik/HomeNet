@@ -1,4 +1,4 @@
-import { Check, Plus } from "@/components/icons";
+﻿import { Check, Plus } from "@/components/icons";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { useTranslation } from "@/i18n";
@@ -93,7 +93,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                   ]}
                 >
                   <TypeIcon
-                    color={isSelected ? "#04cf92" : "#5C6B66"}
+                    color={isSelected ? "#8D5C12" : "#6E6458"}
                     size={20}
                   />
                 </View>
@@ -146,7 +146,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                   webPointer,
                 ]}
               >
-                {isSelected ? <Check color="#04cf92" size={14} /> : null}
+                {isSelected ? <Check color="#8D5C12" size={14} /> : null}
                 <Text
                   style={[
                     styles.subtypePillText,
@@ -175,7 +175,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                 webPointer,
               ]}
             >
-              {showOther ? <Check color="#04cf92" size={14} /> : <Plus color="#5C6B66" size={14} />}
+              {showOther ? <Check color="#8D5C12" size={14} /> : <Plus color="#6E6458" size={14} />}
               <Text
                 style={[
                   styles.subtypePillText,

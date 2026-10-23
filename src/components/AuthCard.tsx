@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -83,35 +83,35 @@ function FigmaSparkleIcon() {
       </Defs>
       <Path
         d="M6.62467 10.3333C6.56515 10.1026 6.44489 9.89207 6.27641 9.72359C6.10793 9.55511 5.89738 9.43485 5.66667 9.37533L1.57667 8.32067C1.50689 8.30086 1.44547 8.25883 1.40174 8.20096C1.35801 8.14309 1.33435 8.07254 1.33435 8C1.33435 7.92746 1.35801 7.85691 1.40174 7.79904C1.44547 7.74117 1.50689 7.69914 1.57667 7.67933L5.66667 6.624C5.8973 6.56454 6.10779 6.44438 6.27627 6.27603C6.44474 6.10767 6.56504 5.89726 6.62467 5.66667L7.67933 1.57667C7.69894 1.50661 7.74092 1.44489 7.79888 1.40093C7.85684 1.35696 7.92759 1.33317 8.00033 1.33317C8.07308 1.33317 8.14383 1.35696 8.20179 1.40093C8.25974 1.44489 8.30173 1.50661 8.32133 1.57667L9.37533 5.66667C9.43485 5.89738 9.55511 6.10793 9.72359 6.27641C9.89207 6.44489 10.1026 6.56515 10.3333 6.62467L14.4233 7.67867C14.4937 7.69807 14.5557 7.74001 14.5999 7.79805C14.6441 7.8561 14.668 7.92704 14.668 8C14.668 8.07296 14.6441 8.1439 14.5999 8.20195C14.5557 8.25999 14.4937 8.30193 14.4233 8.32133L10.3333 9.37533C10.1026 9.43485 9.89207 9.55511 9.72359 9.72359C9.55511 9.89207 9.43485 10.1026 9.37533 10.3333L8.32067 14.4233C8.30106 14.4934 8.25908 14.5551 8.20112 14.5991C8.14316 14.643 8.07241 14.6668 7.99967 14.6668C7.92692 14.6668 7.85617 14.643 7.79821 14.5991C7.74026 14.5551 7.69827 14.4934 7.67867 14.4233L6.62467 10.3333Z"
-        stroke="#04cf92"
+        stroke="#8D5C12"
         strokeWidth={1.33333}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M13.3333 2V4.66667"
-        stroke="#04cf92"
+        stroke="#8D5C12"
         strokeWidth={1.33333}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M14.6667 3.33333H12"
-        stroke="#04cf92"
+        stroke="#8D5C12"
         strokeWidth={1.33333}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M2.66667 11.3333V12.6667"
-        stroke="#04cf92"
+        stroke="#8D5C12"
         strokeWidth={1.33333}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <Path
         d="M3.33333 12H2"
-        stroke="#04cf92"
+        stroke="#8D5C12"
         strokeWidth={1.33333}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -217,7 +217,7 @@ export function AuthCard({
         >
           {/* Exact Figma Gradient Overlay (linear-gradient: 158.18deg) */}
           <LinearGradient
-            colors={["rgb(15, 109, 85)", "rgba(15, 109, 85, 0.535)", "rgba(191, 255, 239, 0.36)"]}
+            colors={["rgb(15, 109, 85)", "rgba(117, 72, 11, 0.535)", "rgba(191, 255, 239, 0.36)"]}
             locations={[0, 0.572, 1]}
             start={{ x: 0.18, y: 0 }}
             end={{ x: 0.82, y: 1 }}
@@ -230,7 +230,7 @@ export function AuthCard({
                 onPress={onClose}
                 style={[styles.closeButton, webPointer]}
               >
-                <X color="#0B1A17" size={18} strokeWidth={2.2} />
+                <X color="#1A1612" size={18} strokeWidth={2.2} />
               </Pressable>
             ) : null}
 
@@ -316,7 +316,7 @@ export function AuthCard({
           {mode === "signup" ? (
             <View>
               <View style={[styles.inputWrap, errors.full_name && styles.inputWrapError]}>
-                <User color="#5C6B66" size={16} style={styles.inputLeftIcon} />
+                <User color="#6E6458" size={16} style={styles.inputLeftIcon} />
                 <Controller
                   control={control}
                   name="full_name"
@@ -344,7 +344,7 @@ export function AuthCard({
 
           <View>
             <View style={[styles.inputWrap, errors.email && styles.inputWrapError]}>
-              <Mail color="#5C6B66" size={16} style={styles.inputLeftIcon} />
+              <Mail color="#6E6458" size={16} style={styles.inputLeftIcon} />
               <Controller
                 control={control}
                 name="email"
@@ -373,7 +373,7 @@ export function AuthCard({
 
           <View>
             <View style={[styles.inputWrap, errors.password && styles.inputWrapError]}>
-              <Lock color="#5C6B66" size={16} style={styles.inputLeftIcon} />
+              <Lock color="#6E6458" size={16} style={styles.inputLeftIcon} />
               <Controller
                 control={control}
                 name="password"
@@ -400,9 +400,9 @@ export function AuthCard({
                 accessibilityLabel={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
               >
                 {showPassword ? (
-                  <EyeOff color="#5C6B66" size={16} />
+                  <EyeOff color="#6E6458" size={16} />
                 ) : (
-                  <Eye color="#5C6B66" size={16} />
+                  <Eye color="#6E6458" size={16} />
                 )}
               </Pressable>
             </View>
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
     width: 67.37,
     height: 67.37,
     borderRadius: 14,
-    backgroundColor: "rgba(15, 109, 85, 0.59)",
+    backgroundColor: "rgba(117, 72, 11, 0.59)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
@@ -579,17 +579,17 @@ const styles = StyleSheet.create({
     borderBottomColor: "transparent",
   },
   tabItemActive: {
-    borderBottomColor: "#04cf92",
+    borderBottomColor: "#8D5C12",
   },
   tabText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.medium,
     fontSize: 14,
     fontWeight: "500",
     lineHeight: 20,
   },
   tabTextActive: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.bold,
     fontWeight: "700",
   },
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(11, 26, 23, 0.08)",
   },
   dividerText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 16,
@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   inputWrap: {
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.08)",
     borderRadius: 20,
@@ -651,14 +651,14 @@ const styles = StyleSheet.create({
   },
   consentText: {
     marginTop: 12,
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 18,
     textAlign: "center",
   },
   consentLink: {
-    // brandText, not the #04cf92 fill: the fill is 2:1 on white and fails for text.
+    // brandText, not the #8D5C12 fill: the fill is 2:1 on white and fails for text.
     color: colorTokens.brandText,
     fontFamily: fonts.semiBold,
     textDecorationLine: "underline",
@@ -679,7 +679,7 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     height: "100%",
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.regular,
     fontSize: 14,
     paddingVertical: 0,
@@ -690,14 +690,14 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
   forgotPasswordText: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
     lineHeight: 20,
   },
   submitButton: {
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     height: 44,
     borderRadius: 20,
     flexDirection: "row",
@@ -720,20 +720,20 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   switchPromptText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 20,
   },
   switchActionText: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.semiBold,
     fontSize: 16,
     fontWeight: "600",
     lineHeight: 24,
   },
   promoCard: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -747,7 +747,7 @@ const styles = StyleSheet.create({
   },
   promoText: {
     flex: 1,
-    color: "rgba(15, 109, 85, 0.8)",
+    color: "rgba(117, 72, 11, 0.8)",
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 16,

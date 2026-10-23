@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Linking, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { Check, CheckCircle2, Flag, X } from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
@@ -198,7 +198,7 @@ const modalStyles = StyleSheet.create({
   subtitle: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     lineHeight: 18,
   },
   reasonsLabel: {
@@ -222,7 +222,7 @@ const modalStyles = StyleSheet.create({
   },
   reasonCardSelected: {
     borderColor: colorTokens.brandText,
-    backgroundColor: "rgba(4, 207, 146, 0.05)",
+    backgroundColor: "rgba(141, 92, 18, 0.05)",
   },
   radioCircle: {
     width: 20,
@@ -253,7 +253,7 @@ const modalStyles = StyleSheet.create({
   reasonDesc: {
     fontSize: 11,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     lineHeight: 15,
   },
   actionsRow: {
@@ -271,7 +271,7 @@ const modalStyles = StyleSheet.create({
   cancelBtnText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   primaryBtn: {
     backgroundColor: colorTokens.brand,
@@ -301,7 +301,7 @@ const modalStyles = StyleSheet.create({
   successMessage: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     textAlign: "center",
     lineHeight: 19,
     marginBottom: 8,

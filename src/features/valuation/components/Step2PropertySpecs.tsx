@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Pressable,
   StyleSheet,
@@ -544,7 +544,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
   },
   tag: {
-    backgroundColor: "rgba(4, 207, 146, 0.15)",
+    backgroundColor: "rgba(141, 92, 18, 0.15)",
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: radius.sm,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     color: colors.muted,
   },
   greenTag: {
-    backgroundColor: "rgba(4, 207, 146, 0.20)",
+    backgroundColor: "rgba(141, 92, 18, 0.20)",
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,

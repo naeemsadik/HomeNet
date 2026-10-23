@@ -1,4 +1,4 @@
-import { Platform, StyleSheet } from "react-native";
+﻿import { Platform, StyleSheet } from "react-native";
 import { colorTokens, colors, fonts, layout } from "@/theme";
 
 export const styles = StyleSheet.create({
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingBold,
     fontSize: 20,
     fontWeight: "700",
@@ -30,7 +30,7 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   sectionSubtitle: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 20,
@@ -109,7 +109,7 @@ export const styles = StyleSheet.create({
     ...(Platform.select({
       web: { boxShadow: "0 28px 64px -24px rgba(11, 26, 23, 0.34)" },
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: "#1A1612",
         shadowOffset: { width: 0, height: 22 },
         shadowOpacity: 0.26,
         shadowRadius: 48,
@@ -196,7 +196,7 @@ export const styles = StyleSheet.create({
     height: 325,
     borderRadius: 24,
     overflow: "hidden",
-    backgroundColor: "#EEF3F1",
+    backgroundColor: "#F3EFE8",
     ...(Platform.OS === "web" ? {
       transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease",
     } : {}),
@@ -209,7 +209,7 @@ export const styles = StyleSheet.create({
   },
   featuredCardHovered: {
     transform: [{ translateY: -4 }, { scale: 1.01 }],
-    shadowColor: "rgba(4, 207, 146, 0.3)",
+    shadowColor: "rgba(141, 92, 18, 0.3)",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 1,
     shadowRadius: 16,
@@ -228,7 +228,7 @@ export const styles = StyleSheet.create({
     transform: [{ scale: 1.035 }],
   },
   featuredCardPlaceholder: {
-    backgroundColor: "#EEF3F1",
+    backgroundColor: "#F3EFE8",
   },
   featuredPlaceholderIcon: {
     position: "absolute",
@@ -248,7 +248,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 999,
@@ -297,7 +297,7 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
   featuredTextDark: {
-    color: "#0B1A17",
+    color: "#1A1612",
   },
 
   /* Position Bar for Featured Properties (Both Mobile & PC) */
@@ -313,7 +313,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     maxWidth: 220,
     height: 6,
-    backgroundColor: "#DFEAE4",
+    backgroundColor: "#EBE3D7",
     borderRadius: 999,
     position: "relative",
     overflow: "hidden",
@@ -334,7 +334,7 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: "#FFFFFF",
     borderWidth: 1.5,
-    borderColor: "#D3DFD8",
+    borderColor: "#CBD8D1",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "rgba(0, 0, 0, 0.05)",
@@ -349,7 +349,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#F8FAFC",
   },
   scrollArrowBtnPressed: {
-    backgroundColor: "#EAF7F1",
+    backgroundColor: "#F9F4EB",
     transform: [{ scale: 0.93 }],
   },
 
@@ -361,9 +361,9 @@ export const styles = StyleSheet.create({
     gap: 10,
     padding: 28,
     borderRadius: 16,
-    backgroundColor: "#F8FBF9",
+    backgroundColor: "#FBF9F6",
     borderWidth: 1,
-    borderColor: "#DDE8E3",
+    borderColor: "#D4DFD9",
   },
   requestStateTitle: {
     color: colors.ink,
@@ -419,7 +419,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderRadius: 16,
     padding: 12,
   },
@@ -448,13 +448,13 @@ export const styles = StyleSheet.create({
     gap: 4,
   },
   partnerNameText: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
   },
   partnerDealsText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 12,
   },
@@ -467,7 +467,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   partnerViewBtnText: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 12,
     fontWeight: "600",
@@ -519,7 +519,7 @@ export const styles = StyleSheet.create({
   },
   newsImageWrap: {
     height: 157,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: "hidden",
@@ -550,12 +550,12 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
   newsTimeText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.semiBold,
     fontSize: 12,
   },
   newsTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 16,
     fontWeight: "600",

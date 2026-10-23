@@ -1,4 +1,4 @@
-import { Phone, X } from "@/components/icons";
+﻿import { Phone, X } from "@/components/icons";
 import { Modal, Pressable, Text, View } from "react-native";
 import { colorTokens, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
@@ -38,7 +38,7 @@ export function BookVisitModal({
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{t("bookVisit.title")}</Text>
             <Pressable onPress={onClose} style={styles.closeBtn}>
-              <X color="#0B1A17" size={20} />
+              <X color="#1A1612" size={20} />
             </Pressable>
           </View>
 

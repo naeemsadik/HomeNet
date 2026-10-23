@@ -1,4 +1,4 @@
-import * as ImagePicker from "expo-image-picker";
+﻿import * as ImagePicker from "expo-image-picker";
 import {
   BarChart2,
   Bell,
@@ -265,7 +265,7 @@ export function SellerProfileScreen() {
                   ]}
                 >
                   <IconComp
-                    color={item.danger ? "#D4183D" : isActive ? "#04cf92" : "#5C6B66"}
+                    color={item.danger ? "#D4183D" : isActive ? "#8D5C12" : "#6E6458"}
                     size={20}
                   />
                   <Text
@@ -353,7 +353,7 @@ export function SellerProfileScreen() {
                   pressed && styles.pressed,
                 ]}
               >
-                <Bell color="#0B1A17" size={19} />
+                <Bell color="#1A1612" size={19} />
               </Pressable>
 
               <ToggleViewButton />
@@ -377,7 +377,7 @@ export function SellerProfileScreen() {
             {/* Section 1: Personal Information */}
             <View style={[styles.card, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
-                <User color="#0B1A17" size={20} />
+                <User color="#1A1612" size={20} />
                 <Text style={styles.cardTitle}>{t("seller.profile.personalInfoTitle")}</Text>
               </View>
 
@@ -417,7 +417,7 @@ export function SellerProfileScreen() {
                     >
                       {isVerified ? (
                         <>
-                          <CheckCircle2 color="#0F6D55" size={14} />
+                          <CheckCircle2 color="#75480B" size={14} />
                           <Text style={styles.verifiedText}>{t("seller.profile.verifiedBadge")}</Text>
                         </>
                       ) : (
@@ -524,7 +524,7 @@ export function SellerProfileScreen() {
             {/* Section 3: Account Security (Change Password & Permanently Delete Account) */}
             <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
-                <Shield color="#0B1A17" size={20} />
+                <Shield color="#1A1612" size={20} />
                 <Text style={styles.cardTitle}>{t("seller.profile.accountSecurityTitle")}</Text>
               </View>
 
@@ -548,7 +548,7 @@ export function SellerProfileScreen() {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <KeyRound color="#03a675" size={15} />
+                  <KeyRound color="#5F3806" size={15} />
                   <Text style={styles.changePasswordBtnText}>{t("seller.profile.changePasswordBtn")}</Text>
                 </Pressable>
               </View>

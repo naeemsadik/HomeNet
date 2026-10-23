@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -337,12 +337,12 @@ export function OwnerListPropertySection() {
                   <View style={styles.trustPillsPhoneWrap}>
                     <View style={styles.trustPillsTopRowPhone}>
                       <View style={styles.trustPillItem}>
-                        <ShieldCheck color="#04cf92" size={14} />
+                        <ShieldCheck color="#8D5C12" size={14} />
                         <Text style={styles.trustPillText}>{t("search.ownerSection.trustVerified")}</Text>
                       </View>
                       <View style={styles.trustDot} />
                       <View style={styles.trustPillItem}>
-                        <FileCheck2 color="#04cf92" size={14} />
+                        <FileCheck2 color="#8D5C12" size={14} />
                         <Text style={styles.trustPillText}>{t("search.ownerSection.trustGuided")}</Text>
                       </View>
                     </View>
@@ -356,12 +356,12 @@ export function OwnerListPropertySection() {
                 ) : (
                   <View style={styles.trustPillsRow}>
                     <View style={styles.trustPillItem}>
-                      <ShieldCheck color="#04cf92" size={15} />
+                      <ShieldCheck color="#8D5C12" size={15} />
                       <Text style={styles.trustPillText}>{t("search.ownerSection.trustVerified")}</Text>
                     </View>
                     <View style={styles.trustDot} />
                     <View style={styles.trustPillItem}>
-                      <FileCheck2 color="#04cf92" size={15} />
+                      <FileCheck2 color="#8D5C12" size={15} />
                       <Text style={styles.trustPillText}>{t("search.ownerSection.trustGuided")}</Text>
                     </View>
                     <View style={styles.trustDot} />
@@ -378,7 +378,7 @@ export function OwnerListPropertySection() {
                 <View style={styles.aestheticPlaque}>
                   <View style={styles.plaqueHeader}>
                     <View style={styles.plaqueIconWrap}>
-                      <BadgeCheck color="#04cf92" size={24} />
+                      <BadgeCheck color="#8D5C12" size={24} />
                     </View>
                     <View>
                       <Text style={styles.plaqueTitle}>{t("search.ownerSection.hubTitle")}</Text>
@@ -413,7 +413,7 @@ export function OwnerListPropertySection() {
                     ]}
                   >
                     <Text style={styles.plaqueActionText}>{t("search.ownerSection.exploreCategories")}</Text>
-                    <ArrowRight color="#04cf92" size={14} />
+                    <ArrowRight color="#8D5C12" size={14} />
                   </Pressable>
                 </View>
               </View>
@@ -443,7 +443,7 @@ export function OwnerListPropertySection() {
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
                 <View style={styles.modalEyebrowRow}>
-                  <Sparkles color="#04cf92" size={14} />
+                  <Sparkles color="#8D5C12" size={14} />
                   <Text style={styles.modalEyebrow}>{t("search.ownerSection.modalEyebrow")}</Text>
                 </View>
                 <Text style={styles.modalTitle}>{t("search.ownerSection.modalTitle")}</Text>
@@ -481,7 +481,7 @@ export function OwnerListPropertySection() {
             >
               <View style={[styles.aiCardLeft, isPhone && styles.aiCardLeftPhone]}>
                 <View style={styles.aiIconGlowingWrap}>
-                  <Sparkles color="#04cf92" size={20} strokeWidth={2.2} />
+                  <Sparkles color="#8D5C12" size={20} strokeWidth={2.2} />
                 </View>
                 <View style={styles.aiTextContainer}>
                   <View style={styles.aiHeadlineRow}>
@@ -549,7 +549,7 @@ export function OwnerListPropertySection() {
                           ]}
                         >
                           <IntentIcon
-                            color={isSelected ? "#04cf92" : "#5C6B66"}
+                            color={isSelected ? "#8D5C12" : "#6E6458"}
                             size={20}
                           />
                         </View>
@@ -587,7 +587,7 @@ export function OwnerListPropertySection() {
             {/* Modal Footer */}
             <View style={styles.modalFooter}>
               <View style={styles.modalFooterHint}>
-                <ShieldCheck color="#04cf92" size={16} />
+                <ShieldCheck color="#8D5C12" size={16} />
                 <Text style={styles.modalFooterHintText}>
                   {t("search.ownerSection.modalFooterHint")}
                 </Text>

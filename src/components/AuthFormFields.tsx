@@ -1,4 +1,4 @@
-import { Eye, EyeOff, AlertCircle, type LucideIcon } from "@/components/icons";
+﻿import { Eye, EyeOff, AlertCircle, type LucideIcon } from "@/components/icons";
 import React, { useRef, useState, useEffect } from "react";
 import {
   Animated,
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: colors.greenLight,
     borderWidth: 1,
-    borderColor: "#C4E4D5",
+    borderColor: "#E5D3BA",
     marginBottom: 18,
   },
   successBannerText: {
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   authButtonLabelPrimary: { color: colorTokens.onBrand },
-  // Brand fill (#04cf92) is 2.03:1 as text on white; brand-text is 6.3:1.
+  // Brand fill (#8D5C12) is 2.03:1 as text on white; brand-text is 6.3:1.
   authButtonLabelSecondary: { color: colors.greenOnLight },
   authButtonLabelGhost: { color: colors.muted },
 

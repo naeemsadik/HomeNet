@@ -1,4 +1,4 @@
-// Leaflet's stylesheet is imported statically: Metro's dev server can't load a CSS file through a
+﻿// Leaflet's stylesheet is imported statically: Metro's dev server can't load a CSS file through a
 // lazy import(). The script itself is still loaded only when this step opens.
 import "leaflet/dist/leaflet.css";
 import type { Map as LeafletMap, Marker } from "leaflet";
@@ -25,8 +25,8 @@ const round = (n: number) => Math.round(n * 1e6) / 1e6;
 
 const PIN_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 36 46">' +
-  '<path d="M18 1C9.2 1 2 8 2 16.7 2 28.4 18 45 18 45s16-16.6 16-28.3C34 8 26.8 1 18 1z" fill="#04cf92" stroke="#0B1A17" stroke-width="2"/>' +
-  '<circle cx="18" cy="17" r="6" fill="#0B1A17"/></svg>';
+  '<path d="M18 1C9.2 1 2 8 2 16.7 2 28.4 18 45 18 45s16-16.6 16-28.3C34 8 26.8 1 18 1z" fill="#8D5C12" stroke="#1A1612" stroke-width="2"/>' +
+  '<circle cx="18" cy="17" r="6" fill="#1A1612"/></svg>';
 
 /** Within the rounding of the six-decimal values the form holds (at most 5e-7 apart). */
 const sameSpot = (a: MapPoint, b: MapPoint) => Math.abs(a.lat - b.lat) < 1e-6 && Math.abs(a.lng - b.lng) < 1e-6;
@@ -201,7 +201,7 @@ export function LocationPicker({ value, openAt, onChange }: LocationPickerProps)
             onPress={useMyLocation}
             style={[styles.subtypePill, webPointer]}
           >
-            <LocateFixed color="#5C6B66" size={14} />
+            <LocateFixed color="#6E6458" size={14} />
             <Text style={styles.subtypePillText}>{locating ? "Locating…" : "Use my location"}</Text>
           </Pressable>
           {value ? (
@@ -211,7 +211,7 @@ export function LocationPicker({ value, openAt, onChange }: LocationPickerProps)
               onPress={clearPin}
               style={[styles.subtypePill, webPointer]}
             >
-              <X color="#5C6B66" size={14} />
+              <X color="#6E6458" size={14} />
               <Text style={styles.subtypePillText}>Clear</Text>
             </Pressable>
           ) : null}
@@ -223,7 +223,7 @@ export function LocationPicker({ value, openAt, onChange }: LocationPickerProps)
           aria-label="Map. Click or tap to place the pin."
           ref={hostRef}
           role="application"
-          style={{ width: "100%", height: "100%", background: "#F4F6F5" }}
+          style={{ width: "100%", height: "100%", background: "#F3EFE8" }}
         />
         {status === "loading" ? <Text style={styles.mapStatus}>Loading map…</Text> : null}
         {status === "error" ? (

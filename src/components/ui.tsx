@@ -1,4 +1,4 @@
-import { router, type Href } from "expo-router";
+﻿import { router, type Href } from "expo-router";
 import { ArrowRight, Check, ChevronDown, type LucideIcon } from "@/components/icons";
 import { useState, type ReactNode } from "react";
 import {
@@ -63,9 +63,9 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
  * ghost       — tertiary / inline, no container until hovered
  * destructive — deletes or cannot be undone
  *
- * Foreground colours are brand-TEXT (#0F6D55), never brand-fill (#04cf92),
+ * Foreground colours are brand-TEXT (#75480B), never brand-fill (#8D5C12),
  * which measures 2.03:1 on white. Text on the brand fill is ink (`onBrand`,
- * 8.8:1) — white on #04cf92 is 2.03:1 and fails WCAG AA.
+ * 8.8:1) — white on #8D5C12 is 2.03:1 and fails WCAG AA.
  */
 const VARIANT_FG: Record<ButtonVariant, string> = {
   primary: colorTokens.onBrand,

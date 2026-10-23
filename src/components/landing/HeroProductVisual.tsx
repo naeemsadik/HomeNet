@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Image,
   Pressable,
@@ -60,13 +60,13 @@ export function HeroProductVisual() {
             {/* Decorative Search Bar Replica */}
             <View style={styles.searchReplicaBar}>
               <View style={styles.searchReplicaInput}>
-                <Search color="#5C6B66" size={16} strokeWidth={2} />
+                <Search color="#6E6458" size={16} strokeWidth={2} />
                 <Text numberOfLines={1} style={styles.searchReplicaPlaceholder}>
                   {t("landing.heroVisual.searchPlaceholder")}
                 </Text>
               </View>
               <View style={styles.searchReplicaAreaBtn}>
-                <MapPin color="#0F6D55" size={14} strokeWidth={2} />
+                <MapPin color="#75480B" size={14} strokeWidth={2} />
                 <Text style={styles.searchReplicaAreaText}>{t("landing.heroVisual.city")}</Text>
               </View>
               <View style={styles.searchReplicaBtn}>
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   },
   browserBody: {
     padding: 18,
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
   searchReplicaBar: {
     flexDirection: "row",
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   searchReplicaPlaceholder: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 13,
   },
@@ -218,18 +218,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
   },
   searchReplicaAreaText: {
-    color: "#0F6D55",
+    color: "#75480B",
     fontFamily: fonts.semiBold,
     fontSize: 12,
   },
   searchReplicaBtn: {
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
@@ -303,18 +303,18 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   mobileDetailLocation: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.medium,
     fontSize: 11,
   },
   mobileDetailTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingBold,
     fontSize: 13.5,
     fontWeight: "700",
   },
   mobileDetailPrice: {
-    color: "#0F6D55",
+    color: "#75480B",
     fontFamily: fonts.headingExtraBold,
     fontSize: 15,
     fontWeight: "800",
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#75480B",
     paddingVertical: 8,
     borderRadius: 8,
     marginTop: 8,

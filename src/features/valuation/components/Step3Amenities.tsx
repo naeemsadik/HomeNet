@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Pressable,
   StyleSheet,
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.brand,
   },
   amenityBadge: {
-    backgroundColor: "rgba(4, 207, 146, 0.15)",
+    backgroundColor: "rgba(141, 92, 18, 0.15)",
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,

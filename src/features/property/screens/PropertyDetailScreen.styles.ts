@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
   },
   retryButton: {
     alignItems: "center",
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     borderRadius: 10,
     flexDirection: "row",
     gap: 8,
@@ -54,7 +54,7 @@ export const styles = StyleSheet.create({
   backLinkText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   actionHeaderBtns: {
     flexDirection: "row",
@@ -95,7 +95,7 @@ export const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: "hidden",
     position: "relative",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
   },
   mainImage: {
     width: "100%",
@@ -130,7 +130,7 @@ export const styles = StyleSheet.create({
   verifiedTagText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   forRentTag: {
     backgroundColor: "#E8EEFC",
@@ -179,7 +179,7 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
   },
   thumbnailCardActive: {
-    borderColor: "#04cf92",
+    borderColor: "#8D5C12",
     opacity: 1,
   },
   thumbnailCardInactive: {
@@ -362,7 +362,7 @@ export const styles = StyleSheet.create({
     opacity: 0.6,
   },
   lightboxThumbCardActive: {
-    borderColor: "#04cf92",
+    borderColor: "#8D5C12",
     opacity: 1,
   },
   overviewHeaderCard: {
@@ -380,7 +380,7 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   categoryBadge: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -388,7 +388,7 @@ export const styles = StyleSheet.create({
   categoryBadgeText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   verifiedSmallBadge: {
     flexDirection: "row",
@@ -398,12 +398,12 @@ export const styles = StyleSheet.create({
   verifiedSmallText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   propertyTitle: {
     fontSize: 24,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.4,
   },
   locationSubRow: {
@@ -414,7 +414,7 @@ export const styles = StyleSheet.create({
   locationSubText: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   keySpecsRow: {
     flexDirection: "row",
@@ -433,7 +433,7 @@ export const styles = StyleSheet.create({
   specText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   specDivider: {
     width: 1,
@@ -441,7 +441,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(11,26,23,0.15)",
   },
   aiValuationCard: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderRadius: 24,
     padding: 24,
     gap: 10,
@@ -454,12 +454,12 @@ export const styles = StyleSheet.create({
   aiValuationTitle: {
     fontSize: 16,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   aiValuationDesc: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
     lineHeight: 20,
   },
   boldText: {
@@ -479,7 +479,7 @@ export const styles = StyleSheet.create({
   aiTrendText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   sectionCard: {
     backgroundColor: "#FFFFFF",
@@ -492,7 +492,7 @@ export const styles = StyleSheet.create({
   sectionHeading: {
     fontSize: 18,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   sectionHeaderBetween: {
     flexDirection: "row",
@@ -502,12 +502,12 @@ export const styles = StyleSheet.create({
   seeAllLink: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   descriptionParagraph: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     lineHeight: 22,
   },
   amenitiesCheckGrid: {
@@ -525,7 +525,7 @@ export const styles = StyleSheet.create({
   amenityCheckText: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   mapCard: {
     height: 320,
@@ -540,13 +540,13 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
   },
   openMapsBtnText: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontSize: 13,
     fontFamily: fonts.semiBold,
   },
@@ -566,7 +566,7 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.1)",
   },
   mapAddressPillText: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontSize: 12,
     fontFamily: fonts.semiBold,
   },
@@ -587,7 +587,7 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   mapTooltip: {
-    backgroundColor: "#0B1A17",
+    backgroundColor: "#1A1612",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -601,7 +601,7 @@ export const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -629,12 +629,12 @@ export const styles = StyleSheet.create({
   poiName: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   poiDist: {
     fontSize: 11,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   similarScroll: {
     width: "100%",
@@ -667,7 +667,7 @@ export const styles = StyleSheet.create({
   similarPrice: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   similarScoreBadge: {
     flexDirection: "row",
@@ -677,22 +677,22 @@ export const styles = StyleSheet.create({
   similarScoreText: {
     fontSize: 12,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   similarTitle: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   similarLoc: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   similarSpecs: {
     fontSize: 11,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 4,
   },
   sellerCard: {
@@ -722,15 +722,15 @@ export const styles = StyleSheet.create({
   sellerName: {
     fontSize: 16,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   sellerAgency: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   priceCalloutWrap: {
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 16,
     padding: 16,
     gap: 4,
@@ -743,7 +743,7 @@ export const styles = StyleSheet.create({
   priceCalloutLabel: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   scoreBadge: {
     flexDirection: "row",
@@ -753,75 +753,90 @@ export const styles = StyleSheet.create({
   scoreBadgeText: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   priceCalloutValue: {
     fontSize: 22,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   priceCalloutPeriod: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   sellerActionsRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
+    alignItems: "center",
   },
   sellerActionBtn: {
     flex: 1,
-    height: 44,
+    height: 48,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(11,26,23,0.12)",
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#1A1612",
     backgroundColor: "#FFFFFF",
+    paddingHorizontal: 10,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   actionBtnDisabled: {
-    opacity: 0.45,
+    opacity: 0.55,
   },
   sellerActionText: {
     fontSize: 14,
-    fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    fontFamily: fonts.bold,
+    color: "#1A1612",
+    letterSpacing: -0.1,
   },
   whatsAppActionBtn: {
-    flex: 1.25,
-    height: 44,
+    flex: 1,
+    height: 48,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    borderRadius: 999,
+    borderRadius: 14,
     backgroundColor: "#F0FDF4",
-    borderWidth: 1.2,
-    borderColor: "#25D366",
-    shadowColor: "#25D366",
+    borderWidth: 1.5,
+    borderColor: "#22C55E",
+    paddingHorizontal: 10,
+    shadowColor: "#22C55E",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
     elevation: 2,
   },
   whatsAppActionText: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#166534",
+    color: "#15803D",
+    letterSpacing: -0.1,
   },
   bookVisitBtn: {
-    height: 46,
+    height: 48,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#F4823A",
-    borderRadius: 999,
+    backgroundColor: "#8D5C12",
+    borderRadius: 14,
+    shadowColor: "#8D5C12",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   bookVisitBtnText: {
-    color: colorTokens.onAccent,
+    color: "#FFFFFF",
     fontSize: 15,
     fontFamily: fonts.bold,
   },
@@ -840,7 +855,7 @@ export const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   aiRecCard: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderRadius: 24,
     padding: 24,
     gap: 10,
@@ -853,12 +868,12 @@ export const styles = StyleSheet.create({
   aiRecTitle: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   aiRecBody: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
     lineHeight: 19,
   },
   modalOverlay: {
@@ -884,7 +899,7 @@ export const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   closeBtn: {
     width: 32,
@@ -895,7 +910,7 @@ export const styles = StyleSheet.create({
   modalBodyText: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     lineHeight: 20,
   },
   modalNoPhoneText: {
@@ -941,7 +956,7 @@ export const styles = StyleSheet.create({
   modalDividerText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   modalCallBtn: {
     height: 44,

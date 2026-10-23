@@ -1,4 +1,4 @@
-import { useResponsive } from "@/hooks/useResponsive";
+﻿import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 import { SUPPORT_EMAIL } from "@/content/legal";
 import { AppLink } from "@/components/ui";
@@ -129,21 +129,21 @@ function WebFooter({ style }: FooterProps) {
     <View style={styles.footerSocialIcons}>
       {/* Facebook */}
       <Pressable accessibilityRole="link" accessibilityLabel="Facebook" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="16" height="16" viewBox="0 0 24 24" fill="#0B1A17">
+        <Svg width="16" height="16" viewBox="0 0 24 24" fill="#1A1612">
           <Path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
         </Svg>
       </Pressable>
 
       {/* X / Twitter */}
       <Pressable accessibilityRole="link" accessibilityLabel="X" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="15" height="15" viewBox="0 0 24 24" fill="#0B1A17">
+        <Svg width="15" height="15" viewBox="0 0 24 24" fill="#1A1612">
           <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
         </Svg>
       </Pressable>
 
       {/* Instagram */}
       <Pressable accessibilityRole="link" accessibilityLabel="Instagram" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1A17" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1612" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <Rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
           <Path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
           <Line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
@@ -152,14 +152,14 @@ function WebFooter({ style }: FooterProps) {
 
       {/* TikTok */}
       <Pressable accessibilityRole="link" accessibilityLabel="TikTok" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="16" height="16" viewBox="0 0 24 24" fill="#0B1A17">
+        <Svg width="16" height="16" viewBox="0 0 24 24" fill="#1A1612">
           <Path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68 6.34 6.34 0 0 0 9.33 22a6.33 6.33 0 0 0 6.33-6.32V8.75a8.28 8.28 0 0 0 3.93 1.07V6.69z" />
         </Svg>
       </Pressable>
 
       {/* YouTube */}
       <Pressable accessibilityRole="link" accessibilityLabel="YouTube" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="17" height="17" viewBox="0 0 24 24" fill="#0B1A17">
+        <Svg width="17" height="17" viewBox="0 0 24 24" fill="#1A1612">
           <Path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
         </Svg>
       </Pressable>
@@ -232,7 +232,7 @@ function WebFooter({ style }: FooterProps) {
               <Text style={styles.footerColHeading}>{t("footer.professional")}</Text>
               <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
                 <Text style={styles.proBadgeText}>{t("footer.homenetPro")}</Text>
-                <Sparkles color="#A7F3D0" size={13} />
+                <Sparkles color="#D4A362" size={13} />
               </AppLink>
             </View>
             <View style={styles.mobileProList}>
@@ -338,7 +338,7 @@ function WebFooter({ style }: FooterProps) {
             <Text style={styles.footerColHeading}>{t("footer.professional")}</Text>
             <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
               <Text style={styles.proBadgeText}>{t("footer.homenetPro")}</Text>
-              <Sparkles color="#A7F3D0" size={13} />
+              <Sparkles color="#D4A362" size={13} />
             </AppLink>
             {proBenefits.map((item) => (
               <AppLink href="/seller" key={item} style={styles.footerLinkWrap}>
@@ -448,7 +448,7 @@ const appFooterStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   footer: {
     width: "100%",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderTopWidth: 1,
     borderTopColor: "rgba(11, 26, 23, 0.08)",
     alignItems: "center",
@@ -499,13 +499,13 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.25,
   },
   mobileDownloadSub: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     lineHeight: 17,
   },
   mobileDownloadBtnWrap: {
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: "#1A1612",
     marginBottom: 16,
     letterSpacing: -0.3,
   },
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     flex: 1.2,
   },
   footerColHeading: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingBold,
     fontSize: 15,
     fontWeight: "700",
@@ -616,13 +616,13 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   footerLinkText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 13,
     lineHeight: 20,
   },
   proBadgeButton: {
-    backgroundColor: "#0B1A17",
+    backgroundColor: "#1A1612",
     borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 6.5,
@@ -685,7 +685,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   footerLegalLinkText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 12.5,
   },

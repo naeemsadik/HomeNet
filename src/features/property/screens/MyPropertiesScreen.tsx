@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+﻿import { router } from "expo-router";
 import {
   BarChart2,
   Building2,
@@ -215,7 +215,7 @@ export function MyPropertiesScreen() {
                   ]}
                 >
                   <IconComp
-                    color={item.danger ? "#D4183D" : item.active ? "#04cf92" : "#5C6B66"}
+                    color={item.danger ? "#D4183D" : item.active ? "#8D5C12" : "#6E6458"}
                     size={20}
                   />
                   <Text
@@ -309,7 +309,7 @@ export function MyPropertiesScreen() {
           <View style={styles.tableCard}>
             {isLoading ? (
               <View style={styles.emptyContainer}>
-                <ActivityIndicator color="#04cf92" size="large" />
+                <ActivityIndicator color="#8D5C12" size="large" />
                 <Text style={styles.emptySub}>{t("dashboard.loadingListings")}</Text>
               </View>
             ) : error ? (
@@ -337,7 +337,7 @@ export function MyPropertiesScreen() {
                 {/* Table Data Rows */}
                 {filteredListings.length === 0 ? (
                   <View style={styles.emptyContainer}>
-                    <Building2 color="#5C6B66" size={40} />
+                    <Building2 color="#6E6458" size={40} />
                     <Text style={styles.emptyTitle}>{t("dashboard.noListingsFound")}</Text>
                     <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
                   </View>
@@ -356,7 +356,7 @@ export function MyPropertiesScreen() {
                         <View style={{ flex: 1, gap: 2 }}>
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                             <Text style={styles.propTitle} numberOfLines={1}>{item.title}</Text>
-                            {item.isVerified ? <CheckCircle2 color="#04cf92" size={16} /> : null}
+                            {item.isVerified ? <CheckCircle2 color="#8D5C12" size={16} /> : null}
                             {item.isBoosted ? <Zap color="#F4823A" size={14} /> : null}
                           </View>
                           <Text style={styles.propLocation}>{item.location}</Text>
@@ -390,22 +390,22 @@ export function MyPropertiesScreen() {
 
                       {/* AI Value Column */}
                       <View style={[styles.tdCell, { flex: 1, flexDirection: "row", alignItems: "center", gap: 4 }]}>
-                        <Sparkles color="#04cf92" size={14} />
+                        <Sparkles color="#8D5C12" size={14} />
                         <Text style={styles.aiValueText}>{item.aiValue}</Text>
                       </View>
 
                       {/* Performance Column (Views, Likes, Inquiries) */}
                       <View style={[styles.tdCell, { flex: 1.5, flexDirection: "row", alignItems: "center", gap: 12 }]}>
                         <View style={styles.metricItem}>
-                          <Eye color="#5C6B66" size={14} />
+                          <Eye color="#6E6458" size={14} />
                           <Text style={styles.metricValue}>{item.views}</Text>
                         </View>
                         <View style={styles.metricItem}>
-                          <Heart color="#5C6B66" size={14} />
+                          <Heart color="#6E6458" size={14} />
                           <Text style={styles.metricValue}>{item.likes}</Text>
                         </View>
                         <View style={styles.metricItem}>
-                          <MessageSquare color="#5C6B66" size={14} />
+                          <MessageSquare color="#6E6458" size={14} />
                           <Text style={styles.metricValue}>{item.inquiries}</Text>
                         </View>
                       </View>
@@ -416,7 +416,7 @@ export function MyPropertiesScreen() {
                           onPress={() => handleDelete(item.id, item.title)}
                           style={({ pressed }) => [styles.actionIconButton, webPointer, pressed && styles.pressed]}
                         >
-                          <MoreVertical color="#5C6B66" size={16} />
+                          <MoreVertical color="#6E6458" size={16} />
                         </Pressable>
                       </View>
                     </View>
@@ -428,7 +428,7 @@ export function MyPropertiesScreen() {
               <View style={styles.mobileCardList}>
                 {filteredListings.length === 0 ? (
                   <View style={styles.emptyContainer}>
-                    <Building2 color="#5C6B66" size={40} />
+                    <Building2 color="#6E6458" size={40} />
                     <Text style={styles.emptyTitle}>{t("dashboard.noListingsFound")}</Text>
                     <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
                   </View>
@@ -463,34 +463,34 @@ export function MyPropertiesScreen() {
                       <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
                         <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                          <Sparkles color="#04cf92" size={14} />
+                          <Sparkles color="#8D5C12" size={14} />
                           <Text style={styles.aiValueText}>{item.aiValue}</Text>
                         </View>
                       </View>
 
                       <View style={styles.mobileMetricsRow}>
                         <View style={styles.metricItem}>
-                          <Eye color="#5C6B66" size={14} />
+                          <Eye color="#6E6458" size={14} />
                           <Text style={styles.metricValue}>{item.views}</Text>
                         </View>
                         <View style={styles.metricItem}>
-                          <Heart color="#5C6B66" size={14} />
+                          <Heart color="#6E6458" size={14} />
                           <Text style={styles.metricValue}>{item.likes}</Text>
                         </View>
                         <View style={styles.metricItem}>
-                          <MessageSquare color="#5C6B66" size={14} />
+                          <MessageSquare color="#6E6458" size={14} />
                           <Text style={styles.metricValue}>{item.inquiries}</Text>
                         </View>
                       </View>
 
                       <View style={styles.mobileActionsRow}>
                         <AppLink href={`/property/${item.id}`} style={styles.mobileActionBtn}>
-                          <Eye color="#5C6B66" size={14} />
+                          <Eye color="#6E6458" size={14} />
                           <Text style={styles.mobileActionText}>{t("seller.actions.view")}</Text>
                         </AppLink>
                         <AppLink href={`/property/edit?id=${item.id}`} style={styles.mobileActionBtn}>
-                          <Edit color="#04cf92" size={14} />
-                          <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
+                          <Edit color="#8D5C12" size={14} />
+                          <Text style={[styles.mobileActionText, { color: "#8D5C12" }]}>{t("seller.actions.edit")}</Text>
                         </AppLink>
                         <Pressable onPress={() => handleDelete(item.id, item.title)} style={styles.mobileActionBtn}>
                           <Trash2 color="#D4183D" size={14} />
@@ -508,7 +508,7 @@ export function MyPropertiesScreen() {
                 onPress={() => void fetchNextPage()}
                 style={styles.loadMoreButton}
               >
-                {isFetchingNextPage ? <ActivityIndicator color="#04cf92" size="small" /> : null}
+                {isFetchingNextPage ? <ActivityIndicator color="#8D5C12" size="small" /> : null}
                 <Text style={styles.loadMoreText}>{isFetchingNextPage ? t("dashboard.loading") : t("dashboard.loadMore")}</Text>
               </Pressable>
             ) : null}
@@ -542,17 +542,17 @@ export function MyPropertiesScreen() {
 function getStatusStyle(status: string) {
   switch (status) {
     case "active":
-      return { bgStyle: { backgroundColor: "#E6FAF4" }, textStyle: { color: "#04cf92" } };
+      return { bgStyle: { backgroundColor: "#F9F4EB" }, textStyle: { color: "#8D5C12" } };
     case "pending":
       return { bgStyle: { backgroundColor: "#FDEEE2" }, textStyle: { color: "#F4823A" } };
     case "sold":
       return { bgStyle: { backgroundColor: "#E8EEFC" }, textStyle: { color: "#2251D6" } };
     case "draft":
-      return { bgStyle: { backgroundColor: "#F4F6F5" }, textStyle: { color: "#5C6B66" } };
+      return { bgStyle: { backgroundColor: "#F3EFE8" }, textStyle: { color: "#6E6458" } };
     case "archived":
-      return { bgStyle: { backgroundColor: "#F4F6F5" }, textStyle: { color: "#899790" } };
+      return { bgStyle: { backgroundColor: "#F3EFE8" }, textStyle: { color: "#899790" } };
     default:
-      return { bgStyle: { backgroundColor: "#E6FAF4" }, textStyle: { color: "#04cf92" } };
+      return { bgStyle: { backgroundColor: "#F9F4EB" }, textStyle: { color: "#8D5C12" } };
   }
 }
 
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
     width: "100%",
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
   sidebar: {
     width: 256,
@@ -586,17 +586,17 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     alignItems: "center",
     justifyContent: "center",
   },
   brandText: {
     fontSize: 18,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   brandTextAccent: {
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   sellerRolePill: {
     backgroundColor: "#E8EEFC",
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   navItemActive: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
   },
   navItemDanger: {
     marginTop: 8,
@@ -633,10 +633,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   navItemTextActive: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
@@ -701,13 +701,13 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.08)",
   },
   filterPillActive: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
+    backgroundColor: "#8D5C12",
+    borderColor: "#8D5C12",
   },
   pillLabel: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   pillLabelActive: {
     color: colorTokens.onBrand,
@@ -719,7 +719,7 @@ const styles = StyleSheet.create({
   pillCountText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   pillCountTextActive: {
     color: "rgba(255,255,255,0.75)",
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     borderRadius: 999,
     paddingHorizontal: 18,
   },
@@ -753,14 +753,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 14,
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderBottomWidth: 0.8,
     borderBottomColor: "rgba(11,26,23,0.08)",
   },
   thCell: {
     fontSize: 12,
     fontFamily: fonts.bold,
-    color: "#5C6B66",
+    color: "#6E6458",
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -779,7 +779,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 48,
     borderRadius: 8,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
   },
   imagePlaceholder: {
     alignItems: "center",
@@ -788,17 +788,17 @@ const styles = StyleSheet.create({
   propTitle: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   propLocation: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   typeText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   forSaleBadge: {
     alignSelf: "flex-start",
@@ -815,7 +815,7 @@ const styles = StyleSheet.create({
   priceText: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   statusBadge: {
     alignSelf: "flex-start",
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
   aiValueText: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   metricItem: {
     flexDirection: "row",
@@ -845,7 +845,7 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   actionIconButton: {
     width: 32,
@@ -865,18 +865,18 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 16,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
     marginTop: 8,
   },
   emptySub: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     textAlign: "center",
   },
   retryButton: {
     alignItems: "center",
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     borderRadius: 10,
     flexDirection: "row",
     gap: 8,
@@ -893,7 +893,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
-  loadMoreText: { color: "#04cf92", fontFamily: fonts.semiBold, fontSize: 13 },
+  loadMoreText: { color: "#8D5C12", fontFamily: fonts.semiBold, fontSize: 13 },
   mobileCardList: {
     padding: 16,
     gap: 16,
@@ -914,7 +914,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 12,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
   },
   mobileCardBody: {
     gap: 10,
@@ -941,6 +941,6 @@ const styles = StyleSheet.create({
   mobileActionText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
 });

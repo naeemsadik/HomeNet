@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Globe } from "@/components/icons";
 import { useTranslation } from "@/i18n";
@@ -37,7 +37,7 @@ export function LanguageToggle({
     >
       <View style={styles.iconWrap}>
         <Globe
-          color={isCrystal ? "#FFFFFF" : "#0B1A17"}
+          color={isCrystal ? "#FFFFFF" : "#1A1612"}
           size={compact ? 15 : 17}
           strokeWidth={2}
         />
@@ -64,12 +64,12 @@ const styles = StyleSheet.create({
     gap: 6,
     backgroundColor: "rgba(255, 255, 255, 0.85)",
     borderWidth: 1.5,
-    borderColor: "rgba(4, 207, 146, 0.85)",
+    borderColor: "rgba(141, 92, 18, 0.85)",
     height: 38,
     paddingHorizontal: 13,
     borderRadius: 999,
     flexShrink: 0,
-    shadowColor: "#04cf92",
+    shadowColor: "#8D5C12",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
@@ -89,13 +89,13 @@ const styles = StyleSheet.create({
     borderWidth: 1.4,
   },
   buttonHovered: {
-    backgroundColor: "rgba(4, 207, 146, 0.05)",
-    borderColor: "#03b57f",
+    backgroundColor: "rgba(141, 92, 18, 0.05)",
+    borderColor: "#75480B",
   },
   buttonPressed: {
     opacity: 0.8,
     transform: [{ scale: 0.98 }],
-    backgroundColor: "rgba(4, 207, 146, 0.1)",
+    backgroundColor: "rgba(141, 92, 18, 0.1)",
   },
   iconWrap: {
     justifyContent: "center",
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: 0.2,
   },
   labelCompact: {

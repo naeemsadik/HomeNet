@@ -1,4 +1,4 @@
-import React, { type ReactNode } from "react";
+﻿import React, { type ReactNode } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 
 interface PhoneFrameProps {
@@ -31,7 +31,7 @@ export function PhoneFrame({ children, style, contentStyle }: PhoneFrameProps) {
 
 const styles = StyleSheet.create({
   phone: {
-    backgroundColor: "#0B1A17",
+    backgroundColor: "#1A1612",
     borderRadius: 36,
     padding: 8,
     borderWidth: 2.5,
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#0B1A17",
+    backgroundColor: "#1A1612",
     width: 90,
     height: 18,
     borderRadius: 9,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.35)",
   },
   screen: {
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     overflow: "hidden",
   },
   homeIndicatorWrap: {

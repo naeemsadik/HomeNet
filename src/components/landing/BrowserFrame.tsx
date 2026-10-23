@@ -1,4 +1,4 @@
-import React, { type ReactNode } from "react";
+﻿import React, { type ReactNode } from "react";
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { Lock } from "@/components/icons";
 import { fonts } from "@/theme";
@@ -31,7 +31,7 @@ export function BrowserFrame({
         </View>
 
         <View style={styles.addressBar}>
-          <Lock color="#5C6B66" size={11} strokeWidth={2.5} />
+          <Lock color="#6E6458" size={11} strokeWidth={2.5} />
           <Text numberOfLines={1} style={styles.addressText}>
             {displayUrl}
           </Text>
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   },
   chromeBar: {
     height: 38,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderBottomWidth: 1,
     borderBottomColor: "rgba(11, 26, 23, 0.08)",
     flexDirection: "row",
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   addressText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.medium,
     fontSize: 11,
     fontWeight: "500",
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     width: 60,
   },
   body: {
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     overflow: "hidden",
   },
 });

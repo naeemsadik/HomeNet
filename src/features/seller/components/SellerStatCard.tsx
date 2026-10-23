@@ -1,4 +1,4 @@
-import { TrendingUp } from "@/components/icons";
+﻿import { TrendingUp } from "@/components/icons";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { fonts } from "@/theme";
 
@@ -35,7 +35,7 @@ export function SellerStatCard({ item }: SellerStatCardProps) {
 
         {item.trend ? (
           <View style={styles.trendPill}>
-            <TrendingUp color="#0F6D55" size={12} strokeWidth={2} />
+            <TrendingUp color="#75480B" size={12} strokeWidth={2} />
             <Text style={styles.trendText}>{item.trend}</Text>
           </View>
         ) : null}
@@ -93,21 +93,21 @@ const styles = StyleSheet.create({
   trendText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#0F6D55",
+    color: "#75480B",
     lineHeight: 16,
   },
   statValue: {
     fontSize: 24,
     lineHeight: 32,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
     marginTop: 12,
   },
   statLabel: {
     fontSize: 14,
     lineHeight: 20,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 2,
   },
 });

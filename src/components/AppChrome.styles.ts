@@ -1,11 +1,11 @@
-import { Platform, StyleSheet } from "react-native";
+﻿import { Platform, StyleSheet } from "react-native";
 import { colorTokens, colors, fonts, layout, shadow } from "@/theme";
 
 export const styles = StyleSheet.create({
   shell: {
     width: "100%",
     flex: 1,
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
   sidebar: {
     width: 256,
@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
   sideNav: {
     gap: 4,
@@ -51,10 +51,10 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
   },
   sideLinkActive: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
   },
   sideLinkText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
@@ -85,7 +85,7 @@ export const styles = StyleSheet.create({
   },
   sidebarCard: {
     padding: 16,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderRadius: 16,
     alignItems: "center",
     gap: 8,
@@ -94,19 +94,19 @@ export const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     alignItems: "center",
     justifyContent: "center",
   },
   sidebarCardTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 15,
     fontWeight: "600",
     textAlign: "center",
   },
   sidebarCardSubtitle: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 16,
@@ -115,7 +115,7 @@ export const styles = StyleSheet.create({
   postAdButton: {
     width: "100%",
     height: 38.4,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
@@ -131,7 +131,7 @@ export const styles = StyleSheet.create({
   pageColumn: {
     width: "100%",
     flex: 1,
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
   pageColumnMobile: {
     position: "absolute",
@@ -162,7 +162,7 @@ export const styles = StyleSheet.create({
         transition: "background-color 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease",
       },
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: "#1A1612",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.03,
         shadowRadius: 10,
@@ -267,7 +267,7 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 15,
     fontWeight: "600",
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.2,
     ...(Platform.select({
       web: { whiteSpace: "nowrap" },
@@ -275,7 +275,7 @@ export const styles = StyleSheet.create({
     }) as any),
   },
   topNavLinkTextActive: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontWeight: "700",
   },
   topNavIndicator: {
@@ -285,7 +285,7 @@ export const styles = StyleSheet.create({
     right: 4,
     height: 2.5,
     borderRadius: 999,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
   },
   mobileBrandRow: {
     flexDirection: "row",
@@ -298,7 +298,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 18,
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
@@ -328,7 +328,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
@@ -337,7 +337,7 @@ export const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   authPillText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.semiBold,
     fontSize: 13,
     fontWeight: "600",
@@ -353,7 +353,7 @@ export const styles = StyleSheet.create({
     borderRadius: 19,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
@@ -416,7 +416,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 14,
     borderRadius: 8,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
   },
   listPropertyText: {
     color: colorTokens.onBrand,
@@ -434,7 +434,7 @@ export const styles = StyleSheet.create({
     gap: 7,
     backgroundColor: "rgba(255, 255, 255, 0.85)",
     borderWidth: 1.5,
-    borderColor: "rgba(4, 207, 146, 0.8)",
+    borderColor: "rgba(141, 92, 18, 0.8)",
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 8,
@@ -457,7 +457,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   rightmoveSignInText: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "700",
@@ -481,7 +481,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderColor: "#04cf92",
+    borderColor: "#8D5C12",
     borderWidth: 1.5,
     borderRadius: 8,
     height: 38,
@@ -505,7 +505,7 @@ export const styles = StyleSheet.create({
   guestPillDivider: {
     width: 1,
     height: 20,
-    backgroundColor: "rgba(4, 207, 146, 0.3)",
+    backgroundColor: "rgba(141, 92, 18, 0.3)",
   },
   guestTriangleBtn: {
     height: "100%",
@@ -517,7 +517,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   guestTriangleBtnActive: {
-    backgroundColor: "rgba(4, 207, 146, 0.12)",
+    backgroundColor: "rgba(141, 92, 18, 0.12)",
   },
   userDropdownTrigger: {
     flexDirection: "row",
@@ -544,8 +544,8 @@ export const styles = StyleSheet.create({
     }) as any),
   },
   userDropdownTriggerActive: {
-    borderColor: "#04cf92",
-    backgroundColor: "rgba(4, 207, 146, 0.04)",
+    borderColor: "#8D5C12",
+    backgroundColor: "rgba(141, 92, 18, 0.04)",
   },
   triangleIconBox: {
     width: 12,
@@ -582,7 +582,7 @@ export const styles = StyleSheet.create({
         boxShadow: "0 16px 36px -4px rgba(11, 26, 23, 0.12), 0 2px 8px -2px rgba(11, 26, 23, 0.04), 0 0 0 1px rgba(11, 26, 23, 0.04)",
       } as any,
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: "#1A1612",
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.12,
         shadowRadius: 18,
@@ -615,7 +615,7 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.2,
   },
   userDropdownEmail: {
@@ -666,7 +666,7 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     fontSize: 14,
     fontWeight: "500",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   locationPill: {
     flexDirection: "row",
@@ -686,7 +686,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1.2,
   },
   locationPillText: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
@@ -707,7 +707,7 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
   logInPillText: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 14,
     fontWeight: "600",
@@ -762,14 +762,14 @@ export const styles = StyleSheet.create({
     }) as any),
   },
   notificationTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 13,
     fontWeight: "600",
   },
   notificationCopy: {
     marginTop: 4,
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 16,
@@ -799,7 +799,7 @@ export const styles = StyleSheet.create({
     flexGrow: 1,
     width: "100%",
     alignItems: "center",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
 
   bleed: {

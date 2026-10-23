@@ -1,4 +1,4 @@
-import { Check } from "@/components/icons";
+﻿import { Check } from "@/components/icons";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -169,7 +169,7 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
                   webPointer,
                 ]}
               >
-                {isSelected ? <Check color="#04cf92" size={14} /> : null}
+                {isSelected ? <Check color="#8D5C12" size={14} /> : null}
                 <Text
                   style={[
                     styles.amenityPillText,

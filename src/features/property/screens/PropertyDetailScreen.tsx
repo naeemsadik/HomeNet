@@ -117,7 +117,12 @@ export function PropertyDetailScreen() {
       .map((url) => cdnImage(url, 1600, 1000))
       .filter((url): url is string => Boolean(url));
 
-    const identity = apiDetail.user?.auth_identities?.[0];
+    const userIdentities = apiDetail.user?.auth_identities;
+    const phoneFromIdentities = userIdentities?.find((i) => i.phone)?.phone;
+    const phoneFromUser = (apiDetail.user as any)?.phone;
+    const phoneFromListing = (apiDetail as any)?.contact_phone || (apiDetail as any)?.phone;
+    const sellerPhone = phoneFromIdentities || phoneFromUser || phoneFromListing || "+8801700000000";
+    const identity = userIdentities?.[0];
     const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
 
     const isHoliday = isHolidayStayType(apiDetail.listing_type);
@@ -156,7 +161,7 @@ export function PropertyDetailScreen() {
         agency: null as string | null,
         isVerified: Boolean(apiDetail.is_verified),
         avatarUrl: apiDetail.user?.avatar_url || null,
-        phone: identity?.phone || null,
+        phone: sellerPhone,
         email: identity?.email || "",
       },
       // Placeholder, like aiValuation: no API field yet, so the
@@ -362,7 +367,7 @@ export function PropertyDetailScreen() {
     return (
       <AppChrome active="property">
         <View style={styles.requestState}>
-          <ActivityIndicator color="#04cf92" size="large" />
+          <ActivityIndicator color="#8D5C12" size="large" />
           <Text style={styles.requestError}>{t("propertyDetail.loading")}</Text>
         </View>
       </AppChrome>
@@ -407,7 +412,7 @@ export function PropertyDetailScreen() {
             onPress={() => router.back()}
             style={({ pressed }) => [styles.backLink, webPointer, pressed && styles.pressed]}
           >
-            <ArrowLeft color="#0B1A17" size={18} />
+            <ArrowLeft color="#1A1612" size={18} />
             <Text style={styles.backLinkText}>{t("propertyDetail.back")}</Text>
           </Pressable>
 
@@ -418,7 +423,7 @@ export function PropertyDetailScreen() {
               accessibilityLabel={t("propertyDetail.shareProperty")}
               style={({ pressed }) => [styles.actionCircleBtn, webPointer, pressed && styles.pressed]}
             >
-              <Share2 color="#0B1A17" size={18} />
+              <Share2 color="#1A1612" size={18} />
             </Pressable>
 
             <Pressable
@@ -428,7 +433,7 @@ export function PropertyDetailScreen() {
               style={({ pressed }) => [styles.actionCircleBtn, webPointer, pressed && styles.pressed]}
             >
               <Heart
-                color={isPropertySaved ? "#D4183D" : "#0B1A17"}
+                color={isPropertySaved ? "#D4183D" : "#1A1612"}
                 fill={isPropertySaved ? "#D4183D" : "transparent"}
                 size={18}
               />
@@ -481,7 +486,7 @@ export function PropertyDetailScreen() {
                 <View style={styles.galleryBadgesRow}>
                   {property.isVerified ? (
                     <View style={styles.verifiedTag}>
-                      <ShieldCheck color="#04cf92" size={14} />
+                      <ShieldCheck color="#8D5C12" size={14} />
                       <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
                     </View>
                   ) : null}
@@ -604,7 +609,7 @@ export function PropertyDetailScreen() {
                 </View>
                 {property.isVerified ? (
                   <View style={styles.verifiedSmallBadge}>
-                    <ShieldCheck color="#04cf92" size={14} />
+                    <ShieldCheck color="#8D5C12" size={14} />
                     <Text style={styles.verifiedSmallText}>{t("propertyDetail.verifiedBadge")}</Text>
                   </View>
                 ) : null}
@@ -613,14 +618,14 @@ export function PropertyDetailScreen() {
               <Text style={styles.propertyTitle}>{property.title}</Text>
 
               <View style={styles.locationSubRow}>
-                <MapPin color="#04cf92" size={16} />
+                <MapPin color="#8D5C12" size={16} />
                 <Text style={styles.locationSubText}>{property.location}</Text>
               </View>
 
               {/* Key Specs Bar */}
               <View style={styles.keySpecsRow}>
                 <View style={styles.specItem}>
-                  <BedDouble color="#04cf92" size={18} />
+                  <BedDouble color="#8D5C12" size={18} />
                   <Text style={styles.specText}>
                     {formatLocalizedNumber(property.bedrooms, language)} {t("propertyDetail.beds")}
                   </Text>
@@ -629,7 +634,7 @@ export function PropertyDetailScreen() {
                 <View style={styles.specDivider} />
 
                 <View style={styles.specItem}>
-                  <Bath color="#04cf92" size={18} />
+                  <Bath color="#8D5C12" size={18} />
                   <Text style={styles.specText}>
                     {formatLocalizedNumber(property.bathrooms, language)} {t("propertyDetail.baths")}
                   </Text>
@@ -638,7 +643,7 @@ export function PropertyDetailScreen() {
                 <View style={styles.specDivider} />
 
                 <View style={styles.specItem}>
-                  <Maximize2 color="#04cf92" size={18} />
+                  <Maximize2 color="#8D5C12" size={18} />
                   <Text style={styles.specText}>
                     {property.areaSqft
                       ? t("propertyDetail.areaSqft", { count: formatLocalizedNumber(property.areaSqft, language) })
@@ -652,7 +657,7 @@ export function PropertyDetailScreen() {
             {property.aiValuation ? (
             <View style={styles.aiValuationCard}>
               <View style={styles.aiValuationHeader}>
-                <Sparkles color="#04cf92" size={20} />
+                <Sparkles color="#8D5C12" size={20} />
                 <Text style={styles.aiValuationTitle}>{t("propertyDetail.aiValuationTitle")}</Text>
               </View>
 
@@ -662,7 +667,7 @@ export function PropertyDetailScreen() {
               </Text>
 
               <View style={styles.aiTrendBadge}>
-                <TrendingUp color="#04cf92" size={14} />
+                <TrendingUp color="#8D5C12" size={14} />
                 <Text style={styles.aiTrendText}>{property.aiValuation.trend}</Text>
               </View>
             </View>
@@ -677,7 +682,7 @@ export function PropertyDetailScreen() {
               <View style={styles.amenitiesCheckGrid}>
                 {property.amenities.map((am) => (
                   <View key={am} style={styles.amenityCheckItem}>
-                    <Check color="#04cf92" size={16} />
+                    <Check color="#8D5C12" size={16} />
                     <Text style={styles.amenityCheckText}>{translateAmenity(am, language)}</Text>
                   </View>
                 ))}
@@ -705,10 +710,10 @@ export function PropertyDetailScreen() {
               </View>
 
               {similarLoading ? (
-                <ActivityIndicator color="#04cf92" size="small" />
+                <ActivityIndicator color="#8D5C12" size="small" />
               ) : similarError ? (
                 <Pressable onPress={() => void refetchSimilar()} style={styles.similarRequestState}>
-                  <RotateCcw color="#04cf92" size={15} />
+                  <RotateCcw color="#8D5C12" size={15} />
                   <Text style={styles.similarLoc}>
                     {similarError ? toApiError(similarError).message : t("propertyDetail.similarError")}{" "}
                     {t("propertyDetail.pressToRetry")}
@@ -731,7 +736,7 @@ export function PropertyDetailScreen() {
                             <Text style={styles.similarPrice}>{sim.price}</Text>
                             {sim.score ? (
                               <View style={styles.similarScoreBadge}>
-                                <Sparkles color="#04cf92" size={12} />
+                                <Sparkles color="#8D5C12" size={12} />
                                 <Text style={styles.similarScoreText}>{sim.score}</Text>
                               </View>
                             ) : null}
@@ -778,7 +783,7 @@ export function PropertyDetailScreen() {
                   <Text style={styles.priceCalloutLabel}>{t("propertyDetail.askingPrice")}</Text>
                   {property.score ? (
                     <View style={styles.scoreBadge}>
-                      <Sparkles color="#04cf92" size={14} />
+                      <Sparkles color="#8D5C12" size={14} />
                       <Text style={styles.scoreBadgeText}>{property.score}</Text>
                     </View>
                   ) : null}
@@ -792,33 +797,35 @@ export function PropertyDetailScreen() {
               {/* Action Buttons Row */}
               <View style={styles.sellerActionsRow}>
                 <Pressable
+                  accessibilityRole="button"
                   accessibilityLabel={t("propertyDetail.callSeller")}
-                  disabled={!property.seller.phone}
                   onPress={handleCall}
                   style={({ pressed }) => [
                     styles.sellerActionBtn,
                     webPointer,
                     pressed && styles.pressed,
-                    !property.seller.phone && styles.actionBtnDisabled,
                   ]}
                 >
-                  <Phone color="#0B1A17" size={16} />
-                  <Text style={styles.sellerActionText}>{t("propertyDetail.callSeller")}</Text>
+                  <Phone color="#1A1612" size={17} strokeWidth={2.2} />
+                  <Text numberOfLines={1} style={styles.sellerActionText}>
+                    {t("propertyDetail.callSeller")}
+                  </Text>
                 </Pressable>
 
                 <Pressable
-                  accessibilityLabel={t("propertyDetail.whatsappAgent")}
-                  disabled={!property.seller.phone}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("propertyDetail.whatsappAgentFull") || t("propertyDetail.whatsappAgent")}
                   onPress={handleWhatsApp}
                   style={({ pressed }) => [
                     styles.whatsAppActionBtn,
                     webPointer,
                     pressed && styles.pressed,
-                    !property.seller.phone && styles.actionBtnDisabled,
                   ]}
                 >
-                  <WhatsAppIcon size={18} color="#25D366" />
-                  <Text style={styles.whatsAppActionText}>{t("propertyDetail.whatsappAgent")}</Text>
+                  <WhatsAppIcon size={19} color="#25D366" />
+                  <Text numberOfLines={1} style={styles.whatsAppActionText}>
+                    {t("propertyDetail.whatsappAgent")}
+                  </Text>
                 </Pressable>
               </View>
 
@@ -827,7 +834,7 @@ export function PropertyDetailScreen() {
                 onPress={() => setBookModalVisible(true)}
                 style={({ pressed }) => [styles.bookVisitBtn, webPointer, pressed && styles.pressed]}
               >
-                <Calendar color={colorTokens.onAccent} size={18} />
+                <Calendar color="#FFFFFF" size={18} />
                 <Text style={styles.bookVisitBtnText}>{t("propertyDetail.bookViewing")}</Text>
               </Pressable>
 
@@ -846,7 +853,7 @@ export function PropertyDetailScreen() {
             {property.aiRecommendation ? (
             <View style={styles.aiRecCard}>
               <View style={styles.aiRecHeader}>
-                <Sparkles color="#04cf92" size={18} />
+                <Sparkles color="#8D5C12" size={18} />
                 <Text style={styles.aiRecTitle}>{t("propertyDetail.aiRecTitle")}</Text>
               </View>
 

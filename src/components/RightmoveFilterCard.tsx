@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -803,7 +803,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 12,
-    shadowColor: "rgba(4, 207, 146, 0.4)",
+    shadowColor: "rgba(141, 92, 18, 0.4)",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,

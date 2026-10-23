@@ -1,17 +1,17 @@
-import { Platform, StyleSheet } from 'react-native';
+﻿import { Platform, StyleSheet } from 'react-native';
 import { colors, radius, fonts } from '../../theme';
 
 export const styles = StyleSheet.create({
   sectionRoot: {
     width: '100%',
-    backgroundColor: '#F8FAF9',
+    backgroundColor: '#FAF8F5',
     paddingVertical: 84,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.05)',
   },
   marketPositionStrip: {
     width: '100%',
-    backgroundColor: '#0B1A17',
+    backgroundColor: '#1A1612',
     paddingVertical: 10,
     alignItems: 'center',
     marginBottom: 40,
@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
   marketPositionText: {
     fontFamily: fonts.semiBold,
     fontSize: 13,
-    color: '#04CF92',
+    color: '#8D5C12',
     letterSpacing: 0.5,
   },
   innerContainer: {
@@ -44,15 +44,15 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: 'rgba(117, 72, 11, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(15, 109, 85, 0.2)',
+    borderColor: 'rgba(117, 72, 11, 0.2)',
     marginBottom: 16,
   },
   eyebrowText: {
     fontFamily: fonts.semiBold,
     fontSize: 12,
-    color: '#0F6D55',
+    color: '#75480B',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
@@ -116,16 +116,16 @@ export const styles = StyleSheet.create({
       : {}),
   },
   headlineCardActive: {
-    borderColor: '#0F6D55',
+    borderColor: '#75480B',
     backgroundColor: '#FFFFFF',
-    shadowColor: '#0F6D55',
+    shadowColor: '#75480B',
     shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 14,
   },
   headlineCardHovered: {
     transform: [{ translateY: -2 }],
-    borderColor: 'rgba(15, 109, 85, 0.4)',
+    borderColor: 'rgba(117, 72, 11, 0.4)',
   },
   cardTopRow: {
     flexDirection: 'row',
@@ -137,12 +137,12 @@ export const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: 'rgba(117, 72, 11, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headlineTagPill: {
-    backgroundColor: 'rgba(15, 109, 85, 0.06)',
+    backgroundColor: 'rgba(117, 72, 11, 0.06)',
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: radius.pill,
@@ -150,7 +150,7 @@ export const styles = StyleSheet.create({
   headlineTagText: {
     fontFamily: fonts.medium,
     fontSize: 11,
-    color: '#0F6D55',
+    color: '#75480B',
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
@@ -234,7 +234,7 @@ export const styles = StyleSheet.create({
   replayBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: 'rgba(117, 72, 11, 0.08)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: radius.pill,
@@ -243,7 +243,7 @@ export const styles = StyleSheet.create({
   replayBtnText: {
     fontFamily: fonts.semiBold,
     fontSize: 11,
-    color: '#0F6D55',
+    color: '#75480B',
   },
   sheetHeader: {
     flexDirection: 'row',
@@ -256,7 +256,7 @@ export const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: 'rgba(15, 109, 85, 0.09)',
+    backgroundColor: 'rgba(117, 72, 11, 0.09)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -306,7 +306,7 @@ export const styles = StyleSheet.create({
     right: 14,
     width: 2,
     height: 16,
-    backgroundColor: '#0F6D55',
+    backgroundColor: '#75480B',
   },
   charCountRow: {
     flexDirection: 'row',
@@ -321,7 +321,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#04CF92',
+    backgroundColor: '#8D5C12',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: radius.pill,
@@ -333,36 +333,36 @@ export const styles = StyleSheet.create({
       : {}),
   },
   analyzeBtnHovered: {
-    backgroundColor: '#04BD84',
+    backgroundColor: '#096A4E',
     transform: [{ translateY: -1 }],
   },
   analyzeBtnText: {
     fontFamily: fonts.bold,
     fontSize: 14,
-    color: '#0B1A17',
+    color: '#1A1612',
   },
   analyzingStateRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    backgroundColor: 'rgba(15, 109, 85, 0.06)',
+    backgroundColor: 'rgba(117, 72, 11, 0.06)',
     borderRadius: radius.pill,
     gap: 10,
   },
   analyzingText: {
     fontFamily: fonts.medium,
     fontSize: 13,
-    color: '#0F6D55',
+    color: '#75480B',
   },
   previewStage: {
     gap: 16,
   },
   conversionBanner: {
-    backgroundColor: 'rgba(15, 109, 85, 0.07)',
+    backgroundColor: 'rgba(117, 72, 11, 0.07)',
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(15, 109, 85, 0.2)',
+    borderColor: 'rgba(117, 72, 11, 0.2)',
     padding: 10,
   },
   conversionTag: {
@@ -382,7 +382,7 @@ export const styles = StyleSheet.create({
   conversionTagValue: {
     fontFamily: fonts.bold,
     fontSize: 13,
-    color: '#0F6D55',
+    color: '#75480B',
   },
   fieldSection: {
     gap: 8,
@@ -427,7 +427,7 @@ export const styles = StyleSheet.create({
   resolvedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: 'rgba(117, 72, 11, 0.08)',
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 6,
@@ -435,7 +435,7 @@ export const styles = StyleSheet.create({
   resolvedBadgeText: {
     fontFamily: fonts.medium,
     fontSize: 11,
-    color: '#0F6D55',
+    color: '#75480B',
   },
   lowConfBadge: {
     flexDirection: 'row',
@@ -453,7 +453,7 @@ export const styles = StyleSheet.create({
     color: '#D4870A',
   },
   fieldValueBox: {
-    backgroundColor: '#F8FAF9',
+    backgroundColor: '#FAF8F5',
     borderRadius: radius.sm,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -490,7 +490,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#0F6D55',
+    borderColor: '#75480B',
     borderRadius: radius.sm,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -503,7 +503,7 @@ export const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: radius.sm,
-    backgroundColor: 'rgba(15, 109, 85, 0.1)',
+    backgroundColor: 'rgba(117, 72, 11, 0.1)',
     alignItems: 'center',
     justifyContent: 'center',
     ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
@@ -516,9 +516,9 @@ export const styles = StyleSheet.create({
   amenityChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: 'rgba(117, 72, 11, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(15, 109, 85, 0.2)',
+    borderColor: 'rgba(117, 72, 11, 0.2)',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: radius.pill,
@@ -526,7 +526,7 @@ export const styles = StyleSheet.create({
   amenityChipText: {
     fontFamily: fonts.medium,
     fontSize: 12,
-    color: '#0F6D55',
+    color: '#75480B',
     textTransform: 'capitalize',
   },
   sheetActionsRow: {
@@ -560,20 +560,20 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#04CF92',
+    backgroundColor: '#8D5C12',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: radius.pill,
     ...(Platform.OS === 'web' ? { cursor: 'pointer', transition: 'all 0.15s ease' } : {}),
   },
   applyBtnHovered: {
-    backgroundColor: '#04BD84',
+    backgroundColor: '#096A4E',
     transform: [{ translateY: -1 }],
   },
   applyBtnText: {
     fontFamily: fonts.bold,
     fontSize: 13,
-    color: '#0B1A17',
+    color: '#1A1612',
   },
   sheetDisclaimer: {
     fontFamily: fonts.regular,

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
 import { Home } from "@/components/icons";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { colors, fonts } from "@/theme";
@@ -70,7 +70,7 @@ export function Brand({
             isLight && { color: "#FFFFFF" },
           ]}
         >
-          Home<Text style={{ color: "#04cf92" }}>net</Text>
+          Home<Text style={{ color: "#8D5C12" }}>net</Text>
         </Text>
       </View>
     </AppLink>
@@ -86,12 +86,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
   },
   markCompact: { width: 28, height: 28, borderRadius: 14 },
   markLarge: { width: 40, height: 40, borderRadius: 20 },
   text: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingExtraBold,
     fontSize: 18,
     letterSpacing: -0.4,

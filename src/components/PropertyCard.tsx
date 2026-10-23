@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+﻿import React, { memo } from "react";
 import {
   Platform,
   Pressable,
@@ -390,14 +390,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.94)",
   },
   intentText: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 11.5,
   },
 
   body: { padding: 16, gap: 5 },
   price: {
-    color: "#0F6D55",
+    color: "#75480B",
     fontFamily: fonts.headingExtraBold,
     fontSize: 20,
     letterSpacing: -0.4,
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
   },
   title: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 15,
     lineHeight: 21,

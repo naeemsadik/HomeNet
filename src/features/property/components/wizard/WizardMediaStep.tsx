@@ -1,4 +1,4 @@
-import { Camera, Trash2, Video } from "@/components/icons";
+﻿import { Camera, Trash2, Video } from "@/components/icons";
 import { ActivityIndicator, Image, Pressable, Text, TextInput, View } from "react-native";
 import { useTranslation } from "@/i18n";
 import { webPointer } from "@/theme";
@@ -40,9 +40,9 @@ export function WizardMediaStep({ isUploading, onPickMedia, onDeleteMedia }: Wiz
           style={({ pressed }) => [styles.addMediaCard, webPointer, pressed && styles.pressed]}
         >
           {isUploading ? (
-            <ActivityIndicator color="#04cf92" />
+            <ActivityIndicator color="#8D5C12" />
           ) : (
-            <Camera color="#5C6B66" size={28} />
+            <Camera color="#6E6458" size={28} />
           )}
           <Text style={styles.addMediaText}>{t("wizard.media.addImage")}</Text>
         </Pressable>
@@ -53,7 +53,7 @@ export function WizardMediaStep({ isUploading, onPickMedia, onDeleteMedia }: Wiz
         <Text style={styles.formLabel}>{t("wizard.media.videoLabel")}</Text>
         {store.media.filter((media) => media.mediaType === "video").map((media) => (
           <View key={media.id} style={styles.uploadedVideoRow}>
-            <Video color="#04cf92" size={20} />
+            <Video color="#8D5C12" size={20} />
             <Text numberOfLines={1} style={styles.uploadedVideoText}>{media.url}</Text>
             <Pressable onPress={() => void onDeleteMedia(media.id)}>
               <Trash2 color="#D4183D" size={17} />
@@ -65,7 +65,7 @@ export function WizardMediaStep({ isUploading, onPickMedia, onDeleteMedia }: Wiz
           onPress={() => void onPickMedia("video")}
           style={styles.videoDropzone}
         >
-          <Video color="#5C6B66" size={24} />
+          <Video color="#6E6458" size={24} />
           <Text style={styles.videoDropzoneText}>{t("wizard.media.uploadVideo")}</Text>
         </Pressable>
         <Text style={styles.uploadHint}>{t("wizard.media.uploadHintVideos")}</Text>

@@ -1,4 +1,4 @@
-import { ExternalLink, MapPin, type LucideIcon } from "@/components/icons";
+﻿import { ExternalLink, MapPin, type LucideIcon } from "@/components/icons";
 import { Image, Linking, Platform, Pressable, Text, View } from "react-native";
 import { colorTokens, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
@@ -38,7 +38,7 @@ export function PropertyLocationSection({
           onPress={() => void Linking.openURL(mapExternalUrl)}
           style={({ pressed }) => [styles.openMapsBtn, webPointer, pressed && styles.pressed]}
         >
-          <ExternalLink color="#04cf92" size={14} />
+          <ExternalLink color="#8D5C12" size={14} />
           <Text style={styles.openMapsBtnText}>{t("propertyDetail.openGoogleMaps")}</Text>
         </Pressable>
       </View>
@@ -79,7 +79,7 @@ export function PropertyLocationSection({
         )}
 
         <View style={styles.mapAddressPill}>
-          <MapPin color="#04cf92" size={14} />
+          <MapPin color="#8D5C12" size={14} />
           <Text numberOfLines={1} style={styles.mapAddressPillText}>
             {address || location}
           </Text>

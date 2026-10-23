@@ -1,4 +1,4 @@
-import { CheckCircle2 } from "@/components/icons";
+﻿import { CheckCircle2 } from "@/components/icons";
 import { Text, View } from "react-native";
 import { useTranslation } from "@/i18n";
 import { subtypeLabel, type PropertyTypeConfig } from "../../constants/propertyCategories";
@@ -15,7 +15,7 @@ export function WizardReviewStep({ activeTypeConfig }: { activeTypeConfig: Prope
       {/* Ready to Publish Alert Banner */}
       <View style={styles.readyAlertBanner}>
         <View style={styles.readyAlertTitleRow}>
-          <CheckCircle2 color="#04cf92" size={18} />
+          <CheckCircle2 color="#8D5C12" size={18} />
           <Text style={styles.readyAlertTitle}>{t("wizard.review.readyTitle")}</Text>
         </View>
         <Text style={styles.readyAlertDesc}>

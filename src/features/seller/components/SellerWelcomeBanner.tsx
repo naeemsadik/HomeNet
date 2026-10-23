@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   Pressable,
   StyleSheet,
@@ -59,7 +59,7 @@ export function SellerWelcomeBanner({
               onPress={onAddNewProperty}
               style={[styles.primaryBtn, webPointer]}
             >
-              <PlusCircle color="#04cf92" size={16} strokeWidth={2} />
+              <PlusCircle color="#8D5C12" size={16} strokeWidth={2} />
               <Text style={styles.primaryBtnText}>{t("dashboard.addNewProperty")}</Text>
             </AppLink>
           ) : (
@@ -71,7 +71,7 @@ export function SellerWelcomeBanner({
                 webPointer,
               ]}
             >
-              <PlusCircle color="#04cf92" size={16} strokeWidth={2} />
+              <PlusCircle color="#8D5C12" size={16} strokeWidth={2} />
               <Text style={styles.primaryBtnText}>{t("dashboard.addNewProperty")}</Text>
             </Pressable>
           )}
@@ -139,7 +139,7 @@ export function SellerWelcomeBanner({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     borderRadius: 24,
     padding: 24,
     position: "relative",
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   primaryBtnText: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontSize: 14,
     fontWeight: "600",
     fontFamily: fonts.semiBold,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from '@/i18n';
 import {
   View,
@@ -207,7 +207,7 @@ export function AiFlagshipSection() {
         {/* Section Header */}
         <View style={styles.headerBlock}>
           <View style={styles.eyebrowBadge}>
-            <Languages size={14} color="#0F6D55" style={{ marginRight: 6 }} />
+            <Languages size={14} color="#75480B" style={{ marginRight: 6 }} />
             <Text style={styles.eyebrowText}>{t("landing.aiFlagship.eyebrow")}</Text>
           </View>
 
@@ -229,9 +229,9 @@ export function AiFlagshipSection() {
             {headlines.map((headline, idx) => {
               const isActive = activeHeadline === idx;
               const icons = [
-                <Languages key="1" size={20} color="#0F6D55" />,
-                <ShieldAlert key="2" size={20} color="#0F6D55" />,
-                <Sliders key="3" size={20} color="#0F6D55" />,
+                <Languages key="1" size={20} color="#75480B" />,
+                <ShieldAlert key="2" size={20} color="#75480B" />,
+                <Sliders key="3" size={20} color="#75480B" />,
               ];
 
               return (
@@ -261,7 +261,7 @@ export function AiFlagshipSection() {
                   <View style={styles.examplesList}>
                     {headline.examples.map((item, itemIdx) => (
                       <View key={itemIdx} style={styles.exampleRow}>
-                        <CheckCircle2 size={13} color="#0F6D55" style={{ marginTop: 2, marginRight: 8 }} />
+                        <CheckCircle2 size={13} color="#75480B" style={{ marginTop: 2, marginRight: 8 }} />
                         <Text style={styles.exampleText}>{item}</Text>
                       </View>
                     ))}
@@ -294,7 +294,7 @@ export function AiFlagshipSection() {
                     onPress={runSequence}
                     accessibilityLabel={t("landing.aiFlagship.replayDemo")}
                   >
-                    <Play size={11} color="#0F6D55" style={{ marginRight: 4 }} />
+                    <Play size={11} color="#75480B" style={{ marginRight: 4 }} />
                     <Text style={styles.replayBtnText}>{t("landing.aiFlagship.replayDemo")}</Text>
                   </Pressable>
                 )}
@@ -303,7 +303,7 @@ export function AiFlagshipSection() {
               {/* Sheet Header */}
               <View style={styles.sheetHeader}>
                 <View style={styles.sheetHeaderIconWrap}>
-                  <Sparkles size={18} color="#0F6D55" />
+                  <Sparkles size={18} color="#75480B" />
                 </View>
                 <View style={styles.sheetHeaderTextWrap}>
                   <Text style={styles.sheetHeaderTitle}>{t("landing.aiFlagship.sheetTitle")}</Text>
@@ -351,7 +351,7 @@ export function AiFlagshipSection() {
                     {/* Action Button */}
                     {demoState === 'analyzing' ? (
                       <View style={styles.analyzingStateRow}>
-                        <ActivityIndicator size="small" color="#04CF92" />
+                        <ActivityIndicator size="small" color="#8D5C12" />
                         <Text style={styles.analyzingText}>{t("landing.aiFlagship.analyzingState")}</Text>
                       </View>
                     ) : (
@@ -362,7 +362,7 @@ export function AiFlagshipSection() {
                         ]}
                         onPress={demoState === 'idle' ? runSequence : handleManualAnalyze}
                       >
-                        <Sparkles size={15} color="#0B1A17" style={{ marginRight: 8 }} />
+                        <Sparkles size={15} color="#1A1612" style={{ marginRight: 8 }} />
                         <Text style={styles.analyzeBtnText}>{t("landing.aiFlagship.analyzeBtn")}</Text>
                       </Pressable>
                     )}
@@ -420,14 +420,14 @@ export function AiFlagshipSection() {
                         <View style={styles.labelWithBadgeRow}>
                           <Text style={styles.fieldLabel}>{t("landing.aiFlagship.priceBdt")}</Text>
                           <View style={styles.resolvedBadge}>
-                            <Check size={11} color="#0F6D55" style={{ marginRight: 3 }} />
+                            <Check size={11} color="#75480B" style={{ marginRight: 3 }} />
                             <Text style={styles.resolvedBadgeText}>
                               {t("landing.aiFlagship.resolvedFrom", { raw: parsedData.priceRaw })}
                             </Text>
                           </View>
                         </View>
                         <View style={styles.fieldValueBox}>
-                          <Text style={[styles.fieldValueText, { fontFamily: fonts.semiBold, color: '#0F6D55' }]}>
+                          <Text style={[styles.fieldValueText, { fontFamily: fonts.semiBold, color: '#75480B' }]}>
                             {parsedData.priceDisplay}
                           </Text>
                         </View>
@@ -478,7 +478,7 @@ export function AiFlagshipSection() {
                               style={styles.fieldEditDone}
                               onPress={() => setEditingField(null)}
                             >
-                              <Check size={14} color="#0F6D55" />
+                              <Check size={14} color="#75480B" />
                             </Pressable>
                           </View>
                         ) : (
@@ -512,7 +512,7 @@ export function AiFlagshipSection() {
                       <View style={styles.amenityChipsGrid}>
                         {amenityEntries.map(([key]) => (
                           <View key={key} style={styles.amenityChip}>
-                            <Check size={12} color="#0F6D55" style={{ marginRight: 4 }} />
+                            <Check size={12} color="#75480B" style={{ marginRight: 4 }} />
                             <Text style={styles.amenityChipText}>{key.replace(/_/g, ' ')}</Text>
                           </View>
                         ))}
@@ -540,7 +540,7 @@ export function AiFlagshipSection() {
                         onPress={handleApply}
                       >
                         <Text style={styles.applyBtnText}>{t("landing.aiFlagship.applyBtn")}</Text>
-                        <ArrowRight size={15} color="#0B1A17" style={{ marginLeft: 6 }} />
+                        <ArrowRight size={15} color="#1A1612" style={{ marginLeft: 6 }} />
                       </Pressable>
                     </View>
 

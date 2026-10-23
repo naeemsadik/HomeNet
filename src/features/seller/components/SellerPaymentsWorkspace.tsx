@@ -1,4 +1,4 @@
-import { CreditCard } from "@/components/icons";
+﻿import { CreditCard } from "@/components/icons";
 import { Pressable, Text, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors } from "@/theme";
@@ -42,7 +42,7 @@ export function SellerPaymentsWorkspace() {
           <Text style={styles.kpiSub}>{t("seller.payments.processingSettlements")}</Text>
         </View>
         <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
-          <Text style={[styles.kpiValue, { color: "#0F6D55" }]}>{zeroAmount}</Text>
+          <Text style={[styles.kpiValue, { color: "#75480B" }]}>{zeroAmount}</Text>
           <Text style={styles.kpiLabel}>{t("seller.payments.lifetimeEarnings")}</Text>
           <Text style={styles.kpiSub}>{t("seller.payments.totalVolumeProcessed")}</Text>
         </View>

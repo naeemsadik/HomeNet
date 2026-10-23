@@ -1,4 +1,4 @@
-import { Bookmark, Heart } from "@/components/icons";
+﻿import { Bookmark, Heart } from "@/components/icons";
 import { useCallback, useEffect, useMemo } from "react";
 import {
   StyleSheet,
@@ -147,7 +147,7 @@ export function SavedScreen() {
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
           <View style={styles.titleWithIconRow}>
-            <Bookmark color="#0B1A17" size={20} />
+            <Bookmark color="#1A1612" size={20} />
             <LiveText style={styles.sectionTitle}>
               {savedListings.length === 1
                 ? t("saved.singleCount", { count: formatLocalizedNumber(1, language) })
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   pageHeading: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingExtraBold,
     fontSize: 25.6,
     fontWeight: "800",
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.512,
   },
   pageSubtitle: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 20,
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sectionTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingBold,
     fontSize: 20,
     fontWeight: "700",
@@ -279,10 +279,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
   },
   exploreLinkText: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.semiBold,
     fontSize: 13,
   },
@@ -300,13 +300,13 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 18,
     fontFamily: fonts.headingBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   emptySavedText: {
     marginTop: 8,
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     textAlign: "center",
     maxWidth: 400,
   },
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 999,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
   },
   browseButtonText: {
     color: colorTokens.onBrand,

@@ -1,4 +1,4 @@
-import { Platform, StyleSheet } from "react-native";
+﻿import { Platform, StyleSheet } from "react-native";
 import { colorTokens, fonts } from "@/theme";
 
 export const styles = StyleSheet.create({
@@ -52,13 +52,13 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   pageTitle: {
     fontSize: 26,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   pageTitlePhone: {
     fontSize: 22,
@@ -94,7 +94,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   profileRow: {
     flexDirection: "row",
@@ -112,7 +112,7 @@ export const styles = StyleSheet.create({
     borderRadius: 22,
     overflow: "hidden",
     position: "relative",
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
   },
   avatarWrapPhone: {
     width: 68,
@@ -143,7 +143,7 @@ export const styles = StyleSheet.create({
     fontSize: 17,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   buyerBadge: {
     flexDirection: "row",
@@ -152,13 +152,13 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 3,
     borderRadius: 999,
-    backgroundColor: "rgba(4, 207, 146, 0.12)",
+    backgroundColor: "rgba(141, 92, 18, 0.12)",
   },
   buyerBadgeText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#03a675",
+    color: "#5F3806",
   },
   changePhotoBtn: {
     alignSelf: "flex-start",
@@ -166,7 +166,7 @@ export const styles = StyleSheet.create({
   changePhotoText: {
     fontSize: 13.5,
     fontFamily: fonts.medium,
-    color: "#04cf92",
+    color: "#8D5C12",
     fontWeight: "600",
   },
   formGroup: {
@@ -179,13 +179,13 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.medium,
     fontWeight: "500",
-    color: "#0B1A17",
+    color: "#1A1612",
     marginBottom: 7,
   },
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 14,
     height: 48,
     paddingHorizontal: 16,
@@ -209,7 +209,7 @@ export const styles = StyleSheet.create({
   },
   textInputNormal: {
     fontWeight: "400",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   clearBtn: {
     padding: 6,
@@ -236,12 +236,12 @@ export const styles = StyleSheet.create({
     fontSize: 14.5,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   securityDesc: {
     fontSize: 12.5,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 3,
     lineHeight: 18,
   },
@@ -258,14 +258,14 @@ export const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 999,
     borderWidth: 1.2,
-    borderColor: "rgba(4, 207, 146, 0.35)",
-    backgroundColor: "rgba(4, 207, 146, 0.12)",
+    borderColor: "rgba(141, 92, 18, 0.35)",
+    backgroundColor: "rgba(141, 92, 18, 0.12)",
   },
   changePasswordBtnText: {
     fontSize: 13.5,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#03a675",
+    color: "#5F3806",
   },
   deleteAccountBtn: {
     flexDirection: "row",
@@ -324,7 +324,7 @@ export const styles = StyleSheet.create({
     color: "#D4183D",
   },
   saveBtn: {
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     paddingHorizontal: 24,
     paddingVertical: 11,
     borderRadius: 999,
@@ -385,7 +385,7 @@ export const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "rgba(4, 207, 146, 0.14)",
+    backgroundColor: "rgba(141, 92, 18, 0.14)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -396,12 +396,12 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   modalSubtitle: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 2,
     lineHeight: 18,
   },
@@ -429,13 +429,13 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.medium,
     fontWeight: "500",
-    color: "#0B1A17",
+    color: "#1A1612",
     marginBottom: 6,
   },
   modalInputWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 12,
     height: 44,
     paddingHorizontal: 14,
@@ -447,7 +447,7 @@ export const styles = StyleSheet.create({
     height: "100%",
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
     paddingVertical: 0,
     ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
   },
@@ -465,18 +465,18 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: 999,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
   },
   modalCancelBtnText: {
     fontSize: 13.5,
     fontFamily: fonts.medium,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   modalSubmitBtn: {
     paddingHorizontal: 20,
     paddingVertical: 9,
     borderRadius: 999,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
   },
   modalSubmitBtnText: {
     fontSize: 13.5,

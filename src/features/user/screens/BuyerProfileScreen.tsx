@@ -1,4 +1,4 @@
-import * as ImagePicker from "expo-image-picker";
+﻿import * as ImagePicker from "expo-image-picker";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -251,7 +251,7 @@ export function BuyerProfileScreen() {
                 pressed && styles.pressed,
               ]}
             >
-              <ArrowLeft color="#0B1A17" size={17} strokeWidth={2.2} />
+              <ArrowLeft color="#1A1612" size={17} strokeWidth={2.2} />
               <Text style={styles.backBtnText}>{t("userProfile.back")}</Text>
             </Pressable>
 
@@ -261,7 +261,7 @@ export function BuyerProfileScreen() {
           {/* Section 1: Personal Information */}
           <View style={[styles.card, isPhone && styles.cardPhone]}>
             <View style={styles.cardHeaderRow}>
-              <User color="#0B1A17" size={20} />
+              <User color="#1A1612" size={20} />
               <Text style={styles.cardTitle}>{t("userProfile.personalInfoTitle")}</Text>
             </View>
 
@@ -286,7 +286,7 @@ export function BuyerProfileScreen() {
                   </Text>
 
                   <View style={styles.buyerBadge}>
-                    <CheckCircle2 color="#04cf92" size={14} />
+                    <CheckCircle2 color="#8D5C12" size={14} />
                     <Text style={styles.buyerBadgeText}>{t("userProfile.buyerBadge")}</Text>
                   </View>
                 </View>
@@ -386,7 +386,7 @@ export function BuyerProfileScreen() {
           {/* Section 3: Account Security (Change Password & Permanently Delete Account) */}
           <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
             <View style={styles.cardHeaderRow}>
-              <Shield color="#0B1A17" size={20} />
+              <Shield color="#1A1612" size={20} />
               <Text style={styles.cardTitle}>{t("userProfile.accountSecurityTitle")}</Text>
             </View>
 
@@ -411,7 +411,7 @@ export function BuyerProfileScreen() {
                   pressed && styles.pressed,
                 ]}
               >
-                <KeyRound color="#03a675" size={15} />
+                <KeyRound color="#5F3806" size={15} />
                 <Text style={styles.changePasswordBtnText}>{t("userProfile.changePasswordBtn")}</Text>
               </Pressable>
             </View>
@@ -513,7 +513,7 @@ export function BuyerProfileScreen() {
           >
             <View style={styles.modalHeader}>
               <View style={styles.modalIconWrap}>
-                <KeyRound color="#03a675" size={20} />
+                <KeyRound color="#5F3806" size={20} />
               </View>
               <View style={styles.modalTitleWrap}>
                 <Text style={styles.modalTitle}>{t("userProfile.changePasswordModalTitle")}</Text>
@@ -527,7 +527,7 @@ export function BuyerProfileScreen() {
                 onPress={() => setChangePasswordModalOpen(false)}
                 style={[styles.modalCloseBtn, webPointer]}
               >
-                <X color="#0B1A17" size={18} />
+                <X color="#1A1612" size={18} />
               </Pressable>
             </View>
 

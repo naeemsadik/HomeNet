@@ -1,4 +1,4 @@
-import { Platform, StyleSheet } from "react-native";
+﻿import { Platform, StyleSheet } from "react-native";
 import { colorTokens, fonts } from "@/theme";
 
 export const styles = StyleSheet.create({
@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
   sidebar: {
     width: 256,
@@ -31,17 +31,17 @@ export const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     alignItems: "center",
     justifyContent: "center",
   },
   brandText: {
     fontSize: 18,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   brandTextAccent: {
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   sellerRolePill: {
     backgroundColor: "#E8EEFC",
@@ -69,7 +69,7 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
   },
   navItemActive: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
   },
   navItemDanger: {
     marginTop: 8,
@@ -78,10 +78,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   navItemTextActive: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
@@ -121,13 +121,13 @@ export const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 19,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.38,
   },
   headerSubtitle: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 2,
   },
   headerActions: {
@@ -141,7 +141,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 999,
     borderWidth: 0.8,
     borderColor: "rgba(11,26,23,0.08)",
@@ -151,7 +151,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   iconCircleBtn: {
     width: 40,
@@ -165,8 +165,8 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   iconCircleBtnActive: {
-    borderColor: "#04cf92",
-    backgroundColor: "#E6FAF4",
+    borderColor: "#8D5C12",
+    backgroundColor: "#F9F4EB",
   },
   iconCircleBtnPressed: {
     transform: [{ scale: 0.96 }],
@@ -206,7 +206,7 @@ export const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "rgba(11,26,23,0.08)",
-    shadowColor: "#0B1A17",
+    shadowColor: "#1A1612",
     shadowOffset: { width: 0, height: 12 },
     shadowOpacity: 0.12,
     shadowRadius: 28,
@@ -232,10 +232,10 @@ export const styles = StyleSheet.create({
   dropdownTitle: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   unreadCountPill: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,
@@ -243,7 +243,7 @@ export const styles = StyleSheet.create({
   unreadCountPillText: {
     fontSize: 11,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   markAllReadBtn: {
     paddingVertical: 4,
@@ -253,7 +253,7 @@ export const styles = StyleSheet.create({
   markAllReadText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   dropdownScroll: {
     maxHeight: 320,
@@ -287,7 +287,7 @@ export const styles = StyleSheet.create({
   viewAllNotificationsText: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   headerDotIndicator: {
     position: "absolute",
@@ -312,7 +312,7 @@ export const styles = StyleSheet.create({
   viewSiteText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   workspaceScroll: {
     flexGrow: 1,
@@ -354,36 +354,36 @@ export const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderWidth: 1.5,
     borderColor: "rgba(11,26,23,0.15)",
     alignItems: "center",
     justifyContent: "center",
   },
   stepCircleCurrent: {
-    borderColor: "#04cf92",
+    borderColor: "#8D5C12",
     backgroundColor: "#FFFFFF",
   },
   stepCircleDone: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
+    backgroundColor: "#8D5C12",
+    borderColor: "#8D5C12",
   },
   stepCircleText: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   stepCircleTextCurrent: {
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   stepLabelText: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   stepLabelTextActive: {
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   stepConnectorLine: {
     flex: 1,
@@ -393,14 +393,14 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   stepConnectorLineDone: {
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
   },
   stepCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
     borderWidth: 1,
     borderColor: "rgba(11,26,23,0.11)",
-    shadowColor: "#0B1A17",
+    shadowColor: "#1A1612",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 16,
@@ -435,7 +435,7 @@ export const styles = StyleSheet.create({
   formLabel: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   formLabelRow: {
     flexDirection: "row",
@@ -450,18 +450,18 @@ export const styles = StyleSheet.create({
   formInput: {
     height: 48,
     borderRadius: 16,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderWidth: 1.2,
     borderColor: "rgba(11,26,23,0.12)",
     paddingHorizontal: 16,
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   formTextarea: {
     minHeight: 116,
     borderRadius: 16,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderWidth: 1.2,
     borderColor: "rgba(11,26,23,0.12)",
     paddingHorizontal: 16,
@@ -469,7 +469,7 @@ export const styles = StyleSheet.create({
     paddingBottom: 14,
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
     textAlignVertical: "top",
     lineHeight: 22,
   },
@@ -483,7 +483,7 @@ export const styles = StyleSheet.create({
     elevation: 2,
   },
   areaPickerButton: { alignItems: "center", flexDirection: "row", gap: 10 },
-  areaPickerText: { color: "#0B1A17", flex: 1, fontFamily: fonts.regular, fontSize: 14 },
+  areaPickerText: { color: "#1A1612", flex: 1, fontFamily: fonts.regular, fontSize: 14 },
   areaPickerPlaceholder: { color: "#899790" },
   formRow: {
     flexDirection: "row",
@@ -495,7 +495,7 @@ export const styles = StyleSheet.create({
   toggleRow: {
     flexDirection: "row",
     height: 48,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 16,
     borderWidth: 1.2,
     borderColor: "rgba(11,26,23,0.12)",
@@ -522,15 +522,15 @@ export const styles = StyleSheet.create({
   toggleBtnText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   toggleBtnTextActive: {
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   toggleGridMobile: {
     flexDirection: "row",
     flexWrap: "wrap",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 16,
     borderWidth: 1.2,
     borderColor: "rgba(11,26,23,0.12)",
@@ -563,17 +563,17 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.12)",
   },
   amenityPillSelected: {
-    borderColor: "#04cf92",
-    backgroundColor: "#E6FAF4",
+    borderColor: "#8D5C12",
+    backgroundColor: "#F9F4EB",
   },
   amenityPillText: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   amenityPillTextSelected: {
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   categoryGrid: {
     flexDirection: "row",
@@ -586,7 +586,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     borderRadius: 16,
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderWidth: 1.5,
     borderColor: "rgba(11, 26, 23, 0.08)",
     gap: 6,
@@ -599,11 +599,11 @@ export const styles = StyleSheet.create({
     }) as any),
   },
   categoryCardSelected: {
-    borderColor: "#04cf92",
-    backgroundColor: "#E6FAF4",
+    borderColor: "#8D5C12",
+    backgroundColor: "#F9F4EB",
     ...(Platform.select({
       web: {
-        boxShadow: "0 2px 10px rgba(4, 207, 146, 0.18)",
+        boxShadow: "0 2px 10px rgba(141, 92, 18, 0.18)",
       },
       default: {},
     }) as any),
@@ -618,24 +618,24 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
   },
   categoryIconWrapSelected: {
-    backgroundColor: "rgba(4, 207, 146, 0.15)",
+    backgroundColor: "rgba(141, 92, 18, 0.15)",
   },
   categoryLabel: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   categoryLabelSelected: {
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   categoryDesc: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     lineHeight: 16,
   },
   categoryDescSelected: {
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   subtypeWrap: {
     flexDirection: "row",
@@ -654,17 +654,17 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(11, 26, 23, 0.12)",
   },
   subtypePillSelected: {
-    borderColor: "#04cf92",
-    backgroundColor: "#E6FAF4",
+    borderColor: "#8D5C12",
+    backgroundColor: "#F9F4EB",
   },
   subtypePillText: {
     fontSize: 13,
     fontFamily: fonts.medium,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   subtypePillTextSelected: {
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   customSubtypeGroup: {
     gap: 6,
@@ -674,7 +674,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     padding: 3,
     borderRadius: 10,
     borderWidth: 1,
@@ -686,12 +686,12 @@ export const styles = StyleSheet.create({
     borderRadius: 7,
   },
   unitPillActive: {
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
   },
   unitPillText: {
     fontSize: 11,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
     textTransform: "uppercase",
   },
   unitPillTextActive: {
@@ -700,12 +700,12 @@ export const styles = StyleSheet.create({
   formHint: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   formHelperText: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 2,
   },
   mapContainer: {
@@ -724,7 +724,7 @@ export const styles = StyleSheet.create({
   locationLinkOk: {
     fontSize: 12,
     fontFamily: fonts.medium,
-    color: "#0F6D55",
+    color: "#75480B",
     marginTop: 2,
   },
   locationLinkError: {
@@ -744,7 +744,7 @@ export const styles = StyleSheet.create({
     textAlignVertical: "center",
     fontSize: 13,
     fontFamily: fonts.medium,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   mapImage: {
     width: "100%",
@@ -758,7 +758,7 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   mapTooltip: {
-    backgroundColor: "#0B1A17",
+    backgroundColor: "#1A1612",
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -772,7 +772,7 @@ export const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     alignItems: "center",
     justifyContent: "center",
     elevation: 4,
@@ -789,7 +789,7 @@ export const styles = StyleSheet.create({
   mapCoordText: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   mediaGrid: {
     flexDirection: "row",
@@ -811,7 +811,7 @@ export const styles = StyleSheet.create({
     position: "absolute",
     bottom: 8,
     left: 8,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 2,
@@ -847,7 +847,7 @@ export const styles = StyleSheet.create({
   addMediaText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   videoDropzone: {
     height: 100,
@@ -863,21 +863,21 @@ export const styles = StyleSheet.create({
   videoDropzoneText: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   uploadHint: { color: "#6B7D78", fontFamily: fonts.regular, fontSize: 12, marginTop: 8 },
   uploadedVideoRow: {
     alignItems: "center",
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderRadius: 10,
     flexDirection: "row",
     gap: 10,
     marginBottom: 8,
     padding: 12,
   },
-  uploadedVideoText: { color: "#0B1A17", flex: 1, fontFamily: fonts.regular, fontSize: 13 },
+  uploadedVideoText: { color: "#1A1612", flex: 1, fontFamily: fonts.regular, fontSize: 13 },
   readyAlertBanner: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderRadius: 16,
     padding: 18,
     gap: 6,
@@ -890,12 +890,12 @@ export const styles = StyleSheet.create({
   readyAlertTitle: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   readyAlertDesc: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   reviewGrid: {
     flexDirection: "row",
@@ -904,7 +904,7 @@ export const styles = StyleSheet.create({
   },
   reviewCard: {
     width: "48%",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 16,
     borderWidth: 1.2,
     borderColor: "rgba(11,26,23,0.12)",
@@ -914,12 +914,12 @@ export const styles = StyleSheet.create({
   reviewCardLabel: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   reviewCardValue: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   wizardActionBar: {
     flexDirection: "row",
@@ -942,7 +942,7 @@ export const styles = StyleSheet.create({
   backBtnText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   wizardRightActions: {
     flexDirection: "row",
@@ -962,14 +962,14 @@ export const styles = StyleSheet.create({
   saveDraftText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   nextBtn: {
     height: 40,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     borderRadius: 999,
     paddingHorizontal: 22,
   },
@@ -983,7 +983,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     borderRadius: 999,
     paddingHorizontal: 22,
   },
@@ -1025,7 +1025,7 @@ export const styles = StyleSheet.create({
   backBtnTextMobile: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   saveDraftBtnMobile: {
     height: 38,
@@ -1043,14 +1043,14 @@ export const styles = StyleSheet.create({
   saveDraftTextMobile: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   nextBtnMobile: {
     height: 38,
     paddingHorizontal: 14,
     gap: 4,
     borderRadius: 999,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
   },
   nextBtnNarrow: {
     paddingHorizontal: 10,

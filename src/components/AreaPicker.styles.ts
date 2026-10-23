@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+﻿import { StyleSheet } from "react-native";
 import { colorTokens, colors, fonts, shadow } from "@/theme";
 
 export const styles = StyleSheet.create({
@@ -70,14 +70,14 @@ export const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     alignItems: "center",
     justifyContent: "center",
   },
   headerTitle: {
     fontSize: 17,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.3,
   },
   headerActions: {
@@ -123,8 +123,8 @@ export const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   chipActive: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
+    backgroundColor: "#8D5C12",
+    borderColor: "#8D5C12",
   },
   chipText: {
     fontSize: 13,
@@ -145,7 +145,7 @@ export const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.1)",
     borderRadius: 12,
@@ -160,7 +160,7 @@ export const styles = StyleSheet.create({
     height: "100%",
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
     outlineStyle: "none",
   } as any,
   clearSearchBtn: {
@@ -274,7 +274,7 @@ export const styles = StyleSheet.create({
   },
   areaRowSelected: {
     backgroundColor: "#F0F7F4",
-    borderColor: "rgba(15, 109, 85, 0.2)",
+    borderColor: "rgba(117, 72, 11, 0.2)",
   },
   areaRowFocused: {
     backgroundColor: "#F4F7F5",
@@ -308,11 +308,11 @@ export const styles = StyleSheet.create({
   areaName: {
     fontSize: 14.5,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.2,
   },
   areaNameSelected: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontWeight: "700",
   },
   areaCity: {
@@ -331,26 +331,26 @@ export const styles = StyleSheet.create({
     paddingVertical: 5.5,
     borderRadius: 7,
     borderWidth: 1,
-    borderColor: "rgba(4, 207, 146, 0.25)",
+    borderColor: "rgba(141, 92, 18, 0.25)",
     backgroundColor: "#FFFFFF",
     minWidth: 54,
     alignItems: "center",
     justifyContent: "center",
   },
   directSelectBtnActive: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
+    backgroundColor: "#8D5C12",
+    borderColor: "#8D5C12",
   },
   directSelectText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   selectedCheckBadge: {
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     alignItems: "center",
     justifyContent: "center",
   },

@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+﻿import { StyleSheet } from "react-native";
 import { colorTokens, colors, fonts, radius } from "@/theme";
 
 export const styles = StyleSheet.create({
@@ -11,7 +11,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
   sidebar: {
     width: 256,
@@ -137,7 +137,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 999,
     borderWidth: 0.8,
     borderColor: "rgba(11,26,23,0.08)",
@@ -471,7 +471,7 @@ export const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -943,7 +943,7 @@ export const styles = StyleSheet.create({
   },
   tableHeaderRow: {
     flexDirection: "row",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -1013,7 +1013,7 @@ export const styles = StyleSheet.create({
     color: colors.ink,
   },
   availableBadge: {
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,

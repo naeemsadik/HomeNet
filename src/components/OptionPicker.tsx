@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type StyleProp, type ViewStyle } from "react-native";
 import { Check, ChevronDown } from "@/components/icons";
 import { colorTokens, fonts } from "@/theme";
@@ -46,7 +46,7 @@ export function OptionPicker({
         <Text numberOfLines={1} style={styles.boxText}>
           {current?.label.trim()}
         </Text>
-        <ChevronDown color="#0B1A17" size={16} strokeWidth={2.2} />
+        <ChevronDown color="#1A1612" size={16} strokeWidth={2.2} />
       </Pressable>
 
       <Modal animationType="fade" onRequestClose={() => setOpen(false)} transparent visible={open}>
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   boxDisabled: { opacity: 0.55 },
-  boxText: { flex: 1, fontSize: 14, color: "#0B1A17", fontFamily: fonts.regular },
+  boxText: { flex: 1, fontSize: 14, color: "#1A1612", fontFamily: fonts.regular },
   layer: { flex: 1, justifyContent: "flex-end" },
   overlay: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(11, 26, 23, 0.45)" },
   sheet: {
@@ -112,6 +112,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   rowSelected: { backgroundColor: "#E4F9F1" },
-  rowText: { flex: 1, fontSize: 15, color: "#0B1A17", fontFamily: fonts.regular },
+  rowText: { flex: 1, fontSize: 15, color: "#1A1612", fontFamily: fonts.regular },
   rowTextSelected: { fontFamily: fonts.semiBold },
 });

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+﻿import React, { useMemo } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { Check, X } from "@/components/icons";
 import { useTranslation } from "@/i18n";
@@ -51,7 +51,7 @@ export function ContrastColumns() {
           {withItems.map((text, idx) => (
             <View key={idx} style={styles.itemRow}>
               <View style={styles.itemIconWith}>
-                <Check color="#0F6D55" size={14} strokeWidth={2.5} />
+                <Check color="#75480B" size={14} strokeWidth={2.5} />
               </View>
               <Text style={styles.itemTextWith}>{text}</Text>
             </View>
@@ -100,13 +100,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   colTitleWithout: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingBold,
     fontSize: 20,
     fontWeight: "700",
   },
   colTitleWith: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingBold,
     fontSize: 20,
     fontWeight: "700",
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   itemTextWithout: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 21,
@@ -140,14 +140,14 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     alignItems: "center",
     justifyContent: "center",
     marginTop: 2,
     flexShrink: 0,
   },
   itemTextWith: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.medium,
     fontSize: 14.5,
     lineHeight: 22,

@@ -1,4 +1,4 @@
-import { MapPin } from "@/components/icons";
+﻿import { MapPin } from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import { useTranslation } from "@/i18n";
@@ -211,7 +211,7 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
             onPress={onOpenAreaPicker}
             style={({ pressed }) => [styles.formInput, styles.areaPickerButton, pressed && styles.pressed]}
           >
-            <MapPin color="#04cf92" size={17} />
+            <MapPin color="#8D5C12" size={17} />
             <Text style={[styles.areaPickerText, !store.areaId && styles.areaPickerPlaceholder]}>
               {store.areaId
                 ? [store.areaName, store.district].filter(Boolean).join(", ")

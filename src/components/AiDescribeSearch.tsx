@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, Search, Sparkles } from "@/components/icons";
+﻿import { AlertTriangle, ArrowRight, Search, Sparkles } from "@/components/icons";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   badges: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 6, paddingHorizontal: 2 },
   badge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, backgroundColor: colors.greenLight },
   badgeText: { color: colors.greenOnLight, fontFamily: fonts.medium, fontSize: 11.5 },
-  empty: { padding: 24, alignItems: "center", borderRadius: 16, backgroundColor: "#F8FAF9" },
+  empty: { padding: 24, alignItems: "center", borderRadius: 16, backgroundColor: "#FAF8F5" },
   emptyTitle: { color: colors.ink, fontFamily: fonts.bold, fontSize: 15, textAlign: "center" },
   emptyText: { marginTop: 6, color: colors.muted, fontFamily: fonts.regular, fontSize: 13, textAlign: "center", lineHeight: 19 },
   emptyAction: { marginTop: 14 },

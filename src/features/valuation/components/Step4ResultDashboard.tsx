@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+﻿import React, { useEffect } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: "rgba(4, 207, 146, 0.18)",
+    backgroundColor: "rgba(141, 92, 18, 0.18)",
   },
   heroTop: {
     flexDirection: "row",
@@ -819,7 +819,7 @@ const styles = StyleSheet.create({
     color: colorTokens.ink,
   },
   similarityBadge: {
-    backgroundColor: "rgba(4, 207, 146, 0.20)",
+    backgroundColor: "rgba(141, 92, 18, 0.20)",
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,

@@ -1,4 +1,4 @@
-import { X } from "@/components/icons";
+﻿import { X } from "@/components/icons";
 import {
   Modal,
   Pressable,
@@ -65,7 +65,7 @@ export function SellerMobileDrawer({
               onPress={onClose}
               style={[styles.closeBtn, webPointer]}
             >
-              <X color="#5C6B66" size={18} />
+              <X color="#6E6458" size={18} />
             </Pressable>
           </View>
 
@@ -104,8 +104,8 @@ export function SellerMobileDrawer({
                       item.danger
                         ? "#D4183D"
                         : isActive
-                        ? "#04cf92"
-                        : "#5C6B66"
+                        ? "#8D5C12"
+                        : "#6E6458"
                     }
                     size={20}
                   />
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 24,
     paddingHorizontal: 16,
-    shadowColor: "#0B1A17",
+    shadowColor: "#1A1612",
     shadowOffset: { width: 4, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 16,
@@ -172,23 +172,23 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     alignItems: "center",
     justifyContent: "center",
   },
   brandText: {
     fontSize: 17,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   brandTextAccent: {
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   closeBtn: {
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   navItemActive: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
   },
   navItemDanger: {
     marginTop: 8,
@@ -230,10 +230,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   navItemTextActive: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {

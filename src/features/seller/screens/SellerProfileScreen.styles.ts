@@ -1,11 +1,11 @@
-import { Platform, StyleSheet } from "react-native";
+﻿import { Platform, StyleSheet } from "react-native";
 import { colorTokens, fonts, webPointer } from "@/theme";
 
 export const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
   workspaceScroll: {
     flexGrow: 1,
@@ -52,7 +52,7 @@ export const styles = StyleSheet.create({
     ...webPointer,
   },
   navItemActive: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
   },
   navItemDanger: {
     marginTop: 8,
@@ -61,10 +61,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   navItemTextActive: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
@@ -76,7 +76,7 @@ export const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     minWidth: 0,
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
   },
   topHeader: {
     minHeight: 68,
@@ -104,7 +104,7 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   headerActions: {
     flexDirection: "row",
@@ -116,7 +116,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 999,
     paddingHorizontal: 14,
     width: 220,
@@ -136,7 +136,7 @@ export const styles = StyleSheet.create({
   },
   textInputNormal: {
     fontWeight: "400",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   iconCircleBtn: {
     width: 38,
@@ -177,7 +177,7 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   // Scrollable Content
   scrollContent: {
@@ -216,10 +216,10 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
   },
   tabBtnActive: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#75480B",
     ...(Platform.OS === "web"
       ? {
-          boxShadow: "0 2px 8px rgba(15, 109, 85, 0.25)",
+          boxShadow: "0 2px 8px rgba(117, 72, 11, 0.25)",
         }
       : {
           elevation: 2,
@@ -229,7 +229,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   tabBtnTextPhone: {
     fontSize: 13,
@@ -273,7 +273,7 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.36,
   },
   // Profile Row
@@ -328,7 +328,7 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   verifiedBadge: {
     flexDirection: "row",
@@ -342,7 +342,7 @@ export const styles = StyleSheet.create({
   verifiedText: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#0F6D55",
+    color: "#75480B",
     fontWeight: "500",
   },
   unverifiedBadge: {
@@ -374,7 +374,7 @@ export const styles = StyleSheet.create({
   buyerBadgeText: {
     fontSize: 12,
     fontFamily: fonts.medium,
-    color: "#0F6D55",
+    color: "#75480B",
     fontWeight: "600",
   },
   changePhotoBtn: {
@@ -385,7 +385,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#0F6D55",
+    color: "#75480B",
   },
   // Form Inputs
   formGroup: {
@@ -398,13 +398,13 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.medium,
     fontWeight: "500",
-    color: "#0B1A17",
+    color: "#1A1612",
     marginBottom: 8,
   },
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 16,
     height: 48,
     paddingHorizontal: 16,
@@ -449,14 +449,14 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 999,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderWidth: 1,
     borderColor: "rgba(11,26,23,0.08)",
   },
   quickChipText: {
     fontSize: 12.5,
     fontFamily: fonts.medium,
-    color: "#0B1A17",
+    color: "#1A1612",
     fontWeight: "500",
   },
   // Account Security
@@ -480,12 +480,12 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   securityDesc: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 3,
     lineHeight: 18,
   },
@@ -502,14 +502,14 @@ export const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 999,
     borderWidth: 1.2,
-    borderColor: "rgba(4, 207, 146, 0.35)",
-    backgroundColor: "rgba(4, 207, 146, 0.12)",
+    borderColor: "rgba(141, 92, 18, 0.35)",
+    backgroundColor: "rgba(141, 92, 18, 0.12)",
   },
   changePasswordBtnText: {
     fontSize: 13.5,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#03a675",
+    color: "#5F3806",
   },
   deleteAccountBtn: {
     flexDirection: "row",
@@ -568,7 +568,7 @@ export const styles = StyleSheet.create({
     color: "#D4183D",
   },
   saveBtn: {
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     paddingHorizontal: 24,
     paddingVertical: 11,
     borderRadius: 999,
@@ -629,7 +629,7 @@ export const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "rgba(4, 207, 146, 0.14)",
+    backgroundColor: "rgba(141, 92, 18, 0.14)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -640,12 +640,12 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   modalSubtitle: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 2,
     lineHeight: 18,
   },
@@ -673,13 +673,13 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: fonts.medium,
     fontWeight: "500",
-    color: "#0B1A17",
+    color: "#1A1612",
     marginBottom: 6,
   },
   modalInputWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 12,
     height: 44,
     paddingHorizontal: 14,
@@ -691,7 +691,7 @@ export const styles = StyleSheet.create({
     height: "100%",
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
     paddingVertical: 0,
     ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
   },
@@ -709,18 +709,18 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 9,
     borderRadius: 999,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
   },
   modalCancelBtnText: {
     fontSize: 13.5,
     fontFamily: fonts.medium,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   modalSubmitBtn: {
     paddingHorizontal: 20,
     paddingVertical: 9,
     borderRadius: 999,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
   },
   modalSubmitBtnText: {
     fontSize: 13.5,

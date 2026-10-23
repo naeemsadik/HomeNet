@@ -1,4 +1,4 @@
-import { Eye, EyeOff, KeyRound, X } from "@/components/icons";
+﻿import { Eye, EyeOff, KeyRound, X } from "@/components/icons";
 import { useState } from "react";
 import { ActivityIndicator, Modal, Pressable, Text, TextInput, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -89,7 +89,7 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
         >
           <View style={styles.modalHeader}>
             <View style={styles.modalIconWrap}>
-              <KeyRound color="#03a675" size={20} />
+              <KeyRound color="#5F3806" size={20} />
             </View>
             <View style={styles.modalTitleWrap}>
               <Text style={styles.modalTitle}>{t("seller.changePassword.title")}</Text>
@@ -103,7 +103,7 @@ export function SellerChangePasswordModal({ visible, onClose }: SellerChangePass
               onPress={handleClose}
               style={[styles.modalCloseBtn, webPointer]}
             >
-              <X color="#0B1A17" size={18} />
+              <X color="#1A1612" size={18} />
             </Pressable>
           </View>
 

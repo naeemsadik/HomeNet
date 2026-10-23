@@ -1,4 +1,4 @@
-import { Platform, StyleSheet } from "react-native";
+﻿import { Platform, StyleSheet } from "react-native";
 import { colorTokens, colors, fonts } from "@/theme";
 
 export const styles = StyleSheet.create({
@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
   },
   cleanCard: {
     position: "relative",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderRadius: 24,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
@@ -28,7 +28,7 @@ export const styles = StyleSheet.create({
         boxShadow: "0 10px 30px rgba(11, 26, 23, 0.03)",
       },
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: "#1A1612",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.04,
         shadowRadius: 14,
@@ -72,19 +72,19 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 100,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderWidth: 1,
-    borderColor: "rgba(4, 207, 146, 0.25)",
+    borderColor: "rgba(141, 92, 18, 0.25)",
   },
   eyebrowText: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 12,
     letterSpacing: 0.3,
     textTransform: "uppercase",
   },
   headline: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.bold,
     fontSize: 36,
     lineHeight: 42,
@@ -97,7 +97,7 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.4,
   },
   subcopy: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 15,
     lineHeight: 24,
@@ -164,7 +164,7 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   trustPillText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.medium,
     fontSize: 12,
   },
@@ -204,17 +204,17 @@ export const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     alignItems: "center",
     justifyContent: "center",
   },
   plaqueTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 15,
   },
   plaqueSubtitle: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 12,
     marginTop: 2,
@@ -223,7 +223,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 12,
@@ -236,12 +236,12 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   plaqueStatNum: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.bold,
     fontSize: 14,
   },
   plaqueStatLabel: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 10,
     marginTop: 2,
@@ -258,7 +258,7 @@ export const styles = StyleSheet.create({
     paddingTop: 4,
   },
   plaqueActionText: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.semiBold,
     fontSize: 13,
   },
@@ -307,20 +307,20 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
   },
   modalEyebrow: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.semiBold,
     fontSize: 12,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   modalTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.bold,
     fontSize: 22,
     lineHeight: 28,
   },
   modalSubtitle: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 13,
     marginTop: 4,
@@ -345,7 +345,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     minWidth: 280,
     flexBasis: "48%",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: "rgba(11, 26, 23, 0.08)",
@@ -358,15 +358,15 @@ export const styles = StyleSheet.create({
     }) as any),
   },
   intentCardHovered: {
-    borderColor: "rgba(4, 207, 146, 0.4)",
+    borderColor: "rgba(141, 92, 18, 0.4)",
     backgroundColor: "#F3FCF9",
   },
   intentCardSelected: {
-    borderColor: "#04cf92",
-    backgroundColor: "#E6FAF4",
+    borderColor: "#8D5C12",
+    backgroundColor: "#F9F4EB",
     ...(Platform.select({
       web: {
-        boxShadow: "0 2px 10px rgba(4, 207, 146, 0.15)",
+        boxShadow: "0 2px 10px rgba(141, 92, 18, 0.15)",
       },
       default: {},
     }) as any),
@@ -386,13 +386,13 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   intentCardIconWrapSelected: {
-    backgroundColor: "rgba(4, 207, 146, 0.15)",
+    backgroundColor: "rgba(141, 92, 18, 0.15)",
   },
   checkCircleSelected: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -405,12 +405,12 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   intentCardTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.semiBold,
     fontSize: 14,
   },
   intentCardTitleSelected: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.bold,
   },
   intentBadgePill: {
@@ -425,7 +425,7 @@ export const styles = StyleSheet.create({
     fontSize: 10,
   },
   intentCardDesc: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 16,
@@ -447,7 +447,7 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   modalFooterHintText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.medium,
     fontSize: 12,
   },
@@ -462,7 +462,7 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
   },
   cancelButtonText: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.medium,
     fontSize: 13,
   },
@@ -470,13 +470,13 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     paddingVertical: 11,
     paddingHorizontal: 20,
     borderRadius: 12,
     ...(Platform.select({
       web: {
-        boxShadow: "0 3px 10px rgba(4, 207, 146, 0.3)",
+        boxShadow: "0 3px 10px rgba(141, 92, 18, 0.3)",
       },
       default: {},
     }) as any),
@@ -492,7 +492,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: "#04cf92",
+    borderColor: "#8D5C12",
     paddingVertical: 13,
     paddingHorizontal: 18,
     flexDirection: "row",
@@ -502,10 +502,10 @@ export const styles = StyleSheet.create({
     ...(Platform.select({
       web: {
         transition: "all 0.16s ease",
-        boxShadow: "0 4px 18px rgba(4, 207, 146, 0.10)",
+        boxShadow: "0 4px 18px rgba(141, 92, 18, 0.10)",
       },
       default: {
-        shadowColor: "#04cf92",
+        shadowColor: "#8D5C12",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
@@ -531,9 +531,9 @@ export const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderWidth: 1,
-    borderColor: "rgba(4, 207, 146, 0.3)",
+    borderColor: "rgba(141, 92, 18, 0.3)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -552,9 +552,9 @@ export const styles = StyleSheet.create({
     color: colors.ink,
   },
   aiBetaBadge: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderWidth: 1,
-    borderColor: "rgba(4, 207, 146, 0.4)",
+    borderColor: "rgba(141, 92, 18, 0.4)",
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 8,
@@ -568,20 +568,20 @@ export const styles = StyleSheet.create({
   aiSubtext: {
     fontFamily: fonts.regular,
     fontSize: 13,
-    color: "#5C6B66",
+    color: "#6E6458",
     lineHeight: 18,
   },
   aiCtaButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 14,
     ...(Platform.select({
       web: {
-        boxShadow: "0 3px 12px rgba(4, 207, 146, 0.35)",
+        boxShadow: "0 3px 12px rgba(141, 92, 18, 0.35)",
       },
       default: {},
     }) as any),

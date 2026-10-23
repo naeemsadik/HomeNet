@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+﻿import React, { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ArrowRight, PlusCircle, Search } from "@/components/icons";
 import { router } from "expo-router";
@@ -66,7 +66,7 @@ export function JourneyTrack() {
       <View style={styles.trackCard}>
         <View style={styles.trackHeader}>
           <View style={styles.trackIconWrap}>
-            <Search color="#0F6D55" size={18} strokeWidth={2.2} />
+            <Search color="#75480B" size={18} strokeWidth={2.2} />
           </View>
           <Text style={styles.trackTitle}>{t("landing.journey.seekersTitle")}</Text>
         </View>
@@ -103,7 +103,7 @@ export function JourneyTrack() {
       <View style={styles.trackCard}>
         <View style={styles.trackHeader}>
           <View style={styles.trackIconWrap}>
-            <PlusCircle color="#0F6D55" size={18} strokeWidth={2.2} />
+            <PlusCircle color="#75480B" size={18} strokeWidth={2.2} />
           </View>
           <Text style={styles.trackTitle}>{t("landing.journey.ownersTitle")}</Text>
         </View>
@@ -168,12 +168,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     alignItems: "center",
     justifyContent: "center",
   },
   trackTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingBold,
     fontSize: 18,
     fontWeight: "700",
@@ -194,15 +194,15 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
     borderWidth: 1,
-    borderColor: "#04cf92",
+    borderColor: "#8D5C12",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 2,
   },
   stepNodeNum: {
-    color: "#0F6D55",
+    color: "#75480B",
     fontFamily: fonts.bold,
     fontSize: 12,
     fontWeight: "700",
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     width: 2,
     flex: 1,
     minHeight: 28,
-    backgroundColor: "rgba(4, 207, 146, 0.25)",
+    backgroundColor: "rgba(141, 92, 18, 0.25)",
   },
   stepContent: {
     flex: 1,
@@ -219,13 +219,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   stepTitle: {
-    color: "#0B1A17",
+    color: "#1A1612",
     fontFamily: fonts.headingBold,
     fontSize: 15,
     fontWeight: "700",
   },
   stepDesc: {
-    color: "#5C6B66",
+    color: "#6E6458",
     fontFamily: fonts.regular,
     fontSize: 13.5,
     lineHeight: 19,

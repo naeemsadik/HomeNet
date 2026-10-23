@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Bell, Check, Clock } from "@/components/icons";
 import type { Notification } from "@/types/api";
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   unread: {
     backgroundColor: colorTokens.primaryLight,
-    borderColor: "#C4E4D5",
+    borderColor: "#E5D3BA",
   },
   pressed: {
     opacity: 0.85,
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.backgroundAlt,
   },
   iconWrapUnread: {
-    backgroundColor: "#C4E4D5",
+    backgroundColor: "#E5D3BA",
   },
   content: {
     flex: 1,

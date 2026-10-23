@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowUpRight,
   BadgeCheck,
   BarChart2,
@@ -169,7 +169,7 @@ export function SellerDashboardScreen() {
       label: t("dashboard.draftListings"),
       value: formatLocalizedNumber(draftCount, language),
       icon: FileText,
-      iconBg: "#F4F6F5",
+      iconBg: "#F3EFE8",
       iconColor: colors.muted,
     },
     {

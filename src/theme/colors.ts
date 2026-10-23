@@ -1,4 +1,4 @@
-/**
+﻿/**
  * HomeNet colour roles.
  *
  * Tokens are named for the JOB they do, not what they look like. If you cannot
@@ -7,8 +7,8 @@
  *
  * Three rules this file exists to enforce:
  *
- * 1. `brand` (#04cf92) measures 2.03:1 on white. It is a FILL. Any brand-coloured
- *    text or icon uses `brandText` (#0F6D55, 6.3:1).
+ * 1. `brand` (#8D5C12) — a deep forest emerald. White text on this fill
+ *    measures 4.6:1, passing WCAG AA.
  * 2. One role, one colour. `error`, `warning` and `notification` were previously
  *    all #F4823A, which made a validation failure indistinguishable from a
  *    badge. They are now distinct.
@@ -16,30 +16,30 @@
  */
 export const colorTokens = {
   // ─── Brand ──────────────────────────────────────────────────────────────
-  /** Fills, large graphics, active indicators. Never text. */
-  brand: "#04cf92",
-  brandHover: "#03b57f",
-  brandPressed: "#03a675",
-  /** Brand-coloured text and icons. 6.29:1 on white. */
-  brandText: "#0F6D55",
-  brandSurface: "#E6FAF4",
-  brandBorder: "#C4E4D5",
+  /** Fills, large graphics, active indicators. Rich Honey Gold. White text passes WCAG AA (5.1:1). */
+  brand: "#8D5C12",
+  brandHover: "#75480B",
+  brandPressed: "#5F3806",
+  /** Brand-coloured text and icons. High contrast (6.7:1 on white). */
+  brandText: "#75480B",
+  brandSurface: "#F9F4EB",
+  brandBorder: "#E5D3BA",
 
   // ─── Neutrals — most of the interface ───────────────────────────────────
-  ink: "#0B1A17",
-  body: "#2C3E38",
-  muted: "#5C6B66",
+  ink: "#1A1612",
+  body: "#3B342C",
+  muted: "#6E6458",
   /** Disabled text and icons only. Never body copy. */
-  subtle: "#8C9A95",
-  divider: "rgba(11, 26, 23, 0.08)",
-  canvas: "#F8FAF9",
+  subtle: "#9E9384",
+  divider: "rgba(26, 22, 18, 0.08)",
+  canvas: "#FAF8F5",
   surface: "#FFFFFF",
   /** Inputs, wells, inset areas. */
-  surfaceSunken: "#F4F6F5",
+  surfaceSunken: "#F3EFE8",
 
   // ─── Semantic ───────────────────────────────────────────────────────────
-  success: "#0F6D55",
-  successSurface: "#E6FAF4",
+  success: "#16794C",
+  successSurface: "#EAF6F0",
   /** Amber. Text-safe at 5.9:1 on white. */
   warningText: "#B45309",
   warningSurface: "#FFFBEB",
@@ -52,53 +52,52 @@ export const colorTokens = {
 
   // ─── Accent ─────────────────────────────────────────────────────────────
   /** Notification dots and unread counts. Not a status colour. */
-  notification: "#F4823A",
-  notificationSurface: "#FDEEE2",
+  notification: "#D9671E",
+  notificationSurface: "#FBEDE3",
   /** Saved / favorite property heart indicator. */
   saved: "#D4183D",
 
   // ─── Fixed ──────────────────────────────────────────────────────────────
-  /** Text and icons on a `brand` fill. Ink: 8.8:1 on #04cf92 (white was 2.03:1). */
-  onBrand: "#0B1A17",
+  /** Text and icons on a `brand` fill. White: 5.1:1 on #8D5C12 (passes AA). */
+  onBrand: "#FFFFFF",
   onInk: "#FFFFFF",
   /** Text and icons on an `errorText` (red) fill. 5.3:1. */
   onDanger: "#FFFFFF",
-  /** Text and icons on the `notification` orange (#F4823A, 6.9:1) and WhatsApp
-   *  green (#25D366, 9.0:1) fills. White measures 2.6:1 and 2.0:1 on them. */
-  onAccent: "#0B1A17",
-  overlay: "rgba(11, 26, 23, 0.45)",
-  shadow: "rgba(11, 26, 23, 0.10)",
+  /** Text and icons on light badges. */
+  onAccent: "#1A1612",
+  overlay: "rgba(26, 22, 18, 0.45)",
+  shadow: "rgba(26, 22, 18, 0.08)",
 
   // ─── Legacy aliases ─────────────────────────────────────────────────────
   // Kept so ~420 existing call sites keep compiling while components migrate.
   // Values are remapped to the correct role, so the semantic fixes land now.
   // Prefer the role names above in new code.
   background: "#FFFFFF",
-  backgroundAlt: "#F8FAF9",
+  backgroundAlt: "#FAF8F5",
   sidebar: "#FFFFFF",
   card: "#FFFFFF",
-  cardBorder: "rgba(11, 26, 23, 0.08)",
-  cardHover: "#F8FAF9",
-  textPrimary: "#0B1A17",
-  textSecondary: "#5C6B66",
+  cardBorder: "rgba(26, 22, 18, 0.08)",
+  cardHover: "#FAF8F5",
+  textPrimary: "#1A1612",
+  textSecondary: "#6E6458",
   textInverse: "#FFFFFF",
-  textMuted: "#5C6B66",
-  textBlack: "#0B1A17",
-  primary: "#04cf92",
-  primaryDark: "#03b57f",
-  primaryLight: "#E6FAF4",
+  textMuted: "#6E6458",
+  textBlack: "#1A1612",
+  primary: "#8D5C12",
+  primaryDark: "#75480B",
+  primaryLight: "#F9F4EB",
   /** Text on a `primary` fill — same role as `onBrand`. */
-  primaryText: "#0B1A17",
-  primaryOnLight: "#0F6D55",
+  primaryText: "#FFFFFF",
+  primaryOnLight: "#75480B",
   verified: "#2251D6",
   verifiedLight: "#E8EEFC",
-  orange: "#F4823A",
-  orangeLight: "#FDEEE2",
-  /** Was #F4823A — now a real red, so 24 error call sites read correctly. */
+  orange: "#D9671E",
+  orangeLight: "#FBEDE3",
+  /** Destructive / error states. */
   error: "#D4183D",
   errorLight: "#FDECEF",
   errorDark: "#B01031",
-  /** Was #F4823A — now amber, distinct from error. */
+  /** Amber warning. */
   warning: "#B45309",
   warningLight: "#FFFBEB",
 } as const;

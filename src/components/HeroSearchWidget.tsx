@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import {
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     ...(Platform.select({
       web: { boxShadow: "0 24px 60px -20px rgba(11, 26, 23, 0.28)" },
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: "#1A1612",
         shadowOffset: { width: 0, height: 20 },
         shadowOpacity: 0.22,
         shadowRadius: 44,

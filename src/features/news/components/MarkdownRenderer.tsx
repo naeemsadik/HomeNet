@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from "react";
+﻿import React, { memo, useCallback, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Check, Copy } from "@/components/icons";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
@@ -39,11 +39,11 @@ const CodeBlock = memo(function CodeBlock({ code }: { code: string }) {
           ]}
         >
           {copied ? (
-            <Check color="#04cf92" size={13} strokeWidth={2.5} />
+            <Check color="#8D5C12" size={13} strokeWidth={2.5} />
           ) : (
             <Copy color={colors.muted} size={13} strokeWidth={2} />
           )}
-          <Text style={[styles.copyBtnText, copied && { color: "#04cf92" }]}>
+          <Text style={[styles.copyBtnText, copied && { color: "#8D5C12" }]}>
             {copied ? t("guides.markdown.copied") : t("guides.markdown.copyCode")}
           </Text>
         </Pressable>

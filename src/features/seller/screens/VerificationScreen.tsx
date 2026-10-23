@@ -1,4 +1,4 @@
-import {
+﻿import {
   Bell,
   Building2,
   Check,
@@ -191,7 +191,7 @@ export function VerificationScreen() {
                   ]}
                 >
                   <IconComp
-                    color={item.danger ? "#D4183D" : isActive ? "#04cf92" : "#5C6B66"}
+                    color={item.danger ? "#D4183D" : isActive ? "#8D5C12" : "#6E6458"}
                     size={20}
                   />
                   <Text
@@ -258,7 +258,7 @@ export function VerificationScreen() {
                 href="/notifications"
                 style={styles.iconCircleBtn}
               >
-                <Bell color="#0B1A17" size={19} />
+                <Bell color="#1A1612" size={19} />
                 <View style={styles.headerDotIndicator} />
               </AppLink>
 
@@ -310,7 +310,7 @@ export function VerificationScreen() {
                       <View key={doc.id} style={styles.documentCard}>
                         <View style={[styles.docIconWrap, isUploaded ? styles.docIconWrapUploaded : styles.docIconWrapPending]}>
                           <DocIcon
-                            color={isUploaded ? "#0F6D55" : "#5C6B66"}
+                            color={isUploaded ? "#75480B" : "#6E6458"}
                             size={20}
                             strokeWidth={1.8}
                           />
@@ -327,7 +327,7 @@ export function VerificationScreen() {
 
                         {isUploaded ? (
                           <View style={styles.uploadedBadge}>
-                            <Check color="#0F6D55" size={14} strokeWidth={2.4} />
+                            <Check color="#75480B" size={14} strokeWidth={2.4} />
                             <Text style={styles.uploadedBadgeText}>{t("seller.verification.uploadedBadge")}</Text>
                           </View>
                         ) : (
@@ -383,7 +383,7 @@ export function VerificationScreen() {
                       cy={60}
                       fill="none"
                       r={circleRadius}
-                      stroke="#0F6D55"
+                      stroke="#75480B"
                       strokeDasharray={circumference}
                       strokeDashoffset={strokeDashoffset}
                       strokeLinecap="round"
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: "#FAF8F5",
     minHeight: "100%",
   },
   workspaceScroll: {
@@ -507,17 +507,17 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#04cf92",
+    backgroundColor: "#8D5C12",
     alignItems: "center",
     justifyContent: "center",
   },
   brandText: {
     fontSize: 18,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   brandTextAccent: {
-    color: "#04cf92",
+    color: "#8D5C12",
   },
   sellerRolePill: {
     backgroundColor: "#E8EEFC",
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
     ...(webPointer as any),
   },
   navItemActive: {
-    backgroundColor: "#E6FAF4",
+    backgroundColor: "#F9F4EB",
   },
   navItemDanger: {
     marginTop: 8,
@@ -555,10 +555,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   navItemTextActive: {
-    color: "#04cf92",
+    color: "#8D5C12",
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
@@ -587,7 +587,7 @@ const styles = StyleSheet.create({
     fontSize: 19.2,
     lineHeight: 26,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.384,
   },
   headerActions: {
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
     borderRadius: 999,
     borderWidth: 0.8,
     borderColor: "rgba(11,26,23,0.08)",
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
     height: "100%",
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: "#1A1612",
     paddingVertical: 0,
   },
   iconCircleBtn: {
@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
   viewSiteText: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
 
   /* Scrollable Content Body */
@@ -702,7 +702,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 48,
     borderRadius: 16,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#75480B",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -713,7 +713,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 26,
     fontFamily: fonts.bold,
-    color: "#0F6D55",
+    color: "#75480B",
     letterSpacing: -0.36,
   },
   badgeSubtitle: {
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 26,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.36,
   },
   documentsList: {
@@ -759,7 +759,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E7F2EE",
   },
   docIconWrapPending: {
-    backgroundColor: "#F4F6F5",
+    backgroundColor: "#F3EFE8",
   },
   docDetails: {
     flex: 1,
@@ -769,13 +769,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   docSubtitle: {
     fontSize: 14,
     lineHeight: 20,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 2,
   },
   uploadedBadge: {
@@ -791,10 +791,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     fontFamily: fonts.regular,
-    color: "#0F6D55",
+    color: "#75480B",
   },
   uploadBtn: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#75480B",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 999,
@@ -812,7 +812,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   submitBtn: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#75480B",
     height: 46,
     borderRadius: 999,
     alignItems: "center",
@@ -842,7 +842,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 26,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: "#1A1612",
     letterSpacing: -0.36,
   },
 
@@ -864,19 +864,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 24,
     fontFamily: fonts.extraBold,
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   progressCompleteLabel: {
     fontSize: 10,
     lineHeight: 14,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   progressTitle: {
     fontSize: 16,
     lineHeight: 24,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: "#1A1612",
     textAlign: "center",
     marginTop: 16,
   },
@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     textAlign: "center",
     marginTop: 4,
   },
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#0F6D55",
+    backgroundColor: "#75480B",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -933,7 +933,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#5C6B66",
+    backgroundColor: "#6E6458",
   },
   timelineConnector: {
     width: 2,
@@ -949,19 +949,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 18,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: "#6E6458",
   },
   timelineStepTitleCompleted: {
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   timelineStepTitleInProgress: {
-    color: "#0B1A17",
+    color: "#1A1612",
   },
   timelineStepDate: {
     fontSize: 12,
     lineHeight: 16,
     fontFamily: fonts.regular,
-    color: "#5C6B66",
+    color: "#6E6458",
     marginTop: 2,
   },
   calloutBox: {

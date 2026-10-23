@@ -1,4 +1,4 @@
-import { BarChart2, TrendingUp } from "@/components/icons";
+﻿import { BarChart2, TrendingUp } from "@/components/icons";
 import { Text, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts } from "@/theme";
@@ -36,7 +36,7 @@ export function SellerAnalyticsWorkspace() {
       label: t("seller.analytics.kpis.marketHealthScore"),
       value: `${formatLocalizedNumber(88, language)} / ${formatLocalizedNumber(100, language)}`,
       sub: t("seller.analytics.kpis.marketHealthScoreSub"),
-      color: "#0F6D55",
+      color: "#75480B",
     },
   ];
 

@@ -1,4 +1,4 @@
-import { useResponsive } from "@/hooks/useResponsive";
+﻿import { useResponsive } from "@/hooks/useResponsive";
 import { colors, colorTokens, layout, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
@@ -133,7 +133,7 @@ function SideBar({
               accessibilityRole="link"
             >
               <Icon
-                color={selected ? colors.greenOnLight : "#5C6B66"}
+                color={selected ? colors.greenOnLight : "#6E6458"}
                 size={20}
                 strokeWidth={selected ? 2.2 : 1.8}
               />
@@ -234,7 +234,7 @@ function TopBar({
               accessibilityLabel={t("nav.openMenu")}
             >
               <Menu
-                color={isCrystal ? "#FFFFFF" : "#0B1A17"}
+                color={isCrystal ? "#FFFFFF" : "#1A1612"}
                 size={isPhone ? 18 : 20}
                 strokeWidth={2.4}
               />
@@ -334,7 +334,7 @@ function TopBar({
                   ]}
                 >
                   <Bell
-                    color={isCrystal ? "#FFFFFF" : "#0B1A17"}
+                    color={isCrystal ? "#FFFFFF" : "#1A1612"}
                     size={isPhone ? 16 : 19}
                     strokeWidth={2}
                   />
@@ -388,7 +388,7 @@ function TopBar({
                     ]}
                   >
                     <Svg width={8} height={5} viewBox="0 0 8 5">
-                      <Path d="M0 0L8 0L4 5Z" fill={isCrystal ? "#FFFFFF" : "#5C6B66"} />
+                      <Path d="M0 0L8 0L4 5Z" fill={isCrystal ? "#FFFFFF" : "#6E6458"} />
                     </Svg>
                   </View>
                 </Pressable>
@@ -440,8 +440,8 @@ function TopBar({
                           webPointer,
                         ]}
                       >
-                        <View style={[styles.dropdownIconBox, { backgroundColor: "rgba(4, 207, 146, 0.10)" }]}>
-                          <Heart color="#04cf92" size={16} strokeWidth={2} />
+                        <View style={[styles.dropdownIconBox, { backgroundColor: "rgba(141, 92, 18, 0.10)" }]}>
+                          <Heart color="#8D5C12" size={16} strokeWidth={2} />
                         </View>
                         <Text style={styles.dropdownItemText}>{t("nav.saved")}</Text>
                       </Pressable>
@@ -461,7 +461,7 @@ function TopBar({
                         ]}
                       >
                         <View style={styles.dropdownIconBox}>
-                          <User color="#0B1A17" size={16} strokeWidth={1.8} />
+                          <User color="#1A1612" size={16} strokeWidth={1.8} />
                         </View>
                         <Text style={styles.dropdownItemText}>{t("nav.profile")}</Text>
                       </Pressable>
@@ -517,7 +517,7 @@ function TopBar({
               ]}
             >
               <User
-                color={isCrystal ? "#FFFFFF" : "#04cf92"}
+                color={isCrystal ? "#FFFFFF" : "#8D5C12"}
                 size={isPhone ? 15 : 17}
                 strokeWidth={2.2}
               />
