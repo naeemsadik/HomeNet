@@ -124,10 +124,14 @@ describe("i18n engine and useTranslation hook", () => {
       ).toBe("২০টির মধ্যে ৫টি প্রপার্টি দেখানো হচ্ছে");
       expect(
         translate("en", "seller.deleteConfirmMessage", { title: "Gulshan Flat" })
-      ).toBe("Are you sure you want to delete \"Gulshan Flat\"?");
+      ).toBe(
+        "Are you sure you want to delete \"Gulshan Flat\"? This permanently removes the listing and its photos and cannot be undone.",
+      );
       expect(
         translate("bn", "seller.deleteConfirmMessage", { title: "গুলশান ফ্ল্যাট" })
-      ).toBe("আপনি কি নিশ্চিত যে \"গুলশান ফ্ল্যাট\" মুছে ফেলতে চান?");
+      ).toBe(
+        "আপনি কি নিশ্চিত যে \"গুলশান ফ্ল্যাট\" মুছে ফেলতে চান? এর ফলে লিস্টিং ও এর ছবিগুলো স্থায়ীভাবে মুছে যাবে এবং আর ফেরানো যাবে না।",
+      );
     });
 
     it("interpolates parameters with {{key}} format", () => {

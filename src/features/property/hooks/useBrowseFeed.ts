@@ -21,8 +21,16 @@ export function useBrowseFeed(filters: PropertyFilters, scope: AreaScope, ready:
   const single = usePropertyFeed(
     {
       ...filters,
-      ...(scope.kind === "city" ? { city: scope.city } : {}),
-      ...(scope.kind === "text" ? { search: filters.search ? `${scope.text} ${filters.search}`.trim() : scope.text } : {}),
+      // `city` is not a filter the API accepts — it answers any value with
+      // 400 "property city should not exist" — so a city searches by name.
+      ...(scope.kind === "city" || scope.kind === "text"
+        ? {
+            search: (() => {
+              const place = scope.kind === "city" ? scope.city : scope.text;
+              return filters.search ? `${place} ${filters.search}`.trim() : place;
+            })(),
+          }
+        : {}),
       ...(scope.kind === "radius" ? { lat: scope.lat, lng: scope.lng, radius: scope.radius } : {}),
     },
     { enabled: ready && !multiArea },

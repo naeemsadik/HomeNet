@@ -4,7 +4,6 @@ import { Check, CheckCircle2, Flag, X } from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { reportListingMailto } from "@/lib/reportListing";
-import { SUPPORT_EMAIL } from "@/content/legal";
 
 export interface ReportListingModalProps {
   visible: boolean;

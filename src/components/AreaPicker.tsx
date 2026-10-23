@@ -98,6 +98,7 @@ export function AreaPicker({
     availableCities,
     searchQuery,
     setSearchQuery,
+    isSearching,
     drillDown,
     drillUp,
     navigateToBreadcrumb,
@@ -338,6 +339,9 @@ export function AreaPicker({
                 style={styles.searchInput}
                 autoCorrect={false}
                 clearButtonMode="while-editing"
+                // Typing is the fastest way through 33 areas on a keyboard. On a
+                // phone an autofocus would open the keyboard over the list.
+                autoFocus={Platform.OS === "web" && !isPhone}
               />
               {searchQuery.length > 0 ? (
                 <Pressable
@@ -460,7 +464,9 @@ export function AreaPicker({
             ) : areas.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Building size={40} color={colors.line} style={styles.emptyIcon} />
-                <Text style={styles.emptyTitle}>{t("areaPicker.noLocationsFound")}</Text>
+                <Text style={styles.emptyTitle}>
+                  {isSearching ? t("areaPicker.noMatches") : t("areaPicker.noLocationsFound")}
+                </Text>
                 <Text style={styles.emptySubtitle}>
                   {t("areaPicker.emptySubtitle")}
                 </Text>
