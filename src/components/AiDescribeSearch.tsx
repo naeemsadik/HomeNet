@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { router, type Href } from "expo-router";
+import { useTranslation } from "@/i18n";
 import { LiveText } from "@/components/LiveText";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
@@ -40,6 +41,7 @@ interface AiDescribeSearchProps {
 }
 
 export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: AiDescribeSearchProps) {
+  const { t } = useTranslation();
   const [text, setText] = useState(initialPrompt);
   // The query that was actually sent; typing doesn't search until Find is pressed.
   const [submitted, setSubmitted] = useState<string | null>(initialPrompt.trim().length >= MIN_QUERY_LENGTH ? initialPrompt.trim() : null);
@@ -62,6 +64,12 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
   const total = firstPage?.pagination.total ?? 0;
   const forRent = firstPage?.filters.listing_type === "rent" || firstPage?.filters.listing_type === "short_let";
 
+  const examples = useMemo(() => [
+    t("search.aiDescribe.examples.ex1"),
+    t("search.aiDescribe.examples.ex2"),
+    t("search.aiDescribe.examples.ex3"),
+  ], [t]);
+
   const openProperty = useCallback(
     (property: Property) => {
       onClose?.();
@@ -81,14 +89,14 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
   return (
     <View style={styles.wrap}>
       <TextInput
-        accessibilityHint="Describe the home you want in your own words"
-        accessibilityLabel="Describe the home you want"
+        accessibilityHint={t("search.aiDescribe.inputHint")}
+        accessibilityLabel={t("search.aiDescribe.inputAria")}
         editable={!isSearching}
         maxLength={MAX_QUERY_LENGTH}
         multiline
         onChangeText={setText}
         onSubmitEditing={runSearch}
-        placeholder="e.g. 3 bedroom flat for sale in Gulshan under 3 crore"
+        placeholder={t("search.aiDescribe.placeholder")}
         placeholderTextColor={colors.muted}
         returnKeyType="search"
         style={[styles.input, isSearching && styles.inputDisabled]}
@@ -98,7 +106,7 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
 
       {!hasResult && !isSearching ? (
         <View style={styles.examples}>
-          {EXAMPLES.map((example) => (
+          {examples.map((example) => (
             <Pressable
               accessibilityRole="button"
               key={example}
@@ -120,11 +128,11 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
         <AppButton
           disabled={!canSearch}
           icon={Search}
-          label={isSearching ? "Reading your search…" : "Find homes"}
+          label={isSearching ? t("search.aiDescribe.reading") : t("search.aiDescribe.findHomes")}
           loading={isSearching}
           onPress={runSearch}
         />
-        <Text style={styles.hint}>AI reads your words into filters. Only verified listings are shown.</Text>
+        <Text style={styles.hint}>{t("search.aiDescribe.aiNotice")}</Text>
       </View>
 
       {error ? (
@@ -137,7 +145,7 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
               onPress={onUseGuided}
               style={({ pressed }) => [styles.errorButton, pressed && styles.pressed, webPointer]}
             >
-              <Text style={styles.errorButtonText}>Answer guided questions</Text>
+              <Text style={styles.errorButtonText}>{t("search.aiDescribe.guidedQuestions")}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -147,14 +155,14 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
         <View style={styles.results}>
           <View style={styles.understoodHeader}>
             <Sparkles color={colors.greenOnLight} size={16} />
-            <Text style={styles.understoodTitle}>What we understood</Text>
+            <Text style={styles.understoodTitle}>{t("search.aiDescribe.understood")}</Text>
             <Pressable
-              accessibilityLabel="Start a new search"
+              accessibilityLabel={t("search.aiDescribe.startNewSearchAria")}
               accessibilityRole="button"
               onPress={() => setSubmitted(null)}
               style={[styles.newSearch, webPointer]}
             >
-              <Text style={styles.newSearchText}>New search</Text>
+              <Text style={styles.newSearchText}>{t("search.aiDescribe.newSearch")}</Text>
             </Pressable>
           </View>
 
@@ -167,23 +175,23 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
                   </View>
                 ))}
               </View>
-              <Text style={styles.notice}>Wrong? Change your words above and search again.</Text>
+              <Text style={styles.notice}>{t("search.aiDescribe.changeWords")}</Text>
             </>
           ) : (
             <Text style={styles.notice}>
-              We couldn't pick out a place, a kind of property or a budget. Try mentioning where, what kind, or how much.
+              {t("search.aiDescribe.noFiltersExtracted")}
             </Text>
           )}
 
           {chips.length > 0 ? (
             listings.length === 0 ? (
               <View style={styles.empty}>
-                <Text style={styles.emptyTitle}>No verified listings match all of this yet</Text>
+                <Text style={styles.emptyTitle}>{t("search.aiDescribe.emptyTitle")}</Text>
                 <Text style={styles.emptyText}>
-                  Try a wider budget or fewer requirements, or browse everything that's listed.
+                  {t("search.aiDescribe.emptySub")}
                 </Text>
                 <AppButton
-                  label={`Browse all ${forRent ? "rentals" : "properties for sale"}`}
+                  label={forRent ? t("search.aiDescribe.browseAllRentals") : t("search.aiDescribe.browseAllSales")}
                   onPress={browseAll}
                   style={styles.emptyAction}
                 />
@@ -191,7 +199,9 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
             ) : (
               <View style={styles.grid}>
                 <LiveText style={styles.count}>
-                  {total} verified {total === 1 ? "listing" : "listings"} found
+                  {total === 1
+                    ? t("search.aiDescribe.verifiedCountOne")
+                    : t("search.aiDescribe.verifiedCount", { count: total })}
                 </LiveText>
                 <PropertyGrid>
                   {listings.map((listing) => (
@@ -218,14 +228,14 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
 
                 {search.hasNextPage ? (
                   <AppButton
-                    label="Show more"
+                    label={t("search.aiDescribe.showMore")}
                     loading={search.isFetchingNextPage}
                     onPress={() => void search.fetchNextPage()}
                     variant="secondary"
                   />
                 ) : null}
                 <AppButton
-                  label={`View all ${forRent ? "rental" : "sale"} properties`}
+                  label={forRent ? t("search.aiDescribe.viewAllRentals") : t("search.aiDescribe.viewAllSales")}
                   onPress={browseAll}
                   trailingIcon={ArrowRight}
                   variant="ghost"
@@ -235,7 +245,7 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
           ) : null}
 
           <Text style={styles.disclaimer}>
-            AI can misread a search, and its notes on each listing are written by AI. Check the listing for the facts.
+            {t("search.aiDescribe.disclaimer")}
           </Text>
         </View>
       ) : null}

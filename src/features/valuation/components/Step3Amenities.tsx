@@ -19,6 +19,7 @@ import {
 } from "@/components/icons";
 import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 import type { ValuationAmenities } from "../types/valuationTypes";
 
@@ -30,70 +31,71 @@ interface AmenityOption {
   icon: typeof Zap;
 }
 
-const DHAKA_AMENITIES: AmenityOption[] = [
-  {
-    key: "lift",
-    label: "Lift / Elevator",
-    impactTag: "+7% Value Premium",
-    desc: "Essential for 3rd floor and above in Dhaka residential buildings.",
-    icon: Layers,
-  },
-  {
-    key: "generator",
-    label: "Full Backup Generator",
-    impactTag: "+5% Value Premium",
-    desc: "Uninterrupted power for water pumps, lift, and essential home appliances.",
-    icon: Zap,
-  },
-  {
-    key: "parking",
-    label: "Dedicated Car Parking",
-    impactTag: "+6% Value Premium",
-    desc: "Guaranteed allocated parking space (worth BDT 5–12 Lakh in Dhaka).",
-    icon: Car,
-  },
-  {
-    key: "gas",
-    label: "Titas / Reticulated LPG Gas",
-    impactTag: "+4% Value Premium",
-    desc: "Continuous piped gas supply eliminates heavy cylinder handling.",
-    icon: Sparkles,
-  },
-  {
-    key: "cctv",
-    label: "24/7 CCTV & Security Guards",
-    impactTag: "+2% Value Premium",
-    desc: "Guarded gate, intercom system, and perimeter surveillance.",
-    icon: ShieldCheck,
-  },
-  {
-    key: "rooftop",
-    label: "Rooftop Garden / Community Space",
-    impactTag: "+2% Value Premium",
-    desc: "Landscaped terrace, walking path, and community gathering hall.",
-    icon: Building,
-  },
-  {
-    key: "lakeParkView",
-    label: "Lake / Open Park View",
-    impactTag: "+6% Value Premium",
-    desc: "Direct view of Dhanmondi/Gulshan lake or open park reserve.",
-    icon: Compass,
-  },
-];
-
 export function Step3Amenities() {
+  const { t } = useTranslation();
   const { form, toggleAmenity, executeValuation, prevStep } = useInstantValuation();
   const { isPhone } = useResponsive();
+
+  const dhakaAmenities: AmenityOption[] = [
+    {
+      key: "lift",
+      label: t("valuation.step3.amenities.lift"),
+      impactTag: t("valuation.step3.amenities.liftTag"),
+      desc: t("valuation.step3.amenities.liftDesc"),
+      icon: Layers,
+    },
+    {
+      key: "generator",
+      label: t("valuation.step3.amenities.generator"),
+      impactTag: t("valuation.step3.amenities.generatorTag"),
+      desc: t("valuation.step3.amenities.generatorDesc"),
+      icon: Zap,
+    },
+    {
+      key: "parking",
+      label: t("valuation.step3.amenities.parking"),
+      impactTag: t("valuation.step3.amenities.parkingTag"),
+      desc: t("valuation.step3.amenities.parkingDesc"),
+      icon: Car,
+    },
+    {
+      key: "gas",
+      label: t("valuation.step3.amenities.gas"),
+      impactTag: t("valuation.step3.amenities.gasTag"),
+      desc: t("valuation.step3.amenities.gasDesc"),
+      icon: Sparkles,
+    },
+    {
+      key: "cctv",
+      label: t("valuation.step3.amenities.cctv"),
+      impactTag: t("valuation.step3.amenities.cctvTag"),
+      desc: t("valuation.step3.amenities.cctvDesc"),
+      icon: ShieldCheck,
+    },
+    {
+      key: "rooftop",
+      label: t("valuation.step3.amenities.rooftop"),
+      impactTag: t("valuation.step3.amenities.rooftopTag"),
+      desc: t("valuation.step3.amenities.rooftopDesc"),
+      icon: Building,
+    },
+    {
+      key: "lakeParkView",
+      label: t("valuation.step3.amenities.lakeParkView"),
+      impactTag: t("valuation.step3.amenities.lakeParkViewTag"),
+      desc: t("valuation.step3.amenities.lakeParkViewDesc"),
+      icon: Compass,
+    },
+  ];
 
   const selectedCount = Object.values(form.amenities).filter(Boolean).length;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Dhaka-Specific Value Drivers & Amenities</Text>
+        <Text style={styles.title}>{t("valuation.step3.title")}</Text>
         <Text style={styles.subtitle}>
-          In Dhaka, building utilities (standby generator, lift, gas line) drive massive resale value and rental yields.
+          {t("valuation.step3.subtitle")}
         </Text>
       </View>
 
@@ -101,13 +103,16 @@ export function Step3Amenities() {
       <View style={styles.counterBanner}>
         <Sparkles color={colorTokens.brandText} size={16} strokeWidth={2.2} />
         <Text style={styles.counterBannerText}>
-          {selectedCount} key value driver{selectedCount === 1 ? "" : "s"} selected for valuation
+          {t("valuation.step3.counterBanner", {
+            count: selectedCount,
+            plural: selectedCount === 1 ? "" : "s",
+          })}
         </Text>
       </View>
 
       {/* Amenities Grid */}
       <View style={[styles.amenitiesGrid, isPhone && styles.amenitiesGridPhone]}>
-        {DHAKA_AMENITIES.map((amenity) => {
+        {dhakaAmenities.map((amenity) => {
           const isSelected = form.amenities[amenity.key];
           const Icon = amenity.icon;
 
@@ -175,9 +180,9 @@ export function Step3Amenities() {
           <FileCheck2 color={colorTokens.info} size={18} strokeWidth={2} />
         </View>
         <View style={styles.tipContent}>
-          <Text style={styles.tipTitle}>HomeNet Verification Engine</Text>
+          <Text style={styles.tipTitle}>{t("valuation.step3.verificationTipTitle")}</Text>
           <Text style={styles.tipText}>
-            Our algorithmic pricing cross-references active listings, building age, and verified road accessibility across 26 Dhaka municipal wards.
+            {t("valuation.step3.verificationTipDesc")}
           </Text>
         </View>
       </View>
@@ -190,7 +195,7 @@ export function Step3Amenities() {
           style={[styles.backButton, webPointer]}
         >
           <ArrowLeft color={colorTokens.ink} size={18} strokeWidth={2} />
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>{t("valuation.step2.backCTA")}</Text>
         </Pressable>
 
         <Pressable
@@ -204,7 +209,7 @@ export function Step3Amenities() {
           ]}
         >
           <Sparkles color={colorTokens.onBrand} size={18} strokeWidth={2.4} />
-          <Text style={styles.calculateButtonText}>Calculate Instant Valuation</Text>
+          <Text style={styles.calculateButtonText}>{t("valuation.step3.calculateCTA")}</Text>
         </Pressable>
       </View>
     </View>

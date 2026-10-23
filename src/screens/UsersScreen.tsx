@@ -63,7 +63,10 @@ function UserRolesLoader({ user }: { user: DirectoryUser }) {
   return <UserRoleBadges roles={roles} />;
 }
 
+import { useTranslation } from "@/i18n";
+
 export function UsersScreen() {
+  const { t } = useTranslation();
   const userRoles = useAuthStore((s) => s.userRoles);
   const currentUser = useAuthStore((s) => s.user);
   const queryClient = useQueryClient();
@@ -141,21 +144,21 @@ export function UsersScreen() {
                   <ProviderIcon provider={primaryIdentity.provider} />
                 ) : null}
                 <Text style={styles.userEmail}>
-                  {primaryIdentity?.email ?? "No email"}
+                  {primaryIdentity?.email ?? t("userDirectory.noEmail")}
                 </Text>
               </View>
               {isVerified && primaryIdentity?.verified_at ? (
                 <View style={styles.verifiedRow}>
                   <Clock color={colors.green} size={10} />
                   <Text style={styles.verifiedTimestamp}>
-                    Verified {new Date(primaryIdentity.verified_at).toLocaleDateString()}
+                    {t("userDirectory.verifiedAt", { date: new Date(primaryIdentity.verified_at).toLocaleDateString() })}
                   </Text>
                 </View>
               ) : null}
             </View>
             <View style={[styles.verifiedBadge, isVerified && styles.verifiedBadgeActive]}>
               <Text style={[styles.verifiedText, isVerified && styles.verifiedTextActive]}>
-                {isVerified ? "Verified" : "Pending"}
+                {isVerified ? t("userDirectory.verifiedBadge") : t("userDirectory.pendingBadge")}
               </Text>
             </View>
           </Pressable>
@@ -172,7 +175,7 @@ export function UsersScreen() {
                 accessibilityLabel={`Manage roles for ${item.full_name}`}
               >
                 <Settings color={colors.green} size={13} />
-                <Text style={[styles.actionText, { color: colors.greenDark }]}>Roles</Text>
+                <Text style={[styles.actionText, { color: colors.greenDark }]}>{t("userDirectory.rolesBtn")}</Text>
               </Pressable>
               <Pressable
                 onPress={() => setDeleteTarget(item)}
@@ -180,14 +183,14 @@ export function UsersScreen() {
                 accessibilityLabel={`Delete ${item.full_name}`}
               >
                 <Trash2 color={colors.coral} size={13} />
-                <Text style={[styles.actionText, { color: colors.coral }]}>Delete</Text>
+                <Text style={[styles.actionText, { color: colors.coral }]}>{t("userDirectory.deleteBtn")}</Text>
               </Pressable>
             </View>
           ) : null}
         </View>
       );
     },
-    [canManageRoles],
+    [canManageRoles, t],
   );
 
   if (!currentUser) {
@@ -195,8 +198,8 @@ export function UsersScreen() {
       <AppChrome active="users">
         <View style={styles.emptyState}>
           <Users color={colors.muted} size={40} />
-          <Text style={styles.emptyTitle}>Log in to view users</Text>
-          <Text style={styles.emptyCopy}>You need to be logged in to access the users directory.</Text>
+          <Text style={styles.emptyTitle}>{t("userDirectory.loginTitle")}</Text>
+          <Text style={styles.emptyCopy}>{t("userDirectory.loginCopy")}</Text>
         </View>
       </AppChrome>
     );
@@ -205,13 +208,13 @@ export function UsersScreen() {
   return (
     <AppChrome active="users">
       <View style={styles.header}>
-        <Eyebrow>Directory</Eyebrow>
-        <Text style={styles.title}>All users</Text>
+        <Eyebrow>{t("userDirectory.eyebrow")}</Eyebrow>
+        <Text style={styles.title}>{t("userDirectory.title")}</Text>
         <View style={styles.searchBox}>
           <Search color={colors.muted} size={16} />
           <TextInput
             onChangeText={setSearchQuery}
-            placeholder="Search by name or email..."
+            placeholder={t("userDirectory.searchPlaceholder")}
             placeholderTextColor="#899790"
             style={styles.searchInput}
             value={searchQuery}
@@ -229,7 +232,7 @@ export function UsersScreen() {
       {loading ? (
         <View style={styles.center}>
           <LoaderCircle color={colors.green} size={24} />
-          <Text style={styles.loadingText}>Loading users...</Text>
+          <Text style={styles.loadingText}>{t("userDirectory.loading")}</Text>
         </View>
       ) : (
         <FlatList
@@ -240,7 +243,7 @@ export function UsersScreen() {
             <View style={styles.emptyState}>
               <UserRound color={colors.muted} size={40} />
               <Text style={styles.emptyTitle}>
-                {searchQuery ? "No users match your search" : "No users found"}
+                {searchQuery ? t("userDirectory.noUsersMatch") : t("userDirectory.noUsersFound")}
               </Text>
             </View>
           }
@@ -256,9 +259,9 @@ export function UsersScreen() {
 
       <ConfirmDialog
         visible={!!deleteTarget}
-        title="Delete User"
-        message={`Are you sure you want to delete ${deleteTarget?.full_name ?? "this user"}? This will permanently remove the user and all associated data. This action cannot be undone.`}
-        confirmLabel="Delete"
+        title={t("userDirectory.deleteConfirmTitle")}
+        message={t("userDirectory.deleteConfirmMessage", { name: deleteTarget?.full_name ?? "this user" })}
+        confirmLabel={t("userDirectory.deleteBtn")}
         variant="danger"
         icon={Trash2}
         onConfirm={handleDeleteConfirm}

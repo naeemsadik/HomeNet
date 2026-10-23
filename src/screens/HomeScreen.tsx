@@ -22,6 +22,7 @@ import {
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
+import { NoTranslateText } from "@/components/NoTranslateText";
 import { PropertyCard } from "@/components/PropertyCard";
 import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
 import { AppButton, AppLink } from "@/components/ui";
@@ -32,13 +33,12 @@ import { JourneyTrack } from "@/components/landing/JourneyTrack";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
 import type { Property as ApiProperty } from "@/features/property/types/property";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { toApiError } from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
 import { colors, webPointer } from "@/theme";
 import { HERO_IMAGE_URL } from "@/lib/heroImage";
 import { styles } from "./HomeScreen.styles";
-
-
 
 /**
  * Hero photograph — placeholder until real imagery is shot.
@@ -62,11 +62,13 @@ function PropertyResult({
   loading: boolean;
   onRetry: () => void;
 }) {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <View style={styles.requestState}>
         <ActivityIndicator color={colors.green} size="large" />
-        <Text style={styles.requestStateCopy}>Loading properties...</Text>
+        <Text style={styles.requestStateCopy}>{t("home.loadingProperties")}</Text>
       </View>
     );
   }
@@ -74,9 +76,9 @@ function PropertyResult({
   if (error) {
     return (
       <View style={styles.requestState}>
-        <Text style={styles.requestStateTitle}>Could not load properties</Text>
-        <Text style={styles.requestStateCopy}>Something went wrong while loading listings. Please try again.</Text>
-        <AppButton icon={RotateCcw} label="Retry" onPress={onRetry} />
+        <Text style={styles.requestStateTitle}>{t("home.couldNotLoadTitle")}</Text>
+        <Text style={styles.requestStateCopy}>{t("home.couldNotLoadCopy")}</Text>
+        <AppButton icon={RotateCcw} label={t("home.retry")} onPress={onRetry} />
       </View>
     );
   }
@@ -85,8 +87,8 @@ function PropertyResult({
     return (
       <View style={styles.requestState}>
         <LandPlot color={colors.green} size={26} />
-        <Text style={styles.requestStateTitle}>No properties available</Text>
-        <Text style={styles.requestStateCopy}>Check again when new listings are published.</Text>
+        <Text style={styles.requestStateTitle}>{t("home.noPropertiesTitle")}</Text>
+        <Text style={styles.requestStateCopy}>{t("home.noPropertiesCopy")}</Text>
       </View>
     );
   }
@@ -95,6 +97,7 @@ function PropertyResult({
 }
 
 export function HomeScreen() {
+  const { t } = useTranslation();
   const {
     isPhone,
     isTablet,
@@ -184,9 +187,9 @@ export function HomeScreen() {
                 { paddingBottom: heroMetrics.copyPad },
               ]}
             >
-              <Text style={[styles.heroHeading, heroType]}>
-                Find Your Dream With Trust
-              </Text>
+              <NoTranslateText style={[styles.heroHeading, heroType]}>
+                {t("home.heroHeadline")}
+              </NoTranslateText>
             </View>
           </ImageBackground>
         </View>
@@ -204,14 +207,14 @@ export function HomeScreen() {
 
           <View style={[styles.ownerBand, isPhone && styles.ownerBandPhone]}>
             <View style={styles.ownerCopy}>
-              <Text style={styles.ownerTitle}>Listing your own property?</Text>
+              <Text style={styles.ownerTitle}>{t("home.listingYourOwnTitle")}</Text>
               <Text style={styles.ownerSub}>
-                Describe it in one sentence — HomeNet fills in the rest.
+                {t("home.listingYourOwnSub")}
               </Text>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="List your property"
+              accessibilityLabel={t("home.listYourPropertyCTA")}
               onPress={() => router.push("/property/create" as never)}
               style={({ hovered, pressed }: any) => [
                 styles.ownerCta,
@@ -221,7 +224,7 @@ export function HomeScreen() {
                 webPointer,
               ]}
             >
-              <Text style={styles.ownerCtaText}>List your property</Text>
+              <Text style={styles.ownerCtaText}>{t("home.listYourPropertyCTA")}</Text>
             </Pressable>
           </View>
         </View>
@@ -238,11 +241,11 @@ export function HomeScreen() {
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.sectionTitle}>Featured properties</Text>
-            <Text style={styles.sectionSubtitle}>Most viewed active listings</Text>
+            <Text style={styles.sectionTitle}>{t("home.featuredTitle")}</Text>
+            <Text style={styles.sectionSubtitle}>{t("home.featuredSubtitle")}</Text>
           </View>
           <AppLink href="/buy" style={styles.seeAllLink}>
-            <Text style={styles.seeAllText}>See all</Text>
+            <Text style={styles.seeAllText}>{t("home.seeAll")}</Text>
             <ChevronRight color={colors.greenOnLight} size={16} />
           </AppLink>
         </View>
@@ -263,7 +266,7 @@ export function HomeScreen() {
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Why HomeNet listings are different</Text>
+          <Text style={styles.sectionTitle}>{t("home.whyDifferentTitle")}</Text>
         </View>
         <ContrastColumns />
       </View>
@@ -273,7 +276,7 @@ export function HomeScreen() {
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>A clear path for both sides</Text>
+          <Text style={styles.sectionTitle}>{t("home.howItWorksTitle")}</Text>
         </View>
         <JourneyTrack />
       </View>
@@ -314,6 +317,7 @@ export function HomeScreen() {
  * the rail, not the whole home page.
  */
 const FeaturedRail = memo(function FeaturedRail({ properties }: { properties: ApiProperty[] }) {
+  const { t } = useTranslation();
   const { isPhone, isTablet, width } = useResponsive();
   const featuredScrollRef = useRef<FlatList<ApiProperty>>(null);
   const featuredWrapperRef = useRef<View>(null);
@@ -488,7 +492,7 @@ const FeaturedRail = memo(function FeaturedRail({ properties }: { properties: Ap
               webPointer,
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Previous featured property"
+            accessibilityLabel={t("home.scrollRailLeft")}
           >
             <ChevronLeft size={16} color={canScrollLeft ? colors.green : "#94A3B8"} strokeWidth={2.5} />
           </Pressable>
@@ -521,7 +525,7 @@ const FeaturedRail = memo(function FeaturedRail({ properties }: { properties: Ap
               webPointer,
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Next featured property"
+            accessibilityLabel={t("home.scrollRailRight")}
           >
             <ChevronRight size={16} color={canScrollRight ? colors.green : "#94A3B8"} strokeWidth={2.5} />
           </Pressable>

@@ -73,14 +73,14 @@ export function AdminUsersScreen() {
       />
       {error ? (
         <Text onPress={() => void refetch()} style={styles.errorText}>
-          {toApiError(error).message} Press to retry.
+          {toApiError(error).message} {t("admin.roles.retry")}
         </Text>
       ) : null}
       {deleteMutation.error ? <Text style={styles.errorText}>{toApiError(deleteMutation.error).message}</Text> : null}
       <ConfirmDialog
         visible={!!deleteTarget}
         title={t("admin.deleteUserTitle")}
-        message={t("admin.deleteUserMessage", { name: deleteTarget?.full_name ?? "this user" })}
+        message={t("admin.deleteUserMessage", { name: deleteTarget?.full_name ?? t("admin.users.thisUser") })}
         confirmLabel={t("admin.actions.delete")}
         variant="danger"
         loading={deleteMutation.isPending}

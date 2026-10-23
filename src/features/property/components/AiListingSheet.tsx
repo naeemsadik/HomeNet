@@ -20,6 +20,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 import {
@@ -46,6 +47,7 @@ interface AiListingSheetProps {
 // ─── Component ─────────────────────────────────────────────────────────────────
 
 export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: AiListingSheetProps) {
+  const { t } = useTranslation();
   const { isPhone, width } = useResponsive();
   const [step, setStep] = useState<Exclude<SheetState, "loading">>("idle");
   const {
@@ -158,8 +160,8 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
       >
         <View style={s.overlay}>
           <Pressable
-            accessibilityHint="Dismisses the AI listing dialog"
-            accessibilityLabel="Close AI listing dialog"
+            accessibilityHint={t("wizard.aiSheet.closeHint")}
+            accessibilityLabel={t("wizard.aiSheet.closeAria")}
             accessibilityRole="button"
             disabled={state === "loading"}
             onPress={handleClose}
@@ -176,8 +178,8 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
             {/* Floating close button */}
             {state !== "loading" && (
               <Pressable
-                accessibilityHint="Closes the AI listing dialog"
-                accessibilityLabel="Close"
+                accessibilityHint={t("wizard.aiSheet.closeBtnHint")}
+                accessibilityLabel={t("wizard.aiSheet.closeBtnAria")}
                 accessibilityRole="button"
                 onPress={handleClose}
                 style={({ pressed, hovered }: any) => [
@@ -200,11 +202,11 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                   <Sparkles color={colors.green} size={20} />
                 </View>
                 <View style={s.headerText}>
-                  <Text style={s.headerTitle}>AI Property Listing</Text>
+                  <Text style={s.headerTitle}>{t("wizard.aiSheet.title")}</Text>
                   <Text style={s.headerSubtitle}>
                     {state === "preview"
-                      ? "Review extracted fields before applying"
-                      : "Describe your property and let AI fill the form"}
+                      ? t("wizard.aiSheet.subtitlePreview")
+                      : t("wizard.aiSheet.subtitleIdle")}
                   </Text>
                 </View>
               </View>
@@ -225,7 +227,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                     </View>
                     {offerManualForm ? (
                       <Pressable
-                        accessibilityHint="Closes quick listing and opens the step-by-step listing form"
+                        accessibilityHint={t("wizard.aiSheet.useManualFormHint")}
                         accessibilityRole="button"
                         onPress={handleUseManualForm}
                         style={({ pressed }) => [
@@ -234,12 +236,12 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                           pressed && s.pressed,
                         ]}
                       >
-                        <Text style={s.errorTryAgainText}>Use step-by-step form</Text>
+                        <Text style={s.errorTryAgainText}>{t("wizard.aiSheet.useManualForm")}</Text>
                       </Pressable>
                     ) : (
                       <Pressable
-                        accessibilityHint="Retries the AI property parsing"
-                        accessibilityLabel="Try again"
+                        accessibilityHint={t("wizard.aiSheet.tryAgainHint")}
+                        accessibilityLabel={t("wizard.aiSheet.tryAgain")}
                         accessibilityRole="button"
                         onPress={handleTryAgain}
                         style={({ pressed }) => [
@@ -248,7 +250,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                           pressed && s.pressed,
                         ]}
                       >
-                        <Text style={s.errorTryAgainText}>Try again</Text>
+                        <Text style={s.errorTryAgainText}>{t("wizard.aiSheet.tryAgain")}</Text>
                       </Pressable>
                     )}
                   </View>
@@ -258,16 +260,14 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                 {(state === "idle" || state === "loading") && (
                   <View style={s.idleBody}>
                     <TextInput
-                      accessibilityHint="Type your property details in plain text"
-                      accessibilityLabel="Property description input"
+                      accessibilityHint={t("wizard.aiSheet.inputHint")}
+                      accessibilityLabel={t("wizard.aiSheet.inputAria")}
                       editable={state !== "loading"}
                       maxLength={MAX_DESCRIPTION_LENGTH}
                       multiline
                       numberOfLines={6}
                       onChangeText={setDescription}
-                      placeholder={
-                        "e.g. 3-bed apartment in Gulshan 2, 7th floor south-facing, 1800 sqft, for sale at 1.8 Cr BDT, has lift, generator, and parking"
-                      }
+                      placeholder={t("wizard.aiSheet.inputPlaceholder")}
                       placeholderTextColor="#899790"
                       style={[
                         s.textArea,
@@ -287,9 +287,9 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                             s.charCountWarning,
                         ]}
                       >
-                        {description.trim().length} characters
+                        {t("wizard.aiSheet.charCount", { count: description.trim().length })}
                         {description.trim().length < 20
-                          ? " (minimum 20 characters)"
+                          ? t("wizard.aiSheet.charCountMin")
                           : ""}
                       </Text>
                     </View>
@@ -298,13 +298,13 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                       <View style={s.loadingWrap}>
                         <ActivityIndicator color={colors.green} size="small" />
                         <Text style={s.loadingText}>
-                          AI is reading your description…
+                          {t("wizard.aiSheet.readingLoading")}
                         </Text>
                       </View>
                     ) : (
                       <Pressable
-                        accessibilityHint="Parses your natural language description into property details"
-                        accessibilityLabel="Analyze with AI"
+                        accessibilityHint={t("wizard.aiSheet.analyzeBtnHint")}
+                        accessibilityLabel={t("wizard.aiSheet.analyzeBtn")}
                         accessibilityRole="button"
                         disabled={isAnalyzeDisabled}
                         onPress={() => void handleAnalyze()}
@@ -316,7 +316,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                         ]}
                       >
                         <Sparkles color={colorTokens.onBrand} size={16} />
-                        <Text style={s.analyzeBtnText}>Analyze with AI</Text>
+                        <Text style={s.analyzeBtnText}>{t("wizard.aiSheet.analyzeBtn")}</Text>
                       </Pressable>
                     )}
                   </View>
@@ -330,7 +330,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                       <View style={s.partialWarningBanner}>
                         <AlertTriangle color="#D4870A" size={16} />
                         <Text style={s.partialWarningText}>
-                          Some key fields weren't detected — please fill them in the wizard
+                          {t("wizard.aiSheet.partialWarning")}
                         </Text>
                       </View>
                     )}
@@ -344,9 +344,16 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                       );
                       if (visibleFields.length === 0) return null;
 
+                      const sectionTitle =
+                        section === "Basics"
+                          ? t("wizard.steps.basics")
+                          : section === "Details"
+                          ? t("wizard.steps.details")
+                          : t("wizard.steps.location");
+
                       return (
                         <View key={section} style={s.sectionWrap}>
-                          <Text style={s.sectionTitle}>{section}</Text>
+                          <Text style={s.sectionTitle}>{sectionTitle}</Text>
                           {visibleFields.map((field) => {
                             const value = getFieldValue(field.key) ?? "";
                             const confidence = getConfidence(field.key as string);
@@ -358,13 +365,13 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                                   <Text style={s.fieldLabel}>{field.label}</Text>
                                   {confidence === "low" && (
                                     <View
-                                      accessibilityHint="AI is less certain about this value — please verify"
-                                      accessibilityLabel="Uncertain field warning"
+                                      accessibilityHint={t("wizard.aiSheet.uncertainHint")}
+                                      accessibilityLabel={t("wizard.aiSheet.uncertainAria")}
                                       style={s.lowConfBadge}
                                     >
                                       <AlertTriangle color="#D4870A" size={11} />
                                       <Text style={s.lowConfText}>
-                                        AI is less certain — please verify
+                                        {t("wizard.aiSheet.uncertainWarning")}
                                       </Text>
                                     </View>
                                   )}
@@ -373,7 +380,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                                 {isEditing ? (
                                   <View style={s.fieldEditRow}>
                                     <TextInput
-                                      accessibilityLabel={`Edit ${field.label}`}
+                                      accessibilityLabel={t("wizard.aiSheet.editFieldAria", { label: field.label })}
                                       autoFocus
                                       onBlur={() => setEditingField(null)}
                                       onChangeText={(v) =>
@@ -386,8 +393,8 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                                       value={value}
                                     />
                                     <Pressable
-                                      accessibilityHint="Confirms edited value"
-                                      accessibilityLabel="Save edit"
+                                      accessibilityHint={t("wizard.aiSheet.saveEditHint")}
+                                      accessibilityLabel={t("wizard.aiSheet.saveEditAria")}
                                       accessibilityRole="button"
                                       onPress={() => setEditingField(null)}
                                       style={[s.fieldEditDone, webPointer]}
@@ -397,7 +404,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                                   </View>
                                 ) : (
                                   <Pressable
-                                    accessibilityHint={`Tap to edit ${field.label}`}
+                                    accessibilityHint={t("wizard.aiSheet.fieldEditHint", { label: field.label })}
                                     accessibilityLabel={`${field.label}: ${value}`}
                                     accessibilityRole="button"
                                     onPress={() => setEditingField(field.key)}
@@ -429,7 +436,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                     {/* Amenities section */}
                     {amenityEntries.length > 0 && (
                       <View style={s.sectionWrap}>
-                        <Text style={s.sectionTitle}>Amenities</Text>
+                        <Text style={s.sectionTitle}>{t("wizard.aiSheet.amenitiesSection")}</Text>
                         <View style={s.amenityGrid}>
                           {amenityEntries.map(([key]) => (
                             <View key={key} style={s.amenityChip}>
@@ -446,8 +453,8 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                     {/* Preview actions */}
                     <View style={s.previewActions}>
                       <Pressable
-                        accessibilityHint="Resets and lets you re-type your description"
-                        accessibilityLabel="Try again"
+                        accessibilityHint={t("wizard.aiSheet.resetTryAgainHint")}
+                        accessibilityLabel={t("wizard.aiSheet.tryAgain")}
                         accessibilityRole="button"
                         onPress={handleTryAgain}
                         style={({ pressed }) => [
@@ -457,12 +464,12 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                         ]}
                       >
                         <RotateCcw color={colors.muted} size={14} />
-                        <Text style={s.tryAgainText}>Try again</Text>
+                        <Text style={s.tryAgainText}>{t("wizard.aiSheet.tryAgain")}</Text>
                       </Pressable>
 
                       <Pressable
-                        accessibilityHint="Applies parsed details to wizard and opens property creation"
-                        accessibilityLabel="Apply & Continue"
+                        accessibilityHint={t("wizard.aiSheet.applyContinueHint")}
+                        accessibilityLabel={t("wizard.aiSheet.applyContinueBtn")}
                         accessibilityRole="button"
                         onPress={handleApply}
                         style={({ pressed }) => [
@@ -471,14 +478,14 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                           pressed && s.pressed,
                         ]}
                       >
-                        <Text style={s.applyBtnText}>Apply & Continue</Text>
+                        <Text style={s.applyBtnText}>{t("wizard.aiSheet.applyContinueBtn")}</Text>
                         <ArrowRight color={colorTokens.onBrand} size={16} />
                       </Pressable>
                     </View>
 
                     {/* Disclaimer */}
                     <Text style={s.disclaimerText}>
-                      AI may make mistakes — you can edit before submitting
+                      {t("wizard.aiSheet.disclaimer")}
                     </Text>
                   </View>
                 )}

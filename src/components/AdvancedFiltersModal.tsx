@@ -183,7 +183,7 @@ export function AdvancedFiltersModal({
           : countOptionLabel(option, language, t, side),
     }));
 
-  const areaChoices = withCurrentArea(areaOptions ?? [], localFilters.areaId, localFilters.area);
+  const areaChoices = withCurrentArea(areaOptions ?? [], localFilters.area);
 
   // A count that ignores the pending client-side filters would be wrong, and a
   // wrong number is worse than no number.
@@ -271,14 +271,10 @@ export function AdvancedFiltersModal({
                     already chosen out there is already chosen in here. */}
                 <SelectField
                   accessibilityLabel={t("filters.location")}
-                  value={localFilters.areaId}
+                  value={localFilters.area}
                   options={areaChoices}
-                  onChange={(value) =>
-                    patch({
-                      areaId: value,
-                      area: areaChoices.find((option) => option.value === value)?.label ?? "",
-                    })
-                  }
+                  // A new place starts with "this area only".
+                  onChange={(value) => patch({ area: value, radius: "" })}
                 />
               </View>
             ) : null}

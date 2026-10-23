@@ -21,7 +21,14 @@ import { AppButton } from "@/components/ui";
 import { AdvancedFiltersModal } from "@/components/AdvancedFiltersModal";
 import { RightmoveFilterCard } from "@/components/RightmoveFilterCard";
 import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
-import { usePropertyFeed } from "@/features/property/hooks/usePropertyFeed";
+import { useAreas } from "@/features/property/hooks/useAreas";
+import { useBrowseFeed } from "@/features/property/hooks/useBrowseFeed";
+import {
+  areaOptions as buildAreaOptions,
+  fallbackAreaOptions,
+  isCityName,
+  resolveScope,
+} from "@/features/property/utils/areaScope";
 import { getProperties } from "@/services/propertyApi";
 import {
   applyClientFilters,
@@ -35,7 +42,6 @@ import {
   toApiFilters,
   type SearchFilters,
 } from "@/features/property/utils/searchFilters";
-import { useAllAreas } from "@/hooks/useAllAreas";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
@@ -54,26 +60,16 @@ export function BrowseScreen({
   const { isPhone } = useResponsive();
   const params = useLocalSearchParams();
 
-  const areas = useAllAreas();
-  const areaItems = React.useMemo(() => areas.data?.items ?? [], [areas.data]);
+  // A partial area list (see useAreas) is worse than none: it would offer two
+  // places and treat every other one as unknown.
+  const { areas: fetchedAreas, ready: areasReady, complete: areasComplete } = useAreas();
+  const areas = areasComplete ? fetchedAreas : [];
   const areaOptions = React.useMemo(() => {
     if (fixedLocation) return undefined;
-    return [
-      { value: "", label: t("filters.allAreas") },
-      // The value is the area's id: the API filters on that, not on a name.
-      ...areaItems.map((area) => ({ value: area.id, label: area.name })),
-    ];
-  }, [areaItems, fixedLocation, t]);
-
-  // A /buy/<area> page names its area in the route, so its id has to be looked
-  // up before the feed can be filtered by it.
-  const fixedAreaId = React.useMemo(() => {
-    if (!fixedLocation) return "";
-    const match = areaItems.find(
-      (area) => area.name.toLowerCase() === fixedLocation.toLowerCase()
-    );
-    return match?.id ?? "";
-  }, [areaItems, fixedLocation]);
+    return areasComplete
+      ? buildAreaOptions(areas, t("filters.allAreas"))
+      : fallbackAreaOptions(t("filters.allAreas"));
+  }, [areas, areasComplete, fixedLocation, t]);
 
   /**
    * The URL is the only filter state. Refresh, Back and a shared link all land
@@ -85,9 +81,9 @@ export function BrowseScreen({
     FILTER_PARAM_KEYS.map((key) => (params as Record<string, unknown>)[key] ?? "")
   );
   const filters = React.useMemo(
-    () => filtersFromParams(params, { mode, fixedLocation, fixedAreaId }),
+    () => filtersFromParams(params, { mode, fixedLocation }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paramKey, mode, fixedLocation, fixedAreaId]
+    [paramKey, mode, fixedLocation]
   );
   const locationParam = filters.area || undefined;
   const activeFilterCount = countActiveFilters(filters);
@@ -121,6 +117,19 @@ export function BrowseScreen({
 
   const apiFilters = toApiFilters(filters);
 
+  const { scope, radiusAvailable } = React.useMemo(
+    () =>
+      resolveScope({
+        name: filters.area,
+        radiusKm: filters.radius ? parseInt(filters.radius, 10) : 0,
+        areas,
+      }),
+    [filters.area, filters.radius, areas]
+  );
+  // A city needs no area list; any other place waits for it, so the page never
+  // shows results for the wrong place first.
+  const feedReady = !filters.area || isCityName(filters.area) || areasReady;
+
   const {
     properties: apiProperties,
     total,
@@ -130,7 +139,7 @@ export function BrowseScreen({
     fetchingNextPage,
     loadMore,
     refresh,
-  } = usePropertyFeed(apiFilters);
+  } = useBrowseFeed(apiFilters, scope, feedReady);
 
   // PropertyCard consumes the API shape directly — no adapter needed.
   const feed = apiProperties ?? [];
@@ -201,6 +210,12 @@ export function BrowseScreen({
         <RightmoveFilterCard
           areaOptions={areaOptions}
           filters={filters}
+          radiusAvailable={radiusAvailable}
+          radiusHint={
+            scope.kind === "areas"
+              ? t("search.rightmove.radiusUnavailable")
+              : t("search.rightmove.pickNeighbourhood")
+          }
           locationName={locationParam || (filters.query ? filters.query : "Dhaka")}
           onFilterChange={applyFilters}
           onOpenMoreFilters={() => setIsFilterModalOpen(true)}

@@ -79,7 +79,7 @@ function WebFooter({ style }: FooterProps) {
     { label: "Search homes for rent", href: "/rent" },
     { label: "Commercial for sale", href: "/buy" },
     { label: "Commercial to rent", href: "/rent" },
-    { label: "Short-let & Serviced", href: "/rent?subtype=short-let" },
+    { label: "Holiday stays & Serviced", href: "/rent?subtype=short-let" },
     { label: "Verified listings only", href: "/buy?is_verified=true" },
     { label: "Student accommodation", href: "/rent" },
     { label: "New developments", href: "/buy" },

@@ -23,6 +23,7 @@ import {
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { router, type Href } from "expo-router";
+import { useTranslation } from "@/i18n";
 import { AiDescribeSearch } from "@/components/AiDescribeSearch";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
@@ -110,6 +111,7 @@ export interface AiFinderWorkflowProps {
 }
 
 export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" }: AiFinderWorkflowProps) {
+  const { t } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
   // Describing a search needs the AI endpoint; without it only the guided steps exist.
   const [mode, setMode] = useState<"describe" | "guided">(AI_SEARCH_ENABLED ? "describe" : "guided");
@@ -125,6 +127,29 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
       router.push(`/property/${property.id}` as Href);
     },
     [isModal, onClose],
+  );
+
+  const stepLabels = useMemo(
+    () => [
+      t("search.aiFinder.steps.goal"),
+      t("search.aiFinder.steps.location"),
+      t("search.aiFinder.steps.budget"),
+      t("search.aiFinder.steps.matches"),
+    ],
+    [t],
+  );
+
+  const neighbourhoods: [name: string, blurb: string][] = useMemo(
+    () => [
+      ["Gulshan", t("search.aiFinder.neighbourhoods.gulshan")],
+      ["Banani", t("search.aiFinder.neighbourhoods.banani")],
+      ["Baridhara", t("search.aiFinder.neighbourhoods.baridhara")],
+      ["Dhanmondi", t("search.aiFinder.neighbourhoods.dhanmondi")],
+      ["Uttara", t("search.aiFinder.neighbourhoods.uttara")],
+      ["Bashundhara", t("search.aiFinder.neighbourhoods.bashundhara")],
+      ["Mirpur", t("search.aiFinder.neighbourhoods.mirpur")],
+    ],
+    [t],
   );
 
   const queryParams = useMemo(() => {
@@ -173,15 +198,17 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
       <View style={styles.headerLeft}>
         <View style={styles.aiPillBadge}>
           <Sparkles color="#04cf92" size={14} />
-          <Text style={styles.aiPillText}>{AI_SEARCH_ENABLED ? "AI Property Finder" : "Property Finder"}</Text>
+          <Text style={styles.aiPillText}>
+            {AI_SEARCH_ENABLED ? t("search.aiFinder.aiFinderBadge") : t("search.aiFinder.finderBadge")}
+          </Text>
         </View>
         <Text style={[styles.title, isPhone && styles.titlePhone]}>
-          Tell us what home feels right.
+          {t("search.aiFinder.title")}
         </Text>
         <Text style={styles.subtitle}>
           {mode === "describe"
-            ? "Describe the home you want in your own words. We turn it into filters and show the listings that match."
-            : "Answer three quick questions and we'll show the listings that match."}
+            ? t("search.aiFinder.subtitleDescribe")
+            : t("search.aiFinder.subtitleGuided")}
         </Text>
       </View>
     </View>
@@ -198,7 +225,7 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
             onUseGuided={() => setMode("guided")}
           />
           <AppButton
-            label="Answer guided questions instead"
+            label={t("search.aiFinder.switchGuided")}
             onPress={() => setMode("guided")}
             style={styles.switchMode}
             variant="ghost"
@@ -215,7 +242,7 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
       {AI_SEARCH_ENABLED ? (
         <AppButton
           icon={Sparkles}
-          label="Describe it in your own words instead"
+          label={t("search.aiFinder.switchDescribe")}
           onPress={() => setMode("describe")}
           style={styles.switchMode}
           variant="ghost"
@@ -226,7 +253,7 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
       <View style={[styles.finderShell, isModal && styles.finderShellModal]}>
         {/* Progress Bar */}
         <View style={styles.progress}>
-          {steps.map((label, index) => {
+          {stepLabels.map((label, index) => {
             const isCompleted = index < step;
             const isCurrent = index === step;
             const isActive = isCompleted || isCurrent;
@@ -269,7 +296,7 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
                 </View>
 
                 {/* Connecting Line between steps (strictly between items, never overlapping text!) */}
-                {index < steps.length - 1 && (
+                {index < stepLabels.length - 1 && (
                   <View style={styles.stepConnector}>
                     <View
                       style={[
@@ -302,17 +329,17 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
               <View>
                 <Text style={styles.questionKicker}>
                   {step === 0
-                    ? "Step 1: The big decision"
+                    ? t("search.aiFinder.step1Kicker")
                     : step === 1
-                      ? "Step 2: Your preferred location"
-                      : "Step 3: A comfortable budget"}
+                      ? t("search.aiFinder.step2Kicker")
+                      : t("search.aiFinder.step3Kicker")}
                 </Text>
                 <Text style={styles.questionHeading}>
                   {step === 0
-                    ? "What are you looking to do?"
+                    ? t("search.aiFinder.step1Heading")
                     : step === 1
-                      ? "Where would you like to live?"
-                      : "What budget should we work within?"}
+                      ? t("search.aiFinder.step2Heading")
+                      : t("search.aiFinder.step3Heading")}
                 </Text>
               </View>
             </View>
@@ -321,24 +348,24 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
               {step === 0 ? (
                 <>
                   <Choice
-                    copy="Build equity in a place of your own"
+                    copy={t("search.aiFinder.buyHomeCopy")}
                     icon={Home}
-                    label="Buy a home"
+                    label={t("search.aiFinder.buyHomeLabel")}
                     onPress={() => setGoal("Buy a home")}
                     selected={goal === "Buy a home"}
                     width={choiceWidth}
                   />
                   <Choice
-                    copy="Stay flexible with a rental in the neighbourhood you want"
+                    copy={t("search.aiFinder.rentHomeCopy")}
                     icon={KeyRound}
-                    label="Rent a home"
+                    label={t("search.aiFinder.rentHomeLabel")}
                     onPress={() => setGoal("Rent a home")}
                     selected={goal === "Rent a home"}
                     width={choiceWidth}
                   />
                 </>
               ) : step === 1 ? (
-                NEIGHBOURHOODS.map(([lbl, cpy]) => (
+                neighbourhoods.map(([lbl, cpy]) => (
                   <Choice
                     copy={cpy}
                     icon={Building2}
@@ -356,7 +383,7 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
                 ).map((lbl) => (
                   <Choice
                     compact
-                    copy="Show homes in this range"
+                    copy={t("search.aiFinder.showHomesInRange")}
                     key={lbl}
                     label={lbl}
                     onPress={() => setBudget(lbl)}
@@ -379,15 +406,19 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
                 <Home color={colorTokens.onBrand} size={22} />
               </View>
               <View style={styles.resultCopyWrap}>
-                <Eyebrow style={styles.resultEyebrow}>Matching listings</Eyebrow>
-                <Text style={styles.resultTitle}>Homes that fit your answers</Text>
+                <Eyebrow style={styles.resultEyebrow}>{t("search.aiFinder.matchingEyebrow")}</Eyebrow>
+                <Text style={styles.resultTitle}>{t("search.aiFinder.matchingTitle")}</Text>
                 <Text style={styles.resultCopy}>
-                  {goal} around {area}, within {budget}.
+                  {t("search.aiFinder.matchingSummary", {
+                    goal: goal === "Rent a home" ? t("search.aiFinder.rentHomeLabel") : t("search.aiFinder.buyHomeLabel"),
+                    area,
+                    budget,
+                  })}
                 </Text>
               </View>
               <AppButton
                 icon={RotateCcw}
-                label="Start over"
+                label={t("search.aiFinder.startOver")}
                 onPress={() => setStep(0)}
                 variant="ghost"
               />
@@ -396,16 +427,16 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
             {matchesLoading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator color={colors.green} size="large" />
-                <Text style={styles.loadingText}>Finding matching listings…</Text>
+                <Text style={styles.loadingText}>{t("search.aiFinder.findingMatches")}</Text>
               </View>
             ) : matches.length === 0 ? (
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyTitle}>No matching listings found</Text>
+                <Text style={styles.emptyTitle}>{t("search.aiFinder.noMatchesTitle")}</Text>
                 <Text style={styles.emptyText}>
-                  Try selecting a different budget range or browse all available properties.
+                  {t("search.aiFinder.noMatchesSub")}
                 </Text>
                 <AppButton
-                  label="Try another budget"
+                  label={t("search.aiFinder.tryAnotherBudget")}
                   onPress={() => setStep(2)}
                   style={{ marginTop: 16 }}
                 />
@@ -426,7 +457,7 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
 
                 <View style={styles.exploreMoreRow}>
                   <AppButton
-                    label={`View all ${goal === "Rent a home" ? "rental" : "sale"} properties`}
+                    label={goal === "Rent a home" ? t("search.aiFinder.viewAllRentals") : t("search.aiFinder.viewAllSales")}
                     onPress={() => {
                       if (isModal && onClose) onClose();
                       router.push(goal === "Rent a home" ? "/rent" : "/buy");
@@ -445,12 +476,12 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
             <AppButton
               disabled={step === 0}
               icon={ArrowLeft}
-              label="Back"
+              label={t("search.aiFinder.back")}
               onPress={() => setStep((current) => Math.max(0, current - 1))}
               variant="secondary"
             />
             <AppButton
-              label={step === 2 ? "Build my matches" : "Continue"}
+              label={step === 2 ? t("search.aiFinder.buildMatches") : t("search.aiFinder.continue")}
               onPress={() => setStep((current) => Math.min(3, current + 1))}
               trailingIcon={ArrowRight}
             />

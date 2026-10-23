@@ -24,7 +24,7 @@ describe("i18n engine and useTranslation hook", () => {
         "About this property"
       );
       expect(translate("en", "propertyDetail.bookViewing")).toBe(
-        "Book a visit"
+        "Book an Inspection / Visit"
       );
       expect(translate("en", "saved.title")).toBe("Saved Properties");
       expect(translate("en", "saved.emptyTitle")).toBe(
@@ -39,6 +39,10 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("en", "admin.dashboardTitle")).toBe("Admin Dashboard");
       expect(translate("en", "admin.columns.property")).toBe("Property");
       expect(translate("en", "admin.actions.activate")).toBe("Activate");
+      expect(translate("en", "admin.areas.managementTitle")).toBe("Manage Areas & Locations");
+      expect(translate("en", "admin.roles.managementTitle")).toBe("Roles & Access Permissions");
+      expect(translate("en", "admin.roles.manageRoles")).toBe("Assign User Roles");
+      expect(translate("en", "admin.permissions.moderateListing")).toBe("Moderate Listings");
       expect(translate("en", "seller.myListings")).toBe("My Listings");
       expect(translate("en", "seller.actions.edit")).toBe("Edit");
     });
@@ -55,21 +59,28 @@ describe("i18n engine and useTranslation hook", () => {
         "এই প্রপার্টি সম্পর্কে"
       );
       expect(translate("bn", "propertyDetail.bookViewing")).toBe(
-        "পরিদর্শনের বুকিং দিন"
+        "ভিজিটের সময় নির্ধারণ করুন"
       );
-      expect(translate("bn", "saved.title")).toBe("সংরক্ষিত প্রপার্টিসমূহ");
+      expect(translate("bn", "saved.title")).toBe("পছন্দের সংরক্ষিত প্রোপার্টি");
       expect(translate("bn", "saved.emptyTitle")).toBe(
-        "এখনও কোনো সংরক্ষিত প্রপার্টি নেই"
+        "আপনার পছন্দের কোনো প্রোপার্টি এখনো সংরক্ষণ করা হয়নি"
       );
-      expect(translate("bn", "auth.signIn")).toBe("সাইন ইন");
-      expect(translate("bn", "auth.signUp")).toBe("অ্যাকাউন্ট তৈরি করুন");
+      expect(translate("bn", "auth.signIn")).toBe("লগইন করুন");
+      expect(translate("bn", "auth.signUp")).toBe("নতুন অ্যাকাউন্ট তৈরি করুন");
       expect(translate("bn", "auth.resetPassword")).toBe("পাসওয়ার্ড রিসেট করুন");
       expect(translate("bn", "dashboard.sellerDashboard")).toBe("সেলার ড্যাশবোর্ড");
       expect(translate("bn", "dashboard.totalListings")).toBe("মোট প্রপার্টি");
       expect(translate("bn", "dashboard.tabs.myListings")).toBe("আমার প্রপার্টি");
       expect(translate("bn", "admin.dashboardTitle")).toBe("অ্যাডমিন ড্যাশবোর্ড");
+      expect(translate("bn", "admin.eyebrow")).toBe("অ্যাডমিন নিয়ন্ত্রণ প্যানেল");
       expect(translate("bn", "admin.columns.property")).toBe("প্রপার্টি");
       expect(translate("bn", "admin.actions.activate")).toBe("সক্রিয় করুন");
+      expect(translate("bn", "admin.areas.managementTitle")).toBe("এলাকা ও লোকেশন ব্যবস্থাপনা");
+      expect(translate("bn", "admin.roles.managementTitle")).toBe("ভূমিকা ও অ্যাক্সেস পারমিশন");
+      expect(translate("bn", "admin.roles.manageRoles")).toBe("ইউজার রোল নির্ধারণ করুন");
+      expect(translate("bn", "admin.permissions.moderateListing")).toBe("প্রোপার্টি যাচাই ও নিয়ন্ত্রণ");
+      expect(translate("bn", "admin.actions.delete")).toBe("অপসারণ করুন");
+      expect(translate("bn", "admin.actions.confirm")).toBe("নিশ্চিত করুন");
       expect(translate("bn", "seller.myListings")).toBe("আমার প্রপার্টি");
       expect(translate("bn", "seller.actions.edit")).toBe("সম্পাদনা");
     });
@@ -97,7 +108,7 @@ describe("i18n engine and useTranslation hook", () => {
         "3 saved properties"
       );
       expect(translate("bn", "saved.count", { count: "৩" })).toBe(
-        "৩টি সংরক্ষিত প্রপার্টি"
+        "৩টি পছন্দের সংরক্ষিত প্রোপার্টি"
       );
       expect(
         translate("en", "auth.socialComingSoon", { provider: "Google" })
@@ -113,10 +124,14 @@ describe("i18n engine and useTranslation hook", () => {
       ).toBe("২০টির মধ্যে ৫টি প্রপার্টি দেখানো হচ্ছে");
       expect(
         translate("en", "seller.deleteConfirmMessage", { title: "Gulshan Flat" })
-      ).toBe("Are you sure you want to delete \"Gulshan Flat\"?");
+      ).toBe(
+        "Are you sure you want to delete \"Gulshan Flat\"? This permanently removes the listing and its photos and cannot be undone.",
+      );
       expect(
         translate("bn", "seller.deleteConfirmMessage", { title: "গুলশান ফ্ল্যাট" })
-      ).toBe("আপনি কি নিশ্চিত যে \"গুলশান ফ্ল্যাট\" মুছে ফেলতে চান?");
+      ).toBe(
+        "আপনি কি নিশ্চিত যে \"গুলশান ফ্ল্যাট\" মুছে ফেলতে চান? এর ফলে লিস্টিং ও এর ছবিগুলো স্থায়ীভাবে মুছে যাবে এবং আর ফেরানো যাবে না।",
+      );
     });
 
     it("interpolates parameters with {{key}} format", () => {

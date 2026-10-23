@@ -12,18 +12,21 @@ import { AppLink, Eyebrow, FeatureCard } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 
+import { useTranslation } from "@/i18n";
+
 export function AboutScreen() {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
 
   return (
     <AppChrome active="home">
       <View style={[styles.intro, isPhone && styles.introPhone]}>
-        <Eyebrow style={styles.eyebrow}>About HomeNet</Eyebrow>
+        <Eyebrow style={styles.eyebrow}>{t("about.eyebrow")}</Eyebrow>
         <Text style={[styles.title, isPhone && styles.titlePhone]}>
-          More clarity for every move.
+          {t("about.title")}
         </Text>
         <Text style={[styles.copy, isPhone && styles.copyPhone]}>
-          HomeNet brings verified property information, local market context, and practical AI guidance into one calmer home-search experience.
+          {t("about.copy")}
         </Text>
       </View>
 
@@ -31,18 +34,18 @@ export function AboutScreen() {
         {[
           [
             ShieldCheck,
-            "Verified where it matters",
-            "Clear listing details, ownership checks, and accountable advisors.",
+            t("about.pillar1Title"),
+            t("about.pillar1Copy"),
           ],
           [
             DatabaseZap,
-            "Data with an explanation",
-            "Pricing guidance that shows the market signals behind each range.",
+            t("about.pillar2Title"),
+            t("about.pillar2Copy"),
           ],
           [
             HeartHandshake,
-            "Human help stays close",
-            "Local support from first shortlist through viewing and negotiation.",
+            t("about.pillar3Title"),
+            t("about.pillar3Copy"),
           ],
         ].map(([Icon, title, copy]) => (
           <FeatureCard
@@ -68,9 +71,9 @@ export function AboutScreen() {
             <HeartHandshake color={colorTokens.onBrand} size={22} />
           </View>
           <View style={styles.contactCopyWrap}>
-            <Text style={styles.contactTitle}>Need help with a property decision?</Text>
+            <Text style={styles.contactTitle}>{t("about.helpTitle")}</Text>
             <Text style={styles.contactCopy}>
-              Our Dhaka property team can help you plan the next practical step.
+              {t("about.helpCopy")}
             </Text>
           </View>
         </View>
@@ -79,7 +82,7 @@ export function AboutScreen() {
           href="mailto:hello@homenet.com.bd"
           style={[styles.contactLink, isPhone && styles.contactLinkPhone, webPointer]}
         >
-          <Text style={styles.contactLinkText}>Contact HomeNet</Text>
+          <Text style={styles.contactLinkText}>{t("about.contactBtn")}</Text>
           <ArrowRight color={colors.green} size={16} />
         </AppLink>
       </LinearGradient>

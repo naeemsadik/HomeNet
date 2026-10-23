@@ -8,12 +8,14 @@ import {
   View,
 } from "react-native";
 import { X } from "@/components/icons";
+import { useTranslation } from "@/i18n";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
 import { useResponsive } from "@/hooks/useResponsive";
 import { AiFinderWorkflow } from "./AiFinderWorkflow";
 import { shadow, webPointer } from "@/theme";
 
 export function AiFinderModal() {
+  const { t } = useTranslation();
   const { visible, close, initialPrompt } = useAiFinderModalStore();
   const { isPhone, width } = useResponsive();
 
@@ -32,7 +34,7 @@ export function AiFinderModal() {
       <View style={styles.overlay}>
         {/* Backdrop clickable area with blur effect */}
         <Pressable
-          accessibilityLabel="Close AI search dialog"
+          accessibilityLabel={t("search.aiFinder.closeDialogAria")}
           onPress={close}
           style={styles.backdrop}
         />
@@ -47,7 +49,7 @@ export function AiFinderModal() {
         >
           {/* Floating Close Button positioned at the red mark (outside top-right) */}
           <Pressable
-            accessibilityLabel="Close AI search dialog"
+            accessibilityLabel={t("search.aiFinder.closeDialogAria")}
             accessibilityRole="button"
             onPress={close}
             style={({ pressed, hovered }: any) => [

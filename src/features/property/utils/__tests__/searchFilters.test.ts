@@ -269,9 +269,11 @@ describe("toApiFilters", () => {
   });
 
   it("keeps the short-let, sold and verified behaviour", () => {
+    // A holiday stay is its own listing type in the API, not rent plus a text
+    // search for the words, which also matched ordinary rentals saying them.
     const shortLet = toApiFilters({ ...defaultSearchFilters, purpose: "short-let" });
-    expect(shortLet.listing_type).toBe("rent");
-    expect(shortLet.search).toBe("short-let");
+    expect(shortLet.listing_type).toBe("short_let");
+    expect(shortLet.search).toBeUndefined();
 
     const sold = toApiFilters({ ...defaultSearchFilters, purpose: "sold" });
     expect(sold.status).toBe("sold");
@@ -281,22 +283,13 @@ describe("toApiFilters", () => {
     expect(toApiFilters({ ...defaultSearchFilters, verifiedOnly: true }).is_verified).toBe(true);
   });
 
-  it("filters by area_id and never sends city", () => {
-    // The deployed API answers `city` with 400 "property city should not
-    // exist", and every area comes back with a null city anyway.
-    const api = toApiFilters({
-      ...defaultSearchFilters,
-      area: "Gulshan",
-      areaId: "gulshan-dhaka",
-    });
-    expect(api.area_id).toBe("gulshan-dhaka");
-    expect(api).not.toHaveProperty("city");
-  });
-
-  it("sends no area filter when an old link carries only a name", () => {
+  it("never sends a city param, whatever the link carried", () => {
+    // The deployed API answers any `city` with 400 "property city should not
+    // exist". The place is applied by resolveScope/useBrowseFeed instead.
     const fromLegacyLink = filtersFromParams({ city: "Dhaka" });
     expect(fromLegacyLink.area).toBe("Dhaka");
-    expect(toApiFilters(fromLegacyLink).area_id).toBeUndefined();
+    expect(toApiFilters(fromLegacyLink)).not.toHaveProperty("city");
+    expect(toApiFilters({ ...defaultSearchFilters, area: "Gulshan" })).not.toHaveProperty("city");
   });
 
   it("leaves type unset for an any-type search", () => {
@@ -468,21 +461,6 @@ describe("clampRange", () => {
 });
 
 describe("resetSearchFilters", () => {
-  it("keeps a pinned area's id, and drops a chosen one", () => {
-    const pinned = resetSearchFilters(
-      { ...defaultSearchFilters, area: "Gulshan", areaId: "gulshan-dhaka" },
-      { fixedLocation: "Gulshan" },
-    );
-    expect(pinned.areaId).toBe("gulshan-dhaka");
-
-    const chosen = resetSearchFilters({
-      ...defaultSearchFilters,
-      area: "Gulshan",
-      areaId: "gulshan-dhaka",
-    });
-    expect(chosen.areaId).toBe("");
-  });
-
   it("keeps the page's purpose and pinned area", () => {
     const current: SearchFilters = {
       ...defaultSearchFilters,

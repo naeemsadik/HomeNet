@@ -23,8 +23,29 @@ const PLANNED = [
   },
 ];
 
+import { useTranslation } from "@/i18n";
+
 export function MarketScreen() {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
+
+  const planned = [
+    {
+      icon: MapPin,
+      title: t("market.planned1Title"),
+      copy: t("market.planned1Copy"),
+    },
+    {
+      icon: ChartNoAxesCombined,
+      title: t("market.planned2Title"),
+      copy: t("market.planned2Copy"),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("market.planned3Title"),
+      copy: t("market.planned3Copy"),
+    },
+  ];
 
   return (
     <AppChrome active="market">
@@ -34,18 +55,16 @@ export function MarketScreen() {
             <ChartNoAxesCombined color={colors.greenOnLight} size={26} />
           </View>
 
-          <Eyebrow>Insights</Eyebrow>
+          <Eyebrow>{t("market.eyebrow")}</Eyebrow>
           <Text style={[styles.title, isPhone && styles.titlePhone]}>
-            Market insights are coming soon
+            {t("market.comingSoonTitle")}
           </Text>
           <Text style={styles.copy}>
-            HomeNet reports market data from real listings, not estimates. There
-            is not yet enough verified inventory to publish figures we would
-            stand behind, so this page stays empty until there is.
+            {t("market.comingSoonCopy")}
           </Text>
 
           <View style={[styles.plannedGrid, isPhone && styles.plannedGridPhone]}>
-            {PLANNED.map(({ icon: Icon, title, copy }) => (
+            {planned.map(({ icon: Icon, title, copy }) => (
               <View key={title} style={styles.plannedCard}>
                 <Icon color={colors.greenOnLight} size={18} />
                 <Text style={styles.plannedTitle}>{title}</Text>
@@ -55,7 +74,7 @@ export function MarketScreen() {
           </View>
 
           <AppLink href="/buy" style={styles.cta}>
-            <Text style={styles.ctaText}>Browse verified listings</Text>
+            <Text style={styles.ctaText}>{t("market.browseVerified")}</Text>
             <ArrowRight color={colorTokens.onBrand} size={16} />
           </AppLink>
         </View>

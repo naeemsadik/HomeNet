@@ -1,6 +1,7 @@
 import React from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { ChevronDown } from "@/components/icons";
+import { OptionPicker } from "@/components/OptionPicker";
 import { colorTokens, fonts } from "@/theme";
 
 // The control border is a solid input grey with no token equivalent — the
@@ -9,8 +10,9 @@ const CONTROL_BORDER = "#D0D5DD";
 
 /**
  * A dropdown that uses the platform's own control: a real `<select>` on web, so
- * the keyboard and screen reader behave as the browser intends, and a read-only
- * summary row on native, where the filter bar is replaced by the modal anyway.
+ * the keyboard and screen reader behave as the browser intends, and on Android
+ * and iOS an OptionPicker sheet — the old native branch only drew the current
+ * value, so the filters could not be changed on a phone at all.
  *
  * Lifted out of RightmoveFilterCard so the filters modal can show the same
  * ladders rather than free-text inputs that produced values no dropdown could
@@ -22,12 +24,14 @@ export function SelectField({
   onChange,
   style,
   accessibilityLabel,
+  disabled,
 }: {
   value: string;
   options: { label: string; value: string }[];
   onChange: (val: string) => void;
   style?: any;
   accessibilityLabel?: string;
+  disabled?: boolean;
 }) {
   if (Platform.OS === "web") {
     return (
@@ -37,6 +41,7 @@ export function SelectField({
           value={value}
           onChange={(e: any) => onChange(e.target.value)}
           aria-label={accessibilityLabel}
+          disabled={disabled}
           style={{
             width: "100%",
             height: 42,
@@ -53,7 +58,8 @@ export function SelectField({
             appearance: "none",
             WebkitAppearance: "none",
             outline: "none",
-            cursor: "pointer",
+            cursor: disabled ? "not-allowed" : "pointer",
+            opacity: disabled ? 0.55 : 1,
             boxSizing: "border-box",
           }}
         >
@@ -70,19 +76,16 @@ export function SelectField({
     );
   }
 
-  // Fallback for native Android/iOS
-  const current = options.find((o) => o.value === value) || options[0];
+  // Android and iOS: a tap opens a sheet of options.
   return (
-    <View
+    <OptionPicker
       accessibilityLabel={accessibilityLabel}
-      accessibilityRole="button"
-      style={[styles.nativeSelectWrap, style]}
-    >
-      <Text style={styles.nativeSelectText} numberOfLines={1}>
-        {current?.label ?? ""}
-      </Text>
-      <ChevronDown color={colorTokens.ink} size={16} strokeWidth={2.2} />
-    </View>
+      disabled={disabled}
+      onChange={onChange}
+      options={options}
+      style={style}
+      value={value}
+    />
   );
 }
 

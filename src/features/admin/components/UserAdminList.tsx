@@ -43,7 +43,7 @@ export function UserAdminList({
           placeholder={t("admin.searchUsersPlaceholder")}
           placeholderTextColor={colorTokens.textMuted}
           style={styles.searchInput}
-          accessibilityLabel="Search users"
+          accessibilityLabel={t("admin.searchUsersPlaceholder")}
         />
       </View>
 
@@ -81,7 +81,7 @@ export function UserAdminList({
           }
           ListFooterComponent={
             hasMore ? (
-              <Pressable onPress={onLoadMore} style={styles.loadMore} accessibilityRole="button" accessibilityLabel="Load more users">
+              <Pressable onPress={onLoadMore} style={styles.loadMore} accessibilityRole="button" accessibilityLabel={t("admin.loadMore")}>
                 <Text style={styles.loadMoreText}>{t("admin.loadMore")}</Text>
               </Pressable>
             ) : null

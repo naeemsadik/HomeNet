@@ -47,8 +47,12 @@ interface RightmoveFilterCardProps {
   onSearch: (filters: SearchFilters) => void;
   /** Opens the filters modal — the superset of this bar. */
   onOpenMoreFilters?: () => void;
-  /** Area choices. Omitted on a /buy/<area> page, where the route pins it. */
+  /** Places to choose from. Without them the Area dropdown is not shown. */
   areaOptions?: { label: string; value: string }[];
+  /** False when the place has no known centre, so "+ N km" cannot apply. */
+  radiusAvailable?: boolean;
+  /** Why distance is off, shown under the radius dropdown. */
+  radiusHint?: string;
   locationName?: string;
   totalResults?: number;
 }
@@ -75,6 +79,8 @@ export function RightmoveFilterCard({
   onSearch,
   onOpenMoreFilters,
   areaOptions,
+  radiusAvailable = true,
+  radiusHint,
   locationName = "Dhaka",
   totalResults,
 }: RightmoveFilterCardProps) {
@@ -179,24 +185,18 @@ export function RightmoveFilterCard({
   // Area leads the bar: it is the first thing a search narrows, and digging it
   // out of the filters modal made the commonest choice the hardest one.
   const showArea = Boolean(areaOptions?.length);
-  const resolvedAreaOptions = withCurrentArea(
-    areaOptions as { label: string; value: string }[],
-    filters.areaId,
-    filters.area,
-  );
+  // The card is used without an area chooser too (a pinned /buy/<area> page).
+  const resolvedAreaOptions = withCurrentArea(areaOptions ?? [], filters.area);
   const areaSelect = showArea ? (
     <SelectField
-      accessibilityLabel={t("filters.area")}
+      accessibilityLabel={t("search.rightmove.area")}
       // The value is the area's id, which is what the API filters on; the name
       // rides along for the heading above.
-      value={filters.areaId}
+      value={filters.area}
       options={resolvedAreaOptions}
-      onChange={(val) =>
-        handleUpdate({
-          areaId: val,
-          area: resolvedAreaOptions.find((option) => option.value === val)?.label ?? "",
-        })
-      }
+      // A new place starts with "this area only": a distance chosen for the
+      // last place says nothing about this one.
+      onChange={(val) => handleUpdate({ area: val, radius: "" })}
     />
   ) : null;
 
@@ -213,7 +213,7 @@ export function RightmoveFilterCard({
         : filters.purpose === "sale"
         ? "search.rightmove.headingSale"
         : "search.rightmove.headingAll";
-    return t(key, { place });
+    return t(key, { location: place });
   }, [filters.purpose, filters.query, locationName, t]);
 
   /** What the collapsed phone bar shows in place of the whole grid. */
@@ -273,7 +273,7 @@ export function RightmoveFilterCard({
           onPress={() => setIsEditingTitle(true)}
           style={[styles.titlePressable, webPointer]}
           accessibilityRole="button"
-          accessibilityLabel={t("search.rightmove.editLocation")}
+          accessibilityLabel={t("search.rightmove.editLocationAria")}
         >
           <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>{heading}</Text>
           <Edit3 color={colorTokens.muted} size={16} style={styles.editIcon} />
@@ -290,7 +290,7 @@ export function RightmoveFilterCard({
         {titleBlock}
         {showArea ? (
           <View style={styles.phoneAreaField}>
-            <Text style={styles.fieldLabel}>{t("filters.area")}</Text>
+            <Text style={styles.fieldLabel}>{t("search.rightmove.area")}</Text>
             {areaSelect}
           </View>
         ) : null}
@@ -341,7 +341,7 @@ export function RightmoveFilterCard({
         {/* ROW 1, COL 1: Area */}
         {showArea ? (
           <View style={[styles.col, colStyle]}>
-            <Text style={styles.fieldLabel}>{t("filters.area")}</Text>
+            <Text style={styles.fieldLabel}>{t("search.rightmove.area")}</Text>
             {areaSelect}
           </View>
         ) : null}
@@ -416,14 +416,17 @@ export function RightmoveFilterCard({
         {/* ROW 2, COL 1: Search radius — reads as "around the area above", so it
             follows the area rather than leading the bar. */}
         <View style={[styles.col, colStyle]}>
-          <Text style={styles.fieldLabel}>{t("filters.searchRadius")}</Text>
+          <Text style={styles.fieldLabel}>{t("search.rightmove.searchRadius")}</Text>
           <SelectField
-            accessibilityLabel={t("filters.searchRadius")}
-            value={filters.radius}
+            accessibilityLabel={t("search.rightmove.searchRadius")}
+            value={radiusAvailable ? filters.radius : ""}
             options={radiusOptions}
+            disabled={!radiusAvailable}
             onChange={(val) => handleUpdate({ radius: val })}
           />
-          <Text style={styles.fieldHint}>{t("filters.radiusHint")}</Text>
+          <Text style={styles.fieldHint}>
+            {!radiusAvailable && radiusHint ? radiusHint : t("search.rightmove.pickNeighbourhood")}
+          </Text>
         </View>
 
         {/* ROW 2, COL 2: No. of bedrooms */}

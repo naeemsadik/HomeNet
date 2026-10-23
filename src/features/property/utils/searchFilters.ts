@@ -10,6 +10,10 @@
  * out of it, plus the two passes that actually filter: `toApiFilters` for what
  * the API can do, and `applyClientFilters` for what it cannot.
  */
+import { filterAddedSince } from "./addedToSite";
+
+// Re-exported so the filter model stays the one import point for callers.
+export { filterAddedSince } from "./addedToSite";
 import type { Property, PropertyFilters } from "../types/property";
 import type { PropertyType } from "@/types/api";
 
@@ -18,14 +22,13 @@ export type SearchPurpose = "all" | "sale" | "rent" | "short-let" | "sold";
 export interface SearchFilters {
   purpose: SearchPurpose;
   query: string;
-  /** Area name, for headings and the chooser. Pinned on /buy/<area>. */
-  area: string;
   /**
-   * The area's id, which is what the API filters on. `city` is documented but
-   * the deployed API rejects it outright ("property city should not exist",
-   * 400), and every area comes back with a null city anyway.
+   * The place, by name: a city ("Dhaka") or a neighbourhood ("Gulshan"); ""
+   * is everywhere. `resolveScope` (areaScope.ts) turns it into the area ids or
+   * the centre-and-radius the API actually filters on — never a `city` param,
+   * which the deployed API rejects outright with a 400.
    */
-  areaId: string;
+  area: string;
   radius: string;
   /** "all" or an API PropertyType: residential, commercial, land, parking. */
   propertyType: string;
@@ -50,7 +53,6 @@ export const defaultSearchFilters: SearchFilters = {
   purpose: "all",
   query: "",
   area: "",
-  areaId: "",
   radius: "",
   propertyType: "all",
   addedToSite: "",
@@ -130,8 +132,6 @@ export interface ParamContext {
   mode?: "buy" | "rent" | "sold";
   /** Pins the area, for the /buy/<area> and /rent/<area> landing pages. */
   fixedLocation?: string;
-  /** That pinned area's id, once the areas list has resolved it. */
-  fixedAreaId?: string;
 }
 
 /** True when the URL asks for the filters modal to be open. */
@@ -142,7 +142,7 @@ export function isFiltersModalRequested(params: SearchParams): boolean {
 
 export function filtersFromParams(
   params: SearchParams,
-  { mode, fixedLocation, fixedAreaId }: ParamContext = {},
+  { mode, fixedLocation }: ParamContext = {},
 ): SearchFilters {
   const status = one(params.status);
   const listingType = one(params.listing_type);
@@ -151,7 +151,7 @@ export function filtersFromParams(
   const purpose: SearchPurpose =
     mode === "sold" || status === "sold"
       ? "sold"
-      : subtype === "short-let"
+      : subtype === "short-let" || listingType === "short_let"
       ? "short-let"
       : listingType === "rent" || mode === "rent"
       ? "rent"
@@ -170,7 +170,6 @@ export function filtersFromParams(
     purpose,
     query: one(params.query) || one(params.search) || "",
     area: fixedLocation || one(params.location) || one(params.city) || "",
-    areaId: fixedAreaId || one(params.area_id) || "",
     radius: one(params.radius) || "",
     propertyType: toPropertyTypeFilter(one(params.type)),
     addedToSite: one(params.added) || "",
@@ -211,13 +210,12 @@ export function filtersToParams(
     params.status = "sold";
   } else if (filters.purpose === "short-let") {
     params.subtype = "short-let";
-    params.listing_type = "rent";
+    params.listing_type = "short_let";
   } else if (filters.purpose === "rent" || filters.purpose === "sale") {
     params.listing_type = filters.purpose;
   }
 
   if (!fixedLocation && filters.area.trim()) params.location = filters.area.trim();
-  if (!fixedLocation && filters.areaId) params.area_id = filters.areaId;
   if (filters.propertyType && filters.propertyType !== "all") params.type = filters.propertyType;
   if (filters.radius) params.radius = filters.radius;
   if (filters.addedToSite) params.added = filters.addedToSite;
@@ -249,7 +247,6 @@ export const FILTER_PARAM_KEYS = [
   "subtype",
   "city",
   "location",
-  "area_id",
   "type",
   "radius",
   "added",
@@ -329,10 +326,12 @@ export function toApiFilters(filters: SearchFilters): PropertyFilters {
     listing_type:
       filters.purpose === "sale"
         ? ("sale" as const)
-        : filters.purpose === "rent" || isShortLet
+        : isShortLet
+        ? ("short_let" as const)
+        : filters.purpose === "rent"
         ? ("rent" as const)
         : undefined,
-    search: filters.query.trim() || (isShortLet ? "short-let" : undefined),
+    search: filters.query.trim() || undefined,
     type:
       filters.propertyType === "all" || !filters.propertyType
         ? undefined
@@ -343,9 +342,6 @@ export function toApiFilters(filters: SearchFilters): PropertyFilters {
     max_price: maxPrice,
     min_area: minSize,
     max_area: maxSize,
-    // Not `city`: the deployed API 400s on it. The area's id is the filter
-    // that works, and `getPropertiesInAreas` already uses the same field.
-    area_id: filters.areaId || undefined,
     // The Sold section is sold-only; elsewhere "include sold" merely widens
     // an otherwise active-only list.
     status: isSold ? ("sold" as const) : filters.includeSold ? undefined : ("active" as const),
@@ -354,32 +350,6 @@ export function toApiFilters(filters: SearchFilters): PropertyFilters {
     // wider page to work from or the first screen comes back nearly empty.
     limit: hasClientFilters(filters) ? 100 : 20,
   };
-}
-
-const ADDED_WINDOW_MS: Record<string, number> = {
-  "24h": 24 * 60 * 60 * 1000,
-  "3d": 3 * 24 * 60 * 60 * 1000,
-  "7d": 7 * 24 * 60 * 60 * 1000,
-  "14d": 14 * 24 * 60 * 60 * 1000,
-};
-
-/**
- * Keeps listings published inside the chosen window. A listing with no readable
- * date cannot be shown to satisfy "added in the last 24 hours", so it is left
- * out rather than assumed recent.
- */
-export function filterAddedSince<T extends Pick<Property, "published_at" | "created_at">>(
-  items: T[],
-  addedToSite: string,
-  now: number = Date.now(),
-): T[] {
-  const window = ADDED_WINDOW_MS[addedToSite];
-  if (!window) return items;
-  const cutoff = now - window;
-  return items.filter((item) => {
-    const stamp = Date.parse(item.published_at || item.created_at || "");
-    return Number.isFinite(stamp) && stamp >= cutoff;
-  });
 }
 
 /** A room count a listing reports, wherever it keeps it. */
@@ -478,7 +448,5 @@ export function resetSearchFilters(
     ...defaultSearchFilters,
     purpose: filters.purpose,
     area: fixedLocation || "",
-    // The pinned area is the page, not a filter on it, so reset keeps it.
-    areaId: fixedLocation ? filters.areaId : "",
   };
 }
