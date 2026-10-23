@@ -8,7 +8,7 @@ export const propertyTypes: [PropertyType, ...PropertyType[]] = [
   "parking",
 ];
 
-export const listingTypes: [ListingType, ...ListingType[]] = ["sale", "rent"];
+export const listingTypes: [ListingType, ...ListingType[]] = ["sale", "rent", "short_let"];
 
 export const areaUnits = ["sqft", "katha", "bigha", "sqm"] as const;
 

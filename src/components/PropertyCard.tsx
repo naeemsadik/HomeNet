@@ -15,8 +15,9 @@ import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck } from "@/compone
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
-import { useTranslation, formatLocalizedPrice, formatLocalizedNumber, type SupportedLanguage } from "@/i18n";
+import { useTranslation, formatLocalizedPrice, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
+import { isHolidayStayType } from "@/features/property/utils/listingType";
 import { useSavedStore } from "@/stores/savedStore";
 
 export type PropertyCardVariant = "standard" | "feature";
@@ -56,7 +57,7 @@ function readSpecs(property: Property, lang: SupportedLanguage) {
     beds: bedsVal !== null ? formatLocalizedNumber(bedsVal, lang) : null,
     baths: bathsVal !== null ? formatLocalizedNumber(bathsVal, lang) : null,
     area: property.area_size
-      ? `${formatLocalizedNumber(property.area_size.toLocaleString("en-BD"), lang)} ${property.area_unit || "sqft"}`
+      ? `${formatLocalizedNumber(property.area_size.toLocaleString("en-BD"), lang)} ${translateAreaUnit(property.area_unit, lang)}`
       : null,
   };
 }
@@ -85,6 +86,8 @@ function PropertyCardComponent({
     t("propertyCard.locationUnavailable");
 
   const isRent = property.listing_type === "rent";
+  const isHoliday = isHolidayStayType(property.listing_type);
+  const intentLabel = isHoliday ? t("propertyCard.holidayStay") : t(isRent ? "propertyCard.forRent" : "propertyCard.forSale");
   const price = formatLocalizedPrice(property.price, property.price_currency || "BDT", language);
   const specs = readSpecs(property, language);
   const isFeature = variant === "feature";
@@ -166,7 +169,7 @@ function PropertyCardComponent({
       <View style={[styles.shell, width ? { width } : null, style]}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${property.title}, ${isRent ? t("propertyCard.forRent") : t("propertyCard.forSale")}, ${price}`}
+          accessibilityLabel={`${property.title}, ${intentLabel}, ${price}`}
           onPress={open}
           style={({ hovered, pressed }: any) => [
             styles.card,
@@ -225,7 +228,7 @@ function PropertyCardComponent({
     <View style={[styles.shell, width ? { width } : null, style]}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${property.title}, ${isRent ? t("propertyCard.forRent") : t("propertyCard.forSale")}, ${price}`}
+        accessibilityLabel={`${property.title}, ${intentLabel}, ${price}`}
         onPress={open}
         style={({ hovered, pressed }: any) => [
           styles.card,
@@ -249,7 +252,7 @@ function PropertyCardComponent({
           )}
           {verifiedBadge}
           <View style={styles.intentTag}>
-            <Text style={styles.intentText}>{isRent ? t("propertyCard.forRent") : t("propertyCard.forSale")}</Text>
+            <Text style={styles.intentText}>{intentLabel}</Text>
           </View>
         </View>
 

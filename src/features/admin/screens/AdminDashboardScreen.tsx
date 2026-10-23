@@ -63,7 +63,7 @@ export function AdminDashboardScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerSection}>
-          <Eyebrow>Admin</Eyebrow>
+          <Eyebrow>{t("admin.eyebrow")}</Eyebrow>
           <Text style={styles.title}>{t("admin.dashboardTitle")}</Text>
           <Text style={styles.subtitle}>{t("admin.dashboardSubtitle")}</Text>
         </View>

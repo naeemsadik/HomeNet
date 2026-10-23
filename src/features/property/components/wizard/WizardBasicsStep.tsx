@@ -1,6 +1,7 @@
 import { Check, Plus } from "@/components/icons";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
 import { webPointer } from "@/theme";
 import type { PropertyType } from "@/types/api";
@@ -16,6 +17,7 @@ import { styles } from "../../screens/PropertyCreateWizard.styles";
 
 /** Step 1: title, category, subtype, purpose and description. */
 export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: PropertyTypeConfig }) {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
   const store = usePropertyWizardStore();
   const [descFocused, setDescFocused] = useState(false);
@@ -42,22 +44,22 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
     <View style={styles.stepFormBody}>
       {/* Property Title */}
       <View style={styles.formGroup}>
-        <Text style={styles.formLabel}>Property Title *</Text>
+        <Text style={styles.formLabel}>{t("wizard.basics.titleLabel")}</Text>
         <TextInput
           onChangeText={(v) => store.setBasics({ title: v })}
-          placeholder="e.g. Modern 3-Bedroom Apartment in Gulshan 2"
+          placeholder={t("wizard.basics.titlePlaceholder")}
           placeholderTextColor="#899790"
           style={styles.formInput}
           value={store.title}
         />
         <Text style={styles.formHelperText}>
-          A clear, descriptive title attracts more serious buyers.
+          {t("wizard.basics.titleHelper")}
         </Text>
       </View>
 
       {/* Primary Category (Residential, Commercial, Land, Parking) */}
       <View style={styles.formGroup}>
-        <Text style={styles.formLabel}>Property Category *</Text>
+        <Text style={styles.formLabel}>{t("wizard.basics.categoryLabel")}</Text>
         <View style={[styles.categoryGrid, isPhone && styles.categoryGridMobile]}>
           {(Object.keys(PROPERTY_TYPE_CONFIGS) as PropertyType[]).map((typeKey) => {
             const cfg = PROPERTY_TYPE_CONFIGS[typeKey];
@@ -122,9 +124,9 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
       <View style={styles.formGroup}>
         <View style={styles.formLabelRow}>
           <Text style={styles.formLabel}>
-            {activeTypeConfig.label} Subtype *
+            {t("wizard.basics.subtypeLabel", { category: activeTypeConfig.label })}
           </Text>
-          <Text style={styles.formHint}>Select specific unit classification</Text>
+          <Text style={styles.formHint}>{t("wizard.basics.subtypeHint")}</Text>
         </View>
         <View style={styles.subtypeWrap}>
           {activeTypeConfig.subtypes.map((sub) => {
@@ -158,8 +160,8 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
           })}
           {activeTypeConfig.allowsCustomSubtype ? (
             <Pressable
-              accessibilityHint="Type a subtype that is not in the list"
-              accessibilityLabel="Other subtype"
+              accessibilityHint={t("wizard.basics.otherSubtypeHint")}
+              accessibilityLabel={t("wizard.basics.otherSubtypeAria")}
               accessibilityRole="button"
               accessibilityState={{ selected: showOther }}
               onPress={() => {
@@ -180,7 +182,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                   showOther && styles.subtypePillTextSelected,
                 ]}
               >
-                Other
+                {t("wizard.basics.otherSubtype")}
               </Text>
             </Pressable>
           ) : null}
@@ -188,7 +190,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
         {showOther ? (
           <View style={styles.customSubtypeGroup}>
             <TextInput
-              accessibilityLabel="Your property subtype"
+              accessibilityLabel={t("wizard.basics.customSubtypeLabel")}
               autoFocus={otherPicked}
               maxLength={CUSTOM_SUBTYPE_MAX_LENGTH}
               onBlur={settleCustomSubtype}
@@ -197,13 +199,13 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                 setOtherPicked(true);
                 store.setBasics({ subtype: v });
               }}
-              placeholder="e.g. Farmhouse, Guest house, Co-working space"
+              placeholder={t("wizard.basics.customSubtypePlaceholder")}
               placeholderTextColor="#899790"
               style={styles.formInput}
               value={store.subtype}
             />
             <Text style={styles.formHelperText}>
-              A short name buyers will recognise. {store.subtype.length}/{CUSTOM_SUBTYPE_MAX_LENGTH}
+              {t("wizard.basics.customSubtypeHelper", { current: store.subtype.length, max: CUSTOM_SUBTYPE_MAX_LENGTH })}
             </Text>
           </View>
         ) : null}
@@ -212,7 +214,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
       {/* Listing Purpose */}
       <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
         <View style={[styles.formGroup, { flex: 1 }]}>
-          <Text style={styles.formLabel}>Listing Purpose *</Text>
+          <Text style={styles.formLabel}>{t("wizard.basics.purposeLabel")}</Text>
           <View style={styles.toggleRow}>
             <Pressable
               onPress={() => {
@@ -234,7 +236,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                   store.listingType === "sale" && store.subtype !== "short-let" && styles.toggleBtnTextActive,
                 ]}
               >
-                For Sale
+                {t("wizard.basics.forSale")}
               </Text>
             </Pressable>
             <Pressable
@@ -257,7 +259,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                   store.listingType === "rent" && store.subtype !== "short-let" && styles.toggleBtnTextActive,
                 ]}
               >
-                For Rent
+                {t("wizard.basics.forRent")}
               </Text>
             </Pressable>
             <Pressable
@@ -282,7 +284,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                   store.subtype === "short-let" && styles.toggleBtnTextActive,
                 ]}
               >
-                Short-let
+                {t("wizard.basics.shortLet")}
               </Text>
             </Pressable>
           </View>
@@ -292,10 +294,13 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
       {/* Description */}
       <View style={styles.formGroup}>
         <View style={styles.formLabelRow}>
-          <Text style={styles.formLabel}>Description *</Text>
+          <Text style={styles.formLabel}>{t("wizard.basics.descriptionLabel")}</Text>
           {store.description.trim().length > 0 && (
             <Text style={styles.formHelperCharCount}>
-              {store.description.length} {store.description.length === 1 ? "char" : "chars"}
+              {t("wizard.basics.charCount", {
+                count: store.description.length,
+                label: store.description.length === 1 ? t("wizard.basics.charSingular") : t("wizard.basics.charPlural"),
+              })}
             </Text>
           )}
         </View>
@@ -305,7 +310,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
           onBlur={() => setDescFocused(false)}
           onFocus={() => setDescFocused(true)}
           onChangeText={(v) => store.setBasics({ description: v })}
-          placeholder="Describe key features, nearby landmarks, orientation, and building condition..."
+          placeholder={t("wizard.basics.descriptionPlaceholder")}
           placeholderTextColor="#899790"
           style={[styles.formTextarea, descFocused && styles.formTextareaFocused]}
           value={store.description}

@@ -15,6 +15,7 @@ import { useRoleMutations } from "../hooks/useRoleMutations";
 import { useRoles } from "../hooks/useRoles";
 import type { UserWithRoles, RoleWithPermissions } from "../types/admin";
 import { toApiError } from "@/services/apiClient";
+import { useTranslation } from "@/i18n";
 
 interface RoleAssignmentModalProps {
   visible: boolean;
@@ -23,6 +24,7 @@ interface RoleAssignmentModalProps {
 }
 
 export function RoleAssignmentModal({ visible, user, onClose }: RoleAssignmentModalProps) {
+  const { t } = useTranslation();
   const { data: allRoles = [], isLoading: rolesLoading } = useRoles();
   const { data: userRoles = [], isLoading: userRolesLoading } = useUserRoles(user?.id ?? "");
   const { assignRole, revokeRole } = useRoleMutations(user?.id);
@@ -63,12 +65,12 @@ export function RoleAssignmentModal({ visible, user, onClose }: RoleAssignmentMo
         <View style={styles.dialog}>
           <View style={styles.header}>
             <View>
-              <Text style={styles.title}>Manage Roles</Text>
+              <Text style={styles.title}>{t("admin.roles.manageRoles")}</Text>
               {user ? (
                 <Text style={styles.subtitle}>{user.full_name}</Text>
               ) : null}
             </View>
-            <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel="Close">
+            <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel={t("common.close")}>
               <X color={colorTokens.textSecondary} size={18} />
             </Pressable>
           </View>
@@ -90,7 +92,11 @@ export function RoleAssignmentModal({ visible, user, onClose }: RoleAssignmentMo
                   <Pressable
                     onPress={() => toggleRole(item)}
                     style={[styles.roleRow, assigned && styles.roleRowActive]}
-                    accessibilityLabel={`${assigned ? "Remove" : "Assign"} ${item.name} role`}
+                    accessibilityLabel={
+                      assigned
+                        ? t("admin.roles.removeRoleAria", { role: item.name })
+                        : t("admin.roles.assignRoleAria", { role: item.name })
+                    }
                     disabled={isProcessing}
                   >
                     <View style={styles.roleInfo}>

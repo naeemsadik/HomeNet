@@ -6,17 +6,20 @@ import { colorTokens, fonts } from "@/theme";
 import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 
+import { useTranslation } from "@/i18n";
+
 export function NotificationScreen() {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
 
   return (
     <AppChrome active="home">
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         <View style={styles.headerSection}>
-          <Eyebrow>Notifications</Eyebrow>
-          <Text style={styles.title}>Stay updated</Text>
+          <Eyebrow>{t("notifications.heading")}</Eyebrow>
+          <Text style={styles.title}>{t("notifications.title")}</Text>
           <Text style={styles.subtitle}>
-            Listing approvals, and news about properties you've saved.
+            {t("notifications.subtitle")}
           </Text>
         </View>
         <View style={styles.listSection}>

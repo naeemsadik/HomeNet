@@ -119,10 +119,14 @@ export function SellerDashboardScreen() {
   };
 
   const handleLogout = async () => {
-    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
-      confirmLabel: "Log Out",
-      destructive: true,
-    });
+    const confirmed = await confirmAction(
+      t("seller.profile.logoutConfirmTitle"),
+      t("seller.profile.logoutConfirmMessage"),
+      {
+        confirmLabel: t("seller.profile.logoutBtn"),
+        destructive: true,
+      }
+    );
     if (!confirmed) return;
     logout();
     router.replace("/home");
@@ -220,9 +224,12 @@ export function SellerDashboardScreen() {
 
   const recentActivities: ActivityItem[] = allMyListings.slice(0, 5).map((p) => ({
     id: p.id,
-    title: p.status === "active" ? "Listing is Live" : "Draft Listing Saved",
+    title:
+      p.status === "active"
+        ? t("seller.dashboard.activityListingLive")
+        : t("seller.dashboard.activityDraftSaved"),
     description: `${p.title} · ${p.area?.name || "Dhaka"}`,
-    time: "Recently updated",
+    time: t("seller.dashboard.activityRecentlyUpdated"),
     icon: p.status === "active" ? BadgeCheck : FileText,
     iconBg: colors.greenLight,
     iconColor: colors.green,
@@ -358,7 +365,7 @@ export function SellerDashboardScreen() {
                 <Search color="rgba(11,26,23,0.5)" size={16} />
                 <TextInput
                   onChangeText={setSearchQuery}
-                  placeholder="Search listings…"
+                  placeholder={t("seller.header.searchPlaceholder")}
                   placeholderTextColor="rgba(11,26,23,0.5)"
                   style={styles.searchInput}
                   value={searchQuery}
@@ -366,7 +373,11 @@ export function SellerDashboardScreen() {
               </View>
 
               {/* Notification Button */}
-              <AppLink href="/notifications" style={styles.iconCircleBtn}>
+              <AppLink
+                accessibilityLabel={t("seller.header.notificationsAria")}
+                href="/notifications"
+                style={styles.iconCircleBtn}
+              >
                 <Bell color={colors.ink} size={19} />
                 <View style={styles.headerDotIndicator} />
               </AppLink>
@@ -438,13 +449,13 @@ export function SellerDashboardScreen() {
                 <View style={styles.cardHeaderTitleRow}>
                   <LineChartIcon color={colors.ink} size={20} />
                   <View>
-                    <Text style={styles.cardTitle}>Listing views</Text>
-                    <Text style={styles.cardSubtext}>Last 7 days</Text>
+                    <Text style={styles.cardTitle}>{t("seller.dashboard.listingViews")}</Text>
+                    <Text style={styles.cardSubtext}>{t("seller.dashboard.last7Days")}</Text>
                   </View>
                 </View>
 
                 <AppLink href="/market" style={styles.analyticsLink}>
-                  <Text style={styles.analyticsLinkText}>Analytics</Text>
+                  <Text style={styles.analyticsLinkText}>{t("seller.dashboard.analyticsLink")}</Text>
                   <ArrowUpRight color={colors.green} size={16} />
                 </AppLink>
               </View>
@@ -499,11 +510,11 @@ export function SellerDashboardScreen() {
               <View style={styles.cardHeader}>
                 <View style={styles.cardHeaderTitleRow}>
                   <Bell color={colors.ink} size={20} />
-                  <Text style={styles.cardTitle}>Recent activity</Text>
+                  <Text style={styles.cardTitle}>{t("seller.dashboard.recentActivity")}</Text>
                 </View>
 
                 <AppLink href="/notifications">
-                  <Text style={styles.analyticsLinkText}>See all</Text>
+                  <Text style={styles.analyticsLinkText}>{t("seller.dashboard.seeAll")}</Text>
                 </AppLink>
               </View>
 
@@ -534,7 +545,7 @@ export function SellerDashboardScreen() {
                 ) : (
                   <View style={{ paddingVertical: 24, alignItems: "center" }}>
                     <Text style={{ fontSize: 13, color: colors.muted, textAlign: "center" }}>
-                      No recent activity. Inquiries and updates on your listings will appear here.
+                      {t("seller.dashboard.noActivity")}
                     </Text>
                   </View>
                 )}

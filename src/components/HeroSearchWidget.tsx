@@ -7,19 +7,25 @@ import {
   Search,
   SlidersHorizontal,
   Sparkles,
+  TrendingUp,
   X,
 } from "@/components/icons";
-import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
+import { useInstantValuationStore } from "@/features/valuation/stores/useInstantValuationStore";
+import type { ValuationPropertyType, ValuationPurpose } from "@/features/valuation/types/valuationTypes";
 import { useTranslation } from "@/i18n";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
 import { AreaPicker } from "./AreaPicker";
+import { AdvancedFiltersModal } from "./AdvancedFiltersModal";
 import {
-  AdvancedFiltersModal,
-  defaultFilterState,
-  type FilterState,
-} from "./AdvancedFiltersModal";
+  countActiveFilters,
+  defaultSearchFilters,
+  filtersToParams,
+  type SearchFilters,
+  type SearchPurpose,
+} from "@/features/property/utils/searchFilters";
 import type { Area } from "@/types/api";
 
 export type HeroSearchTab = SearchTabType;
@@ -43,19 +49,38 @@ export function HeroSearchWidget({
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState<Area | null>(null);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [filters, setFilters] = useState<FilterState>(defaultFilterState);
+  const [filters, setFilters] = useState<SearchFilters>(defaultSearchFilters);
 
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    if (filters.minPrice) count++;
-    if (filters.maxPrice) count++;
-    if (filters.bedrooms !== null) count++;
-    if (filters.bathrooms !== null) count++;
-    if (filters.amenities.length > 0) count += filters.amenities.length;
-    if (filters.verifiedOnly) count++;
-    return count;
-  }, [filters]);
+  // Instant Valuation Morph State
+  const [valuationPurpose, setValuationPurpose] = useState<ValuationPurpose>("sale");
+  const [valuationType, setValuationType] = useState<ValuationPropertyType>("apartment");
+
+  const isValuationMode = activeTab === "instant-valuation";
+
+  // The one shared count, so the badge can no longer claim four filters while
+  // the search applies one.
+  const activeFilterCount = useMemo(() => countActiveFilters(filters), [filters]);
   const hasActiveFilters = activeFilterCount > 0;
+
+  /** The tab is the search's intent; the filters carry it into the URL. */
+  const purposeForTab = (tab: HeroSearchTab): SearchPurpose =>
+    tab === "sold"
+      ? "sold"
+      : tab === "short-let"
+      ? "short-let"
+      : tab === "rent"
+      ? "rent"
+      : "sale";
+
+  // Switching tabs keeps the query, the area and every filter that still
+  // applies. "Include sold" only means something while looking at Sold.
+  const handleTabChange = (tab: HeroSearchTab) => {
+    setActiveTab(tab);
+    setFilters((prev) => ({
+      ...prev,
+      includeSold: tab === "sold" ? prev.includeSold : false,
+    }));
+  };
 
   const openAiModal = useAiFinderModalStore((state) => state.open);
 
@@ -77,28 +102,65 @@ export function HeroSearchWidget({
     router.push((qs ? `/ai-finder?${qs}` : "/ai-finder") as never);
   };
 
+  const handleValuationSubmit = () => {
+    const areaName = selectedArea?.name || "Gulshan";
+    const areaId = selectedArea?.id || "gulshan-2-dhaka";
+    const road = query.trim();
+
+    useInstantValuationStore.getState().setInitialFromHero({
+      areaName,
+      areaId,
+      purpose: valuationPurpose,
+      propertyType: valuationType,
+    });
+
+    if (road) {
+      useInstantValuationStore.getState().setFormField("roadOrBlock", road);
+    }
+
+    const params = new URLSearchParams();
+    params.set("area", areaName);
+    params.set("areaId", areaId);
+    params.set("purpose", valuationPurpose);
+    params.set("type", valuationType);
+    if (road) params.set("query", road);
+
+    router.push(`/instant-valuation?${params.toString()}` as never);
+  };
+
   const handleSearch = () => {
+    if (isValuationMode) {
+      handleValuationSubmit();
+      return;
+    }
+
     if (onSearch) {
       onSearch(query, activeTab, selectedArea);
       return;
     }
     const target =
       activeTab === "sold" ? "/sold" : activeTab === "buy" ? "/buy" : "/rent";
-    const params = new URLSearchParams();
-    if (query.trim()) params.set("query", query.trim());
-    if (activeTab === "short-let") params.set("subtype", "short-let");
+    // Bug 2: the hero used to write only price, beds, baths and verified, so
+    // amenities and size were counted on the badge and then dropped. One
+    // serializer now writes every filter Browse knows how to read.
+    const params = new URLSearchParams(
+      filtersToParams({
+        ...filters,
+        purpose: purposeForTab(activeTab),
+        query: query.trim(),
+        // The area goes in as city + location below, which is the pair Browse
+        // has always read.
+        area: "",
+      })
+    );
     locationParams(params);
-    if (filters.minPrice) params.set("min_price", filters.minPrice);
-    if (filters.maxPrice) params.set("max_price", filters.maxPrice);
-    if (filters.bedrooms !== null) params.set("bedrooms", String(filters.bedrooms));
-    if (filters.bathrooms !== null) params.set("bathrooms", String(filters.bathrooms));
-    if (filters.verifiedOnly) params.set("is_verified", "true");
     const qs = params.toString();
     router.push((qs ? `${target}?${qs}` : target) as never);
   };
 
-  const placeholder =
-    activeTab === "short-let"
+  const placeholder = isValuationMode
+    ? "Enter road, block, sector, or building name (e.g. Road 92)..."
+    : activeTab === "short-let"
       ? t("hero.placeholders.shortLet")
       : activeTab === "sold"
         ? t("hero.placeholders.sold")
@@ -106,130 +168,260 @@ export function HeroSearchWidget({
 
   return (
     <View style={[styles.card, isPhone && styles.cardPhone, docked && styles.cardDocked]}>
-      <SearchTabs activeTab={activeTab} compact={isPhone} onChange={setActiveTab} />
+      <SearchTabs activeTab={activeTab} compact={isPhone} onChange={handleTabChange} />
 
       <View style={styles.rule} />
 
-      <View style={[styles.inputRow, isPhone && styles.inputRowPhone]}>
-        <View style={[styles.field, isPhone && styles.fieldPhone]}>
-          <Search color={colors.muted} size={19} strokeWidth={2} />
-          <TextInput
-            onChangeText={setQuery}
-            onSubmitEditing={handleSearch}
-            placeholder={placeholder}
-            placeholderTextColor={colors.muted}
-            returnKeyType="search"
-            style={[styles.input, isPhone && styles.inputPhone]}
-            value={query}
-          />
-          {query ? (
+      {isValuationMode && (
+        <View style={[styles.valuationBar, isPhone && styles.valuationBarPhone]}>
+          {/* Quick Purpose Toggle */}
+          <View style={styles.valuationToggle}>
             <Pressable
-              accessibilityLabel={t("hero.clearSearch")}
-              onPress={() => setQuery("")}
-              style={[styles.clear, webPointer]}
+              accessibilityRole="button"
+              onPress={() => setValuationPurpose("sale")}
+              style={[
+                styles.valuationTab,
+                valuationPurpose === "sale" && styles.valuationTabActive,
+                webPointer,
+              ]}
             >
-              <X color={colors.muted} size={16} />
+              <Text
+                style={[
+                  styles.valuationTabText,
+                  valuationPurpose === "sale" && styles.valuationTabTextActive,
+                ]}
+              >
+                Sale Valuation
+              </Text>
             </Pressable>
-          ) : null}
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setValuationPurpose("rent")}
+              style={[
+                styles.valuationTab,
+                valuationPurpose === "rent" && styles.valuationTabActive,
+                webPointer,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.valuationTabText,
+                  valuationPurpose === "rent" && styles.valuationTabTextActive,
+                ]}
+              >
+                Rental Valuation
+              </Text>
+            </Pressable>
+          </View>
+
+          {/* Quick Property Type Chips */}
+          <View style={styles.valuationTypeGroup}>
+            {[
+              { key: "apartment" as const, label: "Apartment" },
+              { key: "house" as const, label: "Duplex / House" },
+              { key: "commercial" as const, label: "Commercial" },
+              { key: "land" as const, label: "Plot / Land" },
+            ].map((pt) => {
+              const isSelected = valuationType === pt.key;
+              return (
+                <Pressable
+                  key={pt.key}
+                  accessibilityRole="button"
+                  onPress={() => setValuationType(pt.key)}
+                  style={[
+                    styles.typeChip,
+                    isSelected && styles.typeChipSelected,
+                    webPointer,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.typeChipText,
+                      isSelected && styles.typeChipTextSelected,
+                    ]}
+                  >
+                    {pt.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+      )}
+
+      <View style={[styles.inputRow, isPhone && styles.inputRowPhone]}>
+        {/* The query and the area are one control group: one fill, one height,
+            a divider between them on desktop and stacked on a phone. */}
+        <View style={[styles.group, isPhone && styles.groupPhone]}>
+          <View style={[styles.field, isPhone && styles.fieldPhone]}>
+            {isValuationMode ? (
+              <MapPin color={colors.greenOnLight} size={19} strokeWidth={2.2} />
+            ) : (
+              <Search color={colors.muted} size={19} strokeWidth={2} />
+            )}
+            <TextInput
+              onChangeText={setQuery}
+              onSubmitEditing={handleSearch}
+              placeholder={placeholder}
+              placeholderTextColor={colors.muted}
+              returnKeyType={isValuationMode ? "go" : "search"}
+              style={[styles.input, isPhone && styles.inputPhone]}
+              value={query}
+            />
+            {query ? (
+              <Pressable
+                accessibilityLabel={t("hero.clearSearch")}
+                onPress={() => setQuery("")}
+                style={[styles.clear, webPointer]}
+              >
+                <X color={colors.muted} size={16} />
+              </Pressable>
+            ) : null}
+            {!isValuationMode && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  hasActiveFilters
+                    ? t("hero.openFiltersWithCount", { count: activeFilterCount })
+                    : t("hero.openFilters")
+                }
+                onPress={() => setFilterModalOpen(true)}
+                style={({ hovered }: any) => [
+                  styles.filterButton,
+                  hasActiveFilters && styles.filterButtonActive,
+                  hovered && styles.filterButtonHovered,
+                  webPointer,
+                ]}
+              >
+                <SlidersHorizontal
+                  color={hasActiveFilters ? colorTokens.brandText : colors.muted}
+                  size={18}
+                  strokeWidth={2}
+                />
+                {hasActiveFilters ? (
+                  <View style={styles.filterBadge}>
+                    <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+                  </View>
+                ) : null}
+              </Pressable>
+            )}
+          </View>
+
+          {!isPhone ? <View style={styles.groupDivider} /> : null}
+
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
-              hasActiveFilters
-                ? t("hero.openFiltersWithCount", { count: activeFilterCount })
-                : t("hero.openFilters")
+              selectedArea
+                ? t("hero.filterByAreaWithLocation", { location: selectedArea.name })
+                : t("hero.filterByArea")
             }
-            onPress={() => setFilterModalOpen(true)}
+            onPress={() => setAreaPickerOpen(true)}
             style={({ hovered }: any) => [
-              styles.filterButton,
-              hasActiveFilters && styles.filterButtonActive,
-              hovered && styles.filterButtonHovered,
+              styles.areaButton,
+              isPhone && styles.areaButtonPhone,
+              selectedArea && styles.areaButtonActive,
+              hovered && styles.areaButtonHovered,
               webPointer,
             ]}
           >
-            <SlidersHorizontal
-              color={hasActiveFilters ? colorTokens.brandText : colors.muted}
-              size={18}
+            <MapPin
+              color={selectedArea ? colors.greenOnLight : colors.muted}
+              size={16}
               strokeWidth={2}
             />
-            {hasActiveFilters ? (
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
-              </View>
-            ) : null}
+            <Text
+              numberOfLines={1}
+              style={[styles.areaLabel, selectedArea && styles.areaLabelActive]}
+            >
+              {selectedArea ? selectedArea.name : isValuationMode ? "Dhaka (Select Area)" : t("hero.allLocations")}
+            </Text>
+            {selectedArea ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("hero.clearLocation")}
+                // The glyph is 14px; the target has to be a thumb's width.
+                hitSlop={10}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setSelectedArea(null);
+                }}
+                style={[styles.areaClear, webPointer]}
+              >
+                <X color={colors.greenOnLight} size={14} />
+              </Pressable>
+            ) : (
+              <ChevronDown color={colors.muted} size={15} strokeWidth={2} />
+            )}
           </Pressable>
         </View>
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={
-            selectedArea
-              ? t("hero.filterByAreaWithLocation", { location: selectedArea.name })
-              : t("hero.filterByArea")
-          }
-          onPress={() => setAreaPickerOpen(true)}
-          style={({ hovered }: any) => [
-            styles.areaButton,
-            isPhone && styles.areaButtonPhone,
-            selectedArea && styles.areaButtonActive,
-            hovered && styles.areaButtonHovered,
-            webPointer,
-          ]}
-        >
-          <MapPin
-            color={selectedArea ? colors.greenOnLight : colors.muted}
-            size={16}
-            strokeWidth={2}
-          />
-          <Text
-            numberOfLines={1}
-            style={[styles.areaLabel, selectedArea && styles.areaLabelActive]}
-          >
-            {selectedArea ? selectedArea.name : t("hero.allLocations")}
-          </Text>
-          {selectedArea ? (
-            <Pressable
-              accessibilityLabel={t("hero.clearLocation")}
-              onPress={(e) => {
-                e.stopPropagation();
-                setSelectedArea(null);
-              }}
-              style={styles.areaClear}
-            >
-              <X color={colors.greenOnLight} size={14} />
-            </Pressable>
-          ) : (
-            <ChevronDown color={colors.muted} size={15} strokeWidth={2} />
-          )}
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Search properties"
+          accessibilityLabel={isValuationMode ? "Get instant valuation" : t("hero.searchProperties")}
           onPress={handleSearch}
           style={({ hovered, pressed }: any) => [
             styles.searchButton,
+            isValuationMode && styles.valuationButton,
             isPhone && styles.searchButtonPhone,
             hovered && styles.searchButtonHovered,
             pressed && styles.searchButtonPressed,
             webPointer,
           ]}
         >
-          <Search color={colorTokens.onBrand} size={17} strokeWidth={2.4} />
-          <Text style={styles.searchLabel}>{t("hero.search")}</Text>
+          {isValuationMode ? (
+            <TrendingUp color={colorTokens.onBrand} size={18} strokeWidth={2.4} />
+          ) : (
+            <Search color={colorTokens.onBrand} size={17} strokeWidth={2.4} />
+          )}
+          <Text style={styles.searchLabel}>
+            {isValuationMode ? "Get instant valuation" : t("hero.search")}
+          </Text>
         </Pressable>
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Search with AI"
-        onPress={handleAiSearch}
-        style={({ hovered }: any) => [styles.aiLink, hovered && styles.aiLinkHovered, webPointer]}
-      >
-        <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.2} />
-        <Text style={styles.aiText}>
-          {t("hero.aiPrompt")}
-        </Text>
-      </Pressable>
+      {isValuationMode ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Learn about instant valuation"
+          onPress={handleValuationSubmit}
+          style={({ hovered }: any) => [styles.aiLink, hovered && styles.aiLinkHovered, webPointer]}
+        >
+          <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.2} />
+          <Text style={styles.aiText}>
+            Data-backed Dhaka property valuation · 100% Free · No broker commissions
+          </Text>
+        </Pressable>
+      ) : (
+        <View style={styles.linkRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Search with AI"
+            onPress={handleAiSearch}
+            style={({ hovered }: any) => [styles.aiLink, hovered && styles.aiLinkHovered, webPointer]}
+          >
+            <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.2} />
+            <Text style={styles.aiText}>
+              {t("hero.aiPrompt")}
+            </Text>
+          </Pressable>
+
+          {hasActiveFilters ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("hero.clearFilters")}
+              onPress={() => setFilters(defaultSearchFilters)}
+              style={({ hovered }: any) => [
+                styles.clearFiltersLink,
+                hovered && styles.aiLinkHovered,
+                webPointer,
+              ]}
+            >
+              <Text style={styles.clearFiltersText}>{t("hero.clearFilters")}</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      )}
 
       <AreaPicker
         visible={areaPickerOpen}
@@ -245,7 +437,6 @@ export function HeroSearchWidget({
         filters={filters}
         onApply={(updated) => setFilters(updated)}
         onClose={() => setFilterModalOpen(false)}
-        onReset={() => setFilters(defaultFilterState)}
         visible={filterModalOpen}
       />
     </View>
@@ -302,6 +493,31 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "stretch",
     gap: 8,
+  },
+
+  // One fill behind the query and the area, so they read as a single control.
+  group: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    height: 56,
+    borderRadius: radius.sm,
+    backgroundColor: colors.soft,
+    overflow: "hidden",
+  },
+  groupPhone: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    height: "auto",
+    gap: 8,
+    backgroundColor: "transparent",
+    overflow: "visible",
+  },
+  groupDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: colors.line,
   },
 
   field: {
@@ -402,6 +618,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
+  linkRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 16,
+  },
   aiLink: {
     alignSelf: "flex-start",
     flexDirection: "row",
@@ -409,6 +631,16 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 16,
     paddingVertical: 2,
+  },
+  clearFiltersLink: {
+    alignSelf: "flex-start",
+    marginTop: 16,
+    paddingVertical: 2,
+  },
+  clearFiltersText: {
+    color: colors.greenOnLight,
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
   },
   aiLinkHovered: { opacity: 0.75 },
   aiText: {
@@ -418,4 +650,75 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     ...(Platform.OS === "web" ? { textUnderlineOffset: 3 } : {}),
   } as any,
+
+  // ─── Instant Valuation Morph Bar Styles ─────────────────────────────
+  valuationBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  valuationBarPhone: {
+    flexDirection: "column",
+    alignItems: "stretch",
+  },
+  valuationToggle: {
+    flexDirection: "row",
+    backgroundColor: colorTokens.surfaceSunken,
+    borderRadius: radius.md,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  valuationTab: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: radius.sm,
+  },
+  valuationTabActive: {
+    backgroundColor: colorTokens.brand,
+    ...shadow,
+  },
+  valuationTabText: {
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    color: colors.muted,
+  },
+  valuationTabTextActive: {
+    color: colorTokens.onBrand,
+    fontFamily: fonts.bold,
+  },
+  valuationTypeGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 6,
+  },
+  typeChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.surfaceSunken,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+  },
+  typeChipSelected: {
+    backgroundColor: colorTokens.brandSurface,
+    borderColor: colorTokens.brand,
+  },
+  typeChipText: {
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    color: colors.muted,
+  },
+  typeChipTextSelected: {
+    color: colorTokens.brandText,
+    fontFamily: fonts.bold,
+  },
+  valuationButton: {
+    backgroundColor: colorTokens.brand,
+    paddingHorizontal: 24,
+  },
 });

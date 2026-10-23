@@ -11,25 +11,34 @@ import { colorTokens, fonts } from "@/theme";
  * pages opened by someone without access (see RequirePermission). Answering
  * both the same way avoids confirming that a staff page exists.
  */
+import { useTranslation } from "@/i18n";
+
+/**
+ * The one "page not found" view. Unknown URLs render it, and so do staff-only
+ * pages opened by someone without access (see RequirePermission). Answering
+ * both the same way avoids confirming that a staff page exists.
+ */
 export function NotFoundScreen() {
+  const { t } = useTranslation();
+
   return (
     <AppChrome active="home">
-      <PageMeta title="Page not found | HomeNet" />
+      <PageMeta title={t("notFound.metaTitle")} />
       <Head>
         <meta name="robots" content="noindex" />
       </Head>
       <View style={styles.center}>
-        <Text style={styles.code}>404</Text>
+        <Text style={styles.code}>{t("notFound.code")}</Text>
         <Text accessibilityRole="header" style={styles.title}>
-          Page not found
+          {t("notFound.title")}
         </Text>
         <Text style={styles.copy}>
-          The page you're looking for doesn't exist or has moved.
+          {t("notFound.copy")}
         </Text>
         <View style={styles.actions}>
-          <AppButton label="Go to homepage" onPress={() => router.push("/")} />
+          <AppButton label={t("notFound.goHome")} onPress={() => router.push("/")} />
           <AppButton
-            label="Browse homes for sale"
+            label={t("notFound.browseHomes")}
             variant="secondary"
             onPress={() => router.push("/buy")}
           />

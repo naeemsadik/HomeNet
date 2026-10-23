@@ -2,9 +2,11 @@ import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useToastStore } from "@/lib/toast";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 
 /** Renders the current toast. Mounted once, in the root layout. */
 export function ToastHost() {
+  const { t } = useTranslation();
   const toast = useToastStore((s) => s.toast);
   const dismiss = useToastStore((s) => s.dismiss);
   const insets = useSafeAreaInsets();
@@ -15,6 +17,7 @@ export function ToastHost() {
     <View pointerEvents="box-none" style={[styles.wrap, { bottom: insets.bottom + 24 }]}>
       <View
         accessibilityLiveRegion="polite"
+        accessibilityLabel={t("common.notification")}
         key={toast.id}
         // Web: role="status" makes screen readers announce the message politely.
         role="status"
@@ -24,6 +27,7 @@ export function ToastHost() {
         {toast.action ? (
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel={toast.action.label}
             onPress={() => {
               toast.action?.onPress();
               dismiss();

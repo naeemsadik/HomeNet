@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from "react-native";
-import { colors, fonts, layout } from "@/theme";
+import { colorTokens, colors, fonts, layout } from "@/theme";
 
 export const styles = StyleSheet.create({
   sectionSpacing: {
@@ -143,32 +143,39 @@ export const styles = StyleSheet.create({
     paddingVertical: 18,
   },
   ownerCopy: { flexShrink: 1, gap: 3 },
+  // The band repeats the ask that OwnerListPropertySection makes in full, so it
+  // reads as the aside it is: smaller title, and an outline button rather than a
+  // second solid fill competing with Search for the one obvious action.
   ownerTitle: {
-    color: "#FFFFFF",
+    color: colorTokens.onInk,
     fontFamily: fonts.headingBold,
-    fontSize: 17,
+    fontSize: 15,
   },
   ownerSub: {
     color: "rgba(255, 255, 255, 0.72)",
     fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 19,
   },
+  // On the ink band, `brandText` measures 1.5:1 — the outline carries the
+  // secondary role instead, in the band's own on-ink white.
   ownerCta: {
     flexShrink: 0,
-    height: 46,
-    paddingHorizontal: 24,
+    height: 42,
+    paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 10,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "transparent",
+    borderWidth: 1.5,
+    borderColor: "rgba(255, 255, 255, 0.45)",
   },
-  ownerCtaPhone: { height: 44 },
-  ownerCtaHovered: { backgroundColor: "rgba(255, 255, 255, 0.88)" },
+  ownerCtaPhone: { height: 42 },
+  ownerCtaHovered: { backgroundColor: "rgba(255, 255, 255, 0.12)" },
   ownerCtaText: {
-    color: colors.ink,
-    fontFamily: fonts.bold,
-    fontSize: 15,
+    color: colorTokens.onInk,
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
   },
 
 

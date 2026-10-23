@@ -27,6 +27,7 @@ export { default as Bookmark } from "lucide-react-native/icons/bookmark";
 export { default as BookOpen } from "lucide-react-native/icons/book-open";
 export { default as Building } from "lucide-react-native/icons/building";
 export { default as Building2 } from "lucide-react-native/icons/building-2";
+export { default as Calculator } from "lucide-react-native/icons/calculator";
 export { default as Calendar } from "lucide-react-native/icons/calendar";
 export { default as CalendarCheck } from "lucide-react-native/icons/calendar-check";
 export { default as Camera } from "lucide-react-native/icons/camera";
@@ -41,6 +42,7 @@ export { default as CircleHelp } from "lucide-react-native/icons/circle-question
 export { default as Clock } from "lucide-react-native/icons/clock";
 export { default as Clock3 } from "lucide-react-native/icons/clock-3";
 export { default as Compass } from "lucide-react-native/icons/compass";
+export { default as Copy } from "lucide-react-native/icons/copy";
 export { default as Cpu } from "lucide-react-native/icons/cpu";
 export { default as CreditCard } from "lucide-react-native/icons/credit-card";
 export { default as Database } from "lucide-react-native/icons/database";
