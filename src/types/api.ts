@@ -100,6 +100,9 @@ export interface AreaListResponse {
 
 export interface CreateAreaDto {
   name: string;
+  /** Required by the API on create: a new area is matched to map pins by it. */
+  center_lat: number;
+  center_lng: number;
   parent_area_id?: string | null;
   city?: string;
   boundary?: string;

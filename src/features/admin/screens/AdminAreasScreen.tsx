@@ -39,6 +39,14 @@ interface AreaFormProps {
   onSubmit: (dto: CreateAreaDto) => void;
 }
 
+/** A finite number within ±limit, or null. Empty or partly numeric text ("12abc") is rejected. */
+function parseCoordinate(text: string, limit: number): number | null {
+  const trimmed = text.trim();
+  if (!/^-?\d+(\.\d+)?$/.test(trimmed)) return null;
+  const value = Number(trimmed);
+  return Math.abs(value) <= limit ? value : null;
+}
+
 function areaErrorMessage(error: unknown, t: (key: any) => string) {
   const apiError = toApiError(error);
   if (apiError.errorCode === 1402) return t("admin.areas.cannotDeleteWithListings");
@@ -54,6 +62,8 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
   const [city, setCity] = useState("Dhaka");
   const [boundary, setBoundary] = useState("");
   const [centroid, setCentroid] = useState("");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
   const [advanced, setAdvanced] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [parent, setParent] = useState<Area | null>(null);
@@ -64,6 +74,8 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
     setCity(initial?.city ?? "Dhaka");
     setBoundary(initial?.boundary ?? "");
     setCentroid(initial?.centroid ?? "");
+    setLat(initial?.center_lat != null ? String(initial.center_lat) : "");
+    setLng(initial?.center_lng != null ? String(initial.center_lng) : "");
     setAdvanced(Boolean(initial?.boundary || initial?.centroid));
     setParent(
       initial?.parent
@@ -76,10 +88,16 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
     );
   }, [initial, visible]);
 
+  const centerLat = parseCoordinate(lat, 90);
+  const centerLng = parseCoordinate(lng, 180);
+  const coordinatesValid = centerLat !== null && centerLng !== null;
+
   function submit() {
-    if (!name.trim()) return;
+    if (!name.trim() || centerLat === null || centerLng === null) return;
     onSubmit({
       name: name.trim(),
+      center_lat: centerLat,
+      center_lng: centerLng,
       city: city.trim() || "Dhaka",
       parent_area_id: parent?.id ?? null,
       boundary: boundary.trim() || undefined,
@@ -118,6 +136,28 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
               placeholderTextColor={colorTokens.textMuted}
               style={styles.input}
             />
+
+            <Text style={styles.label}>{t("admin.areas.latLabel")}</Text>
+            <TextInput
+              value={lat}
+              onChangeText={setLat}
+              keyboardType="numbers-and-punctuation"
+              placeholder="23.8103"
+              placeholderTextColor={colorTokens.textMuted}
+              style={styles.input}
+            />
+            <Text style={styles.label}>{t("admin.areas.lngLabel")}</Text>
+            <TextInput
+              value={lng}
+              onChangeText={setLng}
+              keyboardType="numbers-and-punctuation"
+              placeholder="90.4125"
+              placeholderTextColor={colorTokens.textMuted}
+              style={styles.input}
+            />
+            {!coordinatesValid && (lat !== "" || lng !== "") ? (
+              <Text style={styles.errorText}>{t("admin.areas.coordinatesInvalid")}</Text>
+            ) : null}
 
             <Text style={styles.label}>{t("admin.areas.parentLabel")}</Text>
             <Pressable onPress={() => setPickerOpen(true)} style={styles.parentButton}>
@@ -162,8 +202,8 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
               </Pressable>
               <Pressable
                 onPress={submit}
-                disabled={loading || !name.trim() || parent?.id === initial?.id}
-                style={[styles.primaryButton, (loading || !name.trim()) && styles.disabled]}
+                disabled={loading || !name.trim() || !coordinatesValid || parent?.id === initial?.id}
+                style={[styles.primaryButton, (loading || !name.trim() || !coordinatesValid) && styles.disabled]}
               >
                 {loading ? (
                   <ActivityIndicator color={colorTokens.onBrand} size="small" />
