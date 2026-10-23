@@ -21,7 +21,7 @@ export default function Root({ children }: PropsWithChildren) {
         {/*
           Inter and Plus Jakarta Sans are bundled and registered by useFonts in
           _layout.tsx, under the family names Inter_400Regular,
-          PlusJakartaSans_700Bold and so on — which is what all ~675 fonts.*
+          PlusJakartaSans_700Bold and so on, which is what all ~675 fonts.*
           token call sites resolve to.
 
           The Google Fonts stylesheet that used to sit here registered a second,

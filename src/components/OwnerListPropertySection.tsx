@@ -466,7 +466,7 @@ export function OwnerListPropertySection() {
               </Pressable>
             </View>
 
-            {/* AI Entry Card — directly under Select what you want to list / Choose your property type */}
+            {/* AI Entry Card: directly under Select what you want to list / Choose your property type */}
             <Pressable
               accessibilityHint={t("search.ownerSection.skipWithAiHint")}
               accessibilityLabel={t("search.ownerSection.skipWithAiAria")}

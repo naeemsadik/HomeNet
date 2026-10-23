@@ -3,7 +3,7 @@
  *
  * Before this there were two: `FilterState` (hero + modal) and
  * `RightmoveFilters` (Browse). Nothing converted between them, so a search
- * crossed the gap half-translated — bathrooms were written to the URL and never
+ * crossed the gap half-translated, bathrooms were written to the URL and never
  * read back, and the hero's badge counted amenities it never sent.
  *
  * The URL is the only durable state. These helpers are the conversions in and
@@ -25,14 +25,14 @@ export interface SearchFilters {
   /**
    * The place, by name: a city ("Dhaka") or a neighbourhood ("Gulshan"); ""
    * is everywhere. `resolveScope` (areaScope.ts) turns it into the area ids or
-   * the centre-and-radius the API actually filters on — never a `city` param,
+   * the centre-and-radius the API actually filters on, never a `city` param,
    * which the deployed API rejects outright with a 400.
    */
   area: string;
   radius: string;
   /** "all" or an API PropertyType: residential, commercial, land, parking. */
   propertyType: string;
-  /** "", "24h", "3d", "7d", "14d" — applied client-side. */
+  /** "", "24h", "3d", "7d", "14d", applied client-side. */
   addedToSite: string;
   includeSold: boolean;
   verifiedOnly: boolean;
@@ -111,7 +111,7 @@ function normalizePrice(raw?: string): string {
   return parsed === undefined ? "" : String(parsed);
 }
 
-/** A whole, positive count, or "" — guards against `?bedrooms=abc`. */
+/** A whole, positive count, or "", guards against `?bedrooms=abc`. */
 function normalizeCount(raw?: string): string {
   if (!raw) return "";
   const parsed = parseInt(raw, 10);
@@ -236,7 +236,7 @@ export function filtersToParams(
 
 /**
  * Every query param these helpers own. `router.setParams` merges rather than
- * replaces, so clearing a filter has to write an empty value for its param —
+ * replaces, so clearing a filter has to write an empty value for its param,
  * otherwise the old one survives in the URL and comes straight back.
  */
 export const FILTER_PARAM_KEYS = [
@@ -400,7 +400,7 @@ export function applyClientFilters(items: Property[], filters: SearchFilters): P
 
 /**
  * The one count every filter badge uses. One per active group, so ticking three
- * amenities reads as one filter — which is what it is. Purpose, query and area
+ * amenities reads as one filter, which is what it is. Purpose, query and area
  * are the search itself, not filters on it.
  */
 export function countActiveFilters(filters: SearchFilters): number {

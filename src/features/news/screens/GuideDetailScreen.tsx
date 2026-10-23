@@ -46,20 +46,6 @@ interface GuideDetailScreenProps {
   slug: string;
 }
 
-function formatDate(isoString: string | null): string {
-  if (!isoString) return "";
-  try {
-    const d = new Date(isoString);
-    return d.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return "";
-  }
-}
-
 /** Related guide mini card for editorial sidebar */
 const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
   guide,

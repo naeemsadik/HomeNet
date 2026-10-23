@@ -16,7 +16,7 @@ import {
  *
  * Expo Router renders its own `<title data-rh="true">` through react-helmet, and
  * emits it *empty* when no route claims one. That empty tag lands before the
- * static one in `app/+html.tsx`, and browsers and crawlers honour the first —
+ * static one in `app/+html.tsx`, and browsers and crawlers honour the first,
  * which is why Lighthouse reported the page as having no title at all despite
  * one being set. Rendering a title through Head fills the router's own tag
  * rather than competing with it.

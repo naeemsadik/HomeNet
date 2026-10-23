@@ -444,7 +444,7 @@ export function HeroSearchWidget({
 }
 
 const styles = StyleSheet.create({
-  // Elevation is declared once — shadow, no border.
+  // Elevation is declared once, shadow, no border.
   card: {
     width: "100%",
     backgroundColor: colors.white,

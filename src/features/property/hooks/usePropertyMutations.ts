@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  archiveProperty,
   createProperty,
   deleteProperty,
   deletePropertyMedia,
@@ -30,6 +31,11 @@ export function useUpdateProperty() {
     mutationFn: ({ id, dto }: { id: string; dto: UpsertPropertyDto }) => updateProperty(id, dto),
     onSuccess: (_, variables) => invalidate(variables.id),
   });
+}
+
+export function useArchiveProperty() {
+  const invalidate = useInvalidateProperties();
+  return useMutation({ mutationFn: archiveProperty, onSuccess: (_, id) => invalidate(id) });
 }
 
 export function useDeleteProperty() {

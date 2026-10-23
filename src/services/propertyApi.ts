@@ -20,7 +20,7 @@ export async function getProperties(params: PropertyFilters = {}) {
 }
 
 /**
- * Properties across several areas — a parent area plus its sub-areas.
+ * Properties across several areas, a parent area plus its sub-areas.
  *
  * `area_id` takes one id and matches that area only, so one request goes out per
  * id. The results are merged newest first, de-duplicated, and cut to the page
@@ -88,6 +88,12 @@ export async function legacyPatchProperty(id: string, dto: UpsertPropertyDto) {
     `/v1/properties/${id}`,
     dto,
   );
+  return data;
+}
+
+/** Owner archive: hides an active or sold listing but keeps it (the API refuses other statuses). */
+export async function archiveProperty(id: string) {
+  const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/properties/${id}`);
   return data;
 }
 

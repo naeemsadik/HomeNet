@@ -4,7 +4,7 @@ const SAFE_LINK_PROTOCOLS = ["http:", "https:", "mailto:", "tel:"];
 
 /**
  * True only for absolute URLs with a scheme we are willing to open. Rejects
- * `javascript:`, `data:`, relative paths and anything that fails to parse —
+ * `javascript:`, `data:`, relative paths and anything that fails to parse,
  * guide content and links can come from the API.
  */
 export function isSafeLinkUrl(url: string | null | undefined): url is string {

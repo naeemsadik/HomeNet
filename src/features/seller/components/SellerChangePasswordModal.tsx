@@ -10,8 +10,6 @@ import { colorTokens, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { styles } from "../screens/SellerProfileScreen.styles";
 
-const MIN_PASSWORD_LENGTH = 8;
-
 type SellerChangePasswordModalProps = {
   visible: boolean;
   onClose: () => void;

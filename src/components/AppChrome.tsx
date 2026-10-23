@@ -30,7 +30,6 @@ import Svg, { Path } from "react-native-svg";
 import { router } from "expo-router";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { Brand } from "./Brand";
-import { LoginModal } from "./LoginModal";
 import { AiFinderModal } from "./AiFinderModal";
 import { InstantValuationModal } from "@/features/valuation/components/InstantValuationModal";
 import { LanguageToggle } from "./LanguageToggle";
@@ -186,7 +185,6 @@ function TopBar({
   const { t } = useTranslation();
   const { isTablet, isPhone, containerMaxWidth } = useResponsive();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const { data: unreadData } = useUnreadCount("user");
@@ -502,7 +500,7 @@ function TopBar({
             </>
           ) : (
             <Pressable
-              onPress={() => setAuthModalOpen(true)}
+              onPress={() => useAuthModalStore.getState().open()}
               accessibilityLabel={t("nav.signIn")}
               accessibilityRole="button"
               style={({ pressed }) => [
@@ -537,11 +535,6 @@ function TopBar({
           <LanguageToggle compact={isPhone} variant={isCrystal ? "crystal" : "default"} />
         </View>
       </View>
-
-      <LoginModal
-        visible={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-      />
     </SafeAreaView>
   );
 }

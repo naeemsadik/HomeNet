@@ -7,7 +7,7 @@
  *
  * Values are strings because that is what the URL and the <select> elements
  * carry; `toApiFilters` is the single place they become numbers. Labels are not
- * stored here — components build them with `t()` so both languages work.
+ * stored here: components build them with `t()` so both languages work.
  */
 import {
   formatLocalizedNumber,
@@ -173,7 +173,7 @@ export function withCurrentValue(options: RangeOption[], value: string): RangeOp
 }
 
 /**
- * Keeps an area that is not in the list — one carried by an older link — as a
+ * Keeps an area that is not in the list, one carried by an older link , as a
  * real, selected choice rather than letting the control fall back to "All
  * areas" and quietly widen the search.
  */

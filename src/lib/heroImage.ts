@@ -1,6 +1,6 @@
 /**
  * The homepage hero is the Largest Contentful Paint element, and it is drawn as
- * a CSS background — invisible to the browser's preload scanner until the JS
+ * a CSS background: invisible to the browser's preload scanner until the JS
  * bundle has downloaded, parsed and rendered. That cost ~1.3 s of dead wait.
  *
  * `app/+html.tsx` preloads this exact URL in the document head so the download

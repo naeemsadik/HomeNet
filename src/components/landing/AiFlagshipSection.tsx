@@ -195,7 +195,7 @@ export function AiFlagshipSection() {
 
   return (
     <View ref={containerRef} style={styles.sectionRoot}>
-      {/* Optional market position claim — strictly rendered ONLY if explicitly approved */}
+      {/* Optional market position claim, strictly rendered ONLY if explicitly approved */}
       {MARKET_POSITION_CLAIM.approved && (
         <View style={styles.marketPositionStrip}>
           <Text style={styles.marketPositionText}>{MARKET_POSITION_CLAIM.text}</Text>

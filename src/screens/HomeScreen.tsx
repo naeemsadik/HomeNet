@@ -41,7 +41,7 @@ import { HERO_IMAGE_URL } from "@/lib/heroImage";
 import { styles } from "./HomeScreen.styles";
 
 /**
- * Hero photograph — placeholder until real imagery is shot.
+ * Hero photograph: placeholder until real imagery is shot.
  *
  * Replace with a HomeNet-owned photo of a Bangladeshi interior. Spec: landscape,
  * min 2400×1400, a lived-in room (not an exterior tower), natural daylight, with
@@ -168,7 +168,7 @@ export function HomeScreen() {
             ]}
             resizeMode="cover"
           >
-            {/* Scrim only deep enough to carry white type — the room stays visible. */}
+            {/* Scrim only deep enough to carry white type, the room stays visible. */}
             <LinearGradient
               colors={[
                 "rgba(6, 22, 18, 0.58)",
@@ -235,7 +235,7 @@ export function HomeScreen() {
   return (
     <AppChrome active="home" bleed={hero}>
       {/* ─────────────────────────────────────────────────────────────
-          2. FEATURED PROPERTIES (live API) — real listings answer the search
+          2. FEATURED PROPERTIES (live API), real listings answer the search
           box first, before any explaining.
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
@@ -261,7 +261,7 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. TRUST — why these listings are different. Earns the claim before
+          3. TRUST, why these listings are different. Earns the claim before
           the process is explained.
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
@@ -272,7 +272,7 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          4. HOW IT WORKS — dual seeker / owner track
+          4. HOW IT WORKS, dual seeker / owner track
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
@@ -282,28 +282,28 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          5. PRODUCT VISUAL — browser + phone preview of real listings
+          5. PRODUCT VISUAL, browser + phone preview of real listings
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <HeroProductVisual />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          6. AI LISTING — describe it, HomeNet fills the fields
+          6. AI LISTING, describe it, HomeNet fills the fields
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <AiFlagshipSection />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          7. OWNER CTA — list your property
+          7. OWNER CTA, list your property
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <OwnerListPropertySection />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          8. GUIDES & INSIGHTS — editorial, API-ready
+          8. GUIDES & INSIGHTS, editorial, API-ready
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <PropertyGuidesSection />

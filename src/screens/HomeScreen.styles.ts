@@ -157,7 +157,7 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
   },
-  // On the ink band, `brandText` measures 1.5:1 — the outline carries the
+  // On the ink band, `brandText` measures 1.5:1, the outline carries the
   // secondary role instead, in the band's own on-ink white.
   ownerCta: {
     flexShrink: 0,

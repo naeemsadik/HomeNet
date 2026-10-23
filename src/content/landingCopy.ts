@@ -15,7 +15,7 @@
  */
 export const HERO_HEADLINE = "Find Your Home With Trust";
 
-// MARKET POSITION CLAIM — DISABLED PENDING BUSINESS APPROVAL.
+// MARKET POSITION CLAIM: DISABLED PENDING BUSINESS APPROVAL.
 // Cannot be substantiated from the repository. Set `approved: true` ONLY on
 // explicit business confirmation.
 export const MARKET_POSITION_CLAIM = {
@@ -74,7 +74,7 @@ export const landingCopy = {
     eyebrow: "Property marketplace · Bangladesh",
     headline: HERO_HEADLINE,
     subtitle:
-      "Search verified apartments, houses, land and commercial space with direct owner contact. Or list in under a minute — paste a plain description, and HomeNet fills 14 fields for you.",
+      "Search verified apartments, houses, land and commercial space with direct owner contact. Or list in under a minute: paste a plain description and HomeNet fills 14 fields for you.",
     primaryCta: "Explore properties",
     secondaryCta: "List your property",
     reassurance:
@@ -121,9 +121,9 @@ export const landingCopy = {
     withTitle: "With HomeNet",
     withItems: [
       "One centralized, structured database with precise neighborhood filtering",
-      "Strict verification gate — unverified properties are never published publicly",
+      "Strict verification gate: unverified properties are never published publicly",
       "Mandatory completeness: clear photos, exact coordinates, and verified amenities",
-      "Direct owner contact on every card — zero intermediary fees or commissions",
+      "Direct owner contact on every card: zero intermediary fees or commissions",
     ],
   },
   howItWorks: {
@@ -207,7 +207,7 @@ export const landingCopy = {
       {
         tag: "Instant Listing",
         title: "Understands Bangladeshi property language",
-        desc: "Paste a natural description — HomeNet converts crore and lakh into figures, parses katha and bigha, and extracts Dhaka amenities without manual form filling.",
+        desc: "Paste a natural description and HomeNet converts crore and lakh into figures, parses katha and bigha, and extracts Dhaka amenities without manual form filling.",
       },
       {
         tag: "Versatile Taxonomy",
@@ -239,15 +239,15 @@ export const landingCopy = {
     analyzingState: "AI is reading your description…",
     applyBtn: "Apply & Continue",
     tryAgainBtn: "Try again",
-    disclaimer: "AI may make mistakes — you can edit before submitting",
-    lowConfidenceNotice: "AI is less certain — please verify",
+    disclaimer: "AI may make mistakes. You can edit before submitting",
+    lowConfidenceNotice: "AI is less certain, please verify",
     priceConversionBadge: "2.5 crore → BDT 25,000,000",
     headlines: [
       {
         num: "01",
         title: "It speaks Bangladeshi property language",
         tag: "Local Vocabulary",
-        desc: "Purpose-built for Bangladesh. It translates crore and lakh directly into figures (1 crore = 10,000,000; 1 lakh = 100,000), understands katha and bigha alongside sqft and sqm, and recognizes the amenities that matter in Dhaka — standby generator, lift, gas line, servant quarter, nearby mosque, rooftop, and CCTV.",
+        desc: "Purpose-built for Bangladesh. It translates crore and lakh directly into figures (1 crore = 10,000,000; 1 lakh = 100,000), understands katha and bigha alongside sqft and sqm, and recognizes the amenities that matter in Dhaka, standby generator, lift, gas line, servant quarter, nearby mosque, rooftop, and CCTV.",
         examples: [
           "Crore & Lakh: 2.5 crore converts to BDT 25,000,000 automatically",
           "Land units: Understands katha and bigha without conversion errors",
@@ -262,7 +262,7 @@ export const landingCopy = {
         desc: "Honesty before automation. HomeNet returns a confidence level for every single extracted field and flags anything it is less certain about. You only spend time checking the fields that actually need human review.",
         examples: [
           "High confidence on standard specs: price, bedrooms, size, and area",
-          "Flags ambiguous entries with a clear notice: 'AI is less certain — please verify'",
+          "Flags ambiguous entries with a clear notice: 'AI is less certain, please verify'",
           "Saves you from re-checking verified details",
         ],
       },
@@ -285,7 +285,7 @@ export const landingCopy = {
     benefits: [
       "Comprehensive search across residential, commercial, plots, and parking",
       "Every single photo and the exact location on the map before you visit",
-      "Only verified active listings appear in search — no expired or ghost ads",
+      "Only verified active listings appear in search: no expired or ghost ads",
       "Direct owner contact information with 0% broker commission",
     ],
     primaryCta: "Explore properties",
@@ -295,8 +295,8 @@ export const landingCopy = {
     eyebrow: "For Owners",
     title: "List directly. Reach verified seekers. 0 BDT fee.",
     benefits: [
-      "100% free to list — no upfront costs, no hidden listing fees, no commissions",
-      "AI-assisted listing — describe your flat in a sentence and skip tedious forms",
+      "100% free to list: no upfront costs, no hidden listing fees, no commissions",
+      "AI-assisted listing: describe your flat in a sentence and skip tedious forms",
       "Guided 5-step wizard with auto-saved drafts so you can finish anytime",
       "Direct seeker inquiries delivered straight to your email without middlemen",
       "One unified account manages both your searches and your listings",
@@ -333,7 +333,7 @@ export const landingCopy = {
     title: "Built on modern, robust technology",
     aiTitle: "AI Property Listing Assistant",
     aiDesc:
-      "Our AI parser translates natural Bangladeshi property descriptions into structured database records — extracting bedrooms, price in crore/lakh, floor level, and 18 distinct amenities.",
+      "Our AI parser translates natural Bangladeshi property descriptions into structured database records, extracting bedrooms, price in crore/lakh, floor level, and 18 distinct amenities.",
     locationTitle: "Geospatial & Area Taxonomy",
     locationDesc:
       "Two-level hierarchical indexing of Dhaka wards paired with Haversine radius math for point-based spatial search.",

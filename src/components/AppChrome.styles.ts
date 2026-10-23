@@ -806,7 +806,7 @@ export const styles = StyleSheet.create({
     width: "100%",
   },
 
-  // Same container as the navbar — alignment is structural, not tuned.
+  // Same container as the navbar, alignment is structural, not tuned.
   mainGutter: {
     width: "100%",
     maxWidth: layout.containerMaxWidth,

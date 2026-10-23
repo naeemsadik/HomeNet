@@ -30,8 +30,8 @@ export const CARD_HEIGHT = 380;
 export interface PropertyCardProps {
   property: Property;
   /**
-   * `standard` — photo above a fact block. The default everywhere.
-   * `feature`  — photo fills the card, facts overlay it. Curated rails only;
+   * `standard`: photo above a fact block. The default everywhere.
+   * `feature` : photo fills the card, facts overlay it. Curated rails only;
    *              see the scrim note below before reusing it.
    */
   variant?: PropertyCardVariant;
@@ -130,7 +130,7 @@ function PropertyCardComponent({
   /**
    * Rendered as a SIBLING of the card's pressable, never a child.
    * react-native-web renders Pressable as <button>, and a nested button is
-   * invalid HTML — it breaks hydration and swallows the inner click.
+   * invalid HTML: it breaks hydration and swallows the inner click.
    */
   const saveButton = (
     <Pressable

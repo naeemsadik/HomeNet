@@ -21,8 +21,8 @@ export function useBrowseFeed(filters: PropertyFilters, scope: AreaScope, ready:
   const single = usePropertyFeed(
     {
       ...filters,
-      // `city` is not a filter the API accepts — it answers any value with
-      // 400 "property city should not exist" — so a city searches by name.
+      // `city` is not a filter the API accepts, it answers any value with
+      // 400 "property city should not exist", so a city searches by name.
       ...(scope.kind === "city" || scope.kind === "text"
         ? {
             search: (() => {
