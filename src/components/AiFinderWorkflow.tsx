@@ -37,19 +37,6 @@ import type { Property } from "@/features/property/types/property";
 import { areaIdsFor, resolveArea } from "@/features/property/utils/aiSearchFilters";
 import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 
-const steps = ["Goal", "Location", "Budget", "Matches"];
-
-/** Neighbourhoods offered in the guided steps; each is matched to a real area by name. */
-const NEIGHBOURHOODS: [name: string, blurb: string][] = [
-  ["Gulshan", "Central, connected, established diplomatic hub"],
-  ["Banani", "Central, connected, established diplomatic hub"],
-  ["Baridhara", "Quiet tree-lined streets and premium security"],
-  ["Dhanmondi", "Lakeside culture, schools, and central city access"],
-  ["Uttara", "Planned sectors, metro access, and open residential space"],
-  ["Bashundhara", "Fast-growing community with modern complexes"],
-  ["Mirpur", "Connected, budget-friendly and rapidly developing"],
-];
-
 const budgetRanges: Record<string, { min_price?: number; max_price?: number }> = {
   "Under BDT 70k": { max_price: 70000 },
   "BDT 70k–120k": { min_price: 70000, max_price: 120000 },

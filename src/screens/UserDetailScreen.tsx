@@ -19,21 +19,24 @@ export function UserDetailScreen({ userId }: { userId: string }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void loadUser();
-  }, [userId]);
-
-  async function loadUser() {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await getUser(userId);
-      setUser(result.data);
-    } catch (err) {
-      setError(toApiError(err).message);
-    } finally {
-      setLoading(false);
+    let cancelled = false;
+    async function loadUser() {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await getUser(userId);
+        if (!cancelled) setUser(result.data);
+      } catch (err) {
+        if (!cancelled) setError(toApiError(err).message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
-  }
+    void loadUser();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const identity = user?.auth_identities?.[0];
   const isVerified = !!identity?.verified_at;

@@ -548,6 +548,7 @@ export const en = {
       view: "View",
       markSold: "Mark as Sold",
       boost: "Boost",
+      archive: "Archive",
     },
     filters: {
       all: "All",
@@ -560,6 +561,9 @@ export const en = {
     deleteConfirmTitle: "Delete Property",
     deleteConfirmMessage: "Are you sure you want to delete \"{{title}}\"? This permanently removes the listing and its photos and cannot be undone.",
     deleteFailed: "Delete failed",
+    archiveConfirmTitle: "Archive Property",
+    archiveConfirmMessage: "Archive \"{{title}}\"? It will no longer be shown on the site, and you can find it under Archived.",
+    archiveFailed: "Archive failed",
     toggleView: {
       aria: "Toggle view to live site",
       label: "Toggle view",

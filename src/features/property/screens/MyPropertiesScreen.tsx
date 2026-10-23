@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageSquare,
+  Archive,
   MoreVertical,
   Plus,
   PlusCircle,
@@ -44,7 +45,7 @@ import { Footer } from "@/components/Footer";
 import { displaySubtype } from "../constants/holidayStay";
 import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
 import { useMyProperties } from "../hooks/useMyProperties";
-import { useDeleteProperty } from "../hooks/usePropertyMutations";
+import { useArchiveProperty, useDeleteProperty } from "../hooks/usePropertyMutations";
 import { toApiError } from "@/services/apiClient";
 import { cdnImage } from "@/lib/cloudinaryImage";
 
@@ -79,9 +80,10 @@ export function MyPropertiesScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const deleteMutation = useDeleteProperty();
+  const archiveMutation = useArchiveProperty();
 
   const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useMyProperties();
-  const apiProperties = data?.pages.flatMap((p) => p.data?.items ?? []) ?? [];
+  const apiProperties = useMemo(() => data?.pages.flatMap((p) => p.data?.items ?? []) ?? [], [data]);
 
   const allListings = useMemo(() => {
     return apiProperties.map((p): ListingItemData => ({
@@ -181,6 +183,23 @@ export function MyPropertiesScreen() {
       await deleteMutation.mutateAsync(id);
     } catch (deleteError) {
       notify(t("seller.deleteFailed"), toApiError(deleteError).message);
+    }
+  };
+
+  // The API archives only active or sold listings; anything else can only be deleted.
+  const canArchive = (status: ListingItemData["status"]) => status === "active" || status === "sold";
+
+  const handleArchive = async (id: string, title: string) => {
+    const confirmed = await confirmAction(
+      t("seller.archiveConfirmTitle"),
+      t("seller.archiveConfirmMessage", { title }),
+      { confirmLabel: t("seller.actions.archive") }
+    );
+    if (!confirmed) return;
+    try {
+      await archiveMutation.mutateAsync(id);
+    } catch (archiveError) {
+      notify(t("seller.archiveFailed"), toApiError(archiveError).message);
     }
   };
 
@@ -331,7 +350,7 @@ export function MyPropertiesScreen() {
                   <Text style={[styles.thCell, { flex: 1.1 }]}>{t("admin.columns.status")}</Text>
                   <Text style={[styles.thCell, { flex: 1 }]}>{t("admin.columns.aiValue")}</Text>
                   <Text style={[styles.thCell, { flex: 1.5 }]}>{t("admin.columns.performance")}</Text>
-                  <Text style={[styles.thCell, { width: 60, textAlign: "right" }]}>{t("admin.columns.actions")}</Text>
+                  <Text style={[styles.thCell, { width: 84, textAlign: "right" }]}>{t("admin.columns.actions")}</Text>
                 </View>
 
                 {/* Table Data Rows */}
@@ -411,8 +430,18 @@ export function MyPropertiesScreen() {
                       </View>
 
                       {/* Actions Column */}
-                      <View style={[styles.tdCell, { width: 60, alignItems: "flex-end" }]}>
+                      <View style={[styles.tdCell, { width: 84, alignItems: "flex-end", flexDirection: "row", justifyContent: "flex-end", gap: 6 }]}>
+                        {canArchive(item.status) ? (
+                          <Pressable
+                            accessibilityLabel={t("seller.actions.archive")}
+                            onPress={() => handleArchive(item.id, item.title)}
+                            style={({ pressed }) => [styles.actionIconButton, webPointer, pressed && styles.pressed]}
+                          >
+                            <Archive color="#5C6B66" size={16} />
+                          </Pressable>
+                        ) : null}
                         <Pressable
+                          accessibilityLabel={t("seller.actions.delete")}
                           onPress={() => handleDelete(item.id, item.title)}
                           style={({ pressed }) => [styles.actionIconButton, webPointer, pressed && styles.pressed]}
                         >
@@ -492,6 +521,12 @@ export function MyPropertiesScreen() {
                           <Edit color="#04cf92" size={14} />
                           <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
                         </AppLink>
+                        {canArchive(item.status) ? (
+                          <Pressable onPress={() => handleArchive(item.id, item.title)} style={styles.mobileActionBtn}>
+                            <Archive color="#5C6B66" size={14} />
+                            <Text style={styles.mobileActionText}>{t("seller.actions.archive")}</Text>
+                          </Pressable>
+                        ) : null}
                         <Pressable onPress={() => handleDelete(item.id, item.title)} style={styles.mobileActionBtn}>
                           <Trash2 color="#D4183D" size={14} />
                           <Text style={[styles.mobileActionText, { color: "#D4183D" }]}>{t("seller.actions.delete")}</Text>

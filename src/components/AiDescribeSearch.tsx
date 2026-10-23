@@ -26,12 +26,6 @@ import { colorTokens, colors, fonts, webPointer } from "@/theme";
 const MAX_QUERY_LENGTH = 300;
 const MIN_QUERY_LENGTH = 3;
 
-const EXAMPLES = [
-  "3 bedroom flat for sale in Gulshan under 3 crore",
-  "2 bedroom apartment to rent in Dhanmondi, up to 40 thousand, with parking",
-  "Land in Uttara between 50 lakh and 1.5 crore",
-];
-
 interface AiDescribeSearchProps {
   /** A query the seeker already typed elsewhere; it is searched straight away. */
   initialPrompt?: string;

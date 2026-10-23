@@ -91,6 +91,12 @@ export async function legacyPatchProperty(id: string, dto: UpsertPropertyDto) {
   return data;
 }
 
+/** Owner archive: hides an active or sold listing but keeps it (the API refuses other statuses). */
+export async function archiveProperty(id: string) {
+  const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/properties/${id}`);
+  return data;
+}
+
 /** Owner-only permanent delete, any listing status or category (removes the row and its media). */
 export async function deleteProperty(id: string) {
   const { data } = await apiClient.delete<ApiResponse<{ id: string }>>(`/v1/property-delete/${id}`);

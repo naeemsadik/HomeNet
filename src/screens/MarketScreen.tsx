@@ -4,26 +4,8 @@ import { AppChrome } from "@/components/AppChrome";
 import { AppLink, Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, colors, fonts, radius } from "@/theme";
-
-const PLANNED = [
-  {
-    icon: MapPin,
-    title: "Area price trends",
-    copy: "Median asking price per sqft across Dhaka neighbourhoods, drawn from live listings.",
-  },
-  {
-    icon: ChartNoAxesCombined,
-    title: "Time on market",
-    copy: "How long listings stay active before they are marked sold or rented.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Verified supply",
-    copy: "How much verified inventory exists by area, category and listing type.",
-  },
-];
-
 import { useTranslation } from "@/i18n";
+
 
 export function MarketScreen() {
   const { t } = useTranslation();

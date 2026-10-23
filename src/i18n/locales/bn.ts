@@ -550,6 +550,7 @@ export const bn: TranslationSchema = {
       view: "দেখুন",
       markSold: "বিক্রি হিসেবে চিহ্নিত করুন",
       boost: "বুস্ট করুন",
+      archive: "আর্কাইভ করুন",
     },
     filters: {
       all: "সকল",
@@ -562,6 +563,9 @@ export const bn: TranslationSchema = {
     deleteConfirmTitle: "প্রপার্টি মুছুন",
     deleteConfirmMessage: "আপনি কি নিশ্চিত যে \"{{title}}\" মুছে ফেলতে চান? এর ফলে লিস্টিং ও এর ছবিগুলো স্থায়ীভাবে মুছে যাবে এবং আর ফেরানো যাবে না।",
     deleteFailed: "মুছে ফেলা ব্যর্থ হয়েছে",
+    archiveConfirmTitle: "প্রপার্টি আর্কাইভ করুন",
+    archiveConfirmMessage: "\"{{title}}\" আর্কাইভ করবেন? এটি আর সাইটে দেখানো হবে না, তবে আর্কাইভড তালিকায় পাবেন।",
+    archiveFailed: "আর্কাইভ করা ব্যর্থ হয়েছে",
     toggleView: {
       aria: "ওয়েবসাইট ভিউ পরিবর্তন করুন",
       label: "ভিউ পরিবর্তন",
