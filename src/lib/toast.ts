@@ -50,7 +50,7 @@ export const useToastStore = create<ToastState>((set) => ({
   },
 }));
 
-/** Show a toast from anywhere — components, stores or plain helpers. */
+/** Show a toast from anywhere, components, stores or plain helpers. */
 export function showToast(message: string, options?: ToastOptions) {
   useToastStore.getState().show(message, options);
 }

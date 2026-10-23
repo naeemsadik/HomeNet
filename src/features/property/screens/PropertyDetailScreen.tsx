@@ -112,7 +112,7 @@ export function PropertyDetailScreen() {
       : [];
 
     // The gallery is the largest image on the page, so it gets a generous
-    // width — but still a bounded one, not the 3 MB original.
+    // width: but still a bounded one, not the 3 MB original.
     const images = rawImages
       .map((url) => cdnImage(url, 1600, 1000))
       .filter((url): url is string => Boolean(url));
@@ -385,10 +385,10 @@ export function PropertyDetailScreen() {
 
   return (
     <AppChrome active="property">
-      {/* The listing itself is the page title — that is what a search result
+      {/* The listing itself is the page title, that is what a search result
           for this URL should read. */}
       <PageMeta
-        title={`${property.title} — ${property.location} | HomeNet BD`}
+        title={`${property.title} | ${property.location} | HomeNet BD`}
         description={`${property.listingType} at ${property.priceCurrency}${property.price}${property.pricePeriod}. ${property.address}.`}
       />
       {apiDetail ? (

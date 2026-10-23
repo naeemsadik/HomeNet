@@ -20,7 +20,7 @@ export async function getProperties(params: PropertyFilters = {}) {
 }
 
 /**
- * Properties across several areas — a parent area plus its sub-areas.
+ * Properties across several areas, a parent area plus its sub-areas.
  *
  * `area_id` takes one id and matches that area only, so one request goes out per
  * id. The results are merged newest first, de-duplicated, and cut to the page

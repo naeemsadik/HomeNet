@@ -141,7 +141,7 @@ export function BrowseScreen({
     refresh,
   } = useBrowseFeed(apiFilters, scope, feedReady);
 
-  // PropertyCard consumes the API shape directly — no adapter needed.
+  // PropertyCard consumes the API shape directly, no adapter needed.
   const feed = apiProperties ?? [];
   const isSoldView = filters.purpose === "sold";
 
@@ -157,7 +157,7 @@ export function BrowseScreen({
 
   /**
    * The count the modal's pending filters would return, for its apply button.
-   * `limit: 1` keeps it to a count — the listings themselves are not needed.
+   * `limit: 1` keeps it to a count, the listings themselves are not needed.
    */
   const previewQuery = useQuery({
     queryKey: ["properties", "preview", previewFilters && toApiFilters(previewFilters)],

@@ -1,5 +1,5 @@
 /**
- * AI search — data contract.
+ * AI search: data contract.
  *
  * What POST /v1/properties/smart-search returns (docs/BACKEND_REQUIREMENTS.md
  * §1b; backend: modules/property/smart-searching). One call does everything:
@@ -26,7 +26,7 @@ export interface SmartSearchFilters {
   amenities: string[];
 }
 
-/** The slim card the search returns — not a full Property. */
+/** The slim card the search returns, not a full Property. */
 export interface SmartSearchListing {
   id: string;
   title: string;

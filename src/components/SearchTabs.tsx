@@ -15,7 +15,7 @@ const TABS: { key: SearchTabType; translationKey: TranslationKey }[] = [
   { key: "buy", translationKey: "hero.tabs.buy" },
   { key: "rent", translationKey: "hero.tabs.rent" },
   { key: "short-let", translationKey: "hero.tabs.shortLet" },
-  // Sold is a research intent, not a buying one — it trails the live tabs.
+  // Sold is a research intent, not a buying one, it trails the live tabs.
   { key: "sold", translationKey: "hero.tabs.sold" },
   { key: "instant-valuation", translationKey: "hero.tabs.instantValuation" },
 ];

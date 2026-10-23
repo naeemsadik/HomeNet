@@ -21,9 +21,9 @@ export const CURATED_PROPERTY_GUIDES: PropertyGuide[] = [
     title: "Understanding Namzari (Mutation) in Bangladesh: Step-by-Step Guide",
     titleBn: "বাংলাদেশে ই-নামজারি (মিউটেশন) করার নিয়ম: ধাপভিত্তিক পূর্ণাঙ্গ নির্দেশিকা",
     excerpt:
-      "Why registering a deed at the Sub-registry is not enough — how to complete online Namzari via mutation.land.gov.bd and secure government revenue records.",
+      "Why registering a deed at the Sub-registry is not enough: how to complete online Namzari via mutation.land.gov.bd and secure government revenue records.",
     excerptBn:
-      "সাব-রেজিস্ট্রি অফিসে শুধু সাফ-কবলা দলিল করলেই মালিকানা নিশ্চিত হয় না — mutation.land.gov.bd-এর মাধ্যমে অনলাইনে নামজারি সম্পন্ন করার নিয়মাবলী।",
+      "সাব-রেজিস্ট্রি অফিসে শুধু সাফ-কবলা দলিল করলেই মালিকানা নিশ্চিত হয় না, mutation.land.gov.bd-এর মাধ্যমে অনলাইনে নামজারি সম্পন্ন করার নিয়মাবলী।",
     readTime: "5 min read",
     imageUrl:
       "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=85",
@@ -191,16 +191,16 @@ In Bangladesh, real estate disputes usually originate from defective land titles
 
 ## The Four Major Land Surveys in Bangladesh
 
-### 1. CS (Cadastral Survey) — 1888 to 1940
+### 1. CS (Cadastral Survey): 1888 to 1940
 The foundational survey conducted under the British colonial administration. CS records establish the historical benchmark of land ownership.
 
-### 2. SA (State Acquisition Survey) — 1956 to 1962
+### 2. SA (State Acquisition Survey): 1956 to 1962
 Conducted following the abolition of the Zamindari system under the East Bengal State Acquisition and Tenancy Act of 1950. It recorded tenant farmers as direct owners under the government.
 
-### 3. RS (Revisional Survey) — 1965 to 1990
+### 3. RS (Revisional Survey): 1965 to 1990
 Initiated to rectify errors in the SA survey. In many parts of Bangladesh outside Dhaka, RS remains the most legally robust reference survey.
 
-### 4. BS / City Survey (Bangladesh Survey) — 1998 to Present
+### 4. BS / City Survey (Bangladesh Survey): 1998 to Present
 The modern survey. In Dhaka, it is commonly designated as **Dhaka City Survey**. If City Survey is complete in an area, all new registrations and mutations must reference the City Survey Khatian.
 
 ---
@@ -227,16 +227,16 @@ The modern survey. In Dhaka, it is commonly designated as **Dhaka City Survey**.
 
 ## বাংলাদেশে ৪টি প্রধান ভূমি জরিপ
 
-### ১. সিএস (ক্যাডাস্ট্রাল সার্ভে) — ১৮৮৮ থেকে ১৯৪০
+### ১. সিএস (ক্যাডাস্ট্রাল সার্ভে): ১৮৮৮ থেকে ১৯৪০
 ব্রিটিশ শাসনামলে পরিচালিত প্রথম বিজ্ঞানসম্মত পূর্ণাঙ্গ জরিপ। সিএস খতিয়ান জমির মালিকানার ঐতিহাসিক আদি ভিত্তি হিসেবে স্বীকৃত।
 
-### ২. এসএ (স্টেট অ্যাকুইজিশন সার্ভে) — ১৯৫৬ থেকে ১৯৬২
+### ২. এসএ (স্টেট অ্যাকুইজিশন সার্ভে): ১৯৫৬ থেকে ১৯৬২
 ১৯৫০ সালের জমিদারি উচ্ছেদ ও প্রজাস্বত্ব আইনের পর জমিদারি প্রথা বিলুপ্তির প্রেক্ষাপটে এই জরিপ হয়। এর মাধ্যমে রায়ত বা কৃষকদের সরাসরি সরকারের অধীনে জমির মালিক হিসেবে রেকর্ড করা হয়।
 
-### ৩. আরএস (রিভিশনাল সার্ভে) — ১৯৬৫ থেকে ১৯৯০
+### ৩. আরএস (রিভিশনাল সার্ভে): ১৯৬৫ থেকে ১৯৯০
 এসএ জরিপের ভুলভ্রান্তি সংশোধনের উদ্দেশ্যে পরিচালিত হয়। ঢাকার বাইরের বহু জেলায় আরএস খতিয়ান আইনি দিক থেকে সবচেয়ে নির্ভরযোগ্য ভিত্তি হিসেবে গণ্য হয়।
 
-### ৪. বিএস / সিটি জরিপ — ১৯৯৮ থেকে বর্তমান
+### ৪. বিএস / সিটি জরিপ: ১৯৯৮ থেকে বর্তমান
 বাংলাদেশের আধুনিক ডিজিটাল জরিপ। রাজধানী ঢাকায় এটি **ঢাকা সিটি জরিপ** নামে পরিচিত। যেসব এলাকায় সিটি জরিপ সম্পন্ন হয়েছে, সেখানে সব ধরনের নতুন রেজিস্ট্রেশন ও নামজারির জন্য সিটি জরিপ খতিয়ান বাধ্যতামূলক।
 
 ---
@@ -489,7 +489,7 @@ Before signing a deed or transferring a booking deposit for a Dhaka flat, run th
    ইমারত নির্মাণ বিধিমালা অনুযায়ী ভবন নির্মাণের পর রাজউক থেকে অকুপেন্সি সার্টিফিকেট নেওয়া বাধ্যতামূলক।
 
 ৩. **স্ট্যান্ডবাই জেনারেটরের লোড ক্ষমতা:**
-   বিদ্যুৎ চলে গেলে জেনারেটরে এসি ও ফ্রিজ চলবে কি না, নাকি কেবল লাইট ও ফ্যান চলবে—তা নির্দিষ্টভাবে জেনে নিন।
+   বিদ্যুৎ চলে গেলে জেনারেটরে এসি ও ফ্রিজ চলবে কি না, নাকি কেবল লাইট ও ফ্যান চলবে, তা নির্দিষ্টভাবে জেনে নিন।
 
 ৪. **গ্যাস সংযোগ ব্যবস্থা:**
    পাইপলাইন সংযোগ বন্ধ থাকায় ভবনে সেন্ট্রালাইজড এলপিজি রিটিকুলেশন সিস্টেম আছে কি না তা নিশ্চিত হোন।

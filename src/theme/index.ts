@@ -28,7 +28,7 @@ export const colors = {
   soft: colorTokens.canvas,
   sunken: colorTokens.surfaceSunken,
   softBlue: colorTokens.infoSurface,
-  /** Fill only — see `greenOnLight` for text. */
+  /** Fill only: see `greenOnLight` for text. */
   green: colorTokens.brand,
   /** Was identical to `green`, so every "dark" state was a no-op. */
   greenDark: colorTokens.brandHover,

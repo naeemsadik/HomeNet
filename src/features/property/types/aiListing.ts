@@ -1,5 +1,5 @@
 /**
- * AI-Assisted Property Listing — Data Contract
+ * AI-Assisted Property Listing: Data Contract
  *
  * Defines the shape of data returned by the AI property parser.
  * Every field is optional because the AI may not extract all details.

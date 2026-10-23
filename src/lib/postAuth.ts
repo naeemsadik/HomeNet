@@ -5,7 +5,7 @@ import { hasAnyAdminPermission } from "@/lib/permissions";
 /**
  * Where a user lands after signing in with no pending intent.
  *
- * Intent wins when there is one — `useRequireAuth` replays the action the user
+ * Intent wins when there is one, `useRequireAuth` replays the action the user
  * was blocked on. This is only the fallback for a bare "Sign in".
  *
  * Only `admin` / `superadmin` exist as roles today; everyone else is treated as

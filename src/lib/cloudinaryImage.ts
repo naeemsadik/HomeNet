@@ -6,9 +6,9 @@
  * Every public surface was rendering those originals into boxes a few hundred
  * pixels wide, which is where ~22 MB of the homepage's 24.7 MB went.
  *
- *   f_auto  — WebP/AVIF when the browser accepts it
- *   q_auto  — quality chosen per image rather than a fixed number
- *   c_fill  — crop to the requested box, so the delivered aspect ratio matches
+ *   f_auto : WebP/AVIF when the browser accepts it
+ *   q_auto : quality chosen per image rather than a fixed number
+ *   c_fill : crop to the requested box, so the delivered aspect ratio matches
  *             the layout box and the image is never squashed
  */
 const UPLOAD = "/image/upload/";
@@ -33,7 +33,7 @@ export function cdnImage(
 
   // An untransformed URL has the version segment (`v1788701402/`) immediately
   // after /image/upload/. If something else is there the URL already carries a
-  // transform — a stored thumbnail_url, say — and chaining a second one onto it
+  // transform: a stored thumbnail_url, say, and chaining a second one onto it
   // would only cost another round of processing for no gain.
   if (!/^v\d+\//.test(rest)) return url;
 

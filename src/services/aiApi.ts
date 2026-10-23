@@ -17,11 +17,11 @@ import type {
 } from "@/features/property/types/aiSearch";
 
 /**
- * HomeNet AI — client side.
+ * HomeNet AI: client side.
  *
  * The app calls HomeNet operations; the API decides which provider and model
  * serve each one (see docs/BACKEND_REQUIREMENTS.md §1). Nothing in the app knows which vendor
- * is behind an operation, and no provider key ever reaches the client —
+ * is behind an operation, and no provider key ever reaches the client,
  * anything prefixed EXPO_PUBLIC_ is published inside the bundle.
  */
 
@@ -46,7 +46,7 @@ function pickValidFields<T>(
   return result as T;
 }
 
-/** What each failure means for the person using that feature — never a vendor or config detail. */
+/** What each failure means for the person using that feature, never a vendor or config detail. */
 interface AiErrorCopy {
   unauthenticated: string;
   quota: string;

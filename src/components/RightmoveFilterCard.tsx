@@ -45,7 +45,7 @@ interface RightmoveFilterCardProps {
   filters: SearchFilters;
   onFilterChange: (newFilters: SearchFilters) => void;
   onSearch: (filters: SearchFilters) => void;
-  /** Opens the filters modal — the superset of this bar. */
+  /** Opens the filters modal, the superset of this bar. */
   onOpenMoreFilters?: () => void;
   /** Places to choose from. Without them the Area dropdown is not shown. */
   areaOptions?: { label: string; value: string }[];
@@ -202,7 +202,7 @@ export function RightmoveFilterCard({
 
   const heading = useMemo(() => {
     const place = filters.query?.trim() || locationName || "Bangladesh";
-    // Sold is a lookup, not a search — the verb changes with it.
+    // Sold is a lookup, not a search, the verb changes with it.
     const key: TranslationKey =
       filters.purpose === "sold"
         ? "search.rightmove.headingSold"
@@ -413,7 +413,7 @@ export function RightmoveFilterCard({
           </View>
         </View>
 
-        {/* ROW 2, COL 1: Search radius — reads as "around the area above", so it
+        {/* ROW 2, COL 1: Search radius, reads as "around the area above", so it
             follows the area rather than leading the bar. */}
         <View style={[styles.col, colStyle]}>
           <Text style={styles.fieldLabel}>{t("search.rightmove.searchRadius")}</Text>

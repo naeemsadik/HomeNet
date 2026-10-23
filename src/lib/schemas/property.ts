@@ -15,16 +15,16 @@ export const areaUnits = ["sqft", "katha", "bigha", "sqm"] as const;
 /**
  * Schema for the multi-step PropertyForm (create / edit).
  *
- * Step 0 — Details:  title, description, type, listing_type, price
- * Step 1 — Location: area_id, address
- * Step 2 — Features: bedrooms, bathrooms, area_size
- * Step 3 — Images:   (managed outside the form via local state)
+ * Step 0: Details:  title, description, type, listing_type, price
+ * Step 1: Location: area_id, address
+ * Step 2: Features: bedrooms, bathrooms, area_size
+ * Step 3: Images:   (managed outside the form via local state)
  *
  * All fields are strictly validated against type, length, and format.
  */
 export const propertyFormSchema = z
   .object({
-    // Step 0 — Details
+    // Step 0: Details
     title: z
       .string()
       .min(3, "Title must be at least 3 characters")
@@ -46,7 +46,7 @@ export const propertyFormSchema = z
         return !isNaN(n) && n > 0 && n <= 1_000_000_000_000;
       }, "Enter a valid price between 1 and 1,000,000,000,000"),
 
-    // Step 1 — Location
+    // Step 1: Location
     area_id: z
       .string()
       .min(1, "Area is required")
@@ -58,7 +58,7 @@ export const propertyFormSchema = z
       .max(300, "Address must be at most 300 characters")
       .refine((v) => !/[<>{}\x00-\x1F]/.test(v), "Address contains invalid characters"),
 
-    // Step 2 — Features
+    // Step 2: Features
     bedrooms: z
       .string()
       .max(4, "Invalid number of bedrooms")
@@ -79,7 +79,7 @@ export const propertyFormSchema = z
 
 export type PropertyFormData = z.infer<typeof propertyFormSchema>;
 
-/** Field names belonging to each wizard step — used for per-step trigger(). */
+/** Field names belonging to each wizard step, used for per-step trigger(). */
 export const PROPERTY_STEP_FIELDS: Record<number, (keyof PropertyFormData)[]> = {
   0: ["title", "description", "type", "listing_type", "price"],
   1: ["area_id", "address"],

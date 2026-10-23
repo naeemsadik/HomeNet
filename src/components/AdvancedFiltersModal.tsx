@@ -90,7 +90,7 @@ export function AdvancedFiltersModal({
    * means a mistaken Reset can be undone by closing the sheet.
    */
   onReset?: () => void;
-  /** Omitted when the count is unknown — the button then reads "Show results". */
+  /** Omitted when the count is unknown, the button then reads "Show results". */
   resultCount?: number;
   /** The hero has its own area button, so it hides this. Browse shows it. */
   showLocation?: boolean;
@@ -260,7 +260,7 @@ export function AdvancedFiltersModal({
             showsVerticalScrollIndicator={false}
             style={styles.scrollArea}
           >
-            {/* Location — Browse only; the hero has its own area button. */}
+            {/* Location: Browse only; the hero has its own area button. */}
             {showLocation && !fixedLocation && areaOptions?.length ? (
               <View style={styles.section}>
                 <View style={styles.sectionTitleRow}>
@@ -290,7 +290,7 @@ export function AdvancedFiltersModal({
               />
             </View>
 
-            {/* Price range (৳) — the same ladder the inline bar uses, so a
+            {/* Price range (৳): the same ladder the inline bar uses, so a
                 price set here survives a trip through the URL. */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>{t("filters.priceRange")}</Text>
@@ -408,7 +408,7 @@ export function AdvancedFiltersModal({
               />
             </View>
 
-            {/* Amenities — keyed as listings store them, so a tick matches. */}
+            {/* Amenities: keyed as listings store them, so a tick matches. */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>{t("filters.amenities")}</Text>
               <View style={styles.amenitiesWrap}>
@@ -464,7 +464,7 @@ export function AdvancedFiltersModal({
             </Pressable>
           </ScrollView>
 
-          {/* Footer Actions — outside the ScrollView, so it stays reachable. */}
+          {/* Footer Actions: outside the ScrollView, so it stays reachable. */}
           <View style={styles.footer}>
             <Pressable
               accessibilityRole="button"

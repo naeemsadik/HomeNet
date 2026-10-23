@@ -11,14 +11,14 @@ export interface WizardMediaItem {
 }
 
 export interface WizardState {
-  // Step 1 — Basics
+  // Step 1: Basics
   title: string;
   type: PropertyType;
   subtype: string;
   listingType: ListingType;
   description: string;
 
-  // Step 2 — Details
+  // Step 2: Details
   price: string;
   areaSize: string;
   areaUnit: "sqft" | "katha" | "bigha" | "sqm";
@@ -28,7 +28,7 @@ export interface WizardState {
   facing: string;
   amenities: Record<string, boolean>;
 
-  // Step 3 — Location
+  // Step 3: Location
   district: string;
   areaId: string;
   areaName: string;
@@ -36,7 +36,7 @@ export interface WizardState {
   locationLat: number | null;
   locationLng: number | null;
 
-  // Step 4 — Media
+  // Step 4: Media
   media: WizardMediaItem[];
   primaryMediaIndex: number;
   virtualTourUrl: string;

@@ -4,14 +4,14 @@ import { ChevronDown } from "@/components/icons";
 import { OptionPicker } from "@/components/OptionPicker";
 import { colorTokens, fonts } from "@/theme";
 
-// The control border is a solid input grey with no token equivalent — the
+// The control border is a solid input grey with no token equivalent, the
 // `divider` token is an 8% ink wash and reads noticeably lighter here.
 const CONTROL_BORDER = "#D0D5DD";
 
 /**
  * A dropdown that uses the platform's own control: a real `<select>` on web, so
  * the keyboard and screen reader behave as the browser intends, and on Android
- * and iOS an OptionPicker sheet — the old native branch only drew the current
+ * and iOS an OptionPicker sheet, the old native branch only drew the current
  * value, so the filters could not be changed on a phone at all.
  *
  * Lifted out of RightmoveFilterCard so the filters modal can show the same
