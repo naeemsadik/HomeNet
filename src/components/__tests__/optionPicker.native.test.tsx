@@ -2,6 +2,7 @@ import React from "react";
 import renderer, { act, type ReactTestRenderer, type ReactTestInstance } from "react-test-renderer";
 import { OptionPicker } from "@/components/OptionPicker";
 import { RightmoveFilterCard, type RightmoveFilters } from "@/components/RightmoveFilterCard";
+import { defaultSearchFilters } from "@/features/property/utils/searchFilters";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -85,6 +86,9 @@ describe("OptionPicker on Android", () => {
 
 describe("the search filters on Android", () => {
   const filters: RightmoveFilters = {
+    // The filter model gained bathrooms, size and amenities; spreading the
+    // defaults keeps this fixture to what the test actually cares about.
+    ...defaultSearchFilters,
     area: "Gulshan",
     radius: "",
     propertyType: "all",

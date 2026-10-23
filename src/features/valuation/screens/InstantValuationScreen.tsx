@@ -12,12 +12,24 @@ import {
   TrendingUp,
 } from "@/components/icons";
 import { AppChrome } from "@/components/AppChrome";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema, faqPageSchema, valuationToolSchema, VALUATION_FAQ } from "@/lib/schema";
+import { SITE_URL } from "@/lib/seo";
 import { colorTokens, colors, fonts, radius, shadow } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 import { InstantValuationWizard } from "../components/InstantValuationWizard";
 import type { ValuationPropertyType, ValuationPurpose } from "../types/valuationTypes";
+
+const PAGE_PATH = "/instant-valuation";
+const PAGE_URL = `${SITE_URL}${PAGE_PATH}`;
+
+/** Home › Instant Property Valuation. */
+const PAGE_CRUMBS = [
+  { name: "Home", url: `${SITE_URL}/` },
+  { name: "Instant Property Valuation", url: PAGE_URL },
+];
 
 export function InstantValuationScreen() {
   const { t } = useTranslation();
@@ -44,6 +56,13 @@ export function InstantValuationScreen() {
 
   return (
     <AppChrome active="search">
+      <JsonLd
+        nodes={[
+          valuationToolSchema(PAGE_PATH),
+          breadcrumbSchema(PAGE_CRUMBS),
+          faqPageSchema(VALUATION_FAQ, PAGE_URL),
+        ]}
+      />
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         {/* Hero Title Section */}
         <View style={styles.heroIntro}>
@@ -108,6 +127,18 @@ export function InstantValuationScreen() {
               </Text>
             </View>
           </View>
+        </View>
+
+        {/* The questions behind the FAQPage markup above. Google accepts that
+            markup only while the same text is visible here. */}
+        <View style={[styles.faqSection, isPhone && styles.faqSectionPhone]}>
+          <Text style={styles.infoSectionTitle}>Dhaka Property Valuation: Common Questions</Text>
+          {VALUATION_FAQ.map((entry) => (
+            <View key={entry.question} style={styles.faqItem}>
+              <Text style={styles.faqQuestion}>{entry.question}</Text>
+              <Text style={styles.faqAnswer}>{entry.answer}</Text>
+            </View>
+          ))}
         </View>
       </View>
     </AppChrome>
@@ -245,5 +276,32 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     color: colors.muted,
     lineHeight: 18,
+  },
+  faqSection: {
+    marginTop: 24,
+    backgroundColor: colorTokens.surface,
+    borderRadius: radius.xl,
+    padding: 32,
+    borderWidth: 1.5,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    ...shadow,
+  },
+  faqSectionPhone: {
+    padding: 20,
+  },
+  faqItem: {
+    marginBottom: 20,
+  },
+  faqQuestion: {
+    fontSize: 15,
+    fontFamily: fonts.bold,
+    color: colorTokens.ink,
+    marginBottom: 6,
+  },
+  faqAnswer: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: colors.muted,
+    lineHeight: 20,
   },
 });

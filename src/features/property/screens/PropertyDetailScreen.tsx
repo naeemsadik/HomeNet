@@ -36,13 +36,11 @@ import { AppChrome } from "@/components/AppChrome";
 import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
 import { displaySubtype } from "../constants/holidayStay";
-import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
+import {  isHolidayStayType } from "../utils/listingType";
 import { breadcrumbSchema, listingCrumbs, listingSchema } from "@/lib/schema";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
-import { SUPPORT_EMAIL } from "@/content/legal";
-import { reportListingMailto } from "@/lib/reportListing";
 import { shareLink } from "@/lib/share";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { colorTokens, webPointer } from "@/theme";
@@ -56,7 +54,7 @@ import { PropertyLightbox } from "../components/PropertyLightbox";
 import { PropertyLocationSection, type NearbyPlace } from "../components/PropertyLocationSection";
 import { WhatsAppIcon } from "../components/WhatsAppIcon";
 import { NoTranslateText } from "@/components/NoTranslateText";
-import { isHolidayStayType } from "../utils/listingType";
+
 import {
   useTranslation,
   translateAmenity,

@@ -230,20 +230,13 @@ export function HomeScreen() {
         </View>
         </View>
       </View>
-
-
   );
-
 
   return (
     <AppChrome active="home" bleed={hero}>
       {/* ─────────────────────────────────────────────────────────────
-          2. PRODUCT VISUAL — browser + phone preview of real listings
-      ───────────────────────────────────────────────────────────── */}
-      <HeroProductVisual />
-
-      {/* ─────────────────────────────────────────────────────────────
-          3. FEATURED PROPERTIES (live API)
+          2. FEATURED PROPERTIES (live API) — real listings answer the search
+          box first, before any explaining.
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
@@ -267,7 +260,16 @@ export function HomeScreen() {
         </PropertyResult>
       </View>
 
-
+      {/* ─────────────────────────────────────────────────────────────
+          3. TRUST — why these listings are different. Earns the claim before
+          the process is explained.
+      ───────────────────────────────────────────────────────────── */}
+      <View style={styles.sectionSpacing}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t("home.whyDifferentTitle")}</Text>
+        </View>
+        <ContrastColumns />
+      </View>
 
       {/* ─────────────────────────────────────────────────────────────
           4. HOW IT WORKS — dual seeker / owner track
@@ -280,13 +282,10 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          5. TRUST — the problem (Why HomeNet listings are different)
+          5. PRODUCT VISUAL — browser + phone preview of real listings
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t("home.whyDifferentTitle")}</Text>
-        </View>
-        <ContrastColumns />
+        <HeroProductVisual />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -299,14 +298,16 @@ export function HomeScreen() {
       {/* ─────────────────────────────────────────────────────────────
           7. OWNER CTA — list your property
       ───────────────────────────────────────────────────────────── */}
-      <OwnerListPropertySection />
+      <View style={styles.sectionSpacing}>
+        <OwnerListPropertySection />
+      </View>
 
       {/* ─────────────────────────────────────────────────────────────
           8. GUIDES & INSIGHTS — editorial, API-ready
       ───────────────────────────────────────────────────────────── */}
-      <PropertyGuidesSection />
-
-
+      <View style={styles.sectionSpacing}>
+        <PropertyGuidesSection />
+      </View>
     </AppChrome>
   );
 }
