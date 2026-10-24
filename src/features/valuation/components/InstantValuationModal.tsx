@@ -10,6 +10,7 @@ import { X } from "@/components/icons";
 import { colorTokens, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
+import { OverlayHost } from "@/components/OverlayModal";
 import { useInstantValuationModalStore } from "../stores/useInstantValuationModalStore";
 import { useInstantValuationStore } from "../stores/useInstantValuationStore";
 import { InstantValuationWizard } from "./InstantValuationWizard";
@@ -42,6 +43,9 @@ export function InstantValuationModal() {
       transparent
       visible={visible}
     >
+      {/* The area picker opens inside this window; a second Modal opened from
+          here can fail to appear on Android. */}
+      <OverlayHost>
       <View style={styles.overlay}>
         <Pressable
           accessibilityLabel={t("valuation.modal.closeAria")}
@@ -82,6 +86,7 @@ export function InstantValuationModal() {
           </ScrollView>
         </View>
       </View>
+      </OverlayHost>
     </Modal>
   );
 }

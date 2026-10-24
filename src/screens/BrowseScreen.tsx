@@ -204,7 +204,7 @@ export function BrowseScreen({
   );
 
   return (
-    <AppChrome active={mode || "buy"}>
+    <AppChrome active={mode === "rent" && filters.purpose === "short-let" ? "holiday" : mode || "buy"}>
       <View style={styles.container}>
         {/* ─── Rightmove Search Filter Card ─────────────────────────────────── */}
         <RightmoveFilterCard

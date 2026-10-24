@@ -1,7 +1,6 @@
 import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import React, { useState, useEffect } from "react";
 import {
-  Modal,
   Pressable,
   Platform,
   Text,
@@ -21,6 +20,7 @@ import {
   Building,
 } from "@/components/icons";
 import { colorTokens, colors, webPointer } from "@/theme";
+import { OverlayModal } from "@/components/OverlayModal";
 import { useAreaPicker } from "@/hooks/useAreaPicker";
 import { useWindowSize } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
@@ -219,10 +219,9 @@ export function AreaPicker({
   };
 
   return (
-    <Modal
+    <OverlayModal
       visible={visible}
       animationType="slide"
-      transparent={true}
       onRequestClose={onClose}
     >
       <View style={[styles.modalOverlay, !isPhone && styles.modalOverlayDesktop]}>
@@ -591,7 +590,7 @@ export function AreaPicker({
 
         </View>
       </View>
-    </Modal>
+    </OverlayModal>
   );
 }
 

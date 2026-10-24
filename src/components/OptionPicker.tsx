@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type StyleProp, type ViewStyle } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type StyleProp, type ViewStyle } from "react-native";
 import { Check, ChevronDown } from "@/components/icons";
+import { OverlayModal } from "@/components/OverlayModal";
 import { colorTokens, fonts } from "@/theme";
 
 export interface PickerOption {
@@ -49,7 +50,7 @@ export function OptionPicker({
         <ChevronDown color="#0B1A17" size={16} strokeWidth={2.2} />
       </Pressable>
 
-      <Modal animationType="fade" onRequestClose={() => setOpen(false)} transparent visible={open}>
+      <OverlayModal animationType="fade" onRequestClose={() => setOpen(false)} visible={open}>
         <View style={styles.layer}>
           <Pressable accessibilityLabel="Close" accessibilityRole="button" onPress={() => setOpen(false)} style={styles.overlay} />
           <View style={[styles.sheet, { maxHeight: Math.round(height * 0.6) }]}>
@@ -75,7 +76,7 @@ export function OptionPicker({
             </ScrollView>
           </View>
         </View>
-      </Modal>
+      </OverlayModal>
     </>
   );
 }

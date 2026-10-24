@@ -34,6 +34,7 @@ import { PropertyGuidesSection } from "@/features/news/components/PropertyGuides
 import type { Property as ApiProperty } from "@/features/property/types/property";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toApiError } from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
 import { colors, webPointer } from "@/theme";
@@ -98,6 +99,7 @@ function PropertyResult({
 
 export function HomeScreen() {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const {
     isPhone,
     isTablet,
@@ -164,7 +166,11 @@ export function HomeScreen() {
             source={HERO_IMAGE}
             style={[
               styles.heroBg,
-              { minHeight: heroMetrics.minHeight, paddingTop: heroMetrics.topPad },
+              {
+                minHeight: heroMetrics.minHeight,
+                // Clears the pinned bar and, on Android edge-to-edge, the status bar.
+                paddingTop: heroMetrics.topPad + insets.top,
+              },
             ]}
             resizeMode="cover"
           >

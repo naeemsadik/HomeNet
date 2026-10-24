@@ -27,8 +27,12 @@ jest.mock("@/services/propertyApi", () => ({
 jest.mock("@/services/areaApi", () => ({ fetchAreas: jest.fn() }));
 // The chrome and the cards are not what these tests are about, and they pull
 // in the whole app shell.
+let mockActivePage: string | undefined;
 jest.mock("@/components/AppChrome", () => ({
-  AppChrome: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  AppChrome: ({ children, active }: { children: React.ReactNode; active?: string }) => {
+    mockActivePage = active;
+    return <>{children}</>;
+  },
 }));
 jest.mock("@/components/PropertyCard", () => {
   const { Text } = jest.requireActual("react-native");
@@ -113,10 +117,22 @@ describe("the browse screen on Android, on the Holiday stay tab", () => {
     }
   });
 
+  it("highlights Holiday Stay in the navbar, not Rent", async () => {
+    await mount("rent");
+    expect(mockActivePage).toBe("holiday");
+  });
+
   it("shows the holiday stay it gets back", async () => {
     const text = textOf((await mount()).root);
     expect(text).toContain("CARD The Villa [short_let]");
     expect(text).toContain("1");
+  });
+});
+
+describe("the browse screen's navbar highlight", () => {
+  it("highlights Rent on the plain rent page", async () => {
+    await mount("rent");
+    expect(mockActivePage).toBe("rent");
   });
 });
 

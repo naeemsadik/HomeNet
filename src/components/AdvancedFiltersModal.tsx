@@ -10,6 +10,7 @@ import {
 import { Check, MapPin, Sparkles, X } from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
+import { OverlayHost } from "@/components/OverlayModal";
 import { SelectField } from "@/components/SelectField";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -231,6 +232,9 @@ export function AdvancedFiltersModal({
       visible={visible}
       onRequestClose={onClose}
     >
+      {/* The drop-downs open inside this window; a second Modal opened from
+          here can fail to appear on Android. */}
+      <OverlayHost>
       <View style={[styles.backdrop, isPhone && styles.backdropPhone]}>
         <Pressable
           accessibilityRole="button"
@@ -489,6 +493,7 @@ export function AdvancedFiltersModal({
           </View>
         </View>
       </View>
+      </OverlayHost>
     </Modal>
   );
 }
