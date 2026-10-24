@@ -11,6 +11,7 @@ import {
 import { getUserRoles } from "@/services/roleApi";
 import { notifyUnauthorized, toApiError } from "@/services/apiClient";
 import { useSavedStore } from "@/stores/savedStore";
+import { withAvatarVersion } from "@/lib/avatarCache";
 import type {
   AuthUser,
   ChangePasswordDto,
@@ -124,7 +125,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           id: me.id,
           full_name: me.full_name,
           email: me.email,
-          avatar_url: me.avatar_url,
+          avatar_url: withAvatarVersion(me.avatar_url),
           email_verified: me.email_verified,
         },
         loading: false,

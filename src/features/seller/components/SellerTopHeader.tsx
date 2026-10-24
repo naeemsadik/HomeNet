@@ -9,9 +9,12 @@ import {
 } from "react-native";
 import { AppLink } from "@/components/ui";
 import { ToggleViewButton } from "./ToggleViewButton";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
+
+const HEADER_HEIGHT = 64;
 
 export interface SellerTopHeaderProps {
   title?: string;
@@ -46,10 +49,22 @@ export function SellerTopHeader({
 }: SellerTopHeaderProps) {
   const { t } = useTranslation();
   const { isTablet } = useResponsive();
+  const insets = useSafeAreaInsets();
   const displayTitle = title ?? t("seller.header.dashboard");
 
   return (
-    <View style={[styles.header, isTablet ? styles.headerMobile : styles.headerDesktop]}>
+    <View
+      style={[
+        styles.header,
+        isTablet ? styles.headerMobile : styles.headerDesktop,
+        // Edge-to-edge Android draws the app under the status bar.
+        insets.top > 0 && {
+          height: HEADER_HEIGHT + insets.top,
+          minHeight: HEADER_HEIGHT + insets.top,
+          paddingTop: 12 + insets.top,
+        },
+      ]}
+    >
       {/* 3-bar Hamburger Button: strictly for mobile / small screen devices */}
       {isTablet && (
         <Pressable
@@ -122,8 +137,8 @@ export function SellerTopHeader({
 
 const styles = StyleSheet.create({
   header: {
-    height: 64,
-    minHeight: 64,
+    height: HEADER_HEIGHT,
+    minHeight: HEADER_HEIGHT,
     backgroundColor: "rgba(255,255,255,0.92)",
     borderBottomWidth: 1,
     borderBottomColor: "rgba(11,26,23,0.08)",

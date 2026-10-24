@@ -4,7 +4,6 @@ import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Linking,
-  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -17,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { colors, colorTokens, fonts, radius, webPointer } from "@/theme";
+import { OverlayModal } from "@/components/OverlayModal";
 import { useResponsive } from "@/hooks/useResponsive";
 
 export function AppLink({
@@ -266,7 +266,7 @@ export function SelectField({
         <Text numberOfLines={1} style={styles.selectValue}>{show(value)}</Text>
         <ChevronDown color={colors.green} size={14} />
       </Pressable>
-      <Modal animationType="fade" onRequestClose={() => setOpen(false)} transparent visible={open}>
+      <OverlayModal animationType="fade" onRequestClose={() => setOpen(false)} visible={open}>
         <View style={styles.selectModalLayer}>
           <Pressable accessibilityLabel="Close options" onPress={() => setOpen(false)} style={styles.selectModalOverlay} />
           <View style={styles.selectMenu}>
@@ -288,7 +288,7 @@ export function SelectField({
             })}
           </View>
         </View>
-      </Modal>
+      </OverlayModal>
     </View>
   );
 }

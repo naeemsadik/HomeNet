@@ -4,11 +4,15 @@ import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
   Bell,
+  Building2,
+  CalendarCheck,
   Heart,
   Home,
+  KeyRound,
   LogOut,
   Menu,
   Sparkles,
+  Tag,
   TrendingUp,
   User,
   X,
@@ -25,7 +29,7 @@ import {
   View,
 } from "react-native";
 import { confirmAction } from "@/lib/alert";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { router } from "expo-router";
 import { useTranslation, type TranslationKey } from "@/i18n";
@@ -45,6 +49,7 @@ export type ActivePage =
   | "search"
   | "buy"
   | "rent"
+  | "holiday"
   | "sold"
   | "saved"
   | "sell"
@@ -56,6 +61,28 @@ export type ActivePage =
   | "seller"
   | "messages";
 
+/**
+ * The search intents the web navbar leads with. The phone drawer lists the same
+ * links, so nothing on the web navbar is missing on a phone.
+ */
+const browseNavLinks: {
+  translationKey: TranslationKey;
+  href: string;
+  icon: LucideIcon;
+  key: ActivePage;
+  authGated?: boolean;
+}[] = [
+  { translationKey: "nav.buy", href: "/buy", icon: Building2, key: "buy" },
+  { translationKey: "nav.rent", href: "/rent", icon: KeyRound, key: "rent" },
+  {
+    translationKey: "nav.holidayStay",
+    href: "/rent?subtype=short-let",
+    icon: CalendarCheck,
+    key: "holiday",
+  },
+  { translationKey: "nav.sold", href: "/sold", icon: Tag, key: "sold" },
+];
+
 const sidebarNavConfig: {
   translationKey: TranslationKey;
   href: string;
@@ -65,6 +92,7 @@ const sidebarNavConfig: {
   authGated?: boolean;
 }[] = [
     { translationKey: "nav.home", href: "/home", icon: Home, key: "home" },
+    ...browseNavLinks,
     { translationKey: "nav.insights", href: "/market", icon: TrendingUp, key: "market" },
     { translationKey: "nav.saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
     { translationKey: "nav.profile", href: "/profile", icon: User, key: "profile", authGated: true },
@@ -104,11 +132,7 @@ function SideBar({
           const label = t(translationKey);
           const selected =
             active === key ||
-            ((key === "search" || key === "buy") &&
-              (active === "search" ||
-                active === "buy" ||
-                active === "property" ||
-                active === "rent"));
+            (key === "buy" && (active === "search" || active === "property"));
 
           const handlePress = () => {
             onNavigate?.();
@@ -191,17 +215,15 @@ function TopBar({
   const unreadCount = unreadData?.data?.count ?? 0;
   const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
 
-  // Seekers-first: the two search intents lead, Saved follows. Everything
-  // else lives in the drawer (tablet/phone) or the footer.
+  // Seekers-first: the search intents lead, Saved follows. The phone drawer
+  // lists the same links plus the rest of the app.
   const topNavLinks: {
     translationKey: TranslationKey;
     href: string;
     key: string;
     authGated?: boolean;
   }[] = [
-    { translationKey: "nav.buy", href: "/buy", key: "buy" },
-    { translationKey: "nav.rent", href: "/rent", key: "rent" },
-    { translationKey: "nav.sold", href: "/sold", key: "sold" },
+    ...browseNavLinks,
     { translationKey: "nav.saved", href: "/saved", key: "saved", authGated: true },
   ];
 
@@ -633,6 +655,7 @@ export function AppChrome({
   fluid?: boolean;
 }) {
   const { isTablet, isPhone, containerMaxWidth } = useResponsive();
+  const insets = useSafeAreaInsets();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -662,12 +685,15 @@ export function AppChrome({
           scrollEventThrottle={16}
           contentContainerStyle={[
             styles.pageScrollContent,
+            // The bar is pinned over the page and grows by the status-bar inset
+            // (edge-to-edge on Android), so the page must start below both.
             !bleed && {
-              paddingTop: isPhone
-                ? layout.navHeightPhone
-                : isTablet
-                ? layout.navHeightTablet
-                : layout.navHeight,
+              paddingTop:
+                (isPhone
+                  ? layout.navHeightPhone
+                  : isTablet
+                  ? layout.navHeightTablet
+                  : layout.navHeight) + insets.top,
             },
           ]}
           keyboardShouldPersistTaps="handled"

@@ -8,6 +8,7 @@ export const bn: TranslationSchema = {
     profile: "প্রোফাইল",
     buy: "কিনুন",
     rent: "ভাড়া",
+    holidayStay: "হলিডে স্টে",
     sold: "বিক্রি হয়েছে",
     listProperty: "আপনার প্রপার্টি যোগ করুন",
     postAd: "বিজ্ঞাপন দিন",
@@ -567,8 +568,8 @@ export const bn: TranslationSchema = {
     archiveConfirmMessage: "\"{{title}}\" আর্কাইভ করবেন? এটি আর সাইটে দেখানো হবে না, তবে আর্কাইভড তালিকায় পাবেন।",
     archiveFailed: "আর্কাইভ করা ব্যর্থ হয়েছে",
     toggleView: {
-      aria: "ওয়েবসাইট ভিউ পরিবর্তন করুন",
-      label: "ভিউ পরিবর্তন",
+      aria: "ওয়েবসাইটের ক্রেতা ভিউতে যান",
+      label: "ক্রেতা ভিউতে যান",
     },
     header: {
       openMenuAria: "ন্যাভিগেশন মেনু খুলুন",

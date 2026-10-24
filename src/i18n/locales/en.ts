@@ -6,6 +6,7 @@ export const en = {
     profile: "Profile",
     buy: "Buy",
     rent: "Rent",
+    holidayStay: "Holiday Stay",
     sold: "Sold",
     listProperty: "List your property",
     postAd: "Post an ad",
@@ -565,8 +566,8 @@ export const en = {
     archiveConfirmMessage: "Archive \"{{title}}\"? It will no longer be shown on the site, and you can find it under Archived.",
     archiveFailed: "Archive failed",
     toggleView: {
-      aria: "Toggle view to live site",
-      label: "Toggle view",
+      aria: "Switch to the buyer view of the live site",
+      label: "Switch to buyer",
     },
     header: {
       openMenuAria: "Open navigation menu",

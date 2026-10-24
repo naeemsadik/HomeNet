@@ -1,6 +1,7 @@
 import apiClient from "./apiClient";
 import { appendUpload, type UploadInput } from "./upload";
 import { updateUserDtoSchema } from "@/lib/schemas/user";
+import { bumpAvatarVersion } from "@/lib/avatarCache";
 import type { ApiResponse, UpdateUserDto, UserProfile } from "@/types/api";
 
 export async function listUsers() {
@@ -32,11 +33,13 @@ export async function uploadAvatar(file: UploadInput, fileName = "avatar.jpg") {
   const { data } = await apiClient.post<ApiResponse<UserProfile>>("/v1/users/avatar", formData, {
     headers: { "Content-Type": undefined },
   });
+  bumpAvatarVersion();
   return data;
 }
 
 export async function deleteAvatar() {
   const { data } = await apiClient.delete<ApiResponse<UserProfile>>("/v1/users/avatar");
+  bumpAvatarVersion();
   return data;
 }
 
