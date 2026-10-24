@@ -1960,4 +1960,13 @@ export const bn: TranslationSchema = {
     successMessage: "আমাদের ভেরিফিকেশন টিমকে অবহিত করার জন্য ধন্যবাদ। আমরা দ্রুত এই লিস্টিংটি পর্যালোচনা করব।",
     close: "বন্ধ করুন",
   },
+  deleteAccountDialog: {
+    typeToConfirm: "নিশ্চিত করতে এই বাক্যটি লিখুন:",
+    inputLabel: "নিশ্চিতকরণ বাক্য",
+    cancel: "বাতিল",
+    closeAria: "বন্ধ করুন",
+    phraseMismatch: "বাক্যটি ঠিক যেমন দেখানো হয়েছে তেমন লিখুন, ছোট হাতের অক্ষরে এবং হাইফেনসহ।",
+    sessionExpiredTitle: "আবার সাইন ইন করুন",
+    sessionExpiredMessage: "আপনার সেশনের মেয়াদ শেষ হয়েছে। সাইন ইন করে আবার অ্যাকাউন্ট মুছে ফেলার চেষ্টা করুন।",
+  },
 };

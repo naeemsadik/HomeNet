@@ -28,7 +28,8 @@ import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
-import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
+import { updateUser, uploadAvatar } from "@/services/userApi";
+import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 import { editProfileSchema } from "@/lib/schemas/user";
 import { changePasswordSchema } from "@/lib/schemas/auth";
 import { toApiError } from "@/services/apiClient";
@@ -56,7 +57,7 @@ export function BuyerProfileScreen() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Change Password Modal State
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
@@ -177,32 +178,12 @@ export function BuyerProfileScreen() {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (!user) {
       notify(t("common.notice"), t("userProfile.noAuthAccountToDelete"));
       return;
     }
-
-    const doDelete = async () => {
-      try {
-        setIsDeletingAccount(true);
-        await deleteUser(user.id);
-        await logout();
-        router.replace("/home");
-        notify(t("userProfile.accountDeletedTitle"), t("userProfile.accountDeletedMessage"));
-      } catch (err: any) {
-        notify(t("common.error"), toApiError(err).message);
-      } finally {
-        setIsDeletingAccount(false);
-      }
-    };
-
-    const confirmed = await confirmAction(
-      t("userProfile.deleteModalTitle"),
-      t("userProfile.deleteModalMessage"),
-      { confirmLabel: t("userProfile.deleteModalConfirm"), destructive: true },
-    );
-    if (confirmed) await doDelete();
+    setDeleteDialogOpen(true);
   };
 
   const handleLogout = async () => {
@@ -432,24 +413,16 @@ export function BuyerProfileScreen() {
               <Pressable
                 accessibilityLabel={t("userProfile.deleteAccountBtn")}
                 accessibilityRole="button"
-                disabled={isDeletingAccount}
                 onPress={handleDeleteAccount}
                 style={({ pressed }) => [
                   styles.deleteAccountBtn,
                   isPhone && styles.fullWidthBtnPhone,
                   webPointer,
                   pressed && styles.pressed,
-                  isDeletingAccount && styles.btnDisabled,
                 ]}
               >
-                {isDeletingAccount ? (
-                  <ActivityIndicator color="#D4183D" size="small" />
-                ) : (
-                  <>
-                    <Trash2 color="#D4183D" size={15} />
-                    <Text style={styles.deleteAccountBtnText}>{t("userProfile.deleteAccountBtn")}</Text>
-                  </>
-                )}
+                <Trash2 color="#D4183D" size={15} />
+                <Text style={styles.deleteAccountBtnText}>{t("userProfile.deleteAccountBtn")}</Text>
               </Pressable>
             </View>
           </View>
@@ -663,6 +636,16 @@ export function BuyerProfileScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      <DeleteAccountDialog
+        confirmLabel={t("userProfile.deleteModalConfirm")}
+        deletedMessage={t("userProfile.accountDeletedMessage")}
+        deletedTitle={t("userProfile.accountDeletedTitle")}
+        message={t("userProfile.deleteModalMessage")}
+        onClose={() => setDeleteDialogOpen(false)}
+        title={t("userProfile.deleteModalTitle")}
+        visible={deleteDialogOpen}
+      />
     </AppChrome>
   );
 }

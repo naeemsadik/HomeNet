@@ -1958,6 +1958,15 @@ export const en = {
     successMessage: "Thank you for alerting our verification team. We will review this listing shortly.",
     close: "Close",
   },
+  deleteAccountDialog: {
+    typeToConfirm: "To confirm, type this phrase:",
+    inputLabel: "Confirmation phrase",
+    cancel: "Cancel",
+    closeAria: "Close",
+    phraseMismatch: "Type the phrase exactly as shown, in lowercase with the hyphens.",
+    sessionExpiredTitle: "Please sign in again",
+    sessionExpiredMessage: "Your session has expired. Sign in, then try deleting your account again.",
+  },
 } as const;
 
 export type LocaleSchema<T> = {
