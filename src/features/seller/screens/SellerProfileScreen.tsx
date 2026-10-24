@@ -37,7 +37,8 @@ import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
-import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
+import { updateUser, uploadAvatar } from "@/services/userApi";
+import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 import { toApiError } from "@/services/apiClient";
 import { editProfileSchema } from "@/lib/schemas/user";
 import type { UploadInput } from "@/services/upload";
@@ -74,7 +75,7 @@ export function SellerProfileScreen() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
 
@@ -190,29 +191,12 @@ export function SellerProfileScreen() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    const doDelete = async () => {
-      try {
-        setIsDeletingAccount(true);
-        if (user) {
-          await deleteUser(user.id);
-          await logout();
-        }
-        notify(t("seller.profile.accountDeletedTitle"), t("seller.profile.accountDeletedMessage"));
-        router.replace("/home");
-      } catch (err: any) {
-        notify(t("common.error"), toApiError(err).message);
-      } finally {
-        setIsDeletingAccount(false);
-      }
-    };
-
-    const confirmed = await confirmAction(
-      t("seller.profile.deleteAccountConfirmTitle"),
-      t("seller.profile.deleteAccountConfirmMessage"),
-      { confirmLabel: t("seller.profile.deletePermanentlyBtn"), destructive: true },
-    );
-    if (confirmed) await doDelete();
+  const handleDeleteAccount = () => {
+    if (!user) {
+      notify(t("common.notice"), t("userProfile.noAuthAccountToDelete"));
+      return;
+    }
+    setDeleteDialogOpen(true);
   };
 
   const handleLogout = async () => {
@@ -569,24 +553,16 @@ export function SellerProfileScreen() {
                 <Pressable
                   accessibilityLabel={t("seller.profile.deleteAccountBtn")}
                   accessibilityRole="button"
-                  disabled={isDeletingAccount}
                   onPress={handleDeleteAccount}
                   style={({ pressed }) => [
                     styles.deleteAccountBtn,
                     isPhone && styles.fullWidthBtnPhone,
                     webPointer,
                     pressed && styles.pressed,
-                    isDeletingAccount && styles.btnDisabled,
                   ]}
                 >
-                  {isDeletingAccount ? (
-                    <ActivityIndicator color="#D4183D" size="small" />
-                  ) : (
-                    <>
-                      <Trash2 color="#D4183D" size={15} />
-                      <Text style={styles.deleteAccountBtnText}>{t("seller.profile.deleteAccountBtn")}</Text>
-                    </>
-                  )}
+                  <Trash2 color="#D4183D" size={15} />
+                  <Text style={styles.deleteAccountBtnText}>{t("seller.profile.deleteAccountBtn")}</Text>
                 </Pressable>
               </View>
             </View>
@@ -623,6 +599,16 @@ export function SellerProfileScreen() {
       <SellerChangePasswordModal
         onClose={() => setChangePasswordModalOpen(false)}
         visible={changePasswordModalOpen}
+      />
+
+      <DeleteAccountDialog
+        confirmLabel={t("seller.profile.deletePermanentlyBtn")}
+        deletedMessage={t("seller.profile.accountDeletedMessage")}
+        deletedTitle={t("seller.profile.accountDeletedTitle")}
+        message={t("seller.profile.deleteAccountConfirmMessage")}
+        onClose={() => setDeleteDialogOpen(false)}
+        title={t("seller.profile.deleteAccountConfirmTitle")}
+        visible={deleteDialogOpen}
       />
     </View>
   );
