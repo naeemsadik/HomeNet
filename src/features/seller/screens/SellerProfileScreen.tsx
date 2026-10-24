@@ -191,13 +191,17 @@ export function SellerProfileScreen() {
   };
 
   const handleDeleteAccount = async () => {
+    // Nothing to delete without an account; saying "deleted" would be false.
+    if (!user) {
+      notify(t("common.notice"), t("userProfile.noAuthAccountToDelete"));
+      return;
+    }
+
     const doDelete = async () => {
       try {
         setIsDeletingAccount(true);
-        if (user) {
-          await deleteUser(user.id);
-          await logout();
-        }
+        await deleteUser(user.id);
+        await logout();
         notify(t("seller.profile.accountDeletedTitle"), t("seller.profile.accountDeletedMessage"));
         router.replace("/home");
       } catch (err: any) {

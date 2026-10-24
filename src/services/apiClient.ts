@@ -25,7 +25,7 @@ export class ApiError extends Error {
     public readonly validationErrors: string[] = [],
     rawMessage?: string,
   ) {
-    const safeMessage = sanitizeErrorMessage(message, status);
+    const safeMessage = sanitizeErrorMessage(message, status, undefined, errorCode);
     super(safeMessage);
     this.name = "ApiError";
     this.error_code = errorCode;
@@ -55,7 +55,12 @@ export function toApiError(error: unknown): ApiError {
     const validationData = payload?.data as ApiValidationData | null;
     const status = axiosError.response?.status ?? null;
     const rawMsg = payload?.message || axiosError.message || "Request failed";
-    const sanitizedMsg = sanitizeErrorMessage(rawMsg, status);
+    const sanitizedMsg = sanitizeErrorMessage(
+      rawMsg,
+      status,
+      undefined,
+      payload?.error_code ?? null,
+    );
 
     return new ApiError(
       sanitizedMsg,

@@ -69,6 +69,23 @@ describe("errorSanitizer", () => {
       expect(result).toBe(SAFE_GENERIC_MESSAGES.notFound);
     });
 
+    it("shows the backend's own message for a user-facing error code, whatever the status", () => {
+      expect(sanitizeErrorMessage("You do not have permission to modify this user", 403, undefined, 1203)).toBe(
+        "You do not have permission to modify this user",
+      );
+      expect(sanitizeErrorMessage("User not found", 404, undefined, 1200)).toBe("User not found");
+    });
+
+    it("keeps the generic text for a code that is not user-facing", () => {
+      expect(sanitizeErrorMessage("Forbidden resource", 403, undefined, 1003)).toBe(SAFE_GENERIC_MESSAGES.forbidden);
+      expect(sanitizeErrorMessage("Forbidden resource", 403)).toBe(SAFE_GENERIC_MESSAGES.forbidden);
+    });
+
+    it("still masks a user-facing code whose message leaks internals", () => {
+      const leak = "relation \"users\" does not exist";
+      expect(sanitizeErrorMessage(leak, 404, undefined, 1200)).toBe(SAFE_GENERIC_MESSAGES.notFound);
+    });
+
     it("returns rateLimited message for 429 status", () => {
       const result = sanitizeErrorMessage("Too many requests", 429);
       expect(result).toBe(SAFE_GENERIC_MESSAGES.rateLimited);

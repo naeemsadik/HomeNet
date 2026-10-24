@@ -60,6 +60,19 @@ export const SAFE_GENERIC_MESSAGES = {
 };
 
 /**
+ * Backend error codes whose message is written for the person using the app, so
+ * it is shown as sent instead of the generic text for its HTTP status. Without
+ * this a 403 always read "You do not have permission to perform this action",
+ * whatever the real reason was.
+ *
+ * Add a code here only when its message is meant for users.
+ */
+export const USER_FACING_ERROR_CODES: ReadonlySet<number> = new Set([
+  1200, // user not found
+  1203, // not allowed to modify this user
+]);
+
+/**
  * Checks if a string contains internal technical leaks (stack traces, paths, or DB errors).
  */
 export function isUnsafeErrorMessage(message: unknown): boolean {
@@ -90,8 +103,19 @@ export function sanitizeErrorMessage(
   rawMessage: unknown,
   status: number | null = null,
   fallbackMessage?: string,
+  errorCode: number | null = null,
 ): string {
   const text = typeof rawMessage === "string" ? rawMessage.trim() : "";
+
+  // 0. A message the backend wrote for users, if it is clean, beats the status text.
+  if (
+    errorCode !== null &&
+    USER_FACING_ERROR_CODES.has(errorCode) &&
+    text.length > 0 &&
+    !isUnsafeErrorMessage(text)
+  ) {
+    return text;
+  }
 
   // 1. Specific HTTP status fallbacks
   if (status !== null) {
