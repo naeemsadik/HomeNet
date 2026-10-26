@@ -27,6 +27,7 @@ jest.mock("@/components/icons", () => ({
   ChevronRight: () => "ChevronRight",
   Search: () => "Search",
   SlidersHorizontal: () => "SlidersHorizontal",
+  Sparkles: () => "Sparkles",
   X: () => "X",
 }));
 
