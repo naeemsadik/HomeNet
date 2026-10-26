@@ -112,7 +112,7 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.6,
   },
   mobileSearchOverlap: {
-    marginTop: -52,
+    marginTop: -44,
   },
 
   // The dock sits back inside the page gutter even though the photo does not.

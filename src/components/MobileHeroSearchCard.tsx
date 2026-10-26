@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Search,
   SlidersHorizontal,
+  Sparkles,
   X,
 } from "@/components/icons";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
@@ -91,132 +92,168 @@ export function MobileHeroSearchCard() {
       : selectedArea.name
     : null;
 
+  const openAiFinder = () => {
+    const params = new URLSearchParams();
+    if (selectedArea) {
+      if (selectedArea.city) params.set("city", selectedArea.city);
+      params.set("location", selectedArea.name);
+    }
+    const qs = params.toString();
+    router.push((qs ? `/ai-finder?${qs}` : "/ai-finder") as never);
+  };
+
+  const searchLabel =
+    activeTab === "sold"
+      ? t("search.mobileHero.labelSold")
+      : activeTab === "rent"
+      ? t("search.mobileHero.labelRent")
+      : t("search.mobileHero.labelBuy");
+
   return (
     <View style={styles.container}>
-      {/* 1. Transaction Type Tabs */}
-      <View style={styles.tabsContainer} accessibilityRole="tablist">
-        {(["buy", "rent", "sold"] as const).map((tab) => {
-          const isSelected = activeTab === tab;
-          const tabLabel =
-            tab === "buy"
-              ? t("search.tabs.buy")
-              : tab === "rent"
-              ? t("search.tabs.rent")
-              : t("search.tabs.sold");
+      <View style={styles.panel}>
+        {/* 1. Transaction type: underlined tabs */}
+        <View style={styles.tabsRow} accessibilityRole="tablist">
+          {(["buy", "rent", "sold"] as const).map((tab) => {
+            const isSelected = activeTab === tab;
+            const tabLabel =
+              tab === "buy"
+                ? t("search.tabs.buy")
+                : tab === "rent"
+                ? t("search.tabs.rent")
+                : t("search.tabs.sold");
 
-          return (
-            <Pressable
-              key={tab}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: isSelected }}
-              accessibilityLabel={tabLabel}
-              onPress={() => handleTabChange(tab)}
-              style={[
-                styles.tabPill,
-                isSelected && styles.tabPillActive,
-                webPointer,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.tabPillText,
-                  isSelected && styles.tabPillTextActive,
-                ]}
+            return (
+              <Pressable
+                key={tab}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: isSelected }}
+                accessibilityLabel={tabLabel}
+                onPress={() => handleTabChange(tab)}
+                style={[styles.tab, webPointer]}
               >
-                {tabLabel}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {/* 2. Hero Search Card Box */}
-      <View style={styles.card}>
-        <View style={styles.searchBox}>
-          {/* Tapping search box triggers location overlay / autocomplete modal */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              selectedArea
-                ? t("hero.filterByAreaWithLocation", { location: selectedArea.name })
-                : t("hero.filterByArea")
-            }
-            onPress={() => setAreaPickerOpen(true)}
-            style={[styles.searchBoxInputTrigger, webPointer]}
-          >
-            <Search color={colorTokens.brandText} size={20} strokeWidth={2.2} />
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.searchBoxText,
-                !locationDisplayText && styles.searchBoxPlaceholder,
-              ]}
-            >
-              {locationDisplayText || t("search.placeholder")}
-            </Text>
-          </Pressable>
-
-          {/* Clear location button if selected */}
-          {selectedArea ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("hero.clearLocation")}
-              onPress={(e) => {
-                e.stopPropagation?.();
-                setSelectedArea(null);
-              }}
-              style={[styles.clearBtn, webPointer]}
-            >
-              <X color={colorTokens.subtle} size={16} />
-            </Pressable>
-          ) : null}
-
-          {/* Filter button with active filter counter pill */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={
-              hasActiveFilters
-                ? t("hero.openFiltersWithCount", { count: activeFilterCount })
-                : t("hero.openFilters")
-            }
-            onPress={() => setFilterModalOpen(true)}
-            style={({ pressed }) => [
-              styles.filterBtn,
-              hasActiveFilters && styles.filterBtnActive,
-              webPointer,
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <SlidersHorizontal
-              color={hasActiveFilters ? colorTokens.brandText : colorTokens.muted}
-              size={18}
-              strokeWidth={2}
-            />
-            {hasActiveFilters ? (
-              <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
-              </View>
-            ) : null}
-          </Pressable>
+                <Text style={[styles.tabText, isSelected && styles.tabTextActive]}>{tabLabel}</Text>
+                {isSelected ? <View style={styles.tabUnderline} /> : null}
+              </Pressable>
+            );
+          })}
         </View>
 
-        {/* Primary Action Button */}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={primaryButtonLabel}
-          onPress={handleSearch}
-          style={({ pressed }) => [
-            styles.primaryButton,
-            webPointer,
-            pressed && { opacity: 0.9 },
-          ]}
-        >
-          <Search color={colorTokens.onBrand} size={18} strokeWidth={2.4} />
-          <Text style={styles.primaryButtonText}>{primaryButtonLabel}</Text>
-        </Pressable>
+        <View style={styles.panelBody}>
+          {/* 2. Classic search, or the guided AI finder */}
+          <View style={styles.modeToggle}>
+            <View
+              accessibilityRole="button"
+              accessibilityState={{ selected: true }}
+              style={[styles.modeOption, styles.modeOptionActive]}
+            >
+              <Search color={colorTokens.surface} size={16} strokeWidth={2.4} />
+              <Text style={[styles.modeText, styles.modeTextActive]}>{t("search.mobileHero.classic")}</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("search.mobileHero.aiSearch")}
+              onPress={openAiFinder}
+              style={[styles.modeOption, webPointer]}
+            >
+              <Sparkles color={colorTokens.ink} size={16} strokeWidth={2.2} />
+              <Text style={styles.modeText}>{t("search.mobileHero.aiSearch")}</Text>
+            </Pressable>
+          </View>
+
+          <Text style={styles.panelLabel}>{searchLabel}</Text>
+
+          {/* 3. Where: opens the area picker; filters sit beside it */}
+          <View style={styles.searchBox}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                selectedArea
+                  ? t("hero.filterByAreaWithLocation", { location: selectedArea.name })
+                  : t("hero.filterByArea")
+              }
+              onPress={() => setAreaPickerOpen(true)}
+              style={[styles.searchBoxInputTrigger, webPointer]}
+            >
+              <Search color={colorTokens.ink} size={20} strokeWidth={2.2} />
+              <Text
+                numberOfLines={1}
+                style={[styles.searchBoxText, !locationDisplayText && styles.searchBoxPlaceholder]}
+              >
+                {locationDisplayText || t("search.placeholder")}
+              </Text>
+            </Pressable>
+
+            {selectedArea ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("hero.clearLocation")}
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  setSelectedArea(null);
+                }}
+                style={[styles.clearBtn, webPointer]}
+              >
+                <X color={colorTokens.subtle} size={16} />
+              </Pressable>
+            ) : null}
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                hasActiveFilters
+                  ? t("hero.openFiltersWithCount", { count: activeFilterCount })
+                  : t("hero.openFilters")
+              }
+              onPress={() => setFilterModalOpen(true)}
+              style={({ pressed }) => [
+                styles.filterBtn,
+                hasActiveFilters && styles.filterBtnActive,
+                webPointer,
+                pressed && { opacity: 0.8 },
+              ]}
+            >
+              <SlidersHorizontal
+                color={hasActiveFilters ? colorTokens.brandText : colorTokens.muted}
+                size={18}
+                strokeWidth={2}
+              />
+              {hasActiveFilters ? (
+                <View style={styles.filterBadge}>
+                  <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+                </View>
+              ) : null}
+            </Pressable>
+          </View>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={primaryButtonLabel}
+            onPress={handleSearch}
+            style={({ pressed }) => [styles.primaryButton, webPointer, pressed && { opacity: 0.9 }]}
+          >
+            <Text style={styles.primaryButtonText}>{primaryButtonLabel}</Text>
+          </Pressable>
+        </View>
       </View>
 
-      {/* 3. Quick Navigation List (Clean Action Rows) */}
+      {/* 4. Signed out: invite to sign in, as a quiet card */}
+      {!user ? (
+        <View style={styles.signInCard}>
+          <Text style={styles.signInTitle}>{t("search.mobileHero.signInTitle")}</Text>
+          <Text style={styles.signInCopy}>{t("search.mobileHero.signInCopy")}</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("search.mobileHero.signInButton")}
+            onPress={() => useAuthModalStore.getState().open()}
+            style={({ pressed }) => [styles.signInButton, webPointer, pressed && { opacity: 0.85 }]}
+          >
+            <Text style={styles.signInButtonText}>{t("search.mobileHero.signInButton")}</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
+      {/* 5. Quick navigation list (clean action rows) */}
       <View style={styles.quickNavCard}>
         {/* Row 1: Request property valuation */}
         <Pressable
@@ -294,55 +331,84 @@ export function MobileHeroSearchCard() {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    paddingTop: 12,
     paddingBottom: 20,
   },
-  tabsContainer: {
-    flexDirection: "row",
-    backgroundColor: colorTokens.surfaceSunken,
-    borderRadius: radius.pill,
-    padding: 4,
-    gap: 4,
-    marginBottom: 12,
+  // A dark sheet that sits over the lower edge of the hero photo.
+  panel: {
+    backgroundColor: colorTokens.ink,
+    borderRadius: radius.lg,
+    overflow: "hidden",
   },
-  tabPill: {
+  tabsRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.16)",
+  },
+  tab: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: radius.pill,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "transparent",
+    paddingVertical: 16,
   },
-  tabPillActive: {
-    backgroundColor: colorTokens.surface,
-    borderWidth: 1,
-    borderColor: colorTokens.divider,
+  tabText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 16,
+    color: "rgba(255,255,255,0.62)",
   },
-  tabPillText: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colorTokens.muted,
-  },
-  tabPillTextActive: {
+  tabTextActive: {
     fontFamily: fonts.bold,
+    color: "#FFFFFF",
+  },
+  tabUnderline: {
+    position: "absolute",
+    bottom: -1,
+    height: 3,
+    width: 56,
+    borderRadius: 2,
+    backgroundColor: colorTokens.brand,
+  },
+  panelBody: {
+    padding: 16,
+    gap: 14,
+  },
+  modeToggle: {
+    flexDirection: "row",
+    alignSelf: "flex-start",
+    backgroundColor: colorTokens.surfaceSunken,
+    borderRadius: radius.pill,
+    padding: 3,
+  },
+  modeOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: radius.pill,
+  },
+  modeOptionActive: {
+    backgroundColor: colorTokens.ink,
+  },
+  modeText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
     color: colorTokens.ink,
   },
-  card: {
-    backgroundColor: colorTokens.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colorTokens.divider,
-    padding: 14,
-    gap: 12,
+  modeTextActive: {
+    color: "#FFFFFF",
+    fontFamily: fonts.bold,
+  },
+  panelLabel: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: "#FFFFFF",
   },
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colorTokens.surfaceSunken,
-    borderRadius: radius.pill,
-    borderWidth: 1.5,
-    borderColor: colorTokens.divider,
-    height: 52,
+    backgroundColor: colorTokens.surface,
+    borderRadius: radius.md,
+    height: 54,
     paddingHorizontal: 14,
     gap: 10,
   },
@@ -399,19 +465,52 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: colorTokens.brand,
-    borderRadius: radius.pill,
-    height: 50,
-    flexDirection: "row",
+    borderRadius: radius.md,
+    height: 52,
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
     width: "100%",
   },
   primaryButtonText: {
     fontFamily: fonts.bold,
-    fontSize: 15.5,
+    fontSize: 16,
     color: colorTokens.onBrand,
     letterSpacing: -0.2,
+  },
+  signInCard: {
+    backgroundColor: colorTokens.surfaceSunken,
+    borderRadius: radius.lg,
+    padding: 20,
+    marginTop: 16,
+    gap: 8,
+  },
+  signInTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 20,
+    lineHeight: 26,
+    color: colorTokens.ink,
+  },
+  signInCopy: {
+    fontFamily: fonts.regular,
+    fontSize: 14.5,
+    lineHeight: 21,
+    color: colorTokens.muted,
+  },
+  signInButton: {
+    alignSelf: "flex-start",
+    marginTop: 8,
+    minHeight: 46,
+    paddingHorizontal: 18,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colorTokens.ink,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  signInButtonText: {
+    fontFamily: fonts.bold,
+    fontSize: 14.5,
+    color: colorTokens.ink,
   },
   quickNavCard: {
     backgroundColor: colorTokens.surface,
