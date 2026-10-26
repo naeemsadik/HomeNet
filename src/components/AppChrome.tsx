@@ -59,7 +59,8 @@ export type ActivePage =
   | "profile"
   | "users"
   | "seller"
-  | "messages";
+  | "messages"
+  | "enquiries";
 
 /**
  * The search intents the web navbar leads with. The phone drawer lists the same
@@ -207,13 +208,106 @@ function TopBar({
   isCrystal?: boolean;
 }) {
   const { t } = useTranslation();
-  const { isTablet, isPhone, containerMaxWidth } = useResponsive();
+  const { isTablet, isPhone, width, containerMaxWidth } = useResponsive();
+  const isMobile = isPhone || width < 768;
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const { data: unreadData } = useUnreadCount("user");
   const unreadCount = unreadData?.data?.count ?? 0;
   const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
+
+  const isMobileHome = isMobile && active === "home";
+
+  if (isMobileHome) {
+    return (
+      <SafeAreaView edges={["top"]} style={styles.topbarSafe}>
+        <View
+          style={[
+            styles.topbar,
+            styles.topbarMobileHome,
+            { maxWidth: containerMaxWidth },
+          ]}
+        >
+          <View style={styles.mobileHomeBrandWrap}>
+            <Brand compact size="default" subtitle={t("home.subcopy")} />
+          </View>
+
+          <View style={styles.mobileHomeRightWrap}>
+            {/* 1. Ultra-compact Bilingual Language Toggle */}
+            <LanguageToggle compact ultraCompact variant="default" />
+
+            {/* 2. Notification Bell */}
+            <Pressable
+              accessibilityLabel={
+                unreadCount > 0
+                  ? t("nav.openNotificationsWithCount", { count: unreadCount })
+                  : t("nav.openNotifications")
+              }
+              onPress={() => {
+                if (!user) {
+                  useAuthModalStore
+                    .getState()
+                    .open(() => router.push("/notifications" as any));
+                } else {
+                  router.push("/notifications" as any);
+                }
+              }}
+              style={[
+                styles.notificationButton,
+                styles.notificationButtonPhone,
+                webPointer,
+              ]}
+            >
+              <Bell color={colorTokens.ink} size={18} strokeWidth={2} />
+              {unreadCount > 0 ? (
+                <View style={styles.notificationBadge} pointerEvents="none">
+                  <LiveText style={styles.notificationBadgeText}>
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </LiveText>
+                </View>
+              ) : null}
+            </Pressable>
+
+            {/* 3. Auth / Sign In Trigger */}
+            {user ? (
+              <Pressable
+                accessibilityLabel={t("nav.profileSettings")}
+                accessibilityRole="button"
+                onPress={() => router.push("/profile")}
+                style={[styles.mobileHomeAccountBtn, webPointer]}
+              >
+                <View style={styles.mobileHomeAvatarWrap}>
+                  <Image
+                    source={{
+                      uri:
+                        user.avatar_url ||
+                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
+                    }}
+                    style={styles.mobileHomeAvatarImage}
+                  />
+                </View>
+              </Pressable>
+            ) : (
+              <Pressable
+                accessibilityLabel={t("auth.signIn")}
+                accessibilityRole="button"
+                onPress={() => useAuthModalStore.getState().open()}
+                style={({ pressed }) => [
+                  styles.mobileHomeSignInBtn,
+                  webPointer,
+                  pressed && { opacity: 0.85 },
+                ]}
+              >
+                <User color={colorTokens.brandText} size={14} strokeWidth={2.2} />
+                <Text style={styles.mobileHomeSignInText}>{t("auth.signIn")}</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // Seekers-first: the search intents lead, Saved follows. The phone drawer
   // lists the same links plus the rest of the app.
@@ -573,13 +667,6 @@ function MobileNav({ active }: { active: ActivePage }) {
   }[] = [
     { translationKey: "nav.home", href: "/home", icon: Home, selected: active === "home", authGated: false },
     {
-      translationKey: "nav.insights",
-      href: "/market",
-      icon: TrendingUp,
-      selected: active === "market",
-      authGated: false,
-    },
-    {
       translationKey: "nav.saved",
       href: "/saved",
       icon: Heart,
@@ -587,7 +674,14 @@ function MobileNav({ active }: { active: ActivePage }) {
       authGated: true,
     },
     {
-      translationKey: "nav.profile",
+      translationKey: "nav.enquiries",
+      href: "/enquiries",
+      icon: CalendarCheck,
+      selected: active === "enquiries",
+      authGated: true,
+    },
+    {
+      translationKey: "nav.account",
       href: "/profile",
       icon: User,
       selected: active === "profile",
@@ -648,11 +742,13 @@ export function AppChrome({
   active,
   bleed,
   fluid,
+  customTopBar,
 }: {
   children: ReactNode;
   active: ActivePage;
   bleed?: ReactNode;
   fluid?: boolean;
+  customTopBar?: ReactNode;
 }) {
   const { isTablet, isPhone, containerMaxWidth } = useResponsive();
   const insets = useSafeAreaInsets();
@@ -679,7 +775,9 @@ export function AppChrome({
   return (
     <View style={styles.shell}>
       <View style={styles.pageColumn}>
-        <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} isCrystal={isCrystal} />
+        {customTopBar ?? (
+          <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} isCrystal={isCrystal} />
+        )}
         <ScrollView
           onScroll={handleScroll}
           scrollEventThrottle={16}

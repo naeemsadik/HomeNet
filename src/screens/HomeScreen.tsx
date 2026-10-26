@@ -22,6 +22,7 @@ import {
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
+import { MobileHeroSearchCard } from "@/components/MobileHeroSearchCard";
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { PropertyCard } from "@/components/PropertyCard";
 import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
@@ -109,7 +110,10 @@ export function HomeScreen() {
     isLargeScreen,
     isTall,
     height,
+    width,
   } = useResponsive();
+
+  const isMobile = isPhone || width < 768;
 
   // Hero scales seamlessly across mobile, tablet, laptop, large desktop, and ultrawide:
   const heroType = isPhone
@@ -239,7 +243,9 @@ export function HomeScreen() {
   );
 
   return (
-    <AppChrome active="home" bleed={hero}>
+    <AppChrome active="home" bleed={isMobile ? undefined : hero}>
+      {isMobile ? <MobileHeroSearchCard /> : null}
+
       {/* ─────────────────────────────────────────────────────────────
           2. FEATURED PROPERTIES (live API), real listings answer the search
           box first, before any explaining.

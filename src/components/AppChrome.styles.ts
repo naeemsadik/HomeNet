@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from "react-native";
-import { colorTokens, colors, fonts, layout, shadow } from "@/theme";
+import { colorTokens, colors, fonts, layout, radius, shadow } from "@/theme";
 
 export const styles = StyleSheet.create({
   shell: {
@@ -230,6 +230,63 @@ export const styles = StyleSheet.create({
     paddingHorizontal: layout.gutterPhone,
     gap: 4,
   },
+  topbarMobileHome: {
+    height: 56,
+    width: "100%",
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    ...(Platform.select({
+      web: { boxSizing: "border-box" },
+      default: {},
+    }) as any),
+  },
+  mobileHomeBrandWrap: {
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
+    overflow: "hidden",
+    justifyContent: "center",
+  },
+  mobileHomeRightWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexShrink: 0,
+    gap: 8,
+  },
+  mobileHomeSignInBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    height: 36,
+    paddingHorizontal: 12,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.brandSurface,
+    borderWidth: 1,
+    borderColor: colorTokens.brandBorder,
+  },
+  mobileHomeSignInText: {
+    color: colorTokens.brandText,
+    fontFamily: fonts.semiBold,
+    fontSize: 12.5,
+  },
+  mobileHomeAccountBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.pill,
+    overflow: "hidden",
+    borderWidth: 1.5,
+    borderColor: colorTokens.brandBorder,
+  },
+  mobileHomeAvatarWrap: {
+    width: "100%",
+    height: "100%",
+  },
+  mobileHomeAvatarImage: {
+    width: "100%",
+    height: "100%",
+  },
   topbarLeft: {
     flexShrink: 0,
     flexDirection: "row",
@@ -358,9 +415,9 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
   notificationButtonPhone: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   notificationButtonCrystal: {
     backgroundColor: "rgba(255, 255, 255, 0.16)",

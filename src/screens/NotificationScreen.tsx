@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { AppChrome } from "@/components/AppChrome";
+import { AppChrome, type ActivePage } from "@/components/AppChrome";
 import { NotificationList } from "@/features/notification/components/NotificationList";
 import { colorTokens, fonts } from "@/theme";
 import { Eyebrow } from "@/components/ui";
@@ -8,12 +8,16 @@ import { useResponsive } from "@/hooks/useResponsive";
 
 import { useTranslation } from "@/i18n";
 
-export function NotificationScreen() {
+export function NotificationScreen({
+  activePage = "home",
+}: {
+  activePage?: ActivePage;
+} = {}) {
   const { t } = useTranslation();
   const { isPhone } = useResponsive();
 
   return (
-    <AppChrome active="home">
+    <AppChrome active={activePage}>
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         <View style={styles.headerSection}>
           <Eyebrow>{t("notifications.heading")}</Eyebrow>
