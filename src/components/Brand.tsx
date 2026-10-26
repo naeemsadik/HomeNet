@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Home } from "@/components/icons";
 import { Platform, StyleSheet, Text, View } from "react-native";
-import { colors, fonts } from "@/theme";
+import { colorTokens, colors, fonts } from "@/theme";
 import { AppLink } from "./ui";
 
 /**
@@ -29,12 +29,14 @@ export function Brand({
   href = "/home",
   onPress,
   variant = "dark",
+  subtitle,
 }: {
   compact?: boolean;
   size?: "compact" | "default" | "large";
   href?: string;
   onPress?: () => void;
   variant?: "dark" | "light";
+  subtitle?: string;
 }) {
   const isLarge = size === "large";
   const isCompact = compact || size === "compact";
@@ -61,7 +63,7 @@ export function Brand({
           strokeWidth={2}
         />
       </View>
-      <View ref={brandRef}>
+      <View ref={brandRef} style={styles.textWrap}>
         <Text
           style={[
             styles.text,
@@ -72,14 +74,26 @@ export function Brand({
         >
           Home<Text style={{ color: "#04cf92" }}>net</Text>
         </Text>
+        {subtitle ? (
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={[
+              styles.subtitle,
+              isLight && styles.subtitleLight,
+            ]}
+          >
+            {subtitle}
+          </Text>
+        ) : null}
       </View>
     </AppLink>
   );
 }
 
 const styles = StyleSheet.create({
-  link: { flexDirection: "row", alignItems: "center", gap: 9 },
-  linkCompact: { gap: 6 },
+  link: { flexDirection: "row", alignItems: "center", gap: 9, flexShrink: 1, minWidth: 0, overflow: "hidden" },
+  linkCompact: { gap: 6, flexShrink: 1, minWidth: 0, overflow: "hidden" },
   mark: {
     width: 36,
     height: 36,
@@ -87,9 +101,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#04cf92",
+    flexShrink: 0,
   },
-  markCompact: { width: 28, height: 28, borderRadius: 14 },
-  markLarge: { width: 40, height: 40, borderRadius: 20 },
+  markCompact: { width: 28, height: 28, borderRadius: 14, flexShrink: 0 },
+  markLarge: { width: 40, height: 40, borderRadius: 20, flexShrink: 0 },
   text: {
     color: "#0B1A17",
     fontFamily: fonts.headingExtraBold,
@@ -97,6 +112,17 @@ const styles = StyleSheet.create({
     letterSpacing: -0.4,
     fontWeight: "800",
   },
-  textCompact: { fontSize: 14.5 },
+  textCompact: { fontSize: 14.5, lineHeight: 18 },
   textLarge: { fontSize: 20.5, letterSpacing: -0.4 },
+  textWrap: { justifyContent: "center", flexShrink: 1, minWidth: 0, overflow: "hidden" },
+  subtitle: {
+    fontFamily: fonts.medium,
+    fontSize: 10.5,
+    lineHeight: 13,
+    color: colorTokens.muted,
+    letterSpacing: -0.1,
+  },
+  subtitleLight: {
+    color: "rgba(255, 255, 255, 0.75)",
+  },
 });

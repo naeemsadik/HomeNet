@@ -6,16 +6,26 @@ import { fonts, webPointer } from "@/theme";
 
 interface LanguageToggleProps {
   compact?: boolean;
+  ultraCompact?: boolean;
   variant?: "default" | "crystal";
 }
 
 export function LanguageToggle({
   compact = false,
+  ultraCompact = false,
   variant = "default",
 }: LanguageToggleProps) {
   const { language, toggleLanguage, t } = useTranslation();
   const isBangla = language === "bn";
   const isCrystal = variant === "crystal";
+
+  const labelText = ultraCompact
+    ? isBangla
+      ? "বাং"
+      : "EN"
+    : isBangla
+    ? t("common.bangla")
+    : t("common.english");
 
   return (
     <Pressable
@@ -23,6 +33,7 @@ export function LanguageToggle({
       style={({ pressed, hovered }: any) => [
         styles.button,
         compact && styles.buttonCompact,
+        ultraCompact && styles.buttonUltraCompact,
         isCrystal && styles.buttonCrystal,
         hovered && (isCrystal ? styles.buttonCrystalHovered : styles.buttonHovered),
         pressed && styles.buttonPressed,
@@ -38,7 +49,7 @@ export function LanguageToggle({
       <View style={styles.iconWrap}>
         <Globe
           color={isCrystal ? "#FFFFFF" : "#0B1A17"}
-          size={compact ? 15 : 17}
+          size={ultraCompact ? 14 : compact ? 15 : 17}
           strokeWidth={2}
         />
       </View>
@@ -47,10 +58,11 @@ export function LanguageToggle({
         style={[
           styles.label,
           compact && styles.labelCompact,
+          ultraCompact && styles.labelUltraCompact,
           isCrystal && styles.labelCrystal,
         ]}
       >
-        {isBangla ? t("common.bangla") : t("common.english")}
+        {labelText}
       </Text>
     </Pressable>
   );
@@ -88,6 +100,12 @@ const styles = StyleSheet.create({
     gap: 5,
     borderWidth: 1.4,
   },
+  buttonUltraCompact: {
+    height: 36,
+    paddingHorizontal: 8,
+    gap: 4,
+    borderWidth: 1.2,
+  },
   buttonHovered: {
     backgroundColor: "rgba(4, 207, 146, 0.05)",
     borderColor: "#03b57f",
@@ -110,6 +128,10 @@ const styles = StyleSheet.create({
   },
   labelCompact: {
     fontSize: 12,
+  },
+  labelUltraCompact: {
+    fontSize: 11.5,
+    fontFamily: fonts.bold,
   },
   labelCrystal: {
     color: "#FFFFFF",
