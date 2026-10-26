@@ -1163,7 +1163,7 @@ export const en = {
       titleInvalid: "Title contains invalid characters.",
       descLength: "Description cannot exceed 5,000 characters.",
       descInvalid: "Description contains invalid characters.",
-      priceAreaPositive: "Price and area must be greater than zero.",
+      priceAreaPositive: "Enter a price (0 shows \"Contact for price\") and an area greater than zero.",
       priceMax: "Enter a valid price amount up to 1,000,000,000,000.",
       areaMax: "Enter a valid area size up to 1,000,000.",
       pinRequired: "Pin the property's exact spot on the map, or paste a Google Maps link.",

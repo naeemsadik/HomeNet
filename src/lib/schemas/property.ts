@@ -43,8 +43,8 @@ export const propertyFormSchema = z
       .regex(/^\d+(\.\d{1,2})?$/, "Enter a valid price amount")
       .refine((v) => {
         const n = Number(v);
-        return !isNaN(n) && n > 0 && n <= 1_000_000_000_000;
-      }, "Enter a valid price between 1 and 1,000,000,000,000"),
+        return !isNaN(n) && n >= 0 && n <= 1_000_000_000_000;
+      }, "Enter a valid price between 0 and 1,000,000,000,000"),
 
     // Step 1: Location
     area_id: z
@@ -118,7 +118,7 @@ export const upsertPropertyDtoSchema = z
       .refine((v) => !/[<>{}\x00-\x1F]/.test(v), "Subtype contains invalid characters")
       .optional(),
     listing_type: z.enum(listingTypes).optional(),
-    price: z.number().finite().positive().max(1_000_000_000_000).optional(),
+    price: z.number().finite().nonnegative().max(1_000_000_000_000).optional(),
     price_currency: z.literal("BDT").optional(),
     area_size: z.number().finite().positive().max(1_000_000).optional(),
     area_unit: z.enum(areaUnits).optional(),

@@ -4,7 +4,7 @@ import { colorTokens, fontTokens } from "@/theme";
 import { PropertyStatusBadge } from "./StatusBadge";
 import type { PropertyAdminItem } from "../types/admin";
 import { NoTranslateText } from "@/components/NoTranslateText";
-import { useTranslation } from "@/i18n";
+import { priceOnRequestLabel, useTranslation } from "@/i18n";
 
 interface PropertyAdminItemProps {
   item: PropertyAdminItem;
@@ -23,7 +23,7 @@ export function PropertyAdminItemRow({
   onView,
   isMutating = false,
 }: PropertyAdminItemProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const thumbnail = item.media?.[0]?.thumbnail_url ?? item.media?.[0]?.url;
 
   return (
@@ -41,7 +41,7 @@ export function PropertyAdminItemRow({
         <View style={styles.info}>
           <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
           <NoTranslateText style={styles.price}>
-            {item.price_currency} {item.price.toLocaleString()}
+            {item.price === 0 ? priceOnRequestLabel(language) : `${item.price_currency} ${item.price.toLocaleString()}`}
           </NoTranslateText>
           {item.user ? (
             <Text style={styles.owner} numberOfLines={1}>by {item.user.full_name}</Text>
