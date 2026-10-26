@@ -4,13 +4,17 @@ import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
   Bell,
+  BookOpen,
   Building2,
+  Calculator,
   CalendarCheck,
   Heart,
   Home,
   KeyRound,
   LogOut,
   Menu,
+  Plus,
+  Search,
   Sparkles,
   Tag,
   TrendingUp,
@@ -60,7 +64,9 @@ export type ActivePage =
   | "users"
   | "seller"
   | "messages"
-  | "enquiries";
+  | "enquiries"
+  | "valuation"
+  | "guides";
 
 /** Below this width the phone bar is used (matches the phone home and search screens). */
 export const isMobileWidth = (width: number) => width < 768;
@@ -97,11 +103,10 @@ const sidebarNavConfig: {
   badge?: number;
   authGated?: boolean;
 }[] = [
-    { translationKey: "nav.home", href: "/home", icon: Home, key: "home" },
     ...browseNavLinks,
     { translationKey: "nav.insights", href: "/market", icon: TrendingUp, key: "market" },
-    { translationKey: "nav.saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
-    { translationKey: "nav.profile", href: "/profile", icon: User, key: "profile", authGated: true },
+    { translationKey: "nav.valuation", href: "/valuation", icon: Calculator, key: "valuation" },
+    { translationKey: "nav.guides", href: "/guides", icon: BookOpen, key: "guides" },
   ];
 
 function SideBar({
@@ -115,6 +120,7 @@ function SideBar({
 }) {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
+  const { isTablet } = useResponsive();
   return (
     <SafeAreaView
       edges={["top", "bottom"]}
@@ -184,9 +190,15 @@ function SideBar({
         })}
       </View>
 
+      <View style={styles.drawerLanguage}>
+        <Text style={styles.drawerLanguageLabel}>{t("common.language")}</Text>
+        <LanguageToggle />
+      </View>
+
       <View style={styles.sidebarSpacer} />
 
-      {/* List your property Card (Figma node 1:2025) */}
+      {/* List your property card. Where the bottom bar shows, Post there does the same job. */}
+      {isTablet ? null : (
       <View style={styles.sidebarCard}>
         <View style={styles.sidebarCardIconWrap}>
           <Sparkles color={colorTokens.onBrand} size={20} />
@@ -199,6 +211,7 @@ function SideBar({
           <Text style={styles.postAdButtonText}>{t("nav.postAd")}</Text>
         </AppLink>
       </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -253,10 +266,7 @@ function TopBar({
           </View>
 
           <View style={styles.mobileHomeRightWrap}>
-            {/* 1. Ultra-compact Bilingual Language Toggle */}
-            <LanguageToggle compact ultraCompact variant="default" />
-
-            {/* 2. Notification Bell (guests have Sign in beside it instead) */}
+            {/* Notification bell (guests have Sign in beside it instead). The language switcher is in the menu. */}
             {user ? (
             <Pressable
               accessibilityLabel={
@@ -679,27 +689,10 @@ function MobileNav({ active }: { active: ActivePage }) {
     authGated: boolean;
   }[] = [
     { translationKey: "nav.home", href: "/home", icon: Home, selected: active === "home", authGated: false },
-    {
-      translationKey: "nav.saved",
-      href: "/saved",
-      icon: Heart,
-      selected: active === "saved",
-      authGated: true,
-    },
-    {
-      translationKey: "nav.enquiries",
-      href: "/enquiries",
-      icon: CalendarCheck,
-      selected: active === "enquiries",
-      authGated: true,
-    },
-    {
-      translationKey: "nav.account",
-      href: "/profile",
-      icon: User,
-      selected: active === "profile",
-      authGated: true,
-    },
+    { translationKey: "nav.search", href: "/buy", icon: Search, selected: active === "buy" || active === "rent" || active === "holiday" || active === "sold" || active === "search" || active === "property" || active === "market", authGated: false },
+    { translationKey: "nav.post", href: "/property/create", icon: Plus, selected: false, authGated: true },
+    { translationKey: "nav.saved", href: "/saved", icon: Heart, selected: active === "saved", authGated: true },
+    { translationKey: "nav.account", href: "/profile", icon: User, selected: active === "profile", authGated: true },
   ];
 
   return (
@@ -728,6 +721,8 @@ function MobileNav({ active }: { active: ActivePage }) {
                 pressed && { opacity: 0.8 },
               ]}
               accessibilityRole="link"
+              accessibilityLabel={label}
+              accessibilityState={{ selected }}
             >
               <Icon
                 color={selected ? colors.greenOnLight : "#7B8983"}
@@ -756,12 +751,15 @@ export function AppChrome({
   bleed,
   fluid,
   customTopBar,
+  compactFooter,
 }: {
   children: ReactNode;
   active: ActivePage;
   bleed?: ReactNode;
   fluid?: boolean;
   customTopBar?: ReactNode;
+  /** Show only the short footer (policies and contact), for the phone homepage. */
+  compactFooter?: boolean;
 }) {
   const { isTablet, isPhone, width, containerMaxWidth } = useResponsive();
   const isMobile = isMobileWidth(width);
@@ -832,7 +830,7 @@ export function AppChrome({
               {children}
             </View>
           </View>
-          <Footer />
+          <Footer compact={compactFooter} />
         </ScrollView>
         {isTablet ? <MobileNav active={active} /> : null}
       </View>

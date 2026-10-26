@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import {
   Bookmark,
@@ -333,16 +333,26 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingBottom: 20,
   },
-  // A dark sheet that sits over the lower edge of the hero photo.
+  // A white sheet over the lower edge of the hero photo, like the website's search card.
   panel: {
-    backgroundColor: colorTokens.ink,
+    backgroundColor: colorTokens.surface,
     borderRadius: radius.lg,
     overflow: "hidden",
+    ...(Platform.select({
+      web: { boxShadow: "0 18px 40px -18px rgba(11, 26, 23, 0.35)" },
+      default: {
+        shadowColor: "#0B1A17",
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.18,
+        shadowRadius: 24,
+        elevation: 8,
+      },
+    }) ?? {}),
   },
   tabsRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.16)",
+    borderBottomColor: colorTokens.divider,
   },
   tab: {
     flex: 1,
@@ -353,11 +363,11 @@ const styles = StyleSheet.create({
   tabText: {
     fontFamily: fonts.semiBold,
     fontSize: 16,
-    color: "rgba(255,255,255,0.62)",
+    color: colorTokens.muted,
   },
   tabTextActive: {
     fontFamily: fonts.bold,
-    color: "#FFFFFF",
+    color: colorTokens.brandText,
   },
   tabUnderline: {
     position: "absolute",
@@ -401,12 +411,12 @@ const styles = StyleSheet.create({
   panelLabel: {
     fontFamily: fonts.bold,
     fontSize: 15,
-    color: "#FFFFFF",
+    color: colorTokens.ink,
   },
   searchBox: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colorTokens.surface,
+    backgroundColor: colorTokens.surfaceSunken,
     borderRadius: radius.md,
     height: 54,
     paddingHorizontal: 14,

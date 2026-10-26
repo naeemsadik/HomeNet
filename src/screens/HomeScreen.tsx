@@ -23,6 +23,7 @@ import {
 import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
 import { MobileHeroSearchCard } from "@/components/MobileHeroSearchCard";
+import { MobileHomeSections } from "@/components/MobileHomeSections";
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { PropertyCard } from "@/components/PropertyCard";
 import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
@@ -263,13 +264,17 @@ export function HomeScreen() {
   );
 
   return (
-    <AppChrome active="home" bleed={isMobile ? mobileHero : hero}>
+    <AppChrome active="home" bleed={isMobile ? mobileHero : hero} compactFooter={isMobile}>
       {isMobile ? (
         <View style={styles.mobileSearchOverlap}>
           <MobileHeroSearchCard />
         </View>
       ) : null}
 
+      {isMobile ? (
+        <MobileHomeSections />
+      ) : (
+        <>
       {/* ─────────────────────────────────────────────────────────────
           2. FEATURED PROPERTIES (live API), real listings answer the search
           box first, before any explaining.
@@ -344,6 +349,8 @@ export function HomeScreen() {
       <View style={styles.sectionSpacing}>
         <PropertyGuidesSection />
       </View>
+        </>
+      )}
     </AppChrome>
   );
 }

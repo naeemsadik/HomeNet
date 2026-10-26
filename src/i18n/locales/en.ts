@@ -1,6 +1,10 @@
 export const en = {
   nav: {
     home: "Home",
+    search: "Search",
+    post: "Post",
+    valuation: "Valuation",
+    guides: "Guides",
     insights: "Insights",
     saved: "Saved",
     profile: "Profile",
@@ -99,6 +103,10 @@ export const en = {
     homenet: "Homenet",
     professional: "Professional",
     homenetPro: "Homenet Pro",
+    aboutHomenet: "About HomeNet",
+    commercial: "Commercial property",
+    verifiedListings: "Verified listings",
+    sellerDashboard: "Seller dashboard",
     copyright: "Copyright © 2026 HomeNet Group Limited. All rights reserved.",
   },
   common: {
@@ -1125,6 +1133,41 @@ export const en = {
     },
   },
   home: {
+    mobileCards: {
+      valuation: {
+        title: "Instant valuation",
+        copy: "Find out what your property is worth in under a minute.",
+        cta: "Get a valuation",
+      },
+      list: {
+        title: "List your property",
+        copy: "List for free. Describe it in a sentence and HomeNet fills in the details.",
+        cta: "List your property",
+      },
+      ai: {
+        title: "Search in plain words",
+        copy: "Describe what you want in Bangla or English and let AI find it.",
+        cta: "Try AI search",
+      },
+      holiday: {
+        title: "Holiday stays",
+        copy: "Browse serviced flats and holiday stays.",
+        cta: "Search holiday stays",
+      },
+      commercial: {
+        title: "Commercial property",
+        copy: "Offices, shops and commercial space to buy or rent.",
+        cta: "Search commercial",
+      },
+      verified: {
+        title: "Verified listings",
+        copy: "See only the listings we have checked.",
+        cta: "Search verified listings",
+      },
+      newsTitle: "Guides and market updates",
+      newsSeeAll: "See all",
+      marketLink: "Explore market insights",
+    },
     loadingProperties: "Loading properties...",
     couldNotLoadTitle: "Could not load properties",
     couldNotLoadCopy: "Something went wrong while loading listings. Please try again.",
