@@ -2,6 +2,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, webPointer } from "@/theme";
 import { SUPPORT_EMAIL } from "@/content/legal";
 import { AppLink } from "@/components/ui";
+import { MobileFooter } from "@/components/MobileFooter";
 import { Sparkles } from "@/components/icons";
 import { useTranslation } from "@/i18n";
 import {
@@ -56,6 +57,8 @@ export function GooglePlayButton() {
 
 export interface FooterProps {
   style?: StyleProp<ViewStyle>;
+  /** The collapsible phone footer, for pages that keep to a short phone layout. */
+  compact?: boolean;
 }
 
 function WebFooter({ style }: FooterProps) {
@@ -166,109 +169,7 @@ function WebFooter({ style }: FooterProps) {
     </View>
   );
 
-  if (isPhone) {
-    return (
-      <View style={[styles.footer, style]}>
-        <View style={styles.footerInnerPhone}>
-          {/* Individual Card on Top: Download the Homenet app */}
-          <View style={styles.mobileDownloadCard}>
-            <View style={styles.mobileDownloadTextWrap}>
-              <Text style={styles.mobileDownloadHeading}>{t("footer.downloadHeading")}</Text>
-              <Text style={styles.mobileDownloadSub}>
-                {t("footer.downloadSub")}
-              </Text>
-            </View>
-            <View style={styles.mobileDownloadBtnWrap}>
-              <GooglePlayButton />
-            </View>
-          </View>
-
-          {/* 2 by 2 Grid for Resources, Search, Locations, Homenet */}
-          <View style={styles.footer2x2Grid}>
-            {/* 1. Resources */}
-            <View style={styles.footer2x2Col}>
-              <Text style={styles.footerColHeading}>{t("footer.resources")}</Text>
-              {resourcesLinks.map((item) => (
-                <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
-                  <Text style={styles.footerLinkText}>{item.label}</Text>
-                </AppLink>
-              ))}
-            </View>
-
-            {/* 2. Search */}
-            <View style={styles.footer2x2Col}>
-              <Text style={styles.footerColHeading}>{t("footer.search")}</Text>
-              {searchLinks.map((item) => (
-                <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
-                  <Text style={styles.footerLinkText}>{item.label}</Text>
-                </AppLink>
-              ))}
-            </View>
-
-            {/* 3. Locations */}
-            <View style={styles.footer2x2Col}>
-              <Text style={styles.footerColHeading}>{t("footer.locations")}</Text>
-              {locationsLinks.map((item) => (
-                <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
-                  <Text style={styles.footerLinkText}>{item.label}</Text>
-                </AppLink>
-              ))}
-            </View>
-
-            {/* 4. Homenet */}
-            <View style={styles.footer2x2Col}>
-              <Text style={styles.footerColHeading}>{t("footer.homenet")}</Text>
-              {homenetLinks.map((item) => (
-                <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
-                  <Text style={styles.footerLinkText}>{item.label}</Text>
-                </AppLink>
-              ))}
-            </View>
-          </View>
-
-          {/* Column: Professional / Pro Plan Benefits */}
-          <View style={styles.mobileProCard}>
-            <View style={styles.mobileProHeader}>
-              <Text style={styles.footerColHeading}>{t("footer.professional")}</Text>
-              <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
-                <Text style={styles.proBadgeText}>{t("footer.homenetPro")}</Text>
-                <Sparkles color="#A7F3D0" size={13} />
-              </AppLink>
-            </View>
-            <View style={styles.mobileProList}>
-              {proBenefits.map((item) => (
-                <AppLink href="/seller" key={item} style={styles.footerLinkWrap}>
-                  <Text style={styles.footerProBenefitText}>• {item}</Text>
-                </AppLink>
-              ))}
-            </View>
-          </View>
-
-          {/* Footer Bottom Divider */}
-          <View style={styles.footerDividerLine} />
-
-          <View style={styles.footerBottomRowPhone}>
-            {/* Legal / Utility Links */}
-            <View style={styles.footerLegalLinksPhone}>
-              {legalLinks.map((link) => (
-                <AppLink href={link.href} key={link.label} style={styles.footerLegalItemPhone}>
-                  <Text style={styles.footerLegalLinkText}>{link.label}</Text>
-                </AppLink>
-              ))}
-            </View>
-
-            {/* Social Icons */}
-            {renderSocialIcons()}
-          </View>
-
-          {/* Copyright notice */}
-          <Text style={styles.footerCopyrightText}>
-            {t("footer.copyright")}
-          </Text>
-        </View>
-      </View>
-    );
-  }
+  if (isPhone) return <MobileFooter style={style} />;
 
   return (
     <View style={[styles.footer, style]}>
@@ -409,8 +310,9 @@ function AppFooter({ style }: FooterProps) {
   );
 }
 
-export function Footer({ style }: FooterProps = {}) {
-  return Platform.OS === "web" ? <WebFooter style={style} /> : <AppFooter style={style} />;
+export function Footer({ style, compact }: FooterProps = {}) {
+  if (Platform.OS !== "web") return <AppFooter style={style} />;
+  return compact ? <MobileFooter style={style} /> : <WebFooter style={style} />;
 }
 
 const appFooterStyles = StyleSheet.create({

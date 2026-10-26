@@ -232,6 +232,7 @@ export const styles = StyleSheet.create({
   },
   topbarMobileHome: {
     height: 56,
+    minHeight: 56,
     width: "100%",
     paddingHorizontal: 16,
     flexDirection: "row",
@@ -250,7 +251,7 @@ export const styles = StyleSheet.create({
     minWidth: 0,
     marginRight: 8,
     overflow: "hidden",
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
   mobileHomeRightWrap: {
     flexDirection: "row",
@@ -916,6 +917,21 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 3,
+  },
+  drawerLanguage: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 12,
+    paddingTop: 14,
+    paddingHorizontal: 14,
+    borderTopWidth: 1,
+    borderTopColor: colorTokens.divider,
+  },
+  drawerLanguageLabel: {
+    fontFamily: fonts.semiBold,
+    fontSize: 15,
+    color: colorTokens.ink,
   },
   mobileNavText: {
     color: "#7B8983",

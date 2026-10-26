@@ -3,6 +3,10 @@ import type { TranslationSchema } from "./en";
 export const bn: TranslationSchema = {
   nav: {
     home: "হোম",
+    search: "খুঁজুন",
+    post: "পোস্ট",
+    valuation: "মূল্যায়ন",
+    guides: "গাইড",
     insights: "ইনসাইটস",
     saved: "সংরক্ষিত",
     profile: "প্রোফাইল",
@@ -101,6 +105,10 @@ export const bn: TranslationSchema = {
     homenet: "হোমনেট",
     professional: "প্রফেশনাল",
     homenetPro: "হোমনেট প্রো",
+    aboutHomenet: "হোমনেট সম্পর্কে",
+    commercial: "বাণিজ্যিক প্রপার্টি",
+    verifiedListings: "যাচাইকৃত লিস্টিং",
+    sellerDashboard: "বিক্রেতা ড্যাশবোর্ড",
     copyright: "কপিরাইট © ২০২৬ HomeNet Group Limited। সর্বস্বত্ব সংরক্ষিত।",
   },
   common: {
@@ -1127,6 +1135,41 @@ export const bn: TranslationSchema = {
     },
   },
   home: {
+    mobileCards: {
+      valuation: {
+        title: "তাৎক্ষণিক মূল্যায়ন",
+        copy: "এক মিনিটের মধ্যে জানুন আপনার প্রপার্টির দাম কত।",
+        cta: "মূল্যায়ন নিন",
+      },
+      list: {
+        title: "আপনার প্রপার্টি লিস্ট করুন",
+        copy: "বিনামূল্যে লিস্ট করুন। এক বাক্যে বর্ণনা দিন, বাকিটা হোমনেট পূরণ করবে।",
+        cta: "প্রপার্টি লিস্ট করুন",
+      },
+      ai: {
+        title: "সহজ কথায় খুঁজুন",
+        copy: "বাংলা বা ইংরেজিতে বলুন কী চান, এআই খুঁজে দেবে।",
+        cta: "এআই সার্চ করুন",
+      },
+      holiday: {
+        title: "হলিডে স্টে",
+        copy: "সার্ভিসড ফ্ল্যাট ও হলিডে স্টে দেখুন।",
+        cta: "হলিডে স্টে খুঁজুন",
+      },
+      commercial: {
+        title: "বাণিজ্যিক প্রপার্টি",
+        copy: "কেনা বা ভাড়ার জন্য অফিস, দোকান ও বাণিজ্যিক জায়গা।",
+        cta: "বাণিজ্যিক প্রপার্টি খুঁজুন",
+      },
+      verified: {
+        title: "যাচাইকৃত লিস্টিং",
+        copy: "শুধু আমাদের যাচাই করা লিস্টিং দেখুন।",
+        cta: "যাচাইকৃত লিস্টিং খুঁজুন",
+      },
+      newsTitle: "গাইড ও বাজারের খবর",
+      newsSeeAll: "সব দেখুন",
+      marketLink: "বাজারের তথ্য দেখুন",
+    },
     loadingProperties: "প্রপার্টি লোড হচ্ছে...",
     couldNotLoadTitle: "প্রপার্টি লোড করা যায়নি",
     couldNotLoadCopy: "লিস্টিং লোড করার সময় কিছু সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
