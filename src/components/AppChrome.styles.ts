@@ -244,6 +244,9 @@ export const styles = StyleSheet.create({
   },
   mobileHomeBrandWrap: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     minWidth: 0,
     marginRight: 8,
     overflow: "hidden",
