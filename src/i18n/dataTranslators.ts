@@ -23,8 +23,14 @@ export function formatLocalizedNumber(num: number | string | null | undefined, l
   return str.replace(/[0-9]/g, (d) => BENGALI_DIGITS[d] || d);
 }
 
+/** What a listing with a price of 0 shows: the owner wants buyers to ask. */
+export function priceOnRequestLabel(lang: SupportedLanguage = "en"): string {
+  return lang === "bn" ? "মূল্য জানতে যোগাযোগ করুন" : "Contact for price";
+}
+
 /**
  * Formats property price into crore/lakh notation in English or Bengali.
+ * A price of 0 is "Contact for price", not "৳ 0".
  */
 export function formatLocalizedPrice(
   amount: number,
@@ -32,6 +38,7 @@ export function formatLocalizedPrice(
   lang: SupportedLanguage = "en"
 ): string {
   if (typeof amount !== "number" || isNaN(amount)) return "";
+  if (amount === 0) return priceOnRequestLabel(lang);
   const unit = currency === "BDT" ? "৳" : currency;
 
   if (lang === "bn") {

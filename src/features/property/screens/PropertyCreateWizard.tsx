@@ -210,7 +210,8 @@ export function PropertyCreateWizard() {
     if (step === 2) {
       const priceNum = Number(store.price);
       const areaNum = Number(store.areaSize);
-      if (!(priceNum > 0) || !(areaNum > 0)) {
+      // 0 is allowed: the listing then shows "Contact for price".
+      if (store.price.trim() === "" || !(priceNum >= 0) || !(areaNum > 0)) {
         return t("wizard.validation.priceAreaPositive");
       }
       if (!Number.isFinite(priceNum) || priceNum > 1_000_000_000_000) {

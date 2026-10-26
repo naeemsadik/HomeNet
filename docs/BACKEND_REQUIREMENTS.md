@@ -437,3 +437,21 @@ same applies to a hard delete of a single property. When this ships, change the
 `src/content/legal.ts` (Privacy Policy, *How long we keep it*, and the Delete account
 page, *What may remain*) and remove the "may stay with the provider" test in
 `src/content/__tests__/legal.test.ts`.
+
+
+## 11. A price of 0 means "Contact for price", so submitting must allow it
+
+The website now lets an owner enter a price of `0`. Listings with a price of 0 show
+"Contact for price" (Bangla: "মূল্য জানতে যোগাযোগ করুন") instead of "৳ 0". Create and
+update already accept it (`@Min(0)` on `price`), but this stops it going live:
+
+- `RealEstateService.submitForVerification` (real-estate.service.ts, around line 781)
+  adds `price` to `missingFields` when `!property.price || property.price <= 0`, so a
+  listing with price 0 can be saved as a draft but never submitted for review.
+- On create, `price: dto.price ?? 0` stores a listing with no price as 0 too, so
+  "not set yet" and "contact for price" look the same in the database.
+
+Asked for: let the submit check accept 0, and decide how an unset price is told apart
+from a deliberate 0 (for example make the submit check require that `price` was sent,
+or store `null` for "not set"). Also check anything that sorts or filters by price:
+listings priced 0 sort first on "price low to high" and match "under ৳X" filters.

@@ -6,46 +6,34 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { LocateFixed, X } from "@/components/icons";
 import { webPointer } from "@/theme";
-import { DHAKA_CENTER, type MapPoint } from "../../constants/areaCenters";
-import {
-  MAP_AREA_ZOOM,
-  MAP_ATTRIBUTION,
-  MAP_CITY_ZOOM,
-  MAP_MAX_ZOOM,
-  MAP_PIN_ZOOM,
-  MAP_TILE_URL,
-} from "../../constants/map";
+import type { MapPoint } from "../../constants/areaCenters";
+import { MAP_ATTRIBUTION, MAP_MAX_ZOOM, MAP_PIN_ZOOM, MAP_TILE_URL } from "../../constants/map";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
+import { GOOGLE_MAPS_API_KEY } from "@/lib/features";
+import { GoogleLocationPicker } from "./GoogleLocationPicker";
 import type { LocationPickerProps } from "./LocationPicker.types";
+import { LOCATION_MESSAGES, PIN_SVG, round, sameSpot, zoomFor } from "./locationPickerShared";
 
 type LeafletModule = typeof import("leaflet");
 
-/** Six decimals is about 10 cm, far finer than a GPS fix. */
-const round = (n: number) => Math.round(n * 1e6) / 1e6;
-
-const PIN_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="0 0 36 46">' +
-  '<path d="M18 1C9.2 1 2 8 2 16.7 2 28.4 18 45 18 45s16-16.6 16-28.3C34 8 26.8 1 18 1z" fill="#04cf92" stroke="#0B1A17" stroke-width="2"/>' +
-  '<circle cx="18" cy="17" r="6" fill="#0B1A17"/></svg>';
-
-/** Within the rounding of the six-decimal values the form holds (at most 5e-7 apart). */
-const sameSpot = (a: MapPoint, b: MapPoint) => Math.abs(a.lat - b.lat) < 1e-6 && Math.abs(a.lng - b.lng) < 1e-6;
-
-/** Whole-city view until an area is chosen, then a neighbourhood view. */
-const zoomFor = (openAt: MapPoint) => (sameSpot(openAt, DHAKA_CENTER) ? MAP_CITY_ZOOM : MAP_AREA_ZOOM);
-
-const LOCATION_MESSAGES: Record<number, string> = {
-  1: "Location access is blocked. Allow it in your browser's address bar, or tap the map instead.",
-  2: "We couldn't work out where you are. Tap the map instead.",
-  3: "Finding your location took too long. Tap the map instead.",
-};
+/**
+ * Pin-drop map for the listing wizard (web): Google Maps when a key is set and
+ * Google accepts it, otherwise OpenStreetMap.
+ */
+export function LocationPicker(props: LocationPickerProps) {
+  const [googleFailed, setGoogleFailed] = useState(false);
+  if (GOOGLE_MAPS_API_KEY && !googleFailed) {
+    return <GoogleLocationPicker {...props} onUnavailable={() => setGoogleFailed(true)} />;
+  }
+  return <LeafletLocationPicker {...props} />;
+}
 
 /**
- * Pin-drop map for the listing wizard (web). Click or tap to place the pin, drag
- * it to adjust, or use the device location. Leaflet is loaded only when this step
+ * The OpenStreetMap pin-drop map. Click or tap to place the pin, drag it to
+ * adjust, or use the device location. Leaflet is loaded only when this step
  * opens, so it adds nothing to the rest of the app.
  */
-export function LocationPicker({ value, openAt, onChange }: LocationPickerProps) {
+function LeafletLocationPicker({ value, openAt, onChange }: LocationPickerProps) {
   const { lat: openLat, lng: openLng } = openAt;
   const hostRef = useRef<HTMLDivElement | null>(null);
   const leafletRef = useRef<LeafletModule | null>(null);

@@ -1,13 +1,13 @@
 import { CheckCircle2 } from "@/components/icons";
 import { Text, View } from "react-native";
-import { useTranslation } from "@/i18n";
+import { priceOnRequestLabel, useTranslation } from "@/i18n";
 import { subtypeLabel, type PropertyTypeConfig } from "../../constants/propertyCategories";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
 
 /** Step 5: review before publishing. */
 export function WizardReviewStep({ activeTypeConfig }: { activeTypeConfig: PropertyTypeConfig }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const store = usePropertyWizardStore();
 
   return (
@@ -41,8 +41,9 @@ export function WizardReviewStep({ activeTypeConfig }: { activeTypeConfig: Prope
         <View style={styles.reviewCard}>
           <Text style={styles.reviewCardLabel}>{t("wizard.review.priceLabel")}</Text>
           <Text style={styles.reviewCardValue}>
-            {t("wizard.review.bdtPrefix")}{Number(store.price).toLocaleString()}
-            {store.subtype === "short-let" ? t("wizard.review.shortLetRate") : store.listingType === "rent" ? t("wizard.review.perMonth") : ""}
+            {Number(store.price) === 0
+              ? priceOnRequestLabel(language)
+              : `${t("wizard.review.bdtPrefix")}${Number(store.price).toLocaleString()}${store.subtype === "short-let" ? t("wizard.review.shortLetRate") : store.listingType === "rent" ? t("wizard.review.perMonth") : ""}`}
           </Text>
         </View>
 

@@ -51,7 +51,7 @@ import { cdnImage } from "@/lib/cloudinaryImage";
 
 import { LiveText } from "@/components/LiveText";
 import { NoTranslateText } from "@/components/NoTranslateText";
-import { formatLocalizedNumber, translateListingStatus, useTranslation } from "@/i18n";
+import { formatLocalizedNumber, priceOnRequestLabel, translateListingStatus, useTranslation } from "@/i18n";
 
 export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
 
@@ -97,7 +97,9 @@ export function MyPropertiesScreen() {
       ),
       type: displaySubtype(p.subtype) || p.type || "Apartment",
       listingType: listingTypeLabel(p.listing_type),
-      price: `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${pricePeriodFor(p.listing_type)}`,
+      price: p.price === 0
+        ? priceOnRequestLabel(language)
+        : `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${pricePeriodFor(p.listing_type)}`,
       status: p.status,
       isVerified: p.is_verified,
       isBoosted: false,

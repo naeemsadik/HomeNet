@@ -29,6 +29,11 @@ describe("dataTranslators", () => {
   });
 
   describe("formatLocalizedPrice", () => {
+    it("shows a price of 0 as Contact for price, never as 0", () => {
+      expect(formatLocalizedPrice(0, "BDT", "en")).toBe("Contact for price");
+      expect(formatLocalizedPrice(0, "BDT", "bn")).toBe("মূল্য জানতে যোগাযোগ করুন");
+    });
+
     it("formats crore prices correctly in English", () => {
       expect(formatLocalizedPrice(48_500_000, "BDT", "en")).toBe("৳ 4.85 Cr");
       expect(formatLocalizedPrice(10_000_000, "BDT", "en")).toBe("৳ 1 Cr");

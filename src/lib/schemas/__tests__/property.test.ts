@@ -58,10 +58,13 @@ describe("Strict property schemas", () => {
       ).toBe(false);
     });
 
-    it("rejects non-numeric, zero, or negative prices", () => {
+    it("rejects non-numeric or negative prices", () => {
       expect(propertyFormSchema.safeParse({ ...validFormData, price: "abc" }).success).toBe(false);
-      expect(propertyFormSchema.safeParse({ ...validFormData, price: "0" }).success).toBe(false);
       expect(propertyFormSchema.safeParse({ ...validFormData, price: "-100" }).success).toBe(false);
+    });
+
+    it("accepts a price of 0, which a listing shows as Contact for price", () => {
+      expect(propertyFormSchema.safeParse({ ...validFormData, price: "0" }).success).toBe(true);
     });
 
     it("rejects invalid area_id format", () => {

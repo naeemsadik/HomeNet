@@ -32,7 +32,7 @@ function setup() {
       const script = node as HTMLScriptElement;
       setTimeout(() => {
         if (outcome === "load") {
-          window.google = { accounts: { id: api as never } };
+          (window as unknown as { google?: unknown }).google = { accounts: { id: api as never } };
           script.onload?.(new Event("load"));
         } else {
           script.onerror?.(new Event("error") as never);
@@ -76,7 +76,7 @@ function setup() {
 
 afterEach(() => {
   jest.restoreAllMocks();
-  delete window.google;
+  delete (window as unknown as { google?: unknown }).google;
   delete process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
   document.body.replaceChildren();
 });
