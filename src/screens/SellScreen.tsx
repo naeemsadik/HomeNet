@@ -49,7 +49,7 @@ export function SellScreen() {
         <View style={[styles.valuationCard, isPhone && styles.valuationCardPhone]}>
           <View style={styles.valuationHead}>
             <View style={styles.valuationIcon}><BarChart3 color={colorTokens.onBrand} size={20} /></View>
-            <View><Text style={styles.valuationTitle}>{t("sellScreen.valuationTitle")}</Text><Text style={styles.valuationCopy}>{t("sellScreen.valuationCopy")}</Text></View>
+            <View style={styles.valuationHeadText}><Text style={styles.valuationTitle}>{t("sellScreen.valuationTitle")}</Text><Text style={styles.valuationCopy}>{t("sellScreen.valuationCopy")}</Text></View>
           </View>
           <View style={styles.formGroup}>
             <Text style={styles.formLabel}>{t("sellScreen.addressLabel")}</Text>
@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
   valuationCardPhone: { padding: 18 },
   valuationHead: { flexDirection: "row", alignItems: "center", gap: 11, marginBottom: 3 },
   valuationIcon: { width: 41, height: 41, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: colors.green },
+  valuationHeadText: { flex: 1, minWidth: 0 },
   valuationTitle: { color: colors.ink, fontFamily: fonts.extraBold, fontSize: 16 },
   valuationCopy: { marginTop: 3, color: colors.muted, fontFamily: fonts.regular, fontSize: 13 },
   formGroup: { gap: 6 },

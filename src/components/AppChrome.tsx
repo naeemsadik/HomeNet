@@ -31,7 +31,7 @@ import {
 import { confirmAction } from "@/lib/alert";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { Brand } from "./Brand";
 import { AiFinderModal } from "./AiFinderModal";
@@ -61,6 +61,11 @@ export type ActivePage =
   | "seller"
   | "messages"
   | "enquiries";
+
+/** Below this width the phone bar is used (matches the phone home and search screens). */
+export const isMobileWidth = (width: number) => width < 768;
+/** Below this width the web navbar's links no longer fit beside the brand and actions. */
+const isCollapsedNavWidth = (width: number) => width < 1024;
 
 /**
  * The search intents the web navbar leads with. The phone drawer lists the same
@@ -209,7 +214,9 @@ function TopBar({
 }) {
   const { t } = useTranslation();
   const { isTablet, isPhone, width, containerMaxWidth } = useResponsive();
-  const isMobile = isPhone || width < 768;
+  const isMobile = isMobileWidth(width);
+  const collapseNav = isCollapsedNavWidth(width);
+  const pathname = usePathname();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
@@ -217,9 +224,10 @@ function TopBar({
   const unreadCount = unreadData?.data?.count ?? 0;
   const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
 
-  const isMobileHome = isMobile && active === "home";
-
-  if (isMobileHome) {
+  // Every phone page gets the same bar: the menu that holds the web navbar's
+  // links, the brand, then language, notifications and account.
+  if (isMobile) {
+    const onHome = pathname === "/" || pathname === "/home";
     return (
       <SafeAreaView edges={["top"]} style={styles.topbarSafe}>
         <View
@@ -230,29 +238,33 @@ function TopBar({
           ]}
         >
           <View style={styles.mobileHomeBrandWrap}>
-            <Brand compact size="default" subtitle={t("home.subcopy")} />
+            <Pressable
+              onPress={onOpenMenu}
+              style={[styles.menuButton, webPointer]}
+              accessibilityLabel={t("nav.openMenu")}
+            >
+              <Menu color="#0B1A17" size={18} strokeWidth={2.4} />
+            </Pressable>
+            <Brand
+              compact
+              size="default"
+              subtitle={onHome ? t("home.subcopy") : undefined}
+            />
           </View>
 
           <View style={styles.mobileHomeRightWrap}>
             {/* 1. Ultra-compact Bilingual Language Toggle */}
             <LanguageToggle compact ultraCompact variant="default" />
 
-            {/* 2. Notification Bell */}
+            {/* 2. Notification Bell (guests have Sign in beside it instead) */}
+            {user ? (
             <Pressable
               accessibilityLabel={
                 unreadCount > 0
                   ? t("nav.openNotificationsWithCount", { count: unreadCount })
                   : t("nav.openNotifications")
               }
-              onPress={() => {
-                if (!user) {
-                  useAuthModalStore
-                    .getState()
-                    .open(() => router.push("/notifications" as any));
-                } else {
-                  router.push("/notifications" as any);
-                }
-              }}
+              onPress={() => router.push("/notifications" as any)}
               style={[
                 styles.notificationButton,
                 styles.notificationButtonPhone,
@@ -268,6 +280,7 @@ function TopBar({
                 </View>
               ) : null}
             </Pressable>
+            ) : null}
 
             {/* 3. Auth / Sign In Trigger */}
             {user ? (
@@ -336,7 +349,7 @@ function TopBar({
       >
         {/* Left: Brand + Hamburger (mobile) */}
         <View style={[styles.topbarLeft, isPhone && styles.topbarLeftPhone]}>
-          {isTablet ? (
+          {collapseNav ? (
             <Pressable
               onPress={onOpenMenu}
               style={[
@@ -354,11 +367,11 @@ function TopBar({
               />
             </Pressable>
           ) : null}
-          <Brand compact={isTablet} variant={isCrystal ? "light" : "dark"} />
+          <Brand compact={collapseNav} variant={isCrystal ? "light" : "dark"} />
         </View>
 
         {/* Center: Desktop Nav Links (only when links exist) */}
-        {!isTablet && topNavLinks.length > 0 ? (
+        {!collapseNav && topNavLinks.length > 0 ? (
           <View style={styles.topNavCenter}>
             {topNavLinks.map((link) => {
               const label = t(link.translationKey);
@@ -750,7 +763,9 @@ export function AppChrome({
   fluid?: boolean;
   customTopBar?: ReactNode;
 }) {
-  const { isTablet, isPhone, containerMaxWidth } = useResponsive();
+  const { isTablet, isPhone, width, containerMaxWidth } = useResponsive();
+  const isMobile = isMobileWidth(width);
+  const collapseNav = isCollapsedNavWidth(width);
   const insets = useSafeAreaInsets();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -785,9 +800,10 @@ export function AppChrome({
             styles.pageScrollContent,
             // The bar is pinned over the page and grows by the status-bar inset
             // (edge-to-edge on Android), so the page must start below both.
-            !bleed && {
+            // A custom bar (the phone search screen's) sits in the flow instead.
+            !bleed && !customTopBar && {
               paddingTop:
-                (isPhone
+                (isMobile
                   ? layout.navHeightPhone
                   : isTablet
                   ? layout.navHeightTablet
@@ -824,7 +840,7 @@ export function AppChrome({
         animationType="fade"
         onRequestClose={() => setMenuOpen(false)}
         transparent
-        visible={isTablet && menuOpen}
+        visible={collapseNav && menuOpen}
       >
         <View style={styles.drawerLayer}>
           <Pressable

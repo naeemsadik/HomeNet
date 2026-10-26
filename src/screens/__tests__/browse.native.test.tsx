@@ -1,6 +1,7 @@
 import React from "react";
 import renderer, { act, type ReactTestRenderer, type ReactTestInstance } from "react-test-renderer";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Dimensions } from "react-native";
 import { router } from "expo-router";
 import { BrowseScreen } from "@/screens/BrowseScreen";
 import { getProperties } from "@/services/propertyApi";
@@ -81,7 +82,16 @@ async function mount(mode: "buy" | "rent" | "sold" = "rent"): Promise<ReactTestR
 
 afterEach(() => {
   for (const tree of mounted.splice(0)) act(() => tree.unmount());
+  jest.restoreAllMocks();
 });
+
+/**
+ * The default test window is phone-sized, where the search screen shows the
+ * filters modal instead of the desktop filter card and its toolbar.
+ */
+function withDesktopWindow() {
+  jest.spyOn(Dimensions, "get").mockReturnValue({ width: 1280, height: 900, scale: 2, fontScale: 1 });
+}
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -152,6 +162,7 @@ describe("the Area list when the API returns only part of it", () => {
         limit: 2,
       },
     });
+    withDesktopWindow();
     const tree = await mount();
 
     const box = pressableWithText(tree, "All areas");
@@ -252,6 +263,7 @@ describe("BrowseScreen filters on Android", () => {
   it("clears a filter out of the URL rather than leaving it behind", async () => {
     // router.setParams merges, so a cleared filter has to be written as empty.
     mockParams = { bathrooms: "2", amenities: "lift" };
+    withDesktopWindow();
     const tree = await mount("buy");
 
     const reset = pressableWithText(tree, "Reset filters");
