@@ -369,6 +369,9 @@ export function PropertyDetailScreen() {
   if (isLoading && !property) {
     return (
       <AppChrome active="property">
+        {/* The exported HTML for a listing is this state: it must still name
+            the page's canonical URL, which PageMeta builds from the path. */}
+        <PageMeta title="Property for sale or rent in Bangladesh | HomeNet BD" />
         <View style={styles.requestState}>
           <ActivityIndicator color="#04cf92" size="large" />
           <Text style={styles.requestError}>{t("propertyDetail.loading")}</Text>
@@ -380,6 +383,9 @@ export function PropertyDetailScreen() {
   if (!property) {
     return (
       <AppChrome active="property">
+        {/* A removed or mistyped listing answers 200 with this message: keep it
+            out of the index rather than leave a soft 404 there. */}
+        <PageMeta title="Listing not found | HomeNet BD" noindex />
         <View style={styles.requestState}>
           <Text style={styles.requestError}>{error ? toApiError(error).message : t("propertyDetail.notFound")}</Text>
           <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>

@@ -25,6 +25,8 @@ const PRIVATE_PREFIXES = [
   "/messages",
   "/property/create",
   "/property/edit",
+  // Staff-only user lists and profiles: a crawler only ever sees the sign-in gate.
+  "/users",
 ];
 
 export function isPrivatePath(pathname: string): boolean {
