@@ -25,6 +25,7 @@ import { router } from "expo-router";
 import { openExternalUrl } from "@/lib/safeUrl";
 import { shareLink } from "@/lib/share";
 import { AppChrome } from "@/components/AppChrome";
+import { PageMeta } from "@/components/PageMeta";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
@@ -163,6 +164,13 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
 
   return (
     <AppChrome active="home" fluid>
+      {/* Each guide is its own search result, so it carries its own title. A
+          slug with no guide is a soft 404 and stays out of the index. */}
+      <PageMeta
+        title={guide && guideTitle ? `${guideTitle} | HomeNet BD` : "Property Guide | HomeNet BD"}
+        description={guideExcerpt || "Property advice, land verification procedures and Dhaka market updates."}
+        noindex={!isLoading && (isError || !guide) ? true : undefined}
+      />
       <View
         style={[
           styles.container,

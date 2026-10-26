@@ -279,6 +279,11 @@ export async function fetchPropertyGuideBySlug(
     }
   }
 
+  return curatedGuideBySlug(slug);
+}
+
+/** The bundled copy of a guide, or null. Shown before the API answers. */
+export function curatedGuideBySlug(slug: string): PropertyGuide | null {
   const fallback = CURATED_PROPERTY_GUIDES.find((g) => g.slug === slug);
   return fallback ? normalizeGuide(fallback) : null;
 }
