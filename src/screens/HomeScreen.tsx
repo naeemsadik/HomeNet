@@ -151,6 +151,26 @@ export function HomeScreen() {
               copyPad: 96,
               topPad: 76,
             };
+  // Phone: the same photograph as the website, cut to a short banner.
+  const mobileHero = (
+    <View style={styles.mobileHeroPhoto}>
+      <ImageBackground
+        source={HERO_IMAGE}
+        style={[styles.mobileHeroBg, { height: 236 + insets.top, paddingTop: insets.top }]}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={["rgba(6, 22, 18, 0.55)", "rgba(6, 22, 18, 0.18)", "rgba(6, 22, 18, 0.5)"]}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={styles.mobileHeroCopy}>
+          <NoTranslateText style={styles.mobileHeroHeading}>{t("home.heroHeadline")}</NoTranslateText>
+        </View>
+      </ImageBackground>
+    </View>
+  );
+
   const popularQuery = useQuery({
     queryKey: ["properties", "home", "popular"],
     queryFn: () =>
@@ -243,8 +263,12 @@ export function HomeScreen() {
   );
 
   return (
-    <AppChrome active="home" bleed={isMobile ? undefined : hero}>
-      {isMobile ? <MobileHeroSearchCard /> : null}
+    <AppChrome active="home" bleed={isMobile ? mobileHero : hero}>
+      {isMobile ? (
+        <View style={styles.mobileSearchOverlap}>
+          <MobileHeroSearchCard />
+        </View>
+      ) : null}
 
       {/* ─────────────────────────────────────────────────────────────
           2. FEATURED PROPERTIES (live API), real listings answer the search

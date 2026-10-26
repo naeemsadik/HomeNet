@@ -89,6 +89,32 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
 
+  // Phone: a short photo banner, with the search card pulled up over its lower edge.
+  mobileHeroPhoto: {
+    width: "100%",
+    height: 236,
+    overflow: "hidden",
+  },
+  mobileHeroBg: {
+    width: "100%",
+    height: 236,
+    justifyContent: "flex-end",
+  },
+  mobileHeroCopy: {
+    paddingHorizontal: 20,
+    paddingBottom: 64,
+  },
+  mobileHeroHeading: {
+    color: "#FFFFFF",
+    fontFamily: fonts.headingSemiBold,
+    fontSize: 28,
+    lineHeight: 33,
+    letterSpacing: -0.6,
+  },
+  mobileSearchOverlap: {
+    marginTop: -52,
+  },
+
   // The dock sits back inside the page gutter even though the photo does not.
   dockGutter: {
     width: "100%",
