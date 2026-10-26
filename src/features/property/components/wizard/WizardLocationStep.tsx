@@ -5,12 +5,14 @@ import { useTranslation } from "@/i18n";
 import { useAllAreas } from "@/hooks/useAllAreas";
 import { useResponsive } from "@/hooks/useResponsive";
 import { resolveMapLink } from "@/services/mapApi";
+import { GOOGLE_MAPS_API_KEY } from "@/lib/features";
 import { reverseGeocode, type GeocodedPlace } from "@/services/geocodeApi";
+import { googleReverseGeocode } from "@/services/googleGeocode";
 import { areaCenterFor, type MapPoint } from "../../constants/areaCenters";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
 import { coordinateProblem } from "../../utils/coordinates";
 import { parseMapLink } from "../../utils/mapLink";
-import { areaFromPlace, nearestArea } from "../../utils/placeFromPin";
+import { areaFromPlace, nearestArea, pinFillPatch } from "../../utils/placeFromPin";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
 import { LocationPicker } from "./LocationPicker";
 
@@ -107,7 +109,16 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
         let place: GeocodedPlace | null = null;
         let failed = false;
         try {
-          place = await reverseGeocode(pin);
+          // Google when it is set up and answers; OpenStreetMap otherwise, so a refused key costs nothing.
+          if (GOOGLE_MAPS_API_KEY) {
+            try {
+              place = await googleReverseGeocode(pin);
+            } catch {
+              place = await reverseGeocode(pin);
+            }
+          } else {
+            place = await reverseGeocode(pin);
+          }
         } catch {
           failed = true;
         }
@@ -118,18 +129,9 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
         const area = fromPlace ?? nearestArea(pin, list);
 
         const current = usePropertyWizardStore.getState();
-        const patch: { areaId?: string; areaName?: string; district?: string; address?: string } = {};
-        // Fill a box only if it is empty or still holds what this step put there.
-        if (area && (!current.areaId || current.areaId === written.current.areaId)) {
-          patch.areaId = area.id;
-          patch.areaName = area.name;
-          patch.district = area.city ?? "";
-          written.current.areaId = area.id;
-        }
-        if (place?.address && (!current.address.trim() || current.address === written.current.address)) {
-          patch.address = place.address;
-          written.current.address = place.address;
-        }
+        const filled = pinFillPatch(current, written.current, area, place?.address ?? null);
+        written.current = filled.written;
+        const patch = filled.patch;
         if (Object.keys(patch).length > 0) usePropertyWizardStore.getState().setLocation(patch);
         setAuto({ ...written.current });
         setLookup({ status: failed ? "failed" : "done", areaFrom: area ? (fromPlace ? "place" : "nearest") : null });

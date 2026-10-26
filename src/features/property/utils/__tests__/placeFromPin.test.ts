@@ -1,6 +1,6 @@
 import type { GeocodedPlace } from "@/services/geocodeApi";
 import type { Area } from "@/types/api";
-import { areaFromPlace, distanceKm, nearestArea } from "../placeFromPin";
+import { areaFromPlace, distanceKm, nearestArea, pinFillPatch } from "../placeFromPin";
 
 jest.mock("@/services/geocodeApi", () => ({}));
 
@@ -73,5 +73,43 @@ describe("nearestArea", () => {
     const only = [area("uttara", "Uttara"), area("sector-6", "Sector-6", "uttara"), area("pm", "Postman Area muobwcfj")];
     expect(nearestArea({ lat: 23.8759, lng: 90.3795 }, only)?.id).toBe("uttara");
     expect(nearestArea({ lat: 23.81, lng: 90.41 }, [area("pm", "Postman Area muobwcfj")])).toBeNull();
+  });
+});
+
+describe("pinFillPatch", () => {
+  const gulshan = areas[0];
+  const none = { areaId: null, address: null };
+
+  it("fills empty boxes from the pin", () => {
+    const { patch, written } = pinFillPatch({ areaId: "", address: "" }, none, gulshan, "Road 1, Gulshan");
+    expect(patch).toEqual({ areaId: "gulshan", areaName: "Gulshan", district: "Dhaka", address: "Road 1, Gulshan" });
+    expect(written).toEqual({ areaId: "gulshan", address: "Road 1, Gulshan" });
+  });
+
+  it("replaces what an earlier pin wrote", () => {
+    const earlier = { areaId: "gulshan", address: "Road 1, Gulshan" };
+    const banani = areas[2];
+    const { patch } = pinFillPatch({ areaId: "gulshan", address: "Road 1, Gulshan" }, earlier, banani, "Road 9, Banani");
+    expect(patch.areaId).toBe("banani");
+    expect(patch.address).toBe("Road 9, Banani");
+  });
+
+  it("never replaces what the owner chose or typed", () => {
+    const earlier = { areaId: "gulshan", address: "Road 1, Gulshan" };
+    const { patch } = pinFillPatch({ areaId: "uttara", address: "My own address" }, earlier, areas[2], "Road 9, Banani");
+    expect(patch).toEqual({});
+  });
+
+  it("clears the area and address an earlier pin wrote when the new pin gives none", () => {
+    const earlier = { areaId: "gulshan", address: "Road 1, Gulshan" };
+    const { patch, written } = pinFillPatch({ areaId: "gulshan", address: "Road 1, Gulshan" }, earlier, null, null);
+    expect(patch).toEqual({ areaId: "", areaName: "", district: "", address: "" });
+    expect(written).toEqual({ areaId: null, address: null });
+  });
+
+  it("keeps an area and address the owner set when the new pin gives none", () => {
+    const earlier = { areaId: "gulshan", address: "Road 1, Gulshan" };
+    const { patch } = pinFillPatch({ areaId: "uttara", address: "My own address" }, earlier, null, null);
+    expect(patch).toEqual({});
   });
 });
