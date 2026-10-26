@@ -29,7 +29,6 @@ const SECTIONS: FooterSection[] = [
       { label: "nav.guides", href: "/guides" },
       { label: "nav.insights", href: "/market" },
       { label: "nav.valuation", href: "/valuation" },
-      { label: "footer.aboutHomenet", href: "/about" },
     ],
   },
   {
@@ -64,6 +63,7 @@ const SECTIONS: FooterSection[] = [
       { label: "footer.contactUs", href: `mailto:${SUPPORT_EMAIL}` },
       { label: "footer.privacyPolicy", href: "/privacy" },
       { label: "footer.termsOfUse", href: "/terms" },
+      { label: "footer.deleteAccount", href: "/delete-account" },
     ],
   },
   {
@@ -74,13 +74,6 @@ const SECTIONS: FooterSection[] = [
       { label: "footer.sellerDashboard", href: "/seller" },
     ],
   },
-];
-
-const LEGAL: FooterLink[] = [
-  { label: "footer.termsOfUse", href: "/terms" },
-  { label: "footer.privacyPolicy", href: "/privacy" },
-  { label: "footer.deleteAccount", href: "/delete-account" },
-  { label: "footer.contactUs", href: `mailto:${SUPPORT_EMAIL}` },
 ];
 
 const Section = memo(function Section({
@@ -123,46 +116,37 @@ const Section = memo(function Section({
 });
 
 /**
- * The phone footer: collapsed sections that open on tap, then the policy links
- * and the copyright line. Only one section is open at a time, so the footer
- * never grows taller than the open list.
+ * The phone footer: collapsed sections that open on tap. The policy links sit
+ * once, in the Homenet section. Only one section is open at a time, so the
+ * footer never grows taller than the open list.
  */
 export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
-  const { t } = useTranslation();
   const [openKey, setOpenKey] = useState<string | null>(null);
   const toggle = (key: string) => setOpenKey((current) => (current === key ? null : key));
 
   return (
-    <View style={style}>
+    <View style={[styles.root, style]}>
       <View style={styles.sections}>
         {SECTIONS.map((section) => (
           <Section key={section.key} onToggle={toggle} open={openKey === section.key} section={section} />
         ))}
-      </View>
-
-      <View style={styles.legal}>
-        {[LEGAL.slice(0, 2), LEGAL.slice(2)].map((row) => (
-          <View key={row[0].href} style={styles.legalRow}>
-            {row.map((link, index) => (
-              <View key={link.href} style={[styles.legalItem, index > 0 && styles.legalDivider]}>
-                <AppLink href={link.href}>
-                  <Text style={styles.legalText}>{t(link.label as TranslationKey)}</Text>
-                </AppLink>
-              </View>
-            ))}
-          </View>
-        ))}
-        <Text style={styles.copyright}>{t("footer.copyright")}</Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // The page column centres its children, which would shrink the footer to its text width.
+  root: {
+    width: "100%",
+    alignSelf: "stretch",
+  },
   sections: {
     backgroundColor: colorTokens.surfaceSunken,
     paddingHorizontal: 20,
     paddingTop: 8,
+    // Clears the fixed bottom bar, so the last row is never hidden behind it.
+    paddingBottom: 88,
     borderTopWidth: 1,
     borderTopColor: colorTokens.divider,
   },
@@ -195,34 +179,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 15,
     color: colorTokens.ink,
-  },
-  legal: {
-    backgroundColor: colorTokens.surface,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 28,
-    gap: 14,
-  },
-  legalRow: {
-    flexDirection: "row",
-  },
-  legalItem: {
-    paddingRight: 14,
-  },
-  legalDivider: {
-    paddingLeft: 14,
-    borderLeftWidth: 1,
-    borderLeftColor: colorTokens.divider,
-  },
-  legalText: {
-    fontFamily: fonts.regular,
-    fontSize: 13.5,
-    color: colorTokens.ink,
-  },
-  copyright: {
-    fontFamily: fonts.regular,
-    fontSize: 12.5,
-    lineHeight: 18,
-    color: colorTokens.muted,
   },
 });
