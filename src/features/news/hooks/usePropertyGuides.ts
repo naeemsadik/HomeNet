@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchPropertyGuides, fetchPropertyGuideBySlug } from "../api/newsApi";
+import { curatedGuideBySlug, fetchPropertyGuides, fetchPropertyGuideBySlug } from "../api/newsApi";
 import type { FetchPropertyGuidesParams } from "../types/news";
 
 /**
@@ -21,12 +21,19 @@ export function usePropertyGuides(options?: number | FetchPropertyGuidesParams) 
 
 /**
  * Fetches a single property guide by its slug for detail/reader views.
+ *
+ * A curated guide renders from its bundled copy straight away, so the exported
+ * HTML (and so what a crawler first reads) carries the article itself rather
+ * than a spinner. The copy is marked stale, so the API version replaces it.
  */
 export function usePropertyGuide(slug: string) {
+  const curated = curatedGuideBySlug(slug);
   return useQuery({
     queryKey: ["guide", slug],
     queryFn: () => fetchPropertyGuideBySlug(slug),
     enabled: Boolean(slug),
+    initialData: curated ?? undefined,
+    initialDataUpdatedAt: 0,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000,    // 30 minutes
   });

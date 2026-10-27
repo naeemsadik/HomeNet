@@ -1,11 +1,6 @@
-import { RequirePermission } from "@/components/RequirePermission";
-import { UsersScreen } from "@/screens/UsersScreen";
+import { Redirect } from "expo-router";
 
-// The API lists users only for manage_users; everyone else gets a 404.
+/** `/users` is a legacy alias — canonical user management route is `/admin/users`. */
 export default function UsersRoute() {
-  return (
-    <RequirePermission permission="manage_users">
-      <UsersScreen />
-    </RequirePermission>
-  );
+  return <Redirect href="/admin/users" />;
 }

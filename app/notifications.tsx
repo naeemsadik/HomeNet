@@ -1,10 +1,6 @@
-import { RequireAuth } from "@/components/RequireAuth";
-import { NotificationScreen } from "@/screens/NotificationScreen";
+import { Redirect } from "expo-router";
 
+/** `/notifications` is a legacy alias — canonical notifications/enquiries hub is `/enquiries`. */
 export default function NotificationsRoute() {
-  return (
-    <RequireAuth active="home">
-      <NotificationScreen />
-    </RequireAuth>
-  );
+  return <Redirect href={"/enquiries" as any} />;
 }

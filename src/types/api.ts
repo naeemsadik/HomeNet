@@ -134,6 +134,16 @@ export interface UpsertPropertyDto {
   amenities?: Record<string, unknown>;
   virtual_tour_url?: string;
   status?: PropertyStatus;
+  media?: Array<
+    | string
+    | {
+        url: string;
+        public_id?: string;
+        thumbnail_url?: string;
+        media_type?: "image" | "video";
+        display_order?: number;
+      }
+  >;
 }
 
 export type CreatePropertyDto = UpsertPropertyDto & { area_id: string };

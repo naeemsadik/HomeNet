@@ -2,6 +2,7 @@ import React, { memo } from "react";
 import {
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -11,10 +12,22 @@ import {
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { Bath, BedDouble, Heart, LandPlot, MapPin, ShieldCheck } from "@/components/icons";
+import {
+  Bath,
+  BedDouble,
+  Camera,
+  Heart,
+  LandPlot,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Phone,
+  ShieldCheck,
+} from "@/components/icons";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { useTranslation, formatLocalizedPrice, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { isHolidayStayType } from "@/features/property/utils/listingType";
@@ -162,6 +175,288 @@ function PropertyCardComponent({
       <Text style={styles.placeholderText}>{t("propertyCard.noPhoto")}</Text>
     </View>
   );
+
+  // ── Mobile Rightmove Alignment (< 768px / isPhone) ──────────────────────
+  const images = React.useMemo(() => {
+    const list = property.media?.filter((m) => m.media_type === "image" && m.url).map((m) => m.url) ?? [];
+    if (list.length > 0) return list;
+    if (original) return [original];
+    return [];
+  }, [property.media, original]);
+
+  const [activeImageIndex, setActiveImageIndex] = React.useState(0);
+  const [cardWidth, setCardWidth] = React.useState(0);
+
+  const hasFloorPlan = Boolean(property.amenities?.floor_plan || property.amenities?.floorPlan);
+
+  const recencyText = React.useMemo(() => {
+    const dateStr = property.updated_at || property.published_at || property.created_at;
+    if (!dateStr) return null;
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) {
+      return t("propertyCard.addedToday");
+    }
+    const formatted = date.toLocaleDateString(language === "bn" ? "bn-BD" : "en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+    return property.updated_at && property.updated_at !== property.created_at
+      ? t("propertyCard.updatedDate", { date: formatted })
+      : t("propertyCard.addedDate", { date: formatted });
+  }, [property.updated_at, property.published_at, property.created_at, t, language]);
+
+  const sellerPhone =
+    property.user?.auth_identities?.find((id) => id.phone)?.phone ||
+    (property as any).seller?.phone ||
+    null;
+
+  const handleCall = (e?: any) => {
+    e?.stopPropagation?.();
+    if (!sellerPhone) {
+      open();
+      return;
+    }
+    const clean = sellerPhone.replace(/[^\d+]/g, "");
+    const telUrl = `tel:${clean}`;
+    if (isSafeLinkUrl(telUrl)) {
+      openExternalUrl(telUrl);
+    }
+  };
+
+  const handleWhatsApp = (e?: any) => {
+    e?.stopPropagation?.();
+    if (!sellerPhone) {
+      open();
+      return;
+    }
+    const clean = sellerPhone.replace(/[^\d]/g, "");
+    const defaultSeller = language === "bn" ? "মালিক" : "Seller";
+    const defaultProp = language === "bn" ? "প্রোপার্টি" : "Property";
+    const greeting = language === "bn"
+      ? `আসসালামু আলাইকুম ${property.user?.full_name || defaultSeller}, আমি HomeNet-এ আপনার প্রোপার্টি "${property.title || defaultProp}" সম্পর্কে আগ্রহী। এটি কি এখনো পাওয়া যাচ্ছে?`
+      : `Hello ${property.user?.full_name || defaultSeller}, I am interested in your property "${property.title || defaultProp}" on HomeNet. Is it currently available?`;
+    const waUrl = `https://wa.me/${clean}?text=${encodeURIComponent(greeting)}`;
+    if (isSafeLinkUrl(waUrl)) {
+      openExternalUrl(waUrl);
+    }
+  };
+
+  const handleInquire = (e?: any) => {
+    e?.stopPropagation?.();
+    open();
+  };
+
+  if (isPhone) {
+    const bedCount = property.bedrooms || specs.beds;
+    const typeName =
+      property.subtype ||
+      (property.type ? property.type.charAt(0).toUpperCase() + property.type.slice(1) : "Property");
+    const specTitle = bedCount ? `${bedCount} bed ${typeName}` : typeName;
+
+    return (
+      <View
+        style={[styles.mobileCardShell, width ? { width } : null, style]}
+        onLayout={(e) => setCardWidth(e.nativeEvent.layout.width)}
+      >
+        <View style={styles.mobileCard}>
+          {/* Main Card Tappable Area */}
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel={`${property.title}, ${intentLabel}, ${price}`}
+            onPress={open}
+            style={({ pressed }) => [
+              styles.mobileCardBodyPressable,
+              webPointer,
+              pressed && { opacity: 0.96 },
+            ]}
+          >
+            {/* 1. Media Container & Carousel */}
+            <View style={styles.mobileMediaContainer}>
+              {images.length > 1 ? (
+                <ScrollView
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  nestedScrollEnabled
+                  onScroll={(e: any) => {
+                    const x = e.nativeEvent.contentOffset.x;
+                    const w = e.nativeEvent.layoutMeasurement.width;
+                    if (w > 0) {
+                      const idx = Math.round(x / w);
+                      if (idx !== activeImageIndex && idx >= 0 && idx < images.length) {
+                        setActiveImageIndex(idx);
+                      }
+                    }
+                  }}
+                  scrollEventThrottle={16}
+                  style={StyleSheet.absoluteFill}
+                >
+                  {images.map((imgUri, idx) => (
+                    <View
+                      key={`${imgUri}-${idx}`}
+                      style={[styles.mobileSlide, cardWidth > 0 ? { width: cardWidth } : null]}
+                    >
+                      <Image
+                        source={{ uri: cdnImage(imgUri, 800, 480) }}
+                        accessibilityLabel={`${property.title} photo ${idx + 1}`}
+                        style={styles.fill}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
+                      />
+                    </View>
+                  ))}
+                </ScrollView>
+              ) : images.length === 1 ? (
+                <Image
+                  source={{ uri: cdnImage(images[0], 800, 480) }}
+                  accessibilityLabel={property.title}
+                  style={styles.fill}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+                />
+              ) : (
+                placeholder
+              )}
+
+              {/* Top-left image counter badge */}
+              <View style={styles.imageCounterBadge} pointerEvents="none">
+                <Camera size={13} color={colorTokens.onInk} strokeWidth={2.2} />
+                <Text style={styles.imageCounterText}>
+                  {images.length > 0 ? `${activeImageIndex + 1}/${images.length}` : "1/1"}
+                </Text>
+                {hasFloorPlan ? (
+                  <>
+                    <View style={styles.counterDivider} />
+                    <Text style={styles.floorPlanText}>{t("propertyCard.floorPlan")}</Text>
+                  </>
+                ) : null}
+              </View>
+
+              {/* Bottom dots */}
+              {images.length > 1 ? (
+                <View style={styles.dotsContainer} pointerEvents="none">
+                  {images.slice(0, 5).map((_, idx) => (
+                    <View
+                      key={idx}
+                      style={[
+                        styles.dot,
+                        activeImageIndex === idx && styles.dotActive,
+                      ]}
+                    />
+                  ))}
+                </View>
+              ) : null}
+            </View>
+
+            {/* 2. Status Badge Ribbon */}
+            {property.is_verified ? (
+              <View style={styles.ribbonVerified}>
+                <ShieldCheck size={14} color={colorTokens.brandText} strokeWidth={2.4} />
+                <Text style={styles.ribbonVerifiedText}>{t("propertyCard.verifiedFull")}</Text>
+              </View>
+            ) : (
+              <View style={styles.ribbonOwner}>
+                <Text style={styles.ribbonOwnerText}>{t("propertyCard.directOwner")}</Text>
+              </View>
+            )}
+
+            {/* 3. Card Typography & Information Hierarchy */}
+            <View style={styles.mobileBody}>
+              <Text style={styles.mobilePrice}>
+                {price}
+                {isRent ? <Text style={styles.mobilePriceSuffix}>{t("propertyCard.perMonth")}</Text> : null}
+              </Text>
+
+              <Text numberOfLines={1} style={styles.mobileSpecTitle}>
+                {specTitle}
+              </Text>
+
+              <View style={styles.mobileLocationRow}>
+                <MapPin color={colorTokens.muted} size={14} strokeWidth={2} />
+                <Text numberOfLines={1} style={styles.mobileLocationText}>
+                  {location}
+                </Text>
+              </View>
+
+              {recencyText ? (
+                <Text style={styles.mobileRecencyText}>{recencyText}</Text>
+              ) : null}
+            </View>
+          </Pressable>
+
+          {/* Top-right heart button: positioned absolute over media */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              isCardSaved
+                ? t("propertyCard.removeFromSaved", { title: property.title })
+                : t("propertyCard.saveProperty", { title: property.title })
+            }
+            onPress={handleSave}
+            style={[styles.mobileSaveBtn, webPointer]}
+          >
+            <Heart
+              color={isCardSaved ? colorTokens.saved : colorTokens.ink}
+              fill={isCardSaved ? colorTokens.saved : "transparent"}
+              size={18}
+            />
+          </Pressable>
+
+          {/* 4. In-Card Bottom Action Row (3-column action footer) */}
+          <View style={styles.actionFooter}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("propertyDetail.inquire")}
+              onPress={handleInquire}
+              style={({ pressed }) => [
+                styles.actionBtn,
+                webPointer,
+                pressed && { backgroundColor: colorTokens.surfaceSunken },
+              ]}
+            >
+              <Mail size={16} color={colorTokens.brandText} strokeWidth={2} />
+              <Text style={styles.actionBtnText}>{t("propertyDetail.inquire")}</Text>
+            </Pressable>
+
+            <View style={styles.actionDivider} />
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("propertyDetail.call")}
+              onPress={handleCall}
+              style={({ pressed }) => [
+                styles.actionBtn,
+                webPointer,
+                pressed && { backgroundColor: colorTokens.surfaceSunken },
+              ]}
+            >
+              <Phone size={16} color={colorTokens.brandText} strokeWidth={2} />
+              <Text style={styles.actionBtnText}>{t("propertyDetail.call")}</Text>
+            </Pressable>
+
+            <View style={styles.actionDivider} />
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("propertyDetail.whatsapp")}
+              onPress={handleWhatsApp}
+              style={({ pressed }) => [
+                styles.actionBtn,
+                webPointer,
+                pressed && { backgroundColor: colorTokens.surfaceSunken },
+              ]}
+            >
+              <MessageSquare size={16} color={colorTokens.brandText} strokeWidth={2} />
+              <Text style={styles.actionBtnText}>{t("propertyDetail.whatsapp")}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   // ── Feature: photo fills the card, facts overlay it ──────────────────────
   if (isFeature) {
@@ -468,5 +763,191 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.82)",
     fontFamily: fonts.regular,
     fontSize: 14,
+  },
+
+  // ── Mobile Rightmove Pattern Styles ──────────────────────────────────────
+  mobileCardShell: {
+    width: "100%",
+    marginBottom: 16,
+  },
+  mobileCard: {
+    width: "100%",
+    position: "relative",
+    backgroundColor: colorTokens.surface,
+    borderRadius: radius.sm,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
+  },
+  mobileCardBodyPressable: {
+    width: "100%",
+  },
+  mobileMediaContainer: {
+    position: "relative",
+    width: "100%",
+    aspectRatio: 16 / 10,
+    backgroundColor: colorTokens.surfaceSunken,
+    overflow: "hidden",
+  },
+  mobileSlide: {
+    height: "100%",
+  },
+  imageCounterBadge: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(11, 26, 23, 0.72)",
+  },
+  imageCounterText: {
+    color: colorTokens.onInk,
+    fontFamily: fonts.semiBold,
+    fontSize: 11,
+  },
+  counterDivider: {
+    width: 1,
+    height: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    marginHorizontal: 3,
+  },
+  floorPlanText: {
+    color: colorTokens.onInk,
+    fontFamily: fonts.medium,
+    fontSize: 11,
+  },
+  mobileSaveBtn: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 3,
+    width: 36,
+    height: 36,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255, 255, 255, 0.92)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dotsContainer: {
+    position: "absolute",
+    bottom: 8,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 5,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+  },
+  dotActive: {
+    width: 16,
+    backgroundColor: colorTokens.surface,
+  },
+  ribbonVerified: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    backgroundColor: colorTokens.brandSurface,
+    borderBottomWidth: 1,
+    borderBottomColor: colorTokens.brandBorder,
+  },
+  ribbonVerifiedText: {
+    color: colorTokens.brandText,
+    fontFamily: fonts.bold,
+    fontSize: 11.5,
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  ribbonOwner: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    backgroundColor: colorTokens.surfaceSunken,
+    borderBottomWidth: 1,
+    borderBottomColor: colorTokens.divider,
+  },
+  ribbonOwnerText: {
+    color: colorTokens.muted,
+    fontFamily: fonts.semiBold,
+    fontSize: 11,
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
+  mobileBody: {
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    paddingBottom: 14,
+    gap: 4,
+  },
+  mobilePrice: {
+    color: colorTokens.brandText,
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 21,
+    letterSpacing: -0.4,
+  },
+  mobilePriceSuffix: {
+    color: colorTokens.muted,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    letterSpacing: 0,
+  },
+  mobileSpecTitle: {
+    color: colorTokens.ink,
+    fontFamily: fonts.headingBold,
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  mobileLocationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+  mobileLocationText: {
+    flex: 1,
+    color: colorTokens.muted,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+  },
+  mobileRecencyText: {
+    color: colorTokens.subtle,
+    fontFamily: fonts.medium,
+    fontSize: 11.5,
+    marginTop: 2,
+  },
+  actionFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: colorTokens.divider,
+    backgroundColor: colorTokens.surface,
+  },
+  actionBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+  },
+  actionBtnText: {
+    color: colorTokens.brandText,
+    fontFamily: fonts.semiBold,
+    fontSize: 12.5,
+  },
+  actionDivider: {
+    width: 1,
+    height: 22,
+    backgroundColor: colorTokens.divider,
   },
 });

@@ -73,7 +73,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   handleGoHome = () => {
     this.setState({ hasError: false });
     try {
-      router.replace("/home");
+      router.replace("/");
     } catch {
       // A browser can reload the site root. On a phone `window.location` does not
       // exist, and this runs while the app is already failing, so it must not throw.

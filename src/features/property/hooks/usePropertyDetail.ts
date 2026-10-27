@@ -59,14 +59,15 @@ const INITIAL_POLL_ATTEMPTS = 3; // fetches at the initial interval before backi
 const MAX_POLL_ATTEMPTS = 10;
 
 export function usePropertyDetail(id: string) {
+  const cleanId = (typeof id === "string" ? id : String(id || "")).trim();
   return useQuery({
-    queryKey: ["property", id],
+    queryKey: ["property", cleanId],
     queryFn: async () => {
-      const response = await getPropertyById(id);
+      const response = await getPropertyById(cleanId);
       if (!response.data) throw new Error(response.message || "Property not found");
       return response.data as PropertyDetail;
     },
-    enabled: !!id,
+    enabled: Boolean(cleanId && cleanId !== "undefined" && cleanId !== "null"),
     refetchInterval: (query) => {
       const attempts = query.state.dataUpdateCount;
       if (query.state.data?.status !== "pending" || attempts >= MAX_POLL_ATTEMPTS) return false;

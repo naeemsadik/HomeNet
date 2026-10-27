@@ -4,13 +4,17 @@ import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
   Bell,
+  BookOpen,
   Building2,
+  Calculator,
   CalendarCheck,
   Heart,
   Home,
   KeyRound,
   LogOut,
   Menu,
+  Plus,
+  Search,
   Sparkles,
   Tag,
   TrendingUp,
@@ -31,7 +35,7 @@ import {
 import { confirmAction } from "@/lib/alert";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { Brand } from "./Brand";
 import { AiFinderModal } from "./AiFinderModal";
@@ -59,7 +63,15 @@ export type ActivePage =
   | "profile"
   | "users"
   | "seller"
-  | "messages";
+  | "messages"
+  | "enquiries"
+  | "valuation"
+  | "guides";
+
+/** Below this width the phone bar is used (matches the phone home and search screens). */
+export const isMobileWidth = (width: number) => width < 768;
+/** Below this width the web navbar's links no longer fit beside the brand and actions. */
+const isCollapsedNavWidth = (width: number) => width < 1024;
 
 /**
  * The search intents the web navbar leads with. The phone drawer lists the same
@@ -91,11 +103,10 @@ const sidebarNavConfig: {
   badge?: number;
   authGated?: boolean;
 }[] = [
-    { translationKey: "nav.home", href: "/home", icon: Home, key: "home" },
     ...browseNavLinks,
     { translationKey: "nav.insights", href: "/market", icon: TrendingUp, key: "market" },
-    { translationKey: "nav.saved", href: "/saved", icon: Heart, key: "saved", authGated: true },
-    { translationKey: "nav.profile", href: "/profile", icon: User, key: "profile", authGated: true },
+    { translationKey: "nav.valuation", href: "/valuation", icon: Calculator, key: "valuation" },
+    { translationKey: "nav.guides", href: "/guides", icon: BookOpen, key: "guides" },
   ];
 
 function SideBar({
@@ -109,6 +120,7 @@ function SideBar({
 }) {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
+  const { isTablet } = useResponsive();
   return (
     <SafeAreaView
       edges={["top", "bottom"]}
@@ -178,9 +190,15 @@ function SideBar({
         })}
       </View>
 
+      <View style={styles.drawerLanguage}>
+        <Text style={styles.drawerLanguageLabel}>{t("common.language")}</Text>
+        <LanguageToggle />
+      </View>
+
       <View style={styles.sidebarSpacer} />
 
-      {/* List your property Card (Figma node 1:2025) */}
+      {/* List your property card. Where the bottom bar shows, Post there does the same job. */}
+      {isTablet ? null : (
       <View style={styles.sidebarCard}>
         <View style={styles.sidebarCardIconWrap}>
           <Sparkles color={colorTokens.onBrand} size={20} />
@@ -193,6 +211,7 @@ function SideBar({
           <Text style={styles.postAdButtonText}>{t("nav.postAd")}</Text>
         </AppLink>
       </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -207,13 +226,111 @@ function TopBar({
   isCrystal?: boolean;
 }) {
   const { t } = useTranslation();
-  const { isTablet, isPhone, containerMaxWidth } = useResponsive();
+  const { isTablet, isPhone, width, containerMaxWidth } = useResponsive();
+  const isMobile = isMobileWidth(width);
+  const collapseNav = isCollapsedNavWidth(width);
+  const pathname = usePathname();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const { data: unreadData } = useUnreadCount("user");
   const unreadCount = unreadData?.data?.count ?? 0;
   const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
+
+  // Every phone page gets the same bar: the menu that holds the web navbar's
+  // links, the brand, then language, notifications and account.
+  if (isMobile) {
+    const onHome = pathname === "/" || pathname === "/home";
+    return (
+      <SafeAreaView edges={["top"]} style={styles.topbarSafe}>
+        <View
+          style={[
+            styles.topbar,
+            styles.topbarMobileHome,
+            { maxWidth: containerMaxWidth },
+          ]}
+        >
+          <View style={styles.mobileHomeBrandWrap}>
+            <Pressable
+              onPress={onOpenMenu}
+              style={[styles.menuButton, webPointer]}
+              accessibilityLabel={t("nav.openMenu")}
+            >
+              <Menu color="#0B1A17" size={18} strokeWidth={2.4} />
+            </Pressable>
+            <Brand
+              compact
+              size="default"
+              subtitle={onHome ? t("home.subcopy") : undefined}
+            />
+          </View>
+
+          <View style={styles.mobileHomeRightWrap}>
+            {/* Notification bell (guests have Sign in beside it instead). The language switcher is in the menu. */}
+            {user ? (
+            <Pressable
+              accessibilityLabel={
+                unreadCount > 0
+                  ? t("nav.openNotificationsWithCount", { count: unreadCount })
+                  : t("nav.openNotifications")
+              }
+              onPress={() => router.push("/notifications" as any)}
+              style={[
+                styles.notificationButton,
+                styles.notificationButtonPhone,
+                webPointer,
+              ]}
+            >
+              <Bell color={colorTokens.ink} size={18} strokeWidth={2} />
+              {unreadCount > 0 ? (
+                <View style={styles.notificationBadge} pointerEvents="none">
+                  <LiveText style={styles.notificationBadgeText}>
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </LiveText>
+                </View>
+              ) : null}
+            </Pressable>
+            ) : null}
+
+            {/* 3. Auth / Sign In Trigger */}
+            {user ? (
+              <Pressable
+                accessibilityLabel={t("nav.profileSettings")}
+                accessibilityRole="button"
+                onPress={() => router.push("/profile")}
+                style={[styles.mobileHomeAccountBtn, webPointer]}
+              >
+                <View style={styles.mobileHomeAvatarWrap}>
+                  <Image
+                    source={{
+                      uri:
+                        user.avatar_url ||
+                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
+                    }}
+                    style={styles.mobileHomeAvatarImage}
+                  />
+                </View>
+              </Pressable>
+            ) : (
+              <Pressable
+                accessibilityLabel={t("auth.signIn")}
+                accessibilityRole="button"
+                onPress={() => useAuthModalStore.getState().open()}
+                style={({ pressed }) => [
+                  styles.mobileHomeSignInBtn,
+                  webPointer,
+                  pressed && { opacity: 0.85 },
+                ]}
+              >
+                <User color={colorTokens.brandText} size={14} strokeWidth={2.2} />
+                <Text style={styles.mobileHomeSignInText}>{t("auth.signIn")}</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // Seekers-first: the search intents lead, Saved follows. The phone drawer
   // lists the same links plus the rest of the app.
@@ -242,7 +359,7 @@ function TopBar({
       >
         {/* Left: Brand + Hamburger (mobile) */}
         <View style={[styles.topbarLeft, isPhone && styles.topbarLeftPhone]}>
-          {isTablet ? (
+          {collapseNav ? (
             <Pressable
               onPress={onOpenMenu}
               style={[
@@ -260,11 +377,11 @@ function TopBar({
               />
             </Pressable>
           ) : null}
-          <Brand compact={isTablet} variant={isCrystal ? "light" : "dark"} />
+          <Brand compact={collapseNav} variant={isCrystal ? "light" : "dark"} />
         </View>
 
         {/* Center: Desktop Nav Links (only when links exist) */}
-        {!isTablet && topNavLinks.length > 0 ? (
+        {!collapseNav && topNavLinks.length > 0 ? (
           <View style={styles.topNavCenter}>
             {topNavLinks.map((link) => {
               const label = t(link.translationKey);
@@ -500,7 +617,7 @@ function TopBar({
                           });
                           if (!confirmed) return;
                           await logout();
-                          router.push("/home");
+                          router.push("/");
                         }}
                         style={({ pressed, hovered }: any) => [
                           styles.dropdownItem,
@@ -571,28 +688,11 @@ function MobileNav({ active }: { active: ActivePage }) {
     selected: boolean;
     authGated: boolean;
   }[] = [
-    { translationKey: "nav.home", href: "/home", icon: Home, selected: active === "home", authGated: false },
-    {
-      translationKey: "nav.insights",
-      href: "/market",
-      icon: TrendingUp,
-      selected: active === "market",
-      authGated: false,
-    },
-    {
-      translationKey: "nav.saved",
-      href: "/saved",
-      icon: Heart,
-      selected: active === "saved",
-      authGated: true,
-    },
-    {
-      translationKey: "nav.profile",
-      href: "/profile",
-      icon: User,
-      selected: active === "profile",
-      authGated: true,
-    },
+    { translationKey: "nav.home", href: "/", icon: Home, selected: active === "home", authGated: false },
+    { translationKey: "nav.search", href: "/buy", icon: Search, selected: active === "buy" || active === "rent" || active === "holiday" || active === "sold" || active === "search" || active === "property" || active === "market", authGated: false },
+    { translationKey: "nav.post", href: "/property/create", icon: Plus, selected: false, authGated: true },
+    { translationKey: "nav.saved", href: "/saved", icon: Heart, selected: active === "saved", authGated: true },
+    { translationKey: "nav.account", href: "/profile", icon: User, selected: active === "profile", authGated: true },
   ];
 
   return (
@@ -621,6 +721,8 @@ function MobileNav({ active }: { active: ActivePage }) {
                 pressed && { opacity: 0.8 },
               ]}
               accessibilityRole="link"
+              accessibilityLabel={label}
+              accessibilityState={{ selected }}
             >
               <Icon
                 color={selected ? colors.greenOnLight : "#7B8983"}
@@ -648,13 +750,20 @@ export function AppChrome({
   active,
   bleed,
   fluid,
+  customTopBar,
+  compactFooter,
 }: {
   children: ReactNode;
   active: ActivePage;
   bleed?: ReactNode;
   fluid?: boolean;
+  customTopBar?: ReactNode;
+  /** Show only the short footer (policies and contact), for the phone homepage. */
+  compactFooter?: boolean;
 }) {
-  const { isTablet, isPhone, containerMaxWidth } = useResponsive();
+  const { isTablet, isPhone, width, containerMaxWidth } = useResponsive();
+  const isMobile = isMobileWidth(width);
+  const collapseNav = isCollapsedNavWidth(width);
   const insets = useSafeAreaInsets();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -679,7 +788,9 @@ export function AppChrome({
   return (
     <View style={styles.shell}>
       <View style={styles.pageColumn}>
-        <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} isCrystal={isCrystal} />
+        {customTopBar ?? (
+          <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} isCrystal={isCrystal} />
+        )}
         <ScrollView
           onScroll={handleScroll}
           scrollEventThrottle={16}
@@ -687,9 +798,10 @@ export function AppChrome({
             styles.pageScrollContent,
             // The bar is pinned over the page and grows by the status-bar inset
             // (edge-to-edge on Android), so the page must start below both.
-            !bleed && {
+            // A custom bar (the phone search screen's) sits in the flow instead.
+            !bleed && !customTopBar && {
               paddingTop:
-                (isPhone
+                (isMobile
                   ? layout.navHeightPhone
                   : isTablet
                   ? layout.navHeightTablet
@@ -718,7 +830,7 @@ export function AppChrome({
               {children}
             </View>
           </View>
-          <Footer />
+          <Footer compact={compactFooter} />
         </ScrollView>
         {isTablet ? <MobileNav active={active} /> : null}
       </View>
@@ -726,7 +838,7 @@ export function AppChrome({
         animationType="fade"
         onRequestClose={() => setMenuOpen(false)}
         transparent
-        visible={isTablet && menuOpen}
+        visible={collapseNav && menuOpen}
       >
         <View style={styles.drawerLayer}>
           <Pressable

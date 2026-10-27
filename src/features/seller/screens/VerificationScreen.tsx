@@ -1,49 +1,26 @@
 import {
-  Bell,
-  Building2,
   Check,
-  CircleHelp,
   Clock,
-  CreditCard,
   FileCheck,
   IdCard,
-  LayoutDashboard,
-  LogOut,
   MapPin,
-  PlusCircle,
   Receipt,
-  Rocket,
-  Search,
   ShieldCheck,
-  Sparkles,
   Upload,
-  User,
-  BarChart2,
 } from "@/components/icons";
 import { useState } from "react";
 import {
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
-import { confirmAction } from "@/lib/alert";
 import Svg, { Circle } from "react-native-svg";
-import { router } from "expo-router";
 import { useTranslation } from "@/i18n";
-import { AppLink } from "@/components/ui";
-import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useAuthStore } from "@/stores/authStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
-import { SellerTopHeader } from "../components/SellerTopHeader";
-import { ToggleViewButton } from "../components/ToggleViewButton";
-import { Footer } from "@/components/Footer";
-import type { SellerNavKey } from "./SellerDashboardScreen";
+import { SellerShell } from "../components/SellerShell";
 
 interface VerificationDoc {
   id: string;
@@ -128,151 +105,13 @@ export function VerificationScreen() {
   const circumference = 2 * Math.PI * circleRadius;
   const strokeDashoffset = circumference * (1 - progressPercent / 100);
 
-  const logout = useAuthStore((s) => s.logout);
-  const handleLogout = async () => {
-    const confirmed = await confirmAction(
-      t("seller.profile.logoutConfirmTitle"),
-      t("seller.profile.logoutConfirmMessage"),
-      {
-        confirmLabel: t("seller.profile.logoutBtn"),
-        destructive: true,
-      }
-    );
-    if (!confirmed) return;
-    logout();
-    router.replace("/home");
-  };
-
-  const sidebarNavItems = [
-    { key: "dashboard" as SellerNavKey, label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
-    { key: "listings" as SellerNavKey, label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties" },
-    { key: "create" as SellerNavKey, label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
-    { key: "verification" as SellerNavKey, label: t("dashboard.tabs.verification"), icon: ShieldCheck, href: "/verification", active: true },
-    { key: "boost" as SellerNavKey, label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights" as SellerNavKey, label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics" as SellerNavKey, label: t("dashboard.tabs.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments" as SellerNavKey, label: t("dashboard.tabs.payments"), icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile" as SellerNavKey, label: t("dashboard.tabs.profile"), icon: User, href: "/seller/profile" },
-    { key: "help" as SellerNavKey, label: t("dashboard.tabs.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout" as SellerNavKey, label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
-  ];
-
   return (
-    <View style={styles.outerContainer}>
-      {/* Desktop Sidebar */}
-      {!isTablet && (
-        <View style={styles.sidebar}>
-          <View style={styles.sidebarHeader}>
-            <Brand />
-
-            <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>{t("seller.drawer.rolePill")}</Text>
-            </View>
-          </View>
-
-          <ScrollView contentContainerStyle={styles.sidebarNavScroll} showsVerticalScrollIndicator={false}>
-            {sidebarNavItems.map((item) => {
-              const IconComp = item.icon;
-              const isActive = item.key === "verification";
-
-              return (
-                <AppLink
-                  href={item.href || "#"}
-                  key={item.key}
-                  onPress={() => {
-                    if (item.key === "logout") {
-                      handleLogout();
-                    }
-                  }}
-                  style={[
-                    styles.navItem,
-                    isActive && styles.navItemActive,
-                    item.danger && styles.navItemDanger,
-                  ]}
-                >
-                  <IconComp
-                    color={item.danger ? "#D4183D" : isActive ? "#04cf92" : "#5C6B66"}
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      styles.navItemText,
-                      isActive && styles.navItemTextActive,
-                      item.danger && styles.navItemTextDanger,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                </AppLink>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Mobile Navigation Drawer */}
-      <SellerMobileDrawer
-        activeNav="verification"
-        items={sidebarNavItems}
-        onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={(key) => {
-          setMobileDrawerOpen(false);
-          if (key === "logout") {
-            handleLogout();
-            return;
-          }
-          const found = sidebarNavItems.find((i) => i.key === key);
-          if (found?.href) router.push(found.href as any);
-        }}
-        visible={isTablet && mobileDrawerOpen}
-      />
-
-      {/* Main Workspace Area */}
-      <View style={styles.mainContent}>
-        {isTablet ? (
-          <SellerTopHeader
-            hasUnreadNotifications
-            onPressMenu={() => setMobileDrawerOpen(true)}
-            onSearchQueryChange={setSearchQuery}
-            searchQuery={searchQuery}
-            title={t("seller.verification.headerTitle")}
-          />
-        ) : (
-          <View style={styles.topHeader}>
-            <Text style={styles.headerTitle}>{t("seller.verification.headerTitle")}</Text>
-
-            <View style={styles.headerActions}>
-              <View style={styles.searchContainer}>
-                <Search color="rgba(11,26,23,0.5)" size={16} />
-                <TextInput
-                  onChangeText={setSearchQuery}
-                  placeholder={t("seller.header.searchPlaceholder")}
-                  placeholderTextColor="rgba(11,26,23,0.5)"
-                  style={styles.searchInput}
-                  value={searchQuery}
-                />
-              </View>
-
-              <AppLink
-                accessibilityLabel={t("seller.header.notificationsAria")}
-                href="/notifications"
-                style={styles.iconCircleBtn}
-              >
-                <Bell color="#0B1A17" size={19} />
-                <View style={styles.headerDotIndicator} />
-              </AppLink>
-
-              <ToggleViewButton />
-            </View>
-          </View>
-        )}
-
-        {/* Scrollable Center Body */}
-        <ScrollView
-          contentContainerStyle={styles.workspaceScroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+    <SellerShell
+      activeNav="verification"
+      onSearchQueryChange={setSearchQuery}
+      searchQuery={searchQuery}
+      title={t("seller.verification.headerTitle")}
+    >
           <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
             <View style={[styles.contentGrid, isTablet && styles.contentGridMobile]}>
             {/* Left Column: Banner + Documents List */}
@@ -465,10 +304,7 @@ export function VerificationScreen() {
             </View>
           </View>
         </View>
-        <Footer />
-      </ScrollView>
-      </View>
-    </View>
+    </SellerShell>
   );
 }
 

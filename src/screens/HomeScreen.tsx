@@ -22,14 +22,14 @@ import {
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
+import { MobileHeroSearchCard } from "@/components/MobileHeroSearchCard";
+import { MobileHomeSections } from "@/components/MobileHomeSections";
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { PropertyCard } from "@/components/PropertyCard";
-import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
 import { AppButton, AppLink } from "@/components/ui";
 import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
-import { ContrastColumns } from "@/components/landing/ContrastColumns";
+import { HomeNetExplainerSection } from "@/components/landing/HomeNetExplainerSection";
 import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
-import { JourneyTrack } from "@/components/landing/JourneyTrack";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
 import type { Property as ApiProperty } from "@/features/property/types/property";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -109,7 +109,10 @@ export function HomeScreen() {
     isLargeScreen,
     isTall,
     height,
+    width,
   } = useResponsive();
+
+  const isMobile = isPhone || width < 768;
 
   // Hero scales seamlessly across mobile, tablet, laptop, large desktop, and ultrawide:
   const heroType = isPhone
@@ -147,6 +150,26 @@ export function HomeScreen() {
               copyPad: 96,
               topPad: 76,
             };
+  // Phone: the same photograph as the website, cut to a short banner.
+  const mobileHero = (
+    <View style={styles.mobileHeroPhoto}>
+      <ImageBackground
+        source={HERO_IMAGE}
+        style={[styles.mobileHeroBg, { height: 236 + insets.top, paddingTop: insets.top }]}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={["rgba(6, 22, 18, 0.55)", "rgba(6, 22, 18, 0.18)", "rgba(6, 22, 18, 0.5)"]}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={styles.mobileHeroCopy}>
+          <NoTranslateText style={styles.mobileHeroHeading}>{t("home.heroHeadline")}</NoTranslateText>
+        </View>
+      </ImageBackground>
+    </View>
+  );
+
   const popularQuery = useQuery({
     queryKey: ["properties", "home", "popular"],
     queryFn: () =>
@@ -239,7 +262,17 @@ export function HomeScreen() {
   );
 
   return (
-    <AppChrome active="home" bleed={hero}>
+    <AppChrome active="home" bleed={isMobile ? mobileHero : hero} compactFooter={isMobile}>
+      {isMobile ? (
+        <View style={styles.mobileSearchOverlap}>
+          <MobileHeroSearchCard />
+        </View>
+      ) : null}
+
+      {isMobile ? (
+        <MobileHomeSections />
+      ) : (
+        <>
       {/* ─────────────────────────────────────────────────────────────
           2. FEATURED PROPERTIES (live API), real listings answer the search
           box first, before any explaining.
@@ -267,24 +300,10 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. TRUST, why these listings are different. Earns the claim before
-          the process is explained.
+          3. EXPLAINER VIDEO, 30s auto-preview + full walkthrough video
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t("home.whyDifferentTitle")}</Text>
-        </View>
-        <ContrastColumns />
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          4. HOW IT WORKS, dual seeker / owner track
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t("home.howItWorksTitle")}</Text>
-        </View>
-        <JourneyTrack />
+        <HomeNetExplainerSection />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -302,18 +321,13 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          7. OWNER CTA, list your property
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <OwnerListPropertySection />
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
           8. GUIDES & INSIGHTS, editorial, API-ready
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <PropertyGuidesSection />
       </View>
+        </>
+      )}
     </AppChrome>
   );
 }

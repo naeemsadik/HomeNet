@@ -60,6 +60,7 @@ import {
   translateAmenity,
   translatePropertyType,
   formatLocalizedNumber,
+  priceOnRequestLabel,
   translateAreaUnit,
 } from "@/i18n";
 
@@ -71,9 +72,12 @@ type AiValuation = {
 
 export function PropertyDetailScreen() {
   const { t, language } = useTranslation();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const params = useLocalSearchParams<{ id?: string | string[] }>();
+  const rawId = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
+  const propertyId = (rawId ?? "").trim();
+  const id = propertyId;
   const { isPhone, isTablet } = useResponsive();
-  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(id ?? "");
+  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId);
   const {
     data: similarProperties = [],
     error: similarError,
@@ -82,11 +86,11 @@ export function PropertyDetailScreen() {
   } = useSimilarProperties(
     apiDetail?.type,
     apiDetail?.area?.id,
-    id ?? "",
+    propertyId,
   );
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const isPropertySaved = useSavedStore((s) => s.isSaved(id ?? ""));
+  const isPropertySaved = useSavedStore((s) => s.isSaved(propertyId));
   const toggleSaved = useSavedStore((s) => s.toggleSaved);
   const [bookModalVisible, setBookModalVisible] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);
@@ -136,9 +140,14 @@ export function PropertyDetailScreen() {
       longitude: apiDetail.location_lng,
       type: displaySubtype(apiDetail.subtype) || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
       listingType: listingTypeStr,
-      price: typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
-      priceCurrency: apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),
-      pricePeriod: isHoliday ? "" : apiDetail.listing_type === "rent" ? (language === "bn" ? "/মাস" : "/mo") : "",
+      price: apiDetail.price === 0
+        ? priceOnRequestLabel(language)
+        : typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
+      priceCurrency: apiDetail.price === 0 ? "" : apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),
+      pricePeriod: apiDetail.price === 0 || isHoliday ? "" : apiDetail.listing_type === "rent" ? (language === "bn" ? "/মাস" : "/mo") : "",
+      priceText: apiDetail.price === 0
+        ? priceOnRequestLabel(language)
+        : `${apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳")} ${typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0)}${isHoliday ? "" : apiDetail.listing_type === "rent" ? (language === "bn" ? "/মাস" : "/mo") : ""}`,
       isVerified: Boolean(apiDetail.is_verified),
       isBoosted: false,
       score: (apiDetail as any).score ?? null,
@@ -177,7 +186,9 @@ export function PropertyDetailScreen() {
           id: sim.id,
           title: sim.title,
           location: [sim.area?.name, (sim.area as any)?.city].filter(Boolean).join(", ") || sim.address || "Dhaka",
-          price: `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? formatLocalizedNumber(sim.price.toLocaleString("en-BD"), language) : sim.price}`,
+          price: sim.price === 0
+            ? priceOnRequestLabel(language)
+            : `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? formatLocalizedNumber(sim.price.toLocaleString("en-BD"), language) : sim.price}`,
           specs: specParts.join(" · "),
           imageUrl: cdnImage(
             sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
@@ -220,8 +231,8 @@ export function PropertyDetailScreen() {
     const defaultSeller = language === "bn" ? "মালিক" : "Seller";
     const defaultProp = language === "bn" ? "প্রোপার্টি" : "Property";
     const greeting = language === "bn"
-      ? `আসসালামু আলাইকুম ${property?.seller.name || defaultSeller}, আমি HomeNet-এ আপনার প্রোপার্টি "${property?.title || defaultProp}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) সম্পর্কে জানতে আগ্রহী। প্রোপার্টিটি কি এখনো পাওয়া যাচ্ছে?`
-      : `Hello ${property?.seller.name || defaultSeller}, I'm interested in your property "${property?.title || defaultProp}" (${property?.priceCurrency || "৳"} ${property?.price || ""}${property?.pricePeriod || ""}) on HomeNet. Is this property currently available?`;
+      ? `আসসালামু আলাইকুম ${property?.seller.name || defaultSeller}, আমি HomeNet-এ আপনার প্রোপার্টি "${property?.title || defaultProp}" (${property?.priceText ?? ""}) সম্পর্কে জানতে আগ্রহী। প্রোপার্টিটি কি এখনো পাওয়া যাচ্ছে?`
+      : `Hello ${property?.seller.name || defaultSeller}, I'm interested in your property "${property?.title || defaultProp}" (${property?.priceText ?? ""}) on HomeNet. Is this property currently available?`;
     openWhatsApp(greeting);
   };
 
@@ -361,6 +372,9 @@ export function PropertyDetailScreen() {
   if (isLoading && !property) {
     return (
       <AppChrome active="property">
+        {/* The exported HTML for a listing is this state: it must still name
+            the page's canonical URL, which PageMeta builds from the path. */}
+        <PageMeta title="Property for sale or rent in Bangladesh | HomeNet BD" />
         <View style={styles.requestState}>
           <ActivityIndicator color="#04cf92" size="large" />
           <Text style={styles.requestError}>{t("propertyDetail.loading")}</Text>
@@ -372,6 +386,9 @@ export function PropertyDetailScreen() {
   if (!property) {
     return (
       <AppChrome active="property">
+        {/* A removed or mistyped listing answers 200 with this message: keep it
+            out of the index rather than leave a soft 404 there. */}
+        <PageMeta title="Listing not found | HomeNet BD" noindex />
         <View style={styles.requestState}>
           <Text style={styles.requestError}>{error ? toApiError(error).message : t("propertyDetail.notFound")}</Text>
           <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>
@@ -389,7 +406,7 @@ export function PropertyDetailScreen() {
           for this URL should read. */}
       <PageMeta
         title={`${property.title} | ${property.location} | HomeNet BD`}
-        description={`${property.listingType} at ${property.priceCurrency}${property.price}${property.pricePeriod}. ${property.address}.`}
+        description={`${property.listingType}: ${property.priceText}. ${property.address}.`}
       />
       {apiDetail ? (
         <JsonLd nodes={[listingSchema(apiDetail), breadcrumbSchema(listingCrumbs(apiDetail))]} />

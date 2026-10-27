@@ -436,11 +436,13 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.bold,
     color: "#0B1A17",
+    lineHeight: 20,
   },
   formLabelRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    minHeight: 28,
   },
   formHelperCharCount: {
     fontSize: 12,
@@ -673,17 +675,17 @@ export const styles = StyleSheet.create({
   unitSelectorRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 3,
     backgroundColor: "#F4F6F5",
-    padding: 3,
-    borderRadius: 10,
+    padding: 2,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
   unitPill: {
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   unitPillActive: {
     backgroundColor: "#04cf92",

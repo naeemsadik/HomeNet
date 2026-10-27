@@ -42,6 +42,18 @@ function walk(dir, out = []) {
 }
 
 /** @returns {string[]} what is wrong; empty when the project is ready. */
+/**
+ * EXPO_PUBLIC_ variables that are meant to be public, allowed by exact name. The
+ * Google Maps key is a browser key: it is limited to the site's own referrers and
+ * to three APIs in Google Cloud, and that is what protects it. Anything else with
+ * KEY, SECRET or TOKEN in its name still fails the check.
+ */
+const PUBLIC_BY_DESIGN = ["EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"];
+
+function withoutPublicByDesign(text) {
+  return PUBLIC_BY_DESIGN.reduce((out, name) => out.split(name).join(""), text);
+}
+
 function checkAndroidRelease(root = path.resolve(__dirname, "..")) {
   const problems = [];
   const fail = (message) => problems.push(message);
@@ -136,7 +148,7 @@ function checkAndroidRelease(root = path.resolve(__dirname, "..")) {
       fail(`the production API address "${api}" must be an https address of the real server`);
     }
     for (const key of Object.keys(production.env ?? {})) {
-      if (/(KEY|SECRET|TOKEN|PASSWORD)/i.test(key) && key.startsWith("EXPO_PUBLIC_")) {
+      if (/(KEY|SECRET|TOKEN|PASSWORD)/i.test(key) && key.startsWith("EXPO_PUBLIC_") && !PUBLIC_BY_DESIGN.includes(key)) {
         fail(`${key} is bundled into the app and readable by anyone: never put a secret in an EXPO_PUBLIC_ variable`);
       }
     }
@@ -156,7 +168,7 @@ function checkAndroidRelease(root = path.resolve(__dirname, "..")) {
     if (/requestMediaLibraryPermissionsAsync/.test(text)) {
       fail(`${rel} asks for media-library permission; the system photo picker needs none, and on Android 11-12 the request blocks uploads`);
     }
-    if (/EXPO_PUBLIC_[A-Z_]*(SECRET|API_KEY|TOKEN)/.test(text)) {
+    if (/EXPO_PUBLIC_[A-Z_]*(SECRET|API_KEY|TOKEN)/.test(withoutPublicByDesign(text))) {
       fail(`${rel} reads a secret from an EXPO_PUBLIC_ variable; those are bundled into the app`);
     }
   }

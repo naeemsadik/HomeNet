@@ -2,8 +2,6 @@ import * as ImagePicker from "expo-image-picker";
 import {
   ArrowLeft,
   CheckCircle2,
-  Eye,
-  EyeOff,
   KeyRound,
   LogOut,
   Shield,
@@ -15,7 +13,6 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -28,9 +25,10 @@ import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
-import { deleteUser, updateUser, uploadAvatar } from "@/services/userApi";
+import { updateUser, uploadAvatar } from "@/services/userApi";
+import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
+import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { editProfileSchema } from "@/lib/schemas/user";
-import { changePasswordSchema } from "@/lib/schemas/auth";
 import { toApiError } from "@/services/apiClient";
 import type { UploadInput } from "@/services/upload";
 import { useTranslation } from "@/i18n";
@@ -56,18 +54,10 @@ export function BuyerProfileScreen() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Change Password Modal State
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -147,62 +137,13 @@ export function BuyerProfileScreen() {
     }
   };
 
-  const handleChangePasswordSubmit = async () => {
-    setPasswordError(null);
-    const validation = changePasswordSchema.safeParse({
-      current_password: currentPassword,
-      new_password: newPassword,
-      confirmPassword: confirmPassword,
-    });
-    if (!validation.success) {
-      setPasswordError(validation.error.issues[0]?.message || t("userProfile.invalidPasswordDetails"));
-      return;
-    }
 
-    try {
-      setIsChangingPassword(true);
-      await changePassword({
-        current_password: currentPassword,
-        new_password: newPassword,
-      });
-      setChangePasswordModalOpen(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      notify(t("common.success"), t("userProfile.passwordChangeSuccess"));
-    } catch (err: any) {
-      setPasswordError(toApiError(err).message);
-    } finally {
-      setIsChangingPassword(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (!user) {
       notify(t("common.notice"), t("userProfile.noAuthAccountToDelete"));
       return;
     }
-
-    const doDelete = async () => {
-      try {
-        setIsDeletingAccount(true);
-        await deleteUser(user.id);
-        await logout();
-        router.replace("/home");
-        notify(t("userProfile.accountDeletedTitle"), t("userProfile.accountDeletedMessage"));
-      } catch (err: any) {
-        notify(t("common.error"), toApiError(err).message);
-      } finally {
-        setIsDeletingAccount(false);
-      }
-    };
-
-    const confirmed = await confirmAction(
-      t("userProfile.deleteModalTitle"),
-      t("userProfile.deleteModalMessage"),
-      { confirmLabel: t("userProfile.deleteModalConfirm"), destructive: true },
-    );
-    if (confirmed) await doDelete();
+    setDeleteDialogOpen(true);
   };
 
   const handleLogout = async () => {
@@ -212,7 +153,7 @@ export function BuyerProfileScreen() {
       } catch (err) {
         if (__DEV__) console.warn("Logout error:", err);
       }
-      router.replace("/home");
+      router.replace("/");
     };
 
     const confirmed = await confirmAction(t("userProfile.logoutConfirmTitle"), t("userProfile.logoutConfirmMessage"), {
@@ -241,7 +182,7 @@ export function BuyerProfileScreen() {
                 if (router.canGoBack()) {
                   router.back();
                 } else {
-                  router.push("/home");
+                  router.push("/");
                 }
               }}
               style={({ pressed }) => [
@@ -400,10 +341,7 @@ export function BuyerProfileScreen() {
               <Pressable
                 accessibilityLabel={t("userProfile.changePasswordBtn")}
                 accessibilityRole="button"
-                onPress={() => {
-                  setPasswordError(null);
-                  setChangePasswordModalOpen(true);
-                }}
+                onPress={() => setChangePasswordModalOpen(true)}
                 style={({ pressed }) => [
                   styles.changePasswordBtn,
                   isPhone && styles.fullWidthBtnPhone,
@@ -432,24 +370,16 @@ export function BuyerProfileScreen() {
               <Pressable
                 accessibilityLabel={t("userProfile.deleteAccountBtn")}
                 accessibilityRole="button"
-                disabled={isDeletingAccount}
                 onPress={handleDeleteAccount}
                 style={({ pressed }) => [
                   styles.deleteAccountBtn,
                   isPhone && styles.fullWidthBtnPhone,
                   webPointer,
                   pressed && styles.pressed,
-                  isDeletingAccount && styles.btnDisabled,
                 ]}
               >
-                {isDeletingAccount ? (
-                  <ActivityIndicator color="#D4183D" size="small" />
-                ) : (
-                  <>
-                    <Trash2 color="#D4183D" size={15} />
-                    <Text style={styles.deleteAccountBtnText}>{t("userProfile.deleteAccountBtn")}</Text>
-                  </>
-                )}
+                <Trash2 color="#D4183D" size={15} />
+                <Text style={styles.deleteAccountBtnText}>{t("userProfile.deleteAccountBtn")}</Text>
               </Pressable>
             </View>
           </View>
@@ -497,172 +427,20 @@ export function BuyerProfileScreen() {
       </ScrollView>
 
       {/* Change Password Modal */}
-      <Modal
-        animationType="fade"
-        onRequestClose={() => setChangePasswordModalOpen(false)}
-        transparent
+      <ChangePasswordModal
+        onClose={() => setChangePasswordModalOpen(false)}
         visible={changePasswordModalOpen}
-      >
-        <Pressable
-          onPress={() => setChangePasswordModalOpen(false)}
-          style={styles.modalBackdrop}
-        >
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-            style={[styles.modalCard, isPhone && styles.modalCardPhone]}
-          >
-            <View style={styles.modalHeader}>
-              <View style={styles.modalIconWrap}>
-                <KeyRound color="#03a675" size={20} />
-              </View>
-              <View style={styles.modalTitleWrap}>
-                <Text style={styles.modalTitle}>{t("userProfile.changePasswordModalTitle")}</Text>
-                <Text style={styles.modalSubtitle}>
-                  {t("userProfile.changePasswordModalSubtitle")}
-                </Text>
-              </View>
-              <Pressable
-                accessibilityLabel={t("auth.close")}
-                hitSlop={10}
-                onPress={() => setChangePasswordModalOpen(false)}
-                style={[styles.modalCloseBtn, webPointer]}
-              >
-                <X color="#0B1A17" size={18} />
-              </Pressable>
-            </View>
+      />
 
-            {passwordError ? (
-              <View style={styles.modalErrorBanner}>
-                <Text style={styles.modalErrorText}>{passwordError}</Text>
-              </View>
-            ) : null}
-
-            {/* Current Password */}
-            <View style={styles.modalInputGroup}>
-              <Text style={styles.modalFieldLabel}>{t("userProfile.currentPasswordLabel")}</Text>
-              <View style={styles.modalInputWrap}>
-                <TextInput
-                  autoCapitalize="none"
-                  onChangeText={(val) => {
-                    setCurrentPassword(val);
-                    setPasswordError(null);
-                  }}
-                  placeholder={t("userProfile.currentPasswordPlaceholder")}
-                  placeholderTextColor="rgba(11,26,23,0.35)"
-                  secureTextEntry={!showCurrentPassword}
-                  style={styles.modalTextInput}
-                  value={currentPassword}
-                />
-                <Pressable
-                  accessibilityLabel={showCurrentPassword ? t("auth.hidePassword") : t("auth.showPassword")}
-                  onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                  style={[styles.eyeBtn, webPointer]}
-                >
-                  {showCurrentPassword ? (
-                    <EyeOff color="rgba(11,26,23,0.5)" size={16} />
-                  ) : (
-                    <Eye color="rgba(11,26,23,0.5)" size={16} />
-                  )}
-                </Pressable>
-              </View>
-            </View>
-
-            {/* New Password */}
-            <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
-              <Text style={styles.modalFieldLabel}>{t("userProfile.newPasswordLabel")}</Text>
-              <View style={styles.modalInputWrap}>
-                <TextInput
-                  autoCapitalize="none"
-                  onChangeText={(val) => {
-                    setNewPassword(val);
-                    setPasswordError(null);
-                  }}
-                  placeholder={t("userProfile.newPasswordPlaceholder")}
-                  placeholderTextColor="rgba(11,26,23,0.35)"
-                  secureTextEntry={!showNewPassword}
-                  style={styles.modalTextInput}
-                  value={newPassword}
-                />
-                <Pressable
-                  accessibilityLabel={showNewPassword ? t("auth.hidePassword") : t("auth.showPassword")}
-                  onPress={() => setShowNewPassword(!showNewPassword)}
-                  style={[styles.eyeBtn, webPointer]}
-                >
-                  {showNewPassword ? (
-                    <EyeOff color="rgba(11,26,23,0.5)" size={16} />
-                  ) : (
-                    <Eye color="rgba(11,26,23,0.5)" size={16} />
-                  )}
-                </Pressable>
-              </View>
-            </View>
-
-            {/* Confirm New Password */}
-            <View style={[styles.modalInputGroup, { marginTop: 14 }]}>
-              <Text style={styles.modalFieldLabel}>{t("userProfile.confirmNewPasswordLabel")}</Text>
-              <View style={styles.modalInputWrap}>
-                <TextInput
-                  autoCapitalize="none"
-                  onChangeText={(val) => {
-                    setConfirmPassword(val);
-                    setPasswordError(null);
-                  }}
-                  placeholder={t("userProfile.confirmNewPasswordPlaceholder")}
-                  placeholderTextColor="rgba(11,26,23,0.35)"
-                  secureTextEntry={!showConfirmPassword}
-                  style={styles.modalTextInput}
-                  value={confirmPassword}
-                />
-                <Pressable
-                  accessibilityLabel={showConfirmPassword ? t("auth.hidePassword") : t("auth.showPassword")}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                  style={[styles.eyeBtn, webPointer]}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff color="rgba(11,26,23,0.5)" size={16} />
-                  ) : (
-                    <Eye color="rgba(11,26,23,0.5)" size={16} />
-                  )}
-                </Pressable>
-              </View>
-            </View>
-
-            {/* Modal Actions */}
-            <View style={styles.modalActionRow}>
-              <Pressable
-                accessibilityLabel={t("userProfile.cancel")}
-                disabled={isChangingPassword}
-                onPress={() => setChangePasswordModalOpen(false)}
-                style={({ pressed }) => [
-                  styles.modalCancelBtn,
-                  webPointer,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text style={styles.modalCancelBtnText}>{t("userProfile.cancel")}</Text>
-              </Pressable>
-
-              <Pressable
-                accessibilityLabel={t("userProfile.savePassword")}
-                disabled={isChangingPassword}
-                onPress={handleChangePasswordSubmit}
-                style={({ pressed }) => [
-                  styles.modalSubmitBtn,
-                  webPointer,
-                  isChangingPassword && styles.btnDisabled,
-                  pressed && styles.pressed,
-                ]}
-              >
-                {isChangingPassword ? (
-                  <ActivityIndicator color={colorTokens.onBrand} size="small" />
-                ) : (
-                  <Text style={styles.modalSubmitBtnText}>{t("userProfile.savePassword")}</Text>
-                )}
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+      <DeleteAccountDialog
+        confirmLabel={t("userProfile.deleteModalConfirm")}
+        deletedMessage={t("userProfile.accountDeletedMessage")}
+        deletedTitle={t("userProfile.accountDeletedTitle")}
+        message={t("userProfile.deleteModalMessage")}
+        onClose={() => setDeleteDialogOpen(false)}
+        title={t("userProfile.deleteModalTitle")}
+        visible={deleteDialogOpen}
+      />
     </AppChrome>
   );
 }
