@@ -28,9 +28,8 @@ import { NoTranslateText } from "@/components/NoTranslateText";
 import { PropertyCard } from "@/components/PropertyCard";
 import { AppButton, AppLink } from "@/components/ui";
 import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
-import { ContrastColumns } from "@/components/landing/ContrastColumns";
+import { HomeNetExplainerSection } from "@/components/landing/HomeNetExplainerSection";
 import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
-import { JourneyTrack } from "@/components/landing/JourneyTrack";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
 import type { Property as ApiProperty } from "@/features/property/types/property";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -301,24 +300,10 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. TRUST, why these listings are different. Earns the claim before
-          the process is explained.
+          3. EXPLAINER VIDEO, 30s auto-preview + full walkthrough video
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t("home.whyDifferentTitle")}</Text>
-        </View>
-        <ContrastColumns />
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          4. HOW IT WORKS, dual seeker / owner track
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{t("home.howItWorksTitle")}</Text>
-        </View>
-        <JourneyTrack />
+        <HomeNetExplainerSection />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
