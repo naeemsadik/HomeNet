@@ -1,10 +1,6 @@
-import { RequireAuth } from "@/components/RequireAuth";
-import { ChangePasswordScreen } from "@/screens/ChangePasswordScreen";
+import { Redirect } from "expo-router";
 
+/** Change password is now handled via the in-page modal on `/profile`. */
 export default function ChangePasswordRoute() {
-  return (
-    <RequireAuth active="profile">
-      <ChangePasswordScreen />
-    </RequireAuth>
-  );
+  return <Redirect href="/profile" />;
 }

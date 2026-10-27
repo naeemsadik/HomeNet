@@ -26,7 +26,7 @@ function useNoTranslate<T = any>() {
 export function Brand({
   compact = false,
   size = "default",
-  href = "/home",
+  href = "/",
   onPress,
   variant = "dark",
   subtitle,

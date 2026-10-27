@@ -120,13 +120,15 @@ export function BrowseScreen({
     [fixedLocation, params]
   );
 
+  // Depends on the one fact it reads, so the memo survives unrelated param changes.
+  const filtersModalRequested = isFiltersModalRequested(params);
   const closeFilterModal = useCallback(() => {
     setIsFilterModalOpen(false);
     setPreviewFilters(null);
-    if (isFiltersModalRequested(params)) {
+    if (filtersModalRequested) {
       router.setParams({ filters: "", modal: "" });
     }
-  }, [params]);
+  }, [filtersModalRequested, setIsFilterModalOpen, setPreviewFilters]);
 
   const handleResetFilters = useCallback(() => {
     applyFilters(resetSearchFilters(filters, { fixedLocation }));
@@ -254,7 +256,7 @@ export function BrowseScreen({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("common.back")}
-          onPress={() => router.push("/home")}
+          onPress={() => router.push("/")}
           style={[styles.mobileTopBarBtn, webPointer]}
         >
           <ArrowLeft color={colorTokens.ink} size={20} strokeWidth={2.4} />

@@ -1,7 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import {
   BarChart2,
-  Bell,
   Building2,
   CheckCircle2,
   CircleHelp,
@@ -11,7 +10,6 @@ import {
   LogOut,
   PlusCircle,
   Rocket,
-  Search,
   Shield,
   ShieldAlert,
   ShieldCheck,
@@ -25,15 +23,12 @@ import {
   ActivityIndicator,
   Image,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
 import { router } from "expo-router";
-import { AppLink } from "@/components/ui";
-import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
@@ -43,10 +38,7 @@ import { toApiError } from "@/services/apiClient";
 import { editProfileSchema } from "@/lib/schemas/user";
 import type { UploadInput } from "@/services/upload";
 import { SellerChangePasswordModal } from "../components/SellerChangePasswordModal";
-import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
-import { SellerTopHeader } from "../components/SellerTopHeader";
-import { ToggleViewButton } from "../components/ToggleViewButton";
-import { Footer } from "@/components/Footer";
+import { SellerShell } from "../components/SellerShell";
 import { useTranslation } from "@/i18n";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 import { styles } from "./SellerProfileScreen.styles";
@@ -206,7 +198,7 @@ export function SellerProfileScreen() {
       } catch (err) {
         if (__DEV__) console.warn("Logout error:", err);
       }
-      router.replace("/home");
+      router.replace("/");
     };
 
     const confirmed = await confirmAction(t("seller.profile.logoutConfirmTitle"), t("seller.profile.logoutConfirmMessage"), {
@@ -217,140 +209,12 @@ export function SellerProfileScreen() {
   };
 
   return (
-    <View style={styles.outerContainer}>
-      {/* Desktop Sidebar - screen > tablet */}
-      {!isTablet && (
-        <View style={styles.sidebar}>
-          <View style={styles.sidebarHeader}>
-            <Brand />
-
-            <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>{t("seller.drawer.rolePill")}</Text>
-            </View>
-          </View>
-
-          <ScrollView
-            contentContainerStyle={styles.sidebarNavScroll}
-            showsVerticalScrollIndicator={false}
-          >
-            {sidebarNavItems.map((item) => {
-              const IconComp = item.icon;
-              const isActive = item.key === "profile";
-
-              return (
-                <AppLink
-                  href={item.href || "#"}
-                  key={item.key}
-                  onPress={item.key === "logout" ? handleLogout : undefined}
-                  style={[
-                    styles.navItem,
-                    isActive && styles.navItemActive,
-                    item.danger && styles.navItemDanger,
-                  ]}
-                >
-                  <IconComp
-                    color={item.danger ? "#D4183D" : isActive ? "#04cf92" : "#5C6B66"}
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      styles.navItemText,
-                      isActive && styles.navItemTextActive,
-                      item.danger && styles.navItemTextDanger,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                </AppLink>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Mobile Navigation Drawer for Seller */}
-      <SellerMobileDrawer
-        activeNav="profile"
-        items={sidebarNavItems}
-        onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={(key) => {
-          setMobileDrawerOpen(false);
-          if (key === "logout") {
-            handleLogout();
-            return;
-          }
-          const found = sidebarNavItems.find((i) => i.key === key);
-          if (found?.href) router.push(found.href as any);
-        }}
-        visible={isTablet && mobileDrawerOpen}
-      />
-
-      {/* Main Workspace Area */}
-      <View style={styles.mainContent}>
-        {/* Top Header */}
-        {isTablet ? (
-          /* Mobile Top Header (Figma 288:2759) */
-          <SellerTopHeader
-            hasUnreadNotifications
-            onPressMenu={() => setMobileDrawerOpen(true)}
-            showViewSite={false}
-            title={t("seller.profile.title")}
-          />
-        ) : (
-          /* Desktop Header */
-          <View style={styles.topHeader}>
-            <Text style={styles.headerTitle}>{t("seller.profile.title")}</Text>
-
-            <View style={styles.headerActions}>
-              <View style={styles.searchContainer}>
-                <Search color="rgba(11,26,23,0.5)" size={16} />
-                <TextInput
-                  onChangeText={setSearchQuery}
-                  placeholder={t("seller.header.searchPlaceholder")}
-                  placeholderTextColor="rgba(11,26,23,0.5)"
-                  selectTextOnFocus
-                  style={[
-                    styles.searchInput,
-                    (Boolean(user) || searchQuery.length > 0) && styles.textInputNormal,
-                  ]}
-                  value={searchQuery}
-                />
-                {searchQuery.length > 0 && (
-                  <Pressable
-                    accessibilityLabel={t("seller.header.clearSearchAria")}
-                    accessibilityRole="button"
-                    hitSlop={8}
-                    onPress={() => setSearchQuery("")}
-                    style={[styles.clearBtn, webPointer]}
-                  >
-                    <X color="rgba(11,26,23,0.4)" size={15} />
-                  </Pressable>
-                )}
-              </View>
-
-              <Pressable
-                accessibilityLabel={t("seller.header.notificationsAria")}
-                accessibilityRole="button"
-                style={({ pressed }) => [
-                  styles.iconCircleBtn,
-                  webPointer,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Bell color="#0B1A17" size={19} />
-              </Pressable>
-
-              <ToggleViewButton />
-            </View>
-          </View>
-        )}
-
-        {/* Scrollable Form Body */}
-        <ScrollView
-          contentContainerStyle={styles.workspaceScroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+    <SellerShell
+      activeNav="profile"
+      onSearchQueryChange={setSearchQuery}
+      searchQuery={searchQuery}
+      title={t("seller.profile.title")}
+    >
           <View
             style={[
               styles.scrollContent,
@@ -592,9 +456,6 @@ export function SellerProfileScreen() {
             </View>
           </View>
         </View>
-        <Footer />
-      </ScrollView>
-      </View>
 
       <SellerChangePasswordModal
         onClose={() => setChangePasswordModalOpen(false)}
@@ -610,6 +471,6 @@ export function SellerProfileScreen() {
         title={t("seller.profile.deleteAccountConfirmTitle")}
         visible={deleteDialogOpen}
       />
-    </View>
+    </SellerShell>
   );
 }

@@ -35,13 +35,10 @@ import {
 } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
 import { AppLink } from "@/components/ui";
-import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
-import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
-import { Footer } from "@/components/Footer";
+import { SellerShell } from "@/features/seller/components/SellerShell";
 import { displaySubtype } from "../constants/holidayStay";
 import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
 import { useMyProperties } from "../hooks/useMyProperties";
@@ -145,7 +142,7 @@ export function MyPropertiesScreen() {
     });
     if (!confirmed) return;
     logout();
-    router.replace("/home");
+    router.replace("/");
   };
 
   const sidebarNavItems: {
@@ -206,77 +203,12 @@ export function MyPropertiesScreen() {
   };
 
   return (
-    <View style={styles.outerContainer}>
-      {/* Sidebar (Desktop View) */}
-      {!isTablet && (
-        <View style={styles.sidebar}>
-          <View style={styles.sidebarHeader}>
-            <Brand />
-            <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>{t("dashboard.sellerDashboard")}</Text>
-            </View>
-          </View>
-
-          <ScrollView contentContainerStyle={styles.sidebarNavScroll} showsVerticalScrollIndicator={false}>
-            {sidebarNavItems.map((item) => {
-              const IconComp = item.icon;
-              return (
-                <AppLink
-                  href={item.href || "#"}
-                  key={item.key}
-                  onPress={() => {
-                    if (item.key === "logout") {
-                      handleLogout();
-                    }
-                  }}
-                  style={[
-                    styles.navItem,
-                    item.active && styles.navItemActive,
-                    item.danger && styles.navItemDanger,
-                  ]}
-                >
-                  <IconComp
-                    color={item.danger ? "#D4183D" : item.active ? "#04cf92" : "#5C6B66"}
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      styles.navItemText,
-                      item.active && styles.navItemTextActive,
-                      item.danger && styles.navItemTextDanger,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  {item.badgeCount ? (
-                    <View style={styles.badgeCountPill}>
-                      <Text style={styles.badgeCountText}>{item.badgeCount}</Text>
-                    </View>
-                  ) : null}
-                </AppLink>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Main Workspace */}
-      <View style={styles.mainContent}>
-        {/* Header Bar (Figma Node 207:2478 for mobile) */}
-        <SellerTopHeader
-          hasUnreadNotifications
-          onPressMenu={() => setMobileDrawerOpen(true)}
-          onSearchQueryChange={setSearchQuery}
-          searchQuery={searchQuery}
-          title={t("seller.myListings")}
-        />
-
-        {/* Listings Body */}
-        <ScrollView
-          contentContainerStyle={styles.workspaceScroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+    <SellerShell
+      activeNav="listings"
+      onSearchQueryChange={setSearchQuery}
+      searchQuery={searchQuery}
+      title={t("seller.myListings")}
+    >
           <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
             {/* Top Filter Bar + Add New Property */}
             <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
@@ -551,27 +483,7 @@ export function MyPropertiesScreen() {
             ) : null}
           </View>
         </View>
-        <Footer />
-      </ScrollView>
-      </View>
-
-      {/* Mobile / Tablet Navigation Drawer */}
-      <SellerMobileDrawer
-        activeNav="listings"
-        items={sidebarNavItems as any}
-        onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={(key) => {
-          setMobileDrawerOpen(false);
-          if (key === "logout") {
-            handleLogout();
-            return;
-          }
-          const found = sidebarNavItems.find((i) => i.key === key);
-          if (found?.href) router.push(found.href as any);
-        }}
-        visible={isTablet && mobileDrawerOpen}
-      />
-    </View>
+    </SellerShell>
   );
 }
 

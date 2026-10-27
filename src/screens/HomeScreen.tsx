@@ -26,7 +26,6 @@ import { MobileHeroSearchCard } from "@/components/MobileHeroSearchCard";
 import { MobileHomeSections } from "@/components/MobileHomeSections";
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { PropertyCard } from "@/components/PropertyCard";
-import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
 import { AppButton, AppLink } from "@/components/ui";
 import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
 import { ContrastColumns } from "@/components/landing/ContrastColumns";
@@ -334,13 +333,6 @@ export function HomeScreen() {
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <AiFlagshipSection />
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          7. OWNER CTA, list your property
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <OwnerListPropertySection />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────

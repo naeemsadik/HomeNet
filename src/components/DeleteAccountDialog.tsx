@@ -74,7 +74,7 @@ export function DeleteAccountDialog({
       reset();
       onClose();
       await logout();
-      router.replace("/home");
+      router.replace("/");
       notify(deletedTitle, deletedMessage);
     } catch (err) {
       const apiError = toApiError(err);

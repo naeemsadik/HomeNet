@@ -1,10 +1,6 @@
-import { RequireAuth } from "@/components/RequireAuth";
-import { SellerDashboardScreen } from "@/features/seller/screens/SellerDashboardScreen";
+import { Redirect } from "expo-router";
 
+/** `/dashboard` is a legacy alias — the canonical seller hub is `/seller`. */
 export default function DashboardRoute() {
-  return (
-    <RequireAuth active="seller">
-      <SellerDashboardScreen />
-    </RequireAuth>
-  );
+  return <Redirect href="/seller" />;
 }

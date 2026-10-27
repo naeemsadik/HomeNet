@@ -137,6 +137,20 @@ export const upsertPropertyDtoSchema = z
       .refine((url) => /^https?:\/\//i.test(url), "URL must start with http:// or https://")
       .optional(),
     status: z.enum(["draft", "pending", "active", "sold", "archived"]).optional(),
+    media: z
+      .array(
+        z.union([
+          z.string(),
+          z.object({
+            url: z.string(),
+            public_id: z.string().optional(),
+            thumbnail_url: z.string().nullable().optional(),
+            media_type: z.enum(["image", "video"]).optional(),
+            display_order: z.number().optional(),
+          }),
+        ]),
+      )
+      .optional(),
   })
   .strict();
 

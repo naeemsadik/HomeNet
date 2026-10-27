@@ -617,7 +617,7 @@ function TopBar({
                           });
                           if (!confirmed) return;
                           await logout();
-                          router.push("/home");
+                          router.push("/");
                         }}
                         style={({ pressed, hovered }: any) => [
                           styles.dropdownItem,
@@ -688,7 +688,7 @@ function MobileNav({ active }: { active: ActivePage }) {
     selected: boolean;
     authGated: boolean;
   }[] = [
-    { translationKey: "nav.home", href: "/home", icon: Home, selected: active === "home", authGated: false },
+    { translationKey: "nav.home", href: "/", icon: Home, selected: active === "home", authGated: false },
     { translationKey: "nav.search", href: "/buy", icon: Search, selected: active === "buy" || active === "rent" || active === "holiday" || active === "sold" || active === "search" || active === "property" || active === "market", authGated: false },
     { translationKey: "nav.post", href: "/property/create", icon: Plus, selected: false, authGated: true },
     { translationKey: "nav.saved", href: "/saved", icon: Heart, selected: active === "saved", authGated: true },
