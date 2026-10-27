@@ -24,9 +24,11 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
       {/* Price & Area Size Row */}
       <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
         <View style={[styles.formGroup, { flex: 1 }]}>
-          <Text style={styles.formLabel}>
-            {t("wizard.details.priceLabel", { suffix: priceSuffix })}
-          </Text>
+          <View style={styles.formLabelRow}>
+            <Text style={styles.formLabel}>
+              {t("wizard.details.priceLabel", { suffix: priceSuffix })}
+            </Text>
+          </View>
           <TextInput
             keyboardType="numeric"
             onChangeText={(v) => store.setDetails({ price: v })}
