@@ -41,6 +41,7 @@ import { Brand } from "./Brand";
 import { AiFinderModal } from "./AiFinderModal";
 import { InstantValuationModal } from "@/features/valuation/components/InstantValuationModal";
 import { LanguageToggle } from "./LanguageToggle";
+import { DrawerLanguageDropdown } from "./DrawerLanguageDropdown";
 import { AppLink } from "./ui";
 import { Footer } from "./Footer";
 import { NotificationPreview } from "@/features/notification/components/NotificationPreview";
@@ -191,8 +192,7 @@ function SideBar({
       </View>
 
       <View style={styles.drawerLanguage}>
-        <Text style={styles.drawerLanguageLabel}>{t("common.language")}</Text>
-        <LanguageToggle />
+        <DrawerLanguageDropdown />
       </View>
 
       <View style={styles.sidebarSpacer} />

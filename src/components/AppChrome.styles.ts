@@ -919,9 +919,6 @@ export const styles = StyleSheet.create({
     gap: 3,
   },
   drawerLanguage: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     marginTop: 12,
     paddingTop: 14,
     paddingHorizontal: 14,

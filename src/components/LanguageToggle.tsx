@@ -146,3 +146,5 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.5)",
   },
 });
+
+export { DrawerLanguageDropdown } from "./DrawerLanguageDropdown";
