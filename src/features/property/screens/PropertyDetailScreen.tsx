@@ -72,9 +72,12 @@ type AiValuation = {
 
 export function PropertyDetailScreen() {
   const { t, language } = useTranslation();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const params = useLocalSearchParams<{ id?: string | string[] }>();
+  const rawId = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
+  const propertyId = (rawId ?? "").trim();
+  const id = propertyId;
   const { isPhone, isTablet } = useResponsive();
-  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(id ?? "");
+  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId);
   const {
     data: similarProperties = [],
     error: similarError,
@@ -83,11 +86,11 @@ export function PropertyDetailScreen() {
   } = useSimilarProperties(
     apiDetail?.type,
     apiDetail?.area?.id,
-    id ?? "",
+    propertyId,
   );
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const isPropertySaved = useSavedStore((s) => s.isSaved(id ?? ""));
+  const isPropertySaved = useSavedStore((s) => s.isSaved(propertyId));
   const toggleSaved = useSavedStore((s) => s.toggleSaved);
   const [bookModalVisible, setBookModalVisible] = useState(false);
   const [reportModalVisible, setReportModalVisible] = useState(false);

@@ -42,7 +42,6 @@ import Svg, {
   Text as SvgText,
 } from "react-native-svg";
 import { AppLink } from "@/components/ui";
-import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { colors } from "@/theme";
@@ -54,11 +53,8 @@ import { SellerBoostWorkspace } from "../components/SellerBoostWorkspace";
 import { SellerHelpWorkspace } from "../components/SellerHelpWorkspace";
 import { SellerInsightsWorkspace } from "../components/SellerInsightsWorkspace";
 import { SellerPaymentsWorkspace } from "../components/SellerPaymentsWorkspace";
-import { SellerTopHeader } from "../components/SellerTopHeader";
-import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
+import { SellerShell } from "../components/SellerShell";
 import { SellerStatCard, type StatItem } from "../components/SellerStatCard";
-import { ToggleViewButton } from "../components/ToggleViewButton";
-import { Footer } from "@/components/Footer";
 import { styles } from "./SellerDashboardScreen.styles";
 
 import { LiveText } from "@/components/LiveText";
@@ -129,7 +125,7 @@ export function SellerDashboardScreen() {
     );
     if (!confirmed) return;
     logout();
-    router.replace("/home");
+    router.replace("/");
   };
 
   const { data: myPropertiesData } = useMyProperties();
@@ -262,139 +258,13 @@ export function SellerDashboardScreen() {
     sidebarNavItems.find((i) => i.key === activeNav)?.label || t("dashboard.tabs.dashboard");
 
   return (
-    <View style={styles.outerContainer}>
-      {/* Sidebar (Desktop View) */}
-      {!isTablet && (
-        <View style={styles.sidebar}>
-          {/* Logo & Brand Header */}
-          <View style={styles.sidebarHeader}>
-            <Brand />
-
-            <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>{t("dashboard.sellerDashboard")}</Text>
-            </View>
-          </View>
-
-          {/* Navigation Links */}
-          <ScrollView
-            contentContainerStyle={styles.sidebarNavScroll}
-            showsVerticalScrollIndicator={false}
-          >
-            {sidebarNavItems.map((item) => {
-              const IconComp = item.icon;
-              const isActive = activeNav === item.key;
-
-              return (
-                <AppLink
-                  href={item.href || "#"}
-                  key={item.key}
-                  onPress={() => {
-                    if (item.key === "logout") {
-                      handleLogout();
-                      return;
-                    }
-                    if (item.href?.startsWith("/seller?tab=")) {
-                      setActiveNav(item.key);
-                      router.setParams({ tab: item.key });
-                      return;
-                    }
-                    if (item.key === "dashboard") {
-                      setActiveNav("dashboard");
-                      router.setParams({ tab: undefined });
-                      return;
-                    }
-                    setActiveNav(item.key);
-                  }}
-                  style={[
-                    styles.navItem,
-                    isActive && styles.navItemActive,
-                    item.danger && styles.navItemDanger,
-                  ]}
-                >
-                  <IconComp
-                    color={
-                      item.danger
-                        ? "#D4183D"
-                        : isActive
-                        ? colors.green
-                        : colors.muted
-                    }
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      styles.navItemText,
-                      isActive && styles.navItemTextActive,
-                      item.danger && styles.navItemTextDanger,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  {item.badgeCount ? (
-                    <View style={styles.badgeCountPill}>
-                      <Text style={styles.badgeCountText}>{item.badgeCount}</Text>
-                    </View>
-                  ) : null}
-                </AppLink>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Main Content Workspace */}
-      <View style={styles.mainContent}>
-        {/* Top Header Bar */}
-        {isTablet ? (
-          /* Mobile Header (Figma Node 207:2478 with 3-bar button and View site) */
-          <SellerTopHeader
-            hasUnreadNotifications
-            onPressMenu={() => setMobileDrawerOpen(true)}
-            onSearchQueryChange={setSearchQuery}
-            searchQuery={searchQuery}
-            title={activeTitle}
-          />
-        ) : (
-          /* Original Untouched Desktop Header Bar */
-          <View style={styles.topHeader}>
-            <Text style={styles.headerTitle}>{activeTitle}</Text>
-
-            <View style={styles.headerActions}>
-              {/* Search Input */}
-              <View style={styles.searchContainer}>
-                <Search color="rgba(11,26,23,0.5)" size={16} />
-                <TextInput
-                  onChangeText={setSearchQuery}
-                  placeholder={t("seller.header.searchPlaceholder")}
-                  placeholderTextColor="rgba(11,26,23,0.5)"
-                  style={styles.searchInput}
-                  value={searchQuery}
-                />
-              </View>
-
-              {/* Notification Button */}
-              <AppLink
-                accessibilityLabel={t("seller.header.notificationsAria")}
-                href="/notifications"
-                style={styles.iconCircleBtn}
-              >
-                <Bell color={colors.ink} size={19} />
-                <View style={styles.headerDotIndicator} />
-              </AppLink>
-
-              {/* Toggle view button */}
-              <ToggleViewButton />
-            </View>
-          </View>
-        )}
-
-        {/* Scrollable Workspace Body */}
-        <ScrollView
-          contentContainerStyle={styles.workspaceScroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
+    <SellerShell
+      activeNav={activeNav}
+      onSearchQueryChange={setSearchQuery}
+      searchQuery={searchQuery}
+      title={activeTitle}
+    >
+      <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
             {activeNav === "dashboard" && (
               <>
             {/* Welcome Banner (Figma Node 220:8881) */}
@@ -561,9 +431,6 @@ export function SellerDashboardScreen() {
             {activeNav === "payments" && <SellerPaymentsWorkspace />}
             {activeNav === "help" && <SellerHelpWorkspace />}
           </View>
-          <Footer />
-        </ScrollView>
-      </View>
 
       <SellerBoostModal
         onClose={() => setBoostModalVisible(false)}
@@ -571,29 +438,7 @@ export function SellerDashboardScreen() {
         selectedPackage={selectedBoostPkg}
         visible={boostModalVisible}
       />
-
-      {/* Mobile / Tablet Navigation Drawer triggered by 3-bar button */}
-      <SellerMobileDrawer
-        activeNav={activeNav}
-        items={sidebarNavItems}
-        onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={(key) => {
-          setMobileDrawerOpen(false);
-          if (key === "logout") {
-            handleLogout();
-            return;
-          }
-          const found = sidebarNavItems.find((i) => i.key === key);
-          if (found?.href && !found.href.startsWith("/seller")) {
-            router.push(found.href as any);
-          } else {
-            setActiveNav(key);
-            router.setParams({ tab: key === "dashboard" ? undefined : key });
-          }
-        }}
-        visible={isTablet && mobileDrawerOpen}
-      />
-    </View>
+    </SellerShell>
   );
 
 }

@@ -64,13 +64,21 @@ export async function getMyProperties(params: PropertyFilters = {}) {
 }
 
 export async function getPropertyById(id: string) {
-  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/properties/${id}`);
+  if (!id || typeof id !== "string") {
+    throw new Error("Property ID is required");
+  }
+  const cleanId = id.trim();
+  if (!cleanId) {
+    throw new Error("Property ID cannot be empty");
+  }
+  const encodedId = encodeURIComponent(cleanId);
+  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/property/${encodedId}`);
   return data;
 }
 
 export async function upsertProperty(dto: UpsertPropertyDto) {
   const validated = upsertPropertyDtoSchema.parse(dto);
-  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/v1/properties", validated);
+  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/api/properties", validated);
   return data;
 }
 
@@ -107,6 +115,34 @@ export async function submitProperty(id: string) {
   const { data } = await apiClient.post<
     ApiResponse<{ id: string; status: PropertyStatus }>
   >(`/v1/properties/${id}/submit`);
+  return data;
+}
+
+export interface UploadMediaResponse {
+  secure_url: string;
+  public_id: string;
+  resource_type: string;
+  url: string;
+  type?: string;
+  thumbnail_url?: string;
+}
+
+/**
+ * Decoupled media upload route.
+ * Uploads media to Cloudinary without creating any Property database records.
+ */
+export async function uploadMedia(
+  file: UploadInput,
+  mediaType: "image" | "video" = "image",
+) {
+  const formData = new FormData();
+  appendUpload(formData, "file", file, mediaType === "image" ? "property.jpg" : "property.mp4");
+
+  const { data } = await apiClient.post<ApiResponse<UploadMediaResponse>>(
+    `/api/upload`,
+    formData,
+    { headers: { "Content-Type": undefined } },
+  );
   return data;
 }
 

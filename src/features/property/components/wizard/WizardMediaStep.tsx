@@ -31,6 +31,9 @@ export function WizardMediaStep({ isUploading, onPickMedia, onDeleteMedia }: Wiz
             <Pressable onPress={() => void onDeleteMedia(media.id)} style={styles.removeMediaButton}>
               <Trash2 color="#FFFFFF" size={14} />
             </Pressable>
+            <Text numberOfLines={1} selectable style={{ fontSize: 9, color: "#899790", paddingHorizontal: 4, marginTop: 2 }}>
+              {media.url}
+            </Text>
           </View>
         ))}
 
@@ -54,7 +57,7 @@ export function WizardMediaStep({ isUploading, onPickMedia, onDeleteMedia }: Wiz
         {store.media.filter((media) => media.mediaType === "video").map((media) => (
           <View key={media.id} style={styles.uploadedVideoRow}>
             <Video color="#04cf92" size={20} />
-            <Text numberOfLines={1} style={styles.uploadedVideoText}>{media.url}</Text>
+            <Text numberOfLines={1} selectable style={styles.uploadedVideoText}>{media.url}</Text>
             <Pressable onPress={() => void onDeleteMedia(media.id)}>
               <Trash2 color="#D4183D" size={17} />
             </Pressable>

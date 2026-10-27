@@ -32,17 +32,13 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { AreaPicker } from "@/components/AreaPicker";
-import { Brand } from "@/components/Brand";
-import { AppLink } from "@/components/ui";
 import { NotificationItem } from "@/features/notification/components/NotificationItem";
 import {
   useMarkAllRead,
   useNotifications,
   useUnreadCount,
 } from "@/features/notification/hooks/useNotifications";
-import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
-import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
-import { ToggleViewButton } from "@/features/seller/components/ToggleViewButton";
+import { SellerShell } from "@/features/seller/components/SellerShell";
 import { Footer } from "@/components/Footer";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
@@ -173,6 +169,12 @@ export function PropertyCreateWizard() {
     },
     virtual_tour_url: store.virtualTourUrl.trim() || undefined,
     status: "draft",
+    media: store.media.map((m, idx) => ({
+      url: m.url,
+      public_id: m.id,
+      media_type: m.mediaType,
+      display_order: m.displayOrder ?? idx,
+    })),
   });
 
   const upsertDraft = async () => {
@@ -246,7 +248,6 @@ export function PropertyCreateWizard() {
     }
     setLocalError(null);
     try {
-      if (store.currentStep === 3) await upsertDraft();
       if (store.currentStep < 5) store.setCurrentStep((store.currentStep + 1) as 1 | 2 | 3 | 4 | 5);
     } catch (error) {
       setLocalError(toApiError(error).message);
@@ -291,10 +292,6 @@ export function PropertyCreateWizard() {
   };
 
   const handlePickMedia = async (mediaType: "image" | "video") => {
-    if (!store.propertyId) {
-      setLocalError(t("wizard.validation.locationFirst"));
-      return;
-    }
     const existingCount = store.media.filter((media) => media.mediaType === mediaType).length;
     const maxCount = mediaType === "image" ? 20 : 3;
     if (existingCount >= maxCount) {
@@ -340,17 +337,18 @@ export function PropertyCreateWizard() {
     try {
       setLocalError(null);
       const response = await uploadMediaMutation.mutateAsync({
-        propertyId: store.propertyId,
+        propertyId: store.propertyId ?? undefined,
         file,
         type: mediaType,
         displayOrder: store.media.length,
       });
       if (!response.data) throw new Error("The API did not return uploaded media.");
+      const uploadedData = response.data as any;
       store.addMedia({
-        id: response.data.id,
-        url: response.data.url,
-        displayOrder: response.data.display_order,
-        mediaType: response.data.media_type,
+        id: uploadedData.public_id || uploadedData.id || `upload_${Date.now()}`,
+        url: uploadedData.secure_url || uploadedData.url,
+        displayOrder: uploadedData.display_order ?? store.media.length,
+        mediaType: uploadedData.resource_type === "video" || uploadedData.media_type === "video" ? "video" : "image",
       });
     } catch (error) {
       setLocalError(toApiError(error).message);
@@ -360,7 +358,9 @@ export function PropertyCreateWizard() {
   const handleDeleteMedia = async (mediaId: string) => {
     try {
       setLocalError(null);
-      await deleteMediaMutation.mutateAsync({ mediaId, propertyId: store.propertyId ?? undefined });
+      if (store.propertyId) {
+        await deleteMediaMutation.mutateAsync({ mediaId, propertyId: store.propertyId });
+      }
       store.removeMedia(mediaId);
     } catch (error) {
       setLocalError(toApiError(error).message);
@@ -401,7 +401,7 @@ export function PropertyCreateWizard() {
     });
     if (!confirmed) return;
     logout();
-    router.replace("/home");
+    router.replace("/");
   };
 
   // Sidebar items - aligned with HomeNet standards (all seller tabs present)
@@ -428,204 +428,20 @@ export function PropertyCreateWizard() {
   ];
 
   return (
-    <View style={styles.outerContainer}>
-
-      {/* Sidebar (Desktop View) */}
-      {!isTablet && (
-        <View style={styles.sidebar}>
-          <View style={styles.sidebarHeader}>
-            <Brand />
-            <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>{t("wizard.header.sellerDashboard")}</Text>
-            </View>
-          </View>
-
-          <ScrollView contentContainerStyle={styles.sidebarNavScroll} showsVerticalScrollIndicator={false}>
-            {sidebarNavItems.map((item) => {
-              const IconComp = item.icon;
-              return (
-                <AppLink
-                  href={item.href || "#"}
-                  key={item.key}
-                  onPress={() => {
-                    if (item.key === "logout") {
-                      handleLogout();
-                    }
-                  }}
-                  style={[
-                    styles.navItem,
-                    item.active && styles.navItemActive,
-                    item.danger && styles.navItemDanger,
-                  ]}
-                >
-                  <IconComp
-                    color={item.danger ? "#D4183D" : item.active ? "#04cf92" : "#5C6B66"}
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      styles.navItemText,
-                      item.active && styles.navItemTextActive,
-                      item.danger && styles.navItemTextDanger,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  {item.badgeCount ? (
-                    <View style={styles.badgeCountPill}>
-                      <Text style={styles.badgeCountText}>{item.badgeCount}</Text>
-                    </View>
-                  ) : null}
-                </AppLink>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Main Workspace Content */}
-      <View style={styles.mainContent}>
-        {/* Top Header Bar */}
-        {isTablet ? (
-          <SellerTopHeader
-            hasUnreadNotifications={unreadCount > 0}
-            onPressMenu={() => setMobileDrawerOpen(true)}
-            onSearchQueryChange={setSearchQuery}
-            searchQuery={searchQuery}
-            title={t("wizard.header.title")}
-          />
-        ) : (
-          <View style={styles.topHeader}>
-            <View>
-              <Text style={styles.headerTitle}>{t("wizard.header.title")}</Text>
-              <Text style={styles.headerSubtitle}>
-                {t("wizard.header.subtitle")}
-              </Text>
-            </View>
-
-            <View style={styles.headerActions}>
-              <View style={styles.searchContainer}>
-                <Search color="rgba(11,26,23,0.5)" size={16} />
-                <TextInput
-                  onChangeText={setSearchQuery}
-                  placeholder={t("wizard.header.searchPlaceholder")}
-                  placeholderTextColor="rgba(11,26,23,0.5)"
-                  style={styles.searchInput}
-                  value={searchQuery}
-                />
-              </View>
-
-              {/* Notification Bell with live functionalities & popover */}
-              <View style={styles.notificationWrap}>
-                <Pressable
-                  accessibilityLabel={t("wizard.notifications.ariaLabel")}
-                  accessibilityRole="button"
-                  onPress={() => setNotificationsOpen((prev) => !prev)}
-                  style={({ pressed }) => [
-                    styles.iconCircleBtn,
-                    notificationsOpen && styles.iconCircleBtnActive,
-                    webPointer,
-                    pressed && styles.iconCircleBtnPressed,
-                  ]}
-                >
-                  <Bell
-                    color={notificationsOpen ? "#04cf92" : "#0B1A17"}
-                    size={20}
-                    strokeWidth={1.8}
-                  />
-                  {unreadCount > 0 ? (
-                    <View style={styles.notificationBadgePill}>
-                      <Text style={styles.notificationBadgeText}>
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </Text>
-                    </View>
-                  ) : null}
-                </Pressable>
-
-                {/* Notifications dropdown popover */}
-                {notificationsOpen && (
-                  <View style={styles.notificationDropdown}>
-                    <View style={styles.dropdownHeader}>
-                      <View style={styles.dropdownHeaderLeft}>
-                        <Text style={styles.dropdownTitle}>{t("wizard.notifications.title")}</Text>
-                        {unreadCount > 0 && (
-                          <View style={styles.unreadCountPill}>
-                            <Text style={styles.unreadCountPillText}>
-                              {t("wizard.notifications.newCount", { count: unreadCount })}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                      {unreadCount > 0 && (
-                        <Pressable
-                          accessibilityRole="button"
-                          disabled={markAllReadMutation.isPending}
-                          onPress={() => markAllReadMutation.mutate()}
-                          style={({ pressed }) => [
-                            styles.markAllReadBtn,
-                            webPointer,
-                            pressed && { opacity: 0.7 },
-                          ]}
-                        >
-                          <Text style={styles.markAllReadText}>
-                            {markAllReadMutation.isPending ? t("wizard.notifications.marking") : t("wizard.notifications.markAllRead")}
-                          </Text>
-                        </Pressable>
-                      )}
-                    </View>
-
-                    <ScrollView
-                      contentContainerStyle={styles.dropdownScrollContent}
-                      nestedScrollEnabled
-                      style={styles.dropdownScroll}
-                    >
-                      {notificationsLoading ? (
-                        <View style={styles.dropdownEmpty}>
-                          <Text style={styles.dropdownEmptyText}>{t("wizard.notifications.loading")}</Text>
-                        </View>
-                      ) : notificationsList.length === 0 ? (
-                        <View style={styles.dropdownEmpty}>
-                          <Bell color="rgba(11,26,23,0.3)" size={32} />
-                          <Text style={styles.dropdownEmptyText}>{t("wizard.notifications.empty")}</Text>
-                        </View>
-                      ) : (
-                        notificationsList.slice(0, 8).map((notification) => (
-                          <NotificationItem
-                            key={notification.id}
-                            notification={notification}
-                            onPress={() => setNotificationsOpen(false)}
-                          />
-                        ))
-                      )}
-                    </ScrollView>
-
-                    <View style={styles.dropdownFooter}>
-                      <AppLink
-                        href="/notifications"
-                        onPress={() => setNotificationsOpen(false)}
-                        style={styles.viewAllNotificationsBtn}
-                      >
-                        <Text style={styles.viewAllNotificationsText}>
-                          {t("wizard.notifications.viewAll")}
-                        </Text>
-                      </AppLink>
-                    </View>
-                  </View>
-                )}
-              </View>
-
-              <ToggleViewButton />
-            </View>
-          </View>
-        )}
-
-        {/* Scrollable Wizard Body */}
-        <ScrollView
-          ref={scrollRef}
-          contentContainerStyle={styles.workspaceScroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+    <SellerShell
+      activeNav="create"
+      onSearchQueryChange={setSearchQuery}
+      scrollable={false}
+      searchQuery={searchQuery}
+      title={t("wizard.header.title")}
+    >
+      {/* Scrollable Wizard Body */}
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.workspaceScroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
           <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone, isNarrowPhone && styles.scrollBodyNarrow]}>
             {/* 5-Step Progress Stepper Bar */}
           <View style={styles.stepperContainer}>
@@ -798,7 +614,6 @@ export function PropertyCreateWizard() {
         </View>
         <Footer />
       </ScrollView>
-      </View>
       <AreaPicker
         visible={areaPickerVisible}
         onClose={() => setAreaPickerVisible(false)}
@@ -811,21 +626,6 @@ export function PropertyCreateWizard() {
           setLocalError(null);
         }}
       />
-      <SellerMobileDrawer
-        activeNav="create"
-        items={sidebarNavItems as any}
-        onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={(key) => {
-          setMobileDrawerOpen(false);
-          if (key === "logout") {
-            handleLogout();
-            return;
-          }
-          const found = sidebarNavItems.find((i) => i.key === key);
-          if (found?.href) router.push(found.href as any);
-        }}
-        visible={isTablet && mobileDrawerOpen}
-      />
-    </View>
+    </SellerShell>
   );
 }

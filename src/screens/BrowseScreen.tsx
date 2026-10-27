@@ -254,7 +254,7 @@ export function BrowseScreen({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("common.back")}
-          onPress={() => router.push("/home")}
+          onPress={() => router.push("/")}
           style={[styles.mobileTopBarBtn, webPointer]}
         >
           <ArrowLeft color={colorTokens.ink} size={20} strokeWidth={2.4} />
