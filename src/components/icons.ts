@@ -123,3 +123,86 @@ export { default as WalletCards } from "lucide-react-native/icons/wallet-cards";
 export { default as X } from "lucide-react-native/icons/x";
 export { default as XCircle } from "lucide-react-native/icons/circle-x";
 export { default as Zap } from "lucide-react-native/icons/zap";
+import * as React from "react";
+import Svg, { Path } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+
+export interface IconProps extends SvgProps {
+  size?: number;
+  color?: string;
+}
+
+export const Facebook = ({
+  size = 24,
+  color = "currentColor",
+  ...props
+}: IconProps) =>
+  React.createElement(
+    Svg,
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: color,
+      strokeWidth: 2,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...props,
+    },
+    React.createElement(Path, {
+      d: "M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z",
+    })
+  );
+
+export const Linkedin = ({
+  size = 24,
+  color = "currentColor",
+  ...props
+}: IconProps) =>
+  React.createElement(
+    Svg,
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: color,
+      strokeWidth: 2,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...props,
+    },
+    React.createElement(Path, {
+      d: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z",
+    }),
+    React.createElement(Path, { d: "M2 9h4v12H2z" }),
+    React.createElement(Path, { d: "M4 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" })
+  );
+
+export const Youtube = ({
+  size = 24,
+  color = "currentColor",
+  ...props
+}: IconProps) =>
+  React.createElement(
+    Svg,
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: color,
+      strokeWidth: 2,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...props,
+    },
+    React.createElement(Path, {
+      d: "M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17",
+    }),
+    React.createElement(Path, { d: "m10 15 5-3-5-3z", fill: color })
+  );
+
+export { Linkedin as LinkedIn, Youtube as YouTube };
+

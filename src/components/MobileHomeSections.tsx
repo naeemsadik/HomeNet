@@ -1,16 +1,9 @@
-import { memo, type ComponentType } from "react";
+import { memo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import {
-  ArrowRight,
-  BadgeCheck,
-  Bed,
-  Building2,
-  Calculator,
-  Home,
-  Sparkles,
-} from "@/components/icons";
+import { ChevronRight } from "@/components/icons";
+import { GooglePlayButton } from "@/components/Footer";
 import { usePropertyGuides } from "@/features/news/hooks/usePropertyGuides";
 import type { PropertyGuide } from "@/features/news/types/news";
 import { resolveGuideImage } from "@/features/news/utils/guideImageStrategy";
@@ -21,13 +14,9 @@ import {
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 
-type IconType = ComponentType<{ color?: string; size?: number; strokeWidth?: number }>;
-
 interface FeatureCard {
   key: string;
-  icon: IconType;
-  /** Tint behind the icon; kept light so the card reads as quiet. */
-  tint: string;
+  image: string;
   href: string;
   title: TranslationKey;
   copy: TranslationKey;
@@ -35,14 +24,14 @@ interface FeatureCard {
 }
 
 /**
- * What HomeNet offers beyond the search box, one card each, like the promo
- * cards on Rightmove's phone homepage. Every card opens something that exists.
+ * What HomeNet offers beyond the search box, one card each with curated real estate photography.
+ * Every card opens something that exists.
  */
 const FEATURE_CARDS: FeatureCard[] = [
   {
     key: "valuation",
-    icon: Calculator,
-    tint: "#E3F7EF",
+    image:
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
     href: "/valuation",
     title: "home.mobileCards.valuation.title",
     copy: "home.mobileCards.valuation.copy",
@@ -50,8 +39,8 @@ const FEATURE_CARDS: FeatureCard[] = [
   },
   {
     key: "list",
-    icon: Home,
-    tint: "#FFF1DB",
+    image:
+      "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80",
     href: "/sell",
     title: "home.mobileCards.list.title",
     copy: "home.mobileCards.list.copy",
@@ -59,8 +48,8 @@ const FEATURE_CARDS: FeatureCard[] = [
   },
   {
     key: "ai",
-    icon: Sparkles,
-    tint: "#EDE8FF",
+    image:
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
     href: "/ai-finder",
     title: "home.mobileCards.ai.title",
     copy: "home.mobileCards.ai.copy",
@@ -68,8 +57,8 @@ const FEATURE_CARDS: FeatureCard[] = [
   },
   {
     key: "holiday",
-    icon: Bed,
-    tint: "#E1F0FF",
+    image:
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
     href: "/rent?subtype=short-let",
     title: "home.mobileCards.holiday.title",
     copy: "home.mobileCards.holiday.copy",
@@ -77,8 +66,8 @@ const FEATURE_CARDS: FeatureCard[] = [
   },
   {
     key: "commercial",
-    icon: Building2,
-    tint: "#F1ECE4",
+    image:
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
     href: "/buy?type=commercial",
     title: "home.mobileCards.commercial.title",
     copy: "home.mobileCards.commercial.copy",
@@ -86,8 +75,8 @@ const FEATURE_CARDS: FeatureCard[] = [
   },
   {
     key: "verified",
-    icon: BadgeCheck,
-    tint: "#E3F7EF",
+    image:
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
     href: "/buy?is_verified=true",
     title: "home.mobileCards.verified.title",
     copy: "home.mobileCards.verified.copy",
@@ -97,7 +86,6 @@ const FEATURE_CARDS: FeatureCard[] = [
 
 const FeatureCardView = memo(function FeatureCardView({ card }: { card: FeatureCard }) {
   const { t } = useTranslation();
-  const Icon = card.icon;
   const title = t(card.title);
 
   return (
@@ -107,15 +95,19 @@ const FeatureCardView = memo(function FeatureCardView({ card }: { card: FeatureC
       onPress={() => router.push(card.href as never)}
       style={({ pressed }) => [styles.card, webPointer, pressed && { opacity: 0.92 }]}
     >
-      <View style={[styles.cardBand, { backgroundColor: card.tint }]}>
-        <Icon color={colorTokens.ink} size={34} strokeWidth={1.8} />
-      </View>
+      <Image
+        source={{ uri: card.image }}
+        style={styles.cardBanner}
+        contentFit="cover"
+        accessibilityLabel={title}
+        accessibilityIgnoresInvertColors
+      />
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.cardCopy}>{t(card.copy)}</Text>
         <View style={styles.cardCta}>
           <Text style={styles.cardCtaText}>{t(card.cta)}</Text>
-          <ArrowRight color={colorTokens.ink} size={16} strokeWidth={2.2} />
+          <ChevronRight color={colorTokens.ink} size={16} strokeWidth={2.2} />
         </View>
       </View>
     </Pressable>
@@ -172,22 +164,25 @@ function NewsStrip() {
           <NewsCard guide={guide} key={guide.id} />
         ))}
       </ScrollView>
-      <Pressable
-        accessibilityRole="link"
-        onPress={() => router.push("/market" as never)}
-        style={[styles.marketLink, webPointer]}
-      >
-        <Text style={styles.marketLinkText}>{t("home.mobileCards.marketLink")}</Text>
-        <ArrowRight color={colorTokens.ink} size={16} strokeWidth={2.2} />
-      </Pressable>
     </View>
   );
 }
 
+/** "Download the Homenet app" card positioned between guides and footer resources. */
+const AppDownloadCard = memo(function AppDownloadCard() {
+  const { t } = useTranslation();
+
+  return (
+    <View style={styles.appDownloadCard}>
+      <Text style={styles.appDownloadTitle}>{t("home.downloadAppTitle")}</Text>
+      <GooglePlayButton />
+    </View>
+  );
+});
+
 /**
- * Everything the phone homepage shows below the search card: feature cards and
- * news. The long website sections (comparison, how it works, product preview,
- * AI and owner banners) are left to the website.
+ * Everything the phone homepage shows below the search card: feature cards with curated photography,
+ * guides strip, and the app download card.
  */
 export function MobileHomeSections() {
   return (
@@ -196,6 +191,7 @@ export function MobileHomeSections() {
         <FeatureCardView card={card} key={card.key} />
       ))}
       <NewsStrip />
+      <AppDownloadCard />
     </View>
   );
 }
@@ -208,18 +204,21 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colorTokens.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colorTokens.divider,
     overflow: "hidden",
   },
-  cardBand: {
-    height: 92,
-    alignItems: "center",
-    justifyContent: "center",
+  cardBanner: {
+    width: "100%",
+    aspectRatio: 16 / 9,
+    borderTopLeftRadius: radius.card,
+    borderTopRightRadius: radius.card,
+    overflow: "hidden",
+    backgroundColor: colorTokens.surfaceSunken,
   },
   cardBody: {
-    padding: 18,
+    padding: 16,
     gap: 6,
   },
   cardTitle: {
@@ -273,7 +272,7 @@ const styles = StyleSheet.create({
   newsCard: {
     width: 248,
     backgroundColor: colorTokens.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colorTokens.divider,
     overflow: "hidden",
@@ -300,16 +299,16 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     color: colorTokens.ink,
   },
-  marketLink: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingVertical: 6,
+  appDownloadCard: {
+    backgroundColor: colorTokens.surfaceSunken,
+    borderRadius: radius.card,
+    padding: 20,
+    marginVertical: 16,
+    gap: 14,
   },
-  marketLinkText: {
+  appDownloadTitle: {
     fontFamily: fonts.bold,
-    fontSize: 15,
-    color: colorTokens.ink,
-    textDecorationLine: "underline",
+    fontSize: 18,
+    color: colorTokens.brandText,
   },
 });

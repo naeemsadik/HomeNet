@@ -616,7 +616,7 @@ export function HomeNetExplainerSection() {
                   style={{
                     fontSize: 12,
                     color: "#E2E8F0",
-                    fontFamily: fonts.mono || "monospace",
+                    fontFamily: "monospace",
                   }}
                 >
                   {formatTime(currentTime)} / {formatTime(duration)}
