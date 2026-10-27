@@ -72,13 +72,14 @@ export async function getPropertyById(id: string) {
     throw new Error("Property ID cannot be empty");
   }
   const encodedId = encodeURIComponent(cleanId);
-  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/property/${encodedId}`);
+  // The live API serves the plural path; the singular one is not deployed.
+  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/properties/${encodedId}`);
   return data;
 }
 
 export async function upsertProperty(dto: UpsertPropertyDto) {
   const validated = upsertPropertyDtoSchema.parse(dto);
-  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/api/properties", validated);
+  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/v1/properties", validated);
   return data;
 }
 
@@ -139,7 +140,8 @@ export async function uploadMedia(
   appendUpload(formData, "file", file, mediaType === "image" ? "property.jpg" : "property.mp4");
 
   const { data } = await apiClient.post<ApiResponse<UploadMediaResponse>>(
-    `/api/upload`,
+    // Needs the backend upload route (POST /v1/upload). Versioned like every other call.
+    `/v1/upload`,
     formData,
     { headers: { "Content-Type": undefined } },
   );

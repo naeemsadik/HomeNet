@@ -17,7 +17,6 @@ import {
   MessageSquare,
   PlusCircle,
   Rocket,
-  Search,
   ShieldCheck,
   Sparkles,
   TrendingUp,
@@ -26,9 +25,7 @@ import {
 } from "@/components/icons";
 import { useEffect, useState } from "react";
 import {
-  ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { confirmAction } from "@/lib/alert";

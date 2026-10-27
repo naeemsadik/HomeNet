@@ -1,7 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import {
   BarChart2,
-  Bell,
   Building2,
   CheckCircle2,
   CircleHelp,
@@ -11,7 +10,6 @@ import {
   LogOut,
   PlusCircle,
   Rocket,
-  Search,
   Shield,
   ShieldAlert,
   ShieldCheck,
@@ -25,15 +23,12 @@ import {
   ActivityIndicator,
   Image,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   View,
 } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
 import { router } from "expo-router";
-import { AppLink } from "@/components/ui";
-import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
@@ -44,10 +39,6 @@ import { editProfileSchema } from "@/lib/schemas/user";
 import type { UploadInput } from "@/services/upload";
 import { SellerChangePasswordModal } from "../components/SellerChangePasswordModal";
 import { SellerShell } from "../components/SellerShell";
-import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
-import { SellerTopHeader } from "../components/SellerTopHeader";
-import { ToggleViewButton } from "../components/ToggleViewButton";
-import { Footer } from "@/components/Footer";
 import { useTranslation } from "@/i18n";
 import type { SellerNavKey } from "./SellerDashboardScreen";
 import { styles } from "./SellerProfileScreen.styles";
@@ -207,7 +198,7 @@ export function SellerProfileScreen() {
       } catch (err) {
         if (__DEV__) console.warn("Logout error:", err);
       }
-      router.replace("/home");
+      router.replace("/");
     };
 
     const confirmed = await confirmAction(t("seller.profile.logoutConfirmTitle"), t("seller.profile.logoutConfirmMessage"), {

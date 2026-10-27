@@ -7,7 +7,6 @@ import {
   submitProperty,
   updateProperty,
   uploadMedia,
-  uploadPropertyMedia,
 } from "@/services/propertyApi";
 import type { UploadInput } from "@/services/upload";
 import type { UpsertPropertyDto } from "@/types/api";

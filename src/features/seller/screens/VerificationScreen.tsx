@@ -1,38 +1,22 @@
 import {
-  Bell,
-  Building2,
   Check,
-  CircleHelp,
   Clock,
-  CreditCard,
   FileCheck,
   IdCard,
-  LayoutDashboard,
-  LogOut,
   MapPin,
-  PlusCircle,
   Receipt,
-  Rocket,
-  Search,
   ShieldCheck,
-  Sparkles,
   Upload,
-  User,
-  BarChart2,
 } from "@/components/icons";
 import { useState } from "react";
 import {
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
-import { confirmAction } from "@/lib/alert";
 import Svg, { Circle } from "react-native-svg";
-import { router } from "expo-router";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, fonts, webPointer } from "@/theme";

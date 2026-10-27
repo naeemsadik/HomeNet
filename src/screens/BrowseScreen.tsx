@@ -120,13 +120,15 @@ export function BrowseScreen({
     [fixedLocation, params]
   );
 
+  // Depends on the one fact it reads, so the memo survives unrelated param changes.
+  const filtersModalRequested = isFiltersModalRequested(params);
   const closeFilterModal = useCallback(() => {
     setIsFilterModalOpen(false);
     setPreviewFilters(null);
-    if (isFiltersModalRequested(params)) {
+    if (filtersModalRequested) {
       router.setParams({ filters: "", modal: "" });
     }
-  }, [params]);
+  }, [filtersModalRequested, setIsFilterModalOpen, setPreviewFilters]);
 
   const handleResetFilters = useCallback(() => {
     applyFilters(resetSearchFilters(filters, { fixedLocation }));

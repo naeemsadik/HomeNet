@@ -31,9 +31,6 @@ export function WizardMediaStep({ isUploading, onPickMedia, onDeleteMedia }: Wiz
             <Pressable onPress={() => void onDeleteMedia(media.id)} style={styles.removeMediaButton}>
               <Trash2 color="#FFFFFF" size={14} />
             </Pressable>
-            <Text numberOfLines={1} selectable style={{ fontSize: 9, color: "#899790", paddingHorizontal: 4, marginTop: 2 }}>
-              {media.url}
-            </Text>
           </View>
         ))}
 

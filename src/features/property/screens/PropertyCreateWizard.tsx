@@ -2,7 +2,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
   BarChart2,
-  Bell,
   Building2,
   Check,
   ChevronLeft,
@@ -14,7 +13,6 @@ import {
   PlusCircle,
   Rocket,
   Save,
-  Search,
   Send,
   ShieldCheck,
   Sparkles,
@@ -27,12 +25,10 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { AreaPicker } from "@/components/AreaPicker";
-import { NotificationItem } from "@/features/notification/components/NotificationItem";
 import {
   useMarkAllRead,
   useNotifications,
@@ -169,12 +165,18 @@ export function PropertyCreateWizard() {
     },
     virtual_tour_url: store.virtualTourUrl.trim() || undefined,
     status: "draft",
-    media: store.media.map((m, idx) => ({
-      url: m.url,
-      public_id: m.id,
-      media_type: m.mediaType,
-      display_order: m.displayOrder ?? idx,
-    })),
+    // Sent only when there is media: the deployed API refuses an unknown `media` field,
+    // so a draft without photos still saves before the upload backend ships.
+    ...(store.media.length
+      ? {
+          media: store.media.map((m, idx) => ({
+            url: m.url,
+            public_id: m.id,
+            media_type: m.mediaType,
+            display_order: m.displayOrder ?? idx,
+          })),
+        }
+      : {}),
   });
 
   const upsertDraft = async () => {
