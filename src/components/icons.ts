@@ -89,6 +89,7 @@ export { default as MessageSquare } from "lucide-react-native/icons/message-squa
 export { default as MoreVertical } from "lucide-react-native/icons/ellipsis-vertical";
 export { default as Pencil } from "lucide-react-native/icons/pencil";
 export { default as Phone } from "lucide-react-native/icons/phone";
+export { default as Pause } from "lucide-react-native/icons/pause";
 export { default as Play } from "lucide-react-native/icons/play";
 export { default as Plus } from "lucide-react-native/icons/plus";
 export { default as PlusCircle } from "lucide-react-native/icons/circle-plus";
@@ -116,6 +117,8 @@ export { default as User } from "lucide-react-native/icons/user";
 export { default as UserRound } from "lucide-react-native/icons/user-round";
 export { default as Users } from "lucide-react-native/icons/users";
 export { default as Video } from "lucide-react-native/icons/video";
+export { default as Volume2 } from "lucide-react-native/icons/volume-2";
+export { default as VolumeX } from "lucide-react-native/icons/volume-x";
 export { default as WalletCards } from "lucide-react-native/icons/wallet-cards";
 export { default as X } from "lucide-react-native/icons/x";
 export { default as XCircle } from "lucide-react-native/icons/circle-x";
