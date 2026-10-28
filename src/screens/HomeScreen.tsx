@@ -152,7 +152,10 @@ export function HomeScreen() {
             };
   // Phone: the same photograph as the website, cut to a short banner.
   const mobileHero = (
-    <View style={styles.mobileHeroPhoto}>
+    // The frame grows with the photo. At a fixed 236 it clipped the photo's last
+    // inset-worth of height on a phone (the status bar adds ~36 there, 0 on the
+    // web), which is where the headline sits, so the app hid it under the card.
+    <View style={[styles.mobileHeroPhoto, { height: 236 + insets.top }]}>
       <ImageBackground
         source={HERO_IMAGE}
         style={[styles.mobileHeroBg, { height: 236 + insets.top, paddingTop: insets.top }]}
