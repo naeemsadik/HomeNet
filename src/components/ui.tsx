@@ -60,12 +60,11 @@ export function AppLink({
   // still navigates in place (and opens a new tab on ctrl/cmd-click).
   if (Platform.OS === "web" && href.startsWith("/")) {
     return (
-      <Link asChild href={href as Href} onPress={onPress}>
-        <Pressable
-          accessibilityLabel={accessibilityLabel}
-          accessibilityRole="link"
-          style={({ pressed }) => [webPointer, style, pressed && styles.pressed]}
-        >
+      // The style goes on Link, flattened: with asChild, Link hands the anchor its
+      // own style and the child's is lost. Given to the child, every link on the
+      // site rendered unstyled (the logo stacked in a column).
+      <Link asChild href={href as Href} onPress={onPress} style={StyleSheet.flatten([webPointer, style]) as TextStyle}>
+        <Pressable accessibilityLabel={accessibilityLabel} accessibilityRole="link">
           {children}
         </Pressable>
       </Link>
