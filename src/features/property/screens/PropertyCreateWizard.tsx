@@ -19,7 +19,7 @@ import {
   User,
 } from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "@/i18n";
+import { PRICE_ON_REQUEST, useTranslation } from "@/i18n";
 import {
   ActivityIndicator,
   Pressable,
@@ -150,7 +150,7 @@ export function PropertyCreateWizard() {
     type: store.type,
     subtype: cleanCustomSubtype(store.subtype) || undefined,
     listing_type: storedListingTypeFor(store.listingType, cleanCustomSubtype(store.subtype) || undefined),
-    price: store.price ? Number(store.price) : undefined,
+    price: store.priceOnRequest ? PRICE_ON_REQUEST : store.price ? Number(store.price) : undefined,
     price_currency: "BDT",
     area_size: store.areaSize ? Number(store.areaSize) : undefined,
     area_unit: store.areaUnit || activeTypeConfig.defaultUnit,
@@ -226,12 +226,17 @@ export function PropertyCreateWizard() {
     if (step === 3) {
       const priceNum = Number(store.price);
       const areaNum = Number(store.areaSize);
-      // 0 is allowed: the listing then shows "Contact for price".
-      if (store.price.trim() === "" || !(priceNum >= 0) || !(areaNum > 0)) {
-        return t("wizard.validation.priceAreaPositive");
+      if (!store.priceOnRequest) {
+        // 1 is what "Contact for price" is stored as, so a typed price must be above it.
+        if (store.price.trim() === "" || !(priceNum > PRICE_ON_REQUEST)) {
+          return t("wizard.validation.priceRequired");
+        }
+        if (!Number.isFinite(priceNum) || priceNum > 1_000_000_000_000) {
+          return t("wizard.validation.priceMax");
+        }
       }
-      if (!Number.isFinite(priceNum) || priceNum > 1_000_000_000_000) {
-        return t("wizard.validation.priceMax");
+      if (!(areaNum > 0)) {
+        return t("wizard.validation.areaPositive");
       }
       if (!Number.isFinite(areaNum) || areaNum > 1_000_000) {
         return t("wizard.validation.areaMax");

@@ -1,6 +1,6 @@
 import { Check } from "@/components/icons";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { useTranslation } from "@/i18n";
+import { priceOnRequestLabel, useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
 import { webPointer } from "@/theme";
 import type { PropertyTypeConfig } from "../../constants/propertyCategories";
@@ -9,9 +9,10 @@ import { styles } from "../../screens/PropertyCreateWizard.styles";
 
 /** Step 2: price, area and the fields this property type needs. */
 export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: PropertyTypeConfig }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
   const store = usePropertyWizardStore();
+  const onRequest = store.priceOnRequest;
 
   const priceSuffix = store.subtype === "short-let"
     ? t("wizard.details.perNightOrMo")
@@ -29,14 +30,40 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
               {t("wizard.details.priceLabel", { suffix: priceSuffix })}
             </Text>
           </View>
+          {/* Ticked, the box is locked and shows the words buyers will see; the typed
+              price is kept underneath and comes back when the tick is removed. */}
           <TextInput
+            accessibilityLabel={t("wizard.details.priceLabel", { suffix: priceSuffix })}
+            accessibilityState={{ disabled: onRequest }}
+            editable={!onRequest}
             keyboardType="numeric"
             onChangeText={(v) => store.setDetails({ price: v })}
-            placeholder={store.subtype === "short-let" ? t("wizard.details.pricePlaceholderShortLet") : t("wizard.details.pricePlaceholderSale")}
-            placeholderTextColor="#899790"
-            style={styles.formInput}
-            value={store.price}
+            placeholder={
+              onRequest
+                ? priceOnRequestLabel(language)
+                : store.subtype === "short-let"
+                  ? t("wizard.details.pricePlaceholderShortLet")
+                  : t("wizard.details.pricePlaceholderSale")
+            }
+            placeholderTextColor={onRequest ? "#5C6B66" : "#899790"}
+            style={[styles.formInput, onRequest && styles.formInputLocked]}
+            value={onRequest ? "" : store.price}
           />
+          <Pressable
+            accessibilityLabel={priceOnRequestLabel(language)}
+            accessibilityHint={t("wizard.details.contactForPriceHint")}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: onRequest }}
+            aria-checked={onRequest}
+            onPress={() => store.setDetails({ priceOnRequest: !onRequest })}
+            style={({ pressed }) => [styles.priceOnRequestRow, webPointer, pressed && styles.pressed]}
+          >
+            <View style={[styles.priceOnRequestBox, onRequest && styles.priceOnRequestBoxOn]}>
+              {onRequest ? <Check color="#0B1A17" size={14} strokeWidth={3} /> : null}
+            </View>
+            <Text style={styles.priceOnRequestText}>{priceOnRequestLabel(language)}</Text>
+          </Pressable>
+          <Text style={styles.formHint}>{t("wizard.details.contactForPriceHint")}</Text>
         </View>
 
         <View style={[styles.formGroup, { flex: 1 }]}>

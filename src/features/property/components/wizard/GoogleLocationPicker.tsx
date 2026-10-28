@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { LocateFixed, X } from "@/components/icons";
-import { loadGoogleMaps } from "@/lib/googleMapsLoader";
+import { loadGoogleMaps, onGoogleMapsKeyRefused } from "@/lib/googleMapsLoader";
 import { webPointer } from "@/theme";
 import type { MapPoint } from "../../constants/areaCenters";
 import { MAP_PIN_ZOOM } from "../../constants/map";
@@ -81,6 +81,11 @@ export function GoogleLocationPicker({
   // Create the map once, and the place search above it.
   useEffect(() => {
     let cancelled = false;
+    // A key Google refuses only after loading leaves a broken map and a place search
+    // that errors on every keystroke: switch to the OpenStreetMap map instead.
+    const stopListening = onGoogleMapsKeyRefused(() => {
+      if (!cancelled) onUnavailableRef.current();
+    });
     (async () => {
       try {
         await loadGoogleMaps();
@@ -134,6 +139,7 @@ export function GoogleLocationPicker({
 
     return () => {
       cancelled = true;
+      stopListening();
       markerRef.current?.setMap(null);
       markerRef.current = null;
       mapRef.current = null;

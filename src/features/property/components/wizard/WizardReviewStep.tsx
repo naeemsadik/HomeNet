@@ -41,7 +41,7 @@ export function WizardReviewStep({ activeTypeConfig }: { activeTypeConfig: Prope
         <View style={styles.reviewCard}>
           <Text style={styles.reviewCardLabel}>{t("wizard.review.priceLabel")}</Text>
           <Text style={styles.reviewCardValue}>
-            {Number(store.price) === 0
+            {store.priceOnRequest
               ? priceOnRequestLabel(language)
               : `${t("wizard.review.bdtPrefix")}${Number(store.price).toLocaleString()}${store.subtype === "short-let" ? t("wizard.review.shortLetRate") : store.listingType === "rent" ? t("wizard.review.perMonth") : ""}`}
           </Text>
