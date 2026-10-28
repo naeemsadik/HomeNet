@@ -1,4 +1,6 @@
+import { translate, useLanguageStore } from "@/i18n";
 import {
+  ERROR_CODE_MESSAGES,
   isUnsafeErrorMessage,
   sanitizeErrorMessage,
   SAFE_GENERIC_MESSAGES,
@@ -69,21 +71,69 @@ describe("errorSanitizer", () => {
       expect(result).toBe(SAFE_GENERIC_MESSAGES.notFound);
     });
 
-    it("shows the backend's own message for a user-facing error code, whatever the status", () => {
+    it("gives every known backend code its own plain sentence, whatever the status", () => {
       expect(sanitizeErrorMessage("You do not have permission to modify this user", 403, undefined, 1203)).toBe(
-        "You do not have permission to modify this user",
+        "You can't make changes to this account.",
       );
-      expect(sanitizeErrorMessage("User not found", 404, undefined, 1200)).toBe("User not found");
+      expect(sanitizeErrorMessage("User not found", 404, undefined, 1200)).toBe("We couldn't find that account.");
+      expect(sanitizeErrorMessage("Invalid email or password", 401, undefined, 1100)).toBe(
+        "The email or password is incorrect.",
+      );
     });
 
-    it("keeps the generic text for a code that is not user-facing", () => {
+    it("never shows field names from a coded message", () => {
+      expect(sanitizeErrorMessage("area_id is required for property creation", 400, undefined, 1502)).toBe(
+        "Please choose the area your property is in.",
+      );
+    });
+
+    it("keeps the generic text for the guard's plain 403", () => {
       expect(sanitizeErrorMessage("Forbidden resource", 403, undefined, 1003)).toBe(SAFE_GENERIC_MESSAGES.forbidden);
       expect(sanitizeErrorMessage("Forbidden resource", 403)).toBe(SAFE_GENERIC_MESSAGES.forbidden);
     });
 
-    it("still masks a user-facing code whose message leaks internals", () => {
+    it("hides a coded message that leaks internals", () => {
       const leak = "relation \"users\" does not exist";
-      expect(sanitizeErrorMessage(leak, 404, undefined, 1200)).toBe(SAFE_GENERIC_MESSAGES.notFound);
+      expect(sanitizeErrorMessage(leak, 404, undefined, 1200)).toBe("We couldn't find that account.");
+    });
+
+    it("turns validator output into a plain sentence", () => {
+      for (const raw of [
+        "property media should not exist",
+        "area_id must be a UUID",
+        "listing_type must be one of the following values: sale, rent",
+        "media.0.url must be a string",
+        "Bad Request",
+      ]) {
+        expect(sanitizeErrorMessage(raw, 400)).toBe(SAFE_GENERIC_MESSAGES.invalidInput);
+      }
+    });
+
+    it("turns developer wording with no status into a plain sentence", () => {
+      expect(sanitizeErrorMessage("Cannot read properties of undefined (reading 'id')")).toBe(SAFE_GENERIC_MESSAGES.generic);
+      expect(sanitizeErrorMessage("popup_closed_by_user")).toBe(SAFE_GENERIC_MESSAGES.generic);
+      expect(sanitizeErrorMessage("timeout of 15000ms exceeded")).toBe(SAFE_GENERIC_MESSAGES.timeout);
+    });
+
+    it("says the service is busy for a gateway error", () => {
+      expect(sanitizeErrorMessage("Bad Gateway", 502)).toBe(SAFE_GENERIC_MESSAGES.unavailable);
+    });
+
+    it("answers in Bangla when the reader picked Bangla", () => {
+      useLanguageStore.setState({ language: "bn" });
+      try {
+        expect(sanitizeErrorMessage("Invalid email or password", 401, undefined, 1100)).toBe("ইমেইল বা পাসওয়ার্ড সঠিক নয়।");
+        expect(sanitizeErrorMessage("Forbidden resource", 403)).toBe("এটি করার অনুমতি আপনার নেই।");
+      } finally {
+        useLanguageStore.setState({ language: "en" });
+      }
+    });
+
+    it("has a sentence in both languages for every backend code", () => {
+      for (const key of Object.values(ERROR_CODE_MESSAGES)) {
+        expect(translate("en", key)).not.toBe(key);
+        expect(translate("bn", key)).not.toBe(translate("en", key));
+      }
     });
 
     it("returns rateLimited message for 429 status", () => {
@@ -98,7 +148,7 @@ describe("errorSanitizer", () => {
 
     it("translates raw database syntax errors to generic error", () => {
       const raw = "syntax error at or near 'WHERE': SELECT * FROM users";
-      expect(sanitizeErrorMessage(raw)).toBe(SAFE_GENERIC_MESSAGES.serverError);
+      expect(sanitizeErrorMessage(raw)).toBe(SAFE_GENERIC_MESSAGES.generic);
     });
 
     it("translates internal connection errors to friendly network error", () => {

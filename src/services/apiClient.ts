@@ -66,7 +66,8 @@ export function toApiError(error: unknown): ApiError {
       sanitizedMsg,
       status,
       payload?.error_code ?? null,
-      (validationData?.errors ?? []).map((err) => sanitizeErrorMessage(err, status)),
+      // Several validator lines can become the same friendly sentence; show it once.
+      [...new Set((validationData?.errors ?? []).map((err) => sanitizeErrorMessage(err, status)))],
       rawMsg,
     );
   }
