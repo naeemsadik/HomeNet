@@ -164,7 +164,8 @@ export function HomeScreen() {
           style={StyleSheet.absoluteFill}
         />
         <View style={styles.mobileHeroCopy}>
-          <NoTranslateText style={styles.mobileHeroHeading}>{t("home.heroHeadline")}</NoTranslateText>
+          {/* The page's one <h1>: the homepage had none, so crawlers had no heading to read. */}
+          <NoTranslateText accessibilityRole="header" aria-level={1} style={styles.mobileHeroHeading}>{t("home.heroHeadline")}</NoTranslateText>
         </View>
       </ImageBackground>
     </View>
@@ -216,7 +217,7 @@ export function HomeScreen() {
                 { paddingBottom: heroMetrics.copyPad },
               ]}
             >
-              <NoTranslateText style={[styles.heroHeading, heroType]}>
+              <NoTranslateText accessibilityRole="header" aria-level={1} style={[styles.heroHeading, heroType]}>
                 {t("home.heroHeadline")}
               </NoTranslateText>
             </View>

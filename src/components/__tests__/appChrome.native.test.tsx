@@ -76,7 +76,7 @@ describe("the page chrome on a phone", () => {
 
     const links = tree.root.findAll((n) => n.props.accessibilityRole === "link" && typeof n.props.onPress === "function");
     const labels = links.map(textOf).map((label) => label.trim());
-    for (const label of ["Home", "Buy", "Rent", "Holiday Stay", "Sold", "Insights", "Saved", "Profile"]) {
+    for (const label of ["Buy", "Rent", "Holiday Stay", "Sold", "Insights", "Valuation", "Guides"]) {
       expect(labels).toContain(label);
     }
 

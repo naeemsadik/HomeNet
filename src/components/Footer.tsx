@@ -89,15 +89,17 @@ function WebFooter({ style }: FooterProps) {
   ];
 
   const locationsLinks = [
-    { label: "Major areas in Dhaka", href: "/buy" },
-    { label: "Gulshan", href: "/buy?location=Gulshan" },
-    { label: "Banani", href: "/buy?location=Banani" },
-    { label: "Dhanmondi", href: "/buy?location=Dhanmondi" },
-    { label: "Uttara", href: "/buy?location=Uttara" },
-    { label: "Bashundhara R/A", href: "/buy?location=Bashundhara+R%2FA" },
-    { label: "Mirpur", href: "/buy?location=Mirpur" },
-    { label: "Chittagong", href: "/buy?city=Chittagong" },
-    { label: "Sylhet", href: "/buy?city=Sylhet" },
+    // Each area links to its own page (/buy/<area>), the one Google is asked to
+    // index, not to a ?location= copy of /buy.
+    { label: "All areas", href: "/areas" },
+    { label: "Gulshan", href: "/buy/gulshan" },
+    { label: "Banani", href: "/buy/banani" },
+    { label: "Dhanmondi", href: "/buy/dhanmondi" },
+    { label: "Uttara", href: "/buy/uttara" },
+    { label: "Bashundhara R/A", href: "/buy/bashundhara-ra" },
+    { label: "Mirpur", href: "/buy/mirpur" },
+    { label: "Chittagong", href: "/buy/chattogram" },
+    { label: "Sylhet", href: "/buy/sylhet" },
   ];
 
   const homenetLinks = [
