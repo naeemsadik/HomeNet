@@ -278,7 +278,7 @@ export function MobileHeroSearchCard() {
         <Pressable
           accessibilityRole="link"
           accessibilityLabel={t("home.requestValuation")}
-          onPress={() => router.push("/valuation" as never)}
+          onPress={() => router.push("/instant-valuation" as never)}
           style={({ pressed }) => [
             styles.quickNavRow,
             webPointer,

@@ -40,16 +40,6 @@ const SOCIAL_LINKS = [
   },
 ] as const;
 
-/** Legal / Utility Links row for mobile footer. */
-const LEGAL_LINKS: { key: TranslationKey; href: string }[] = [
-  { key: "footer.sitemap", href: "/about" },
-  { key: "footer.help", href: "/about" },
-  { key: "footer.safety", href: "/about" },
-  { key: "footer.terms", href: "/terms" },
-  { key: "footer.accessibility", href: "/about" },
-  { key: "footer.privacy", href: "/privacy" },
-];
-
 /** Every link opens a page that exists. */
 const SECTIONS: FooterSection[] = [
   {
@@ -58,7 +48,7 @@ const SECTIONS: FooterSection[] = [
     links: [
       { label: "nav.guides", href: "/guides" },
       { label: "nav.insights", href: "/market" },
-      { label: "nav.valuation", href: "/valuation" },
+      { label: "nav.valuation", href: "/instant-valuation" },
     ],
   },
   {
@@ -77,12 +67,13 @@ const SECTIONS: FooterSection[] = [
     key: "locations",
     title: "footer.locations",
     links: [
-      { label: "Gulshan", href: "/buy?location=Gulshan" },
-      { label: "Banani", href: "/buy?location=Banani" },
-      { label: "Dhanmondi", href: "/buy?location=Dhanmondi" },
-      { label: "Uttara", href: "/buy?location=Uttara" },
-      { label: "Bashundhara R/A", href: "/buy?location=Bashundhara+R%2FA" },
-      { label: "Mirpur", href: "/buy?location=Mirpur" },
+      { label: "Gulshan", href: "/buy/gulshan" },
+      { label: "Banani", href: "/buy/banani" },
+      { label: "Dhanmondi", href: "/buy/dhanmondi" },
+      { label: "Uttara", href: "/buy/uttara" },
+      { label: "Bashundhara R/A", href: "/buy/bashundhara-ra" },
+      { label: "Mirpur", href: "/buy/mirpur" },
+      { label: "footer.allAreas", href: "/areas" },
     ],
   },
   {
@@ -147,7 +138,7 @@ const Section = memo(function Section({
 
 /**
  * The phone footer: collapsed sections that open on tap, followed by targeted social media links
- * (Facebook, LinkedIn, YouTube), legal navigation links, and the official copyright notice.
+ * (Facebook, LinkedIn, YouTube) and the copyright notice. The policy links sit once, in the Homenet section.
  */
 export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
   const { t } = useTranslation();
@@ -188,20 +179,6 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
                 />
               )}
             </Pressable>
-          ))}
-        </View>
-
-        {/* Legal Navigation Strip */}
-        <View style={styles.legalLinksRow}>
-          {LEGAL_LINKS.map((link, idx) => (
-            <View key={link.key} style={styles.legalItem}>
-              <AppLink href={link.href}>
-                <Text style={styles.legalLinkText}>{t(link.key)}</Text>
-              </AppLink>
-              {idx < LEGAL_LINKS.length - 1 ? (
-                <Text style={styles.legalDivider}>|</Text>
-              ) : null}
-            </View>
           ))}
         </View>
 
@@ -271,30 +248,6 @@ const styles = StyleSheet.create({
     padding: 6,
     alignItems: "center",
     justifyContent: "center",
-  },
-  legalLinksRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    alignItems: "center",
-    rowGap: 6,
-    columnGap: 8,
-    marginVertical: 8,
-    paddingHorizontal: 16,
-  },
-  legalItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  legalLinkText: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colorTokens.muted,
-  },
-  legalDivider: {
-    fontSize: 12,
-    color: colorTokens.divider,
   },
   copyrightText: {
     fontFamily: fonts.regular,

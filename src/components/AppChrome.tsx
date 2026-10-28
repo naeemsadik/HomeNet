@@ -35,7 +35,7 @@ import {
 import { confirmAction } from "@/lib/alert";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
-import { router, usePathname } from "expo-router";
+import { Link, router, usePathname, type Href } from "expo-router";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { Brand } from "./Brand";
 import { AiFinderModal } from "./AiFinderModal";
@@ -106,7 +106,7 @@ const sidebarNavConfig: {
 }[] = [
     ...browseNavLinks,
     { translationKey: "nav.insights", href: "/market", icon: TrendingUp, key: "market" },
-    { translationKey: "nav.valuation", href: "/valuation", icon: Calculator, key: "valuation" },
+    { translationKey: "nav.valuation", href: "/instant-valuation", icon: Calculator, key: "valuation" },
     { translationKey: "nav.guides", href: "/guides", icon: BookOpen, key: "guides" },
   ];
 
@@ -397,10 +397,13 @@ function TopBar({
                 }
               };
 
-              return (
+              // Signed-out visitors get the sign-in prompt first; every other
+              // link is a real <a href> on the web so crawlers can follow it.
+              const asAnchor = Platform.OS === "web" && !(link.authGated && !user);
+              const item = (
                 <Pressable
                   key={link.key}
-                  onPress={handlePress}
+                  onPress={asAnchor ? undefined : handlePress}
                   style={({ pressed, hovered }: any) => [
                     styles.topNavLink,
                     hovered && styles.topNavLinkHovered,
@@ -421,6 +424,13 @@ function TopBar({
                   </Text>
                   {isSelected ? <View style={styles.topNavIndicator} /> : null}
                 </Pressable>
+              );
+              return asAnchor ? (
+                <Link asChild href={link.href as Href} key={link.key}>
+                  {item}
+                </Link>
+              ) : (
+                item
               );
             })}
           </View>

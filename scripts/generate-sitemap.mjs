@@ -20,7 +20,8 @@ const MAX_PAGES = 50; // a runaway-loop guard: 5,000 listings
 const TIMEOUT_MS = 15_000;
 
 // Pages a stranger can open and that have real content. Left out on purpose:
-// signed-in pages, /market (an empty page until there is data) and /ai-finder.
+// signed-in pages, /market (an empty page until there is data), /ai-finder and
+// /explore (the same listings as /buy, canonicalised to it).
 // <lastmod> for these is the date their route file last changed in git. A
 // made-up date teaches Google to ignore the field for the listings that do have
 // a real one, so where git cannot say (a shallow clone), it is left out.
@@ -29,7 +30,7 @@ const STATIC_PAGES = [
   { path: "/buy", file: "app/buy.tsx", changefreq: "daily", priority: "0.9" },
   { path: "/rent", file: "app/rent.tsx", changefreq: "daily", priority: "0.9" },
   { path: "/sold", file: "app/sold.tsx", changefreq: "weekly", priority: "0.5" },
-  { path: "/explore", file: "app/explore.tsx", changefreq: "daily", priority: "0.6" },
+  { path: "/areas", file: "app/areas.tsx", changefreq: "weekly", priority: "0.7" },
   { path: "/sell", file: "app/sell.tsx", changefreq: "monthly", priority: "0.7" },
   { path: "/instant-valuation", file: "app/instant-valuation.tsx", changefreq: "monthly", priority: "0.8" },
   { path: "/guides", file: "app/guides/index.tsx", changefreq: "weekly", priority: "0.6" },

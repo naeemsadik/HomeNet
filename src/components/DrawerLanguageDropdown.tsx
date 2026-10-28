@@ -6,7 +6,7 @@ import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { BdFlagCircle, UkFlagCircle } from "./flags";
 
 export function DrawerLanguageDropdown() {
-  const { language, setLanguage } = useTranslation();
+  const { t, language, setLanguage } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const isBangla = language === "bn";
@@ -22,7 +22,7 @@ export function DrawerLanguageDropdown() {
       {/* Trigger Card */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Language selector: ${activeCode}`}
+        accessibilityLabel={t("common.languageSelector", { code: activeCode })}
         accessibilityState={{ expanded: open }}
         onPress={() => setOpen((prev) => !prev)}
         style={[styles.trigger, webPointer]}
@@ -44,7 +44,7 @@ export function DrawerLanguageDropdown() {
           {/* Option 1: ENG */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="English"
+            accessibilityLabel={t("common.english")}
             onPress={() => handleSelect("en")}
             style={[
               styles.optionItem,
@@ -69,7 +69,7 @@ export function DrawerLanguageDropdown() {
           {/* Option 2: BEN */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Bengali"
+            accessibilityLabel={t("common.bangla")}
             onPress={() => handleSelect("bn")}
             style={[
               styles.optionItem,

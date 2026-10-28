@@ -925,11 +925,6 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colorTokens.divider,
   },
-  drawerLanguageLabel: {
-    fontFamily: fonts.semiBold,
-    fontSize: 15,
-    color: colorTokens.ink,
-  },
   mobileNavText: {
     color: "#7B8983",
     fontFamily: fonts.semiBold,

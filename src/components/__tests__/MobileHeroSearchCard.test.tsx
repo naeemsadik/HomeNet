@@ -82,7 +82,7 @@ describe("MobileHeroSearchCard", () => {
     // Segmented tabs in Bengali
     expect(container.textContent).toContain("কিনুন");
     expect(container.textContent).toContain("ভাড়া");
-    expect(container.textContent).toContain("ছুটির আবাসন");
+    expect(container.textContent).toContain("হলিডে স্টে");
     expect(container.textContent).toContain("বিক্রি হয়েছে");
 
     // Dynamic search button in Bengali
@@ -143,7 +143,7 @@ describe("MobileHeroSearchCard", () => {
       valuationRow?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(router.push).toHaveBeenCalledWith("/valuation");
+    expect(router.push).toHaveBeenCalledWith("/instant-valuation");
 
     await act(async () => {
       root.unmount();

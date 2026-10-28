@@ -1,9 +1,10 @@
-import { router, type Href } from "expo-router";
+import { Link, router, type Href } from "expo-router";
 import { ArrowRight, Check, ChevronDown, type LucideIcon } from "@/components/icons";
 import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Linking,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -41,7 +42,7 @@ export function AppLink({
     router.push(href as Href);
   };
 
-  return (
+  const pressable = (
     <Pressable
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="link"
@@ -51,6 +52,27 @@ export function AppLink({
       {children}
     </Pressable>
   );
+
+  // On the web a page link must be a real <a href>. A <div role="link"> that
+  // calls router.push on click is invisible to Google: it follows only anchors,
+  // so none of the site's internal links led it anywhere and every page it knew
+  // of came from the sitemap alone. The router's Link renders the anchor and
+  // still navigates in place (and opens a new tab on ctrl/cmd-click).
+  if (Platform.OS === "web" && href.startsWith("/")) {
+    return (
+      <Link asChild href={href as Href} onPress={onPress}>
+        <Pressable
+          accessibilityLabel={accessibilityLabel}
+          accessibilityRole="link"
+          style={({ pressed }) => [webPointer, style, pressed && styles.pressed]}
+        >
+          {children}
+        </Pressable>
+      </Link>
+    );
+  }
+
+  return pressable;
 }
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";

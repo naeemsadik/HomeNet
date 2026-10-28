@@ -60,7 +60,7 @@ describe("DrawerLanguageDropdown (Bproperty style)", () => {
 
     // Options should now be visible
     expect(container.querySelector('[aria-label="English"]')).toBeTruthy();
-    expect(container.querySelector('[aria-label="Bengali"]')).toBeTruthy();
+    expect(container.querySelector('[aria-label="বাংলা"]')).toBeTruthy();
     expect(container.textContent).toContain("BEN");
 
     // Tap trigger again to collapse
@@ -89,7 +89,7 @@ describe("DrawerLanguageDropdown (Bproperty style)", () => {
       trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    const bengaliOption = container.querySelector('[aria-label="Bengali"]');
+    const bengaliOption = container.querySelector('[aria-label="বাংলা"]');
     expect(bengaliOption).toBeTruthy();
 
     // Select Bengali
@@ -101,7 +101,7 @@ describe("DrawerLanguageDropdown (Bproperty style)", () => {
     expect(useLanguageStore.getState().language).toBe("bn");
 
     // Dropdown should be collapsed
-    expect(container.querySelector('[aria-label="Bengali"]')).toBeFalsy();
+    expect(container.querySelector('[aria-label="বাংলা"]')).toBeFalsy();
 
     // Trigger should now show BEN and Bangladesh flag
     expect(container.textContent).toContain("BEN");
