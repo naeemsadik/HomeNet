@@ -24,6 +24,7 @@ import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
 import { MobileHeroSearchCard } from "@/components/MobileHeroSearchCard";
 import { MobileHomeSections } from "@/components/MobileHomeSections";
+import { FitText } from "@/components/FitText";
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { PropertyCard } from "@/components/PropertyCard";
 import { AppButton, AppLink } from "@/components/ui";
@@ -37,7 +38,7 @@ import { useTranslation } from "@/i18n";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toApiError } from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
-import { colors, webPointer } from "@/theme";
+import { colors, layout, webPointer } from "@/theme";
 import { HERO_IMAGE_URL } from "@/lib/heroImage";
 import { styles } from "./HomeScreen.styles";
 
@@ -166,9 +167,13 @@ export function HomeScreen() {
           locations={[0, 0.5, 1]}
           style={StyleSheet.absoluteFill}
         />
-        <View style={styles.mobileHeroCopy}>
+        {/* Same side margins as the search card below, and the headline sized to
+            fill them, so it lines up with the card on the left and the right. */}
+        <View style={[styles.mobileHeroCopy, { paddingHorizontal: isPhone ? layout.gutterPhone : layout.gutter }]}>
           {/* The page's one <h1>: the homepage had none, so crawlers had no heading to read. */}
-          <NoTranslateText accessibilityRole="header" aria-level={1} style={styles.mobileHeroHeading}>{t("home.heroHeadline")}</NoTranslateText>
+          <FitText accessibilityRole="header" aria-level={1} noTranslate style={styles.mobileHeroHeading}>
+            {t("home.heroHeadline")}
+          </FitText>
         </View>
       </ImageBackground>
     </View>
