@@ -111,6 +111,11 @@ export function GoogleLocationPicker({
           if (cancelled || !searchRef.current) return;
           const search = new PlaceAutocompleteElement({ includedRegionCodes: ["bd"] });
           search.style.width = "100%";
+          // Google's box turns black when the browser is in dark mode; the form is always light.
+          search.style.colorScheme = "light";
+          search.style.backgroundColor = "#FFFFFF";
+          search.style.border = "1.2px solid rgba(11,26,23,0.12)";
+          search.style.borderRadius = "16px";
           search.addEventListener("gmp-select", (async (event: { placePrediction: { toPlace: () => google.maps.places.Place } }) => {
             const place = event.placePrediction.toPlace();
             await place.fetchFields({ fields: ["location"] });
