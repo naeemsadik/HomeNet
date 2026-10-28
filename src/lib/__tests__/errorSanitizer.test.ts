@@ -83,7 +83,7 @@ describe("errorSanitizer", () => {
 
     it("never shows field names from a coded message", () => {
       expect(sanitizeErrorMessage("area_id is required for property creation", 400, undefined, 1502)).toBe(
-        "Please choose the area your property is in.",
+        "Select an area, or a nearby area if the autofill didn't find one.",
       );
     });
 

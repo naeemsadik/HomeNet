@@ -6,7 +6,7 @@ import {
   deletePropertyMedia,
   submitProperty,
   updateProperty,
-  uploadMedia,
+  uploadPropertyMedia,
 } from "@/services/propertyApi";
 import type { UploadInput } from "@/services/upload";
 import type { UpsertPropertyDto } from "@/types/api";
@@ -46,18 +46,19 @@ export function useDeleteProperty() {
 export function useUploadMedia() {
   const invalidate = useInvalidateProperties();
   return useMutation({
+    // The live API stores each file against a saved listing (POST /v1/properties/:id/media).
     mutationFn: ({
+      propertyId,
       file,
       type = "image",
+      displayOrder,
     }: {
-      propertyId?: string;
+      propertyId: string;
       file: UploadInput;
       type?: "image" | "video";
       displayOrder?: number;
-    }) => uploadMedia(file, type),
-    onSuccess: (_, variables) => {
-      if (variables.propertyId) invalidate(variables.propertyId);
-    },
+    }) => uploadPropertyMedia(propertyId, file, type, displayOrder),
+    onSuccess: (_, variables) => invalidate(variables.propertyId),
   });
 }
 
