@@ -61,8 +61,13 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
   const [link, setLink] = useState<LinkStatus>({ kind: "idle" });
   const latestLink = useRef(0);
 
+  // Set once the owner moves the pin on this visit. A pin restored from a draft
+  // does not count, so reopening the step keeps the area they chose.
+  const ownerMovedPin = useRef(false);
+
   /** The pin was placed, dragged or cleared on the map, or read from a link. */
   const handlePick = (next: MapPoint | null) => {
+    if (next) ownerMovedPin.current = true;
     store.setLocation({ locationLat: next?.lat ?? null, locationLng: next?.lng ?? null });
   };
 
@@ -129,7 +134,7 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
         const area = fromPlace ?? nearestArea(pin, list);
 
         const current = usePropertyWizardStore.getState();
-        const filled = pinFillPatch(current, written.current, area, place?.address ?? null);
+        const filled = pinFillPatch(current, written.current, area, place?.address ?? null, ownerMovedPin.current);
         written.current = filled.written;
         const patch = filled.patch;
         if (Object.keys(patch).length > 0) usePropertyWizardStore.getState().setLocation(patch);
