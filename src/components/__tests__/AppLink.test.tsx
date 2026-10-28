@@ -36,4 +36,26 @@ describe("AppLink on the web", () => {
     });
     container.remove();
   });
+
+  it("keeps the style it was given, so a row of logo and name stays a row", async () => {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(
+        <AppLink href="/" style={{ flexDirection: "row" }}>
+          <Text>Home</Text>
+        </AppLink>,
+      );
+    });
+
+    const anchor = container.querySelector("a");
+    expect(anchor?.getAttribute("style")).toMatch(/flex-direction: row/);
+
+    await act(async () => {
+      root.unmount();
+    });
+    container.remove();
+  });
 });

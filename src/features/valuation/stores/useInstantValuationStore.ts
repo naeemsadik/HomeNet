@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { router } from "expo-router";
 import { usePropertyWizardStore } from "@/features/property/stores/propertyWizardStore";
+import { toApiError } from "@/services/apiClient";
 import { getInstantValuation } from "../services/valuationService";
 import type {
   PropertyCondition,
@@ -195,9 +196,9 @@ export const useInstantValuationStore = create<InstantValuationStoreState>((set,
     try {
       const data = await getInstantValuation(payload);
       set({ result: data, isLoading: false, loadingStage: "" });
-    } catch (err: any) {
+    } catch (err: unknown) {
       set({
-        error: err?.message || "Failed to generate instant valuation. Please check inputs and try again.",
+        error: toApiError(err).message,
         isLoading: false,
         loadingStage: "",
       });

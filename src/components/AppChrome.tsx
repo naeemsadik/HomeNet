@@ -29,8 +29,10 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   View,
+  type TextStyle,
 } from "react-native";
 import { confirmAction } from "@/lib/alert";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -223,6 +225,39 @@ function SideBar({
   );
 }
 
+/**
+ * A top-nav item that is a real <a href> on the web. Link's asChild drops a
+ * function style on its child, which left these links with no padding, so the
+ * style goes on Link, flattened, and hover is tracked here instead.
+ */
+function TopNavAnchor({
+  href,
+  selected,
+  children,
+}: {
+  href: string;
+  selected: boolean;
+  children: ReactNode;
+}) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <Link
+      asChild
+      href={href as Href}
+      style={StyleSheet.flatten([styles.topNavLink, hovered && styles.topNavLinkHovered, webPointer]) as TextStyle}
+    >
+      <Pressable
+        accessibilityRole="link"
+        accessibilityState={{ selected }}
+        onHoverIn={() => setHovered(true)}
+        onHoverOut={() => setHovered(false)}
+      >
+        {children}
+      </Pressable>
+    </Link>
+  );
+}
+
 function TopBar({
   active,
   onOpenMenu,
@@ -407,19 +442,8 @@ function TopBar({
               // Signed-out visitors get the sign-in prompt first; every other
               // link is a real <a href> on the web so crawlers can follow it.
               const asAnchor = Platform.OS === "web" && !(link.authGated && !user);
-              const item = (
-                <Pressable
-                  key={link.key}
-                  onPress={asAnchor ? undefined : handlePress}
-                  style={({ pressed, hovered }: any) => [
-                    styles.topNavLink,
-                    hovered && styles.topNavLinkHovered,
-                    webPointer,
-                    pressed && { opacity: 0.8 },
-                  ]}
-                  accessibilityRole="link"
-                  accessibilityState={{ selected: isSelected }}
-                >
+              const content = (
+                <>
                   <Text
                     style={[
                       styles.topNavLinkText,
@@ -430,14 +454,27 @@ function TopBar({
                     {label}
                   </Text>
                   {isSelected ? <View style={styles.topNavIndicator} /> : null}
-                </Pressable>
+                </>
               );
               return asAnchor ? (
-                <Link asChild href={link.href as Href} key={link.key}>
-                  {item}
-                </Link>
+                <TopNavAnchor href={link.href} key={link.key} selected={isSelected}>
+                  {content}
+                </TopNavAnchor>
               ) : (
-                item
+                <Pressable
+                  key={link.key}
+                  onPress={handlePress}
+                  style={({ pressed, hovered }: any) => [
+                    styles.topNavLink,
+                    hovered && styles.topNavLinkHovered,
+                    webPointer,
+                    pressed && { opacity: 0.8 },
+                  ]}
+                  accessibilityRole="link"
+                  accessibilityState={{ selected: isSelected }}
+                >
+                  {content}
+                </Pressable>
               );
             })}
           </View>

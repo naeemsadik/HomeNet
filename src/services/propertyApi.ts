@@ -119,35 +119,6 @@ export async function submitProperty(id: string) {
   return data;
 }
 
-export interface UploadMediaResponse {
-  secure_url: string;
-  public_id: string;
-  resource_type: string;
-  url: string;
-  type?: string;
-  thumbnail_url?: string;
-}
-
-/**
- * Decoupled media upload route.
- * Uploads media to Cloudinary without creating any Property database records.
- */
-export async function uploadMedia(
-  file: UploadInput,
-  mediaType: "image" | "video" = "image",
-) {
-  const formData = new FormData();
-  appendUpload(formData, "file", file, mediaType === "image" ? "property.jpg" : "property.mp4");
-
-  const { data } = await apiClient.post<ApiResponse<UploadMediaResponse>>(
-    // Needs the backend upload route (POST /v1/upload). Versioned like every other call.
-    `/v1/upload`,
-    formData,
-    { headers: { "Content-Type": undefined } },
-  );
-  return data;
-}
-
 export async function uploadPropertyMedia(
   id: string,
   file: UploadInput,

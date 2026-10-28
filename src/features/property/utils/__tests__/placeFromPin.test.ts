@@ -94,6 +94,16 @@ describe("pinFillPatch", () => {
     expect(patch.address).toBe("Road 9, Banani");
   });
 
+  it("moves a hand-picked area to the pin once the owner moves the pin, but keeps their address", () => {
+    const { patch } = pinFillPatch({ areaId: "uttara", address: "House 95, Road 44" }, none, areas[2], "Road 9, Banani", true);
+    expect(patch).toEqual({ areaId: "banani", areaName: "Banani", district: "Dhaka" });
+  });
+
+  it("clears a hand-picked area when the moved pin is in no listed area", () => {
+    const { patch } = pinFillPatch({ areaId: "uttara", address: "" }, none, null, null, true);
+    expect(patch).toEqual({ areaId: "", areaName: "", district: "" });
+  });
+
   it("never replaces what the owner chose or typed", () => {
     const earlier = { areaId: "gulshan", address: "Road 1, Gulshan" };
     const { patch } = pinFillPatch({ areaId: "uttara", address: "My own address" }, earlier, areas[2], "Road 9, Banani");
