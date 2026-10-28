@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -15,7 +14,7 @@ import {
   Volume2,
   VolumeX,
 } from "@/components/icons";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, radius } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
 
@@ -616,7 +615,7 @@ export function HomeNetExplainerSection() {
                   style={{
                     fontSize: 12,
                     color: "#E2E8F0",
-                    fontFamily: fonts.mono || "monospace",
+                    fontFamily: "monospace",
                   }}
                 >
                   {formatTime(currentTime)} / {formatTime(duration)}
