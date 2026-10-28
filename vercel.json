@@ -7,6 +7,16 @@
   "framework": null,
   "redirects": [
     {
+      "source": "/valuation",
+      "destination": "/instant-valuation",
+      "permanent": true
+    },
+    {
+      "source": "/search",
+      "destination": "/buy",
+      "permanent": true
+    },
+    {
       "source": "/home",
       "destination": "/",
       "permanent": true
@@ -33,6 +43,15 @@
     { "source": "/users/:id", "destination": "/users/[id]" }
   ],
   "headers": [
+    {
+      "source": "/property/:id",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "<https://www.homenetbd.com/property/:id>; rel=\"canonical\""
+        }
+      ]
+    },
     {
       "source": "/_expo/static/(.*)",
       "headers": [

@@ -32,6 +32,7 @@ export const colorTokens = {
   /** Disabled text and icons only. Never body copy. */
   subtle: "#8C9A95",
   divider: "rgba(11, 26, 23, 0.08)",
+  border: "rgba(11, 26, 23, 0.08)",
   canvas: "#F8FAF9",
   surface: "#FFFFFF",
   /** Inputs, wells, inset areas. */

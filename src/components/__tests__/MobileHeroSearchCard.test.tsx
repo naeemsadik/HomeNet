@@ -56,6 +56,7 @@ describe("MobileHeroSearchCard", () => {
     // Segmented tabs
     expect(container.textContent).toContain("Buy");
     expect(container.textContent).toContain("Rent");
+    expect(container.textContent).toContain("Holiday stay");
     expect(container.textContent).toContain("Sold");
 
     // Dynamic search button for Buy (default)
@@ -81,6 +82,7 @@ describe("MobileHeroSearchCard", () => {
     // Segmented tabs in Bengali
     expect(container.textContent).toContain("কিনুন");
     expect(container.textContent).toContain("ভাড়া");
+    expect(container.textContent).toContain("হলিডে স্টে");
     expect(container.textContent).toContain("বিক্রি হয়েছে");
 
     // Dynamic search button in Bengali
@@ -89,6 +91,38 @@ describe("MobileHeroSearchCard", () => {
     // Quick navigation list in Bengali
     expect(container.textContent).toContain("প্রপার্টি মূল্যায়নের আবেদন করুন");
     expect(container.textContent).toContain("সংরক্ষিত সার্চ ও অ্যালার্ট");
+
+    await act(async () => {
+      root.unmount();
+    });
+  });
+
+  it("routes to holiday stay search when Holiday Stay tab is active", async () => {
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(<MobileHeroSearchCard />);
+    });
+
+    const holidayTab = container.querySelector('[aria-label="Holiday stay"]');
+    expect(holidayTab).toBeTruthy();
+
+    await act(async () => {
+      holidayTab?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(container.textContent).toContain("Search holiday stays");
+
+    const primaryBtn = Array.from(container.querySelectorAll('[role="button"]')).find(
+      (el) => el.textContent?.includes("Search holiday stays")
+    );
+    expect(primaryBtn).toBeTruthy();
+
+    await act(async () => {
+      primaryBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(router.push).toHaveBeenCalledWith("/rent?subtype=short-let&listing_type=short_let");
 
     await act(async () => {
       root.unmount();
@@ -109,7 +143,7 @@ describe("MobileHeroSearchCard", () => {
       valuationRow?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(router.push).toHaveBeenCalledWith("/valuation");
+    expect(router.push).toHaveBeenCalledWith("/instant-valuation");
 
     await act(async () => {
       root.unmount();

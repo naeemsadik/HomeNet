@@ -919,19 +919,11 @@ export const styles = StyleSheet.create({
     gap: 3,
   },
   drawerLanguage: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     marginTop: 12,
     paddingTop: 14,
     paddingHorizontal: 14,
     borderTopWidth: 1,
     borderTopColor: colorTokens.divider,
-  },
-  drawerLanguageLabel: {
-    fontFamily: fonts.semiBold,
-    fontSize: 15,
-    color: colorTokens.ink,
   },
   mobileNavText: {
     color: "#7B8983",
