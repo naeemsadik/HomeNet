@@ -1,11 +1,13 @@
 import { CheckCircle2 } from "@/components/icons";
 import { Text, View } from "react-native";
+import { priceOnRequestLabel, useTranslation } from "@/i18n";
 import { subtypeLabel, type PropertyTypeConfig } from "../../constants/propertyCategories";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
 
 /** Step 5: review before publishing. */
 export function WizardReviewStep({ activeTypeConfig }: { activeTypeConfig: PropertyTypeConfig }) {
+  const { t, language } = useTranslation();
   const store = usePropertyWizardStore();
 
   return (
@@ -14,85 +16,86 @@ export function WizardReviewStep({ activeTypeConfig }: { activeTypeConfig: Prope
       <View style={styles.readyAlertBanner}>
         <View style={styles.readyAlertTitleRow}>
           <CheckCircle2 color="#04cf92" size={18} />
-          <Text style={styles.readyAlertTitle}>Ready for verification</Text>
+          <Text style={styles.readyAlertTitle}>{t("wizard.review.readyTitle")}</Text>
         </View>
         <Text style={styles.readyAlertDesc}>
-          Review your listing below. Submission sends it to the verification queue.
+          {t("wizard.review.readyDesc")}
         </Text>
       </View>
 
       {/* Summary Key-Value Cards Grid */}
       <View style={styles.reviewGrid}>
         <View style={styles.reviewCard}>
-          <Text style={styles.reviewCardLabel}>Title</Text>
+          <Text style={styles.reviewCardLabel}>{t("wizard.review.titleLabel")}</Text>
           <Text style={styles.reviewCardValue}>{store.title}</Text>
         </View>
 
         <View style={styles.reviewCard}>
-          <Text style={styles.reviewCardLabel}>Category & Subtype</Text>
+          <Text style={styles.reviewCardLabel}>{t("wizard.review.categorySubtypeLabel")}</Text>
           <Text style={styles.reviewCardValue}>
             {activeTypeConfig.label} ({subtypeLabel(activeTypeConfig, store.subtype)}) ·{" "}
-            {store.listingType === "sale" ? "For Sale" : "For Rent"}
+            {store.listingType === "sale" ? t("wizard.basics.forSale") : t("wizard.basics.forRent")}
           </Text>
         </View>
 
         <View style={styles.reviewCard}>
-          <Text style={styles.reviewCardLabel}>Price</Text>
+          <Text style={styles.reviewCardLabel}>{t("wizard.review.priceLabel")}</Text>
           <Text style={styles.reviewCardValue}>
-            BDT {Number(store.price).toLocaleString()}
-            {store.subtype === "short-let" ? " (Short-let rate)" : store.listingType === "rent" ? "/mo" : ""}
+            {store.priceOnRequest
+              ? priceOnRequestLabel(language)
+              : `${t("wizard.review.bdtPrefix")}${Number(store.price).toLocaleString()}${store.subtype === "short-let" ? t("wizard.review.shortLetRate") : store.listingType === "rent" ? t("wizard.review.perMonth") : ""}`}
           </Text>
         </View>
 
         <View style={styles.reviewCard}>
-          <Text style={styles.reviewCardLabel}>Area Size</Text>
+          <Text style={styles.reviewCardLabel}>{t("wizard.review.areaSizeLabel")}</Text>
           <Text style={styles.reviewCardValue}>
-            {store.areaSize || "Not specified"} {store.areaUnit || activeTypeConfig.defaultUnit}
+            {store.areaSize || t("wizard.review.notSpecified")} {store.areaUnit || activeTypeConfig.defaultUnit}
           </Text>
         </View>
 
         {activeTypeConfig.hasBedrooms && (
           <View style={styles.reviewCard}>
-            <Text style={styles.reviewCardLabel}>Beds / Baths</Text>
+            <Text style={styles.reviewCardLabel}>{t("wizard.review.bedsBathsLabel")}</Text>
             <Text style={styles.reviewCardValue}>
-              {store.bedrooms || "0"} Beds / {store.bathrooms || "0"} Baths
+              {t("wizard.review.bedsBathsValue", { beds: store.bedrooms || "0", baths: store.bathrooms || "0" })}
             </Text>
           </View>
         )}
 
         {activeTypeConfig.hasFloor && (
           <View style={styles.reviewCard}>
-            <Text style={styles.reviewCardLabel}>Floor Level</Text>
-            <Text style={styles.reviewCardValue}>{store.floor || "Not specified"}</Text>
+            <Text style={styles.reviewCardLabel}>{t("wizard.review.floorLevelLabel")}</Text>
+            <Text style={styles.reviewCardValue}>{store.floor || t("wizard.review.notSpecified")}</Text>
           </View>
         )}
 
         {activeTypeConfig.hasFacing && (
           <View style={styles.reviewCard}>
-            <Text style={styles.reviewCardLabel}>Facing</Text>
-            <Text style={styles.reviewCardValue}>{store.facing || "Not specified"}</Text>
+            <Text style={styles.reviewCardLabel}>{t("wizard.review.facingLabel")}</Text>
+            <Text style={styles.reviewCardValue}>{store.facing || t("wizard.review.notSpecified")}</Text>
           </View>
         )}
 
         <View style={styles.reviewCard}>
-          <Text style={styles.reviewCardLabel}>Location</Text>
+          <Text style={styles.reviewCardLabel}>{t("wizard.review.locationLabel")}</Text>
           <Text style={styles.reviewCardValue}>
-            {[store.address, store.areaName, store.district].filter(Boolean).join(", ") || "Not specified"}
+            {[store.address, store.areaName, store.district].filter(Boolean).join(", ") || t("wizard.review.notSpecified")}
           </Text>
         </View>
 
         <View style={styles.reviewCard}>
-          <Text style={styles.reviewCardLabel}>Amenities</Text>
+          <Text style={styles.reviewCardLabel}>{t("wizard.review.amenitiesLabel")}</Text>
           <Text style={styles.reviewCardValue}>
-            {Object.values(store.amenities).filter(Boolean).length} features selected
+            {t("wizard.review.amenitiesCount", { count: Object.values(store.amenities).filter(Boolean).length })}
           </Text>
         </View>
 
         <View style={styles.reviewCard}>
-          <Text style={styles.reviewCardLabel}>Media</Text>
+          <Text style={styles.reviewCardLabel}>{t("wizard.review.mediaLabel")}</Text>
           <Text style={styles.reviewCardValue}>
-            {store.media.filter((m) => m.mediaType === "image").length} photos
-            {store.media.some((m) => m.mediaType === "video") ? " · 1 video" : ""}
+            {t("wizard.review.photosCount", { count: store.media.filter((m) => m.mediaType === "image").length })}
+            {store.media.some((m) => m.mediaType === "video") ? t("wizard.review.oneVideo") : ""}
           </Text>
         </View>
       </View>

@@ -9,11 +9,14 @@ import {
 import { X } from "@/components/icons";
 import { colorTokens, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
+import { OverlayHost } from "@/components/OverlayModal";
 import { useInstantValuationModalStore } from "../stores/useInstantValuationModalStore";
 import { useInstantValuationStore } from "../stores/useInstantValuationStore";
 import { InstantValuationWizard } from "./InstantValuationWizard";
 
 export function InstantValuationModal() {
+  const { t } = useTranslation();
   const { visible, close, initialArea, initialPurpose, initialType } =
     useInstantValuationModalStore();
   const setInitialFromHero = useInstantValuationStore((s) => s.setInitialFromHero);
@@ -40,9 +43,12 @@ export function InstantValuationModal() {
       transparent
       visible={visible}
     >
+      {/* The area picker opens inside this window; a second Modal opened from
+          here can fail to appear on Android. */}
+      <OverlayHost>
       <View style={styles.overlay}>
         <Pressable
-          accessibilityLabel="Close valuation dialog"
+          accessibilityLabel={t("valuation.modal.closeAria")}
           onPress={close}
           style={styles.backdrop}
         />
@@ -56,7 +62,7 @@ export function InstantValuationModal() {
         >
           {/* Floating Close Button */}
           <Pressable
-            accessibilityLabel="Close valuation dialog"
+            accessibilityLabel={t("valuation.modal.closeAria")}
             accessibilityRole="button"
             onPress={close}
             style={({ pressed, hovered }: any) => [
@@ -80,6 +86,7 @@ export function InstantValuationModal() {
           </ScrollView>
         </View>
       </View>
+      </OverlayHost>
     </Modal>
   );
 }

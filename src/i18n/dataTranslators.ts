@@ -24,7 +24,24 @@ export function formatLocalizedNumber(num: number | string | null | undefined, l
 }
 
 /**
+ * The price the API stores for "Contact for price". The backend team chose 1:
+ * its submit check refuses a price of 0, and no real listing costs ৳1.
+ */
+export const PRICE_ON_REQUEST = 1;
+
+/** Whether a listing's price means "ask the owner": 1, or 0 on listings saved before that. */
+export function isPriceOnRequest(amount: number | null | undefined): boolean {
+  return amount === PRICE_ON_REQUEST || amount === 0;
+}
+
+/** What a listing priced "Contact for price" shows instead of a number. */
+export function priceOnRequestLabel(lang: SupportedLanguage = "en"): string {
+  return lang === "bn" ? "মূল্য জানতে যোগাযোগ করুন" : "Contact for price";
+}
+
+/**
  * Formats property price into crore/lakh notation in English or Bengali.
+ * "Contact for price" (see isPriceOnRequest) shows as words, not "৳ 1".
  */
 export function formatLocalizedPrice(
   amount: number,
@@ -32,6 +49,7 @@ export function formatLocalizedPrice(
   lang: SupportedLanguage = "en"
 ): string {
   if (typeof amount !== "number" || isNaN(amount)) return "";
+  if (isPriceOnRequest(amount)) return priceOnRequestLabel(lang);
   const unit = currency === "BDT" ? "৳" : currency;
 
   if (lang === "bn") {
@@ -160,4 +178,78 @@ export function translateAmenity(amenity: string, lang: SupportedLanguage): stri
 
   const normalized = amenity.trim().toLowerCase();
   return AMENITY_MAP_BN[normalized] || amenity;
+}
+
+const FACING_MAP_BN: Record<string, string> = {
+  south: "দক্ষিণমুখী",
+  "south facing": "দক্ষিণমুখী",
+  "south-facing": "দক্ষিণমুখী",
+  north: "উত্তরমুখী",
+  "north facing": "উত্তরমুখী",
+  "north-facing": "উত্তরমুখী",
+  east: "পূর্বমুখী",
+  "east facing": "পূর্বমুখী",
+  "east-facing": "পূর্বমুখী",
+  west: "পশ্চিমমুখী",
+  "west facing": "পশ্চিমমুখী",
+  "west-facing": "পশ্চিমমুখী",
+  "north-east": "উত্তর-পূর্বমুখী",
+  "north east": "উত্তর-পূর্বমুখী",
+  "south-east": "দক্ষিণ-পূর্বমুখী",
+  "south east": "দক্ষিণ-পূর্বমুখী",
+  "north-west": "উত্তর-পশ্চিমমুখী",
+  "north west": "উত্তর-পশ্চিমমুখী",
+  "south-west": "দক্ষিণ-পশ্চিমমুখী",
+  "south west": "দক্ষিণ-পশ্চিমমুখী",
+};
+
+/**
+ * Translates property facing orientation to authentic Bengali.
+ */
+export function translateFacing(facing: string, lang: SupportedLanguage): string {
+  if (!facing || typeof facing !== "string") return "";
+  if (lang !== "bn") return facing;
+
+  const normalized = facing.trim().toLowerCase();
+  return FACING_MAP_BN[normalized] || facing;
+}
+
+const COMPLETION_STATUS_MAP_BN: Record<string, string> = {
+  ready: "রেডি ফ্ল্যাট",
+  "ready flat": "রেডি ফ্ল্যাট",
+  under_construction: "নির্মাণাধীন",
+  "under construction": "নির্মাণাধীন",
+  ongoing: "চলমান",
+  upcoming: "আসন্ন",
+};
+
+/**
+ * Translates handover / completion status to authentic Bengali standard.
+ */
+export function translateCompletionStatus(status: string, lang: SupportedLanguage): string {
+  if (!status || typeof status !== "string") return "";
+  if (lang !== "bn") return status;
+
+  const normalized = status.trim().toLowerCase().replace(/-/g, "_");
+  return COMPLETION_STATUS_MAP_BN[normalized] || COMPLETION_STATUS_MAP_BN[status.trim().toLowerCase()] || status;
+}
+
+const AREA_UNIT_MAP_BN: Record<string, string> = {
+  sqft: "বর্গফুট",
+  katha: "কাঠা",
+  bigha: "বিঘা",
+  sqm: "বর্গমিটার",
+  shotok: "শতক",
+  decimal: "শতাংশ",
+};
+
+/**
+ * Translates land / property area measurement units to Bengali.
+ */
+export function translateAreaUnit(unit: string | null | undefined, lang: SupportedLanguage): string {
+  if (!unit || typeof unit !== "string") return lang === "bn" ? "বর্গফুট" : "sqft";
+  if (lang !== "bn") return unit;
+
+  const normalized = unit.trim().toLowerCase();
+  return AREA_UNIT_MAP_BN[normalized] || unit;
 }

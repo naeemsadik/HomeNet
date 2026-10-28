@@ -12,6 +12,7 @@ export type { LucideIcon } from "lucide-react-native";
 
 export { default as AlertCircle } from "lucide-react-native/icons/circle-alert";
 export { default as AlertTriangle } from "lucide-react-native/icons/triangle-alert";
+export { default as Archive } from "lucide-react-native/icons/archive";
 export { default as ArrowLeft } from "lucide-react-native/icons/arrow-left";
 export { default as ArrowRight } from "lucide-react-native/icons/arrow-right";
 export { default as ArrowUpRight } from "lucide-react-native/icons/arrow-up-right";
@@ -42,6 +43,7 @@ export { default as CircleHelp } from "lucide-react-native/icons/circle-question
 export { default as Clock } from "lucide-react-native/icons/clock";
 export { default as Clock3 } from "lucide-react-native/icons/clock-3";
 export { default as Compass } from "lucide-react-native/icons/compass";
+export { default as Copy } from "lucide-react-native/icons/copy";
 export { default as Cpu } from "lucide-react-native/icons/cpu";
 export { default as CreditCard } from "lucide-react-native/icons/credit-card";
 export { default as Database } from "lucide-react-native/icons/database";
@@ -77,6 +79,7 @@ export { default as LocateFixed } from "lucide-react-native/icons/locate-fixed";
 export { default as Lock } from "lucide-react-native/icons/lock";
 export { default as LogOut } from "lucide-react-native/icons/log-out";
 export { default as Mail } from "lucide-react-native/icons/mail";
+export { default as MapIcon } from "lucide-react-native/icons/map";
 export { default as MapPin } from "lucide-react-native/icons/map-pin";
 export { default as MapPinned } from "lucide-react-native/icons/map-pinned";
 export { default as Maximize } from "lucide-react-native/icons/maximize";
@@ -86,6 +89,7 @@ export { default as MessageSquare } from "lucide-react-native/icons/message-squa
 export { default as MoreVertical } from "lucide-react-native/icons/ellipsis-vertical";
 export { default as Pencil } from "lucide-react-native/icons/pencil";
 export { default as Phone } from "lucide-react-native/icons/phone";
+export { default as Pause } from "lucide-react-native/icons/pause";
 export { default as Play } from "lucide-react-native/icons/play";
 export { default as Plus } from "lucide-react-native/icons/plus";
 export { default as PlusCircle } from "lucide-react-native/icons/circle-plus";
@@ -104,6 +108,7 @@ export { default as ShieldCheck } from "lucide-react-native/icons/shield-check";
 export { default as Sliders } from "lucide-react-native/icons/sliders-vertical";
 export { default as SlidersHorizontal } from "lucide-react-native/icons/sliders-horizontal";
 export { default as Sparkles } from "lucide-react-native/icons/sparkles";
+export { default as Star } from "lucide-react-native/icons/star";
 export { default as Tag } from "lucide-react-native/icons/tag";
 export { default as Trash2 } from "lucide-react-native/icons/trash-2";
 export { default as TrendingUp } from "lucide-react-native/icons/trending-up";
@@ -112,7 +117,92 @@ export { default as User } from "lucide-react-native/icons/user";
 export { default as UserRound } from "lucide-react-native/icons/user-round";
 export { default as Users } from "lucide-react-native/icons/users";
 export { default as Video } from "lucide-react-native/icons/video";
+export { default as Volume2 } from "lucide-react-native/icons/volume-2";
+export { default as VolumeX } from "lucide-react-native/icons/volume-x";
 export { default as WalletCards } from "lucide-react-native/icons/wallet-cards";
 export { default as X } from "lucide-react-native/icons/x";
 export { default as XCircle } from "lucide-react-native/icons/circle-x";
 export { default as Zap } from "lucide-react-native/icons/zap";
+import * as React from "react";
+import Svg, { Path } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+
+export interface IconProps extends SvgProps {
+  size?: number;
+  color?: string;
+}
+
+export const Facebook = ({
+  size = 24,
+  color = "currentColor",
+  ...props
+}: IconProps) =>
+  React.createElement(
+    Svg,
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: color,
+      strokeWidth: 2,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...props,
+    },
+    React.createElement(Path, {
+      d: "M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z",
+    })
+  );
+
+export const Linkedin = ({
+  size = 24,
+  color = "currentColor",
+  ...props
+}: IconProps) =>
+  React.createElement(
+    Svg,
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: color,
+      strokeWidth: 2,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...props,
+    },
+    React.createElement(Path, {
+      d: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z",
+    }),
+    React.createElement(Path, { d: "M2 9h4v12H2z" }),
+    React.createElement(Path, { d: "M4 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" })
+  );
+
+export const Youtube = ({
+  size = 24,
+  color = "currentColor",
+  ...props
+}: IconProps) =>
+  React.createElement(
+    Svg,
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: color,
+      strokeWidth: 2,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      ...props,
+    },
+    React.createElement(Path, {
+      d: "M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17",
+    }),
+    React.createElement(Path, { d: "m10 15 5-3-5-3z", fill: color })
+  );
+
+export { Linkedin as LinkedIn, Youtube as YouTube };
+

@@ -1,10 +1,10 @@
-import { router, type Href } from "expo-router";
+import { Link, router, type Href } from "expo-router";
 import { ArrowRight, Check, ChevronDown, type LucideIcon } from "@/components/icons";
 import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Linking,
-  Modal,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { colors, colorTokens, fonts, radius, webPointer } from "@/theme";
+import { OverlayModal } from "@/components/OverlayModal";
 import { useResponsive } from "@/hooks/useResponsive";
 
 export function AppLink({
@@ -41,7 +42,7 @@ export function AppLink({
     router.push(href as Href);
   };
 
-  return (
+  const pressable = (
     <Pressable
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="link"
@@ -51,6 +52,26 @@ export function AppLink({
       {children}
     </Pressable>
   );
+
+  // On the web a page link must be a real <a href>. A <div role="link"> that
+  // calls router.push on click is invisible to Google: it follows only anchors,
+  // so none of the site's internal links led it anywhere and every page it knew
+  // of came from the sitemap alone. The router's Link renders the anchor and
+  // still navigates in place (and opens a new tab on ctrl/cmd-click).
+  if (Platform.OS === "web" && href.startsWith("/")) {
+    return (
+      // The style goes on Link, flattened: with asChild, Link hands the anchor its
+      // own style and the child's is lost. Given to the child, every link on the
+      // site rendered unstyled (the logo stacked in a column).
+      <Link asChild href={href as Href} onPress={onPress} style={StyleSheet.flatten([webPointer, style]) as TextStyle}>
+        <Pressable accessibilityLabel={accessibilityLabel} accessibilityRole="link">
+          {children}
+        </Pressable>
+      </Link>
+    );
+  }
+
+  return pressable;
 }
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
@@ -58,14 +79,14 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
 /**
  * The four button roles. There is no fifth.
  *
- * primary     — the one action this view exists for
- * secondary   — a real alternative, equal weight, lower emphasis
- * ghost       — tertiary / inline, no container until hovered
- * destructive — deletes or cannot be undone
+ * primary    : the one action this view exists for
+ * secondary  : a real alternative, equal weight, lower emphasis
+ * ghost      : tertiary / inline, no container until hovered
+ * destructive: deletes or cannot be undone
  *
  * Foreground colours are brand-TEXT (#0F6D55), never brand-fill (#04cf92),
  * which measures 2.03:1 on white. Text on the brand fill is ink (`onBrand`,
- * 8.8:1) — white on #04cf92 is 2.03:1 and fails WCAG AA.
+ * 8.8:1): white on #04cf92 is 2.03:1 and fails WCAG AA.
  */
 const VARIANT_FG: Record<ButtonVariant, string> = {
   primary: colorTokens.onBrand,
@@ -248,21 +269,25 @@ export function SelectField({
   options,
   onChange,
   style,
+  formatOption,
 }: {
   value: string;
   options: string[];
   onChange: (value: string) => void;
   style?: StyleProp<ViewStyle>;
+  /** How a stored value is shown, when it is not fit to read as it is. */
+  formatOption?: (option: string) => string;
 }) {
   const [open, setOpen] = useState(false);
+  const show = (option: string) => (formatOption ? formatOption(option) : option);
 
   return (
     <View style={[styles.selectWrap, style]}>
       <Pressable accessibilityLabel={`Select ${value}`} onPress={() => setOpen(true)} style={[styles.selectButton, webPointer]}>
-        <Text numberOfLines={1} style={styles.selectValue}>{value}</Text>
+        <Text numberOfLines={1} style={styles.selectValue}>{show(value)}</Text>
         <ChevronDown color={colors.green} size={14} />
       </Pressable>
-      <Modal animationType="fade" onRequestClose={() => setOpen(false)} transparent visible={open}>
+      <OverlayModal animationType="fade" onRequestClose={() => setOpen(false)} visible={open}>
         <View style={styles.selectModalLayer}>
           <Pressable accessibilityLabel="Close options" onPress={() => setOpen(false)} style={styles.selectModalOverlay} />
           <View style={styles.selectMenu}>
@@ -277,14 +302,14 @@ export function SelectField({
                   }}
                   style={[styles.selectOption, selected && styles.selectOptionActive, webPointer]}
                 >
-                  <Text style={[styles.selectOptionText, selected && styles.selectOptionTextActive]}>{option}</Text>
+                  <Text style={[styles.selectOptionText, selected && styles.selectOptionTextActive]}>{show(option)}</Text>
                   {selected ? <Check color={colors.green} size={15} /> : null}
                 </Pressable>
               );
             })}
           </View>
         </View>
-      </Modal>
+      </OverlayModal>
     </View>
   );
 }

@@ -11,23 +11,33 @@ const RELATED = [
   { label: "Delete account", href: "/delete-account", doc: DELETE_ACCOUNT },
 ] as const;
 
+import { useTranslation } from "@/i18n";
+
 /**
  * A long-form legal page: the privacy policy, the terms, the account-deletion
  * steps. Plain text on purpose: people read these on a phone, and the store
  * reviewer opens the privacy policy link first.
  */
 export function LegalScreen({ document }: { document: LegalDocument }) {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
+
+  const getRelatedLabel = (href: string, fallback: string) => {
+    if (href === "/privacy") return t("legal.privacyPolicy");
+    if (href === "/terms") return t("legal.termsOfUse");
+    if (href === "/delete-account") return t("legal.deleteAccount");
+    return fallback;
+  };
 
   return (
     <AppChrome active="home">
       <View style={[styles.page, isPhone && styles.pagePhone]}>
-        <Eyebrow style={styles.eyebrow}>Legal</Eyebrow>
+        <Eyebrow style={styles.eyebrow}>{t("legal.eyebrow")}</Eyebrow>
         <Text accessibilityRole="header" style={[styles.title, isPhone && styles.titlePhone]}>
           {document.title}
         </Text>
         <Text style={styles.summary}>{document.summary}</Text>
-        <Text style={styles.updated}>Last updated {document.updated}</Text>
+        <Text style={styles.updated}>{t("legal.lastUpdated", { date: document.updated })}</Text>
 
         {document.sections.map((section) => (
           <View key={section.heading} style={styles.section}>
@@ -53,7 +63,7 @@ export function LegalScreen({ document }: { document: LegalDocument }) {
         <View style={styles.related}>
           {RELATED.filter((item) => item.doc.title !== document.title).map((item) => (
             <AppLink key={item.href} href={item.href} style={styles.relatedLink}>
-              <Text style={styles.relatedText}>{item.label}</Text>
+              <Text style={styles.relatedText}>{getRelatedLabel(item.href, item.label)}</Text>
             </AppLink>
           ))}
         </View>

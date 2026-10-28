@@ -33,3 +33,17 @@ export const GOOGLE_CLIENT_ID = (() => {
 })();
 
 export const GOOGLE_SIGN_IN_AVAILABLE = Platform.OS === "web" && GOOGLE_CLIENT_ID !== null;
+
+/**
+ * Google Maps (map, place search and address lookup in the listing wizard),
+ * read from EXPO_PUBLIC_GOOGLE_MAPS_API_KEY at build time. The key is public by
+ * design and is protected by its HTTP-referrer and API restrictions in Google
+ * Cloud, not by secrecy. Without a well-formed key, or when Google refuses it,
+ * the wizard uses the OpenStreetMap map and Nominatim instead. Website only.
+ */
+const GOOGLE_MAPS_KEY_PATTERN = /^AIza[0-9A-Za-z_-]{35}$/;
+
+export const GOOGLE_MAPS_API_KEY: string | null = (() => {
+  const key = (process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "").trim();
+  return Platform.OS === "web" && GOOGLE_MAPS_KEY_PATTERN.test(key) ? key : null;
+})();

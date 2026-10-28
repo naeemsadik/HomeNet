@@ -24,10 +24,12 @@ import {
 } from "@/components/icons";
 import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { notify } from "@/lib/alert";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 
 export function Step4ResultDashboard() {
+  const { t } = useTranslation();
   const {
     form,
     result,
@@ -54,21 +56,23 @@ export function Step4ResultDashboard() {
           <View style={styles.spinnerWrap}>
             <ActivityIndicator color={colorTokens.brand} size="large" />
           </View>
-          <Text style={styles.loadingHeading}>Calculating Instant Valuation</Text>
+          <Text style={styles.loadingHeading}>{t("valuation.step4.loadingHeading")}</Text>
           <Text style={styles.loadingStageText}>{loadingStage}</Text>
 
           <View style={styles.progressChecklist}>
             <View style={styles.checkItem}>
               <CheckCircle2 color={colors.greenOnLight} size={16} strokeWidth={2.4} />
-              <Text style={styles.checkItemText}>Normalized 26 Dhaka municipal ward averages</Text>
+              <Text style={styles.checkItemText}>{t("valuation.step4.checkStep1")}</Text>
             </View>
             <View style={styles.checkItem}>
               <CheckCircle2 color={colors.greenOnLight} size={16} strokeWidth={2.4} />
-              <Text style={styles.checkItemText}>Benchmarked active verified listings in {form.areaName}</Text>
+              <Text style={styles.checkItemText}>
+                {t("valuation.step4.checkStep2", { area: form.areaName })}
+              </Text>
             </View>
             <View style={styles.checkItem}>
               <CheckCircle2 color={colors.greenOnLight} size={16} strokeWidth={2.4} />
-              <Text style={styles.checkItemText}>Weighted floor, orientation & generator premiums</Text>
+              <Text style={styles.checkItemText}>{t("valuation.step4.checkStep3")}</Text>
             </View>
           </View>
         </View>
@@ -79,15 +83,15 @@ export function Step4ResultDashboard() {
   if (error || !result) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>Valuation Could Not Complete</Text>
-        <Text style={styles.errorMessage}>{error || "An unexpected error occurred."}</Text>
+        <Text style={styles.errorTitle}>{t("valuation.step4.errorTitle")}</Text>
+        <Text style={styles.errorMessage}>{error || t("valuation.step4.errorMessageFallback")}</Text>
         <Pressable
           accessibilityRole="button"
           onPress={() => executeValuation()}
           style={[styles.retryBtn, webPointer]}
         >
           <RotateCcw color={colorTokens.onBrand} size={16} strokeWidth={2.2} />
-          <Text style={styles.retryBtnText}>Retry Calculation</Text>
+          <Text style={styles.retryBtnText}>{t("valuation.step4.retryBtn")}</Text>
         </Pressable>
       </View>
     );
@@ -95,8 +99,8 @@ export function Step4ResultDashboard() {
 
   const handleShare = () => {
     notify(
-      "Report Link Copied",
-      "Valuation report summary link has been copied to your clipboard."
+      t("valuation.step4.shareCopiedTitle"),
+      t("valuation.step4.shareCopiedMsg")
     );
   };
 
@@ -108,9 +112,9 @@ export function Step4ResultDashboard() {
           <View style={styles.verifiedBadgeRow}>
             <View style={styles.verifiedBadge}>
               <ShieldCheck color={colorTokens.info} size={14} strokeWidth={2.4} />
-              <Text style={styles.verifiedBadgeText}>HomeNet Market Valuation</Text>
+              <Text style={styles.verifiedBadgeText}>{t("valuation.step4.badgeText")}</Text>
             </View>
-            <Text style={styles.reportTimestamp}>Generated Today</Text>
+            <Text style={styles.reportTimestamp}>{t("valuation.step4.today")}</Text>
           </View>
 
           <Text style={styles.propertyAddressTitle}>{result.addressFormatted}</Text>
@@ -129,7 +133,7 @@ export function Step4ResultDashboard() {
           ]}
         >
           <Share2 color={colorTokens.ink} size={16} strokeWidth={2} />
-          <Text style={styles.shareBtnText}>Share Report</Text>
+          <Text style={styles.shareBtnText}>{t("valuation.step4.shareReport")}</Text>
         </Pressable>
       </View>
 
@@ -140,7 +144,9 @@ export function Step4ResultDashboard() {
         <View style={styles.heroTop}>
           <View>
             <Text style={styles.estimateLabel}>
-              {result.purpose === "rent" ? "ESTIMATED MONTHLY RENT" : "ESTIMATED MARKET VALUE"}
+              {result.purpose === "rent"
+                ? t("valuation.step4.estimatedMonthlyRent")
+                : t("valuation.step4.estimatedMarketValue")}
             </Text>
             <Text style={styles.heroEstimatedValue}>{result.estimatedValueFormatted}</Text>
           </View>
@@ -148,7 +154,10 @@ export function Step4ResultDashboard() {
           <View style={styles.confidencePill}>
             <BadgeCheck color={colors.greenOnLight} size={16} strokeWidth={2.4} />
             <Text style={styles.confidencePillText}>
-              {result.confidenceScore === "high" ? "High Confidence" : "Medium Confidence"} ({result.confidencePct}%)
+              {result.confidenceScore === "high"
+                ? t("valuation.step4.highConfidence")
+                : t("valuation.step4.mediumConfidence")}{" "}
+              ({result.confidencePct}%)
             </Text>
           </View>
         </View>
@@ -157,17 +166,17 @@ export function Step4ResultDashboard() {
         <View style={styles.rangeSection}>
           <View style={styles.rangeLabelsRow}>
             <View>
-              <Text style={styles.rangeSubLabel}>Low Estimate</Text>
+              <Text style={styles.rangeSubLabel}>{t("valuation.step4.lowEstimate")}</Text>
               <Text style={styles.rangeValueText}>{result.lowEstimateFormatted}</Text>
             </View>
 
             <View style={styles.midPointIndicator}>
-              <Text style={styles.rangeMidLabel}>Mid Market Benchmark</Text>
+              <Text style={styles.rangeMidLabel}>{t("valuation.step4.midMarket")}</Text>
               <Text style={styles.rangeMidValueText}>{result.estimatedValueFormatted}</Text>
             </View>
 
             <View style={styles.rangeHighAlign}>
-              <Text style={styles.rangeSubLabel}>High Estimate</Text>
+              <Text style={styles.rangeSubLabel}>{t("valuation.step4.highEstimate")}</Text>
               <Text style={styles.rangeValueText}>{result.highEstimateFormatted}</Text>
             </View>
           </View>
@@ -187,7 +196,7 @@ export function Step4ResultDashboard() {
         {/* Metric 1: Rate Per Sqft */}
         <View style={styles.metricCard}>
           <View style={styles.metricHeader}>
-            <Text style={styles.metricTitle}>Rate per Sqft</Text>
+            <Text style={styles.metricTitle}>{t("valuation.step4.ratePerSqft")}</Text>
             <View style={styles.deltaChip}>
               <TrendingUp color={colorTokens.brandText} size={12} strokeWidth={2.4} />
               <Text style={styles.deltaChipText}>
@@ -197,33 +206,40 @@ export function Step4ResultDashboard() {
           </View>
           <Text style={styles.metricMainValue}>{result.pricePerSqftFormatted}</Text>
           <Text style={styles.metricFootnote}>
-            vs {result.areaName} avg ({result.areaAveragePricePerSqftFormatted})
+            {t("valuation.step4.areaAvgFootnote", {
+              area: result.areaName,
+              avg: result.areaAveragePricePerSqftFormatted,
+            })}
           </Text>
         </View>
 
         {/* Metric 2: Estimated Rental Yield */}
         <View style={styles.metricCard}>
           <View style={styles.metricHeader}>
-            <Text style={styles.metricTitle}>Estimated Rental Yield</Text>
+            <Text style={styles.metricTitle}>{t("valuation.step4.rentalYield")}</Text>
             <WalletCards color={colorTokens.brandText} size={16} strokeWidth={2} />
           </View>
           <Text style={styles.metricMainValue}>{result.estimatedMonthlyRentFormatted}</Text>
           <Text style={styles.metricFootnote}>
-            Gross Yield: <Text style={styles.boldText}>{result.grossRentalYieldPct}%</Text> annually
+            {t("valuation.step4.grossYield", { yield: String(result.grossRentalYieldPct) })}
           </Text>
         </View>
 
         {/* Metric 3: Market Demand */}
         <View style={styles.metricCard}>
           <View style={styles.metricHeader}>
-            <Text style={styles.metricTitle}>{result.areaName} Market Demand</Text>
+            <Text style={styles.metricTitle}>
+              {t("valuation.step4.marketDemand", { area: result.areaName })}
+            </Text>
             <LineChart color={colorTokens.info} size={16} strokeWidth={2} />
           </View>
           <Text style={[styles.metricMainValue, { color: colorTokens.info }]}>
             {result.marketMetric.marketDemand}
           </Text>
           <Text style={styles.metricFootnote}>
-            +{result.marketMetric.yearOverYearGrowthPct}% capital appreciation YoY
+            {t("valuation.step4.appreciationYoY", {
+              growth: String(result.marketMetric.yearOverYearGrowthPct),
+            })}
           </Text>
         </View>
       </View>
@@ -233,10 +249,10 @@ export function Step4ResultDashboard() {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Sparkles color={colors.greenOnLight} size={18} strokeWidth={2.2} />
-            <Text style={styles.sectionTitle}>What Contributed to this Valuation?</Text>
+            <Text style={styles.sectionTitle}>{t("valuation.step4.driversTitle")}</Text>
           </View>
           <Text style={styles.sectionSubtitle}>
-            Specific micro-features in Dhaka that command a verified price premium over standard baseline properties.
+            {t("valuation.step4.driversSubtitle")}
           </Text>
 
           <View style={styles.driversList}>
@@ -265,10 +281,12 @@ export function Step4ResultDashboard() {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Building2 color={colors.greenOnLight} size={18} strokeWidth={2.2} />
-            <Text style={styles.sectionTitle}>Comparable Verified Listings in {result.areaName}</Text>
+            <Text style={styles.sectionTitle}>
+              {t("valuation.step4.comparablesTitle", { area: result.areaName })}
+            </Text>
           </View>
           <Text style={styles.sectionSubtitle}>
-            Recent active inventory on HomeNet used to benchmark this property.
+            {t("valuation.step4.comparablesSubtitle")}
           </Text>
 
           <View style={[styles.comparablesGrid, isPhone && styles.comparablesGridPhone]}>
@@ -279,7 +297,9 @@ export function Step4ResultDashboard() {
                   <View style={styles.compHeaderRow}>
                     <Text style={styles.compPrice}>{comp.priceFormatted}</Text>
                     <View style={styles.similarityBadge}>
-                      <Text style={styles.similarityText}>{comp.similarityScore}% match</Text>
+                      <Text style={styles.similarityText}>
+                        {t("valuation.step4.matchPercent", { score: String(comp.similarityScore) })}
+                      </Text>
                     </View>
                   </View>
                   <Text numberOfLines={1} style={styles.compTitle}>
@@ -309,9 +329,9 @@ export function Step4ResultDashboard() {
               <PlusCircle color={colorTokens.onBrand} size={24} strokeWidth={2.2} />
             </View>
             <View style={styles.listCtaContent}>
-              <Text style={styles.listCtaTitle}>Ready to Sell or Rent?</Text>
+              <Text style={styles.listCtaTitle}>{t("valuation.step4.readyToSell")}</Text>
               <Text style={styles.listCtaSubtitle}>
-                Publish this property on HomeNet in 60 seconds with these exact details and valuation prefilled. Free to list.
+                {t("valuation.step4.readyToSellSub")}
               </Text>
             </View>
           </View>
@@ -327,7 +347,7 @@ export function Step4ResultDashboard() {
               webPointer,
             ]}
           >
-            <Text style={styles.primaryListBtnText}>List this property on HomeNet</Text>
+            <Text style={styles.primaryListBtnText}>{t("valuation.step4.listPropertyCTA")}</Text>
             <ArrowUpRight color={colorTokens.onBrand} size={18} strokeWidth={2.4} />
           </Pressable>
         </View>
@@ -343,7 +363,7 @@ export function Step4ResultDashboard() {
           ]}
         >
           <RotateCcw color={colorTokens.ink} size={16} strokeWidth={2} />
-          <Text style={styles.recalcBtnText}>Recalculate / Adjust Property Details</Text>
+          <Text style={styles.recalcBtnText}>{t("valuation.step4.recalcCTA")}</Text>
         </Pressable>
       </View>
     </View>

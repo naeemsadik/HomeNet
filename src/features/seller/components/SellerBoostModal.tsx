@@ -1,6 +1,7 @@
 import { Check, Rocket, X } from "@/components/icons";
 import { Modal, Pressable, Text, View } from "react-native";
 import { colorTokens, colors, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 import { styles } from "../screens/SellerDashboardScreen.styles";
 
 type SellerBoostModalProps = {
@@ -12,6 +13,32 @@ type SellerBoostModalProps = {
 
 /** Pick a boost package. "Activate Boost" only closes the dialog: there is no boost API yet. */
 export function SellerBoostModal({ visible, onClose, selectedPackage, onSelectPackage }: SellerBoostModalProps) {
+  const { t } = useTranslation();
+
+  const packages = [
+    {
+      id: "featured",
+      name: t("seller.boost.packages.featured.name"),
+      price: t("seller.boost.packages.featured.price"),
+      highlight: t("seller.boost.packages.featured.highlight"),
+      desc: t("seller.boost.packages.featured.desc"),
+    },
+    {
+      id: "ai_priority",
+      name: t("seller.boost.packages.aiPriority.name"),
+      price: t("seller.boost.packages.aiPriority.price"),
+      highlight: t("seller.boost.packages.aiPriority.highlight"),
+      desc: t("seller.boost.packages.aiPriority.desc"),
+    },
+    {
+      id: "omni_blast",
+      name: t("seller.boost.packages.omniBlast.name"),
+      price: t("seller.boost.packages.omniBlast.price"),
+      highlight: t("seller.boost.packages.omniBlast.highlight"),
+      desc: t("seller.boost.packages.omniBlast.desc"),
+    },
+  ];
+
   return (
     <Modal
       animationType="fade"
@@ -30,13 +57,13 @@ export function SellerBoostModal({ visible, onClose, selectedPackage, onSelectPa
               <Rocket color={colors.green} size={20} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.boostModalTitle}>Boost a listing</Text>
+              <Text style={styles.boostModalTitle}>{t("seller.boost.modal.title")}</Text>
               <Text style={styles.boostModalSub}>
-                Get up to 10x more buyer views and inquiries.
+                {t("seller.boost.modal.subtitle")}
               </Text>
             </View>
             <Pressable
-              accessibilityLabel="Close modal"
+              accessibilityLabel={t("seller.boost.modal.closeAria")}
               onPress={onClose}
               style={[styles.modalCloseBtn, webPointer]}
             >
@@ -46,29 +73,7 @@ export function SellerBoostModal({ visible, onClose, selectedPackage, onSelectPa
 
           {/* Boost Packages */}
           <View style={styles.packagesList}>
-            {[
-              {
-                id: "featured",
-                name: "Featured Spotlight",
-                price: "৳ 1,500 / 7 days",
-                highlight: "3x More Views",
-                desc: "Top placement in search results and category landing pages.",
-              },
-              {
-                id: "ai_priority",
-                name: "AI Recommendation Priority",
-                price: "৳ 2,500 / 14 days",
-                highlight: "5x More Inquiries",
-                desc: "Ranked #1 in Homenet's AI Matchmaker search algorithm.",
-              },
-              {
-                id: "omni_blast",
-                name: "VIP Omni-Channel Blast",
-                price: "৳ 4,500 / 30 days",
-                highlight: "10x Reach",
-                desc: "Included in weekly buyer newsletter and verified partner badges.",
-              },
-            ].map((pkg) => {
+            {packages.map((pkg) => {
               const isSelected = selectedPackage === pkg.id;
               return (
                 <Pressable
@@ -111,14 +116,14 @@ export function SellerBoostModal({ visible, onClose, selectedPackage, onSelectPa
               onPress={onClose}
               style={[styles.boostCancelBtn, webPointer]}
             >
-              <Text style={styles.boostCancelBtnText}>Cancel</Text>
+              <Text style={styles.boostCancelBtnText}>{t("seller.boost.modal.cancelBtn")}</Text>
             </Pressable>
             <Pressable
               onPress={onClose}
               style={[styles.boostConfirmBtn, webPointer]}
             >
               <Rocket color={colorTokens.onBrand} size={16} />
-              <Text style={styles.boostConfirmBtnText}>Activate Boost</Text>
+              <Text style={styles.boostConfirmBtnText}>{t("seller.boost.modal.activateBtn")}</Text>
             </Pressable>
           </View>
         </View>

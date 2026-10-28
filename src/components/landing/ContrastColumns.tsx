@@ -1,20 +1,32 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { Check, X } from "@/components/icons";
+import { useTranslation } from "@/i18n";
 import { colorTokens, fonts } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
-import { landingCopy } from "@/content/landingCopy";
 
 export function ContrastColumns() {
+  const { t } = useTranslation();
   const { isTablet } = useResponsive();
-  const { withoutTitle, withoutItems, withTitle, withItems } = landingCopy.problem;
+
+  const withoutItems = useMemo(() => [
+    t("landing.contrast.without1"),
+    t("landing.contrast.without2"),
+    t("landing.contrast.without3"),
+  ], [t]);
+
+  const withItems = useMemo(() => [
+    t("landing.contrast.with1"),
+    t("landing.contrast.with2"),
+    t("landing.contrast.with3"),
+  ], [t]);
 
   return (
     <View style={[styles.container, isTablet && styles.containerTablet]}>
       {/* Left Column: Without HomeNet */}
       <View style={[styles.column, styles.columnWithout]}>
         <View style={styles.colHeader}>
-          <Text style={styles.colTitleWithout}>{withoutTitle}</Text>
+          <Text style={styles.colTitleWithout}>{t("landing.contrast.withoutTitle")}</Text>
         </View>
 
         <View style={styles.itemsList}>
@@ -32,7 +44,7 @@ export function ContrastColumns() {
       {/* Right Column: With HomeNet */}
       <View style={[styles.column, styles.columnWith]}>
         <View style={styles.colHeader}>
-          <Text style={styles.colTitleWith}>{withTitle}</Text>
+          <Text style={styles.colTitleWith}>{t("landing.contrast.withTitle")}</Text>
         </View>
 
         <View style={styles.itemsList}>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { PRICE_ON_REQUEST, isPriceOnRequest, priceOnRequestLabel, useTranslation } from "@/i18n";
 import { Send, ArrowRight, ArrowLeft, Check, MapPin } from "@/components/icons";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +10,7 @@ import { FormSelectField } from "@/components/FormSelectField";
 import { ErrorBanner, AuthButton } from "@/components/AuthFormFields";
 import { AreaPicker } from "@/components/AreaPicker";
 import { ImageUploader } from "./ImageUploader";
+import { HOLIDAY_STAY_LABEL } from "../constants/holidayStay";
 import {
   propertyFormSchema,
   PROPERTY_STEP_FIELDS,
@@ -39,6 +41,9 @@ export function PropertyForm({
   loading = false,
   error = null,
 }: PropertyFormProps) {
+  const { t, language } = useTranslation();
+  // "Contact for price" is stored as price 1; the box is then locked.
+  const [onRequest, setOnRequest] = useState(isPriceOnRequest(initialData?.price));
   const [step, setStep] = useState(0);
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
   const [area, setArea] = useState<Area | null>(initialArea);
@@ -51,7 +56,11 @@ export function PropertyForm({
       description: initialData?.description ?? "",
       type: (initialData?.type as PropertyFormData["type"]) ?? "residential",
       listing_type: (initialData?.listing_type as PropertyFormData["listing_type"]) ?? "sale",
-      price: initialData?.price ? String(initialData.price) : "",
+      price: isPriceOnRequest(initialData?.price)
+        ? String(PRICE_ON_REQUEST)
+        : initialData?.price
+          ? String(initialData.price)
+          : "",
       area_id: area?.id ?? initialData?.area_id ?? "",
       address: initialData?.address ?? "",
       bedrooms: initialData?.amenities?.bedrooms ? String(initialData.amenities.bedrooms) : "",
@@ -101,19 +110,30 @@ export function PropertyForm({
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {/* Step Indicator */}
         <View style={styles.stepIndicator}>
-          {STEPS.map((s, i) => (
-            <View key={s} style={styles.stepItem}>
-              <View style={[styles.stepDot, i <= step && styles.stepDotActive, i < step && styles.stepDotDone]}>
-                {i < step ? (
-                  <Check color={colorTokens.onBrand} size={13} />
-                ) : (
-                  <Text style={[styles.stepDotText, i <= step && styles.stepDotTextActive]}>{i + 1}</Text>
-                )}
+          {STEPS.map((s, i) => {
+            const stepTitle =
+              s === "Details"
+                ? t("wizard.form.steps.details")
+                : s === "Location"
+                ? t("wizard.form.steps.location")
+                : s === "Features"
+                ? t("wizard.form.steps.features")
+                : t("wizard.form.steps.images");
+
+            return (
+              <View key={s} style={styles.stepItem}>
+                <View style={[styles.stepDot, i <= step && styles.stepDotActive, i < step && styles.stepDotDone]}>
+                  {i < step ? (
+                    <Check color={colorTokens.onBrand} size={13} />
+                  ) : (
+                    <Text style={[styles.stepDotText, i <= step && styles.stepDotTextActive]}>{i + 1}</Text>
+                  )}
+                </View>
+                <Text style={[styles.stepLabel, i === step && styles.stepLabelActive]}>{stepTitle}</Text>
+                {i < STEPS.length - 1 && <View style={[styles.stepLine, i < step && styles.stepLineActive]} />}
               </View>
-              <Text style={[styles.stepLabel, i === step && styles.stepLabelActive]}>{s}</Text>
-              {i < STEPS.length - 1 && <View style={[styles.stepLine, i < step && styles.stepLineActive]} />}
-            </View>
-          ))}
+            );
+          })}
         </View>
 
         <ErrorBanner message={error} />
@@ -121,21 +141,21 @@ export function PropertyForm({
         {/* Step Content */}
         {step === 0 && (
           <View style={styles.stepContent}>
-            <Text style={styles.sectionTitle}>Property Details</Text>
+            <Text style={styles.sectionTitle}>{t("wizard.form.detailsTitle")}</Text>
             <FormFloatingInput
               control={control}
               name="title"
-              label="Title"
+              label={t("wizard.form.titleLabel")}
               autoCapitalize="words"
             />
             <FormFloatingInput
               control={control}
               name="description"
-              label="Description (optional)"
+              label={t("wizard.form.descLabel")}
             />
             <View style={styles.row}>
               <View style={styles.halfField}>
-                <Text style={styles.fieldLabel}>Type</Text>
+                <Text style={styles.fieldLabel}>{t("wizard.form.typeLabel")}</Text>
                 <FormSelectField
                   control={control}
                   name="type"
@@ -143,30 +163,56 @@ export function PropertyForm({
                 />
               </View>
               <View style={styles.halfField}>
-                <Text style={styles.fieldLabel}>Listing</Text>
+                <Text style={styles.fieldLabel}>{t("wizard.form.listingLabel")}</Text>
                 <FormSelectField
                   control={control}
                   name="listing_type"
-                  options={["sale", "rent"]}
+                  options={["sale", "rent", "short_let"]}
+                  formatOption={(option) => (option === "short_let" ? HOLIDAY_STAY_LABEL : option)}
                 />
               </View>
             </View>
-            <FormFloatingInput
-              control={control}
-              name="price"
-              label="Price"
-              keyboardType="numeric"
-            />
+            {onRequest ? (
+              <View accessibilityState={{ disabled: true }} style={styles.priceLocked}>
+                <Text style={styles.priceLockedLabel}>{t("wizard.form.priceLabel")}</Text>
+                <Text style={styles.priceLockedValue}>{priceOnRequestLabel(language)}</Text>
+              </View>
+            ) : (
+              <FormFloatingInput
+                control={control}
+                name="price"
+                label={t("wizard.form.priceLabel")}
+                keyboardType="numeric"
+              />
+            )}
+            <Pressable
+              accessibilityLabel={priceOnRequestLabel(language)}
+              accessibilityHint={t("wizard.details.contactForPriceHint")}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: onRequest }}
+              aria-checked={onRequest}
+              onPress={() => {
+                const next = !onRequest;
+                setOnRequest(next);
+                setValue("price", next ? String(PRICE_ON_REQUEST) : "", { shouldValidate: next });
+              }}
+              style={styles.priceOnRequestRow}
+            >
+              <View style={[styles.priceOnRequestBox, onRequest && styles.priceOnRequestBoxOn]}>
+                {onRequest ? <Check color={colorTokens.ink} size={14} strokeWidth={3} /> : null}
+              </View>
+              <Text style={styles.priceOnRequestText}>{priceOnRequestLabel(language)}</Text>
+            </Pressable>
           </View>
         )}
 
         {step === 1 && (
           <View style={styles.stepContent}>
-            <Text style={styles.sectionTitle}>Location</Text>
-            <Text style={styles.fieldLabel}>Area</Text>
+            <Text style={styles.sectionTitle}>{t("wizard.form.locationTitle")}</Text>
+            <Text style={styles.fieldLabel}>{t("wizard.form.areaLabel")}</Text>
             <Pressable onPress={() => setAreaPickerVisible(true)} style={styles.areaButton}>
               <MapPin color={colorTokens.primary} size={18} />
-              <Text style={styles.areaButtonText}>{area?.name || initialArea?.name || "Select an API area"}</Text>
+              <Text style={styles.areaButtonText}>{area?.name || initialArea?.name || t("wizard.form.selectArea")}</Text>
             </Pressable>
             {errors.area_id && (
               <Text style={styles.fieldError}>{errors.area_id.message}</Text>
@@ -174,7 +220,7 @@ export function PropertyForm({
             <FormFloatingInput
               control={control}
               name="address"
-              label="Address (optional)"
+              label={t("wizard.form.addressLabel")}
               autoCapitalize="words"
             />
           </View>
@@ -182,13 +228,13 @@ export function PropertyForm({
 
         {step === 2 && (
           <View style={styles.stepContent}>
-            <Text style={styles.sectionTitle}>Features</Text>
+            <Text style={styles.sectionTitle}>{t("wizard.form.featuresTitle")}</Text>
             <View style={styles.row}>
               <View style={styles.halfField}>
                 <FormFloatingInput
                   control={control}
                   name="bedrooms"
-                  label="Bedrooms"
+                  label={t("wizard.form.bedrooms")}
                   keyboardType="numeric"
                 />
               </View>
@@ -196,7 +242,7 @@ export function PropertyForm({
                 <FormFloatingInput
                   control={control}
                   name="bathrooms"
-                  label="Bathrooms"
+                  label={t("wizard.form.bathrooms")}
                   keyboardType="numeric"
                 />
               </View>
@@ -204,7 +250,7 @@ export function PropertyForm({
             <FormFloatingInput
               control={control}
               name="area_size"
-              label="Area size (sqft)"
+              label={t("wizard.form.areaSizeSqft")}
               keyboardType="numeric"
             />
           </View>
@@ -212,7 +258,7 @@ export function PropertyForm({
 
         {step === 3 && (
           <View style={styles.stepContent}>
-            <Text style={styles.sectionTitle}>Images</Text>
+            <Text style={styles.sectionTitle}>{t("wizard.form.imagesTitle")}</Text>
             <ImageUploader
               images={images}
               onAdd={(newImgs) => setImages((prev) => [...prev, ...newImgs])}
@@ -226,7 +272,7 @@ export function PropertyForm({
         <View style={styles.navRow}>
           {step > 0 ? (
             <AuthButton
-              label="Back"
+              label={t("wizard.form.back")}
               onPress={() => setStep((s) => s - 1)}
               variant="secondary"
               icon={ArrowLeft}
@@ -234,7 +280,7 @@ export function PropertyForm({
             />
           ) : onCancel ? (
             <AuthButton
-              label="Cancel"
+              label={t("wizard.form.cancel")}
               onPress={onCancel}
               variant="secondary"
               style={styles.navBtn}
@@ -245,14 +291,14 @@ export function PropertyForm({
 
           {step < STEPS.length - 1 ? (
             <AuthButton
-              label="Next"
+              label={t("wizard.form.next")}
               onPress={handleNext}
               icon={ArrowRight}
               style={styles.navBtn}
             />
           ) : (
             <AuthButton
-              label={mode === "create" ? "Create Property" : "Save Changes"}
+              label={mode === "create" ? t("wizard.form.createProperty") : t("wizard.form.saveChanges")}
               onPress={handleSubmit(onFormSubmit as any)}
               loading={loading}
               disabled={loading}
@@ -280,6 +326,37 @@ export function PropertyForm({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  priceLocked: {
+    minHeight: 56,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
+    backgroundColor: "#ECEFEE",
+    opacity: 0.75,
+  },
+  priceLockedLabel: { fontFamily: fonts.medium, fontSize: 12, color: colorTokens.muted },
+  priceLockedValue: { fontFamily: fonts.semiBold, fontSize: 15, color: colorTokens.ink },
+  priceOnRequestRow: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    alignSelf: "flex-start",
+  },
+  priceOnRequestBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: "rgba(11,26,23,0.35)",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  priceOnRequestBoxOn: { backgroundColor: colorTokens.brand, borderColor: colorTokens.brand },
+  priceOnRequestText: { fontFamily: fonts.semiBold, fontSize: 14, color: colorTokens.ink },
   scrollContent: { paddingBottom: 40 },
   stepIndicator: {
     flexDirection: "row",

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import { Home } from "@/components/icons";
 import { Platform, StyleSheet, Text, View } from "react-native";
-import { colors, fonts } from "@/theme";
+import { colorTokens, fonts } from "@/theme";
+import { BrandMark, BrandWordmark } from "./BrandArt";
 import { AppLink } from "./ui";
 
 /**
@@ -26,19 +26,22 @@ function useNoTranslate<T = any>() {
 export function Brand({
   compact = false,
   size = "default",
-  href = "/home",
+  href = "/",
   onPress,
   variant = "dark",
+  subtitle,
 }: {
   compact?: boolean;
   size?: "compact" | "default" | "large";
   href?: string;
   onPress?: () => void;
   variant?: "dark" | "light";
+  subtitle?: string;
 }) {
   const isLarge = size === "large";
   const isCompact = compact || size === "compact";
   const isLight = variant === "light";
+  const tone = isLight ? "light" : "dark";
   const brandRef = useNoTranslate<View>();
 
   return (
@@ -48,55 +51,41 @@ export function Brand({
       onPress={onPress}
       style={[styles.link, isCompact && styles.linkCompact]}
     >
-      <View
-        style={[
-          styles.mark,
-          isCompact && styles.markCompact,
-          isLarge && styles.markLarge,
-        ]}
-      >
-        <Home
-          color={colors.white}
-          size={isCompact ? 16 : isLarge ? 22 : 20}
-          strokeWidth={2}
-        />
+      <View style={styles.mark}>
+        <BrandMark size={isCompact ? 30 : isLarge ? 40 : 36} tone={tone} />
       </View>
-      <View ref={brandRef}>
-        <Text
-          style={[
-            styles.text,
-            isCompact && styles.textCompact,
-            isLarge && styles.textLarge,
-            isLight && { color: "#FFFFFF" },
-          ]}
-        >
-          Home<Text style={{ color: "#04cf92" }}>net</Text>
-        </Text>
+      <View ref={brandRef} style={styles.textWrap}>
+        <BrandWordmark height={isCompact ? 15 : isLarge ? 19 : 17} tone={tone} />
+        {subtitle ? (
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={[
+              styles.subtitle,
+              isLight && styles.subtitleLight,
+            ]}
+          >
+            {subtitle}
+          </Text>
+        ) : null}
       </View>
     </AppLink>
   );
 }
 
 const styles = StyleSheet.create({
-  link: { flexDirection: "row", alignItems: "center", gap: 9 },
-  linkCompact: { gap: 6 },
-  mark: {
-    width: 36,
-    height: 36,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#04cf92",
+  link: { flexDirection: "row", alignItems: "center", gap: 9, flexShrink: 1, minWidth: 0, overflow: "hidden" },
+  linkCompact: { gap: 6, flexShrink: 1, minWidth: 0, overflow: "hidden" },
+  mark: { flexShrink: 0 },
+  textWrap: { justifyContent: "center", gap: 2, flexShrink: 1, minWidth: 0, overflow: "hidden" },
+  subtitle: {
+    fontFamily: fonts.medium,
+    fontSize: 10.5,
+    lineHeight: 13,
+    color: colorTokens.muted,
+    letterSpacing: -0.1,
   },
-  markCompact: { width: 28, height: 28, borderRadius: 14 },
-  markLarge: { width: 40, height: 40, borderRadius: 20 },
-  text: {
-    color: "#0B1A17",
-    fontFamily: fonts.headingExtraBold,
-    fontSize: 18,
-    letterSpacing: -0.4,
-    fontWeight: "800",
+  subtitleLight: {
+    color: "rgba(255, 255, 255, 0.75)",
   },
-  textCompact: { fontSize: 14.5 },
-  textLarge: { fontSize: 20.5, letterSpacing: -0.4 },
 });

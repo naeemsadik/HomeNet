@@ -19,6 +19,7 @@ import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { GOOGLE_SIGN_IN_AVAILABLE } from "@/lib/features";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { ClipPath, Defs, Path, Rect } from "react-native-svg";
+import { BrandMark, BrandWordmark } from "./BrandArt";
 import {
   ArrowRight,
   Eye,
@@ -44,30 +45,6 @@ export interface AuthCardProps {
   onClose?: () => void;
   isModal?: boolean;
   style?: StyleProp<ViewStyle>;
-}
-
-/**
- * Figma Node 282:7 House Icon (size: 37.427px)
- */
-function HomenetHouseIcon() {
-  return (
-    <Svg width={38} height={38} viewBox="0 0 38 38" fill="none">
-      <Path
-        d="M23.3916 32.7482V20.2727C23.3916 19.8591 23.2273 19.4625 22.9348 19.17C22.6424 18.8776 22.2457 18.7133 21.8321 18.7133H15.5944C15.1808 18.7133 14.7841 18.8776 14.4917 19.17C14.1992 19.4625 14.0349 19.8591 14.0349 20.2727V32.7482"
-        stroke="#FFFFFF"
-        strokeWidth={3.11888}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M4.67831 15.5944C4.6782 15.1407 4.77708 14.6924 4.96804 14.2809C5.159 13.8693 5.43744 13.5044 5.78395 13.2116L16.7 3.85649C17.263 3.38071 17.9762 3.11968 18.7133 3.11968C19.4503 3.11968 20.1636 3.38071 20.7265 3.85649L31.6426 13.2116C31.9891 13.5044 32.2675 13.8693 32.4585 14.2809C32.6494 14.6924 32.7483 15.1407 32.7482 15.5944V29.6293C32.7482 30.4565 32.4196 31.2498 31.8347 31.8347C31.2498 32.4196 30.4565 32.7482 29.6293 32.7482H7.79719C6.97001 32.7482 6.17671 32.4196 5.59181 31.8347C5.00691 32.4196 4.67831 30.4565 4.67831 29.6293V15.5944Z"
-        stroke="#FFFFFF"
-        strokeWidth={3.11888}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
 }
 
 /**
@@ -236,11 +213,13 @@ export function AuthCard({
 
             {/* Center Logo Icon Tile (Node 282:6 - 67.37px x 67.37px) */}
             <View style={styles.logoIconTile}>
-              <HomenetHouseIcon />
+              <BrandMark size={46} tone="light" />
             </View>
 
             {/* App Title (Node 282:10) */}
-            <Text style={styles.brandTitle}>Homenet</Text>
+            <View accessibilityRole="header" accessibilityLabel="Homenet BD" style={styles.brandTitle}>
+              <BrandWordmark height={26} tone="light" />
+            </View>
 
             {/* Subtitle (Node 282:12) */}
             <Text style={styles.brandSubtitle}>
@@ -548,12 +527,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   brandTitle: {
-    color: "#FFFFFF",
-    fontFamily: fonts.headingExtraBold,
-    fontSize: 24,
-    fontWeight: "800",
-    lineHeight: 32,
-    textAlign: "center",
+    height: 32,
+    justifyContent: "center",
   },
   brandSubtitle: {
     marginTop: 4,

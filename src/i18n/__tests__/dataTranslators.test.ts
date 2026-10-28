@@ -1,9 +1,13 @@
 import {
   formatLocalizedNumber,
   formatLocalizedPrice,
+  isPriceOnRequest,
   translateAmenity,
   translatePropertyType,
   translateListingStatus,
+  translateFacing,
+  translateCompletionStatus,
+  translateAreaUnit,
 } from "@/i18n/dataTranslators";
 
 describe("dataTranslators", () => {
@@ -26,6 +30,24 @@ describe("dataTranslators", () => {
   });
 
   describe("formatLocalizedPrice", () => {
+    it("shows a price of 1, what the API stores for Contact for price, as words", () => {
+      expect(formatLocalizedPrice(1, "BDT", "en")).toBe("Contact for price");
+      expect(formatLocalizedPrice(1, "BDT", "bn")).toBe("মূল্য জানতে যোগাযোগ করুন");
+    });
+
+    it("treats 1 and the older 0 as Contact for price, and nothing else", () => {
+      expect(isPriceOnRequest(1)).toBe(true);
+      expect(isPriceOnRequest(0)).toBe(true);
+      expect(isPriceOnRequest(2)).toBe(false);
+      expect(isPriceOnRequest(18_500_000)).toBe(false);
+      expect(isPriceOnRequest(undefined)).toBe(false);
+    });
+
+    it("shows a price of 0 as Contact for price, never as 0", () => {
+      expect(formatLocalizedPrice(0, "BDT", "en")).toBe("Contact for price");
+      expect(formatLocalizedPrice(0, "BDT", "bn")).toBe("মূল্য জানতে যোগাযোগ করুন");
+    });
+
     it("formats crore prices correctly in English", () => {
       expect(formatLocalizedPrice(48_500_000, "BDT", "en")).toBe("৳ 4.85 Cr");
       expect(formatLocalizedPrice(10_000_000, "BDT", "en")).toBe("৳ 1 Cr");
@@ -133,6 +155,66 @@ describe("dataTranslators", () => {
       expect(translateAmenity("" as any, "bn")).toBe("");
       expect(translateAmenity(null as any, "bn")).toBe("");
       expect(translateAmenity(undefined as any, "bn")).toBe("");
+    });
+  });
+
+  describe("translateFacing", () => {
+    it("returns raw string in English", () => {
+      expect(translateFacing("South", "en")).toBe("South");
+      expect(translateFacing("North-Facing", "en")).toBe("North-Facing");
+    });
+
+    it("translates known facing directions into authentic Bengali", () => {
+      expect(translateFacing("South", "bn")).toBe("দক্ষিণমুখী");
+      expect(translateFacing("south-facing", "bn")).toBe("দক্ষিণমুখী");
+      expect(translateFacing("North", "bn")).toBe("উত্তরমুখী");
+      expect(translateFacing("East", "bn")).toBe("পূর্বমুখী");
+      expect(translateFacing("West", "bn")).toBe("পশ্চিমমুখী");
+      expect(translateFacing("north-east", "bn")).toBe("উত্তর-পূর্বমুখী");
+    });
+
+    it("handles null, undefined, empty string safely", () => {
+      expect(translateFacing("" as any, "bn")).toBe("");
+      expect(translateFacing(null as any, "bn")).toBe("");
+      expect(translateFacing(undefined as any, "bn")).toBe("");
+    });
+  });
+
+  describe("translateCompletionStatus", () => {
+    it("returns raw string in English", () => {
+      expect(translateCompletionStatus("ready", "en")).toBe("ready");
+      expect(translateCompletionStatus("under_construction", "en")).toBe("under_construction");
+    });
+
+    it("translates completion status into authentic Bengali standard", () => {
+      expect(translateCompletionStatus("ready", "bn")).toBe("রেডি ফ্ল্যাট");
+      expect(translateCompletionStatus("under_construction", "bn")).toBe("নির্মাণাধীন");
+      expect(translateCompletionStatus("ongoing", "bn")).toBe("চলমান");
+    });
+
+    it("handles null, undefined, empty string safely", () => {
+      expect(translateCompletionStatus("" as any, "bn")).toBe("");
+      expect(translateCompletionStatus(null as any, "bn")).toBe("");
+      expect(translateCompletionStatus(undefined as any, "bn")).toBe("");
+    });
+  });
+
+  describe("translateAreaUnit", () => {
+    it("returns raw string in English", () => {
+      expect(translateAreaUnit("sqft", "en")).toBe("sqft");
+      expect(translateAreaUnit("katha", "en")).toBe("katha");
+    });
+
+    it("translates measurement units into Bengali", () => {
+      expect(translateAreaUnit("sqft", "bn")).toBe("বর্গফুট");
+      expect(translateAreaUnit("katha", "bn")).toBe("কাঠা");
+      expect(translateAreaUnit("bigha", "bn")).toBe("বিঘা");
+      expect(translateAreaUnit("sqm", "bn")).toBe("বর্গমিটার");
+    });
+
+    it("handles null and undefined gracefully", () => {
+      expect(translateAreaUnit(null, "bn")).toBe("বর্গফুট");
+      expect(translateAreaUnit(undefined, "en")).toBe("sqft");
     });
   });
 });

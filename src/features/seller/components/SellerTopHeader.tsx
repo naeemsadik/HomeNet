@@ -9,8 +9,12 @@ import {
 } from "react-native";
 import { AppLink } from "@/components/ui";
 import { ToggleViewButton } from "./ToggleViewButton";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
+
+const HEADER_HEIGHT = 64;
 
 export interface SellerTopHeaderProps {
   title?: string;
@@ -35,7 +39,7 @@ export interface SellerTopHeaderProps {
  *   - Right: Search input + Notification bell + "View site" quick link.
  */
 export function SellerTopHeader({
-  title = "Dashboard",
+  title,
   onPressMenu,
   searchQuery,
   onSearchQueryChange,
@@ -43,14 +47,28 @@ export function SellerTopHeader({
   showViewSite = true,
   hasUnreadNotifications = true,
 }: SellerTopHeaderProps) {
+  const { t } = useTranslation();
   const { isTablet } = useResponsive();
+  const insets = useSafeAreaInsets();
+  const displayTitle = title ?? t("seller.header.dashboard");
 
   return (
-    <View style={[styles.header, isTablet ? styles.headerMobile : styles.headerDesktop]}>
+    <View
+      style={[
+        styles.header,
+        isTablet ? styles.headerMobile : styles.headerDesktop,
+        // Edge-to-edge Android draws the app under the status bar.
+        insets.top > 0 && {
+          height: HEADER_HEIGHT + insets.top,
+          minHeight: HEADER_HEIGHT + insets.top,
+          paddingTop: 12 + insets.top,
+        },
+      ]}
+    >
       {/* 3-bar Hamburger Button: strictly for mobile / small screen devices */}
       {isTablet && (
         <Pressable
-          accessibilityLabel="Open navigation menu"
+          accessibilityLabel={t("seller.header.openMenuAria")}
           accessibilityRole="button"
           onPress={onPressMenu}
           style={({ pressed }) => [
@@ -66,7 +84,7 @@ export function SellerTopHeader({
       {/* Screen Title */}
       <View style={styles.titleContainer}>
         <Text numberOfLines={1} style={styles.headerTitle}>
-          {title}
+          {displayTitle}
         </Text>
       </View>
 
@@ -78,7 +96,7 @@ export function SellerTopHeader({
             <Search color="rgba(11,26,23,0.5)" size={16} />
             <TextInput
               onChangeText={onSearchQueryChange}
-              placeholder="Search listings…"
+              placeholder={t("seller.header.searchPlaceholder")}
               placeholderTextColor="rgba(11,26,23,0.5)"
               selectTextOnFocus
               style={styles.searchInput}
@@ -86,7 +104,7 @@ export function SellerTopHeader({
             />
             {Boolean(searchQuery && searchQuery.length > 0) && (
               <Pressable
-                accessibilityLabel="Clear search query"
+                accessibilityLabel={t("seller.header.clearSearchAria")}
                 accessibilityRole="button"
                 hitSlop={8}
                 onPress={() => onSearchQueryChange("")}
@@ -100,7 +118,7 @@ export function SellerTopHeader({
 
         {/* Notification Bell Button with orange badge */}
         <AppLink
-          accessibilityLabel="Notifications"
+          accessibilityLabel={t("seller.header.notificationsAria")}
           href="/notifications"
           style={[styles.iconCircleBtn, webPointer]}
         >
@@ -119,8 +137,8 @@ export function SellerTopHeader({
 
 const styles = StyleSheet.create({
   header: {
-    height: 64,
-    minHeight: 64,
+    height: HEADER_HEIGHT,
+    minHeight: HEADER_HEIGHT,
     backgroundColor: "rgba(255,255,255,0.92)",
     borderBottomWidth: 1,
     borderBottomColor: "rgba(11,26,23,0.08)",

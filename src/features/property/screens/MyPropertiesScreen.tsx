@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageSquare,
+  Archive,
   MoreVertical,
   Plus,
   PlusCircle,
@@ -34,21 +35,20 @@ import {
 } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
 import { AppLink } from "@/components/ui";
-import { Brand } from "@/components/Brand";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
-import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
-import { Footer } from "@/components/Footer";
+import { SellerShell } from "@/features/seller/components/SellerShell";
+import { displaySubtype } from "../constants/holidayStay";
+import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
 import { useMyProperties } from "../hooks/useMyProperties";
-import { useDeleteProperty } from "../hooks/usePropertyMutations";
+import { useArchiveProperty, useDeleteProperty } from "../hooks/usePropertyMutations";
 import { toApiError } from "@/services/apiClient";
 import { cdnImage } from "@/lib/cloudinaryImage";
 
 import { LiveText } from "@/components/LiveText";
 import { NoTranslateText } from "@/components/NoTranslateText";
-import { formatLocalizedNumber, translateListingStatus, useTranslation } from "@/i18n";
+import { formatLocalizedNumber, isPriceOnRequest, priceOnRequestLabel, translateListingStatus, useTranslation } from "@/i18n";
 
 export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
 
@@ -58,7 +58,7 @@ interface ListingItemData {
   location: string;
   imageUrl?: string;
   type: string;
-  listingType: "For Sale" | "For Rent";
+  listingType: string;
   price: string;
   status: "active" | "draft" | "pending" | "sold" | "archived";
   boostText?: string;
@@ -77,9 +77,10 @@ export function MyPropertiesScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const deleteMutation = useDeleteProperty();
+  const archiveMutation = useArchiveProperty();
 
   const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useMyProperties();
-  const apiProperties = data?.pages.flatMap((p) => p.data?.items ?? []) ?? [];
+  const apiProperties = useMemo(() => data?.pages.flatMap((p) => p.data?.items ?? []) ?? [], [data]);
 
   const allListings = useMemo(() => {
     return apiProperties.map((p): ListingItemData => ({
@@ -91,9 +92,11 @@ export function MyPropertiesScreen() {
         700,
         460,
       ),
-      type: p.subtype || p.type || "Apartment",
-      listingType: p.listing_type === "rent" ? "For Rent" : "For Sale",
-      price: `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${p.listing_type === "rent" ? "/mo" : ""}`,
+      type: displaySubtype(p.subtype) || p.type || "Apartment",
+      listingType: listingTypeLabel(p.listing_type),
+      price: isPriceOnRequest(p.price)
+        ? priceOnRequestLabel(language)
+        : `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${pricePeriodFor(p.listing_type)}`,
       status: p.status,
       isVerified: p.is_verified,
       isBoosted: false,
@@ -139,7 +142,7 @@ export function MyPropertiesScreen() {
     });
     if (!confirmed) return;
     logout();
-    router.replace("/home");
+    router.replace("/");
   };
 
   const sidebarNavItems: {
@@ -182,78 +185,30 @@ export function MyPropertiesScreen() {
     }
   };
 
+  // The API archives only active or sold listings; anything else can only be deleted.
+  const canArchive = (status: ListingItemData["status"]) => status === "active" || status === "sold";
+
+  const handleArchive = async (id: string, title: string) => {
+    const confirmed = await confirmAction(
+      t("seller.archiveConfirmTitle"),
+      t("seller.archiveConfirmMessage", { title }),
+      { confirmLabel: t("seller.actions.archive") }
+    );
+    if (!confirmed) return;
+    try {
+      await archiveMutation.mutateAsync(id);
+    } catch (archiveError) {
+      notify(t("seller.archiveFailed"), toApiError(archiveError).message);
+    }
+  };
+
   return (
-    <View style={styles.outerContainer}>
-      {/* Sidebar (Desktop View) */}
-      {!isTablet && (
-        <View style={styles.sidebar}>
-          <View style={styles.sidebarHeader}>
-            <Brand />
-            <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>{t("dashboard.sellerDashboard")}</Text>
-            </View>
-          </View>
-
-          <ScrollView contentContainerStyle={styles.sidebarNavScroll} showsVerticalScrollIndicator={false}>
-            {sidebarNavItems.map((item) => {
-              const IconComp = item.icon;
-              return (
-                <AppLink
-                  href={item.href || "#"}
-                  key={item.key}
-                  onPress={() => {
-                    if (item.key === "logout") {
-                      handleLogout();
-                    }
-                  }}
-                  style={[
-                    styles.navItem,
-                    item.active && styles.navItemActive,
-                    item.danger && styles.navItemDanger,
-                  ]}
-                >
-                  <IconComp
-                    color={item.danger ? "#D4183D" : item.active ? "#04cf92" : "#5C6B66"}
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      styles.navItemText,
-                      item.active && styles.navItemTextActive,
-                      item.danger && styles.navItemTextDanger,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  {item.badgeCount ? (
-                    <View style={styles.badgeCountPill}>
-                      <Text style={styles.badgeCountText}>{item.badgeCount}</Text>
-                    </View>
-                  ) : null}
-                </AppLink>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Main Workspace */}
-      <View style={styles.mainContent}>
-        {/* Header Bar (Figma Node 207:2478 for mobile) */}
-        <SellerTopHeader
-          hasUnreadNotifications
-          onPressMenu={() => setMobileDrawerOpen(true)}
-          onSearchQueryChange={setSearchQuery}
-          searchQuery={searchQuery}
-          title={t("seller.myListings")}
-        />
-
-        {/* Listings Body */}
-        <ScrollView
-          contentContainerStyle={styles.workspaceScroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+    <SellerShell
+      activeNav="listings"
+      onSearchQueryChange={setSearchQuery}
+      searchQuery={searchQuery}
+      title={t("seller.myListings")}
+    >
           <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
             {/* Top Filter Bar + Add New Property */}
             <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
@@ -329,7 +284,7 @@ export function MyPropertiesScreen() {
                   <Text style={[styles.thCell, { flex: 1.1 }]}>{t("admin.columns.status")}</Text>
                   <Text style={[styles.thCell, { flex: 1 }]}>{t("admin.columns.aiValue")}</Text>
                   <Text style={[styles.thCell, { flex: 1.5 }]}>{t("admin.columns.performance")}</Text>
-                  <Text style={[styles.thCell, { width: 60, textAlign: "right" }]}>{t("admin.columns.actions")}</Text>
+                  <Text style={[styles.thCell, { width: 84, textAlign: "right" }]}>{t("admin.columns.actions")}</Text>
                 </View>
 
                 {/* Table Data Rows */}
@@ -409,8 +364,18 @@ export function MyPropertiesScreen() {
                       </View>
 
                       {/* Actions Column */}
-                      <View style={[styles.tdCell, { width: 60, alignItems: "flex-end" }]}>
+                      <View style={[styles.tdCell, { width: 84, alignItems: "flex-end", flexDirection: "row", justifyContent: "flex-end", gap: 6 }]}>
+                        {canArchive(item.status) ? (
+                          <Pressable
+                            accessibilityLabel={t("seller.actions.archive")}
+                            onPress={() => handleArchive(item.id, item.title)}
+                            style={({ pressed }) => [styles.actionIconButton, webPointer, pressed && styles.pressed]}
+                          >
+                            <Archive color="#5C6B66" size={16} />
+                          </Pressable>
+                        ) : null}
                         <Pressable
+                          accessibilityLabel={t("seller.actions.delete")}
                           onPress={() => handleDelete(item.id, item.title)}
                           style={({ pressed }) => [styles.actionIconButton, webPointer, pressed && styles.pressed]}
                         >
@@ -490,6 +455,12 @@ export function MyPropertiesScreen() {
                           <Edit color="#04cf92" size={14} />
                           <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
                         </AppLink>
+                        {canArchive(item.status) ? (
+                          <Pressable onPress={() => handleArchive(item.id, item.title)} style={styles.mobileActionBtn}>
+                            <Archive color="#5C6B66" size={14} />
+                            <Text style={styles.mobileActionText}>{t("seller.actions.archive")}</Text>
+                          </Pressable>
+                        ) : null}
                         <Pressable onPress={() => handleDelete(item.id, item.title)} style={styles.mobileActionBtn}>
                           <Trash2 color="#D4183D" size={14} />
                           <Text style={[styles.mobileActionText, { color: "#D4183D" }]}>{t("seller.actions.delete")}</Text>
@@ -512,27 +483,7 @@ export function MyPropertiesScreen() {
             ) : null}
           </View>
         </View>
-        <Footer />
-      </ScrollView>
-      </View>
-
-      {/* Mobile / Tablet Navigation Drawer */}
-      <SellerMobileDrawer
-        activeNav="listings"
-        items={sidebarNavItems as any}
-        onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={(key) => {
-          setMobileDrawerOpen(false);
-          if (key === "logout") {
-            handleLogout();
-            return;
-          }
-          const found = sidebarNavItems.find((i) => i.key === key);
-          if (found?.href) router.push(found.href as any);
-        }}
-        visible={isTablet && mobileDrawerOpen}
-      />
-    </View>
+    </SellerShell>
   );
 }
 

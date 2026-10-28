@@ -25,7 +25,7 @@ interface RequireAuthProps {
  * Route-level auth gate.
  *
  * Renders a gate rather than redirecting, so the user stays on the URL they
- * asked for and sees the page as soon as the modal login succeeds — the same
+ * asked for and sees the page as soon as the modal login succeeds, the same
  * intent-preserving behaviour `useRequireAuth` gives action-level gating.
  */
 export function RequireAuth({

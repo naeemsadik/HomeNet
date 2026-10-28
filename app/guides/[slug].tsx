@@ -1,17 +1,17 @@
 import { useLocalSearchParams } from "expo-router";
-import { PageMeta } from "@/components/PageMeta";
+import { CURATED_PROPERTY_GUIDES } from "@/content/curatedGuides";
 import { GuideDetailScreen } from "@/features/news/screens/GuideDetailScreen";
+
+/**
+ * Each curated guide is exported as its own static page, with its own title,
+ * canonical and text in the HTML. The title and description are set by
+ * GuideDetailScreen from the guide itself.
+ */
+export function generateStaticParams() {
+  return CURATED_PROPERTY_GUIDES.map((guide) => ({ slug: guide.slug }));
+}
 
 export default function GuideDetailRoute() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
-
-  return (
-    <>
-      <PageMeta
-        title="Property Guide & Market Report | HomeNet Bangladesh"
-        description="Detailed property advice, land verification procedures, and Dhaka market updates."
-      />
-      <GuideDetailScreen slug={String(slug || "")} />
-    </>
-  );
+  return <GuideDetailScreen slug={String(slug || "")} />;
 }

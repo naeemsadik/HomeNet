@@ -1,48 +1,26 @@
 import {
-  Bell,
-  Building2,
   Check,
-  CircleHelp,
   Clock,
-  CreditCard,
   FileCheck,
   IdCard,
-  LayoutDashboard,
-  LogOut,
   MapPin,
-  PlusCircle,
   Receipt,
-  Rocket,
-  Search,
   ShieldCheck,
-  Sparkles,
   Upload,
-  User,
-  BarChart2,
 } from "@/components/icons";
 import { useState } from "react";
 import {
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
-import { confirmAction } from "@/lib/alert";
 import Svg, { Circle } from "react-native-svg";
-import { router } from "expo-router";
-import { AppLink } from "@/components/ui";
-import { Brand } from "@/components/Brand";
+import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useAuthStore } from "@/stores/authStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import { SellerMobileDrawer } from "../components/SellerMobileDrawer";
-import { SellerTopHeader } from "../components/SellerTopHeader";
-import { ToggleViewButton } from "../components/ToggleViewButton";
-import { Footer } from "@/components/Footer";
-import type { SellerNavKey } from "./SellerDashboardScreen";
+import { SellerShell } from "../components/SellerShell";
 
 interface VerificationDoc {
   id: string;
@@ -52,72 +30,70 @@ interface VerificationDoc {
   status: "uploaded" | "pending";
 }
 
-const REQUIRED_DOCUMENTS: VerificationDoc[] = [
-  {
-    id: "nid",
-    title: "National ID",
-    subtitle: "Front & back of your NID card",
-    icon: IdCard,
-    status: "pending",
-  },
-  {
-    id: "deed",
-    title: "Property Deed",
-    subtitle: "Registered ownership document",
-    icon: FileCheck,
-    status: "pending",
-  },
-  {
-    id: "tax",
-    title: "Land Tax Receipt",
-    subtitle: "Latest paid tax receipt",
-    icon: Receipt,
-    status: "pending",
-  },
-  {
-    id: "gps",
-    title: "GPS Property Photo",
-    subtitle: "Geo-tagged photo of the property",
-    icon: MapPin,
-    status: "pending",
-  },
-];
-
 type TimelineStatus = "completed" | "in_progress" | "pending";
 
-const TIMELINE_STEPS: {
-  id: string;
-  title: string;
-  date: string;
-  status: TimelineStatus;
-}[] = [
-  {
-    id: "submitted",
-    title: "Submitted",
-    date: "Not yet submitted",
-    status: "pending",
-  },
-  {
-    id: "review",
-    title: "Under Review",
-    date: "Not started",
-    status: "pending",
-  },
-  {
-    id: "approved",
-    title: "Approved",
-    date: "Not started",
-    status: "pending",
-  },
-];
-
 export function VerificationScreen() {
+  const { t } = useTranslation();
   const { isTablet, isPhone } = useResponsive();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  // Seller KYC document upload has no backend endpoint yet, so this list is
-  // read-only until one exists.
-  const documents: VerificationDoc[] = REQUIRED_DOCUMENTS;
+
+  const documents: VerificationDoc[] = [
+    {
+      id: "nid",
+      title: t("seller.verification.docs.nid.title"),
+      subtitle: t("seller.verification.docs.nid.subtitle"),
+      icon: IdCard,
+      status: "pending",
+    },
+    {
+      id: "deed",
+      title: t("seller.verification.docs.deed.title"),
+      subtitle: t("seller.verification.docs.deed.subtitle"),
+      icon: FileCheck,
+      status: "pending",
+    },
+    {
+      id: "tax",
+      title: t("seller.verification.docs.tax.title"),
+      subtitle: t("seller.verification.docs.tax.subtitle"),
+      icon: Receipt,
+      status: "pending",
+    },
+    {
+      id: "gps",
+      title: t("seller.verification.docs.gps.title"),
+      subtitle: t("seller.verification.docs.gps.subtitle"),
+      icon: MapPin,
+      status: "pending",
+    },
+  ];
+
+  const timelineSteps: {
+    id: string;
+    title: string;
+    date: string;
+    status: TimelineStatus;
+  }[] = [
+    {
+      id: "submitted",
+      title: t("seller.verification.timeline.submitted.title"),
+      date: t("seller.verification.timeline.submitted.date"),
+      status: "pending",
+    },
+    {
+      id: "review",
+      title: t("seller.verification.timeline.review.title"),
+      date: t("seller.verification.timeline.review.date"),
+      status: "pending",
+    },
+    {
+      id: "approved",
+      title: t("seller.verification.timeline.approved.title"),
+      date: t("seller.verification.timeline.approved.date"),
+      status: "pending",
+    },
+  ];
 
   const uploadedCount = documents.filter((d) => d.status === "uploaded").length;
   const totalDocs = documents.length;
@@ -129,143 +105,13 @@ export function VerificationScreen() {
   const circumference = 2 * Math.PI * circleRadius;
   const strokeDashoffset = circumference * (1 - progressPercent / 100);
 
-  const logout = useAuthStore((s) => s.logout);
-  const handleLogout = async () => {
-    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
-      confirmLabel: "Log Out",
-      destructive: true,
-    });
-    if (!confirmed) return;
-    logout();
-    router.replace("/home");
-  };
-
-  const sidebarNavItems = [
-    { key: "dashboard" as SellerNavKey, label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
-    { key: "listings" as SellerNavKey, label: "My Listings", icon: Building2, href: "/my-properties" },
-    { key: "create" as SellerNavKey, label: "Create Property", icon: PlusCircle, href: "/property/create" },
-    { key: "verification" as SellerNavKey, label: "Verification", icon: ShieldCheck, href: "/verification", active: true },
-    { key: "boost" as SellerNavKey, label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights" as SellerNavKey, label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics" as SellerNavKey, label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments" as SellerNavKey, label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile" as SellerNavKey, label: "Profile", icon: User, href: "/seller/profile" },
-    { key: "help" as SellerNavKey, label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout" as SellerNavKey, label: "Logout", icon: LogOut, danger: true, href: "/" },
-  ];
-
   return (
-    <View style={styles.outerContainer}>
-      {/* Desktop Sidebar */}
-      {!isTablet && (
-        <View style={styles.sidebar}>
-          <View style={styles.sidebarHeader}>
-            <Brand />
-
-            <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
-            </View>
-          </View>
-
-          <ScrollView contentContainerStyle={styles.sidebarNavScroll} showsVerticalScrollIndicator={false}>
-            {sidebarNavItems.map((item) => {
-              const IconComp = item.icon;
-              const isActive = item.key === "verification";
-
-              return (
-                <AppLink
-                  href={item.href || "#"}
-                  key={item.key}
-                  onPress={() => {
-                    if (item.key === "logout") {
-                      handleLogout();
-                    }
-                  }}
-                  style={[
-                    styles.navItem,
-                    isActive && styles.navItemActive,
-                    item.danger && styles.navItemDanger,
-                  ]}
-                >
-                  <IconComp
-                    color={item.danger ? "#D4183D" : isActive ? "#04cf92" : "#5C6B66"}
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      styles.navItemText,
-                      isActive && styles.navItemTextActive,
-                      item.danger && styles.navItemTextDanger,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                </AppLink>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Mobile Navigation Drawer */}
-      <SellerMobileDrawer
-        activeNav="verification"
-        items={sidebarNavItems}
-        onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={(key) => {
-          setMobileDrawerOpen(false);
-          if (key === "logout") {
-            handleLogout();
-            return;
-          }
-          const found = sidebarNavItems.find((i) => i.key === key);
-          if (found?.href) router.push(found.href as any);
-        }}
-        visible={isTablet && mobileDrawerOpen}
-      />
-
-      {/* Main Workspace Area */}
-      <View style={styles.mainContent}>
-        {isTablet ? (
-          <SellerTopHeader
-            hasUnreadNotifications
-            onPressMenu={() => setMobileDrawerOpen(true)}
-            onSearchQueryChange={setSearchQuery}
-            searchQuery={searchQuery}
-            title="Verification Center"
-          />
-        ) : (
-          <View style={styles.topHeader}>
-            <Text style={styles.headerTitle}>Verification Center</Text>
-
-            <View style={styles.headerActions}>
-              <View style={styles.searchContainer}>
-                <Search color="rgba(11,26,23,0.5)" size={16} />
-                <TextInput
-                  onChangeText={setSearchQuery}
-                  placeholder="Search listings…"
-                  placeholderTextColor="rgba(11,26,23,0.5)"
-                  style={styles.searchInput}
-                  value={searchQuery}
-                />
-              </View>
-
-              <AppLink href="/notifications" style={styles.iconCircleBtn}>
-                <Bell color="#0B1A17" size={19} />
-                <View style={styles.headerDotIndicator} />
-              </AppLink>
-
-              <ToggleViewButton />
-            </View>
-          </View>
-        )}
-
-        {/* Scrollable Center Body */}
-        <ScrollView
-          contentContainerStyle={styles.workspaceScroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+    <SellerShell
+      activeNav="verification"
+      onSearchQueryChange={setSearchQuery}
+      searchQuery={searchQuery}
+      title={t("seller.verification.headerTitle")}
+    >
           <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
             <View style={[styles.contentGrid, isTablet && styles.contentGridMobile]}>
             {/* Left Column: Banner + Documents List */}
@@ -276,22 +122,21 @@ export function VerificationScreen() {
                   <ShieldCheck color="#FFFFFF" size={24} strokeWidth={2.2} />
                 </View>
                 <View style={styles.badgeTextWrap}>
-                  <Text style={styles.badgeTitle}>Get your Verified Badge</Text>
+                  <Text style={styles.badgeTitle}>{t("seller.verification.badgeTitle")}</Text>
                   <Text style={styles.badgeSubtitle}>
-                    Verified sellers get up to 3x more inquiries and buyer trust.
+                    {t("seller.verification.badgeSubtitle")}
                   </Text>
                 </View>
               </View>
 
               {/* Required Documents Section (Figma Node 288:2180) */}
               <View style={styles.documentsSection}>
-                <Text style={styles.sectionTitle}>Required documents</Text>
+                <Text style={styles.sectionTitle}>{t("seller.verification.requiredDocsTitle")}</Text>
 
                 <View style={styles.calloutBox}>
                   <Clock color="#2251D6" size={16} strokeWidth={2} />
                   <Text style={styles.calloutText}>
-                    Document upload is not available yet. You will be able to submit
-                    these documents once seller verification goes live.
+                    {t("seller.verification.uploadUnavailableCallout")}
                   </Text>
                 </View>
 
@@ -322,18 +167,18 @@ export function VerificationScreen() {
                         {isUploaded ? (
                           <View style={styles.uploadedBadge}>
                             <Check color="#0F6D55" size={14} strokeWidth={2.4} />
-                            <Text style={styles.uploadedBadgeText}>Uploaded</Text>
+                            <Text style={styles.uploadedBadgeText}>{t("seller.verification.uploadedBadge")}</Text>
                           </View>
                         ) : (
                           <Pressable
-                            accessibilityLabel={`Upload ${doc.title} — coming soon`}
+                            accessibilityLabel={t("seller.verification.uploadDocAria", { title: doc.title })}
                             accessibilityRole="button"
                             accessibilityState={{ disabled: true }}
                             disabled
                             style={[styles.uploadBtn, styles.uploadBtnDisabled]}
                           >
                             <Upload color="#FFFFFF" size={15} strokeWidth={2} />
-                            <Text style={styles.uploadBtnText}>Coming soon</Text>
+                            <Text style={styles.uploadBtnText}>{t("seller.verification.comingSoonBtn")}</Text>
                           </Pressable>
                         )}
                       </View>
@@ -343,14 +188,14 @@ export function VerificationScreen() {
 
                 {/* Submit Button (Figma Node 288:2268) */}
                 <Pressable
-                  accessibilityLabel="Submit documents for verification — not available yet"
+                  accessibilityLabel={t("seller.verification.submitUnavailableAria")}
                   accessibilityRole="button"
                   accessibilityState={{ disabled: true }}
                   disabled
                   style={[styles.submitBtn, styles.submitBtnDisabled]}
                 >
                   <Text style={styles.submitBtnText}>
-                    Submitting for verification is not available yet
+                    {t("seller.verification.submitUnavailableBtn")}
                   </Text>
                 </Pressable>
               </View>
@@ -388,25 +233,28 @@ export function VerificationScreen() {
 
                   <View style={styles.progressCenterContent}>
                     <Text style={styles.progressValueText}>{progressPercent}</Text>
-                    <Text style={styles.progressCompleteLabel}>complete</Text>
+                    <Text style={styles.progressCompleteLabel}>{t("seller.verification.completeLabel")}</Text>
                   </View>
                 </View>
 
-                <Text style={styles.progressTitle}>Verification progress</Text>
+                <Text style={styles.progressTitle}>{t("seller.verification.progressTitle")}</Text>
                 <Text style={styles.progressSubtitle}>
-                  {uploadedCount} of {totalDocs} documents uploaded
+                  {t("seller.verification.progressSubtitle", {
+                    uploaded: uploadedCount,
+                    total: totalDocs,
+                  })}
                 </Text>
               </View>
 
               {/* Verification Timeline Card (Figma Node 288:2296) */}
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Verification timeline</Text>
+                <Text style={styles.cardTitle}>{t("seller.verification.timelineTitle")}</Text>
 
                 <View style={styles.timelineList}>
-                  {TIMELINE_STEPS.map((step, idx) => {
+                  {timelineSteps.map((step, idx) => {
                     const isCompleted = step.status === "completed";
                     const isInProgress = step.status === "in_progress";
-                    const isLast = idx === TIMELINE_STEPS.length - 1;
+                    const isLast = idx === timelineSteps.length - 1;
 
                     return (
                       <View key={step.id} style={styles.timelineRow}>
@@ -449,17 +297,14 @@ export function VerificationScreen() {
                 <View style={styles.calloutBox}>
                   <Clock color="#2251D6" size={16} strokeWidth={2} />
                   <Text style={styles.calloutText}>
-                    Reviews typically complete within 2–3 business days.
+                    {t("seller.verification.timelineNotice")}
                   </Text>
                 </View>
               </View>
             </View>
           </View>
         </View>
-        <Footer />
-      </ScrollView>
-      </View>
-    </View>
+    </SellerShell>
   );
 }
 

@@ -1,7 +1,6 @@
 import { USE_NATIVE_DRIVER } from "@/lib/animation";
 import React, { useState, useEffect } from "react";
 import {
-  Modal,
   Pressable,
   Platform,
   Text,
@@ -21,6 +20,7 @@ import {
   Building,
 } from "@/components/icons";
 import { colorTokens, colors, webPointer } from "@/theme";
+import { OverlayModal } from "@/components/OverlayModal";
 import { useAreaPicker } from "@/hooks/useAreaPicker";
 import { useWindowSize } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
@@ -98,6 +98,7 @@ export function AreaPicker({
     availableCities,
     searchQuery,
     setSearchQuery,
+    isSearching,
     drillDown,
     drillUp,
     navigateToBreadcrumb,
@@ -218,10 +219,9 @@ export function AreaPicker({
   };
 
   return (
-    <Modal
+    <OverlayModal
       visible={visible}
       animationType="slide"
-      transparent={true}
       onRequestClose={onClose}
     >
       <View style={[styles.modalOverlay, !isPhone && styles.modalOverlayDesktop]}>
@@ -338,6 +338,9 @@ export function AreaPicker({
                 style={styles.searchInput}
                 autoCorrect={false}
                 clearButtonMode="while-editing"
+                // Typing is the fastest way through 33 areas on a keyboard. On a
+                // phone an autofocus would open the keyboard over the list.
+                autoFocus={Platform.OS === "web" && !isPhone}
               />
               {searchQuery.length > 0 ? (
                 <Pressable
@@ -460,7 +463,9 @@ export function AreaPicker({
             ) : areas.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Building size={40} color={colors.line} style={styles.emptyIcon} />
-                <Text style={styles.emptyTitle}>{t("areaPicker.noLocationsFound")}</Text>
+                <Text style={styles.emptyTitle}>
+                  {isSearching ? t("areaPicker.noMatches") : t("areaPicker.noLocationsFound")}
+                </Text>
                 <Text style={styles.emptySubtitle}>
                   {t("areaPicker.emptySubtitle")}
                 </Text>
@@ -585,7 +590,7 @@ export function AreaPicker({
 
         </View>
       </View>
-    </Modal>
+    </OverlayModal>
   );
 }
 

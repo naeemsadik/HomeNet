@@ -12,13 +12,27 @@ import {
   TrendingUp,
 } from "@/components/icons";
 import { AppChrome } from "@/components/AppChrome";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema, faqPageSchema, valuationToolSchema, VALUATION_FAQ } from "@/lib/schema";
+import { SITE_URL } from "@/lib/seo";
 import { colorTokens, colors, fonts, radius, shadow } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 import { InstantValuationWizard } from "../components/InstantValuationWizard";
 import type { ValuationPropertyType, ValuationPurpose } from "../types/valuationTypes";
 
+const PAGE_PATH = "/instant-valuation";
+const PAGE_URL = `${SITE_URL}${PAGE_PATH}`;
+
+/** Home › Instant Property Valuation. */
+const PAGE_CRUMBS = [
+  { name: "Home", url: `${SITE_URL}/` },
+  { name: "Instant Property Valuation", url: PAGE_URL },
+];
+
 export function InstantValuationScreen() {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
   const { setInitialFromHero } = useInstantValuation();
   const params = useLocalSearchParams<{
@@ -42,33 +56,40 @@ export function InstantValuationScreen() {
 
   return (
     <AppChrome active="search">
+      <JsonLd
+        nodes={[
+          valuationToolSchema(PAGE_PATH),
+          breadcrumbSchema(PAGE_CRUMBS),
+          faqPageSchema(VALUATION_FAQ, PAGE_URL),
+        ]}
+      />
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         {/* Hero Title Section */}
         <View style={styles.heroIntro}>
           <View style={styles.eyebrow}>
             <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.4} />
-            <Text style={styles.eyebrowText}>DHAKA REAL ESTATE VALUATION ENGINE</Text>
+            <Text style={styles.eyebrowText}>{t("valuation.engineEyebrow")}</Text>
           </View>
           <Text style={[styles.mainHeading, isPhone && styles.mainHeadingPhone]}>
-            Instant Property Valuation
+            {t("valuation.title")}
           </Text>
           <Text style={styles.subHeading}>
-            Get a verified, data-backed estimate of your property’s sale price and rental yield in under a minute — powered by verified transactions across 26 Dhaka wards.
+            {t("valuation.subtitle")}
           </Text>
 
           {/* Trust Value Badges */}
           <View style={[styles.trustBadgeRow, isPhone && styles.trustBadgeRowPhone]}>
             <View style={styles.trustBadge}>
               <ShieldCheck color={colorTokens.brandText} size={16} strokeWidth={2.2} />
-              <Text style={styles.trustBadgeText}>100% Free · No Broker Inquiries</Text>
+              <Text style={styles.trustBadgeText}>{t("valuation.badges.free")}</Text>
             </View>
             <View style={styles.trustBadge}>
               <TrendingUp color={colorTokens.brandText} size={16} strokeWidth={2.2} />
-              <Text style={styles.trustBadgeText}>Dhaka Market Dynamics Included</Text>
+              <Text style={styles.trustBadgeText}>{t("valuation.badges.dynamics")}</Text>
             </View>
             <View style={styles.trustBadge}>
               <FileCheck2 color={colorTokens.brandText} size={16} strokeWidth={2.2} />
-              <Text style={styles.trustBadgeText}>Verified Comparable Listings</Text>
+              <Text style={styles.trustBadgeText}>{t("valuation.badges.comparable")}</Text>
             </View>
           </View>
         </View>
@@ -80,32 +101,44 @@ export function InstantValuationScreen() {
 
         {/* Informational Guidance Section: How Valuation Works in Dhaka */}
         <View style={[styles.infoSection, isPhone && styles.infoSectionPhone]}>
-          <Text style={styles.infoSectionTitle}>How HomeNet Calculates Property Valuations</Text>
+          <Text style={styles.infoSectionTitle}>{t("valuation.howItWorksTitle")}</Text>
           <View style={[styles.infoGrid, isPhone && styles.infoGridPhone]}>
             <View style={styles.infoCard}>
               <Text style={styles.infoCardNumber}>01</Text>
-              <Text style={styles.infoCardTitle}>Ward & Subzone Baselines</Text>
+              <Text style={styles.infoCardTitle}>{t("valuation.howItWorks1Title")}</Text>
               <Text style={styles.infoCardDesc}>
-                We track price-per-sqft data across Gulshan, Banani, Dhanmondi, Uttara, Bashundhara, and 21 other zones, adjusted for road width and sector access.
+                {t("valuation.howItWorks1Desc")}
               </Text>
             </View>
 
             <View style={styles.infoCard}>
               <Text style={styles.infoCardNumber}>02</Text>
-              <Text style={styles.infoCardTitle}>Micro-Factors & Utilities</Text>
+              <Text style={styles.infoCardTitle}>{t("valuation.howItWorks2Title")}</Text>
               <Text style={styles.infoCardDesc}>
-                South-facing orientation (+6%), sweet-spot floors (4th–8th), dedicated parking bays, and standby backup generators are mathematically accounted for.
+                {t("valuation.howItWorks2Desc")}
               </Text>
             </View>
 
             <View style={styles.infoCard}>
               <Text style={styles.infoCardNumber}>03</Text>
-              <Text style={styles.infoCardTitle}>Active Inventory Benchmark</Text>
+              <Text style={styles.infoCardTitle}>{t("valuation.howItWorks3Title")}</Text>
               <Text style={styles.infoCardDesc}>
-                Your valuation is cross-checked against actively listed and recently sold verified properties on HomeNet to generate high-confidence estimates.
+                {t("valuation.howItWorks3Desc")}
               </Text>
             </View>
           </View>
+        </View>
+
+        {/* The questions behind the FAQPage markup above. Google accepts that
+            markup only while the same text is visible here. */}
+        <View style={[styles.faqSection, isPhone && styles.faqSectionPhone]}>
+          <Text style={styles.infoSectionTitle}>Dhaka Property Valuation: Common Questions</Text>
+          {VALUATION_FAQ.map((entry) => (
+            <View key={entry.question} style={styles.faqItem}>
+              <Text style={styles.faqQuestion}>{entry.question}</Text>
+              <Text style={styles.faqAnswer}>{entry.answer}</Text>
+            </View>
+          ))}
         </View>
       </View>
     </AppChrome>
@@ -243,5 +276,32 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     color: colors.muted,
     lineHeight: 18,
+  },
+  faqSection: {
+    marginTop: 24,
+    backgroundColor: colorTokens.surface,
+    borderRadius: radius.xl,
+    padding: 32,
+    borderWidth: 1.5,
+    borderColor: "rgba(11, 26, 23, 0.08)",
+    ...shadow,
+  },
+  faqSectionPhone: {
+    padding: 20,
+  },
+  faqItem: {
+    marginBottom: 20,
+  },
+  faqQuestion: {
+    fontSize: 15,
+    fontFamily: fonts.bold,
+    color: colorTokens.ink,
+    marginBottom: 6,
+  },
+  faqAnswer: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: colors.muted,
+    lineHeight: 20,
   },
 });

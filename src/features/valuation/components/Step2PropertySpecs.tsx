@@ -17,85 +17,90 @@ import {
 } from "@/components/icons";
 import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 import type { PropertyCondition, PropertyFacing } from "../types/valuationTypes";
 
-const FACING_OPTIONS: {
-  key: PropertyFacing;
-  label: string;
-  tag?: string;
-  desc: string;
-}[] = [
-  {
-    key: "south",
-    label: "South Facing",
-    tag: "High Demand (+6%)",
-    desc: "Direct southern cross-breeze and warm winter sun",
-  },
-  {
-    key: "east",
-    label: "East Facing",
-    desc: "Pleasant early morning sunlight",
-  },
-  {
-    key: "north",
-    label: "North Facing",
-    desc: "Even, indirect natural daylight throughout the day",
-  },
-  {
-    key: "west",
-    label: "West Facing",
-    desc: "Late afternoon sun",
-  },
-];
-
-const FLOOR_TIERS = [
-  { label: "Ground Floor", value: "1", note: "Security/privacy discount" },
-  { label: "2nd – 3rd Floor", value: "2", note: "Standard low-rise" },
-  { label: "4th – 8th Floor", value: "6", note: "Dhaka Sweet Spot (+4%)", popular: true },
-  { label: "9th – 14th Floor", value: "11", note: "High view & clean air" },
-  { label: "Penthouse / Top", value: "16", note: "Exclusive skyline level" },
-];
-
-const CONDITION_OPTIONS: {
-  key: PropertyCondition;
-  label: string;
-  desc: string;
-}[] = [
-  {
-    key: "brand_new",
-    label: "Brand New / Ready",
-    desc: "Recently handed over, never inhabited",
-  },
-  {
-    key: "under_construction",
-    label: "Under Construction",
-    desc: "Handover expected in 6–24 months",
-  },
-  {
-    key: "resale",
-    label: "Resale / Previously Used",
-    desc: "Lived-in property (5–15 years old)",
-  },
-];
-
 export function Step2PropertySpecs() {
+  const { t } = useTranslation();
   const { form, setFormField, nextStep, prevStep, isStep2Valid } = useInstantValuation();
   const { isPhone } = useResponsive();
+
+  const facingOptions: {
+    key: PropertyFacing;
+    label: string;
+    tag?: string;
+    desc: string;
+  }[] = [
+    {
+      key: "south",
+      label: t("valuation.step2.facing.south"),
+      tag: t("valuation.step2.facing.southTag"),
+      desc: t("valuation.step2.facing.southDesc"),
+    },
+    {
+      key: "east",
+      label: t("valuation.step2.facing.east"),
+      desc: t("valuation.step2.facing.eastDesc"),
+    },
+    {
+      key: "north",
+      label: t("valuation.step2.facing.north"),
+      desc: t("valuation.step2.facing.northDesc"),
+    },
+    {
+      key: "west",
+      label: t("valuation.step2.facing.west"),
+      desc: t("valuation.step2.facing.westDesc"),
+    },
+  ];
+
+  const floorTiers = [
+    { label: t("valuation.step2.floors.ground"), value: "1", note: "Security/privacy discount" },
+    { label: t("valuation.step2.floors.low"), value: "2", note: "Standard low-rise" },
+    { label: t("valuation.step2.floors.mid"), value: "6", note: "Dhaka Sweet Spot (+4%)", popular: true },
+    { label: t("valuation.step2.floors.high"), value: "11", note: "High view & clean air" },
+    { label: t("valuation.step2.floors.top"), value: "16", note: "Exclusive skyline level" },
+  ];
+
+  const conditionOptions: {
+    key: PropertyCondition;
+    label: string;
+    desc: string;
+  }[] = [
+    {
+      key: "brand_new",
+      label: t("valuation.step2.conditions.brandNew"),
+      desc: t("valuation.step2.conditions.brandNewDesc"),
+    },
+    {
+      key: "under_construction",
+      label: t("valuation.step2.conditions.underConstruction"),
+      desc: t("valuation.step2.conditions.underConstructionDesc"),
+    },
+    {
+      key: "resale",
+      label: t("valuation.step2.conditions.resale"),
+      desc: t("valuation.step2.conditions.resaleDesc"),
+    },
+  ];
+
+  const currentUnitLabel =
+    form.sizeUnit === "katha" ? t("valuation.step2.unitKatha") : t("valuation.step2.unitSqft");
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Property Specifications & Dimensions</Text>
+        <Text style={styles.title}>{t("valuation.step2.title")}</Text>
         <Text style={styles.subtitle}>
-          Dhaka buyers pay close attention to south-facing orientation, floor height, and square footage.
+          {t("valuation.step2.subtitle")}
         </Text>
       </View>
 
       {/* Property Size Input with Unit Toggle */}
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>
-          Property Size ({form.sizeUnit === "katha" ? "Katha" : "Sqft"})
+          {t("valuation.step2.sizeLabel", { unit: currentUnitLabel })}
         </Text>
         <View style={styles.sizeInputRow}>
           <View style={styles.sizeInputWrap}>
@@ -103,7 +108,7 @@ export function Step2PropertySpecs() {
             <TextInput
               keyboardType="numeric"
               onChangeText={(v) => setFormField("sizeInput", v)}
-              placeholder="e.g. 2150"
+              placeholder={t("valuation.step2.sizePlaceholder")}
               placeholderTextColor={colors.muted}
               style={styles.sizeInput}
               value={form.sizeInput}
@@ -126,7 +131,7 @@ export function Step2PropertySpecs() {
                   form.sizeUnit === "sqft" && styles.unitBtnTextActive,
                 ]}
               >
-                Sqft
+                {t("valuation.step2.unitSqft")}
               </Text>
             </Pressable>
             <Pressable
@@ -144,15 +149,15 @@ export function Step2PropertySpecs() {
                   form.sizeUnit === "katha" && styles.unitBtnTextActive,
                 ]}
               >
-                Katha
+                {t("valuation.step2.unitKatha")}
               </Text>
             </Pressable>
           </View>
         </View>
         <Text style={styles.inputHelper}>
           {form.sizeUnit === "katha"
-            ? "1 Katha = 720 Sqft (Common for plots and duplexes)"
-            : "Include proportional common space as stated in sale deed"}
+            ? t("valuation.step2.kathaHelper")
+            : t("valuation.step2.sqftHelper")}
         </Text>
       </View>
 
@@ -161,7 +166,7 @@ export function Step2PropertySpecs() {
         <View style={styles.counterBox}>
           <View style={styles.counterHeader}>
             <Bed color={colors.greenOnLight} size={16} strokeWidth={2.2} />
-            <Text style={styles.counterTitle}>Bedrooms</Text>
+            <Text style={styles.counterTitle}>{t("valuation.step2.bedrooms")}</Text>
           </View>
           <View style={styles.pillRow}>
             {[1, 2, 3, 4, 5].map((num) => {
@@ -194,7 +199,7 @@ export function Step2PropertySpecs() {
         <View style={styles.counterBox}>
           <View style={styles.counterHeader}>
             <Bath color={colors.greenOnLight} size={16} strokeWidth={2.2} />
-            <Text style={styles.counterTitle}>Bathrooms</Text>
+            <Text style={styles.counterTitle}>{t("valuation.step2.bathrooms")}</Text>
           </View>
           <View style={styles.pillRow}>
             {[1, 2, 3, 4, 5].map((num) => {
@@ -229,10 +234,10 @@ export function Step2PropertySpecs() {
       <View style={styles.section}>
         <View style={styles.sectionHeaderWithIcon}>
           <Layers color={colors.greenOnLight} size={16} strokeWidth={2} />
-          <Text style={styles.sectionLabel}>Floor Level</Text>
+          <Text style={styles.sectionLabel}>{t("valuation.step2.floorLabel")}</Text>
         </View>
         <View style={styles.floorChipsRow}>
-          {FLOOR_TIERS.map((tier) => {
+          {floorTiers.map((tier) => {
             const isSelected = form.floorLevel === tier.value;
             return (
               <Pressable
@@ -255,7 +260,7 @@ export function Step2PropertySpecs() {
                 </Text>
                 {tier.popular && (
                   <View style={styles.tag}>
-                    <Text style={styles.tagText}>Sweet Spot</Text>
+                    <Text style={styles.tagText}>{t("valuation.step2.sweetSpot")}</Text>
                   </View>
                 )}
               </Pressable>
@@ -268,10 +273,10 @@ export function Step2PropertySpecs() {
       <View style={styles.section}>
         <View style={styles.sectionHeaderWithIcon}>
           <Compass color={colors.greenOnLight} size={16} strokeWidth={2} />
-          <Text style={styles.sectionLabel}>Building Facing / Orientation</Text>
+          <Text style={styles.sectionLabel}>{t("valuation.step2.facingLabel")}</Text>
         </View>
         <View style={[styles.facingGrid, isPhone && styles.facingGridPhone]}>
-          {FACING_OPTIONS.map((f) => {
+          {facingOptions.map((f) => {
             const isSelected = form.facing === f.key;
             return (
               <Pressable
@@ -308,9 +313,9 @@ export function Step2PropertySpecs() {
 
       {/* Property Condition / Age */}
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Property Condition & Handover Status</Text>
+        <Text style={styles.sectionLabel}>{t("valuation.step2.conditionLabel")}</Text>
         <View style={[styles.conditionRow, isPhone && styles.conditionRowPhone]}>
-          {CONDITION_OPTIONS.map((c) => {
+          {conditionOptions.map((c) => {
             const isSelected = form.propertyAge === c.key;
             return (
               <Pressable
@@ -346,7 +351,7 @@ export function Step2PropertySpecs() {
           style={[styles.backButton, webPointer]}
         >
           <ArrowLeft color={colorTokens.ink} size={18} strokeWidth={2} />
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>{t("valuation.step2.backCTA")}</Text>
         </Pressable>
 
         <Pressable
@@ -361,7 +366,7 @@ export function Step2PropertySpecs() {
             webPointer,
           ]}
         >
-          <Text style={styles.continueButtonText}>Continue to Amenities</Text>
+          <Text style={styles.continueButtonText}>{t("valuation.step2.continueCTA")}</Text>
           <ArrowRight color={colorTokens.onBrand} size={18} strokeWidth={2.4} />
         </Pressable>
       </View>

@@ -20,7 +20,7 @@ export async function getProperties(params: PropertyFilters = {}) {
 }
 
 /**
- * Properties across several areas — a parent area plus its sub-areas.
+ * Properties across several areas, a parent area plus its sub-areas.
  *
  * `area_id` takes one id and matches that area only, so one request goes out per
  * id. The results are merged newest first, de-duplicated, and cut to the page
@@ -64,7 +64,16 @@ export async function getMyProperties(params: PropertyFilters = {}) {
 }
 
 export async function getPropertyById(id: string) {
-  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/properties/${id}`);
+  if (!id || typeof id !== "string") {
+    throw new Error("Property ID is required");
+  }
+  const cleanId = id.trim();
+  if (!cleanId) {
+    throw new Error("Property ID cannot be empty");
+  }
+  const encodedId = encodeURIComponent(cleanId);
+  // The live API serves the plural path; the singular one is not deployed.
+  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/properties/${encodedId}`);
   return data;
 }
 
@@ -91,8 +100,15 @@ export async function legacyPatchProperty(id: string, dto: UpsertPropertyDto) {
   return data;
 }
 
-export async function deleteProperty(id: string) {
+/** Owner archive: hides an active or sold listing but keeps it (the API refuses other statuses). */
+export async function archiveProperty(id: string) {
   const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/properties/${id}`);
+  return data;
+}
+
+/** Owner-only permanent delete, any listing status or category (removes the row and its media). */
+export async function deleteProperty(id: string) {
+  const { data } = await apiClient.delete<ApiResponse<{ id: string }>>(`/v1/property-delete/${id}`);
   return data;
 }
 

@@ -2,7 +2,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
   BarChart2,
-  Bell,
   Building2,
   Check,
   ChevronLeft,
@@ -14,34 +13,28 @@ import {
   PlusCircle,
   Rocket,
   Save,
-  Search,
   Send,
   ShieldCheck,
   Sparkles,
   User,
 } from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
+import { PRICE_ON_REQUEST, useTranslation } from "@/i18n";
 import {
   ActivityIndicator,
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { AreaPicker } from "@/components/AreaPicker";
-import { Brand } from "@/components/Brand";
-import { AppLink } from "@/components/ui";
-import { NotificationItem } from "@/features/notification/components/NotificationItem";
 import {
   useMarkAllRead,
   useNotifications,
   useUnreadCount,
 } from "@/features/notification/hooks/useNotifications";
-import { SellerMobileDrawer } from "@/features/seller/components/SellerMobileDrawer";
-import { SellerTopHeader } from "@/features/seller/components/SellerTopHeader";
-import { ToggleViewButton } from "@/features/seller/components/ToggleViewButton";
+import { SellerShell } from "@/features/seller/components/SellerShell";
 import { Footer } from "@/components/Footer";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
@@ -71,8 +64,11 @@ import { WizardDetailsStep } from "../components/wizard/WizardDetailsStep";
 import { WizardLocationStep } from "../components/wizard/WizardLocationStep";
 import { WizardMediaStep } from "../components/wizard/WizardMediaStep";
 import { WizardReviewStep } from "../components/wizard/WizardReviewStep";
+import { storedListingTypeFor } from "../utils/listingType";
+import { uploadLocalMedia } from "../utils/localMedia";
 
 export function PropertyCreateWizard() {
+  const { t } = useTranslation();
   const { isPhone, isTablet, width } = useResponsive();
   const isNarrowPhone = isPhone && width <= 360;
   const store = usePropertyWizardStore();
@@ -112,7 +108,9 @@ export function PropertyCreateWizard() {
         ...(params.listing_type === "sale" || params.listing_type === "rent"
           ? { listingType: params.listing_type }
           : {}),
-        subtype: initialSubtype(cfg, params.subtype),
+        // A holiday stay is "rent" in the form; it is saved as short_let (see storedListingTypeFor).
+        ...(params.listing_type === "short_let" ? { listingType: "rent" as const, subtype: "short-let" } : {}),
+        subtype: params.listing_type === "short_let" ? "short-let" : initialSubtype(cfg, params.subtype),
         areaUnit: cfg.defaultUnit,
       });
     }
@@ -135,12 +133,14 @@ export function PropertyCreateWizard() {
     }
     : null;
 
+  // Location comes before Details, so an owner can save a draft with just the place
+  // and add the price and size once they know them.
   const steps = [
-    { num: 1, title: "Basics" },
-    { num: 2, title: "Details" },
-    { num: 3, title: "Location" },
-    { num: 4, title: "Media" },
-    { num: 5, title: "Review" },
+    { num: 1, title: t("wizard.steps.basics") },
+    { num: 2, title: t("wizard.steps.location") },
+    { num: 3, title: t("wizard.steps.details") },
+    { num: 4, title: t("wizard.steps.media") },
+    { num: 5, title: t("wizard.steps.review") },
   ];
 
   const buildDto = (): UpsertPropertyDto => ({
@@ -149,8 +149,8 @@ export function PropertyCreateWizard() {
     description: store.description.trim() || undefined,
     type: store.type,
     subtype: cleanCustomSubtype(store.subtype) || undefined,
-    listing_type: store.listingType,
-    price: store.price ? Number(store.price) : undefined,
+    listing_type: storedListingTypeFor(store.listingType, cleanCustomSubtype(store.subtype) || undefined),
+    price: store.priceOnRequest ? PRICE_ON_REQUEST : store.price ? Number(store.price) : undefined,
     price_currency: "BDT",
     area_size: store.areaSize ? Number(store.areaSize) : undefined,
     area_unit: store.areaUnit || activeTypeConfig.defaultUnit,
@@ -170,7 +170,8 @@ export function PropertyCreateWizard() {
     status: "draft",
   });
 
-  const upsertDraft = async () => {
+  /** Writes the listing to the API: the first time it creates it, after that it updates it. */
+  const saveListing = async () => {
     const result = store.propertyId
       ? await updatePropertyMutation.mutateAsync({ id: store.propertyId, dto: buildDto() })
       : await createPropertyMutation.mutateAsync(buildDto());
@@ -180,52 +181,78 @@ export function PropertyCreateWizard() {
     return propertyId;
   };
 
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
+
+  /** Uploads the photos and videos still on the device to the saved listing. */
+  const uploadPendingMedia = async (propertyId: string) => {
+    try {
+      await uploadLocalMedia(
+        usePropertyWizardStore.getState().media,
+        async (file, type, displayOrder) => {
+          const response = await uploadMediaMutation.mutateAsync({ propertyId, file, type, displayOrder });
+          if (!response.data) throw new Error("The API did not return uploaded media.");
+          return response.data;
+        },
+        store.replaceMedia,
+        (done, total) => setUploadProgress({ done, total }),
+      );
+    } finally {
+      setUploadProgress(null);
+    }
+  };
+
   const validateStep = (step: number) => {
     if (step === 1) {
       const title = store.title.trim();
       const desc = store.description.trim();
       if (!title || !desc) {
-        return "Add a title and description before continuing.";
+        return t("wizard.validation.titleDescRequired");
       }
       if (title.length < 3 || title.length > 150) {
-        return "Title must be between 3 and 150 characters.";
+        return t("wizard.validation.titleLength");
       }
       if (/[<>{}\x00-\x1F]/.test(title)) {
-        return "Title contains invalid characters.";
+        return t("wizard.validation.titleInvalid");
       }
       if (desc.length > 5000) {
-        return "Description cannot exceed 5,000 characters.";
+        return t("wizard.validation.descLength");
       }
       if (/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(desc)) {
-        return "Description contains invalid characters.";
+        return t("wizard.validation.descInvalid");
       }
       const subtypeProblem = validateSubtype(activeTypeConfig, store.subtype);
       if (subtypeProblem) return subtypeProblem;
     }
-    if (step === 2) {
+    if (step === 3) {
       const priceNum = Number(store.price);
       const areaNum = Number(store.areaSize);
-      if (!(priceNum > 0) || !(areaNum > 0)) {
-        return "Price and area must be greater than zero.";
+      if (!store.priceOnRequest) {
+        // 1 is what "Contact for price" is stored as, so a typed price must be above it.
+        if (store.price.trim() === "" || !(priceNum > PRICE_ON_REQUEST)) {
+          return t("wizard.validation.priceRequired");
+        }
+        if (!Number.isFinite(priceNum) || priceNum > 1_000_000_000_000) {
+          return t("wizard.validation.priceMax");
+        }
       }
-      if (!Number.isFinite(priceNum) || priceNum > 1_000_000_000_000) {
-        return "Enter a valid price amount up to 1,000,000,000,000.";
+      if (!(areaNum > 0)) {
+        return t("wizard.validation.areaPositive");
       }
       if (!Number.isFinite(areaNum) || areaNum > 1_000_000) {
-        return "Enter a valid area size up to 1,000,000.";
+        return t("wizard.validation.areaMax");
       }
     }
-    if (step === 3) {
+    if (step === 2) {
       const addr = store.address.trim();
       // The spot comes first on screen: the map pin, the device location or a Google Maps link.
       // Owners never type coordinates, and the address and area fill in from the pin.
       if (coordinateProblem(store.locationLat, store.locationLng) !== null) {
-        return "Pin the property's exact spot on the map, or paste a Google Maps link.";
+        return t("wizard.validation.pinRequired");
       }
-      if (!addr) return "Enter the property address.";
-      if (!store.areaId) return "Choose the area or neighbourhood from the list.";
+      if (!addr) return t("wizard.validation.addressRequired");
+      if (!store.areaId) return t("wizard.validation.areaRequired");
       if (addr.length > 300 || /[<>{}\x00-\x1F]/.test(addr)) {
-        return "Address cannot exceed 300 characters or contain invalid characters.";
+        return t("wizard.validation.addressLength");
       }
     }
     return null;
@@ -240,7 +267,7 @@ export function PropertyCreateWizard() {
     }
     setLocalError(null);
     try {
-      if (store.currentStep === 3) await upsertDraft();
+      // Nothing is sent to the server here: the form stays on the device until Save draft or Submit.
       if (store.currentStep < 5) store.setCurrentStep((store.currentStep + 1) as 1 | 2 | 3 | 4 | 5);
     } catch (error) {
       setLocalError(toApiError(error).message);
@@ -266,12 +293,19 @@ export function PropertyCreateWizard() {
   };
 
   const handleSaveDraft = async () => {
+    // A listing cannot be created without its area; everything else can wait.
+    if (!store.areaId) {
+      setLocalError(t("wizard.validation.draftNeedsArea"));
+      return;
+    }
     try {
       store.setIsSubmitting(true);
       setLocalError(null);
-      await upsertDraft();
-      notify("Draft saved", "Your latest property details were saved.", {
-        confirmLabel: "View my listings",
+      const propertyId = await saveListing();
+      // The draft keeps the photos picked so far, so they are not lost.
+      await uploadPendingMedia(propertyId);
+      notify(t("wizard.toast.draftSavedTitle"), t("wizard.toast.draftSavedMessage"), {
+        confirmLabel: t("wizard.toast.viewMyListings"),
         onConfirm: () => {
           store.reset();
           router.replace("/my-properties" as never);
@@ -285,14 +319,10 @@ export function PropertyCreateWizard() {
   };
 
   const handlePickMedia = async (mediaType: "image" | "video") => {
-    if (!store.propertyId) {
-      setLocalError("Complete Location first so the draft can be created before media upload.");
-      return;
-    }
     const existingCount = store.media.filter((media) => media.mediaType === mediaType).length;
     const maxCount = mediaType === "image" ? 20 : 3;
     if (existingCount >= maxCount) {
-      setLocalError(`You can upload up to ${maxCount} ${mediaType === "image" ? "images" : "videos"}.`);
+      setLocalError(t("wizard.validation.uploadLimit", { count: maxCount, type: mediaType === "image" ? "images" : "videos" }));
       return;
     }
     // No permission request: the system photo picker needs none. On Android 11-12 the
@@ -311,14 +341,18 @@ export function PropertyCreateWizard() {
     if (asset.mimeType && !allowedTypes.includes(asset.mimeType)) {
       setLocalError(
         mediaType === "image"
-          ? "Images must be JPEG, PNG, or WebP."
-          : "Videos must be MP4 or WebM.",
+          ? t("wizard.validation.imagesAllowed")
+          : t("wizard.validation.videosAllowed"),
       );
       return;
     }
     const maxBytes = mediaType === "image" ? 10 * 1024 * 1024 : 100 * 1024 * 1024;
     if (asset.fileSize && asset.fileSize > maxBytes) {
-      setLocalError(`${mediaType === "image" ? "Images" : "Videos"} must be under ${mediaType === "image" ? "10 MB" : "100 MB"}.`);
+      setLocalError(
+        mediaType === "image"
+          ? t("wizard.validation.imageSizeLimit")
+          : t("wizard.validation.videoSizeLimit"),
+      );
       return;
     }
 
@@ -327,30 +361,26 @@ export function PropertyCreateWizard() {
       name: asset.fileName || (mediaType === "image" ? "property.jpg" : "property.mp4"),
       type: asset.mimeType || (mediaType === "image" ? "image/jpeg" : "video/mp4"),
     };
-    try {
-      setLocalError(null);
-      const response = await uploadMediaMutation.mutateAsync({
-        propertyId: store.propertyId,
-        file,
-        type: mediaType,
-        displayOrder: store.media.length,
-      });
-      if (!response.data) throw new Error("The API did not return uploaded media.");
-      store.addMedia({
-        id: response.data.id,
-        url: response.data.url,
-        displayOrder: response.data.display_order,
-        mediaType: response.data.media_type,
-      });
-    } catch (error) {
-      setLocalError(toApiError(error).message);
-    }
+    // Kept on the device; it is uploaded when the listing is saved or submitted.
+    setLocalError(null);
+    store.addMedia({
+      id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      url: asset.uri,
+      displayOrder: store.media.length,
+      mediaType,
+      file,
+      name: asset.fileName ?? undefined,
+    });
   };
 
   const handleDeleteMedia = async (mediaId: string) => {
     try {
       setLocalError(null);
-      await deleteMediaMutation.mutateAsync({ mediaId, propertyId: store.propertyId ?? undefined });
+      // Only a file that has been uploaded exists on the server.
+      const item = store.media.find((media) => media.id === mediaId);
+      if (item && !item.file && store.propertyId) {
+        await deleteMediaMutation.mutateAsync({ mediaId, propertyId: store.propertyId });
+      }
       store.removeMedia(mediaId);
     } catch (error) {
       setLocalError(toApiError(error).message);
@@ -359,7 +389,7 @@ export function PropertyCreateWizard() {
 
   const handleSubmit = async () => {
     const errors = [validateStep(1), validateStep(2), validateStep(3)].filter(Boolean);
-    if (!store.media.some((media) => media.mediaType === "image")) errors.push("Upload at least one property image.");
+    if (!store.media.some((media) => media.mediaType === "image")) errors.push(t("wizard.validation.oneImageRequired"));
     if (errors.length) {
       setLocalError(errors[0] as string);
       return;
@@ -367,10 +397,12 @@ export function PropertyCreateWizard() {
     try {
       store.setIsSubmitting(true);
       setLocalError(null);
-      const propertyId = await upsertDraft();
+      // Write the listing, then its photos and videos, then send it for review.
+      const propertyId = await saveListing();
+      await uploadPendingMedia(propertyId);
       await submitMutation.mutateAsync(propertyId);
-      notify("Submitted for verification", "Your listing is pending review.", {
-        confirmLabel: "View my listings",
+      notify(t("wizard.toast.submittedTitle"), t("wizard.toast.submittedMessage"), {
+        confirmLabel: t("wizard.toast.viewMyListings"),
         onConfirm: () => {
           store.reset();
           router.replace("/my-properties" as never);
@@ -385,13 +417,13 @@ export function PropertyCreateWizard() {
 
   const logout = useAuthStore((s) => s.logout);
   const handleLogout = async () => {
-    const confirmed = await confirmAction("Log Out", "Are you sure you want to log out of your account?", {
-      confirmLabel: "Log Out",
+    const confirmed = await confirmAction(t("wizard.logoutConfirm.title"), t("wizard.logoutConfirm.message"), {
+      confirmLabel: t("wizard.logoutConfirm.confirm"),
       destructive: true,
     });
     if (!confirmed) return;
     logout();
-    router.replace("/home");
+    router.replace("/");
   };
 
   // Sidebar items - aligned with HomeNet standards (all seller tabs present)
@@ -404,218 +436,34 @@ export function PropertyCreateWizard() {
     danger?: boolean;
     badgeCount?: number;
   }[] = [
-    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/seller" },
-    { key: "listings", label: "My Listings", icon: Building2, href: "/my-properties" },
-    { key: "create", label: "Create Property", icon: PlusCircle, href: "/property/create", active: true },
-    { key: "verification", label: "Verification", icon: ShieldCheck, href: "/verification" },
-    { key: "boost", label: "Boost Listings", icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights", label: "AI Insights", icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics", label: "Analytics", icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments", label: "Payments", icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile", label: "Profile", icon: User, href: "/seller/profile" },
-    { key: "help", label: "Help Center", icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout", label: "Logout", icon: LogOut, danger: true, href: "/" },
+    { key: "dashboard", label: t("wizard.nav.dashboard"), icon: LayoutDashboard, href: "/seller" },
+    { key: "listings", label: t("wizard.nav.myListings"), icon: Building2, href: "/my-properties" },
+    { key: "create", label: t("wizard.nav.createProperty"), icon: PlusCircle, href: "/property/create", active: true },
+    { key: "verification", label: t("wizard.nav.verification"), icon: ShieldCheck, href: "/verification" },
+    { key: "boost", label: t("wizard.nav.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
+    { key: "insights", label: t("wizard.nav.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "analytics", label: t("wizard.nav.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
+    { key: "payments", label: t("wizard.nav.payments"), icon: CreditCard, href: "/seller?tab=payments" },
+    { key: "profile", label: t("wizard.nav.profile"), icon: User, href: "/seller/profile" },
+    { key: "help", label: t("wizard.nav.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
+    { key: "logout", label: t("wizard.nav.logout"), icon: LogOut, danger: true, href: "/" },
   ];
 
   return (
-    <View style={styles.outerContainer}>
-
-      {/* Sidebar (Desktop View) */}
-      {!isTablet && (
-        <View style={styles.sidebar}>
-          <View style={styles.sidebarHeader}>
-            <Brand />
-            <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
-            </View>
-          </View>
-
-          <ScrollView contentContainerStyle={styles.sidebarNavScroll} showsVerticalScrollIndicator={false}>
-            {sidebarNavItems.map((item) => {
-              const IconComp = item.icon;
-              return (
-                <AppLink
-                  href={item.href || "#"}
-                  key={item.key}
-                  onPress={() => {
-                    if (item.key === "logout") {
-                      handleLogout();
-                    }
-                  }}
-                  style={[
-                    styles.navItem,
-                    item.active && styles.navItemActive,
-                    item.danger && styles.navItemDanger,
-                  ]}
-                >
-                  <IconComp
-                    color={item.danger ? "#D4183D" : item.active ? "#04cf92" : "#5C6B66"}
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      styles.navItemText,
-                      item.active && styles.navItemTextActive,
-                      item.danger && styles.navItemTextDanger,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  {item.badgeCount ? (
-                    <View style={styles.badgeCountPill}>
-                      <Text style={styles.badgeCountText}>{item.badgeCount}</Text>
-                    </View>
-                  ) : null}
-                </AppLink>
-              );
-            })}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Main Workspace Content */}
-      <View style={styles.mainContent}>
-        {/* Top Header Bar */}
-        {isTablet ? (
-          <SellerTopHeader
-            hasUnreadNotifications={unreadCount > 0}
-            onPressMenu={() => setMobileDrawerOpen(true)}
-            onSearchQueryChange={setSearchQuery}
-            searchQuery={searchQuery}
-            title="Create Property"
-          />
-        ) : (
-          <View style={styles.topHeader}>
-            <View>
-              <Text style={styles.headerTitle}>Create Property</Text>
-              <Text style={styles.headerSubtitle}>
-                Follow the 5 steps to list your property across Bangladesh
-              </Text>
-            </View>
-
-            <View style={styles.headerActions}>
-              <View style={styles.searchContainer}>
-                <Search color="rgba(11,26,23,0.5)" size={16} />
-                <TextInput
-                  onChangeText={setSearchQuery}
-                  placeholder="Search listings…"
-                  placeholderTextColor="rgba(11,26,23,0.5)"
-                  style={styles.searchInput}
-                  value={searchQuery}
-                />
-              </View>
-
-              {/* Notification Bell with live functionalities & popover */}
-              <View style={styles.notificationWrap}>
-                <Pressable
-                  accessibilityLabel="Notifications"
-                  accessibilityRole="button"
-                  onPress={() => setNotificationsOpen((prev) => !prev)}
-                  style={({ pressed }) => [
-                    styles.iconCircleBtn,
-                    notificationsOpen && styles.iconCircleBtnActive,
-                    webPointer,
-                    pressed && styles.iconCircleBtnPressed,
-                  ]}
-                >
-                  <Bell
-                    color={notificationsOpen ? "#04cf92" : "#0B1A17"}
-                    size={20}
-                    strokeWidth={1.8}
-                  />
-                  {unreadCount > 0 ? (
-                    <View style={styles.notificationBadgePill}>
-                      <Text style={styles.notificationBadgeText}>
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </Text>
-                    </View>
-                  ) : null}
-                </Pressable>
-
-                {/* Notifications dropdown popover */}
-                {notificationsOpen && (
-                  <View style={styles.notificationDropdown}>
-                    <View style={styles.dropdownHeader}>
-                      <View style={styles.dropdownHeaderLeft}>
-                        <Text style={styles.dropdownTitle}>Notifications</Text>
-                        {unreadCount > 0 && (
-                          <View style={styles.unreadCountPill}>
-                            <Text style={styles.unreadCountPillText}>
-                              {unreadCount} new
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                      {unreadCount > 0 && (
-                        <Pressable
-                          accessibilityRole="button"
-                          disabled={markAllReadMutation.isPending}
-                          onPress={() => markAllReadMutation.mutate()}
-                          style={({ pressed }) => [
-                            styles.markAllReadBtn,
-                            webPointer,
-                            pressed && { opacity: 0.7 },
-                          ]}
-                        >
-                          <Text style={styles.markAllReadText}>
-                            {markAllReadMutation.isPending ? "Marking..." : "Mark all read"}
-                          </Text>
-                        </Pressable>
-                      )}
-                    </View>
-
-                    <ScrollView
-                      contentContainerStyle={styles.dropdownScrollContent}
-                      nestedScrollEnabled
-                      style={styles.dropdownScroll}
-                    >
-                      {notificationsLoading ? (
-                        <View style={styles.dropdownEmpty}>
-                          <Text style={styles.dropdownEmptyText}>Loading notifications...</Text>
-                        </View>
-                      ) : notificationsList.length === 0 ? (
-                        <View style={styles.dropdownEmpty}>
-                          <Bell color="rgba(11,26,23,0.3)" size={32} />
-                          <Text style={styles.dropdownEmptyText}>No notifications yet</Text>
-                        </View>
-                      ) : (
-                        notificationsList.slice(0, 8).map((notification) => (
-                          <NotificationItem
-                            key={notification.id}
-                            notification={notification}
-                            onPress={() => setNotificationsOpen(false)}
-                          />
-                        ))
-                      )}
-                    </ScrollView>
-
-                    <View style={styles.dropdownFooter}>
-                      <AppLink
-                        href="/notifications"
-                        onPress={() => setNotificationsOpen(false)}
-                        style={styles.viewAllNotificationsBtn}
-                      >
-                        <Text style={styles.viewAllNotificationsText}>
-                          View all notifications →
-                        </Text>
-                      </AppLink>
-                    </View>
-                  </View>
-                )}
-              </View>
-
-              <ToggleViewButton />
-            </View>
-          </View>
-        )}
-
-        {/* Scrollable Wizard Body */}
-        <ScrollView
-          ref={scrollRef}
-          contentContainerStyle={styles.workspaceScroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+    <SellerShell
+      activeNav="create"
+      onSearchQueryChange={setSearchQuery}
+      scrollable={false}
+      searchQuery={searchQuery}
+      title={t("wizard.header.title")}
+    >
+      {/* Scrollable Wizard Body */}
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.workspaceScroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
           <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone, isNarrowPhone && styles.scrollBodyNarrow]}>
             {/* 5-Step Progress Stepper Bar */}
           <View style={styles.stepperContainer}>
@@ -668,25 +516,30 @@ export function PropertyCreateWizard() {
                 <Text style={styles.errorBannerText}>{localError}</Text>
               </View>
             ) : null}
+            {uploadProgress ? (
+              <Text accessibilityLiveRegion="polite" style={styles.formHelperText}>
+                {t("wizard.validation.uploadProgress", { done: uploadProgress.done, total: uploadProgress.total })}
+              </Text>
+            ) : null}
             {/* STEP 1: BASICS */}
             {store.currentStep === 1 && (
               <WizardBasicsStep activeTypeConfig={activeTypeConfig} />
             )}
 
-            {/* STEP 2: DETAILS */}
+            {/* STEP 2: LOCATION (Figma Node 56:2) */}
             {store.currentStep === 2 && (
-              <WizardDetailsStep activeTypeConfig={activeTypeConfig} />
+              <WizardLocationStep onOpenAreaPicker={() => setAreaPickerVisible(true)} />
             )}
 
-            {/* STEP 3: LOCATION (Figma Node 56:2) */}
+            {/* STEP 3: DETAILS */}
             {store.currentStep === 3 && (
-              <WizardLocationStep onOpenAreaPicker={() => setAreaPickerVisible(true)} />
+              <WizardDetailsStep activeTypeConfig={activeTypeConfig} />
             )}
 
             {/* STEP 4: MEDIA (Figma Node 56:1219) */}
             {store.currentStep === 4 && (
               <WizardMediaStep
-                isUploading={uploadMediaMutation.isPending}
+                isUploading={store.isSubmitting}
                 onDeleteMedia={handleDeleteMedia}
                 onPickMedia={handlePickMedia}
               />
@@ -713,7 +566,7 @@ export function PropertyCreateWizard() {
                   ]}
                 >
                   <ChevronLeft color="#5C6B66" size={16} strokeWidth={2} />
-                  <Text style={[styles.backBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>Back</Text>
+                  <Text style={[styles.backBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>{t("wizard.actions.back")}</Text>
                 </Pressable>
               ) : store.currentStep > 1 ? (
                 <Pressable
@@ -721,7 +574,7 @@ export function PropertyCreateWizard() {
                   style={({ pressed }) => [styles.backBtn, webPointer, pressed && styles.pressed]}
                 >
                   <ArrowLeft color="#0B1A17" size={16} />
-                  <Text style={styles.backBtnText}>Back</Text>
+                  <Text style={styles.backBtnText}>{t("wizard.actions.back")}</Text>
                 </Pressable>
               ) : (
                 <View />
@@ -741,7 +594,7 @@ export function PropertyCreateWizard() {
                 >
                   <Save color="#0B1A17" size={14} />
                   <Text style={[styles.saveDraftText, isPhone && styles.saveDraftTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
-                    {isNarrowPhone ? "Save" : "Save draft"}
+                    {isNarrowPhone ? t("wizard.actions.save") : t("wizard.actions.saveDraft")}
                   </Text>
                 </Pressable>
 
@@ -757,7 +610,7 @@ export function PropertyCreateWizard() {
                       pressed && styles.pressed,
                     ]}
                   >
-                    <Text style={[styles.nextBtnText, isPhone && styles.nextBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>Next</Text>
+                    <Text style={[styles.nextBtnText, isPhone && styles.nextBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>{t("wizard.actions.next")}</Text>
                     <ChevronRight color={colorTokens.onBrand} size={15} strokeWidth={2} />
                   </Pressable>
                 ) : (
@@ -778,7 +631,7 @@ export function PropertyCreateWizard() {
                       <Send color={colorTokens.onBrand} size={14} />
                     )}
                     <Text style={[styles.publishBtnText, isPhone && styles.publishBtnTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
-                      {isPhone ? "Submit" : "Submit for verification"}
+                      {isPhone ? t("wizard.actions.submit") : t("wizard.actions.submitVerification")}
                     </Text>
                   </Pressable>
                 )}
@@ -788,7 +641,6 @@ export function PropertyCreateWizard() {
         </View>
         <Footer />
       </ScrollView>
-      </View>
       <AreaPicker
         visible={areaPickerVisible}
         onClose={() => setAreaPickerVisible(false)}
@@ -801,21 +653,6 @@ export function PropertyCreateWizard() {
           setLocalError(null);
         }}
       />
-      <SellerMobileDrawer
-        activeNav="create"
-        items={sidebarNavItems as any}
-        onClose={() => setMobileDrawerOpen(false)}
-        onSelectNav={(key) => {
-          setMobileDrawerOpen(false);
-          if (key === "logout") {
-            handleLogout();
-            return;
-          }
-          const found = sidebarNavItems.find((i) => i.key === key);
-          if (found?.href) router.push(found.href as any);
-        }}
-        visible={isTablet && mobileDrawerOpen}
-      />
-    </View>
+    </SellerShell>
   );
 }

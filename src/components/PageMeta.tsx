@@ -16,7 +16,7 @@ import {
  *
  * Expo Router renders its own `<title data-rh="true">` through react-helmet, and
  * emits it *empty* when no route claims one. That empty tag lands before the
- * static one in `app/+html.tsx`, and browsers and crawlers honour the first —
+ * static one in `app/+html.tsx`, and browsers and crawlers honour the first,
  * which is why Lighthouse reported the page as having no title at all despite
  * one being set. Rendering a title through Head fills the router's own tag
  * rather than competing with it.
@@ -37,18 +37,22 @@ export function PageMeta({
   title,
   description,
   noindex,
+  canonicalPath,
 }: {
   title: string;
   description?: string;
   /** Force noindex on or off. Defaults to on for signed-in pages only. */
   noindex?: boolean;
+  /** The page this one duplicates, when it should not be indexed under its own address. */
+  canonicalPath?: string;
 }) {
   const pathname = usePathname();
   const hidden = noindex ?? isPrivatePath(pathname);
   // A dynamic route is exported once as a shell whose path still reads
   // "/property/[id]". A canonical built from that would be wrong for every
   // listing, so none is emitted until the browser knows the real path.
-  const canonical = pathname.includes("[") ? null : `${SITE_URL}${pathname === "/" ? "" : pathname}`;
+  const canonicalPart = canonicalPath ?? pathname;
+  const canonical = canonicalPart.includes("[") ? null : `${SITE_URL}${canonicalPart === "/" ? "" : canonicalPart}`;
 
   return (
     <Head>

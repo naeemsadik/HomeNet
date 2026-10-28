@@ -8,7 +8,7 @@ export const SMART_SEARCH_PAGE_SIZE = 12;
 /**
  * AI search for one submitted query; `null` means nothing has been searched yet.
  * Pages accumulate for "show more". Each fetch costs model calls, so a failed
- * search is never retried or refetched on its own — the seeker presses Find again.
+ * search is never retried or refetched on its own, the seeker presses Find again.
  */
 export function useSmartSearch(query: string | null) {
   return useInfiniteQuery<

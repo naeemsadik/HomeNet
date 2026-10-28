@@ -5,6 +5,8 @@ import { AlertTriangle, RotateCcw, Home } from "@/components/icons";
 import { reportError } from "@/lib/errorLogger";
 import { colorTokens, fonts, webPointer } from "@/theme";
 
+import { useTranslation } from "@/i18n";
+
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
@@ -12,6 +14,39 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   hasError: boolean;
+}
+
+function DefaultErrorFallback({ onReset, onGoHome }: { onReset: () => void; onGoHome: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <View style={styles.iconWrap}>
+          <AlertTriangle color={colorTokens.errorText} size={32} />
+        </View>
+        <Text style={styles.title}>{t("errorBoundary.title")}</Text>
+        <Text style={styles.message}>{t("errorBoundary.message")}</Text>
+        <View style={styles.buttonRow}>
+          <Pressable
+            accessibilityLabel={t("errorBoundary.tryAgain")}
+            onPress={onReset}
+            style={[styles.primaryButton, webPointer]}
+          >
+            <RotateCcw color={colorTokens.onBrand} size={16} />
+            <Text style={styles.primaryButtonText}>{t("errorBoundary.tryAgain")}</Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel={t("errorBoundary.goHome")}
+            onPress={onGoHome}
+            style={[styles.secondaryButton, webPointer]}
+          >
+            <Home color={colorTokens.textPrimary} size={16} />
+            <Text style={styles.secondaryButtonText}>{t("errorBoundary.goHome")}</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -38,7 +73,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   handleGoHome = () => {
     this.setState({ hasError: false });
     try {
-      router.replace("/home");
+      router.replace("/");
     } catch {
       // A browser can reload the site root. On a phone `window.location` does not
       // exist, and this runs while the app is already failing, so it must not throw.
@@ -54,37 +89,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback;
       }
 
-      return (
-        <View style={styles.container}>
-          <View style={styles.card}>
-            <View style={styles.iconWrap}>
-              <AlertTriangle color={colorTokens.errorText} size={32} />
-            </View>
-            <Text style={styles.title}>Something went wrong</Text>
-            <Text style={styles.message}>
-              An unexpected error occurred while displaying this page. Our team has been notified.
-            </Text>
-            <View style={styles.buttonRow}>
-              <Pressable
-                accessibilityLabel="Try again"
-                onPress={this.handleReset}
-                style={[styles.primaryButton, webPointer]}
-              >
-                <RotateCcw color={colorTokens.onBrand} size={16} />
-                <Text style={styles.primaryButtonText}>Try again</Text>
-              </Pressable>
-              <Pressable
-                accessibilityLabel="Go to Home"
-                onPress={this.handleGoHome}
-                style={[styles.secondaryButton, webPointer]}
-              >
-                <Home color={colorTokens.textPrimary} size={16} />
-                <Text style={styles.secondaryButtonText}>Go to Home</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      );
+      return <DefaultErrorFallback onReset={this.handleReset} onGoHome={this.handleGoHome} />;
     }
 
     return this.props.children;

@@ -10,6 +10,7 @@ import {
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { colorTokens, fonts, webPointer } from "@/theme";
+import { useTranslation } from "@/i18n";
 import type { SellerNavKey } from "../screens/SellerDashboardScreen";
 
 export interface SellerNavItem {
@@ -36,6 +37,8 @@ export function SellerMobileDrawer({
   onSelectNav,
   items,
 }: SellerMobileDrawerProps) {
+  const { t } = useTranslation();
+
   return (
     <Modal
       animationType="fade"
@@ -46,7 +49,7 @@ export function SellerMobileDrawer({
       <View style={styles.modalOverlay}>
         {/* Backdrop */}
         <Pressable
-          accessibilityLabel="Close drawer overlay"
+          accessibilityLabel={t("seller.drawer.closeOverlayAria")}
           onPress={onClose}
           style={styles.backdrop}
         />
@@ -58,7 +61,7 @@ export function SellerMobileDrawer({
             <Brand compact onPress={onClose} />
 
             <Pressable
-              accessibilityLabel="Close navigation menu"
+              accessibilityLabel={t("seller.drawer.closeMenuAria")}
               onPress={onClose}
               style={[styles.closeBtn, webPointer]}
             >
@@ -69,7 +72,7 @@ export function SellerMobileDrawer({
           {/* Seller Role Pill */}
           <View style={styles.rolePillWrap}>
             <View style={styles.sellerRolePill}>
-              <Text style={styles.sellerRoleText}>Seller Dashboard</Text>
+              <Text style={styles.sellerRoleText}>{t("seller.drawer.rolePill")}</Text>
             </View>
           </View>
 

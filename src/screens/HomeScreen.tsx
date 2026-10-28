@@ -22,26 +22,27 @@ import {
 } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { HeroSearchWidget } from "@/components/HeroSearchWidget";
+import { MobileHeroSearchCard } from "@/components/MobileHeroSearchCard";
+import { MobileHomeSections } from "@/components/MobileHomeSections";
+import { NoTranslateText } from "@/components/NoTranslateText";
 import { PropertyCard } from "@/components/PropertyCard";
-import { OwnerListPropertySection } from "@/components/OwnerListPropertySection";
 import { AppButton, AppLink } from "@/components/ui";
 import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
-import { ContrastColumns } from "@/components/landing/ContrastColumns";
+import { HomeNetExplainerSection } from "@/components/landing/HomeNetExplainerSection";
 import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
-import { JourneyTrack } from "@/components/landing/JourneyTrack";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
 import type { Property as ApiProperty } from "@/features/property/types/property";
 import { useResponsive } from "@/hooks/useResponsive";
+import { useTranslation } from "@/i18n";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { toApiError } from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
 import { colors, webPointer } from "@/theme";
 import { HERO_IMAGE_URL } from "@/lib/heroImage";
 import { styles } from "./HomeScreen.styles";
 
-
-
 /**
- * Hero photograph — placeholder until real imagery is shot.
+ * Hero photograph: placeholder until real imagery is shot.
  *
  * Replace with a HomeNet-owned photo of a Bangladeshi interior. Spec: landscape,
  * min 2400×1400, a lived-in room (not an exterior tower), natural daylight, with
@@ -62,11 +63,13 @@ function PropertyResult({
   loading: boolean;
   onRetry: () => void;
 }) {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <View style={styles.requestState}>
         <ActivityIndicator color={colors.green} size="large" />
-        <Text style={styles.requestStateCopy}>Loading properties...</Text>
+        <Text style={styles.requestStateCopy}>{t("home.loadingProperties")}</Text>
       </View>
     );
   }
@@ -74,9 +77,9 @@ function PropertyResult({
   if (error) {
     return (
       <View style={styles.requestState}>
-        <Text style={styles.requestStateTitle}>Could not load properties</Text>
-        <Text style={styles.requestStateCopy}>Something went wrong while loading listings. Please try again.</Text>
-        <AppButton icon={RotateCcw} label="Retry" onPress={onRetry} />
+        <Text style={styles.requestStateTitle}>{t("home.couldNotLoadTitle")}</Text>
+        <Text style={styles.requestStateCopy}>{t("home.couldNotLoadCopy")}</Text>
+        <AppButton icon={RotateCcw} label={t("home.retry")} onPress={onRetry} />
       </View>
     );
   }
@@ -85,8 +88,8 @@ function PropertyResult({
     return (
       <View style={styles.requestState}>
         <LandPlot color={colors.green} size={26} />
-        <Text style={styles.requestStateTitle}>No properties available</Text>
-        <Text style={styles.requestStateCopy}>Check again when new listings are published.</Text>
+        <Text style={styles.requestStateTitle}>{t("home.noPropertiesTitle")}</Text>
+        <Text style={styles.requestStateCopy}>{t("home.noPropertiesCopy")}</Text>
       </View>
     );
   }
@@ -95,6 +98,8 @@ function PropertyResult({
 }
 
 export function HomeScreen() {
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const {
     isPhone,
     isTablet,
@@ -104,7 +109,10 @@ export function HomeScreen() {
     isLargeScreen,
     isTall,
     height,
+    width,
   } = useResponsive();
+
+  const isMobile = isPhone || width < 768;
 
   // Hero scales seamlessly across mobile, tablet, laptop, large desktop, and ultrawide:
   const heroType = isPhone
@@ -142,6 +150,27 @@ export function HomeScreen() {
               copyPad: 96,
               topPad: 76,
             };
+  // Phone: the same photograph as the website, cut to a short banner.
+  const mobileHero = (
+    <View style={styles.mobileHeroPhoto}>
+      <ImageBackground
+        source={HERO_IMAGE}
+        style={[styles.mobileHeroBg, { height: 236 + insets.top, paddingTop: insets.top }]}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={["rgba(6, 22, 18, 0.55)", "rgba(6, 22, 18, 0.18)", "rgba(6, 22, 18, 0.5)"]}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={styles.mobileHeroCopy}>
+          {/* The page's one <h1>: the homepage had none, so crawlers had no heading to read. */}
+          <NoTranslateText accessibilityRole="header" aria-level={1} style={styles.mobileHeroHeading}>{t("home.heroHeadline")}</NoTranslateText>
+        </View>
+      </ImageBackground>
+    </View>
+  );
+
   const popularQuery = useQuery({
     queryKey: ["properties", "home", "popular"],
     queryFn: () =>
@@ -161,11 +190,15 @@ export function HomeScreen() {
             source={HERO_IMAGE}
             style={[
               styles.heroBg,
-              { minHeight: heroMetrics.minHeight, paddingTop: heroMetrics.topPad },
+              {
+                minHeight: heroMetrics.minHeight,
+                // Clears the pinned bar and, on Android edge-to-edge, the status bar.
+                paddingTop: heroMetrics.topPad + insets.top,
+              },
             ]}
             resizeMode="cover"
           >
-            {/* Scrim only deep enough to carry white type — the room stays visible. */}
+            {/* Scrim only deep enough to carry white type, the room stays visible. */}
             <LinearGradient
               colors={[
                 "rgba(6, 22, 18, 0.58)",
@@ -184,9 +217,9 @@ export function HomeScreen() {
                 { paddingBottom: heroMetrics.copyPad },
               ]}
             >
-              <Text style={[styles.heroHeading, heroType]}>
-                Find Your Dream With Trust
-              </Text>
+              <NoTranslateText accessibilityRole="header" aria-level={1} style={[styles.heroHeading, heroType]}>
+                {t("home.heroHeadline")}
+              </NoTranslateText>
             </View>
           </ImageBackground>
         </View>
@@ -204,14 +237,14 @@ export function HomeScreen() {
 
           <View style={[styles.ownerBand, isPhone && styles.ownerBandPhone]}>
             <View style={styles.ownerCopy}>
-              <Text style={styles.ownerTitle}>Listing your own property?</Text>
+              <Text style={styles.ownerTitle}>{t("home.listingYourOwnTitle")}</Text>
               <Text style={styles.ownerSub}>
-                Describe it in one sentence — HomeNet fills in the rest.
+                {t("home.listingYourOwnSub")}
               </Text>
             </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="List your property"
+              accessibilityLabel={t("home.listYourPropertyCTA")}
               onPress={() => router.push("/property/create" as never)}
               style={({ hovered, pressed }: any) => [
                 styles.ownerCta,
@@ -221,35 +254,38 @@ export function HomeScreen() {
                 webPointer,
               ]}
             >
-              <Text style={styles.ownerCtaText}>List your property</Text>
+              <Text style={styles.ownerCtaText}>{t("home.listYourPropertyCTA")}</Text>
             </Pressable>
           </View>
         </View>
         </View>
       </View>
-
-
   );
 
-
   return (
-    <AppChrome active="home" bleed={hero}>
-      {/* ─────────────────────────────────────────────────────────────
-          2. PRODUCT VISUAL — browser + phone preview of real listings
-      ───────────────────────────────────────────────────────────── */}
-      <HeroProductVisual />
+    <AppChrome active="home" bleed={isMobile ? mobileHero : hero} compactFooter={isMobile}>
+      {isMobile ? (
+        <View style={styles.mobileSearchOverlap}>
+          <MobileHeroSearchCard />
+        </View>
+      ) : null}
 
+      {isMobile ? (
+        <MobileHomeSections />
+      ) : (
+        <>
       {/* ─────────────────────────────────────────────────────────────
-          3. FEATURED PROPERTIES (live API)
+          2. FEATURED PROPERTIES (live API), real listings answer the search
+          box first, before any explaining.
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.sectionTitle}>Featured properties</Text>
-            <Text style={styles.sectionSubtitle}>Most viewed active listings</Text>
+            <Text style={styles.sectionTitle}>{t("home.featuredTitle")}</Text>
+            <Text style={styles.sectionSubtitle}>{t("home.featuredSubtitle")}</Text>
           </View>
           <AppLink href="/buy" style={styles.seeAllLink}>
-            <Text style={styles.seeAllText}>See all</Text>
+            <Text style={styles.seeAllText}>{t("home.seeAll")}</Text>
             <ChevronRight color={colors.greenOnLight} size={16} />
           </AppLink>
         </View>
@@ -264,46 +300,35 @@ export function HomeScreen() {
         </PropertyResult>
       </View>
 
-
-
       {/* ─────────────────────────────────────────────────────────────
-          4. HOW IT WORKS — dual seeker / owner track
+          3. EXPLAINER VIDEO, 30s auto-preview + full walkthrough video
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>A clear path for both sides</Text>
-        </View>
-        <JourneyTrack />
+        <HomeNetExplainerSection />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          5. TRUST — the problem (Why HomeNet listings are different)
+          5. PRODUCT VISUAL, browser + phone preview of real listings
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Why HomeNet listings are different</Text>
-        </View>
-        <ContrastColumns />
+        <HeroProductVisual />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          6. AI LISTING — describe it, HomeNet fills the fields
+          6. AI LISTING, describe it, HomeNet fills the fields
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <AiFlagshipSection />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          7. OWNER CTA — list your property
+          8. GUIDES & INSIGHTS, editorial, API-ready
       ───────────────────────────────────────────────────────────── */}
-      <OwnerListPropertySection />
-
-      {/* ─────────────────────────────────────────────────────────────
-          8. GUIDES & INSIGHTS — editorial, API-ready
-      ───────────────────────────────────────────────────────────── */}
-      <PropertyGuidesSection />
-
-
+      <View style={styles.sectionSpacing}>
+        <PropertyGuidesSection />
+      </View>
+        </>
+      )}
     </AppChrome>
   );
 }
@@ -313,6 +338,7 @@ export function HomeScreen() {
  * the rail, not the whole home page.
  */
 const FeaturedRail = memo(function FeaturedRail({ properties }: { properties: ApiProperty[] }) {
+  const { t } = useTranslation();
   const { isPhone, isTablet, width } = useResponsive();
   const featuredScrollRef = useRef<FlatList<ApiProperty>>(null);
   const featuredWrapperRef = useRef<View>(null);
@@ -487,7 +513,7 @@ const FeaturedRail = memo(function FeaturedRail({ properties }: { properties: Ap
               webPointer,
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Previous featured property"
+            accessibilityLabel={t("home.scrollRailLeft")}
           >
             <ChevronLeft size={16} color={canScrollLeft ? colors.green : "#94A3B8"} strokeWidth={2.5} />
           </Pressable>
@@ -520,7 +546,7 @@ const FeaturedRail = memo(function FeaturedRail({ properties }: { properties: Ap
               webPointer,
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Next featured property"
+            accessibilityLabel={t("home.scrollRailRight")}
           >
             <ChevronRight size={16} color={canScrollRight ? colors.green : "#94A3B8"} strokeWidth={2.5} />
           </Pressable>

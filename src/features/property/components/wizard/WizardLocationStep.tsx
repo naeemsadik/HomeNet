@@ -1,24 +1,22 @@
 import { MapPin } from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, Text, TextInput, View } from "react-native";
+import { useTranslation } from "@/i18n";
 import { useAllAreas } from "@/hooks/useAllAreas";
 import { useResponsive } from "@/hooks/useResponsive";
 import { resolveMapLink } from "@/services/mapApi";
+import { GOOGLE_MAPS_API_KEY } from "@/lib/features";
 import { reverseGeocode, type GeocodedPlace } from "@/services/geocodeApi";
+import { googleReverseGeocode } from "@/services/googleGeocode";
 import { areaCenterFor, type MapPoint } from "../../constants/areaCenters";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
 import { coordinateProblem } from "../../utils/coordinates";
 import { parseMapLink } from "../../utils/mapLink";
-import { areaFromPlace, nearestArea } from "../../utils/placeFromPin";
+import { areaFromPlace, nearestArea, pinFillPatch } from "../../utils/placeFromPin";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
 import { LocationPicker } from "./LocationPicker";
 
 const ON_WEB = Platform.OS === "web";
-
-/** Shown when a short link can't be followed, which stays true until the API can do it. */
-const SHORT_LINK_HELP = ON_WEB
-  ? "We can't open short links yet. Open the link, copy the full address from your browser's address bar and paste that, or tap the spot on the map."
-  : "We can't open short links yet. Open the link, copy the full address from your browser's address bar and paste that.";
 
 type LinkStatus = { kind: "idle" } | { kind: "reading" } | { kind: "ok" } | { kind: "error"; message: string };
 
@@ -38,10 +36,15 @@ type PlaceLookup = {
  * both stay editable, and an owner's own entry is never overwritten.
  */
 export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () => void }) {
+  const { t } = useTranslation();
   const { isPhone } = useResponsive();
   const store = usePropertyWizardStore();
   const areas = useAllAreas();
   const areaItems = areas.data?.items;
+
+  const shortLinkHelp = ON_WEB
+    ? t("wizard.location.linkHelpWeb")
+    : t("wizard.location.linkHelpMobile");
 
   // Where the map opens: the chosen neighbourhood, else Dhaka.
   const openAt = areaCenterFor(store.areaId, store.areaName, areaItems ?? []);
@@ -58,8 +61,13 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
   const [link, setLink] = useState<LinkStatus>({ kind: "idle" });
   const latestLink = useRef(0);
 
+  // Set once the owner moves the pin on this visit. A pin restored from a draft
+  // does not count, so reopening the step keeps the area they chose.
+  const ownerMovedPin = useRef(false);
+
   /** The pin was placed, dragged or cleared on the map, or read from a link. */
   const handlePick = (next: MapPoint | null) => {
+    if (next) ownerMovedPin.current = true;
     store.setLocation({ locationLat: next?.lat ?? null, locationLng: next?.lng ?? null });
   };
 
@@ -81,7 +89,7 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
         handlePick(point);
         setLink({ kind: "ok" });
       } catch {
-        if (attempt === latestLink.current) setLink({ kind: "error", message: SHORT_LINK_HELP });
+        if (attempt === latestLink.current) setLink({ kind: "error", message: shortLinkHelp });
       }
       return;
     }
@@ -106,7 +114,16 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
         let place: GeocodedPlace | null = null;
         let failed = false;
         try {
-          place = await reverseGeocode(pin);
+          // Google when it is set up and answers; OpenStreetMap otherwise, so a refused key costs nothing.
+          if (GOOGLE_MAPS_API_KEY) {
+            try {
+              place = await googleReverseGeocode(pin);
+            } catch {
+              place = await reverseGeocode(pin);
+            }
+          } else {
+            place = await reverseGeocode(pin);
+          }
         } catch {
           failed = true;
         }
@@ -117,18 +134,9 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
         const area = fromPlace ?? nearestArea(pin, list);
 
         const current = usePropertyWizardStore.getState();
-        const patch: { areaId?: string; areaName?: string; district?: string; address?: string } = {};
-        // Fill a box only if it is empty or still holds what this step put there.
-        if (area && (!current.areaId || current.areaId === written.current.areaId)) {
-          patch.areaId = area.id;
-          patch.areaName = area.name;
-          patch.district = area.city ?? "";
-          written.current.areaId = area.id;
-        }
-        if (place?.address && (!current.address.trim() || current.address === written.current.address)) {
-          patch.address = place.address;
-          written.current.address = place.address;
-        }
+        const filled = pinFillPatch(current, written.current, area, place?.address ?? null, ownerMovedPin.current);
+        written.current = filled.written;
+        const patch = filled.patch;
         if (Object.keys(patch).length > 0) usePropertyWizardStore.getState().setLocation(patch);
         setAuto({ ...written.current });
         setLookup({ status: failed ? "failed" : "done", areaFrom: area ? (fromPlace ? "place" : "nearest") : null });
@@ -150,9 +158,9 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
       <LocationPicker onChange={handlePick} openAt={openAt} value={pin} />
 
       <View style={styles.formGroup}>
-        <Text style={styles.formLabel}>{ON_WEB ? "Or paste a Google Maps link" : "Paste a Google Maps link"}</Text>
+        <Text style={styles.formLabel}>{ON_WEB ? t("wizard.location.mapLinkWeb") : t("wizard.location.mapLinkMobile")}</Text>
         <TextInput
-          accessibilityLabel="Google Maps link"
+          accessibilityLabel={t("wizard.location.mapLinkAria")}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="url"
@@ -161,51 +169,51 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
             setLinkText(text);
             void readLink(text, false);
           }}
-          placeholder="https://maps.google.com/…"
+          placeholder={t("wizard.location.mapLinkPlaceholder")}
           placeholderTextColor="#899790"
           style={styles.formInput}
           value={linkText}
         />
-        {link.kind === "reading" ? <Text style={styles.formHelperText}>Reading your link…</Text> : null}
+        {link.kind === "reading" ? <Text style={styles.formHelperText}>{t("wizard.location.readingLink")}</Text> : null}
         {link.kind === "ok" ? (
           <Text style={styles.locationLinkOk}>
-            {ON_WEB ? "Pin placed from your link. Drag it on the map to adjust." : "Location saved from your link."}
+            {ON_WEB ? t("wizard.location.linkOkWeb") : t("wizard.location.linkOkMobile")}
           </Text>
         ) : null}
         {link.kind === "error" ? <Text style={styles.locationLinkError}>{link.message}</Text> : null}
         {link.kind === "idle" ? (
           <Text style={styles.formHelperText}>
-            In Google Maps, open the place, tap Share, copy the link and paste it here.
+            {t("wizard.location.linkIdleHelp")}
           </Text>
         ) : null}
-        {!ON_WEB && pin && link.kind !== "ok" ? <Text style={styles.locationLinkOk}>Location saved.</Text> : null}
+        {!ON_WEB && pin && link.kind !== "ok" ? <Text style={styles.locationLinkOk}>{t("wizard.location.locationSaved")}</Text> : null}
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.formLabel}>Property address</Text>
+        <Text style={styles.formLabel}>{t("wizard.location.addressLabel")}</Text>
         <TextInput
           onChangeText={(v) => store.setLocation({ address: v })}
-          placeholder="e.g. House 12, Road 45, Gulshan 2"
+          placeholder={t("wizard.location.addressPlaceholder")}
           placeholderTextColor="#899790"
           style={styles.formInput}
           value={store.address}
         />
         {lookupNow.status === "looking" ? (
-          <Text style={styles.formHelperText}>Looking up the address from your pin…</Text>
+          <Text style={styles.formHelperText}>{t("wizard.location.lookingUpAddress")}</Text>
         ) : addressFilled ? (
-          <Text style={styles.locationLinkOk}>Filled in from your pin. Check it and add the house or flat number.</Text>
+          <Text style={styles.locationLinkOk}>{t("wizard.location.addressFilled")}</Text>
         ) : lookedUp && !store.address.trim() ? (
           <Text style={styles.formHelperText}>
             {lookupNow.status === "failed"
-              ? "We couldn't look up the address. Please type it."
-              : "We couldn't find an address for this spot. Please type it."}
+              ? t("wizard.location.addressFailed")
+              : t("wizard.location.addressNotFound")}
           </Text>
         ) : null}
       </View>
 
       <View style={[styles.formRow, isPhone && styles.formRowPhone]}>
         <View style={[styles.formGroup, { flex: 1 }]}>
-          <Text style={styles.formLabel}>Area / Neighbourhood</Text>
+          <Text style={styles.formLabel}>{t("wizard.location.areaLabel")}</Text>
           <Pressable
             onPress={onOpenAreaPicker}
             style={({ pressed }) => [styles.formInput, styles.areaPickerButton, pressed && styles.pressed]}
@@ -214,17 +222,17 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
             <Text style={[styles.areaPickerText, !store.areaId && styles.areaPickerPlaceholder]}>
               {store.areaId
                 ? [store.areaName, store.district].filter(Boolean).join(", ")
-                : "Select the area or neighbourhood"}
+                : t("wizard.location.selectArea")}
             </Text>
           </Pressable>
           {areaFilled ? (
             <Text style={styles.locationLinkOk}>
               {lookupNow.areaFrom === "nearest"
-                ? "The listed area nearest your pin. Change it if that's wrong."
-                : "Set from your pin. Change it if that's wrong."}
+                ? t("wizard.location.areaNearest")
+                : t("wizard.location.areaFromPin")}
             </Text>
           ) : lookedUp && !store.areaId ? (
-            <Text style={styles.formHelperText}>We couldn't tell the area from your pin. Choose the closest one.</Text>
+            <Text style={styles.formHelperText}>{t("wizard.location.areaUndetermined")}</Text>
           ) : null}
         </View>
       </View>

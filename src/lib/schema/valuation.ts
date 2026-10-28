@@ -20,9 +20,9 @@ export function faqPageSchema(entries: FaqEntry[], pageUrl: string): SchemaNode 
 }
 
 /**
- * The valuation tool as a free web application. For the /instant-valuation
- * page once it exists; not mounted anywhere yet, since the site has no working
- * valuation (the card on /sell is a placeholder).
+ * The valuation tool as a free web application. Mounted on /instant-valuation
+ * (src/features/valuation/screens/InstantValuationScreen.tsx), alongside the
+ * breadcrumb and the FAQPage built from VALUATION_FAQ below.
  */
 export function valuationToolSchema(pagePath = "/instant-valuation"): SchemaNode {
   const url = `${SITE_URL}${pagePath}`;

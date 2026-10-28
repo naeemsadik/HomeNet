@@ -54,3 +54,63 @@ export function nearestArea(point: MapPoint, areas: Area[]): Area | null {
   }
   return best?.area ?? null;
 }
+
+/** What this step has written into the form itself, as opposed to what the owner typed. */
+export interface WrittenByPin {
+  areaId: string | null;
+  address: string | null;
+}
+
+export interface PinFillPatch {
+  areaId?: string;
+  areaName?: string;
+  district?: string;
+  address?: string;
+}
+
+/**
+ * What to change in the form after a pin has been looked up.
+ *
+ * A box is filled only when it is empty or still holds what the pin put there,
+ * so an owner's own entry is never replaced. When the new pin gives no area (or
+ * no address), whatever an earlier pin put in that box is cleared rather than
+ * left to describe a place the pin is no longer at.
+ *
+ * `areaFollowsPin` is set once the owner has moved the pin: the area then always
+ * describes where the pin is, even if it was picked by hand or came from a draft.
+ * The address the owner typed is still kept, since it holds the house and road.
+ */
+export function pinFillPatch(
+  current: { areaId: string; address: string },
+  written: WrittenByPin,
+  area: Area | null,
+  address: string | null,
+  areaFollowsPin = false,
+): { patch: PinFillPatch; written: WrittenByPin } {
+  const patch: PinFillPatch = {};
+  const next = { ...written };
+
+  const areaIsOurs = areaFollowsPin || current.areaId === "" || current.areaId === written.areaId;
+  if (area && areaIsOurs) {
+    patch.areaId = area.id;
+    patch.areaName = area.name;
+    patch.district = area.city ?? "";
+    next.areaId = area.id;
+  } else if (!area && current.areaId !== "" && areaIsOurs) {
+    patch.areaId = "";
+    patch.areaName = "";
+    patch.district = "";
+    next.areaId = null;
+  }
+
+  const addressIsOurs = current.address.trim() === "" || current.address === written.address;
+  if (address && addressIsOurs) {
+    patch.address = address;
+    next.address = address;
+  } else if (!address && current.address !== "" && current.address === written.address) {
+    patch.address = "";
+    next.address = null;
+  }
+
+  return { patch, written: next };
+}

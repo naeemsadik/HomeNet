@@ -17,6 +17,8 @@ describe("isPrivatePath", () => {
     "/messages",
     "/property/create",
     "/property/edit",
+    "/users",
+    "/users/abc-123",
   ])("keeps %s out of search results", (path) => {
     expect(isPrivatePath(path)).toBe(true);
   });
@@ -31,7 +33,6 @@ describe("isPrivatePath", () => {
     "/guides",
     "/guides/namzari-mutation-bangladesh-guide",
     "/property/abc-123",
-    "/users/abc-123",
     "/about",
     "/privacy",
     "/terms",

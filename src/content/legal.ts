@@ -206,7 +206,7 @@ export const DELETE_ACCOUNT: LegalDocument = {
         "Sign in to HomeNet.",
         "Open Profile.",
         "Under Account security, choose Permanently delete account.",
-        "Confirm. Your account is deleted straight away and you are signed out.",
+        "Type delete-my-account to confirm, then choose Delete Permanently. Your account is deleted straight away and you are signed out.",
       ],
     },
     {

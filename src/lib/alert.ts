@@ -3,7 +3,7 @@ import { sanitizeErrorMessage } from "./errorSanitizer";
 
 /**
  * Cross-platform replacements for `Alert.alert`, which is a no-op on
- * react-native-web — the platform this app primarily ships to.
+ * react-native-web: the platform this app primarily ships to.
  */
 
 type NotifyOptions = {

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  archiveProperty,
   createProperty,
   deleteProperty,
   deletePropertyMedia,
@@ -32,6 +33,11 @@ export function useUpdateProperty() {
   });
 }
 
+export function useArchiveProperty() {
+  const invalidate = useInvalidateProperties();
+  return useMutation({ mutationFn: archiveProperty, onSuccess: (_, id) => invalidate(id) });
+}
+
 export function useDeleteProperty() {
   const invalidate = useInvalidateProperties();
   return useMutation({ mutationFn: deleteProperty, onSuccess: () => invalidate() });
@@ -40,6 +46,7 @@ export function useDeleteProperty() {
 export function useUploadMedia() {
   const invalidate = useInvalidateProperties();
   return useMutation({
+    // The live API stores each file against a saved listing (POST /v1/properties/:id/media).
     mutationFn: ({
       propertyId,
       file,

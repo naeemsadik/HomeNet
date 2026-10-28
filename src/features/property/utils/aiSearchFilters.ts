@@ -1,5 +1,6 @@
 import { formatPrice } from "@/lib/format";
 import type { Area } from "@/types/api";
+import { HOLIDAY_STAY_LABEL } from "../constants/holidayStay";
 import type { SmartSearchFilters, SmartSearchListing } from "../types/aiSearch";
 import type { Property } from "../types/property";
 
@@ -67,7 +68,7 @@ export function describeFilters(filters: SmartSearchFilters): SearchChip[] {
   const chips: SearchChip[] = [];
 
   if (filters.listing_type) {
-    const label = { sale: "For sale", rent: "For rent", short_let: "Short-let" }[filters.listing_type];
+    const label = { sale: "For sale", rent: "For rent", short_let: HOLIDAY_STAY_LABEL }[filters.listing_type];
     chips.push({ id: "listing_type", label });
   }
   if (filters.type) chips.push({ id: "type", label: capitalise(filters.type) });

@@ -41,6 +41,7 @@ Each area has a sale page at /buy/{area} and a rent page at /rent/{area}.
 ## For owners
 
 - [List a property for free](https://www.homenetbd.com/sell)
+- [Instant property valuation](https://www.homenetbd.com/instant-valuation): a free estimate of a property’s sale value and monthly rent from its area, size, configuration and comparable HomeNet listings. No sign-up, no broker.
 
 ## About
 

@@ -8,23 +8,23 @@ export const propertyTypes: [PropertyType, ...PropertyType[]] = [
   "parking",
 ];
 
-export const listingTypes: [ListingType, ...ListingType[]] = ["sale", "rent"];
+export const listingTypes: [ListingType, ...ListingType[]] = ["sale", "rent", "short_let"];
 
 export const areaUnits = ["sqft", "katha", "bigha", "sqm"] as const;
 
 /**
  * Schema for the multi-step PropertyForm (create / edit).
  *
- * Step 0 — Details:  title, description, type, listing_type, price
- * Step 1 — Location: area_id, address
- * Step 2 — Features: bedrooms, bathrooms, area_size
- * Step 3 — Images:   (managed outside the form via local state)
+ * Step 0: Details:  title, description, type, listing_type, price
+ * Step 1: Location: area_id, address
+ * Step 2: Features: bedrooms, bathrooms, area_size
+ * Step 3: Images:   (managed outside the form via local state)
  *
  * All fields are strictly validated against type, length, and format.
  */
 export const propertyFormSchema = z
   .object({
-    // Step 0 — Details
+    // Step 0: Details
     title: z
       .string()
       .min(3, "Title must be at least 3 characters")
@@ -43,10 +43,10 @@ export const propertyFormSchema = z
       .regex(/^\d+(\.\d{1,2})?$/, "Enter a valid price amount")
       .refine((v) => {
         const n = Number(v);
-        return !isNaN(n) && n > 0 && n <= 1_000_000_000_000;
-      }, "Enter a valid price between 1 and 1,000,000,000,000"),
+        return !isNaN(n) && n >= 0 && n <= 1_000_000_000_000;
+      }, "Enter a valid price between 0 and 1,000,000,000,000"),
 
-    // Step 1 — Location
+    // Step 1: Location
     area_id: z
       .string()
       .min(1, "Area is required")
@@ -58,7 +58,7 @@ export const propertyFormSchema = z
       .max(300, "Address must be at most 300 characters")
       .refine((v) => !/[<>{}\x00-\x1F]/.test(v), "Address contains invalid characters"),
 
-    // Step 2 — Features
+    // Step 2: Features
     bedrooms: z
       .string()
       .max(4, "Invalid number of bedrooms")
@@ -79,7 +79,7 @@ export const propertyFormSchema = z
 
 export type PropertyFormData = z.infer<typeof propertyFormSchema>;
 
-/** Field names belonging to each wizard step — used for per-step trigger(). */
+/** Field names belonging to each wizard step, used for per-step trigger(). */
 export const PROPERTY_STEP_FIELDS: Record<number, (keyof PropertyFormData)[]> = {
   0: ["title", "description", "type", "listing_type", "price"],
   1: ["area_id", "address"],
@@ -118,7 +118,7 @@ export const upsertPropertyDtoSchema = z
       .refine((v) => !/[<>{}\x00-\x1F]/.test(v), "Subtype contains invalid characters")
       .optional(),
     listing_type: z.enum(listingTypes).optional(),
-    price: z.number().finite().positive().max(1_000_000_000_000).optional(),
+    price: z.number().finite().nonnegative().max(1_000_000_000_000).optional(),
     price_currency: z.literal("BDT").optional(),
     area_size: z.number().finite().positive().max(1_000_000).optional(),
     area_unit: z.enum(areaUnits).optional(),
@@ -137,6 +137,20 @@ export const upsertPropertyDtoSchema = z
       .refine((url) => /^https?:\/\//i.test(url), "URL must start with http:// or https://")
       .optional(),
     status: z.enum(["draft", "pending", "active", "sold", "archived"]).optional(),
+    media: z
+      .array(
+        z.union([
+          z.string(),
+          z.object({
+            url: z.string(),
+            public_id: z.string().optional(),
+            thumbnail_url: z.string().nullable().optional(),
+            media_type: z.enum(["image", "video"]).optional(),
+            display_order: z.number().optional(),
+          }),
+        ]),
+      )
+      .optional(),
   })
   .strict();
 

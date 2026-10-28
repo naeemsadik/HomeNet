@@ -6,7 +6,7 @@ export default function DeleteAccountRoute() {
   return (
     <>
       <PageMeta
-        title="Delete your account — HomeNet"
+        title="Delete your account | HomeNet BD"
         description="How to delete your HomeNet account and what is removed."
       />
       <LegalScreen document={DELETE_ACCOUNT} />

@@ -2,7 +2,7 @@
  * HomeNet colour roles.
  *
  * Tokens are named for the JOB they do, not what they look like. If you cannot
- * say which role a colour plays, it does not belong here — and a raw hex does
+ * say which role a colour plays, it does not belong here, and a raw hex does
  * not belong in a component.
  *
  * Three rules this file exists to enforce:
@@ -12,7 +12,7 @@
  * 2. One role, one colour. `error`, `warning` and `notification` were previously
  *    all #F4823A, which made a validation failure indistinguishable from a
  *    badge. They are now distinct.
- * 3. Declare elevation once — `divider` OR `shadow`, never both on one surface.
+ * 3. Declare elevation once, `divider` OR `shadow`, never both on one surface.
  */
 export const colorTokens = {
   // ─── Brand ──────────────────────────────────────────────────────────────
@@ -25,13 +25,14 @@ export const colorTokens = {
   brandSurface: "#E6FAF4",
   brandBorder: "#C4E4D5",
 
-  // ─── Neutrals — most of the interface ───────────────────────────────────
+  // ─── Neutrals: most of the interface ───────────────────────────────────
   ink: "#0B1A17",
   body: "#2C3E38",
   muted: "#5C6B66",
   /** Disabled text and icons only. Never body copy. */
   subtle: "#8C9A95",
   divider: "rgba(11, 26, 23, 0.08)",
+  border: "rgba(11, 26, 23, 0.08)",
   canvas: "#F8FAF9",
   surface: "#FFFFFF",
   /** Inputs, wells, inset areas. */
@@ -46,7 +47,7 @@ export const colorTokens = {
   /** Destructive actions and validation failures. 5.3:1 on white. */
   errorText: "#D4183D",
   errorSurface: "#FDECEF",
-  /** Verified badge only — a trust signal, not decoration. */
+  /** Verified badge only: a trust signal, not decoration. */
   info: "#2251D6",
   infoSurface: "#E8EEFC",
 
@@ -87,18 +88,18 @@ export const colorTokens = {
   primary: "#04cf92",
   primaryDark: "#03b57f",
   primaryLight: "#E6FAF4",
-  /** Text on a `primary` fill — same role as `onBrand`. */
+  /** Text on a `primary` fill, same role as `onBrand`. */
   primaryText: "#0B1A17",
   primaryOnLight: "#0F6D55",
   verified: "#2251D6",
   verifiedLight: "#E8EEFC",
   orange: "#F4823A",
   orangeLight: "#FDEEE2",
-  /** Was #F4823A — now a real red, so 24 error call sites read correctly. */
+  /** Was #F4823A: now a real red, so 24 error call sites read correctly. */
   error: "#D4183D",
   errorLight: "#FDECEF",
   errorDark: "#B01031",
-  /** Was #F4823A — now amber, distinct from error. */
+  /** Was #F4823A: now amber, distinct from error. */
   warning: "#B45309",
   warningLight: "#FFFBEB",
 } as const;

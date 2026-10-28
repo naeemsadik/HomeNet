@@ -75,6 +75,9 @@ export interface Area {
   name: string;
   parent_area_id: string | null;
   city: string | null;
+  /** Where the area is centred. Not every area has one yet; distance search needs it. */
+  center_lat?: number | null;
+  center_lng?: number | null;
   created_at?: string;
   updated_at?: string;
   _count?: { children: number };
@@ -97,6 +100,9 @@ export interface AreaListResponse {
 
 export interface CreateAreaDto {
   name: string;
+  /** Required by the API on create: a new area is matched to map pins by it. */
+  center_lat: number;
+  center_lng: number;
   parent_area_id?: string | null;
   city?: string;
   boundary?: string;
@@ -106,7 +112,8 @@ export interface CreateAreaDto {
 export type UpdateAreaDto = Partial<CreateAreaDto>;
 
 export type PropertyType = "residential" | "commercial" | "land" | "parking";
-export type ListingType = "sale" | "rent";
+/** `short_let` is a holiday stay: people see "Holiday stay", the API stores `short_let`. */
+export type ListingType = "sale" | "rent" | "short_let";
 export type PropertyStatus = "draft" | "pending" | "active" | "sold" | "archived";
 
 export interface UpsertPropertyDto {

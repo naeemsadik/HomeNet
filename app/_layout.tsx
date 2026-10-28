@@ -79,7 +79,7 @@ export default function RootLayout() {
             override this; without it, any route lacking one would ship the
             empty <title> that Expo Router emits by default. */}
           <PageMeta
-            title="HomeNet — Verified Property Listings in Bangladesh"
+            title="HomeNet BD | Verified Property Listings in Bangladesh"
             description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
           />
           <StatusBar style="dark" />

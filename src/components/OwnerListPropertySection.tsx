@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { useTranslation } from "@/i18n";
 import {
   ArrowRight,
   BadgeCheck,
@@ -74,7 +75,7 @@ export const OWNER_INTENT_OPTIONS: OwnerIntentOption[] = [
   },
   {
     id: "short_let",
-    label: "Short let",
+    label: "Holiday stay",
     badge: "High demand",
     icon: CalendarCheck,
     listingType: "rent",
@@ -112,6 +113,7 @@ export const OWNER_INTENT_OPTIONS: OwnerIntentOption[] = [
 ];
 
 export function OwnerListPropertySection() {
+  const { t } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
   const requireAuth = useRequireAuth();
   const setWizardBasics = usePropertyWizardStore((s) => s.setBasics);
@@ -120,6 +122,64 @@ export function OwnerListPropertySection() {
   const [selectedIntentId, setSelectedIntentId] = useState<OwnerIntentId>("sell_residential");
   const [hoveredIntentId, setHoveredIntentId] = useState<OwnerIntentId | null>(null);
   const [aiSheetVisible, setAiSheetVisible] = useState(false);
+
+  const ownerIntentOptions: OwnerIntentOption[] = useMemo(() => [
+    {
+      id: "sell_residential",
+      label: t("search.ownerSection.intents.sellResidentialLabel"),
+      icon: Home,
+      listingType: "sale",
+      propertyType: "residential",
+      subtype: "apartment",
+      description: t("search.ownerSection.intents.sellResidentialDesc"),
+    },
+    {
+      id: "rent_residential",
+      label: t("search.ownerSection.intents.rentResidentialLabel"),
+      icon: KeyRound,
+      listingType: "rent",
+      propertyType: "residential",
+      subtype: "apartment",
+      description: t("search.ownerSection.intents.rentResidentialDesc"),
+    },
+    {
+      id: "short_let",
+      label: t("search.ownerSection.intents.shortLetLabel"),
+      badge: t("search.ownerSection.intents.shortLetBadge"),
+      icon: CalendarCheck,
+      listingType: "rent",
+      propertyType: "residential",
+      subtype: "short-let",
+      description: t("search.ownerSection.intents.shortLetDesc"),
+    },
+    {
+      id: "sell_land",
+      label: t("search.ownerSection.intents.sellLandLabel"),
+      icon: Compass,
+      listingType: "sale",
+      propertyType: "land",
+      subtype: "residential-plot",
+      description: t("search.ownerSection.intents.sellLandDesc"),
+    },
+    {
+      id: "rent_parking",
+      label: t("search.ownerSection.intents.rentParkingLabel"),
+      icon: Car,
+      listingType: "rent",
+      propertyType: "parking",
+      subtype: "garage",
+      description: t("search.ownerSection.intents.rentParkingDesc"),
+    },
+    {
+      id: "commercial_hotel",
+      label: t("search.ownerSection.intents.commercialHotelLabel"),
+      icon: Building2,
+      listingType: "sale",
+      propertyType: "commercial",
+      subtype: "office",
+      description: t("search.ownerSection.intents.commercialHotelDesc"),
+    },
+  ], [t]);
 
   const handleAiApply = (data: AiParsedProperty) => {
     // Hydrate zustand wizard store
@@ -167,7 +227,7 @@ export function OwnerListPropertySection() {
   };
 
   const selectedIntent =
-    OWNER_INTENT_OPTIONS.find((item) => item.id === selectedIntentId) ?? OWNER_INTENT_OPTIONS[0];
+    ownerIntentOptions.find((item) => item.id === selectedIntentId) ?? ownerIntentOptions[0];
 
   const handleOpenStudio = () => {
     setIsModalOpen(true);
@@ -209,7 +269,7 @@ export function OwnerListPropertySection() {
           CLEAN LANDING PAGE SECTION (BREATHABLE, UNCLUTTERED)
       ───────────────────────────────────────────────────────────── */}
       <View
-        accessibilityLabel="Property owner listing section"
+        accessibilityLabel={t("search.ownerSection.regionAria")}
         // @ts-ignore web role
         role="region"
         // @ts-ignore web-standard aria attribute
@@ -229,7 +289,7 @@ export function OwnerListPropertySection() {
                 {/* Eyebrow */}
                 <View style={styles.eyebrowContainer}>
                   <View style={styles.eyebrowBadge}>
-                    <Text style={styles.eyebrowText}>For owners · Free to start</Text>
+                    <Text style={styles.eyebrowText}>{t("search.ownerSection.eyebrow")}</Text>
                   </View>
                 </View>
 
@@ -239,27 +299,25 @@ export function OwnerListPropertySection() {
                   id="owner-section-heading"
                   style={[styles.headline, isPhone && styles.headlinePhone]}
                 >
-                  List your property
+                  {t("search.ownerSection.headline")}
                 </Text>
 
                 {/* Subcopy */}
                 <Text style={[styles.subcopy, isPhone && styles.subcopyPhone]}>
-                  Sell, rent, or short-let with confidence. List flats, houses, plots,
-                  garages, parking spaces, or commercial units across Bangladesh — completely
-                  free to start.
+                  {t("search.ownerSection.subcopy")}
                 </Text>
 
                 {/* Clean CTAs Row */}
                 <View style={[styles.ctaRow, isPhone && styles.ctaRowPhone]}>
                   <AppButton
-                    label="Start listing"
+                    label={t("search.ownerSection.startListing")}
                     onPress={handleOpenStudio}
                     trailingIcon={ArrowRight}
                     style={isPhone && styles.fullWidthButton}
                   />
 
                   <AppButton
-                    label="Seller dashboard"
+                    label={t("search.ownerSection.sellerDashboard")}
                     onPress={handleSecondarySellerDashboard}
                     icon={LayoutDashboard}
                     variant="secondary"
@@ -267,7 +325,7 @@ export function OwnerListPropertySection() {
                   />
 
                   <AppButton
-                    label="Get a free estimate"
+                    label={t("search.ownerSection.freeEstimate")}
                     onPress={handleTertiaryEstimate}
                     icon={TrendingUp}
                     variant="ghost"
@@ -280,18 +338,18 @@ export function OwnerListPropertySection() {
                     <View style={styles.trustPillsTopRowPhone}>
                       <View style={styles.trustPillItem}>
                         <ShieldCheck color="#04cf92" size={14} />
-                        <Text style={styles.trustPillText}>Verified buyers & tenants</Text>
+                        <Text style={styles.trustPillText}>{t("search.ownerSection.trustVerified")}</Text>
                       </View>
                       <View style={styles.trustDot} />
                       <View style={styles.trustPillItem}>
                         <FileCheck2 color="#04cf92" size={14} />
-                        <Text style={styles.trustPillText}>Guided 5-step listing</Text>
+                        <Text style={styles.trustPillText}>{t("search.ownerSection.trustGuided")}</Text>
                       </View>
                     </View>
                     <View style={styles.trustPillCenterPhone}>
                       <View style={styles.trustPillItem}>
                         <Sparkles color="#F4823A" size={14} />
-                        <Text style={styles.trustPillText}>0 BDT listing fee</Text>
+                        <Text style={styles.trustPillText}>{t("search.ownerSection.trustFree")}</Text>
                       </View>
                     </View>
                   </View>
@@ -299,17 +357,17 @@ export function OwnerListPropertySection() {
                   <View style={styles.trustPillsRow}>
                     <View style={styles.trustPillItem}>
                       <ShieldCheck color="#04cf92" size={15} />
-                      <Text style={styles.trustPillText}>Verified buyers & tenants</Text>
+                      <Text style={styles.trustPillText}>{t("search.ownerSection.trustVerified")}</Text>
                     </View>
                     <View style={styles.trustDot} />
                     <View style={styles.trustPillItem}>
                       <FileCheck2 color="#04cf92" size={15} />
-                      <Text style={styles.trustPillText}>Guided 5-step listing</Text>
+                      <Text style={styles.trustPillText}>{t("search.ownerSection.trustGuided")}</Text>
                     </View>
                     <View style={styles.trustDot} />
                     <View style={styles.trustPillItem}>
                       <Sparkles color="#F4823A" size={14} />
-                      <Text style={styles.trustPillText}>0 BDT listing fee</Text>
+                      <Text style={styles.trustPillText}>{t("search.ownerSection.trustFree")}</Text>
                     </View>
                   </View>
                 )}
@@ -323,30 +381,30 @@ export function OwnerListPropertySection() {
                       <BadgeCheck color="#04cf92" size={24} />
                     </View>
                     <View>
-                      <Text style={styles.plaqueTitle}>HomeNet Owner Hub</Text>
-                      <Text style={styles.plaqueSubtitle}>Direct inquiries • No broker spam</Text>
+                      <Text style={styles.plaqueTitle}>{t("search.ownerSection.hubTitle")}</Text>
+                      <Text style={styles.plaqueSubtitle}>{t("search.ownerSection.hubSubtitle")}</Text>
                     </View>
                   </View>
 
                   <View style={styles.plaqueStatsRow}>
                     <View style={styles.plaqueStatItem}>
-                      <Text style={styles.plaqueStatNum}>Verified</Text>
-                      <Text style={styles.plaqueStatLabel}>Buyer Network</Text>
+                      <Text style={styles.plaqueStatNum}>{t("search.ownerSection.statVerifiedNum")}</Text>
+                      <Text style={styles.plaqueStatLabel}>{t("search.ownerSection.statVerifiedLabel")}</Text>
                     </View>
                     <View style={styles.plaqueDivider} />
                     <View style={styles.plaqueStatItem}>
-                      <Text style={styles.plaqueStatNum}>0 BDT</Text>
-                      <Text style={styles.plaqueStatLabel}>Upfront Cost</Text>
+                      <Text style={styles.plaqueStatNum}>{t("search.ownerSection.statZeroNum")}</Text>
+                      <Text style={styles.plaqueStatLabel}>{t("search.ownerSection.statZeroLabel")}</Text>
                     </View>
                     <View style={styles.plaqueDivider} />
                     <View style={styles.plaqueStatItem}>
-                      <Text style={styles.plaqueStatNum}>Direct</Text>
-                      <Text style={styles.plaqueStatLabel}>Owner Contact</Text>
+                      <Text style={styles.plaqueStatNum}>{t("search.ownerSection.statDirectNum")}</Text>
+                      <Text style={styles.plaqueStatLabel}>{t("search.ownerSection.statDirectLabel")}</Text>
                     </View>
                   </View>
 
                   <Pressable
-                    accessibilityLabel="Start listing now"
+                    accessibilityLabel={t("search.ownerSection.startListingAria")}
                     onPress={handleOpenStudio}
                     style={({ pressed }) => [
                       styles.plaqueActionRow,
@@ -354,7 +412,7 @@ export function OwnerListPropertySection() {
                       webPointer,
                     ]}
                   >
-                    <Text style={styles.plaqueActionText}>Explore listing categories</Text>
+                    <Text style={styles.plaqueActionText}>{t("search.ownerSection.exploreCategories")}</Text>
                     <ArrowRight color="#04cf92" size={14} />
                   </Pressable>
                 </View>
@@ -375,7 +433,7 @@ export function OwnerListPropertySection() {
       >
         <View style={styles.modalOverlay}>
           <Pressable
-            accessibilityLabel="Close modal overlay"
+            accessibilityLabel={t("search.ownerSection.closeModalOverlay")}
             onPress={() => setIsModalOpen(false)}
             style={StyleSheet.absoluteFill}
           />
@@ -386,16 +444,16 @@ export function OwnerListPropertySection() {
               <View style={{ flex: 1 }}>
                 <View style={styles.modalEyebrowRow}>
                   <Sparkles color="#04cf92" size={14} />
-                  <Text style={styles.modalEyebrow}>Owner Studio</Text>
+                  <Text style={styles.modalEyebrow}>{t("search.ownerSection.modalEyebrow")}</Text>
                 </View>
-                <Text style={styles.modalTitle}>Select what you want to list</Text>
+                <Text style={styles.modalTitle}>{t("search.ownerSection.modalTitle")}</Text>
                 <Text style={styles.modalSubtitle}>
-                  Choose your property type to customize your 5-step listing workflow.
+                  {t("search.ownerSection.modalSubtitle")}
                 </Text>
               </View>
 
               <Pressable
-                accessibilityLabel="Close dialog"
+                accessibilityLabel={t("search.ownerSection.closeDialog")}
                 accessibilityRole="button"
                 onPress={() => setIsModalOpen(false)}
                 style={({ pressed }) => [
@@ -408,10 +466,10 @@ export function OwnerListPropertySection() {
               </Pressable>
             </View>
 
-            {/* AI Entry Card — directly under Select what you want to list / Choose your property type */}
+            {/* AI Entry Card: directly under Select what you want to list / Choose your property type */}
             <Pressable
-              accessibilityHint="Opens the AI listing assistant to describe your property in plain text"
-              accessibilityLabel="Skip the form, describe it with AI"
+              accessibilityHint={t("search.ownerSection.skipWithAiHint")}
+              accessibilityLabel={t("search.ownerSection.skipWithAiAria")}
               accessibilityRole="button"
               onPress={() => setAiSheetVisible(true)}
               style={({ pressed }) => [
@@ -428,14 +486,14 @@ export function OwnerListPropertySection() {
                 <View style={styles.aiTextContainer}>
                   <View style={styles.aiHeadlineRow}>
                     <Text style={styles.aiHeadline}>
-                      Skip the form — describe it
+                      {t("search.ownerSection.skipWithAiTitle")}
                     </Text>
                     <View style={styles.aiBetaBadge}>
                       <Text style={styles.aiBetaText}>BETA</Text>
                     </View>
                   </View>
                   <Text style={styles.aiSubtext}>
-                    Type what you're listing and AI fills the details for you
+                    {t("search.ownerSection.skipWithAiSub")}
                   </Text>
                 </View>
               </View>
@@ -447,7 +505,7 @@ export function OwnerListPropertySection() {
                 ]}
               >
                 <Sparkles color={colorTokens.onBrand} size={15} strokeWidth={2.2} />
-                <Text style={styles.aiCtaButtonText}>List with AI</Text>
+                <Text style={styles.aiCtaButtonText}>{t("search.ownerSection.listWithAi")}</Text>
                 <ArrowRight color={colorTokens.onBrand} size={15} strokeWidth={2.2} />
               </View>
             </Pressable>
@@ -459,7 +517,7 @@ export function OwnerListPropertySection() {
               style={{ maxHeight: isPhone ? 300 : 340 }}
             >
               <View style={styles.modalGrid}>
-                {OWNER_INTENT_OPTIONS.map((intent) => {
+                {ownerIntentOptions.map((intent) => {
                   const isSelected = intent.id === selectedIntentId;
                   const isHovered = intent.id === hoveredIntentId;
                   const IntentIcon = intent.icon;
@@ -531,13 +589,13 @@ export function OwnerListPropertySection() {
               <View style={styles.modalFooterHint}>
                 <ShieldCheck color="#04cf92" size={16} />
                 <Text style={styles.modalFooterHintText}>
-                  Free to publish • Direct verified inquiries
+                  {t("search.ownerSection.modalFooterHint")}
                 </Text>
               </View>
 
               <View style={styles.modalFooterActions}>
                 <Pressable
-                  accessibilityLabel="Cancel selection"
+                  accessibilityLabel={t("search.ownerSection.cancelAria")}
                   onPress={() => setIsModalOpen(false)}
                   style={({ pressed }) => [
                     styles.cancelButton,
@@ -545,11 +603,11 @@ export function OwnerListPropertySection() {
                     webPointer,
                   ]}
                 >
-                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                  <Text style={styles.cancelButtonText}>{t("search.ownerSection.cancel")}</Text>
                 </Pressable>
 
                 <Pressable
-                  accessibilityLabel={`Continue listing ${selectedIntent.label}`}
+                  accessibilityLabel={t("search.ownerSection.continueWithAria", { label: selectedIntent.label })}
                   accessibilityRole="button"
                   onPress={() => handleProceedWithIntent(selectedIntent)}
                   style={({ pressed }) => [
@@ -559,7 +617,7 @@ export function OwnerListPropertySection() {
                   ]}
                 >
                   <Text style={styles.continueButtonText}>
-                    Continue with {selectedIntent.label}
+                    {t("search.ownerSection.continueWith", { label: selectedIntent.label })}
                   </Text>
                   <ArrowRight color={colorTokens.onBrand} size={16} />
                 </Pressable>
