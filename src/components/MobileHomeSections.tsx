@@ -28,18 +28,9 @@ interface FeatureCard {
 
 /**
  * What HomeNet offers beyond the search box, one card each with curated real estate photography.
- * Every card opens something that exists.
+ * Every card opens something that exists. Listing comes first.
  */
 const FEATURE_CARDS: FeatureCard[] = [
-  {
-    key: "valuation",
-    image:
-      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
-    href: "/instant-valuation",
-    title: "home.mobileCards.valuation.title",
-    copy: "home.mobileCards.valuation.copy",
-    cta: "home.mobileCards.valuation.cta",
-  },
   {
     key: "list",
     image:
@@ -50,6 +41,15 @@ const FEATURE_CARDS: FeatureCard[] = [
     title: "home.mobileCards.list.title",
     copy: "home.mobileCards.list.copy",
     cta: "home.mobileCards.list.cta",
+  },
+  {
+    key: "valuation",
+    image:
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80",
+    href: "/instant-valuation",
+    title: "home.mobileCards.valuation.title",
+    copy: "home.mobileCards.valuation.copy",
+    cta: "home.mobileCards.valuation.cta",
   },
   {
     key: "ai",
