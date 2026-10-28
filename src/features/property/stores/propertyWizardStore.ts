@@ -28,6 +28,8 @@ export interface WizardState {
 
   // Details
   price: string;
+  /** "Contact for price": sent as price 1, and the typed price is ignored. */
+  priceOnRequest: boolean;
   areaSize: string;
   areaUnit: "sqft" | "katha" | "bigha" | "sqm";
   bedrooms: string;
@@ -56,7 +58,7 @@ export interface WizardState {
 
   // Actions
   setBasics: (data: Partial<Pick<WizardState, "title" | "type" | "subtype" | "listingType" | "description" | "price" | "areaSize" | "areaUnit" | "areaId" | "areaName" | "address">>) => void;
-  setDetails: (data: Partial<Pick<WizardState, "price" | "areaSize" | "areaUnit" | "bedrooms" | "bathrooms" | "floor" | "facing">>) => void;
+  setDetails: (data: Partial<Pick<WizardState, "price" | "priceOnRequest" | "areaSize" | "areaUnit" | "bedrooms" | "bathrooms" | "floor" | "facing">>) => void;
   setLocation: (data: Partial<Pick<WizardState, "district" | "areaId" | "areaName" | "address" | "locationLat" | "locationLng">>) => void;
   setMedia: (media: WizardMediaItem[]) => void;
   addMedia: (item: WizardMediaItem) => void;
@@ -81,6 +83,7 @@ const initialState = {
   description: "",
 
   price: "",
+  priceOnRequest: false,
   areaSize: "",
   areaUnit: "sqft" as const,
   bedrooms: "",

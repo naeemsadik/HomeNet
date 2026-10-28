@@ -60,6 +60,7 @@ import {
   translateAmenity,
   translatePropertyType,
   formatLocalizedNumber,
+  isPriceOnRequest,
   priceOnRequestLabel,
   translateAreaUnit,
 } from "@/i18n";
@@ -140,12 +141,12 @@ export function PropertyDetailScreen() {
       longitude: apiDetail.location_lng,
       type: displaySubtype(apiDetail.subtype) || (apiDetail.type ? apiDetail.type.charAt(0).toUpperCase() + apiDetail.type.slice(1) : "Property"),
       listingType: listingTypeStr,
-      price: apiDetail.price === 0
+      price: isPriceOnRequest(apiDetail.price)
         ? priceOnRequestLabel(language)
         : typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0),
-      priceCurrency: apiDetail.price === 0 ? "" : apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),
-      pricePeriod: apiDetail.price === 0 || isHoliday ? "" : apiDetail.listing_type === "rent" ? (language === "bn" ? "/মাস" : "/mo") : "",
-      priceText: apiDetail.price === 0
+      priceCurrency: isPriceOnRequest(apiDetail.price) ? "" : apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳"),
+      pricePeriod: isPriceOnRequest(apiDetail.price) || isHoliday ? "" : apiDetail.listing_type === "rent" ? (language === "bn" ? "/মাস" : "/mo") : "",
+      priceText: isPriceOnRequest(apiDetail.price)
         ? priceOnRequestLabel(language)
         : `${apiDetail.price_currency === "BDT" ? "৳" : (apiDetail.price_currency || "৳")} ${typeof apiDetail.price === "number" ? apiDetail.price.toLocaleString("en-BD") : String(apiDetail.price || 0)}${isHoliday ? "" : apiDetail.listing_type === "rent" ? (language === "bn" ? "/মাস" : "/mo") : ""}`,
       isVerified: Boolean(apiDetail.is_verified),
@@ -186,7 +187,7 @@ export function PropertyDetailScreen() {
           id: sim.id,
           title: sim.title,
           location: [sim.area?.name, (sim.area as any)?.city].filter(Boolean).join(", ") || sim.address || "Dhaka",
-          price: sim.price === 0
+          price: isPriceOnRequest(sim.price)
             ? priceOnRequestLabel(language)
             : `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? formatLocalizedNumber(sim.price.toLocaleString("en-BD"), language) : sim.price}`,
           specs: specParts.join(" · "),

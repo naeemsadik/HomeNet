@@ -460,6 +460,38 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     color: "#0B1A17",
   },
+  formInputLocked: {
+    opacity: 0.6,
+    backgroundColor: "#ECEFEE",
+    ...(Platform.select({ web: { cursor: "not-allowed" }, default: {} }) as object),
+  },
+  priceOnRequestRow: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    alignSelf: "flex-start",
+    marginTop: 6,
+  },
+  priceOnRequestBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: "rgba(11,26,23,0.35)",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  priceOnRequestBoxOn: {
+    backgroundColor: "#04cf92",
+    borderColor: "#04cf92",
+  },
+  priceOnRequestText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
+    color: "#0B1A17",
+  },
   formTextarea: {
     minHeight: 116,
     borderRadius: 16,

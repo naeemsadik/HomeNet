@@ -23,14 +23,25 @@ export function formatLocalizedNumber(num: number | string | null | undefined, l
   return str.replace(/[0-9]/g, (d) => BENGALI_DIGITS[d] || d);
 }
 
-/** What a listing with a price of 0 shows: the owner wants buyers to ask. */
+/**
+ * The price the API stores for "Contact for price". The backend team chose 1:
+ * its submit check refuses a price of 0, and no real listing costs ৳1.
+ */
+export const PRICE_ON_REQUEST = 1;
+
+/** Whether a listing's price means "ask the owner": 1, or 0 on listings saved before that. */
+export function isPriceOnRequest(amount: number | null | undefined): boolean {
+  return amount === PRICE_ON_REQUEST || amount === 0;
+}
+
+/** What a listing priced "Contact for price" shows instead of a number. */
 export function priceOnRequestLabel(lang: SupportedLanguage = "en"): string {
   return lang === "bn" ? "মূল্য জানতে যোগাযোগ করুন" : "Contact for price";
 }
 
 /**
  * Formats property price into crore/lakh notation in English or Bengali.
- * A price of 0 is "Contact for price", not "৳ 0".
+ * "Contact for price" (see isPriceOnRequest) shows as words, not "৳ 1".
  */
 export function formatLocalizedPrice(
   amount: number,
@@ -38,7 +49,7 @@ export function formatLocalizedPrice(
   lang: SupportedLanguage = "en"
 ): string {
   if (typeof amount !== "number" || isNaN(amount)) return "";
-  if (amount === 0) return priceOnRequestLabel(lang);
+  if (isPriceOnRequest(amount)) return priceOnRequestLabel(lang);
   const unit = currency === "BDT" ? "৳" : currency;
 
   if (lang === "bn") {

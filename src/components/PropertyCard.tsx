@@ -28,7 +28,7 @@ import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
-import { useTranslation, formatLocalizedPrice, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
+import { useTranslation, formatLocalizedPrice, isPriceOnRequest, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { isHolidayStayType } from "@/features/property/utils/listingType";
 import { useSavedStore } from "@/stores/savedStore";
@@ -554,7 +554,7 @@ function PropertyCardComponent({
         <View style={styles.body}>
           <Text style={styles.price}>
             {price}
-            {isRent ? <Text style={styles.priceSuffix}>{t("propertyCard.perMonth")}</Text> : null}
+            {isRent && !isPriceOnRequest(property.price) ? <Text style={styles.priceSuffix}>{t("propertyCard.perMonth")}</Text> : null}
           </Text>
 
           <Text numberOfLines={2} style={styles.title}>{property.title}</Text>
