@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import {
   Bookmark,
@@ -25,7 +25,7 @@ import type { Area } from "@/types/api";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 
-type MobileTab = "buy" | "rent" | "sold";
+type MobileTab = "buy" | "rent" | "holiday" | "sold";
 
 export function MobileHeroSearchCard() {
   const { t } = useTranslation();
@@ -43,6 +43,8 @@ export function MobileHeroSearchCard() {
     switch (tab) {
       case "sold":
         return "sold";
+      case "holiday":
+        return "short-let";
       case "rent":
         return "rent";
       case "buy":
@@ -82,6 +84,8 @@ export function MobileHeroSearchCard() {
   const primaryButtonLabel =
     activeTab === "sold"
       ? t("search.searchHomesSold")
+      : activeTab === "holiday"
+      ? t("search.searchHolidayStays")
       : activeTab === "rent"
       ? t("search.searchHomesForRent")
       : t("search.searchHomesForSale");
@@ -105,6 +109,8 @@ export function MobileHeroSearchCard() {
   const searchLabel =
     activeTab === "sold"
       ? t("search.mobileHero.labelSold")
+      : activeTab === "holiday"
+      ? t("search.mobileHero.labelHoliday")
       : activeTab === "rent"
       ? t("search.mobileHero.labelRent")
       : t("search.mobileHero.labelBuy");
@@ -114,29 +120,42 @@ export function MobileHeroSearchCard() {
       <View style={styles.panel}>
         {/* 1. Transaction type: underlined tabs */}
         <View style={styles.tabsRow} accessibilityRole="tablist">
-          {(["buy", "rent", "sold"] as const).map((tab) => {
-            const isSelected = activeTab === tab;
-            const tabLabel =
-              tab === "buy"
-                ? t("search.tabs.buy")
-                : tab === "rent"
-                ? t("search.tabs.rent")
-                : t("search.tabs.sold");
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabsScrollContent}
+          >
+            {(["buy", "rent", "holiday", "sold"] as const).map((tab) => {
+              const isSelected = activeTab === tab;
+              const tabLabel =
+                tab === "buy"
+                  ? t("search.tabs.buy")
+                  : tab === "rent"
+                  ? t("search.tabs.rent")
+                  : tab === "holiday"
+                  ? t("search.tabs.holidayStay")
+                  : t("search.tabs.sold");
 
-            return (
-              <Pressable
-                key={tab}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: isSelected }}
-                accessibilityLabel={tabLabel}
-                onPress={() => handleTabChange(tab)}
-                style={[styles.tab, webPointer]}
-              >
-                <Text style={[styles.tabText, isSelected && styles.tabTextActive]}>{tabLabel}</Text>
-                {isSelected ? <View style={styles.tabUnderline} /> : null}
-              </Pressable>
-            );
-          })}
+              return (
+                <Pressable
+                  key={tab}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: isSelected }}
+                  accessibilityLabel={tabLabel}
+                  onPress={() => handleTabChange(tab)}
+                  style={[styles.tab, webPointer]}
+                >
+                  <Text
+                    style={[styles.tabText, isSelected && styles.tabTextActive]}
+                    numberOfLines={1}
+                  >
+                    {tabLabel}
+                  </Text>
+                  {isSelected ? <View style={styles.tabUnderline} /> : null}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
 
         <View style={styles.panelBody}>
@@ -259,7 +278,7 @@ export function MobileHeroSearchCard() {
         <Pressable
           accessibilityRole="link"
           accessibilityLabel={t("home.requestValuation")}
-          onPress={() => router.push("/valuation" as never)}
+          onPress={() => router.push("/instant-valuation" as never)}
           style={({ pressed }) => [
             styles.quickNavRow,
             webPointer,
@@ -350,20 +369,30 @@ const styles = StyleSheet.create({
     }) ?? {}),
   },
   tabsRow: {
-    flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: colorTokens.divider,
+    paddingHorizontal: 16,
+    width: "100%",
+  },
+  tabsScrollContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    minWidth: "100%",
+    gap: 8,
   },
   tab: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    overflow: "visible",
   },
   tabText: {
     fontFamily: fonts.semiBold,
     fontSize: 16,
     color: colorTokens.muted,
+    textAlign: "center",
   },
   tabTextActive: {
     fontFamily: fonts.bold,
@@ -373,7 +402,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: -1,
     height: 3,
-    width: 56,
+    width: "70%",
+    maxWidth: 48,
     borderRadius: 2,
     backgroundColor: colorTokens.brand,
   },

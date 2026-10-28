@@ -14,7 +14,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/seo";
  */
 export const BRAND = {
   name: SITE_NAME,
-  alternateName: ["HomeNet", "HomenetBd", "HomeNet Bangladesh", "হোমনেট"],
+  alternateName: ["HomeNet", "HomenetBd", "HomeNetBD", "homenetbd.com", "HomeNet Bangladesh", "হোমনেট"],
   /** Tells search engines which "HomeNet" this is. Facts only, no claim about any other company. */
   disambiguatingDescription: "HomeNet BD (homenetbd.com): a property marketplace for Bangladesh.",
   url: SITE_URL,
