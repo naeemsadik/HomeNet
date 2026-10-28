@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { colorTokens, colors, fonts, webPointer } from "@/theme";
 import { useTranslation, type TranslationKey } from "@/i18n";
 
-export type SearchTabType = "buy" | "rent" | "short-let" | "sold" | "instant-valuation";
+export type SearchTabType = "buy" | "rent" | "short-let" | "sold";
 
 interface SearchTabsProps {
   activeTab: SearchTabType;
@@ -17,7 +17,6 @@ const TABS: { key: SearchTabType; translationKey: TranslationKey }[] = [
   { key: "short-let", translationKey: "hero.tabs.shortLet" },
   // Sold is a research intent, not a buying one, it trails the live tabs.
   { key: "sold", translationKey: "hero.tabs.sold" },
-  { key: "instant-valuation", translationKey: "hero.tabs.instantValuation" },
 ];
 
 export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {
