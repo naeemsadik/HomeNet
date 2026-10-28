@@ -42,12 +42,12 @@ import { AiFinderModal } from "./AiFinderModal";
 import { InstantValuationModal } from "@/features/valuation/components/InstantValuationModal";
 import { LanguageToggle } from "./LanguageToggle";
 import { DrawerLanguageDropdown } from "./DrawerLanguageDropdown";
-import { AppLink } from "./ui";
 import { Footer } from "./Footer";
 import { NotificationPreview } from "@/features/notification/components/NotificationPreview";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 import { styles } from "./AppChrome.styles";
 import { LiveText } from "@/components/LiveText";
+import { startListing } from "@/lib/startListing";
 
 export type ActivePage =
   | "home"
@@ -207,9 +207,16 @@ function SideBar({
         <Text style={styles.sidebarCardSubtitle}>
           {t("nav.listPropertyDesc")}
         </Text>
-        <AppLink href="/sell" style={styles.postAdButton} onPress={onNavigate}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            onNavigate?.();
+            startListing();
+          }}
+          style={[styles.postAdButton, webPointer]}
+        >
           <Text style={styles.postAdButtonText}>{t("nav.postAd")}</Text>
-        </AppLink>
+        </Pressable>
       </View>
       )}
     </SafeAreaView>
@@ -442,13 +449,7 @@ function TopBar({
             <Pressable
               accessibilityLabel={t("nav.listProperty")}
               accessibilityRole="button"
-              onPress={() => {
-                if (user) router.push("/property/create" as any);
-                else
-                  useAuthModalStore
-                    .getState()
-                    .open(() => router.push("/property/create" as any));
-              }}
+              onPress={startListing}
               style={({ pressed }) => [
                 styles.listPropertyBtn,
                 webPointer,

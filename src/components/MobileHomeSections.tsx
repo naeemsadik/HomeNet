@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ChevronRight } from "@/components/icons";
+import { LIST_PROPERTY_PATH, startListing } from "@/lib/startListing";
 import { GooglePlayButton } from "@/components/Footer";
 import { usePropertyGuides } from "@/features/news/hooks/usePropertyGuides";
 import type { PropertyGuide } from "@/features/news/types/news";
@@ -18,6 +19,8 @@ interface FeatureCard {
   key: string;
   image: string;
   href: string;
+  /** Goes through sign-in first, like every other "List your property" button. */
+  startsListing?: boolean;
   title: TranslationKey;
   copy: TranslationKey;
   cta: TranslationKey;
@@ -41,7 +44,9 @@ const FEATURE_CARDS: FeatureCard[] = [
     key: "list",
     image:
       "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80",
-    href: "/sell",
+    // The listing form (after sign-in), not the /sell marketing page.
+    href: LIST_PROPERTY_PATH,
+    startsListing: true,
     title: "home.mobileCards.list.title",
     copy: "home.mobileCards.list.copy",
     cta: "home.mobileCards.list.cta",
@@ -92,7 +97,7 @@ const FeatureCardView = memo(function FeatureCardView({ card }: { card: FeatureC
     <Pressable
       accessibilityRole="link"
       accessibilityLabel={title}
-      onPress={() => router.push(card.href as never)}
+      onPress={() => (card.startsListing ? startListing() : router.push(card.href as never))}
       style={({ pressed }) => [styles.card, webPointer, pressed && { opacity: 0.92 }]}
     >
       <Image
