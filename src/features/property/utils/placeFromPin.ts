@@ -75,23 +75,28 @@ export interface PinFillPatch {
  * so an owner's own entry is never replaced. When the new pin gives no area (or
  * no address), whatever an earlier pin put in that box is cleared rather than
  * left to describe a place the pin is no longer at.
+ *
+ * `areaFollowsPin` is set once the owner has moved the pin: the area then always
+ * describes where the pin is, even if it was picked by hand or came from a draft.
+ * The address the owner typed is still kept, since it holds the house and road.
  */
 export function pinFillPatch(
   current: { areaId: string; address: string },
   written: WrittenByPin,
   area: Area | null,
   address: string | null,
+  areaFollowsPin = false,
 ): { patch: PinFillPatch; written: WrittenByPin } {
   const patch: PinFillPatch = {};
   const next = { ...written };
 
-  const areaIsOurs = current.areaId === "" || current.areaId === written.areaId;
+  const areaIsOurs = areaFollowsPin || current.areaId === "" || current.areaId === written.areaId;
   if (area && areaIsOurs) {
     patch.areaId = area.id;
     patch.areaName = area.name;
     patch.district = area.city ?? "";
     next.areaId = area.id;
-  } else if (!area && current.areaId !== "" && current.areaId === written.areaId) {
+  } else if (!area && current.areaId !== "" && areaIsOurs) {
     patch.areaId = "";
     patch.areaName = "";
     patch.district = "";

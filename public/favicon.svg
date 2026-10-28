@@ -1,13 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#04cf92" />
-      <stop offset="100%" stop-color="#03b57f" />
-    </linearGradient>
-  </defs>
-  <!-- Rounded Badge -->
-  <rect width="64" height="64" rx="18" fill="url(#brandGrad)" />
-  <!-- House Icon matching Brand & Lucide Home -->
-  <path d="M16 29.5L32 17L48 29.5V47C48 48.6569 46.6569 50 45 50H19C17.3431 50 16 48.6569 16 47V29.5Z" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M26 50V34H38V50" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Homenet favicon"><title>Homenet favicon</title><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#04cf92"/><stop offset="1" stop-color="#03b57f"/></linearGradient></defs><rect x="16" y="16" width="480" height="480" rx="118" fill="url(#g)"/><circle cx="224" cy="212" r="132" fill="rgba(3,90,64,0.16)"/><circle cx="224" cy="212" r="132" fill="none" stroke="#FFFFFF" stroke-width="52"/><path d="M320 308 L398 386" stroke="#FFFFFF" stroke-width="62"/><circle cx="398" cy="386" r="31" fill="#FFFFFF"/><g transform="translate(224 210) scale(1.5)"><path d="M-54 6 L0 -42 L54 6 M-40 -6 V40 H-14 V10 H14 V40 H40 V-6" fill="none" stroke="#0B1A17" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/></g></svg>

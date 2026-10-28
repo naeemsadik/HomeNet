@@ -65,6 +65,7 @@ import { WizardLocationStep } from "../components/wizard/WizardLocationStep";
 import { WizardMediaStep } from "../components/wizard/WizardMediaStep";
 import { WizardReviewStep } from "../components/wizard/WizardReviewStep";
 import { storedListingTypeFor } from "../utils/listingType";
+import { uploadLocalMedia } from "../utils/localMedia";
 
 export function PropertyCreateWizard() {
   const { t } = useTranslation();
@@ -132,10 +133,12 @@ export function PropertyCreateWizard() {
     }
     : null;
 
+  // Location comes before Details, so an owner can save a draft with just the place
+  // and add the price and size once they know them.
   const steps = [
     { num: 1, title: t("wizard.steps.basics") },
-    { num: 2, title: t("wizard.steps.details") },
-    { num: 3, title: t("wizard.steps.location") },
+    { num: 2, title: t("wizard.steps.location") },
+    { num: 3, title: t("wizard.steps.details") },
     { num: 4, title: t("wizard.steps.media") },
     { num: 5, title: t("wizard.steps.review") },
   ];
@@ -165,21 +168,10 @@ export function PropertyCreateWizard() {
     },
     virtual_tour_url: store.virtualTourUrl.trim() || undefined,
     status: "draft",
-    // Sent only when there is media: the deployed API refuses an unknown `media` field,
-    // so a draft without photos still saves before the upload backend ships.
-    ...(store.media.length
-      ? {
-          media: store.media.map((m, idx) => ({
-            url: m.url,
-            public_id: m.id,
-            media_type: m.mediaType,
-            display_order: m.displayOrder ?? idx,
-          })),
-        }
-      : {}),
   });
 
-  const upsertDraft = async () => {
+  /** Writes the listing to the API: the first time it creates it, after that it updates it. */
+  const saveListing = async () => {
     const result = store.propertyId
       ? await updatePropertyMutation.mutateAsync({ id: store.propertyId, dto: buildDto() })
       : await createPropertyMutation.mutateAsync(buildDto());
@@ -187,6 +179,26 @@ export function PropertyCreateWizard() {
     if (!propertyId) throw new Error("The API did not return a property ID.");
     store.setPropertyId(propertyId);
     return propertyId;
+  };
+
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
+
+  /** Uploads the photos and videos still on the device to the saved listing. */
+  const uploadPendingMedia = async (propertyId: string) => {
+    try {
+      await uploadLocalMedia(
+        usePropertyWizardStore.getState().media,
+        async (file, type, displayOrder) => {
+          const response = await uploadMediaMutation.mutateAsync({ propertyId, file, type, displayOrder });
+          if (!response.data) throw new Error("The API did not return uploaded media.");
+          return response.data;
+        },
+        store.replaceMedia,
+        (done, total) => setUploadProgress({ done, total }),
+      );
+    } finally {
+      setUploadProgress(null);
+    }
   };
 
   const validateStep = (step: number) => {
@@ -211,7 +223,7 @@ export function PropertyCreateWizard() {
       const subtypeProblem = validateSubtype(activeTypeConfig, store.subtype);
       if (subtypeProblem) return subtypeProblem;
     }
-    if (step === 2) {
+    if (step === 3) {
       const priceNum = Number(store.price);
       const areaNum = Number(store.areaSize);
       // 0 is allowed: the listing then shows "Contact for price".
@@ -225,7 +237,7 @@ export function PropertyCreateWizard() {
         return t("wizard.validation.areaMax");
       }
     }
-    if (step === 3) {
+    if (step === 2) {
       const addr = store.address.trim();
       // The spot comes first on screen: the map pin, the device location or a Google Maps link.
       // Owners never type coordinates, and the address and area fill in from the pin.
@@ -250,6 +262,7 @@ export function PropertyCreateWizard() {
     }
     setLocalError(null);
     try {
+      // Nothing is sent to the server here: the form stays on the device until Save draft or Submit.
       if (store.currentStep < 5) store.setCurrentStep((store.currentStep + 1) as 1 | 2 | 3 | 4 | 5);
     } catch (error) {
       setLocalError(toApiError(error).message);
@@ -275,10 +288,17 @@ export function PropertyCreateWizard() {
   };
 
   const handleSaveDraft = async () => {
+    // A listing cannot be created without its area; everything else can wait.
+    if (!store.areaId) {
+      setLocalError(t("wizard.validation.draftNeedsArea"));
+      return;
+    }
     try {
       store.setIsSubmitting(true);
       setLocalError(null);
-      await upsertDraft();
+      const propertyId = await saveListing();
+      // The draft keeps the photos picked so far, so they are not lost.
+      await uploadPendingMedia(propertyId);
       notify(t("wizard.toast.draftSavedTitle"), t("wizard.toast.draftSavedMessage"), {
         confirmLabel: t("wizard.toast.viewMyListings"),
         onConfirm: () => {
@@ -336,31 +356,24 @@ export function PropertyCreateWizard() {
       name: asset.fileName || (mediaType === "image" ? "property.jpg" : "property.mp4"),
       type: asset.mimeType || (mediaType === "image" ? "image/jpeg" : "video/mp4"),
     };
-    try {
-      setLocalError(null);
-      const response = await uploadMediaMutation.mutateAsync({
-        propertyId: store.propertyId ?? undefined,
-        file,
-        type: mediaType,
-        displayOrder: store.media.length,
-      });
-      if (!response.data) throw new Error("The API did not return uploaded media.");
-      const uploadedData = response.data as any;
-      store.addMedia({
-        id: uploadedData.public_id || uploadedData.id || `upload_${Date.now()}`,
-        url: uploadedData.secure_url || uploadedData.url,
-        displayOrder: uploadedData.display_order ?? store.media.length,
-        mediaType: uploadedData.resource_type === "video" || uploadedData.media_type === "video" ? "video" : "image",
-      });
-    } catch (error) {
-      setLocalError(toApiError(error).message);
-    }
+    // Kept on the device; it is uploaded when the listing is saved or submitted.
+    setLocalError(null);
+    store.addMedia({
+      id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      url: asset.uri,
+      displayOrder: store.media.length,
+      mediaType,
+      file,
+      name: asset.fileName ?? undefined,
+    });
   };
 
   const handleDeleteMedia = async (mediaId: string) => {
     try {
       setLocalError(null);
-      if (store.propertyId) {
+      // Only a file that has been uploaded exists on the server.
+      const item = store.media.find((media) => media.id === mediaId);
+      if (item && !item.file && store.propertyId) {
         await deleteMediaMutation.mutateAsync({ mediaId, propertyId: store.propertyId });
       }
       store.removeMedia(mediaId);
@@ -379,7 +392,9 @@ export function PropertyCreateWizard() {
     try {
       store.setIsSubmitting(true);
       setLocalError(null);
-      const propertyId = await upsertDraft();
+      // Write the listing, then its photos and videos, then send it for review.
+      const propertyId = await saveListing();
+      await uploadPendingMedia(propertyId);
       await submitMutation.mutateAsync(propertyId);
       notify(t("wizard.toast.submittedTitle"), t("wizard.toast.submittedMessage"), {
         confirmLabel: t("wizard.toast.viewMyListings"),
@@ -496,25 +511,30 @@ export function PropertyCreateWizard() {
                 <Text style={styles.errorBannerText}>{localError}</Text>
               </View>
             ) : null}
+            {uploadProgress ? (
+              <Text accessibilityLiveRegion="polite" style={styles.formHelperText}>
+                {t("wizard.validation.uploadProgress", { done: uploadProgress.done, total: uploadProgress.total })}
+              </Text>
+            ) : null}
             {/* STEP 1: BASICS */}
             {store.currentStep === 1 && (
               <WizardBasicsStep activeTypeConfig={activeTypeConfig} />
             )}
 
-            {/* STEP 2: DETAILS */}
+            {/* STEP 2: LOCATION (Figma Node 56:2) */}
             {store.currentStep === 2 && (
-              <WizardDetailsStep activeTypeConfig={activeTypeConfig} />
+              <WizardLocationStep onOpenAreaPicker={() => setAreaPickerVisible(true)} />
             )}
 
-            {/* STEP 3: LOCATION (Figma Node 56:2) */}
+            {/* STEP 3: DETAILS */}
             {store.currentStep === 3 && (
-              <WizardLocationStep onOpenAreaPicker={() => setAreaPickerVisible(true)} />
+              <WizardDetailsStep activeTypeConfig={activeTypeConfig} />
             )}
 
             {/* STEP 4: MEDIA (Figma Node 56:1219) */}
             {store.currentStep === 4 && (
               <WizardMediaStep
-                isUploading={uploadMediaMutation.isPending}
+                isUploading={store.isSubmitting}
                 onDeleteMedia={handleDeleteMedia}
                 onPickMedia={handlePickMedia}
               />

@@ -1,24 +1,32 @@
 import { create } from "zustand";
+import type { UploadInput } from "@/services/upload";
 
 type PropertyType = "residential" | "commercial" | "land" | "parking";
 type ListingType = "sale" | "rent";
 
+/**
+ * A photo or video in the form. Until the listing is saved it lives on the
+ * device: `file` holds it, `id` is a local one and `url` is a local preview.
+ * Once uploaded, `file` is gone and `id` and `url` are the server's.
+ */
 export interface WizardMediaItem {
   id: string;
   url: string;
   displayOrder: number;
   mediaType: "image" | "video";
+  file?: UploadInput;
+  name?: string;
 }
 
 export interface WizardState {
-  // Step 1: Basics
+  // Basics
   title: string;
   type: PropertyType;
   subtype: string;
   listingType: ListingType;
   description: string;
 
-  // Step 2: Details
+  // Details
   price: string;
   areaSize: string;
   areaUnit: "sqft" | "katha" | "bigha" | "sqm";
@@ -28,7 +36,7 @@ export interface WizardState {
   facing: string;
   amenities: Record<string, boolean>;
 
-  // Step 3: Location
+  // Location
   district: string;
   areaId: string;
   areaName: string;
@@ -36,7 +44,7 @@ export interface WizardState {
   locationLat: number | null;
   locationLng: number | null;
 
-  // Step 4: Media
+  // Media
   media: WizardMediaItem[];
   primaryMediaIndex: number;
   virtualTourUrl: string;
@@ -53,6 +61,8 @@ export interface WizardState {
   setMedia: (media: WizardMediaItem[]) => void;
   addMedia: (item: WizardMediaItem) => void;
   removeMedia: (id: string) => void;
+  /** Swaps a local item for what the server stored. */
+  replaceMedia: (id: string, item: WizardMediaItem) => void;
   setPrimaryMedia: (index: number) => void;
   setAmenities: (amenities: Record<string, boolean>) => void;
   toggleAmenity: (key: string) => void;
@@ -116,6 +126,11 @@ export const usePropertyWizardStore = create<WizardState>((set) => ({
         s.primaryMediaIndex >= s.media.length - 1
           ? Math.max(0, s.media.length - 2)
           : s.primaryMediaIndex,
+    })),
+
+  replaceMedia: (id, item) =>
+    set((s) => ({
+      media: s.media.map((m) => (m.id === id ? item : m)),
     })),
 
   setPrimaryMedia: (index) => set({ primaryMediaIndex: index }),
