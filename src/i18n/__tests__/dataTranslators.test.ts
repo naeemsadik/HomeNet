@@ -1,6 +1,7 @@
 import {
   formatLocalizedNumber,
   formatLocalizedPrice,
+  isPriceOnRequest,
   translateAmenity,
   translatePropertyType,
   translateListingStatus,
@@ -29,6 +30,19 @@ describe("dataTranslators", () => {
   });
 
   describe("formatLocalizedPrice", () => {
+    it("shows a price of 1, what the API stores for Contact for price, as words", () => {
+      expect(formatLocalizedPrice(1, "BDT", "en")).toBe("Contact for price");
+      expect(formatLocalizedPrice(1, "BDT", "bn")).toBe("মূল্য জানতে যোগাযোগ করুন");
+    });
+
+    it("treats 1 and the older 0 as Contact for price, and nothing else", () => {
+      expect(isPriceOnRequest(1)).toBe(true);
+      expect(isPriceOnRequest(0)).toBe(true);
+      expect(isPriceOnRequest(2)).toBe(false);
+      expect(isPriceOnRequest(18_500_000)).toBe(false);
+      expect(isPriceOnRequest(undefined)).toBe(false);
+    });
+
     it("shows a price of 0 as Contact for price, never as 0", () => {
       expect(formatLocalizedPrice(0, "BDT", "en")).toBe("Contact for price");
       expect(formatLocalizedPrice(0, "BDT", "bn")).toBe("মূল্য জানতে যোগাযোগ করুন");

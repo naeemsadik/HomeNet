@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
-import { useTranslation } from "@/i18n";
+import { PRICE_ON_REQUEST, isPriceOnRequest, priceOnRequestLabel, useTranslation } from "@/i18n";
 import { Send, ArrowRight, ArrowLeft, Check, MapPin } from "@/components/icons";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,7 +41,9 @@ export function PropertyForm({
   loading = false,
   error = null,
 }: PropertyFormProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  // "Contact for price" is stored as price 1; the box is then locked.
+  const [onRequest, setOnRequest] = useState(isPriceOnRequest(initialData?.price));
   const [step, setStep] = useState(0);
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
   const [area, setArea] = useState<Area | null>(initialArea);
@@ -54,7 +56,11 @@ export function PropertyForm({
       description: initialData?.description ?? "",
       type: (initialData?.type as PropertyFormData["type"]) ?? "residential",
       listing_type: (initialData?.listing_type as PropertyFormData["listing_type"]) ?? "sale",
-      price: initialData?.price ? String(initialData.price) : "",
+      price: isPriceOnRequest(initialData?.price)
+        ? String(PRICE_ON_REQUEST)
+        : initialData?.price
+          ? String(initialData.price)
+          : "",
       area_id: area?.id ?? initialData?.area_id ?? "",
       address: initialData?.address ?? "",
       bedrooms: initialData?.amenities?.bedrooms ? String(initialData.amenities.bedrooms) : "",
@@ -166,12 +172,37 @@ export function PropertyForm({
                 />
               </View>
             </View>
-            <FormFloatingInput
-              control={control}
-              name="price"
-              label={t("wizard.form.priceLabel")}
-              keyboardType="numeric"
-            />
+            {onRequest ? (
+              <View accessibilityState={{ disabled: true }} style={styles.priceLocked}>
+                <Text style={styles.priceLockedLabel}>{t("wizard.form.priceLabel")}</Text>
+                <Text style={styles.priceLockedValue}>{priceOnRequestLabel(language)}</Text>
+              </View>
+            ) : (
+              <FormFloatingInput
+                control={control}
+                name="price"
+                label={t("wizard.form.priceLabel")}
+                keyboardType="numeric"
+              />
+            )}
+            <Pressable
+              accessibilityLabel={priceOnRequestLabel(language)}
+              accessibilityHint={t("wizard.details.contactForPriceHint")}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: onRequest }}
+              aria-checked={onRequest}
+              onPress={() => {
+                const next = !onRequest;
+                setOnRequest(next);
+                setValue("price", next ? String(PRICE_ON_REQUEST) : "", { shouldValidate: next });
+              }}
+              style={styles.priceOnRequestRow}
+            >
+              <View style={[styles.priceOnRequestBox, onRequest && styles.priceOnRequestBoxOn]}>
+                {onRequest ? <Check color={colorTokens.ink} size={14} strokeWidth={3} /> : null}
+              </View>
+              <Text style={styles.priceOnRequestText}>{priceOnRequestLabel(language)}</Text>
+            </Pressable>
           </View>
         )}
 
@@ -295,6 +326,37 @@ export function PropertyForm({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  priceLocked: {
+    minHeight: 56,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
+    backgroundColor: "#ECEFEE",
+    opacity: 0.75,
+  },
+  priceLockedLabel: { fontFamily: fonts.medium, fontSize: 12, color: colorTokens.muted },
+  priceLockedValue: { fontFamily: fonts.semiBold, fontSize: 15, color: colorTokens.ink },
+  priceOnRequestRow: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    alignSelf: "flex-start",
+  },
+  priceOnRequestBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: "rgba(11,26,23,0.35)",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  priceOnRequestBoxOn: { backgroundColor: colorTokens.brand, borderColor: colorTokens.brand },
+  priceOnRequestText: { fontFamily: fonts.semiBold, fontSize: 14, color: colorTokens.ink },
   scrollContent: { paddingBottom: 40 },
   stepIndicator: {
     flexDirection: "row",
