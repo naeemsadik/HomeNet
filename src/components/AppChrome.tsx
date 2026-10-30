@@ -275,6 +275,10 @@ function TopBar({
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
+  // Until the saved session is restored, "Sign in" would be a guess. Every full
+  // page load starts here, so showing it flashed a signed-out header at people
+  // who were signed in.
+  const hydrated = useAuthStore((s) => s.hydrated);
   const { data: unreadData } = useUnreadCount("user");
   const unreadCount = unreadData?.data?.count ?? 0;
   const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
@@ -353,7 +357,7 @@ function TopBar({
                   />
                 </View>
               </Pressable>
-            ) : (
+            ) : hydrated ? (
               <Pressable
                 accessibilityLabel={t("auth.signIn")}
                 accessibilityRole="button"
@@ -367,7 +371,7 @@ function TopBar({
                 <User color={colorTokens.brandText} size={14} strokeWidth={2.2} />
                 <Text style={styles.mobileHomeSignInText}>{t("auth.signIn")}</Text>
               </Pressable>
-            )}
+            ) : null}
           </View>
         </View>
       </SafeAreaView>
@@ -685,7 +689,7 @@ function TopBar({
                 )}
               </View>
             </>
-          ) : (
+          ) : hydrated ? (
             <Pressable
               onPress={() => useAuthModalStore.getState().open()}
               accessibilityLabel={t("nav.signIn")}
@@ -716,7 +720,7 @@ function TopBar({
                 {t("nav.signIn")}
               </Text>
             </Pressable>
-          )}
+          ) : null}
 
           {/* Language Toggle (ENG / BN) */}
           <LanguageToggle compact={isPhone} variant={isCrystal ? "crystal" : "default"} />
