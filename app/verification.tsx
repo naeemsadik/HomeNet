@@ -1,10 +1,5 @@
-import { RequireAuth } from "@/components/RequireAuth";
-import { VerificationScreen } from "@/features/seller/screens/VerificationScreen";
+import { Redirect } from "expo-router";
 
 export default function VerificationRoute() {
-  return (
-    <RequireAuth active="seller">
-      <VerificationScreen />
-    </RequireAuth>
-  );
+  return <Redirect href="/seller" />;
 }

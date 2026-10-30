@@ -76,18 +76,20 @@ export function SellerWelcomeBanner({
             </Pressable>
           )}
 
-          <Pressable
-            accessibilityLabel={t("dashboard.boostListing")}
-            onPress={onBoostListing}
-            style={({ pressed }) => [
-              styles.secondaryBtn,
-              pressed && styles.btnPressed,
-              webPointer,
-            ]}
-          >
-            <Rocket color="#FFFFFF" size={16} strokeWidth={2} />
-            <Text style={styles.secondaryBtnText}>{t("dashboard.boostListing")}</Text>
-          </Pressable>
+          {onBoostListing && (
+            <Pressable
+              accessibilityLabel={t("dashboard.boostListing")}
+              onPress={onBoostListing}
+              style={({ pressed }) => [
+                styles.secondaryBtn,
+                pressed && styles.btnPressed,
+                webPointer,
+              ]}
+            >
+              <Rocket color="#FFFFFF" size={16} strokeWidth={2} />
+              <Text style={styles.secondaryBtnText}>{t("dashboard.boostListing")}</Text>
+            </Pressable>
+          )}
         </View>
       </View>
 

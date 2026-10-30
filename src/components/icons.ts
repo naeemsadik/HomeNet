@@ -13,6 +13,7 @@ export type { LucideIcon } from "lucide-react-native";
 export { default as AlertCircle } from "lucide-react-native/icons/circle-alert";
 export { default as AlertTriangle } from "lucide-react-native/icons/triangle-alert";
 export { default as Archive } from "lucide-react-native/icons/archive";
+export { default as ArchiveRestore } from "lucide-react-native/icons/archive-restore";
 export { default as ArrowLeft } from "lucide-react-native/icons/arrow-left";
 export { default as ArrowRight } from "lucide-react-native/icons/arrow-right";
 export { default as ArrowUpRight } from "lucide-react-native/icons/arrow-up-right";
