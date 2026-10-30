@@ -372,7 +372,7 @@ export const bn: TranslationSchema = {
     sellerDashboard: "সেলার ড্যাশবোর্ড",
     welcomeBack: "স্বাগতম,",
     welcomeTitle: "{{name}} 👋",
-    bannerDescription: "আপনার লিস্টিংগুলোতে এখন পর্যন্ত মোট {{views}}টি ভিউ এবং {{inquiries}}টি ক্রেতার অনুসন্ধান এসেছে। গতি ধরে রাখুন।",
+    bannerDescription: "আপনার লিস্টিংগুলোতে এখন পর্যন্ত মোট {{views}}টি ভিউ এসেছে। আপনার সক্রিয় লিস্টিং পরিচালনা করুন বা নতুন প্রোপার্টি যোগ করুন।",
     totalListings: "মোট প্রপার্টি",
     activeListings: "সক্রিয় প্রপার্টি",
     draftListings: "খসড়া প্রপার্টি",
@@ -572,6 +572,7 @@ export const bn: TranslationSchema = {
       markSold: "বিক্রি হিসেবে চিহ্নিত করুন",
       boost: "বুস্ট করুন",
       archive: "আর্কাইভ করুন",
+      unarchive: "আন-আর্কাইভ করুন",
     },
     filters: {
       all: "সকল",
@@ -587,6 +588,9 @@ export const bn: TranslationSchema = {
     archiveConfirmTitle: "প্রপার্টি আর্কাইভ করুন",
     archiveConfirmMessage: "\"{{title}}\" আর্কাইভ করবেন? এটি আর সাইটে দেখানো হবে না, তবে আর্কাইভড তালিকায় পাবেন।",
     archiveFailed: "আর্কাইভ করা ব্যর্থ হয়েছে",
+    unarchiveConfirmTitle: "প্রপার্টি আন-আর্কাইভ করুন",
+    unarchiveConfirmMessage: "\"{{title}}\" আন-আর্কাইভ করবেন? এটি আবার সক্রিয় তালিকায় প্রদর্শিত হবে।",
+    unarchiveFailed: "আন-আর্কাইভ করা ব্যর্থ হয়েছে",
     toggleView: {
       aria: "ওয়েবসাইটের ক্রেতা ভিউতে যান",
       label: "ক্রেতা ভিউতে যান",

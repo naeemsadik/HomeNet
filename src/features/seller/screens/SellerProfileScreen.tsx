@@ -1,19 +1,9 @@
 import * as ImagePicker from "expo-image-picker";
 import {
-  BarChart2,
-  Building2,
   CheckCircle2,
-  CircleHelp,
-  CreditCard,
   KeyRound,
-  LayoutDashboard,
-  LogOut,
-  PlusCircle,
-  Rocket,
   Shield,
   ShieldAlert,
-  ShieldCheck,
-  Sparkles,
   Trash2,
   User,
   X,
@@ -27,8 +17,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { confirmAction, notify } from "@/lib/alert";
-import { router } from "expo-router";
+import { notify } from "@/lib/alert";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
@@ -40,7 +29,6 @@ import type { UploadInput } from "@/services/upload";
 import { SellerChangePasswordModal } from "../components/SellerChangePasswordModal";
 import { SellerShell } from "../components/SellerShell";
 import { useTranslation } from "@/i18n";
-import type { SellerNavKey } from "./SellerDashboardScreen";
 import { styles } from "./SellerProfileScreen.styles";
 
 const DEFAULT_AVATAR =
@@ -51,10 +39,8 @@ const DEFAULT_EMAIL = "you@example.com";
 
 export function SellerProfileScreen() {
   const { t } = useTranslation();
-  const { isPhone, isTablet } = useResponsive();
-  const { user, logout, fetchMe } = useAuthStore();
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const { isPhone } = useResponsive();
+  const { user, fetchMe } = useAuthStore();
 
   const defaultName = t("seller.profile.defaultName");
 
@@ -84,48 +70,19 @@ export function SellerProfileScreen() {
   const isNormalText = (val: string, defaultVal: string) =>
     Boolean(user) || (val.length > 0 && val !== defaultVal);
 
-  // The browser's confirm dialog only has OK / Cancel, so each message ends
-  // with the question its OK answers.
-  const handleBadgePress = async () => {
+  const handleBadgePress = () => {
     if (isVerified) {
-      const view = await confirmAction(
+      notify(
         t("seller.profile.verifiedAlertTitle"),
-        t("seller.profile.verifiedAlertMessage"),
-        { confirmLabel: t("seller.profile.viewVerificationBtn"), cancelLabel: t("common.ok") },
+        t("seller.profile.verifiedAlertMessage")
       );
-      if (view) router.push("/verification" as any);
-    } else if (!user) {
-      // Verification needs an account (the route is behind RequireAuth), so
-      // signing in is the only step to offer.
-      const signIn = await confirmAction(
-        t("seller.profile.signInRequiredTitle"),
-        t("seller.profile.signInRequiredMessage"),
-        { confirmLabel: t("seller.profile.signInBtn") },
-      );
-      if (signIn) router.push("/profile" as any);
     } else {
-      const go = await confirmAction(
-        t("seller.profile.verificationPendingTitle"),
-        t("seller.profile.verificationPendingMessage"),
-        { confirmLabel: t("seller.profile.goToVerificationBtn") },
+      notify(
+        t("seller.profile.unverifiedBadge"),
+        t("seller.profile.verificationPendingMessage")
       );
-      if (go) router.push("/verification" as any);
     }
   };
-
-  const sidebarNavItems = [
-    { key: "dashboard" as SellerNavKey, label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
-    { key: "listings" as SellerNavKey, label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties" },
-    { key: "create" as SellerNavKey, label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
-    { key: "verification" as SellerNavKey, label: t("dashboard.tabs.verification"), icon: ShieldCheck, href: "/verification" },
-    { key: "boost" as SellerNavKey, label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights" as SellerNavKey, label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics" as SellerNavKey, label: t("dashboard.tabs.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments" as SellerNavKey, label: t("dashboard.tabs.payments"), icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile" as SellerNavKey, label: t("dashboard.tabs.profile"), icon: User, href: "/seller/profile", active: true },
-    { key: "help" as SellerNavKey, label: t("dashboard.tabs.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout" as SellerNavKey, label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
-  ];
 
   const handleAvatarUpload = async () => {
     try {
@@ -191,28 +148,9 @@ export function SellerProfileScreen() {
     setDeleteDialogOpen(true);
   };
 
-  const handleLogout = async () => {
-    const doLogout = async () => {
-      try {
-        await logout();
-      } catch (err) {
-        if (__DEV__) console.warn("Logout error:", err);
-      }
-      router.replace("/");
-    };
-
-    const confirmed = await confirmAction(t("seller.profile.logoutConfirmTitle"), t("seller.profile.logoutConfirmMessage"), {
-      confirmLabel: t("seller.profile.logoutBtn"),
-      destructive: true,
-    });
-    if (confirmed) await doLogout();
-  };
-
   return (
     <SellerShell
       activeNav="profile"
-      onSearchQueryChange={setSearchQuery}
-      searchQuery={searchQuery}
       title={t("seller.profile.title")}
     >
           <View

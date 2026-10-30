@@ -45,7 +45,7 @@ export function SellerTopHeader({
   onSearchQueryChange,
   showSearch = true,
   showViewSite = true,
-  hasUnreadNotifications = true,
+  hasUnreadNotifications = false,
 }: SellerTopHeaderProps) {
   const { t } = useTranslation();
   const { isTablet } = useResponsive();

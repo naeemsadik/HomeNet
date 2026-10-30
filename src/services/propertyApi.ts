@@ -100,6 +100,26 @@ export async function legacyPatchProperty(id: string, dto: UpsertPropertyDto) {
   return data;
 }
 
+/** Owner unarchive: restores an archived listing back to active via multiple fallback strategies. */
+export async function unarchiveProperty(id: string) {
+  try {
+    const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>(`/v1/properties/${id}/unarchive`);
+    return data;
+  } catch {
+    try {
+      const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>(`/v1/properties/${id}/restore`);
+      return data;
+    } catch {
+      try {
+        const { data } = await legacyPatchProperty(id, { status: "active" } as any);
+        return data;
+      } catch {
+        return updateProperty(id, { status: "active" } as any);
+      }
+    }
+  }
+}
+
 /** Owner archive: hides an active or sold listing but keeps it (the API refuses other statuses). */
 export async function archiveProperty(id: string) {
   const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/properties/${id}`);
