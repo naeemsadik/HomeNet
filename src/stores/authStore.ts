@@ -40,6 +40,25 @@ interface AuthState {
   resetSession: () => void;
 }
 
+/** 401: the refresh in apiClient failed too. 404: the account is gone. */
+function isSessionGone(error: unknown) {
+  const status = toApiError(error).status;
+  return status === 401 || status === 404;
+}
+
+const RESTORE_RETRY_DELAYS_MS = [1_000, 3_000];
+
+async function fetchMeWithRetry(fetchMe: () => Promise<void>) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fetchMe();
+    } catch (error) {
+      if (isSessionGone(error) || attempt >= RESTORE_RETRY_DELAYS_MS.length) throw error;
+      await new Promise((resolve) => setTimeout(resolve, RESTORE_RETRY_DELAYS_MS[attempt]));
+    }
+  }
+}
+
 function authError(error: unknown) {
   const normalized = toApiError(error);
   return { error: normalized.message, errorCode: normalized.errorCode };
@@ -166,12 +185,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (get().hydrated) return;
     try {
       if (await getAccessToken()) {
-        await get().fetchMe();
+        await fetchMeWithRetry(get().fetchMe);
         void useSavedStore.getState().syncGuestSaves();
       }
-    } catch {
-      await clearTokens();
-      get().resetSession();
+    } catch (error) {
+      // Only a rejected session ends it. A 429, a 5xx or a dropped connection
+      // says nothing about the tokens, and clearing them signed people out
+      // whenever the API was busy.
+      if (isSessionGone(error)) {
+        await clearTokens();
+        get().resetSession();
+      }
     } finally {
       set({ hydrated: true, loading: false });
     }

@@ -226,9 +226,13 @@ apiClient.interceptors.response.use(
       return apiClient(originalRequest);
     } catch (refreshError) {
       const normalized = toApiError(refreshError);
-      await clearTokens();
       processPendingQueue(normalized, null);
-      await notifyUnauthorized();
+      // Only a rejected refresh token ends the session. /v1/auth/refresh is rate
+      // limited, so a 429, a 5xx or a dropped connection must keep the tokens.
+      if (normalized.status === 400 || normalized.status === 401 || normalized.status === 403) {
+        await clearTokens();
+        await notifyUnauthorized();
+      }
       return Promise.reject(normalized);
     } finally {
       isRefreshing = false;

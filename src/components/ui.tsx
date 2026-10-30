@@ -63,8 +63,11 @@ export function AppLink({
       // The style goes on Link, flattened: with asChild, Link hands the anchor its
       // own style and the child's is lost. Given to the child, every link on the
       // site rendered unstyled (the logo stacked in a column).
-      <Link asChild href={href as Href} onPress={onPress} style={StyleSheet.flatten([webPointer, style]) as TextStyle}>
-        <Pressable accessibilityLabel={accessibilityLabel} accessibilityRole="link">
+      // onPress goes on the child, never on Link. Link spreads its own props over
+      // its navigation handler, so even onPress={undefined} replaced it, and the
+      // click fell through to the anchor as a full page load.
+      <Link asChild href={href as Href} style={StyleSheet.flatten([webPointer, style]) as TextStyle}>
+        <Pressable accessibilityLabel={accessibilityLabel} accessibilityRole="link" onPress={onPress}>
           {children}
         </Pressable>
       </Link>
