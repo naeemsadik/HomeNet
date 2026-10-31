@@ -1,7 +1,8 @@
 import { CreditCard } from "@/components/icons";
 import { Pressable, Text, View } from "react-native";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors } from "@/theme";
+import { colors, webPointer } from "@/theme";
+import { notify } from "@/lib/alert";
 import { useTranslation, formatLocalizedNumber } from "@/i18n";
 import { styles } from "../screens/SellerDashboardScreen.styles";
 
@@ -11,6 +12,10 @@ export function SellerPaymentsWorkspace() {
   const { isPhone } = useResponsive();
 
   const zeroAmount = t("seller.payments.currencyAmount", { amount: formatLocalizedNumber("0.00", language) });
+
+  const handleConnectPayout = (method: string) => {
+    notify(t("common.notice"), `${method} integration is currently in sandbox demo mode.`);
+  };
 
   return (
     <>
@@ -63,7 +68,10 @@ export function SellerPaymentsWorkspace() {
               </View>
             </View>
             <Text style={styles.payoutAccountNo}>{t("seller.payments.linkBkash")}</Text>
-            <Pressable style={styles.connectPayoutBtn}>
+            <Pressable
+              onPress={() => handleConnectPayout("bKash")}
+              style={[styles.connectPayoutBtn, webPointer]}
+            >
               <Text style={styles.connectPayoutBtnText}>{t("seller.payments.connectBtn")}</Text>
             </Pressable>
           </View>
@@ -76,7 +84,10 @@ export function SellerPaymentsWorkspace() {
               </View>
             </View>
             <Text style={styles.payoutAccountNo}>{t("seller.payments.localBank")}</Text>
-            <Pressable style={styles.connectPayoutBtn}>
+            <Pressable
+              onPress={() => handleConnectPayout("Bank Transfer")}
+              style={[styles.connectPayoutBtn, webPointer]}
+            >
               <Text style={styles.connectPayoutBtnText}>{t("seller.payments.connectBtn")}</Text>
             </Pressable>
           </View>
