@@ -32,14 +32,14 @@ import { RightmoveFilterCard } from "@/components/RightmoveFilterCard";
 import { PropertyResultsMap } from "@/features/property/components/PropertyResultsMap";
 import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
 import { useAreas } from "@/features/property/hooks/useAreas";
-import { useBrowseFeed } from "@/features/property/hooks/useBrowseFeed";
+import { fetchBrowseTotal, useBrowseFeed } from "@/features/property/hooks/useBrowseFeed";
+import type { PropertyFilters } from "@/features/property/types/property";
 import {
   areaOptions as buildAreaOptions,
   fallbackAreaOptions,
   isCityName,
   resolveScope,
 } from "@/features/property/utils/areaScope";
-import { getProperties } from "@/services/propertyApi";
 import {
   applyClientFilters,
   countActiveFilters,
@@ -196,13 +196,31 @@ export function BrowseScreen({
     ? results.length
     : (total ?? results.length);
 
+  // The sheet's count has to be asked for the way the feed is: the area and
+  // distance are not part of toApiFilters, they become the scope. Asking with
+  // toApiFilters alone ignored the area, so picking Mohammadpur still read
+  // "Show all 18 results", and the right number only flashed up as the sheet
+  // closed and the feed behind it reloaded.
+  const previewArea = previewFilters?.area ?? "";
+  const previewRadius = previewFilters?.radius ?? "";
+  const previewScope = React.useMemo(
+    () =>
+      resolveScope({
+        name: previewArea,
+        radiusKm: previewRadius ? parseInt(previewRadius, 10) : 0,
+        areas,
+      }).scope,
+    [previewArea, previewRadius, areas]
+  );
+  const previewReady = !previewArea || isCityName(previewArea) || areasReady;
+  const previewApiFilters = previewFilters ? toApiFilters(previewFilters) : null;
   const previewQuery = useQuery({
-    queryKey: ["properties", "preview", previewFilters && toApiFilters(previewFilters)],
-    queryFn: () => getProperties({ ...toApiFilters(previewFilters as SearchFilters), limit: 1 }),
-    enabled: Boolean(previewFilters) && isFilterModalOpen,
+    queryKey: ["properties", "preview", previewApiFilters, previewScope],
+    queryFn: () => fetchBrowseTotal(previewApiFilters as PropertyFilters, previewScope),
+    enabled: Boolean(previewFilters) && isFilterModalOpen && previewReady,
   });
   const previewCount = previewFilters
-    ? previewQuery.data?.data?.total
+    ? previewQuery.data
     : totalCount;
 
   const handleToggleSaved = useCallback(
