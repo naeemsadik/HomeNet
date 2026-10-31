@@ -26,6 +26,7 @@ import { Footer } from "@/components/Footer";
 import { SellerTopHeader } from "./SellerTopHeader";
 import { SellerMobileDrawer } from "./SellerMobileDrawer";
 import { useResponsive } from "@/hooks/useResponsive";
+import { MobileNav } from "@/components/AppChrome";
 import { useAuthStore } from "@/stores/authStore";
 import { confirmAction } from "@/lib/alert";
 import { colors, colorTokens, fonts } from "@/theme";
@@ -217,6 +218,8 @@ export function SellerShell({
             {children}
           </View>
         )}
+        {/* The same bottom bar as the rest of the site, so Post never hides it. */}
+        {isTablet ? <MobileNav active={activeNav === "create" ? "post" : activeNav === "profile" ? "profile" : "seller"} /> : null}
       </View>
 
       {/* Mobile / Tablet Navigation Drawer */}

@@ -939,6 +939,16 @@ export const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colorTokens.divider,
   },
+  mobileNavIndicator: {
+    width: 56,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mobileNavIndicatorActive: {
+    backgroundColor: colorTokens.brandSurface,
+  },
   mobileNavText: {
     color: "#7B8983",
     fontFamily: fonts.semiBold,
