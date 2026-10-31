@@ -1,4 +1,4 @@
-import { X } from "@/components/icons";
+import { Store, X } from "@/components/icons";
 import {
   Modal,
   Pressable,
@@ -75,6 +75,17 @@ export function SellerMobileDrawer({
               <Text style={styles.sellerRoleText}>{t("seller.drawer.rolePill")}</Text>
             </View>
           </View>
+
+          {/* Back to the buyer site, with its full label: on phones the header shows only the icon. */}
+          <AppLink
+            accessibilityLabel={t("seller.toggleView.aria")}
+            href="/"
+            onPress={onClose}
+            style={styles.switchToBuyer}
+          >
+            <Store color={colorTokens.brandText} size={20} />
+            <Text style={styles.switchToBuyerText}>{t("seller.toggleView.label")}</Text>
+          </AppLink>
 
           {/* Navigation Links List */}
           <ScrollView
@@ -210,6 +221,24 @@ const styles = StyleSheet.create({
   navScroll: {
     gap: 2,
     paddingVertical: 4,
+  },
+  switchToBuyer: {
+    minHeight: 48,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 12,
+    backgroundColor: colorTokens.brandSurface,
+    borderWidth: 1,
+    borderColor: colorTokens.brandBorder,
+  },
+  switchToBuyerText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 15,
+    color: colorTokens.brandText,
   },
   navItem: {
     minHeight: 42,

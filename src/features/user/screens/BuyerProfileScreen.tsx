@@ -12,7 +12,6 @@ import {
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   ScrollView,
   Text,
@@ -32,10 +31,9 @@ import { editProfileSchema } from "@/lib/schemas/user";
 import { toApiError } from "@/services/apiClient";
 import type { UploadInput } from "@/services/upload";
 import { useTranslation } from "@/i18n";
+import { UserAvatar } from "@/components/UserAvatar";
 import { styles } from "./BuyerProfileScreen.styles";
 
-const DEFAULT_AVATAR =
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop";
 // Sample values shown (greyed out) in signed-out preview. Never a real person.
 const DEFAULT_NAME = "Your name";
 const DEFAULT_EMAIL = "you@example.com";
@@ -49,7 +47,7 @@ export function BuyerProfileScreen() {
   const [fullName, setFullName] = useState(user?.full_name || DEFAULT_NAME);
   const [email, setEmail] = useState(user?.email || DEFAULT_EMAIL);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
-    user?.avatar_url || DEFAULT_AVATAR
+    user?.avatar_url ?? null
   );
 
   const [isSaving, setIsSaving] = useState(false);
@@ -209,10 +207,7 @@ export function BuyerProfileScreen() {
             {/* Avatar and Name Row */}
             <View style={[styles.profileRow, isPhone && styles.profileRowPhone]}>
               <View style={[styles.avatarWrap, isPhone && styles.avatarWrapPhone]}>
-                <Image
-                  source={{ uri: avatarUrl || DEFAULT_AVATAR }}
-                  style={styles.avatarImage}
-                />
+                <UserAvatar name={fullName} size={96} style={styles.avatarImage} uri={avatarUrl} />
                 {isUploading && (
                   <View style={styles.uploadingOverlay}>
                     <ActivityIndicator color="#FFFFFF" size="small" />

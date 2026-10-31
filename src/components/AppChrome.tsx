@@ -24,7 +24,6 @@ import {
 } from "@/components/icons";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
-  Image,
   Modal,
   Platform,
   Pressable,
@@ -40,6 +39,7 @@ import Svg, { Path } from "react-native-svg";
 import { Link, router, usePathname, type Href } from "expo-router";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { Brand } from "./Brand";
+import { UserAvatar } from "./UserAvatar";
 import { AiFinderModal } from "./AiFinderModal";
 import { InstantValuationModal } from "@/features/valuation/components/InstantValuationModal";
 import { LanguageToggle } from "./LanguageToggle";
@@ -53,6 +53,7 @@ import { startListing } from "@/lib/startListing";
 
 export type ActivePage =
   | "home"
+  | "post"
   | "search"
   | "buy"
   | "rent"
@@ -338,26 +339,9 @@ function TopBar({
             </Pressable>
             ) : null}
 
-            {/* 3. Auth / Sign In Trigger */}
-            {user ? (
-              <Pressable
-                accessibilityLabel={t("nav.profileSettings")}
-                accessibilityRole="button"
-                onPress={() => router.push("/profile")}
-                style={[styles.mobileHomeAccountBtn, webPointer]}
-              >
-                <View style={styles.mobileHomeAvatarWrap}>
-                  <Image
-                    source={{
-                      uri:
-                        user.avatar_url ||
-                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
-                    }}
-                    style={styles.mobileHomeAvatarImage}
-                  />
-                </View>
-              </Pressable>
-            ) : hydrated ? (
+            {/* 3. Sign in for guests. A signed-in person's photo is on the Account tab
+                below, so it is not repeated up here. */}
+            {!user && hydrated ? (
               <Pressable
                 accessibilityLabel={t("auth.signIn")}
                 accessibilityRole="button"
@@ -559,13 +543,11 @@ function TopBar({
                   ]}
                 >
                   <View style={[styles.avatarButton, isPhone && styles.avatarButtonPhone]}>
-                    <Image
-                      source={{
-                        uri:
-                          user.avatar_url ||
-                          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
-                      }}
+                    <UserAvatar
+                      name={user.full_name}
+                      size={isPhone ? 28 : 32}
                       style={[styles.avatarImage, isPhone && styles.avatarImagePhone]}
+                      uri={user.avatar_url}
                     />
                   </View>
 
@@ -593,13 +575,11 @@ function TopBar({
                     <View style={[styles.userDropdownMenu, isPhone && styles.userDropdownMenuPhone]}>
                       {/* User Info Header */}
                       <View style={styles.userDropdownProfile}>
-                        <Image
-                          source={{
-                            uri:
-                              user.avatar_url ||
-                              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80",
-                          }}
+                        <UserAvatar
+                          name={user.full_name}
+                          size={36}
                           style={styles.dropdownAvatar}
+                          uri={user.avatar_url}
                         />
                         <View style={styles.dropdownProfileInfo}>
                           <Text numberOfLines={1} style={styles.userDropdownName}>
@@ -730,7 +710,8 @@ function TopBar({
   );
 }
 
-function MobileNav({ active }: { active: ActivePage }) {
+/** The phone and tablet bottom bar. Seller pages show it too, so it never disappears. */
+export function MobileNav({ active }: { active: ActivePage }) {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const links: {
@@ -742,7 +723,7 @@ function MobileNav({ active }: { active: ActivePage }) {
   }[] = [
     { translationKey: "nav.home", href: "/", icon: Home, selected: active === "home", authGated: false },
     { translationKey: "nav.search", href: "/buy", icon: Search, selected: active === "buy" || active === "rent" || active === "holiday" || active === "sold" || active === "search" || active === "property" || active === "market", authGated: false },
-    { translationKey: "nav.post", href: "/property/create", icon: Plus, selected: false, authGated: true },
+    { translationKey: "nav.post", href: "/property/create", icon: Plus, selected: active === "post", authGated: true },
     { translationKey: "nav.saved", href: "/saved", icon: Heart, selected: active === "saved", authGated: true },
     { translationKey: "nav.account", href: "/profile", icon: User, selected: active === "profile", authGated: true },
   ];
@@ -776,11 +757,19 @@ function MobileNav({ active }: { active: ActivePage }) {
               accessibilityLabel={label}
               accessibilityState={{ selected }}
             >
-              <Icon
-                color={selected ? colors.greenOnLight : "#7B8983"}
-                size={20}
-                strokeWidth={selected ? 2.2 : 1.8}
-              />
+              {/* The current tab sits on a tinted pill (Material 3's active indicator). */}
+              <View style={[styles.mobileNavIndicator, selected && styles.mobileNavIndicatorActive]}>
+                {translationKey === "nav.account" && user ? (
+                  // Signed in, the Account tab is the person's own photo (or initials).
+                  <UserAvatar name={user.full_name} size={26} uri={user.avatar_url} />
+                ) : (
+                  <Icon
+                    color={selected ? colors.greenOnLight : "#7B8983"}
+                    size={20}
+                    strokeWidth={selected ? 2.2 : 1.8}
+                  />
+                )}
+              </View>
               <Text
                 style={[
                   styles.mobileNavText,
@@ -804,6 +793,7 @@ export function AppChrome({
   fluid,
   customTopBar,
   compactFooter,
+  floating,
 }: {
   children: ReactNode;
   active: ActivePage;
@@ -812,6 +802,14 @@ export function AppChrome({
   customTopBar?: ReactNode;
   /** Show only the short footer (policies and contact), for the phone homepage. */
   compactFooter?: boolean;
+  /**
+   * Pinned over the page, just above the bottom tabs, while the page scrolls
+   * under it (the search results' List | Map switcher). The web pins such
+   * controls with position: fixed; in the app that is not available, and an
+   * absolute child of the page scrolled away with the content and landed over
+   * the last card, so the app needs this slot outside the scroll view.
+   */
+  floating?: ReactNode;
 }) {
   const { isTablet, isPhone, width, containerMaxWidth } = useResponsive();
   const isMobile = isMobileWidth(width);
@@ -837,53 +835,66 @@ export function AppChrome({
     setIsScrolled(top > 40);
   };
 
+  const scrollView = (
+    <ScrollView
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
+      contentContainerStyle={[
+        styles.pageScrollContent,
+        // The bar is pinned over the page and grows by the status-bar inset
+        // (edge-to-edge on Android), so the page must start below both.
+        // A custom bar (the phone search screen's) sits in the flow instead.
+        !bleed && !customTopBar && {
+          paddingTop:
+            (isMobile
+              ? layout.navHeightPhone
+              : isTablet
+              ? layout.navHeightTablet
+              : layout.navHeight) + insets.top,
+        },
+      ]}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+      style={{ width: "100%" }}
+    >
+      {bleed ? <View style={styles.bleed}>{bleed}</View> : null}
+      <View
+        style={[
+          styles.mainGutter,
+          isPhone && styles.mainGutterPhone,
+          fluid ? styles.mainGutterFluid : { maxWidth: containerMaxWidth },
+        ]}
+      >
+        <View
+          style={[
+            styles.main,
+            isPhone && styles.mainPhone,
+            fluid && styles.mainFluid,
+          ]}
+        >
+          {children}
+        </View>
+      </View>
+      <Footer compact={compactFooter} />
+    </ScrollView>
+  );
+
   return (
     <View style={styles.shell}>
       <View style={styles.pageColumn}>
         {customTopBar ?? (
           <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} isCrystal={isCrystal} />
         )}
-        <ScrollView
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          contentContainerStyle={[
-            styles.pageScrollContent,
-            // The bar is pinned over the page and grows by the status-bar inset
-            // (edge-to-edge on Android), so the page must start below both.
-            // A custom bar (the phone search screen's) sits in the flow instead.
-            !bleed && !customTopBar && {
-              paddingTop:
-                (isMobile
-                  ? layout.navHeightPhone
-                  : isTablet
-                  ? layout.navHeightTablet
-                  : layout.navHeight) + insets.top,
-            },
-          ]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          style={{ width: "100%" }}
-        >
-          {bleed ? <View style={styles.bleed}>{bleed}</View> : null}
-          <View
-            style={[
-              styles.mainGutter,
-              isPhone && styles.mainGutterPhone,
-              fluid ? styles.mainGutterFluid : { maxWidth: containerMaxWidth },
-            ]}
-          >
-            <View
-              style={[
-                styles.main,
-                isPhone && styles.mainPhone,
-                fluid && styles.mainFluid,
-              ]}
-            >
-              {children}
+        {floating ? (
+          <View style={styles.scrollArea}>
+            {scrollView}
+            <View pointerEvents="box-none" style={styles.floatingLayer}>
+              {floating}
             </View>
           </View>
-          <Footer compact={compactFooter} />
-        </ScrollView>
+        ) : (
+          scrollView
+        )}
         {isTablet ? <MobileNav active={active} /> : null}
       </View>
       <Modal

@@ -1,22 +1,11 @@
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
-  BarChart2,
-  Building2,
   Check,
   ChevronLeft,
   ChevronRight,
-  CircleHelp,
-  CreditCard,
-  LayoutDashboard,
-  LogOut,
-  PlusCircle,
-  Rocket,
   Save,
   Send,
-  ShieldCheck,
-  Sparkles,
-  User,
 } from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
 import { PRICE_ON_REQUEST, useTranslation } from "@/i18n";
