@@ -199,6 +199,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
       background-color: #E5E7EB;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       overflow: hidden;
+      touch-action: pan-x pan-y pinch-zoom;
     }
     .leaflet-container {
       background: #E5E7EB;
@@ -342,9 +343,13 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
     var map = L.map('map', {
       zoomControl: true,
       attributionControl: true,
-      scrollWheelZoom: false,
+      scrollWheelZoom: true,
+      doubleClickZoom: true,
       touchZoom: true,
-      tap: true
+      boxZoom: true,
+      keyboard: true,
+      tap: true,
+      dragging: true
     }).setView([${center.lat}, ${center.lng}], 13);
 
     // Google Maps Roadmap layer (official Google Maps road styling & labels)
@@ -410,6 +415,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
       markerMap[item.id] = marker;
       marker.on('click', function(e) {
         setActiveMarker(item.id);
+        map.panTo([item.lat - 0.003, item.lng], { animate: true, duration: 0.35 });
         window.parent.postMessage({ type: 'PROPERTY_SELECTED', id: item.id }, '*');
       });
       markersCluster.addLayer(marker);
