@@ -804,6 +804,7 @@ export function AppChrome({
   fluid,
   customTopBar,
   compactFooter,
+  floating,
 }: {
   children: ReactNode;
   active: ActivePage;
@@ -812,6 +813,14 @@ export function AppChrome({
   customTopBar?: ReactNode;
   /** Show only the short footer (policies and contact), for the phone homepage. */
   compactFooter?: boolean;
+  /**
+   * Pinned over the page, just above the bottom tabs, while the page scrolls
+   * under it (the search results' List | Map switcher). The web pins such
+   * controls with position: fixed; in the app that is not available, and an
+   * absolute child of the page scrolled away with the content and landed over
+   * the last card, so the app needs this slot outside the scroll view.
+   */
+  floating?: ReactNode;
 }) {
   const { isTablet, isPhone, width, containerMaxWidth } = useResponsive();
   const isMobile = isMobileWidth(width);
@@ -837,53 +846,66 @@ export function AppChrome({
     setIsScrolled(top > 40);
   };
 
+  const scrollView = (
+    <ScrollView
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
+      contentContainerStyle={[
+        styles.pageScrollContent,
+        // The bar is pinned over the page and grows by the status-bar inset
+        // (edge-to-edge on Android), so the page must start below both.
+        // A custom bar (the phone search screen's) sits in the flow instead.
+        !bleed && !customTopBar && {
+          paddingTop:
+            (isMobile
+              ? layout.navHeightPhone
+              : isTablet
+              ? layout.navHeightTablet
+              : layout.navHeight) + insets.top,
+        },
+      ]}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+      style={{ width: "100%" }}
+    >
+      {bleed ? <View style={styles.bleed}>{bleed}</View> : null}
+      <View
+        style={[
+          styles.mainGutter,
+          isPhone && styles.mainGutterPhone,
+          fluid ? styles.mainGutterFluid : { maxWidth: containerMaxWidth },
+        ]}
+      >
+        <View
+          style={[
+            styles.main,
+            isPhone && styles.mainPhone,
+            fluid && styles.mainFluid,
+          ]}
+        >
+          {children}
+        </View>
+      </View>
+      <Footer compact={compactFooter} />
+    </ScrollView>
+  );
+
   return (
     <View style={styles.shell}>
       <View style={styles.pageColumn}>
         {customTopBar ?? (
           <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} isCrystal={isCrystal} />
         )}
-        <ScrollView
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          contentContainerStyle={[
-            styles.pageScrollContent,
-            // The bar is pinned over the page and grows by the status-bar inset
-            // (edge-to-edge on Android), so the page must start below both.
-            // A custom bar (the phone search screen's) sits in the flow instead.
-            !bleed && !customTopBar && {
-              paddingTop:
-                (isMobile
-                  ? layout.navHeightPhone
-                  : isTablet
-                  ? layout.navHeightTablet
-                  : layout.navHeight) + insets.top,
-            },
-          ]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          style={{ width: "100%" }}
-        >
-          {bleed ? <View style={styles.bleed}>{bleed}</View> : null}
-          <View
-            style={[
-              styles.mainGutter,
-              isPhone && styles.mainGutterPhone,
-              fluid ? styles.mainGutterFluid : { maxWidth: containerMaxWidth },
-            ]}
-          >
-            <View
-              style={[
-                styles.main,
-                isPhone && styles.mainPhone,
-                fluid && styles.mainFluid,
-              ]}
-            >
-              {children}
+        {floating ? (
+          <View style={styles.scrollArea}>
+            {scrollView}
+            <View pointerEvents="box-none" style={styles.floatingLayer}>
+              {floating}
             </View>
           </View>
-          <Footer compact={compactFooter} />
-        </ScrollView>
+        ) : (
+          scrollView
+        )}
         {isTablet ? <MobileNav active={active} /> : null}
       </View>
       <Modal

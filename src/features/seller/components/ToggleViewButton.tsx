@@ -19,6 +19,8 @@ export interface ToggleViewButtonProps {
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
   size?: "sm" | "md";
+  /** Icon only, for narrow phone headers where the label pushed the page title to "Creat…". */
+  iconOnly?: boolean;
 }
 
 /**
@@ -30,6 +32,7 @@ export function ToggleViewButton({
   onPress,
   style,
   size = "md",
+  iconOnly = false,
 }: ToggleViewButtonProps) {
   const { t } = useTranslation();
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -71,6 +74,7 @@ export function ToggleViewButton({
       style={({ pressed }) => [
         styles.btn,
         size === "sm" && styles.btnSm,
+        iconOnly && (size === "sm" ? styles.btnIconOnlySm : styles.btnIconOnly),
         isHovered && styles.btnHovered,
         pressed && styles.btnPressed,
         webPointer,
@@ -84,9 +88,11 @@ export function ToggleViewButton({
           strokeWidth={2}
         />
       </Animated.View>
-      <Text style={[styles.text, size === "sm" && styles.textSm]}>
-        {t("seller.toggleView.label")}
-      </Text>
+      {iconOnly ? null : (
+        <Text style={[styles.text, size === "sm" && styles.textSm]}>
+          {t("seller.toggleView.label")}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -113,6 +119,16 @@ const styles = StyleSheet.create({
     height: 34,
     paddingHorizontal: 12,
     gap: 6,
+  },
+  btnIconOnly: {
+    width: 38,
+    paddingHorizontal: 0,
+    justifyContent: "center",
+  },
+  btnIconOnlySm: {
+    width: 34,
+    paddingHorizontal: 0,
+    justifyContent: "center",
   },
   btnHovered: {
     backgroundColor: colors.soft,

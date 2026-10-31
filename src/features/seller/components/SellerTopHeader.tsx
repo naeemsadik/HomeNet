@@ -48,7 +48,7 @@ export function SellerTopHeader({
   hasUnreadNotifications = true,
 }: SellerTopHeaderProps) {
   const { t } = useTranslation();
-  const { isTablet } = useResponsive();
+  const { isTablet, width } = useResponsive();
   const insets = useSafeAreaInsets();
   const displayTitle = title ?? t("seller.header.dashboard");
 
@@ -128,7 +128,10 @@ export function SellerTopHeader({
 
         {/* Toggle view button (kept visible on both PC and mobile) */}
         {showViewSite && (
-          <ToggleViewButton size={isTablet ? "sm" : "md"} />
+          // Under 480px the labelled pill left the title about 80px, so
+          // "Create listing" showed as "Creat…". The icon keeps its label for
+          // screen readers.
+          <ToggleViewButton iconOnly={width < 480} size={isTablet ? "sm" : "md"} />
         )}
       </View>
     </View>

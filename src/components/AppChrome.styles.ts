@@ -133,6 +133,17 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8FAF9",
   },
+  scrollArea: {
+    flex: 1,
+    width: "100%",
+  },
+  floatingLayer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 16,
+    alignItems: "center",
+  },
   pageColumnMobile: {
     position: "absolute",
     top: 0,
