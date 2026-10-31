@@ -1,5 +1,7 @@
-// Leaflet's stylesheet is injected via app/+html.tsx / <Head> to prevent Metro CSS asset import warnings.
-// The script itself is loaded dynamically only when this step opens.
+// Leaflet's stylesheet is imported statically: Metro's dev server can't load a CSS file through a
+// lazy import(), and bundling it keeps it under the site's CSP (style-src 'self'), which blocks
+// CDN stylesheets such as unpkg. The script itself is still loaded only when this step opens.
+import "leaflet/dist/leaflet.css";
 import type { Map as LeafletMap, Marker } from "leaflet";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -92,13 +94,6 @@ function LeafletLocationPicker({ value, openAt, onChange }: LocationPickerProps)
         const leaflet = await import("leaflet");
         const L = ((leaflet as unknown as { default?: LeafletModule }).default ?? leaflet) as LeafletModule;
         if (cancelled || !hostRef.current) return;
-
-        delete (L.Icon.Default.prototype as any)._getIconUrl;
-        L.Icon.Default.mergeOptions({
-          iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-          iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-          shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-        });
 
         const start = value ?? openAt;
         const map = L.map(hostRef.current, {

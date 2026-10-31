@@ -15,8 +15,6 @@ import { colorTokens } from "@/theme";
 import { appFonts } from "@/theme/appFonts";
 import { restoreSavedLanguage } from "@/i18n";
 import { PageMeta } from "@/components/PageMeta";
-import Head from "expo-router/head";
-import { Platform } from "react-native";
 import { queryClient } from "@/lib/queryClient";
 import { installDomGuard } from "@/lib/domGuard";
 
@@ -84,16 +82,6 @@ export default function RootLayout() {
             title="HomeNet BD | Verified Property Listings in Bangladesh"
             description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
           />
-          {Platform.OS === "web" ? (
-            <Head>
-              <link
-                rel="stylesheet"
-                href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-                integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-                crossOrigin="anonymous"
-              />
-            </Head>
-          ) : null}
           <StatusBar style="dark" />
           <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
           <AuthModal />
