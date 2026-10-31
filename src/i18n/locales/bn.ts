@@ -265,7 +265,7 @@ export const bn: TranslationSchema = {
     call: "কল",
     whatsapp: "হোয়াটসঅ্যাপ",
     callSeller: "সরাসরি ফোন করুন",
-    whatsappAgent: "হোয়াটসঅ্যাপে মালিকের সাথে কথা বলুন",
+    whatsappAgent: "মালিকের সাথে যোগাযোগ করুন",
     bookViewing: "ভিজিটের সময় নির্ধারণ করুন",
     saveProperty: "প্রপার্টি সংরক্ষণ করুন",
     savedProperty: "সংরক্ষিত",

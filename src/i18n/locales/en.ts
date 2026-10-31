@@ -263,7 +263,7 @@ export const en = {
     call: "Call",
     whatsapp: "WhatsApp",
     callSeller: "Direct Call",
-    whatsappAgent: "Contact Owner via WhatsApp",
+    whatsappAgent: "Contact Owner",
     bookViewing: "Book an Inspection / Visit",
     saveProperty: "Save property",
     savedProperty: "Saved",

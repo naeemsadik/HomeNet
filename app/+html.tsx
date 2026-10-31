@@ -17,6 +17,12 @@ export default function Root({ children }: PropsWithChildren) {
             this file, and on the others an unused preload logs a console
             warning. */}
         <link rel="preconnect" href="https://images.unsplash.com" />
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossOrigin="anonymous"
+        />
         <ScrollViewStyleReset />
         {/*
           Inter and Plus Jakarta Sans are bundled and registered by useFonts in
