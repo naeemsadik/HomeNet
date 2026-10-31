@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { ChevronRight } from "@/components/icons";
 import { LIST_PROPERTY_PATH, startListing } from "@/lib/startListing";
 import { GooglePlayButton } from "@/components/Footer";
+import { HomeMapExplorer } from "@/features/property/components/HomeMapExplorer";
 import { usePropertyGuides } from "@/features/news/hooks/usePropertyGuides";
 import type { PropertyGuide } from "@/features/news/types/news";
 import { resolveGuideImage } from "@/features/news/utils/guideImageStrategy";
@@ -192,6 +193,9 @@ const AppDownloadCard = memo(function AppDownloadCard() {
 export function MobileHomeSections() {
   return (
     <View style={styles.wrap}>
+      <View style={{ marginBottom: 8 }}>
+        <HomeMapExplorer />
+      </View>
       {FEATURE_CARDS.map((card) => (
         <FeatureCardView card={card} key={card.key} />
       ))}
