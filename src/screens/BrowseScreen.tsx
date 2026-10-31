@@ -305,8 +305,68 @@ export function BrowseScreen({
     </SafeAreaView>
   ) : undefined;
 
+  // On the web the pill is position: fixed over the page. The app has no
+  // fixed positioning, so it goes in AppChrome's floating slot instead, which
+  // keeps it above the bottom tabs rather than at the end of the results.
+  const viewSwitcher = (
+    <View style={styles.floatingPill}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("search.listView")}
+        onPress={() => setMobileTabMode("list")}
+        style={[
+          styles.floatingPillBtn,
+          mobileTabMode === "list" && styles.floatingPillBtnActive,
+          webPointer,
+        ]}
+      >
+        <List
+          size={16}
+          color={mobileTabMode === "list" ? colorTokens.onBrand : colorTokens.ink}
+          strokeWidth={2.4}
+        />
+        <Text
+          style={[
+            styles.floatingPillText,
+            mobileTabMode === "list" && styles.floatingPillTextActive,
+          ]}
+        >
+          {t("search.listView")}
+        </Text>
+      </Pressable>
+
+      <View style={styles.floatingPillDivider} />
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("search.mapView")}
+        onPress={() => setMobileTabMode("map")}
+        style={[
+          styles.floatingPillBtn,
+          mobileTabMode === "map" && styles.floatingPillBtnActive,
+          webPointer,
+        ]}
+      >
+        <MapIcon
+          size={16}
+          color={mobileTabMode === "map" ? colorTokens.onBrand : colorTokens.ink}
+          strokeWidth={2.4}
+        />
+        <Text
+          style={[
+            styles.floatingPillText,
+            mobileTabMode === "map" && styles.floatingPillTextActive,
+          ]}
+        >
+          {t("search.mapView")}
+        </Text>
+      </Pressable>
+    </View>
+  );
+
   return (
     <AppChrome
+      floating={isMobile && Platform.OS !== "web" ? viewSwitcher : undefined}
       active={mode === "rent" && filters.purpose === "short-let" ? "holiday" : mode || "buy"}
       customTopBar={mobileTopBar}
     >
@@ -526,61 +586,9 @@ export function BrowseScreen({
       </View>
 
       {/* ── Mobile: Floating View Switcher Pill (List | Map) ─────────────── */}
-      {isMobile ? (
+      {isMobile && Platform.OS === "web" ? (
         <View style={styles.floatingPillContainer} pointerEvents="box-none">
-          <View style={styles.floatingPill}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("search.listView")}
-              onPress={() => setMobileTabMode("list")}
-              style={[
-                styles.floatingPillBtn,
-                mobileTabMode === "list" && styles.floatingPillBtnActive,
-                webPointer,
-              ]}
-            >
-              <List
-                size={16}
-                color={mobileTabMode === "list" ? colorTokens.onBrand : colorTokens.ink}
-                strokeWidth={2.4}
-              />
-              <Text
-                style={[
-                  styles.floatingPillText,
-                  mobileTabMode === "list" && styles.floatingPillTextActive,
-                ]}
-              >
-                {t("search.listView")}
-              </Text>
-            </Pressable>
-
-            <View style={styles.floatingPillDivider} />
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("search.mapView")}
-              onPress={() => setMobileTabMode("map")}
-              style={[
-                styles.floatingPillBtn,
-                mobileTabMode === "map" && styles.floatingPillBtnActive,
-                webPointer,
-              ]}
-            >
-              <MapIcon
-                size={16}
-                color={mobileTabMode === "map" ? colorTokens.onBrand : colorTokens.ink}
-                strokeWidth={2.4}
-              />
-              <Text
-                style={[
-                  styles.floatingPillText,
-                  mobileTabMode === "map" && styles.floatingPillTextActive,
-                ]}
-              >
-                {t("search.mapView")}
-              </Text>
-            </Pressable>
-          </View>
+          {viewSwitcher}
         </View>
       ) : null}
 

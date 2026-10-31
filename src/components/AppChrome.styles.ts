@@ -133,6 +133,17 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8FAF9",
   },
+  scrollArea: {
+    flex: 1,
+    width: "100%",
+  },
+  floatingLayer: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 16,
+    alignItems: "center",
+  },
   pageColumnMobile: {
     position: "absolute",
     top: 0,
@@ -927,6 +938,16 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderTopWidth: 1,
     borderTopColor: colorTokens.divider,
+  },
+  mobileNavIndicator: {
+    width: 56,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mobileNavIndicatorActive: {
+    backgroundColor: colorTokens.brandSurface,
   },
   mobileNavText: {
     color: "#7B8983",

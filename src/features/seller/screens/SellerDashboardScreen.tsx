@@ -1,35 +1,21 @@
 import {
-  ArrowUpRight,
   BadgeCheck,
-  BarChart2,
   Bell,
   Building2,
   CheckCircle2,
-  CircleHelp,
-  CreditCard,
   Eye,
   FileText,
   Handshake,
   Heart,
-  LayoutDashboard,
   LineChart as LineChartIcon,
-  LogOut,
   MessageSquare,
-  PlusCircle,
-  Rocket,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
-  User,
   Zap,
 } from "@/components/icons";
 import { useEffect, useState } from "react";
-import {
-  Text,
-  View,
-} from "react-native";
-import { confirmAction } from "@/lib/alert";
-import { router, useLocalSearchParams } from "expo-router";
+import { Text, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import Svg, {
   Circle,
   Defs,
@@ -44,33 +30,20 @@ import { useAuthStore } from "@/stores/authStore";
 import { colors } from "@/theme";
 import { useMyProperties } from "@/features/property/hooks/useMyProperties";
 import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
-import { SellerAnalyticsWorkspace } from "../components/SellerAnalyticsWorkspace";
-import { SellerBoostModal } from "../components/SellerBoostModal";
 import { SellerBoostWorkspace } from "../components/SellerBoostWorkspace";
-import { SellerHelpWorkspace } from "../components/SellerHelpWorkspace";
 import { SellerInsightsWorkspace } from "../components/SellerInsightsWorkspace";
+import { SellerAnalyticsWorkspace } from "../components/SellerAnalyticsWorkspace";
 import { SellerPaymentsWorkspace } from "../components/SellerPaymentsWorkspace";
-import { SellerShell } from "../components/SellerShell";
+import { SellerHelpWorkspace } from "../components/SellerHelpWorkspace";
+import { SellerBoostModal } from "../components/SellerBoostModal";
+import { SellerShell, type SellerNavKey } from "../components/SellerShell";
 import { SellerStatCard, type StatItem } from "../components/SellerStatCard";
 import { styles } from "./SellerDashboardScreen.styles";
 
 import { LiveText } from "@/components/LiveText";
 import { useTranslation, formatLocalizedNumber } from "@/i18n";
 
-// Types
-export type SellerNavKey =
-  | "dashboard"
-  | "listings"
-  | "create"
-  | "verification"
-  | "boost"
-  | "insights"
-  | "analytics"
-  | "payments"
-  | "notifications"
-  | "profile"
-  | "help"
-  | "logout";
+export type { SellerNavKey };
 
 interface ActivityItem {
   id: string;
@@ -87,13 +60,10 @@ export function SellerDashboardScreen() {
   const { t, language } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
   const { user } = useAuthStore();
-  const logout = useAuthStore((s) => s.logout);
   const { tab } = useLocalSearchParams<{ tab?: string }>();
   const [activeNav, setActiveNav] = useState<SellerNavKey>("dashboard");
-  const [searchQuery, setSearchQuery] = useState("");
   const [boostModalVisible, setBoostModalVisible] = useState(false);
   const [selectedBoostPkg, setSelectedBoostPkg] = useState<string>("featured");
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (
@@ -111,20 +81,6 @@ export function SellerDashboardScreen() {
     setBoostModalVisible(true);
   };
 
-  const handleLogout = async () => {
-    const confirmed = await confirmAction(
-      t("seller.profile.logoutConfirmTitle"),
-      t("seller.profile.logoutConfirmMessage"),
-      {
-        confirmLabel: t("seller.profile.logoutBtn"),
-        destructive: true,
-      }
-    );
-    if (!confirmed) return;
-    logout();
-    router.replace("/");
-  };
-
   const { data: myPropertiesData } = useMyProperties();
   const allMyListings =
     myPropertiesData?.pages.flatMap((page) => page.data?.items ?? (page.data as any)?.data ?? []) ?? [];
@@ -137,7 +93,7 @@ export function SellerDashboardScreen() {
   const verifiedCount = allMyListings.filter((p) => Boolean(p.is_verified)).length;
   const totalViews = allMyListings.reduce((sum, p) => sum + (p.view_count || 0), 0);
 
-  // Desktop stats grid (3x3 layout for laptop/PC viewports)
+  // Stats grid items
   const sellerStats: StatItem[] = [
     {
       id: "total",
@@ -229,205 +185,188 @@ export function SellerDashboardScreen() {
     hasUnreadDot: false,
   }));
 
-  // Sidebar Items list
-  const sidebarNavItems: {
-    key: SellerNavKey;
-    label: string;
-    icon: any;
-    badgeCount?: number;
-    danger?: boolean;
-    href?: string;
-  }[] = [
-    { key: "dashboard", label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
-    { key: "listings", label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties" },
-    { key: "create", label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
-    { key: "verification", label: t("dashboard.tabs.verification"), icon: ShieldCheck, href: "/verification" },
-    { key: "boost", label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights", label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics", label: t("dashboard.tabs.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments", label: t("dashboard.tabs.payments"), icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile", label: t("dashboard.tabs.profile"), icon: User, href: "/seller/profile" },
-    { key: "help", label: t("dashboard.tabs.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout", label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
-  ];
+  const titles: Record<SellerNavKey, string> = {
+    dashboard: t("dashboard.tabs.dashboard"),
+    listings: t("dashboard.tabs.myListings"),
+    create: t("dashboard.tabs.createProperty"),
+    boost: t("dashboard.tabs.boostListings"),
+    insights: t("dashboard.tabs.aiInsights"),
+    analytics: t("dashboard.tabs.analytics"),
+    payments: t("dashboard.tabs.payments"),
+    profile: t("dashboard.tabs.profile"),
+    help: t("dashboard.tabs.helpCenter"),
+    logout: t("dashboard.tabs.logout"),
+  };
 
-  const activeTitle =
-    sidebarNavItems.find((i) => i.key === activeNav)?.label || t("dashboard.tabs.dashboard");
+  const activeTitle = titles[activeNav] || t("dashboard.tabs.dashboard");
 
   return (
     <SellerShell
       activeNav={activeNav}
-      onSearchQueryChange={setSearchQuery}
-      searchQuery={searchQuery}
       title={activeTitle}
     >
       <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
-            {activeNav === "dashboard" && (
-              <>
-            {/* Welcome Banner (Figma Node 220:8881) */}
+        {activeNav === "dashboard" && (
+          <>
+            {/* Welcome Banner */}
             <SellerWelcomeBanner
               name={sellerName}
-            viewsThisWeek={totalViews}
-            inquiriesThisWeek={0}
-            onBoostListing={() => setBoostModalVisible(true)}
-          />
+              viewsThisWeek={totalViews}
+              inquiriesThisWeek={0}
+              onBoostListing={() => setBoostModalVisible(true)}
+            />
 
-          {/* Stats Grid: Responsive */}
-          {isTablet ? (
-            /* Mobile / Small Screens: 2-by-2 card layout */
-            <View style={styles.statsGridMobile}>
-              {sellerStats.map((item) => (
-                <SellerStatCard item={item} key={item.id} />
-              ))}
-            </View>
-          ) : (
-            /* PC / Laptop / Big Screens: 3x3 layout */
-            <View style={styles.statsGridDesktop}>
-              {sellerStats.map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <View key={item.id} style={styles.statCardDesktop}>
-                    <View style={styles.statCardHeaderDesktop}>
-                      <View style={[styles.statIconWrapDesktop, { backgroundColor: item.iconBg }]}>
-                        <IconComponent color={item.iconColor} size={20} />
-                      </View>
-
-                      {item.trend ? (
-                        <View style={styles.trendPillDesktop}>
-                          <TrendingUp color={colors.green} size={12} />
-                          <Text style={styles.trendPillTextDesktop}>{item.trend}</Text>
-                        </View>
-                      ) : null}
-                    </View>
-
-                    <LiveText style={styles.statValueDesktop}>{item.value}</LiveText>
-                    <Text style={styles.statLabelDesktop}>{item.label}</Text>
-                  </View>
-                );
-              })}
-            </View>
-          )}
-
-          {/* Bottom Section (Chart + Recent Activity Grid) */}
-          <View style={[styles.bottomGrid, isTablet && styles.bottomGridTablet]}>
-            {/* Left Box: Listing Views Area Chart */}
-            <View style={styles.chartCard}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardHeaderTitleRow}>
-                  <LineChartIcon color={colors.ink} size={20} />
-                  <View>
-                    <Text style={styles.cardTitle}>{t("seller.dashboard.listingViews")}</Text>
-                    <Text style={styles.cardSubtext}>{t("seller.dashboard.last7Days")}</Text>
-                  </View>
-                </View>
-
-                <AppLink href="/market" style={styles.analyticsLink}>
-                  <Text style={styles.analyticsLinkText}>{t("seller.dashboard.analyticsLink")}</Text>
-                  <ArrowUpRight color={colors.green} size={16} />
-                </AppLink>
+            {/* Stats Grid: Responsive */}
+            {isTablet ? (
+              /* Mobile / Small Screens: 2-column card layout */
+              <View style={styles.statsGridMobile}>
+                {sellerStats.map((item) => (
+                  <SellerStatCard item={item} key={item.id} />
+                ))}
               </View>
-
-              {/* Chart SVG */}
-              <View style={styles.chartSvgWrap}>
-                <Svg height={220} width="100%" viewBox="0 0 500 200">
-                  <Defs>
-                    <SvgGradient id="chartTealGrad" x1="0" y1="0" x2="0" y2="1">
-                      <Stop offset="0%" stopColor={colors.green} stopOpacity="0.3" />
-                      <Stop offset="100%" stopColor={colors.green} stopOpacity="0.0" />
-                    </SvgGradient>
-                  </Defs>
-
-                  {/* Gradient Area Fill */}
-                  <Path
-                    d="M 20 160 Q 90 130 160 140 T 300 90 T 440 50 L 440 180 L 20 180 Z"
-                    fill="url(#chartTealGrad)"
-                  />
-
-                  {/* Trend Line */}
-                  <Path
-                    d="M 20 160 Q 90 130 160 140 T 300 90 T 440 50"
-                    fill="none"
-                    stroke={colors.green}
-                    strokeWidth="3.5"
-                  />
-
-                  {/* Data Points */}
-                  <Circle cx="20" cy="160" r="4.5" fill={colors.green} />
-                  <Circle cx="90" cy="130" r="4.5" fill={colors.green} />
-                  <Circle cx="160" cy="140" r="4.5" fill={colors.green} />
-                  <Circle cx="230" cy="110" r="4.5" fill={colors.green} />
-                  <Circle cx="300" cy="90" r="4.5" fill={colors.green} />
-                  <Circle cx="370" cy="65" r="4.5" fill={colors.green} />
-                  <Circle cx="440" cy="50" r="4.5" fill={colors.green} />
-
-                  {/* Days X Axis */}
-                  <SvgText x="20" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Mon</SvgText>
-                  <SvgText x="90" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Tue</SvgText>
-                  <SvgText x="160" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Wed</SvgText>
-                  <SvgText x="230" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Thu</SvgText>
-                  <SvgText x="300" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Fri</SvgText>
-                  <SvgText x="370" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Sat</SvgText>
-                  <SvgText x="440" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Sun</SvgText>
-                </Svg>
-              </View>
-            </View>
-
-            {/* Right Box: Recent Activity Feed */}
-            <View style={styles.activityCard}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardHeaderTitleRow}>
-                  <Bell color={colors.ink} size={20} />
-                  <Text style={styles.cardTitle}>{t("seller.dashboard.recentActivity")}</Text>
-                </View>
-
-                <AppLink href="/notifications">
-                  <Text style={styles.analyticsLinkText}>{t("seller.dashboard.seeAll")}</Text>
-                </AppLink>
-              </View>
-
-              <View style={styles.activityList}>
-                {recentActivities.length > 0 ? (
-                  recentActivities.map((act) => {
-                    const ActIcon = act.icon;
-                    return (
-                      <View key={act.id} style={styles.activityItem}>
-                        <View style={[styles.activityIconWrap, { backgroundColor: act.iconBg }]}>
-                          <ActIcon color={act.iconColor} size={16} />
+            ) : (
+              /* PC / Laptop / Big Screens: 3x3 layout */
+              <View style={styles.statsGridDesktop}>
+                {sellerStats.map((item) => {
+                  const IconComponent = item.icon;
+                  return (
+                    <View key={item.id} style={styles.statCardDesktop}>
+                      <View style={styles.statCardHeaderDesktop}>
+                        <View style={[styles.statIconWrapDesktop, { backgroundColor: item.iconBg }]}>
+                          <IconComponent color={item.iconColor} size={20} />
                         </View>
 
-                        <View style={styles.activityContent}>
-                          <View style={styles.activityTitleRow}>
-                            <Text style={styles.activityTitle}>{act.title}</Text>
-                            {act.hasUnreadDot ? <View style={styles.unreadOrangeDot} /> : null}
+                        {item.trend ? (
+                          <View style={styles.trendPillDesktop}>
+                            <TrendingUp color={colors.green} size={12} />
+                            <Text style={styles.trendPillTextDesktop}>{item.trend}</Text>
                           </View>
-                          <Text numberOfLines={1} style={styles.activityDesc}>
-                            {act.description}
-                          </Text>
-                        </View>
-
-                        <Text style={styles.activityTime}>{act.time}</Text>
+                        ) : null}
                       </View>
-                    );
-                  })
-                ) : (
-                  <View style={{ paddingVertical: 24, alignItems: "center" }}>
-                    <Text style={{ fontSize: 13, color: colors.muted, textAlign: "center" }}>
-                      {t("seller.dashboard.noActivity")}
-                    </Text>
+
+                      <LiveText style={styles.statValueDesktop}>{item.value}</LiveText>
+                      <Text style={styles.statLabelDesktop}>{item.label}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+
+            {/* Bottom Section (Chart + Recent Activity Grid) */}
+            <View style={[styles.bottomGrid, isTablet && styles.bottomGridTablet]}>
+              {/* Left Box: Listing Views Area Chart */}
+              <View style={styles.chartCard}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.cardHeaderTitleRow}>
+                    <LineChartIcon color={colors.ink} size={20} />
+                    <View>
+                      <Text style={styles.cardTitle}>{t("seller.dashboard.listingViews")}</Text>
+                      <Text style={styles.cardSubtext}>{t("seller.dashboard.last7Days")}</Text>
+                    </View>
                   </View>
-                )}
+                </View>
+
+                {/* Chart SVG */}
+                <View style={styles.chartSvgWrap}>
+                  <Svg height={220} width="100%" viewBox="0 0 500 200">
+                    <Defs>
+                      <SvgGradient id="chartTealGrad" x1="0" y1="0" x2="0" y2="1">
+                        <Stop offset="0%" stopColor={colors.green} stopOpacity="0.3" />
+                        <Stop offset="100%" stopColor={colors.green} stopOpacity="0.0" />
+                      </SvgGradient>
+                    </Defs>
+
+                    {/* Gradient Area Fill */}
+                    <Path
+                      d="M 20 160 Q 90 130 160 140 T 300 90 T 440 50 L 440 180 L 20 180 Z"
+                      fill="url(#chartTealGrad)"
+                    />
+
+                    {/* Trend Line */}
+                    <Path
+                      d="M 20 160 Q 90 130 160 140 T 300 90 T 440 50"
+                      fill="none"
+                      stroke={colors.green}
+                      strokeWidth="3.5"
+                    />
+
+                    {/* Data Points */}
+                    <Circle cx="20" cy="160" r="4.5" fill={colors.green} />
+                    <Circle cx="90" cy="130" r="4.5" fill={colors.green} />
+                    <Circle cx="160" cy="140" r="4.5" fill={colors.green} />
+                    <Circle cx="230" cy="110" r="4.5" fill={colors.green} />
+                    <Circle cx="300" cy="90" r="4.5" fill={colors.green} />
+                    <Circle cx="370" cy="65" r="4.5" fill={colors.green} />
+                    <Circle cx="440" cy="50" r="4.5" fill={colors.green} />
+
+                    {/* Days X Axis */}
+                    <SvgText x="20" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Mon</SvgText>
+                    <SvgText x="90" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Tue</SvgText>
+                    <SvgText x="160" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Wed</SvgText>
+                    <SvgText x="230" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Thu</SvgText>
+                    <SvgText x="300" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Fri</SvgText>
+                    <SvgText x="370" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Sat</SvgText>
+                    <SvgText x="440" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Sun</SvgText>
+                  </Svg>
+                </View>
+              </View>
+
+              {/* Right Box: Recent Activity Feed */}
+              <View style={styles.activityCard}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.cardHeaderTitleRow}>
+                    <Bell color={colors.ink} size={20} />
+                    <Text style={styles.cardTitle}>{t("seller.dashboard.recentActivity")}</Text>
+                  </View>
+
+                  <AppLink href="/notifications">
+                    <Text style={styles.analyticsLinkText}>{t("seller.dashboard.seeAll")}</Text>
+                  </AppLink>
+                </View>
+
+                <View style={styles.activityList}>
+                  {recentActivities.length > 0 ? (
+                    recentActivities.map((act) => {
+                      const ActIcon = act.icon;
+                      return (
+                        <View key={act.id} style={styles.activityItem}>
+                          <View style={[styles.activityIconWrap, { backgroundColor: act.iconBg }]}>
+                            <ActIcon color={act.iconColor} size={16} />
+                          </View>
+
+                          <View style={styles.activityContent}>
+                            <View style={styles.activityTitleRow}>
+                              <Text style={styles.activityTitle}>{act.title}</Text>
+                              {act.hasUnreadDot ? <View style={styles.unreadOrangeDot} /> : null}
+                            </View>
+                            <Text numberOfLines={1} style={styles.activityDesc}>
+                              {act.description}
+                            </Text>
+                          </View>
+
+                          <Text style={styles.activityTime}>{act.time}</Text>
+                        </View>
+                      );
+                    })
+                  ) : (
+                    <View style={{ paddingVertical: 24, alignItems: "center" }}>
+                      <Text style={{ fontSize: 13, color: colors.muted, textAlign: "center" }}>
+                        {t("seller.dashboard.noActivity")}
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </View>
             </View>
-          </View>
-        </>
-      )}
+          </>
+        )}
 
-            {activeNav === "boost" && <SellerBoostWorkspace onOpenBoost={handleOpenBoost} />}
-            {activeNav === "insights" && <SellerInsightsWorkspace />}
-            {activeNav === "analytics" && <SellerAnalyticsWorkspace />}
-            {activeNav === "payments" && <SellerPaymentsWorkspace />}
-            {activeNav === "help" && <SellerHelpWorkspace />}
-          </View>
+        {activeNav === "boost" && <SellerBoostWorkspace onOpenBoost={handleOpenBoost} />}
+        {activeNav === "insights" && <SellerInsightsWorkspace />}
+        {activeNav === "analytics" && <SellerAnalyticsWorkspace />}
+        {activeNav === "payments" && <SellerPaymentsWorkspace />}
+        {activeNav === "help" && <SellerHelpWorkspace />}
+      </View>
 
       <SellerBoostModal
         onClose={() => setBoostModalVisible(false)}
@@ -437,5 +376,4 @@ export function SellerDashboardScreen() {
       />
     </SellerShell>
   );
-
 }

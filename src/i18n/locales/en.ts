@@ -370,7 +370,7 @@ export const en = {
     sellerDashboard: "Seller Dashboard",
     welcomeBack: "Welcome back,",
     welcomeTitle: "{{name}} 👋",
-    bannerDescription: "Your listings have {{views}} total views and {{inquiries}} buyer inquiries so far. Keep the momentum going.",
+    bannerDescription: "Your listings have {{views}} total views so far. Manage your active listings or add a new property.",
     totalListings: "Total Listings",
     activeListings: "Active Listings",
     draftListings: "Draft Listings",
@@ -570,6 +570,7 @@ export const en = {
       markSold: "Mark as Sold",
       boost: "Boost",
       archive: "Archive",
+      unarchive: "Unarchive",
     },
     filters: {
       all: "All",
@@ -585,6 +586,9 @@ export const en = {
     archiveConfirmTitle: "Archive Property",
     archiveConfirmMessage: "Archive \"{{title}}\"? It will no longer be shown on the site, and you can find it under Archived.",
     archiveFailed: "Archive failed",
+    unarchiveConfirmTitle: "Unarchive Property",
+    unarchiveConfirmMessage: "Unarchive \"{{title}}\"? This will make the listing active again.",
+    unarchiveFailed: "Unarchive failed",
     toggleView: {
       aria: "Switch to the buyer view of the live site",
       label: "Switch to buyer",

@@ -7,7 +7,6 @@ import {
   LogOut,
   PlusCircle,
   Rocket,
-  ShieldCheck,
   Sparkles,
   User,
 } from "@/components/icons";
@@ -27,6 +26,7 @@ import { Footer } from "@/components/Footer";
 import { SellerTopHeader } from "./SellerTopHeader";
 import { SellerMobileDrawer } from "./SellerMobileDrawer";
 import { useResponsive } from "@/hooks/useResponsive";
+import { MobileNav } from "@/components/AppChrome";
 import { useAuthStore } from "@/stores/authStore";
 import { confirmAction } from "@/lib/alert";
 import { colors, colorTokens, fonts } from "@/theme";
@@ -36,14 +36,12 @@ export type SellerNavKey =
   | "dashboard"
   | "listings"
   | "create"
-  | "verification"
   | "boost"
   | "insights"
   | "analytics"
   | "payments"
   | "profile"
   | "help"
-  | "notifications"
   | "logout";
 
 export interface SellerShellProps {
@@ -86,7 +84,6 @@ export function SellerShell({
     { key: "dashboard", label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
     { key: "listings", label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties" },
     { key: "create", label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
-    { key: "verification", label: t("dashboard.tabs.verification"), icon: ShieldCheck, href: "/verification" },
     { key: "boost", label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
     { key: "insights", label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
     { key: "analytics", label: t("dashboard.tabs.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
@@ -113,11 +110,6 @@ export function SellerShell({
   const handleNavPress = (item: (typeof sidebarNavItems)[number]) => {
     if (item.key === "logout") {
       handleLogout();
-      return;
-    }
-
-    if (item.href?.startsWith("/seller?tab=")) {
-      router.push(item.href as any);
       return;
     }
 
@@ -203,7 +195,7 @@ export function SellerShell({
           customHeader
         ) : (
           <SellerTopHeader
-            hasUnreadNotifications
+            hasUnreadNotifications={false}
             onPressMenu={() => setMobileDrawerOpen(true)}
             onSearchQueryChange={onSearchQueryChange}
             searchQuery={searchQuery}
@@ -226,6 +218,8 @@ export function SellerShell({
             {children}
           </View>
         )}
+        {/* The same bottom bar as the rest of the site, so Post never hides it. */}
+        {isTablet ? <MobileNav active={activeNav === "create" ? "post" : activeNav === "profile" ? "profile" : "seller"} /> : null}
       </View>
 
       {/* Mobile / Tablet Navigation Drawer */}

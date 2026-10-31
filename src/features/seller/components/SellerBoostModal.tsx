@@ -1,6 +1,7 @@
 import { Check, Rocket, X } from "@/components/icons";
 import { Modal, Pressable, Text, View } from "react-native";
 import { colorTokens, colors, webPointer } from "@/theme";
+import { notify } from "@/lib/alert";
 import { useTranslation } from "@/i18n";
 import { styles } from "../screens/SellerDashboardScreen.styles";
 
@@ -119,7 +120,10 @@ export function SellerBoostModal({ visible, onClose, selectedPackage, onSelectPa
               <Text style={styles.boostCancelBtnText}>{t("seller.boost.modal.cancelBtn")}</Text>
             </Pressable>
             <Pressable
-              onPress={onClose}
+              onPress={() => {
+                notify(t("common.success"), "Boost request received! Package will be activated.");
+                onClose();
+              }}
               style={[styles.boostConfirmBtn, webPointer]}
             >
               <Rocket color={colorTokens.onBrand} size={16} />

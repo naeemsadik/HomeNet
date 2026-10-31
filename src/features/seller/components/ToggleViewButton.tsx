@@ -1,7 +1,5 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
-  Animated,
-  Easing,
   Platform,
   Pressable,
   StyleSheet,
@@ -9,7 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { RefreshCw } from "@/components/icons";
+import { Store } from "@/components/icons";
 import { router, type Href } from "expo-router";
 import { colors, fonts, radius, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
@@ -19,39 +17,26 @@ export interface ToggleViewButtonProps {
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
   size?: "sm" | "md";
+  /** Icon only, for narrow phone headers where the label pushed the page title to "Creat…". */
+  iconOnly?: boolean;
 }
 
 /**
- * Interactive button to toggle between seller portal and the public site view.
- * Features a rotating RefreshCw icon that spins on hover/press.
+ * Leaves the seller portal for the public site. The storefront icon reads as
+ * "the buyer site" even when the label is hidden on narrow phones, where the
+ * seller menu also has a "Switch to buyer" row with the full label.
  */
 export function ToggleViewButton({
   href = "/",
   onPress,
   style,
   size = "md",
+  iconOnly = false,
 }: ToggleViewButtonProps) {
   const { t } = useTranslation();
-  const rotateAnim = useRef(new Animated.Value(0)).current;
   const [isHovered, setIsHovered] = useState(false);
 
-  const triggerSpin = () => {
-    rotateAnim.setValue(0);
-    Animated.timing(rotateAnim, {
-      toValue: 1,
-      duration: 500,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: Platform.OS !== "web",
-    }).start();
-  };
-
-  const spin = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
-  });
-
   const handlePress = () => {
-    triggerSpin();
     onPress?.();
     if (href) {
       router.push(href as Href);
@@ -62,31 +47,27 @@ export function ToggleViewButton({
     <Pressable
       accessibilityLabel={t("seller.toggleView.aria")}
       accessibilityRole="link"
-      onHoverIn={() => {
-        setIsHovered(true);
-        triggerSpin();
-      }}
+      // The icon-only button is 34-38px; this brings the tap area past 44px.
+      hitSlop={iconOnly ? 6 : undefined}
+      onHoverIn={() => setIsHovered(true)}
       onHoverOut={() => setIsHovered(false)}
       onPress={handlePress}
       style={({ pressed }) => [
         styles.btn,
         size === "sm" && styles.btnSm,
+        iconOnly && (size === "sm" ? styles.btnIconOnlySm : styles.btnIconOnly),
         isHovered && styles.btnHovered,
         pressed && styles.btnPressed,
         webPointer,
         style,
       ]}
     >
-      <Animated.View style={{ transform: [{ rotate: spin }] }}>
-        <RefreshCw
-          color={colors.ink}
-          size={size === "sm" ? 14 : 15}
-          strokeWidth={2}
-        />
-      </Animated.View>
-      <Text style={[styles.text, size === "sm" && styles.textSm]}>
-        {t("seller.toggleView.label")}
-      </Text>
+      <Store color={colors.ink} size={size === "sm" ? 14 : 15} strokeWidth={2} />
+      {iconOnly ? null : (
+        <Text style={[styles.text, size === "sm" && styles.textSm]}>
+          {t("seller.toggleView.label")}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -113,6 +94,16 @@ const styles = StyleSheet.create({
     height: 34,
     paddingHorizontal: 12,
     gap: 6,
+  },
+  btnIconOnly: {
+    width: 38,
+    paddingHorizontal: 0,
+    justifyContent: "center",
+  },
+  btnIconOnlySm: {
+    width: 34,
+    paddingHorizontal: 0,
+    justifyContent: "center",
   },
   btnHovered: {
     backgroundColor: colors.soft,

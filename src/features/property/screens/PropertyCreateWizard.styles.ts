@@ -433,6 +433,9 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   formLabel: {
+    // Native text does not shrink in a row by default (the web's does), so a
+    // long label would push past the screen edge in the app.
+    flexShrink: 1,
     fontSize: 14,
     fontFamily: fonts.bold,
     color: "#0B1A17",
@@ -440,8 +443,13 @@ export const styles = StyleSheet.create({
   },
   formLabelRow: {
     flexDirection: "row",
+    // A label and its hint did not fit one line on a phone: the hint ran into
+    // the label and off the right edge. Let the hint drop below instead.
+    flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
+    columnGap: 8,
+    rowGap: 2,
     minHeight: 28,
   },
   formHelperCharCount: {
@@ -732,6 +740,7 @@ export const styles = StyleSheet.create({
     color: colorTokens.onBrand,
   },
   formHint: {
+    flexShrink: 1,
     fontSize: 12,
     fontFamily: fonts.regular,
     color: "#5C6B66",

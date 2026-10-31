@@ -29,9 +29,19 @@ jest.mock("@/services/areaApi", () => ({ fetchAreas: jest.fn() }));
 // The chrome and the cards are not what these tests are about, and they pull
 // in the whole app shell.
 let mockActivePage: string | undefined;
+let mockFloating: React.ReactNode;
 jest.mock("@/components/AppChrome", () => ({
-  AppChrome: ({ children, active }: { children: React.ReactNode; active?: string }) => {
+  AppChrome: ({
+    children,
+    active,
+    floating,
+  }: {
+    children: React.ReactNode;
+    active?: string;
+    floating?: React.ReactNode;
+  }) => {
     mockActivePage = active;
+    mockFloating = floating;
     return <>{children}</>;
   },
 }));
@@ -273,5 +283,25 @@ describe("BrowseScreen filters on Android", () => {
     expect(router.setParams).toHaveBeenCalledWith(
       expect.objectContaining({ bathrooms: "", amenities: "" }),
     );
+  });
+});
+
+describe("the List | Map switcher in the app", () => {
+  it("is pinned by the chrome above the tabs, not placed at the end of the results", async () => {
+    const tree = await mount("buy");
+
+    // Inside the scrolling page it sat at the bottom of the results, over the
+    // last card's Email and Call buttons.
+    expect(mockFloating).toBeTruthy();
+    expect(pressableWithText(tree, "List")).toBeUndefined();
+
+    let floating!: ReactTestRenderer;
+    act(() => {
+      floating = renderer.create(<>{mockFloating}</>);
+    });
+    const text = textOf(floating.root);
+    expect(text).toContain("List");
+    expect(text).toContain("Map");
+    act(() => floating.unmount());
   });
 });

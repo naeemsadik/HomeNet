@@ -1,32 +1,26 @@
 import { router } from "expo-router";
 import {
-  BarChart2,
+  Archive,
+  ArchiveRestore,
   Building2,
   CheckCircle2,
-  CircleHelp,
-  CreditCard,
   Edit,
   Eye,
   Heart,
-  LayoutDashboard,
-  LogOut,
   MessageSquare,
-  Archive,
   MoreVertical,
   Plus,
-  PlusCircle,
-  Rocket,
   RotateCcw,
-  ShieldCheck,
   Sparkles,
   Trash2,
-  User,
   Zap,
 } from "@/components/icons";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -36,13 +30,12 @@ import {
 import { confirmAction, notify } from "@/lib/alert";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useAuthStore } from "@/stores/authStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { SellerShell } from "@/features/seller/components/SellerShell";
 import { displaySubtype } from "../constants/holidayStay";
 import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
 import { useMyProperties } from "../hooks/useMyProperties";
-import { useArchiveProperty, useDeleteProperty } from "../hooks/usePropertyMutations";
+import { useArchiveProperty, useDeleteProperty, useUnarchiveProperty } from "../hooks/usePropertyMutations";
 import { toApiError } from "@/services/apiClient";
 import { cdnImage } from "@/lib/cloudinaryImage";
 
@@ -71,13 +64,20 @@ interface ListingItemData {
 }
 
 export function MyPropertiesScreen() {
-  const { isPhone, isTablet } = useResponsive();
+  const { isPhone } = useResponsive();
   const { t, language } = useTranslation();
   const [activeFilter, setActiveFilter] = useState<ListingFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const deleteMutation = useDeleteProperty();
   const archiveMutation = useArchiveProperty();
+  const unarchiveMutation = useUnarchiveProperty();
+  const [activeMenu, setActiveMenu] = useState<{
+    id: string;
+    title: string;
+    status: ListingItemData["status"];
+    right: number;
+    top: number;
+  } | null>(null);
 
   const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useMyProperties();
   const apiProperties = useMemo(() => data?.pages.flatMap((p) => p.data?.items ?? []) ?? [], [data]);
@@ -133,42 +133,9 @@ export function MyPropertiesScreen() {
     };
   }, [allListings]);
 
-  // Sidebar items
-  const logout = useAuthStore((s) => s.logout);
-  const handleLogout = async () => {
-    const confirmed = await confirmAction(t("dashboard.tabs.logout"), "Are you sure you want to log out of your account?", {
-      confirmLabel: t("dashboard.tabs.logout"),
-      destructive: true,
-    });
-    if (!confirmed) return;
-    logout();
-    router.replace("/");
-  };
-
-  const sidebarNavItems: {
-    key: string;
-    label: string;
-    icon: any;
-    href?: string;
-    active?: boolean;
-    danger?: boolean;
-    badgeCount?: number;
-  }[] = [
-    { key: "dashboard", label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
-    { key: "listings", label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties", active: true },
-    { key: "create", label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
-    { key: "verification", label: t("dashboard.tabs.verification"), icon: ShieldCheck, href: "/verification" },
-    { key: "boost", label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights", label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics", label: t("dashboard.tabs.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments", label: t("dashboard.tabs.payments"), icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile", label: t("dashboard.tabs.profile"), icon: User, href: "/seller/profile" },
-    { key: "help", label: t("dashboard.tabs.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout", label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
-  ];
-
-  // Had no web branch, so deleting a listing was impossible on web.
+  // Delete listing
   const handleDelete = async (id: string, title: string) => {
+    setActiveMenu(null);
     const confirmed = await confirmAction(
       t("seller.deleteConfirmTitle"),
       t("seller.deleteConfirmMessage", { title }),
@@ -189,6 +156,7 @@ export function MyPropertiesScreen() {
   const canArchive = (status: ListingItemData["status"]) => status === "active" || status === "sold";
 
   const handleArchive = async (id: string, title: string) => {
+    setActiveMenu(null);
     const confirmed = await confirmAction(
       t("seller.archiveConfirmTitle"),
       t("seller.archiveConfirmMessage", { title }),
@@ -202,6 +170,55 @@ export function MyPropertiesScreen() {
     }
   };
 
+  const handleUnarchive = async (id: string, title: string) => {
+    setActiveMenu(null);
+    const confirmed = await confirmAction(
+      t("seller.unarchiveConfirmTitle"),
+      t("seller.unarchiveConfirmMessage", { title }),
+      { confirmLabel: t("seller.actions.unarchive") }
+    );
+    if (!confirmed) return;
+    try {
+      await unarchiveMutation.mutateAsync(id);
+    } catch (unarchiveError) {
+      notify(t("seller.unarchiveFailed"), toApiError(unarchiveError).message);
+    }
+  };
+
+  const handleOpenMenu = (event: any, item: ListingItemData) => {
+    if (Platform.OS === "web") {
+      const rect = (event?.currentTarget as HTMLElement)?.getBoundingClientRect?.();
+      if (rect) {
+        const windowWidth = typeof window !== "undefined" ? window.innerWidth : 800;
+        const windowHeight = typeof window !== "undefined" ? window.innerHeight : 800;
+        const menuHeight = 120;
+        // Position menu to the LEFT of the 3-dots button:
+        const right = Math.max(16, windowWidth - rect.left + 8);
+        // Vertically center with the 3-dots button:
+        const centerY = rect.top + rect.height / 2;
+        let top = centerY - menuHeight / 2;
+        top = Math.max(16, Math.min(top, windowHeight - menuHeight - 16));
+        setActiveMenu({
+          id: item.id,
+          title: item.title,
+          status: item.status,
+          right,
+          top,
+        });
+        return;
+      }
+    }
+    const pageX = event?.nativeEvent?.pageX || 200;
+    const pageY = event?.nativeEvent?.pageY || 100;
+    setActiveMenu({
+      id: item.id,
+      title: item.title,
+      status: item.status,
+      right: 60,
+      top: pageY - 40,
+    });
+  };
+
   return (
     <SellerShell
       activeNav="listings"
@@ -209,85 +226,100 @@ export function MyPropertiesScreen() {
       searchQuery={searchQuery}
       title={t("seller.myListings")}
     >
-          <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
-            {/* Top Filter Bar + Add New Property */}
-            <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
-            {/* Filter Pills */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
-              <View style={styles.pillsRow}>
-                {(
-                  [
-                    ["all", t("seller.filters.all"), counts.all],
-                    ["active", t("seller.filters.active"), counts.active],
-                    ["draft", t("seller.filters.draft"), counts.draft],
-                    ["pending", t("seller.filters.pending"), counts.pending],
-                    ["sold", t("seller.filters.sold"), counts.sold],
-                    ["archived", t("seller.filters.archived"), counts.archived],
-                  ] as const
-                ).map(([key, label, count]) => {
-                  const isSelected = activeFilter === key;
-                  return (
-                    <Pressable
-                      key={key}
-                      onPress={() => setActiveFilter(key as ListingFilter)}
-                      style={({ pressed }) => [
-                        styles.filterPill,
-                        isSelected && styles.filterPillActive,
-                        webPointer,
-                        pressed && styles.pressed,
-                      ]}
-                    >
-                      <Text style={[styles.pillLabel, isSelected && styles.pillLabelActive]}>
-                        {label}
-                      </Text>
-                      <View style={[styles.pillCountBg, isSelected && styles.pillCountBgActive]}>
-                        <LiveText style={[styles.pillCountText, isSelected && styles.pillCountTextActive]}>
-                          {formatLocalizedNumber(count, language)}
-                        </LiveText>
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </ScrollView>
+      <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
+        {/* Top Filter Bar + Add New Property */}
+        <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
+          {/* Filter Pills */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
+            <View style={styles.pillsRow}>
+              {(
+                [
+                  ["all", t("seller.filters.all"), counts.all],
+                  ["active", t("seller.filters.active"), counts.active],
+                  ["draft", t("seller.filters.draft"), counts.draft],
+                  ["pending", t("seller.filters.pending"), counts.pending],
+                  ["sold", t("seller.filters.sold"), counts.sold],
+                  ["archived", t("seller.filters.archived"), counts.archived],
+                ] as const
+              ).map(([key, label, count]) => {
+                const isSelected = activeFilter === key;
+                return (
+                  <Pressable
+                    key={key}
+                    onPress={() => setActiveFilter(key as ListingFilter)}
+                    style={({ pressed }) => [
+                      styles.filterPill,
+                      isSelected && styles.filterPillActive,
+                      webPointer,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Text style={[styles.pillLabel, isSelected && styles.pillLabelActive]}>
+                      {label}
+                    </Text>
+                    <View style={[styles.pillCountBg, isSelected && styles.pillCountBgActive]}>
+                      <LiveText style={[styles.pillCountText, isSelected && styles.pillCountTextActive]}>
+                        {formatLocalizedNumber(count, language)}
+                      </LiveText>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
 
-            {/* Add Property Primary Button */}
-            <AppLink href="/property/create" style={styles.addPropertyBtn}>
-              <Plus color={colorTokens.onBrand} size={16} />
-              <Text style={styles.addPropertyBtnText}>{t("seller.addNewProperty")}</Text>
-            </AppLink>
-          </View>
+          {/* Add Property Primary Button */}
+          <AppLink href="/property/create" style={styles.addPropertyBtn}>
+            <Plus color={colorTokens.onBrand} size={16} />
+            <Text style={styles.addPropertyBtnText}>{t("seller.addNewProperty")}</Text>
+          </AppLink>
+        </View>
 
-          {/* Listings Table / Card View */}
-          <View style={styles.tableCard}>
-            {isLoading ? (
-              <View style={styles.emptyContainer}>
-                <ActivityIndicator color="#04cf92" size="large" />
-                <Text style={styles.emptySub}>{t("dashboard.loadingListings")}</Text>
-              </View>
-            ) : error ? (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyTitle}>{t("dashboard.couldNotLoadListings")}</Text>
-                <Text style={styles.emptySub}>{toApiError(error).message}</Text>
-                <Pressable onPress={() => void refetch()} style={styles.retryButton}>
-                  <RotateCcw color={colorTokens.onBrand} size={16} />
-                  <Text style={styles.retryText}>{t("dashboard.retry")}</Text>
-                </Pressable>
-              </View>
-            ) : !isPhone ? (
+        {/* Listings Table / Card View */}
+        <View style={styles.tableCard}>
+          {isLoading ? (
+            <View style={styles.emptyContainer}>
+              <ActivityIndicator color="#04cf92" size="large" />
+              <Text style={styles.emptySub}>{t("dashboard.loadingListings")}</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>{t("dashboard.couldNotLoadListings")}</Text>
+              <Text style={styles.emptySub}>{toApiError(error).message}</Text>
+              <Pressable onPress={() => void refetch()} style={styles.retryButton}>
+                <RotateCcw color={colorTokens.onBrand} size={16} />
+                <Text style={styles.retryText}>{t("dashboard.retry")}</Text>
+              </Pressable>
+            </View>
+          ) : !isPhone ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tableScrollContent}>
               <View style={styles.table}>
-                {/* Table Header */}
+                {/* Table Header with Column-wise Borders */}
                 <View style={styles.tableHeaderRow}>
-                  <Text style={[styles.thCell, { flex: 2.2 }]}>{t("admin.columns.property")}</Text>
-                  <Text style={[styles.thCell, { flex: 1 }]}>{t("admin.columns.type")}</Text>
-                  <Text style={[styles.thCell, { flex: 1.1 }]}>{t("admin.columns.price")}</Text>
-                  <Text style={[styles.thCell, { flex: 1.1 }]}>{t("admin.columns.status")}</Text>
-                  <Text style={[styles.thCell, { flex: 1 }]}>{t("admin.columns.aiValue")}</Text>
-                  <Text style={[styles.thCell, { flex: 1.5 }]}>{t("admin.columns.performance")}</Text>
-                  <Text style={[styles.thCell, { width: 84, textAlign: "right" }]}>{t("admin.columns.actions")}</Text>
+                  <View style={[styles.colProperty, styles.colBorder]}>
+                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.property")}</Text>
+                  </View>
+                  <View style={[styles.colType, styles.colBorder]}>
+                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.type")}</Text>
+                  </View>
+                  <View style={[styles.colPrice, styles.colBorder]}>
+                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.price")}</Text>
+                  </View>
+                  <View style={[styles.colStatus, styles.colBorder]}>
+                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.status")}</Text>
+                  </View>
+                  <View style={[styles.colAiValue, styles.colBorder]}>
+                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.aiValue")}</Text>
+                  </View>
+                  <View style={[styles.colPerformance, styles.colBorder]}>
+                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.performance")}</Text>
+                  </View>
+                  <View style={styles.colActions}>
+                    <Text style={[styles.thCell, { textAlign: "center" }]} numberOfLines={1}>{t("admin.columns.actions")}</Text>
+                  </View>
                 </View>
 
-                {/* Table Data Rows */}
+                {/* Table Data Rows with Column-wise Borders */}
                 {filteredListings.length === 0 ? (
                   <View style={styles.emptyContainer}>
                     <Building2 color="#5C6B66" size={40} />
@@ -298,57 +330,61 @@ export function MyPropertiesScreen() {
                   filteredListings.map((item) => (
                     <View key={item.id} style={styles.tableDataRow}>
                       {/* Property Info (Thumbnail, Title, Verified, Boost, Location) */}
-                      <View style={[styles.tdCell, { flex: 2.2, flexDirection: "row", gap: 12, alignItems: "center" }]}>
-                        {item.imageUrl ? (
-                          <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.propThumb} />
-                        ) : (
-                          <View style={[styles.propThumb, styles.imagePlaceholder]}>
-                            <Building2 color="#6B7D78" size={20} />
-                          </View>
-                        )}
-                        <View style={{ flex: 1, gap: 2 }}>
+                      <View style={[styles.colProperty, styles.colBorder, { flexDirection: "row", gap: 12, alignItems: "center" }]}>
+                        <AppLink href={`/property/${item.id}`} style={styles.propThumb}>
+                          {item.imageUrl ? (
+                            <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.propThumb} />
+                          ) : (
+                            <View style={[styles.propThumb, styles.imagePlaceholder]}>
+                              <Building2 color="#6B7D78" size={20} />
+                            </View>
+                          )}
+                        </AppLink>
+                        <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                            <Text style={styles.propTitle} numberOfLines={1}>{item.title}</Text>
+                            <AppLink href={`/property/${item.id}`} style={{ flexShrink: 1 }}>
+                              <Text style={styles.propTitle} numberOfLines={1}>{item.title}</Text>
+                            </AppLink>
                             {item.isVerified ? <CheckCircle2 color="#04cf92" size={16} /> : null}
                             {item.isBoosted ? <Zap color="#F4823A" size={14} /> : null}
                           </View>
-                          <Text style={styles.propLocation}>{item.location}</Text>
+                          <Text style={styles.propLocation} numberOfLines={1}>{item.location}</Text>
                         </View>
                       </View>
 
                       {/* Type Column */}
-                      <View style={[styles.tdCell, { flex: 1, gap: 4 }]}>
-                        <Text style={styles.typeText}>{item.type}</Text>
+                      <View style={[styles.colType, styles.colBorder, { gap: 4, justifyContent: "center" }]}>
+                        <Text style={styles.typeText} numberOfLines={1}>{item.type}</Text>
                         <View style={styles.forSaleBadge}>
                           <Text style={styles.forSaleBadgeText}>{item.listingType}</Text>
                         </View>
                       </View>
 
                       {/* Price Column */}
-                      <View style={[styles.tdCell, { flex: 1.1 }]}>
-                        <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
+                      <View style={[styles.colPrice, styles.colBorder, { justifyContent: "center" }]}>
+                        <NoTranslateText style={styles.priceText} numberOfLines={1}>{item.price}</NoTranslateText>
                       </View>
 
                       {/* Status Column */}
-                      <View style={[styles.tdCell, { flex: 1.1, gap: 4 }]}>
+                      <View style={[styles.colStatus, styles.colBorder, { gap: 4, justifyContent: "center" }]}>
                         <View style={[styles.statusBadge, getStatusStyle(item.status).bgStyle]}>
                           <Text style={[styles.statusBadgeText, getStatusStyle(item.status).textStyle]}>
                             {translateListingStatus(item.status, language)}
                           </Text>
                         </View>
                         {item.boostText ? (
-                          <Text style={styles.boostCountdown}>{item.boostText}</Text>
+                          <Text style={styles.boostCountdown} numberOfLines={1}>{item.boostText}</Text>
                         ) : null}
                       </View>
 
                       {/* AI Value Column */}
-                      <View style={[styles.tdCell, { flex: 1, flexDirection: "row", alignItems: "center", gap: 4 }]}>
+                      <View style={[styles.colAiValue, styles.colBorder, { flexDirection: "row", alignItems: "center", gap: 4 }]}>
                         <Sparkles color="#04cf92" size={14} />
-                        <Text style={styles.aiValueText}>{item.aiValue}</Text>
+                        <Text style={styles.aiValueText} numberOfLines={1}>{item.aiValue}</Text>
                       </View>
 
                       {/* Performance Column (Views, Likes, Inquiries) */}
-                      <View style={[styles.tdCell, { flex: 1.5, flexDirection: "row", alignItems: "center", gap: 12 }]}>
+                      <View style={[styles.colPerformance, styles.colBorder, { flexDirection: "row", alignItems: "center", gap: 10 }]}>
                         <View style={styles.metricItem}>
                           <Eye color="#5C6B66" size={14} />
                           <Text style={styles.metricValue}>{item.views}</Text>
@@ -363,20 +399,11 @@ export function MyPropertiesScreen() {
                         </View>
                       </View>
 
-                      {/* Actions Column */}
-                      <View style={[styles.tdCell, { width: 84, alignItems: "flex-end", flexDirection: "row", justifyContent: "flex-end", gap: 6 }]}>
-                        {canArchive(item.status) ? (
-                          <Pressable
-                            accessibilityLabel={t("seller.actions.archive")}
-                            onPress={() => handleArchive(item.id, item.title)}
-                            style={({ pressed }) => [styles.actionIconButton, webPointer, pressed && styles.pressed]}
-                          >
-                            <Archive color="#5C6B66" size={16} />
-                          </Pressable>
-                        ) : null}
+                      {/* Actions Column - 3 dot menu only */}
+                      <View style={styles.colActions}>
                         <Pressable
-                          accessibilityLabel={t("seller.actions.delete")}
-                          onPress={() => handleDelete(item.id, item.title)}
+                          accessibilityLabel={t("admin.columns.actions")}
+                          onPress={(e) => handleOpenMenu(e, item)}
                           style={({ pressed }) => [styles.actionIconButton, webPointer, pressed && styles.pressed]}
                         >
                           <MoreVertical color="#5C6B66" size={16} />
@@ -386,26 +413,27 @@ export function MyPropertiesScreen() {
                   ))
                 )}
               </View>
-            ) : (
-              /* Mobile Card View */
-              <View style={styles.mobileCardList}>
-                {filteredListings.length === 0 ? (
-                  <View style={styles.emptyContainer}>
-                    <Building2 color="#5C6B66" size={40} />
-                    <Text style={styles.emptyTitle}>{t("dashboard.noListingsFound")}</Text>
-                    <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
-                  </View>
-                ) : (
-                  filteredListings.map((item) => (
-                    <View key={item.id} style={styles.mobileCard}>
-                      <View style={styles.mobileCardHead}>
-                        {item.imageUrl ? (
-                          <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.mobileThumb} />
-                        ) : (
-                          <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
-                            <Building2 color="#6B7D78" size={20} />
-                          </View>
-                        )}
+            </ScrollView>
+          ) : (
+            /* Mobile Card View */
+            <View style={styles.mobileCardList}>
+              {filteredListings.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Building2 color="#5C6B66" size={40} />
+                  <Text style={styles.emptyTitle}>{t("dashboard.noListingsFound")}</Text>
+                  <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
+                </View>
+              ) : (
+                filteredListings.map((item) => (
+                  <View key={item.id} style={styles.mobileCard}>
+                    <View style={styles.mobileCardHead}>
+                      {item.imageUrl ? (
+                        <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.mobileThumb} />
+                      ) : (
+                        <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
+                          <Building2 color="#6B7D78" size={20} />
+                        </View>
+                      )}
                       <View style={{ flex: 1, gap: 4 }}>
                         <Text style={styles.propTitle}>{item.title}</Text>
                         <Text style={styles.propLocation}>{item.location}</Text>
@@ -455,7 +483,12 @@ export function MyPropertiesScreen() {
                           <Edit color="#04cf92" size={14} />
                           <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
                         </AppLink>
-                        {canArchive(item.status) ? (
+                        {item.status === "archived" ? (
+                          <Pressable onPress={() => handleUnarchive(item.id, item.title)} style={styles.mobileActionBtn}>
+                            <ArchiveRestore color="#04cf92" size={14} />
+                            <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.unarchive")}</Text>
+                          </Pressable>
+                        ) : canArchive(item.status) ? (
                           <Pressable onPress={() => handleArchive(item.id, item.title)} style={styles.mobileActionBtn}>
                             <Archive color="#5C6B66" size={14} />
                             <Text style={styles.mobileActionText}>{t("seller.actions.archive")}</Text>
@@ -468,21 +501,89 @@ export function MyPropertiesScreen() {
                       </View>
                     </View>
                   </View>
-                )))}
-              </View>
-            )}
-            {hasNextPage && !isLoading && !error ? (
-              <Pressable
-                disabled={isFetchingNextPage}
-                onPress={() => void fetchNextPage()}
-                style={styles.loadMoreButton}
-              >
-                {isFetchingNextPage ? <ActivityIndicator color="#04cf92" size="small" /> : null}
-                <Text style={styles.loadMoreText}>{isFetchingNextPage ? t("dashboard.loading") : t("dashboard.loadMore")}</Text>
-              </Pressable>
-            ) : null}
-          </View>
+                ))
+              )}
+            </View>
+          )}
+          {hasNextPage && !isLoading && !error ? (
+            <Pressable
+              disabled={isFetchingNextPage}
+              onPress={() => void fetchNextPage()}
+              style={styles.loadMoreButton}
+            >
+              {isFetchingNextPage ? <ActivityIndicator color="#04cf92" size="small" /> : null}
+              <Text style={styles.loadMoreText}>{isFetchingNextPage ? t("dashboard.loading") : t("dashboard.loadMore")}</Text>
+            </Pressable>
+          ) : null}
         </View>
+      </View>
+
+      {/* 3-Dot Actions Dropdown Modal with Blurred Background */}
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setActiveMenu(null)}
+        transparent
+        visible={!!activeMenu}
+      >
+        <Pressable
+          accessibilityLabel={t("common.close") || "Close"}
+          onPress={() => setActiveMenu(null)}
+          style={styles.menuOverlay}
+        >
+          {activeMenu && (
+            <View
+              style={[
+                styles.menuDropdown,
+                {
+                  top: activeMenu.top,
+                  right: activeMenu.right,
+                },
+              ]}
+              onStartShouldSetResponder={() => true}
+            >
+              <Pressable
+                style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
+                onPress={() => {
+                  const id = activeMenu.id;
+                  setActiveMenu(null);
+                  router.push(`/property/edit?id=${id}` as any);
+                }}
+              >
+                <Edit color="#04cf92" size={15} />
+                <Text style={[styles.menuItemText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
+              </Pressable>
+
+              {activeMenu.status === "archived" ? (
+                <Pressable
+                  style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
+                  onPress={() => handleUnarchive(activeMenu.id, activeMenu.title)}
+                >
+                  <ArchiveRestore color="#04cf92" size={15} />
+                  <Text style={[styles.menuItemText, { color: "#04cf92" }]}>{t("seller.actions.unarchive")}</Text>
+                </Pressable>
+              ) : canArchive(activeMenu.status) ? (
+                <Pressable
+                  style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
+                  onPress={() => handleArchive(activeMenu.id, activeMenu.title)}
+                >
+                  <Archive color="#5C6B66" size={15} />
+                  <Text style={styles.menuItemText}>{t("seller.actions.archive")}</Text>
+                </Pressable>
+              ) : null}
+
+              <View style={styles.menuDivider} />
+
+              <Pressable
+                style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
+                onPress={() => handleDelete(activeMenu.id, activeMenu.title)}
+              >
+                <Trash2 color="#D4183D" size={15} />
+                <Text style={[styles.menuItemText, { color: "#D4183D" }]}>{t("seller.actions.delete")}</Text>
+              </Pressable>
+            </View>
+          )}
+        </Pressable>
+      </Modal>
     </SellerShell>
   );
 }
@@ -507,112 +608,6 @@ function getStatusStyle(status: string) {
 
 const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
-  outerContainer: {
-    width: "100%",
-    flex: 1,
-    flexDirection: "row",
-    backgroundColor: "#F8FAF9",
-  },
-  sidebar: {
-    width: 256,
-    backgroundColor: "#FFFFFF",
-    borderRightWidth: 0.8,
-    borderRightColor: "rgba(11,26,23,0.08)",
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-  },
-  sidebarHeader: {
-    gap: 16,
-    marginBottom: 16,
-    paddingHorizontal: 8,
-  },
-  brandRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  brandIconBg: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#04cf92",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  brandText: {
-    fontSize: 18,
-    fontFamily: fonts.extraBold,
-    color: "#0B1A17",
-  },
-  brandTextAccent: {
-    color: "#04cf92",
-  },
-  sellerRolePill: {
-    backgroundColor: "#E8EEFC",
-    borderRadius: 999,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    alignItems: "center",
-  },
-  sellerRoleText: {
-    color: "#2251D6",
-    fontSize: 12,
-    fontFamily: fonts.semiBold,
-  },
-  sidebarNavScroll: {
-    gap: 2,
-    paddingVertical: 8,
-  },
-  navItem: {
-    minHeight: 42,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
-  },
-  navItemActive: {
-    backgroundColor: "#E6FAF4",
-  },
-  navItemDanger: {
-    marginTop: 8,
-  },
-  navItemText: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-    color: "#5C6B66",
-  },
-  navItemTextActive: {
-    color: "#04cf92",
-    fontFamily: fonts.bold,
-  },
-  navItemTextDanger: {
-    color: "#D4183D",
-  },
-  badgeCountPill: {
-    backgroundColor: "#F4823A",
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  badgeCountText: {
-    color: colorTokens.onAccent,
-    fontSize: 12,
-    fontFamily: fonts.bold,
-  },
-  mainContent: {
-    flex: 1,
-    minWidth: 0,
-    flexDirection: "column",
-  },
-  workspaceScroll: {
-    flexGrow: 1,
-    justifyContent: "space-between",
-  },
   scrollBody: {
     padding: 24,
     gap: 20,
@@ -694,16 +689,18 @@ const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.08)",
     overflow: "hidden",
   },
+  tableScrollContent: {
+    minWidth: "100%",
+  },
   table: {
     width: "100%",
+    minWidth: 840,
   },
   tableHeaderRow: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    alignItems: "stretch",
     backgroundColor: "#F8FAF9",
-    borderBottomWidth: 0.8,
+    borderBottomWidth: 1,
     borderBottomColor: "rgba(11,26,23,0.08)",
   },
   thCell: {
@@ -715,13 +712,64 @@ const styles = StyleSheet.create({
   },
   tableDataRow: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 0.8,
+    alignItems: "stretch",
+    borderBottomWidth: 1,
     borderBottomColor: "rgba(11,26,23,0.06)",
   },
-  tdCell: {
+  // Column border for vertical column separators
+  colBorder: {
+    borderRightWidth: 1,
+    borderRightColor: "rgba(11,26,23,0.08)",
+  },
+  // Column sizing & padding
+  colProperty: {
+    flex: 2.8,
+    minWidth: 220,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    justifyContent: "center",
+  },
+  colType: {
+    flex: 1.1,
+    minWidth: 100,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    justifyContent: "center",
+  },
+  colPrice: {
+    flex: 1.3,
+    minWidth: 120,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    justifyContent: "center",
+  },
+  colStatus: {
+    flex: 1.0,
+    minWidth: 96,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    justifyContent: "center",
+  },
+  colAiValue: {
+    flex: 1.0,
+    minWidth: 96,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    justifyContent: "center",
+  },
+  colPerformance: {
+    flex: 1.4,
+    minWidth: 120,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    justifyContent: "center",
+  },
+  colActions: {
+    width: 88,
+    minWidth: 88,
+    paddingHorizontal: 8,
+    paddingVertical: 14,
+    alignItems: "center",
     justifyContent: "center",
   },
   propThumb: {
@@ -891,5 +939,55 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.semiBold,
     color: "#5C6B66",
+  },
+  // Blurred Backdrop & Dropdown menu styles
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(11, 26, 23, 0.22)",
+    ...Platform.select({
+      web: {
+        backdropFilter: "blur(4px)",
+        WebkitBackdropFilter: "blur(4px)",
+      },
+      default: {},
+    }),
+  },
+  menuDropdown: {
+    position: "absolute",
+    zIndex: 9999,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    borderWidth: 0.8,
+    borderColor: "rgba(11,26,23,0.10)",
+    paddingVertical: 4,
+    minWidth: 150,
+    ...Platform.select({
+      web: {
+        boxShadow: "0 8px 24px rgba(11,26,23,0.18)",
+      },
+      default: {
+        elevation: 10,
+      },
+    }),
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  menuItemPressed: {
+    backgroundColor: "#F4F6F5",
+  },
+  menuItemText: {
+    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    color: "#0B1A17",
+  },
+  menuDivider: {
+    height: 0.8,
+    backgroundColor: "rgba(11,26,23,0.06)",
+    marginVertical: 4,
   },
 });
