@@ -144,7 +144,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  // HTML content for Leaflet map inside iframe
+  // HTML content for map inside iframe powered by Google Maps roadmap & satellite layers
   const mapHtml = useMemo(() => {
     const markerData = filteredProperties.map((p, idx) => {
       // Coordinate fallback with deterministic spreading around Dhaka / area centers
@@ -196,12 +196,12 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
       padding: 0;
       width: 100%;
       height: 100%;
-      background-color: #F8FAFC;
+      background-color: #E5E7EB;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       overflow: hidden;
     }
     .leaflet-container {
-      background: #F1F5F9;
+      background: #E5E7EB;
       font-family: inherit;
     }
     .price-marker-wrap {
@@ -213,16 +213,17 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
       align-items: center;
       gap: 5px;
       font-weight: 700;
-      font-size: 11.5px;
+      font-size: 11px;
       line-height: 1;
-      padding: 5px 10px;
+      padding: 5px 9px;
       border-radius: 9999px;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.22);
+      box-shadow: 0 2px 7px rgba(15, 23, 42, 0.28);
       white-space: nowrap;
       text-align: center;
       cursor: pointer;
       transition: transform 0.16s ease, box-shadow 0.16s ease;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     .price-marker.sale {
       background-color: #0F172A;
@@ -252,25 +253,25 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
 
     .price-marker:hover {
       transform: translateY(-2px) scale(1.06);
-      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.28);
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.32);
       z-index: 500 !important;
     }
     .price-marker.active {
-      transform: scale(1.15);
-      box-shadow: 0 0 0 3px #10B981, 0 8px 22px rgba(15, 23, 42, 0.35);
+      transform: scale(1.14);
+      box-shadow: 0 0 0 3px #10B981, 0 8px 22px rgba(15, 23, 42, 0.38);
       z-index: 1000 !important;
     }
     /* Cluster bubble */
     .custom-cluster {
-      background-color: rgba(15, 23, 42, 0.12);
+      background-color: rgba(15, 23, 42, 0.14);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .custom-cluster-inner {
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background-color: #0F172A;
       color: #FFFFFF;
@@ -279,53 +280,115 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+      font-size: 11.5px;
+      box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
     }
     /* Clean zoom control */
     .leaflet-top.leaflet-right .leaflet-control-zoom {
-      border: 1px solid #E2E8F0;
+      border: 1px solid #CBD5E1;
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      margin-top: 12px;
-      margin-right: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      margin-top: 10px;
+      margin-right: 10px;
     }
     .leaflet-control-zoom a {
       color: #0F172A !important;
       background-color: #FFFFFF !important;
       font-weight: 700;
+      width: 30px !important;
+      height: 30px !important;
+      line-height: 30px !important;
     }
     .leaflet-control-zoom a:hover {
       background-color: #F8FAFC !important;
     }
+    /* Layer switch (Map / Satellite) */
+    .layer-control {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 800;
+      display: flex;
+      background: #FFFFFF;
+      border-radius: 7px;
+      border: 1px solid #CBD5E1;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+    .layer-btn {
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+      background: #FFFFFF;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .layer-btn.active {
+      background: #0F172A;
+      color: #FFFFFF;
+    }
   </style>
 </head>
 <body>
+  <div class="layer-control">
+    <button id="btn-map" class="layer-btn active" onclick="switchLayer('map')">Map</button>
+    <button id="btn-sat" class="layer-btn" onclick="switchLayer('sat')">Satellite</button>
+  </div>
   <div id="map"></div>
   <script>
     var map = L.map('map', {
       zoomControl: true,
-      attributionControl: true
+      attributionControl: true,
+      scrollWheelZoom: false,
+      touchZoom: true,
+      tap: true
     }).setView([${center.lat}, ${center.lng}], 13);
 
-    // High quality road/neighborhood basemap with minimal POI distraction
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      subdomains: 'abcd',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    // Google Maps Roadmap layer (official Google Maps road styling & labels)
+    var googleRoadmap = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '&copy; Google Maps'
     }).addTo(map);
+
+    // Google Maps Satellite layer (satellite imagery with labels)
+    var googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+      maxZoom: 20,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '&copy; Google Maps'
+    });
+
+    var currentLayer = 'map';
+    window.switchLayer = function(type) {
+      if (type === currentLayer) return;
+      if (type === 'sat') {
+        map.removeLayer(googleRoadmap);
+        googleSatellite.addTo(map);
+        document.getElementById('btn-map').classList.remove('active');
+        document.getElementById('btn-sat').classList.add('active');
+        currentLayer = 'sat';
+      } else {
+        map.removeLayer(googleSatellite);
+        googleRoadmap.addTo(map);
+        document.getElementById('btn-sat').classList.remove('active');
+        document.getElementById('btn-map').classList.add('active');
+        currentLayer = 'map';
+      }
+    };
 
     var markersCluster = L.markerClusterGroup({
       showCoverageOnHover: false,
-      maxClusterRadius: 40,
+      maxClusterRadius: 36,
       iconCreateFunction: function(cluster) {
         var count = cluster.getChildCount();
         return L.divIcon({
           html: '<div class="custom-cluster-inner">' + count + '</div>',
           className: 'custom-cluster',
-          iconSize: [40, 40],
-          iconAnchor: [20, 20]
+          iconSize: [38, 38],
+          iconAnchor: [19, 19]
         });
       }
     });
@@ -340,8 +403,8 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
                 '<span class="marker-dot ' + item.dotClass + '"></span>' +
                 '<span>' + item.price + '</span>' +
               '</div>',
-        iconSize: [item.width, 28],
-        iconAnchor: [item.width / 2, 14]
+        iconSize: [item.width, 26],
+        iconAnchor: [item.width / 2, 13]
       });
       var marker = L.marker([item.lat, item.lng], { icon: icon });
       markerMap[item.id] = marker;
@@ -378,7 +441,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
 </html>`;
   }, [filteredProperties, center]);
 
-  const mapHeight = isPhone ? 420 : isTablet ? 490 : 540;
+  const mapHeight = isPhone ? 390 : isTablet ? 470 : 530;
 
   // Selected property specs and image
   const selectedPhoto = useMemo(() => {
@@ -410,10 +473,16 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
       <View style={[styles.headerRow, isPhone && styles.headerRowPhone]}>
         <View style={styles.headerTitles}>
           <Text style={styles.kickerTag}>{t("home.mapExplorer.kicker")}</Text>
-          <Text style={styles.headlineText} accessibilityRole="header" aria-level={2}>
+          <Text
+            style={[styles.headlineText, isPhone && styles.headlineTextPhone]}
+            accessibilityRole="header"
+            aria-level={2}
+          >
             {t("home.mapExplorer.headline")}
           </Text>
-          <Text style={styles.subheadlineText}>{t("home.mapExplorer.subheadline")}</Text>
+          <Text style={[styles.subheadlineText, isPhone && styles.subheadlineTextPhone]}>
+            {t("home.mapExplorer.subheadline")}
+          </Text>
         </View>
 
         <Pressable
@@ -427,19 +496,20 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
           ]}
         >
           <Text style={styles.exploreLinkText}>{t("home.mapExplorer.exploreAll")}</Text>
-          <ChevronRight size={16} color={colors.greenOnLight} strokeWidth={2.2} />
+          <ChevronRight size={15} color={colors.greenOnLight} strokeWidth={2.2} />
         </Pressable>
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
           2. FILTER PILLS BAR: All / For Sale / For Rent
       ───────────────────────────────────────────────────────────── */}
-      <View style={styles.filterRow}>
+      <View style={[styles.filterRow, isPhone && styles.filterRowPhone]}>
         <Pressable
           accessibilityRole="button"
           onPress={() => setActiveFilter("all")}
           style={[
             styles.filterPill,
+            isPhone && styles.filterPillPhone,
             activeFilter === "all" && styles.filterPillActive,
             webPointer,
           ]}
@@ -447,6 +517,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
           <Text
             style={[
               styles.filterPillText,
+              isPhone && styles.filterPillTextPhone,
               activeFilter === "all" && styles.filterPillTextActive,
             ]}
           >
@@ -462,6 +533,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
           onPress={() => setActiveFilter("sale")}
           style={[
             styles.filterPill,
+            isPhone && styles.filterPillPhone,
             activeFilter === "sale" && styles.filterPillActive,
             webPointer,
           ]}
@@ -470,6 +542,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
           <Text
             style={[
               styles.filterPillText,
+              isPhone && styles.filterPillTextPhone,
               activeFilter === "sale" && styles.filterPillTextActive,
             ]}
           >
@@ -485,6 +558,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
           onPress={() => setActiveFilter("rent")}
           style={[
             styles.filterPill,
+            isPhone && styles.filterPillPhone,
             activeFilter === "rent" && styles.filterPillActive,
             webPointer,
           ]}
@@ -493,6 +567,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
           <Text
             style={[
               styles.filterPillText,
+              isPhone && styles.filterPillTextPhone,
               activeFilter === "rent" && styles.filterPillTextActive,
             ]}
           >
@@ -505,7 +580,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. MAP CANVAS CONTAINER
+          3. MAP CANVAS CONTAINER (GOOGLE MAPS)
       ───────────────────────────────────────────────────────────── */}
       <View style={[styles.mapContainer, { height: mapHeight }]}>
         {listingsQuery.isLoading ? (
@@ -521,20 +596,21 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
               height: "100%",
               border: "none",
             }}
-            title="HomeNet Interactive Property Map Explorer"
+            title="Google Maps Interactive Real Estate Explorer"
           />
         ) : (
           <View style={styles.nativeFallback}>
-            <MapPin size={36} color={colorTokens.brandText} />
-            <Text style={styles.nativeFallbackTitle}>Dhaka Property Map</Text>
+            <MapPin size={34} color={colorTokens.brandText} />
+            <Text style={styles.nativeFallbackTitle}>Google Maps Property Explorer</Text>
             <Text style={styles.nativeFallbackSub}>
-              {filteredProperties.length} active listings ready to explore
+              {filteredProperties.length} active listings across Dhaka
             </Text>
           </View>
         )}
 
         {/* ─────────────────────────────────────────────────────────────
             4. FLOATING PROPERTY PREVIEW CARD (OnClick Pin)
+            Matching mobile reference screenshot with compact layout
         ───────────────────────────────────────────────────────────── */}
         {selectedProperty ? (
           <Pressable
@@ -550,79 +626,80 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
             ]}
           >
             {/* Image Thumbnail */}
-            <View style={styles.previewImageWrap}>
+            <View style={[styles.previewImageWrap, isPhone && styles.previewImageWrapPhone]}>
               {selectedPhoto ? (
                 <Image
-                  source={{ uri: cdnImage(selectedPhoto, 240, 200) }}
+                  source={{ uri: cdnImage(selectedPhoto, 200, 160) }}
                   style={styles.previewImage}
                   contentFit="cover"
-                  transition={200}
+                  transition={180}
                 />
               ) : (
                 <View style={styles.previewImageFallback}>
-                  <MapPin size={22} color={colorTokens.subtle} />
+                  <MapPin size={20} color={colorTokens.subtle} />
                 </View>
               )}
             </View>
 
             {/* Info Content */}
             <View style={styles.previewContent}>
-              {/* Badge + Close button row */}
+              {/* Top Row: Price + Tag + Close */}
               <View style={styles.previewTopRow}>
-                <View
-                  style={[
-                    styles.tagBadge,
-                    selectedProperty.listing_type === "rent"
-                      ? styles.tagBadgeRent
-                      : styles.tagBadgeSale,
-                  ]}
-                >
-                  <Text style={styles.tagBadgeText}>
-                    {selectedProperty.listing_type === "rent"
-                      ? t("home.mapExplorer.statusRent")
-                      : t("home.mapExplorer.statusSale")}
-                  </Text>
-                </View>
+                <Text style={[styles.previewPrice, isPhone && styles.previewPricePhone]} numberOfLines={1}>
+                  {formatLocalizedPrice(
+                    selectedProperty.price,
+                    selectedProperty.price_currency || "BDT",
+                    language
+                  )}
+                  {selectedProperty.listing_type === "rent" ? (
+                    <Text style={styles.previewPerMonth}> /mo</Text>
+                  ) : null}
+                </Text>
 
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Close property preview"
-                  onPress={(e) => {
-                    e.stopPropagation?.();
-                    setSelectedPropertyId(null);
-                  }}
-                  style={[styles.closeBtn, webPointer]}
-                >
-                  <X size={14} color="#64748B" />
-                </Pressable>
+                <View style={styles.topRightActions}>
+                  <View
+                    style={[
+                      styles.tagBadge,
+                      selectedProperty.listing_type === "rent"
+                        ? styles.tagBadgeRent
+                        : styles.tagBadgeSale,
+                    ]}
+                  >
+                    <Text style={styles.tagBadgeText}>
+                      {selectedProperty.listing_type === "rent"
+                        ? t("home.mapExplorer.statusRent")
+                        : t("home.mapExplorer.statusSale")}
+                    </Text>
+                  </View>
+
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Close property preview"
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      setSelectedPropertyId(null);
+                    }}
+                    style={[styles.closeBtn, webPointer]}
+                  >
+                    <X size={13} color="#64748B" />
+                  </Pressable>
+                </View>
               </View>
 
-              {/* Price */}
-              <Text style={styles.previewPrice} numberOfLines={1}>
-                {formatLocalizedPrice(
-                  selectedProperty.price,
-                  selectedProperty.price_currency || "BDT",
-                  language
-                )}
-                {selectedProperty.listing_type === "rent" ? (
-                  <Text style={styles.previewPerMonth}> /mo</Text>
-                ) : null}
-              </Text>
-
               {/* Title */}
-              <Text numberOfLines={1} style={styles.previewTitle}>
+              <Text numberOfLines={1} style={[styles.previewTitle, isPhone && styles.previewTitlePhone]}>
                 {selectedProperty.title}
               </Text>
 
               {/* Neighborhood / Address */}
               <View style={styles.previewLocationRow}>
-                <MapPin size={12} color="#64748B" style={{ marginTop: 1 }} />
-                <Text numberOfLines={1} style={styles.previewLocation}>
+                <MapPin size={11} color="#64748B" style={{ marginTop: 1 }} />
+                <Text numberOfLines={1} style={[styles.previewLocation, isPhone && styles.previewLocationPhone]}>
                   {selectedProperty.area?.name || selectedProperty.address || "Dhaka"}
                 </Text>
               </View>
 
-              {/* Beds / Baths / Sqft specs */}
+              {/* Specs row */}
               {selectedSpecs && (selectedSpecs.beds || selectedSpecs.baths || selectedSpecs.sqft) ? (
                 <View style={styles.previewSpecsRow}>
                   {selectedSpecs.beds ? (
@@ -651,13 +728,15 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
                 </View>
               ) : null}
 
-              {/* Direct CTA button */}
-              <View style={styles.ctaRow}>
-                <View style={styles.viewPropertyCta}>
-                  <Text style={styles.viewPropertyText}>{t("home.mapExplorer.viewProperty")}</Text>
-                  <ChevronRight size={13} color="#FFFFFF" strokeWidth={2.4} />
+              {/* CTA button (Desktop only, mobile card is directly clickable) */}
+              {!isPhone ? (
+                <View style={styles.ctaRow}>
+                  <View style={styles.viewPropertyCta}>
+                    <Text style={styles.viewPropertyText}>{t("home.mapExplorer.viewProperty")}</Text>
+                    <ChevronRight size={13} color="#FFFFFF" strokeWidth={2.4} />
+                  </View>
                 </View>
-              </View>
+              ) : null}
             </View>
           </Pressable>
         ) : null}
@@ -676,12 +755,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
-    marginBottom: 16,
-    gap: 16,
+    marginBottom: 14,
+    gap: 12,
   },
   headerRowPhone: {
     flexDirection: "column",
     alignItems: "flex-start",
+    gap: 8,
+    marginBottom: 12,
   },
   headerTitles: {
     flex: 1,
@@ -689,11 +770,11 @@ const styles = StyleSheet.create({
   kickerTag: {
     color: "#059669",
     fontFamily: fonts.bold,
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: "700",
     letterSpacing: 1.1,
     textTransform: "uppercase",
-    marginBottom: 4,
+    marginBottom: 3,
   },
   headlineText: {
     color: "#0B1A17",
@@ -703,12 +784,20 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     letterSpacing: -0.4,
   },
+  headlineTextPhone: {
+    fontSize: 18,
+    lineHeight: 24,
+  },
   subheadlineText: {
     color: "#5C6B66",
     fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 20,
-    marginTop: 3,
+    marginTop: 2,
+  },
+  subheadlineTextPhone: {
+    fontSize: 12.5,
+    lineHeight: 18,
   },
 
   exploreLink: {
@@ -723,7 +812,7 @@ const styles = StyleSheet.create({
   exploreLinkText: {
     color: colors.greenOnLight,
     fontFamily: fonts.semiBold,
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: "600",
   },
 
@@ -732,18 +821,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 14,
+    marginBottom: 12,
+  },
+  filterRowPhone: {
+    flexWrap: "wrap",
+    gap: 6,
+    marginBottom: 10,
   },
   filterPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingHorizontal: 13,
+    paddingVertical: 6.5,
     borderRadius: 9999,
     backgroundColor: "#F1F5F9",
     borderWidth: 1,
     borderColor: "#E2E8F0",
+  },
+  filterPillPhone: {
+    paddingHorizontal: 10,
+    paddingVertical: 5.5,
+    gap: 4,
   },
   filterPillActive: {
     backgroundColor: "#0F172A",
@@ -751,24 +850,27 @@ const styles = StyleSheet.create({
   },
   filterPillText: {
     fontFamily: fonts.semiBold,
-    fontSize: 13,
+    fontSize: 12.5,
     color: "#334155",
     fontWeight: "600",
+  },
+  filterPillTextPhone: {
+    fontSize: 11.5,
   },
   filterPillTextActive: {
     color: "#FFFFFF",
   },
   countActive: {
     color: "#94A3B8",
-    fontSize: 12,
+    fontSize: 11.5,
   },
   countInactive: {
     color: "#64748B",
-    fontSize: 12,
+    fontSize: 11.5,
   },
   filterDot: {
-    width: 7,
-    height: 7,
+    width: 6,
+    height: 6,
     borderRadius: 50,
   },
   filterDotSale: {
@@ -781,7 +883,7 @@ const styles = StyleSheet.create({
   /* Map Canvas Box */
   mapContainer: {
     width: "100%",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#E5E7EB",
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#E2E8F0",
@@ -789,7 +891,7 @@ const styles = StyleSheet.create({
     position: "relative",
     ...(Platform.OS === "web"
       ? {
-          boxShadow: "0 4px 18px -2px rgba(15, 23, 42, 0.06)",
+          boxShadow: "0 4px 18px -2px rgba(15, 23, 42, 0.08)",
         }
       : {}),
   },
@@ -811,59 +913,67 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     backgroundColor: "#F8FAFC",
-    padding: 24,
+    padding: 20,
   },
   nativeFallbackTitle: {
     fontFamily: fonts.semiBold,
-    fontSize: 16,
+    fontSize: 15,
     color: "#0F172A",
   },
   nativeFallbackSub: {
     fontFamily: fonts.regular,
-    fontSize: 13,
+    fontSize: 12.5,
     color: "#64748B",
   },
 
   /* Bottom Peek Preview Card */
   previewCard: {
     position: "absolute",
-    bottom: 14,
-    left: 14,
-    width: 390,
+    bottom: 12,
+    left: 12,
+    width: 380,
     maxWidth: "92%",
     backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#E2E8F0",
     padding: 10,
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 10,
     zIndex: 100,
     ...(Platform.OS === "web"
       ? {
-          boxShadow: "0 12px 30px -4px rgba(15, 23, 42, 0.18), 0 4px 8px -2px rgba(0, 0, 0, 0.05)",
-          transition: "transform 0.2s ease, box-shadow 0.2s ease",
+          boxShadow: "0 10px 25px -4px rgba(15, 23, 42, 0.2), 0 4px 8px -2px rgba(0, 0, 0, 0.06)",
+          transition: "transform 0.18s ease, box-shadow 0.18s ease",
         }
       : {}),
   },
   previewCardPhone: {
-    left: 10,
-    right: 10,
+    left: 8,
+    right: 8,
+    bottom: 8,
     width: undefined,
     maxWidth: undefined,
-    bottom: 10,
+    padding: 8,
+    gap: 9,
+    borderRadius: 11,
   },
   previewCardHovered: {
     transform: [{ translateY: -2 }],
   },
   previewImageWrap: {
-    width: 104,
-    height: 100,
-    borderRadius: 10,
+    width: 96,
+    height: 86,
+    borderRadius: 8,
     overflow: "hidden",
     backgroundColor: "#F1F5F9",
     flexShrink: 0,
+  },
+  previewImageWrapPhone: {
+    width: 74,
+    height: 66,
+    borderRadius: 7,
   },
   previewImage: {
     width: "100%",
@@ -878,18 +988,22 @@ const styles = StyleSheet.create({
   previewContent: {
     flex: 1,
     minWidth: 0,
-    gap: 2,
+    gap: 1.5,
   },
   previewTopRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 2,
+  },
+  topRightActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   tagBadge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2.5,
-    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   tagBadgeSale: {
     backgroundColor: "#0F172A",
@@ -900,34 +1014,40 @@ const styles = StyleSheet.create({
   tagBadgeText: {
     color: "#FFFFFF",
     fontFamily: fonts.bold,
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: "700",
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
   closeBtn: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
   },
   previewPrice: {
     fontFamily: fonts.headingBold,
-    fontSize: 16,
+    fontSize: 15.5,
     color: "#0B1A17",
     fontWeight: "700",
   },
+  previewPricePhone: {
+    fontSize: 14.5,
+  },
   previewPerMonth: {
     fontFamily: fonts.regular,
-    fontSize: 12,
+    fontSize: 11.5,
     color: "#64748B",
     fontWeight: "400",
   },
   previewTitle: {
     fontFamily: fonts.semiBold,
-    fontSize: 13,
+    fontSize: 12.5,
     color: "#1E293B",
+  },
+  previewTitlePhone: {
+    fontSize: 12,
   },
   previewLocationRow: {
     flexDirection: "row",
@@ -936,26 +1056,29 @@ const styles = StyleSheet.create({
   },
   previewLocation: {
     fontFamily: fonts.regular,
-    fontSize: 12,
+    fontSize: 11.5,
     color: "#64748B",
+  },
+  previewLocationPhone: {
+    fontSize: 11,
   },
   previewSpecsRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    marginTop: 2,
+    gap: 4,
+    marginTop: 1,
   },
   previewSpecItem: {
     fontFamily: fonts.medium,
-    fontSize: 11,
+    fontSize: 10.5,
     color: "#475569",
   },
   specDivider: {
     color: "#94A3B8",
-    fontSize: 10,
+    fontSize: 9,
   },
   ctaRow: {
-    marginTop: 4,
+    marginTop: 3,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -964,14 +1087,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 3,
     backgroundColor: "#0F172A",
-    paddingHorizontal: 9,
-    paddingVertical: 3.5,
-    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 5,
   },
   viewPropertyText: {
     color: "#FFFFFF",
     fontFamily: fonts.semiBold,
-    fontSize: 11,
+    fontSize: 10.5,
     fontWeight: "600",
   },
 });
