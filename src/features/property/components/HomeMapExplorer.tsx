@@ -1,7 +1,8 @@
-import React, { memo, useState, useMemo, useEffect, useCallback } from "react";
+import React, { memo, useState, useMemo, useCallback } from "react";
 import {
   Platform,
   Pressable,
+  type PressableStateCallbackType,
   StyleSheet,
   Text,
   View,
@@ -12,52 +13,32 @@ import { router } from "expo-router";
 import { ChevronRight, MapPin, X } from "@/components/icons";
 import { colorTokens, colors, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useTranslation, formatLocalizedPrice } from "@/i18n";
+import {
+  useTranslation,
+  formatLocalizedNumber,
+  formatLocalizedPrice,
+  isPriceOnRequest,
+} from "@/i18n";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { getProperties } from "@/services/propertyApi";
 import { useQuery } from "@tanstack/react-query";
-import { DHAKA_CENTER, areaCenterFor } from "../constants/areaCenters";
 import type { Property } from "../types/property";
+import { HomeMapCanvas } from "./HomeMapCanvas";
+import type { HomeMapMarker } from "./HomeMapCanvas.types";
 
 type FilterType = "all" | "sale" | "rent";
 
-function sanitize(str?: string | null): string {
-  if (!str) return "";
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+type MappableProperty = Property & { location_lat: number; location_lng: number };
 
-function formatPillPrice(price: number, listingType: string): string {
-  if (!price || price <= 0) return "Contact for price";
-
-  if (listingType === "rent") {
-    if (price >= 100000) {
-      const lac = (price / 100000).toFixed(price % 100000 === 0 ? 0 : 1);
-      return `৳ ${lac} Lac/mo`;
-    }
-    if (price >= 1000) {
-      return `৳ ${Math.round(price / 1000)}k/mo`;
-    }
-    return `৳ ${price.toLocaleString()}/mo`;
-  }
-
-  // Sale
-  if (price >= 10000000) {
-    const cr = (price / 10000000).toFixed(price % 10000000 === 0 ? 0 : 2).replace(/\.00$/, "");
-    return `৳ ${cr} Cr`;
-  }
-  if (price >= 100000) {
-    const lac = (price / 100000).toFixed(price % 100000 === 0 ? 0 : 2).replace(/\.00$/, "");
-    return `৳ ${lac} Lac`;
-  }
-  if (price >= 1000) {
-    return `৳ ${Math.round(price / 1000)}k`;
-  }
-  return `৳ ${price.toLocaleString()}`;
+/** Only listings with a real pin go on the map; an area centre would put them in the wrong place. */
+function hasCoordinates(p: Property): p is MappableProperty {
+  return (
+    typeof p.location_lat === "number" &&
+    typeof p.location_lng === "number" &&
+    Number.isFinite(p.location_lat) &&
+    Number.isFinite(p.location_lng) &&
+    !(p.location_lat === 0 && p.location_lng === 0)
+  );
 }
 
 function getPropertySpecs(property: Property) {
@@ -72,7 +53,14 @@ function getPropertySpecs(property: Property) {
   return { beds, baths, sqft };
 }
 
-export const HomeMapExplorer = memo(function HomeMapExplorer() {
+/**
+ * Home page map of active listings. Web only for now: the map is Leaflet in
+ * the page (HomeMapCanvas.web.tsx), and there's no native map yet, so on the
+ * app this renders nothing and fetches nothing.
+ */
+export const HomeMapExplorer = Platform.OS === "web" ? memo(HomeMapExplorerWeb) : () => null;
+
+function HomeMapExplorerWeb() {
   const { t, language } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
 
@@ -87,365 +75,50 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
     gcTime: 30 * 60 * 1000,
   });
 
-  const rawProperties = useMemo(
-    () => listingsQuery.data?.data?.items ?? [],
-    [listingsQuery.data?.data?.items]
-  );
+  const items = listingsQuery.data?.data?.items;
+  const mappableProperties = useMemo(() => (items ?? []).filter(hasCoordinates), [items]);
 
   // Filter properties based on active tab
   const filteredProperties = useMemo(() => {
-    if (activeFilter === "sale") {
-      return rawProperties.filter((p) => p.listing_type === "sale");
-    }
-    if (activeFilter === "rent") {
-      return rawProperties.filter((p) => p.listing_type === "rent");
-    }
-    return rawProperties;
-  }, [rawProperties, activeFilter]);
+    if (activeFilter === "all") return mappableProperties;
+    return mappableProperties.filter((p) => p.listing_type === activeFilter);
+  }, [mappableProperties, activeFilter]);
 
-  const allCount = rawProperties.length;
+  const allCount = mappableProperties.length;
   const saleCount = useMemo(
-    () => rawProperties.filter((p) => p.listing_type === "sale").length,
-    [rawProperties]
+    () => mappableProperties.filter((p) => p.listing_type === "sale").length,
+    [mappableProperties]
   );
   const rentCount = useMemo(
-    () => rawProperties.filter((p) => p.listing_type === "rent").length,
-    [rawProperties]
+    () => mappableProperties.filter((p) => p.listing_type === "rent").length,
+    [mappableProperties]
   );
 
-  // Selected property
+  // Looked up in the filtered list, so switching filters closes a card whose pin is gone.
   const selectedProperty = useMemo(() => {
     if (!selectedPropertyId) return null;
-    return rawProperties.find((p) => p.id === selectedPropertyId) ?? null;
-  }, [rawProperties, selectedPropertyId]);
+    return filteredProperties.find((p) => p.id === selectedPropertyId) ?? null;
+  }, [filteredProperties, selectedPropertyId]);
 
-  // Center coordinate: compute from properties or fallback to Dhaka
-  const center = useMemo(() => {
-    const withCoords = filteredProperties.find(
-      (p) => typeof p.location_lat === "number" && typeof p.location_lng === "number"
-    );
-    if (withCoords?.location_lat && withCoords?.location_lng) {
-      return { lat: withCoords.location_lat, lng: withCoords.location_lng };
-    }
-    return DHAKA_CENTER;
-  }, [filteredProperties]);
+  const perMonth = t("propertyCard.perMonth");
+  const markers = useMemo<HomeMapMarker[]>(
+    () =>
+      filteredProperties.map((p) => {
+        const onRequest = isPriceOnRequest(p.price);
+        const isRent = p.listing_type === "rent";
+        const price = formatLocalizedPrice(p.price, p.price_currency || "BDT", language);
+        return {
+          id: String(p.id),
+          lat: p.location_lat,
+          lng: p.location_lng,
+          label: isRent && !onRequest ? `${price}${perMonth}` : price,
+          variant: onRequest ? "neutral" : isRent ? "rent" : "sale",
+        };
+      }),
+    [filteredProperties, language, perMonth]
+  );
 
-  // Listen for PROPERTY_SELECTED messages from the Leaflet map iframe
-  useEffect(() => {
-    if (Platform.OS !== "web" || typeof window === "undefined") return;
-
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === "PROPERTY_SELECTED" && event.data.id) {
-        setSelectedPropertyId(String(event.data.id));
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
-
-  // HTML content for map inside iframe powered by Google Maps roadmap & satellite layers
-  const mapHtml = useMemo(() => {
-    const markerData = filteredProperties.map((p, idx) => {
-      // Coordinate fallback with deterministic spreading around Dhaka / area centers
-      let lat = p.location_lat;
-      let lng = p.location_lng;
-
-      if (!lat || !lng) {
-        const areaName = p.area?.name || "";
-        const areaPoint = areaCenterFor(p.area_id || "", areaName, []);
-        const jitterLat = ((idx % 7) - 3) * 0.006;
-        const jitterLng = ((idx % 5) - 2) * 0.006;
-        lat = (areaPoint?.lat || center.lat) + jitterLat;
-        lng = (areaPoint?.lng || center.lng) + jitterLng;
-      }
-
-      const isRent = p.listing_type === "rent";
-      const isContactForPrice = !p.price || p.price <= 0;
-      const variant = isContactForPrice ? "neutral" : isRent ? "rent" : "sale";
-      const dotClass = isContactForPrice ? "dot-neutral" : isRent ? "dot-rent" : "dot-sale";
-      const priceText = formatPillPrice(p.price, p.listing_type);
-
-      return {
-        id: sanitize(p.id),
-        title: sanitize(p.title),
-        price: sanitize(priceText),
-        variant,
-        dotClass,
-        lat,
-        lng,
-        width: Math.max(76, priceText.length * 7.5 + 24),
-      };
-    });
-
-    const markersJson = JSON.stringify(markerData);
-
-    return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-  <style>
-    body, html, #map {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #E5E7EB;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      overflow: hidden;
-      touch-action: pan-x pan-y pinch-zoom;
-    }
-    .leaflet-container {
-      background: #E5E7EB;
-      font-family: inherit;
-    }
-    .price-marker-wrap {
-      background: transparent;
-      border: none;
-    }
-    .price-marker {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-weight: 700;
-      font-size: 11px;
-      line-height: 1;
-      padding: 5px 9px;
-      border-radius: 9999px;
-      box-shadow: 0 2px 7px rgba(15, 23, 42, 0.28);
-      white-space: nowrap;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.16s ease, box-shadow 0.16s ease;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .price-marker.sale {
-      background-color: #0F172A;
-      color: #FFFFFF;
-      border: 1.5px solid #1E293B;
-    }
-    .price-marker.rent {
-      background-color: #059669;
-      color: #FFFFFF;
-      border: 1.5px solid #047857;
-    }
-    .price-marker.neutral {
-      background-color: #334155;
-      color: #F8FAFC;
-      border: 1.5px solid #475569;
-    }
-    .marker-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-    .dot-sale { background-color: #38BDF8; }
-    .dot-rent { background-color: #6EE7B7; }
-    .dot-neutral { background-color: #94A3B8; }
-
-    .price-marker:hover {
-      transform: translateY(-2px) scale(1.06);
-      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.32);
-      z-index: 500 !important;
-    }
-    .price-marker.active {
-      transform: scale(1.14);
-      box-shadow: 0 0 0 3px #10B981, 0 8px 22px rgba(15, 23, 42, 0.38);
-      z-index: 1000 !important;
-    }
-    /* Cluster bubble */
-    .custom-cluster {
-      background-color: rgba(15, 23, 42, 0.14);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .custom-cluster-inner {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background-color: #0F172A;
-      color: #FFFFFF;
-      border: 2px solid #FFFFFF;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 11.5px;
-      box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
-    }
-    /* Clean zoom control */
-    .leaflet-top.leaflet-right .leaflet-control-zoom {
-      border: 1px solid #CBD5E1;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-      margin-top: 10px;
-      margin-right: 10px;
-    }
-    .leaflet-control-zoom a {
-      color: #0F172A !important;
-      background-color: #FFFFFF !important;
-      font-weight: 700;
-      width: 30px !important;
-      height: 30px !important;
-      line-height: 30px !important;
-    }
-    .leaflet-control-zoom a:hover {
-      background-color: #F8FAFC !important;
-    }
-    /* Layer switch (Map / Satellite) */
-    .layer-control {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 800;
-      display: flex;
-      background: #FFFFFF;
-      border-radius: 7px;
-      border: 1px solid #CBD5E1;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-      overflow: hidden;
-    }
-    .layer-btn {
-      padding: 5px 9px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #475569;
-      background: #FFFFFF;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .layer-btn.active {
-      background: #0F172A;
-      color: #FFFFFF;
-    }
-  </style>
-</head>
-<body>
-  <div class="layer-control">
-    <button id="btn-map" class="layer-btn active" onclick="switchLayer('map')">Map</button>
-    <button id="btn-sat" class="layer-btn" onclick="switchLayer('sat')">Satellite</button>
-  </div>
-  <div id="map"></div>
-  <script>
-    var map = L.map('map', {
-      zoomControl: true,
-      attributionControl: true,
-      scrollWheelZoom: true,
-      doubleClickZoom: true,
-      touchZoom: true,
-      boxZoom: true,
-      keyboard: true,
-      tap: true,
-      dragging: true
-    }).setView([${center.lat}, ${center.lng}], 13);
-
-    // Google Maps Roadmap layer (official Google Maps road styling & labels)
-    var googleRoadmap = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-      maxZoom: 20,
-      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-      attribution: '&copy; Google Maps'
-    }).addTo(map);
-
-    // Google Maps Satellite layer (satellite imagery with labels)
-    var googleSatellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-      maxZoom: 20,
-      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-      attribution: '&copy; Google Maps'
-    });
-
-    var currentLayer = 'map';
-    window.switchLayer = function(type) {
-      if (type === currentLayer) return;
-      if (type === 'sat') {
-        map.removeLayer(googleRoadmap);
-        googleSatellite.addTo(map);
-        document.getElementById('btn-map').classList.remove('active');
-        document.getElementById('btn-sat').classList.add('active');
-        currentLayer = 'sat';
-      } else {
-        map.removeLayer(googleSatellite);
-        googleRoadmap.addTo(map);
-        document.getElementById('btn-sat').classList.remove('active');
-        document.getElementById('btn-map').classList.add('active');
-        currentLayer = 'map';
-      }
-    };
-
-    var markersCluster = L.markerClusterGroup({
-      showCoverageOnHover: false,
-      maxClusterRadius: 36,
-      iconCreateFunction: function(cluster) {
-        var count = cluster.getChildCount();
-        return L.divIcon({
-          html: '<div class="custom-cluster-inner">' + count + '</div>',
-          className: 'custom-cluster',
-          iconSize: [38, 38],
-          iconAnchor: [19, 19]
-        });
-      }
-    });
-
-    var markersData = ${markersJson};
-    var markerMap = {};
-
-    markersData.forEach(function(item) {
-      var icon = L.divIcon({
-        className: 'price-marker-wrap',
-        html: '<div class="price-marker ' + item.variant + '" id="marker-' + item.id + '">' +
-                '<span class="marker-dot ' + item.dotClass + '"></span>' +
-                '<span>' + item.price + '</span>' +
-              '</div>',
-        iconSize: [item.width, 26],
-        iconAnchor: [item.width / 2, 13]
-      });
-      var marker = L.marker([item.lat, item.lng], { icon: icon });
-      markerMap[item.id] = marker;
-      marker.on('click', function(e) {
-        setActiveMarker(item.id);
-        map.panTo([item.lat - 0.003, item.lng], { animate: true, duration: 0.35 });
-        window.parent.postMessage({ type: 'PROPERTY_SELECTED', id: item.id }, '*');
-      });
-      markersCluster.addLayer(marker);
-    });
-
-    map.addLayer(markersCluster);
-
-    function setActiveMarker(id) {
-      document.querySelectorAll('.price-marker').forEach(function(el) {
-        el.classList.remove('active');
-      });
-      var target = document.getElementById('marker-' + id);
-      if (target) {
-        target.classList.add('active');
-      }
-    }
-
-    window.addEventListener('message', function(event) {
-      if (event.data && event.data.type === 'SELECT_PROPERTY_FROM_OUTSIDE') {
-        setActiveMarker(event.data.id);
-        var m = markerMap[event.data.id];
-        if (m) {
-          map.panTo(m.getLatLng(), { animate: true, duration: 0.5 });
-        }
-      }
-    });
-  </script>
-</body>
-</html>`;
-  }, [filteredProperties, center]);
+  const handleSelect = useCallback((id: string) => setSelectedPropertyId(id), []);
 
   const mapHeight = isPhone ? 390 : isTablet ? 470 : 530;
 
@@ -467,9 +140,10 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
   const handleCardPress = useCallback(() => {
     if (!selectedProperty?.id) return;
     router.push(`/property/${selectedProperty.id}` as never);
-  }, [selectedProperty?.id]);
+  }, [selectedProperty]);
 
   const exploreAllHref = activeFilter === "rent" ? "/rent" : "/buy";
+  const num = (value: number) => formatLocalizedNumber(value.toLocaleString("en-BD"), language);
 
   return (
     <View style={styles.sectionContainer}>
@@ -495,7 +169,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
           accessibilityRole="link"
           accessibilityLabel={t("home.mapExplorer.exploreAll")}
           onPress={() => router.push(exploreAllHref as never)}
-          style={({ hovered }: { hovered?: boolean }) => [
+          style={({ hovered }: PressableStateCallbackType & { hovered?: boolean }) => [
             styles.exploreLink,
             webPointer,
             hovered && styles.exploreLinkHovered,
@@ -586,7 +260,7 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. MAP CANVAS CONTAINER (GOOGLE MAPS)
+          3. MAP CANVAS CONTAINER
       ───────────────────────────────────────────────────────────── */}
       <View style={[styles.mapContainer, { height: mapHeight }]}>
         {listingsQuery.isLoading ? (
@@ -594,75 +268,71 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
             <ActivityIndicator size="small" color={colorTokens.brand} />
             <Text style={styles.loadingText}>{t("home.mapExplorer.loadingMap")}</Text>
           </View>
-        ) : Platform.OS === "web" ? (
-          <iframe
-            srcDoc={mapHtml}
-            style={{
-              width: "100%",
-              height: "100%",
-              border: "none",
-            }}
-            title="Google Maps Interactive Real Estate Explorer"
-          />
         ) : (
-          <View style={styles.nativeFallback}>
-            <MapPin size={34} color={colorTokens.brandText} />
-            <Text style={styles.nativeFallbackTitle}>Google Maps Property Explorer</Text>
-            <Text style={styles.nativeFallbackSub}>
-              {filteredProperties.length} active listings across Dhaka
-            </Text>
-          </View>
+          <HomeMapCanvas
+            markers={markers}
+            selectedId={selectedProperty ? String(selectedProperty.id) : null}
+            onSelect={handleSelect}
+            accessibilityLabel={t("home.mapExplorer.mapLabel")}
+          />
         )}
+
+        {!listingsQuery.isLoading && markers.length === 0 ? (
+          <View pointerEvents="none" style={styles.emptyOverlay}>
+            <Text style={styles.emptyOverlayText}>{t("home.mapExplorer.noProperties")}</Text>
+          </View>
+        ) : null}
 
         {/* ─────────────────────────────────────────────────────────────
             4. FLOATING PROPERTY PREVIEW CARD (OnClick Pin)
-            Matching mobile reference screenshot with compact layout
+            The close button is a sibling of the card's button, not inside
+            it: a <button> inside a <button> is invalid HTML on web.
         ───────────────────────────────────────────────────────────── */}
         {selectedProperty ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`View details for ${selectedProperty.title}`}
-            onPress={handleCardPress}
-            style={({ pressed, hovered }: { pressed?: boolean; hovered?: boolean }) => [
-              styles.previewCard,
-              isPhone && styles.previewCardPhone,
-              webPointer,
-              pressed && { opacity: 0.96 },
-              hovered && styles.previewCardHovered,
-            ]}
-          >
-            {/* Image Thumbnail */}
-            <View style={[styles.previewImageWrap, isPhone && styles.previewImageWrapPhone]}>
-              {selectedPhoto ? (
-                <Image
-                  source={{ uri: cdnImage(selectedPhoto, 200, 160) }}
-                  style={styles.previewImage}
-                  contentFit="cover"
-                  transition={180}
-                />
-              ) : (
-                <View style={styles.previewImageFallback}>
-                  <MapPin size={20} color={colorTokens.subtle} />
-                </View>
-              )}
-            </View>
+          <View style={[styles.previewCard, isPhone && styles.previewCardPhone]}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("home.mapExplorer.viewDetails", { title: selectedProperty.title })}
+              onPress={handleCardPress}
+              style={({ pressed, hovered }: PressableStateCallbackType & { hovered?: boolean }) => [
+                styles.previewPressable,
+                isPhone && styles.previewPressablePhone,
+                webPointer,
+                pressed && { opacity: 0.96 },
+                hovered && styles.previewCardHovered,
+              ]}
+            >
+              {/* Image Thumbnail */}
+              <View style={[styles.previewImageWrap, isPhone && styles.previewImageWrapPhone]}>
+                {selectedPhoto ? (
+                  <Image
+                    source={{ uri: cdnImage(selectedPhoto, 200, 160) }}
+                    style={styles.previewImage}
+                    contentFit="cover"
+                    transition={180}
+                  />
+                ) : (
+                  <View style={styles.previewImageFallback}>
+                    <MapPin size={20} color={colorTokens.subtle} />
+                  </View>
+                )}
+              </View>
 
-            {/* Info Content */}
-            <View style={styles.previewContent}>
-              {/* Top Row: Price + Tag + Close */}
-              <View style={styles.previewTopRow}>
-                <Text style={[styles.previewPrice, isPhone && styles.previewPricePhone]} numberOfLines={1}>
-                  {formatLocalizedPrice(
-                    selectedProperty.price,
-                    selectedProperty.price_currency || "BDT",
-                    language
-                  )}
-                  {selectedProperty.listing_type === "rent" ? (
-                    <Text style={styles.previewPerMonth}> /mo</Text>
-                  ) : null}
-                </Text>
+              {/* Info Content */}
+              <View style={styles.previewContent}>
+                {/* Top Row: Price + Tag (the close button sits over the top-right corner) */}
+                <View style={styles.previewTopRow}>
+                  <Text style={[styles.previewPrice, isPhone && styles.previewPricePhone]} numberOfLines={1}>
+                    {formatLocalizedPrice(
+                      selectedProperty.price,
+                      selectedProperty.price_currency || "BDT",
+                      language
+                    )}
+                    {selectedProperty.listing_type === "rent" && !isPriceOnRequest(selectedProperty.price) ? (
+                      <Text style={styles.previewPerMonth}> {perMonth}</Text>
+                    ) : null}
+                  </Text>
 
-                <View style={styles.topRightActions}>
                   <View
                     style={[
                       styles.tagBadge,
@@ -677,80 +347,77 @@ export const HomeMapExplorer = memo(function HomeMapExplorer() {
                         : t("home.mapExplorer.statusSale")}
                     </Text>
                   </View>
-
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Close property preview"
-                    onPress={(e) => {
-                      e.stopPropagation?.();
-                      setSelectedPropertyId(null);
-                    }}
-                    style={[styles.closeBtn, webPointer]}
-                  >
-                    <X size={13} color="#64748B" />
-                  </Pressable>
                 </View>
-              </View>
 
-              {/* Title */}
-              <Text numberOfLines={1} style={[styles.previewTitle, isPhone && styles.previewTitlePhone]}>
-                {selectedProperty.title}
-              </Text>
-
-              {/* Neighborhood / Address */}
-              <View style={styles.previewLocationRow}>
-                <MapPin size={11} color="#64748B" style={{ marginTop: 1 }} />
-                <Text numberOfLines={1} style={[styles.previewLocation, isPhone && styles.previewLocationPhone]}>
-                  {selectedProperty.area?.name || selectedProperty.address || "Dhaka"}
+                {/* Title */}
+                <Text numberOfLines={1} style={[styles.previewTitle, isPhone && styles.previewTitlePhone]}>
+                  {selectedProperty.title}
                 </Text>
-              </View>
 
-              {/* Specs row */}
-              {selectedSpecs && (selectedSpecs.beds || selectedSpecs.baths || selectedSpecs.sqft) ? (
-                <View style={styles.previewSpecsRow}>
-                  {selectedSpecs.beds ? (
-                    <Text style={styles.previewSpecItem}>
-                      {selectedSpecs.beds}{" "}
-                      {selectedSpecs.beds === 1 ? t("home.mapExplorer.bed") : t("home.mapExplorer.beds")}
-                    </Text>
-                  ) : null}
-                  {selectedSpecs.beds && selectedSpecs.baths ? (
-                    <Text style={styles.specDivider}>•</Text>
-                  ) : null}
-                  {selectedSpecs.baths ? (
-                    <Text style={styles.previewSpecItem}>
-                      {selectedSpecs.baths}{" "}
-                      {selectedSpecs.baths === 1 ? t("home.mapExplorer.bath") : t("home.mapExplorer.baths")}
-                    </Text>
-                  ) : null}
-                  {(selectedSpecs.beds || selectedSpecs.baths) && selectedSpecs.sqft ? (
-                    <Text style={styles.specDivider}>•</Text>
-                  ) : null}
-                  {selectedSpecs.sqft ? (
-                    <Text style={styles.previewSpecItem}>
-                      {selectedSpecs.sqft.toLocaleString()} {t("home.mapExplorer.sqft")}
-                    </Text>
-                  ) : null}
+                {/* Neighborhood / Address */}
+                <View style={styles.previewLocationRow}>
+                  <MapPin size={11} color="#64748B" style={{ marginTop: 1 }} />
+                  <Text numberOfLines={1} style={[styles.previewLocation, isPhone && styles.previewLocationPhone]}>
+                    {selectedProperty.area?.name || selectedProperty.address || "Dhaka"}
+                  </Text>
                 </View>
-              ) : null}
 
-              {/* CTA button (Desktop only, mobile card is directly clickable) */}
-              {!isPhone ? (
-                <View style={styles.ctaRow}>
-                  <View style={styles.viewPropertyCta}>
-                    <Text style={styles.viewPropertyText}>{t("home.mapExplorer.viewProperty")}</Text>
-                    <ChevronRight size={13} color="#FFFFFF" strokeWidth={2.4} />
+                {/* Specs row */}
+                {selectedSpecs && (selectedSpecs.beds || selectedSpecs.baths || selectedSpecs.sqft) ? (
+                  <View style={styles.previewSpecsRow}>
+                    {selectedSpecs.beds ? (
+                      <Text style={styles.previewSpecItem}>
+                        {num(selectedSpecs.beds)}{" "}
+                        {selectedSpecs.beds === 1 ? t("home.mapExplorer.bed") : t("home.mapExplorer.beds")}
+                      </Text>
+                    ) : null}
+                    {selectedSpecs.beds && selectedSpecs.baths ? (
+                      <Text style={styles.specDivider}>•</Text>
+                    ) : null}
+                    {selectedSpecs.baths ? (
+                      <Text style={styles.previewSpecItem}>
+                        {num(selectedSpecs.baths)}{" "}
+                        {selectedSpecs.baths === 1 ? t("home.mapExplorer.bath") : t("home.mapExplorer.baths")}
+                      </Text>
+                    ) : null}
+                    {(selectedSpecs.beds || selectedSpecs.baths) && selectedSpecs.sqft ? (
+                      <Text style={styles.specDivider}>•</Text>
+                    ) : null}
+                    {selectedSpecs.sqft ? (
+                      <Text style={styles.previewSpecItem}>
+                        {num(selectedSpecs.sqft)} {t("home.mapExplorer.sqft")}
+                      </Text>
+                    ) : null}
                   </View>
-                </View>
-              ) : null}
-            </View>
-          </Pressable>
+                ) : null}
+
+                {/* CTA button (Desktop only, mobile card is directly clickable) */}
+                {!isPhone ? (
+                  <View style={styles.ctaRow}>
+                    <View style={styles.viewPropertyCta}>
+                      <Text style={styles.viewPropertyText}>{t("home.mapExplorer.viewProperty")}</Text>
+                      <ChevronRight size={13} color="#FFFFFF" strokeWidth={2.4} />
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("home.mapExplorer.closePreview")}
+              onPress={() => setSelectedPropertyId(null)}
+              hitSlop={8}
+              style={[styles.closeBtn, webPointer]}
+            >
+              <X size={13} color="#64748B" />
+            </Pressable>
+          </View>
         ) : null}
       </View>
     </View>
   );
-});
-
+}
 const styles = StyleSheet.create({
   sectionContainer: {
     width: "100%",
@@ -913,23 +580,24 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#64748B",
   },
-  nativeFallback: {
-    flex: 1,
+  emptyOverlay: {
+    position: "absolute",
+    top: 12,
+    left: 0,
+    right: 0,
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#F8FAFC",
-    padding: 20,
+    zIndex: 50,
   },
-  nativeFallbackTitle: {
-    fontFamily: fonts.semiBold,
-    fontSize: 15,
-    color: "#0F172A",
-  },
-  nativeFallbackSub: {
-    fontFamily: fonts.regular,
+  emptyOverlayText: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    fontFamily: fonts.medium,
     fontSize: 12.5,
-    color: "#64748B",
+    color: "#475569",
   },
 
   /* Bottom Peek Preview Card */
@@ -943,10 +611,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    padding: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
     zIndex: 100,
     ...(Platform.OS === "web"
       ? {
@@ -961,9 +625,18 @@ const styles = StyleSheet.create({
     bottom: 8,
     width: undefined,
     maxWidth: undefined,
+    borderRadius: 11,
+  },
+  previewPressable: {
+    padding: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: 12,
+  },
+  previewPressablePhone: {
     padding: 8,
     gap: 9,
-    borderRadius: 11,
   },
   previewCardHovered: {
     transform: [{ translateY: -2 }],
@@ -1000,11 +673,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-  },
-  topRightActions: {
-    flexDirection: "row",
-    alignItems: "center",
     gap: 6,
+    // Room for the close button, which sits over this corner.
+    paddingRight: 24,
   },
   tagBadge: {
     paddingHorizontal: 6,
@@ -1025,6 +696,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
   },
   closeBtn: {
+    position: "absolute",
+    top: 8,
+    right: 8,
     width: 20,
     height: 20,
     borderRadius: 10,

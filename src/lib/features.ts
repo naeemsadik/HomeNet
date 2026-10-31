@@ -44,10 +44,6 @@ export const GOOGLE_SIGN_IN_AVAILABLE = Platform.OS === "web" && GOOGLE_CLIENT_I
 const GOOGLE_MAPS_KEY_PATTERN = /^AIza[0-9A-Za-z_-]{35}$/;
 
 export const GOOGLE_MAPS_API_KEY: string | null = (() => {
-  const key = (
-    process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ??
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ??
-    ""
-  ).trim();
+  const key = (process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "").trim();
   return Platform.OS === "web" && GOOGLE_MAPS_KEY_PATTERN.test(key) ? key : null;
 })();

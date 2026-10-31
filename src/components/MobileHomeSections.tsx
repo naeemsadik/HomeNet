@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ChevronRight } from "@/components/icons";
@@ -193,9 +193,12 @@ const AppDownloadCard = memo(function AppDownloadCard() {
 export function MobileHomeSections() {
   return (
     <View style={styles.wrap}>
-      <View style={{ marginBottom: 8 }}>
-        <HomeMapExplorer />
-      </View>
+      {/* The map explorer is web only; the app has no native map yet. */}
+      {Platform.OS === "web" ? (
+        <View style={{ marginBottom: 8 }}>
+          <HomeMapExplorer />
+        </View>
+      ) : null}
       {FEATURE_CARDS.map((card) => (
         <FeatureCardView card={card} key={card.key} />
       ))}
