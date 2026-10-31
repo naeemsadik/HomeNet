@@ -100,6 +100,7 @@ export { default as Rocket } from "lucide-react-native/icons/rocket";
 export { default as RotateCcw } from "lucide-react-native/icons/rotate-ccw";
 export { default as Save } from "lucide-react-native/icons/save";
 export { default as Search } from "lucide-react-native/icons/search";
+export { default as Store } from "lucide-react-native/icons/store";
 export { default as Send } from "lucide-react-native/icons/send";
 export { default as Settings } from "lucide-react-native/icons/settings";
 export { default as Share2 } from "lucide-react-native/icons/share-2";

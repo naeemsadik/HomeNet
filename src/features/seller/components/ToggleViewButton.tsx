@@ -1,7 +1,5 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
-  Animated,
-  Easing,
   Platform,
   Pressable,
   StyleSheet,
@@ -9,7 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { RefreshCw } from "@/components/icons";
+import { Store } from "@/components/icons";
 import { router, type Href } from "expo-router";
 import { colors, fonts, radius, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
@@ -24,8 +22,9 @@ export interface ToggleViewButtonProps {
 }
 
 /**
- * Interactive button to toggle between seller portal and the public site view.
- * Features a rotating RefreshCw icon that spins on hover/press.
+ * Leaves the seller portal for the public site. The storefront icon reads as
+ * "the buyer site" even when the label is hidden on narrow phones, where the
+ * seller menu also has a "Switch to buyer" row with the full label.
  */
 export function ToggleViewButton({
   href = "/",
@@ -35,26 +34,9 @@ export function ToggleViewButton({
   iconOnly = false,
 }: ToggleViewButtonProps) {
   const { t } = useTranslation();
-  const rotateAnim = useRef(new Animated.Value(0)).current;
   const [isHovered, setIsHovered] = useState(false);
 
-  const triggerSpin = () => {
-    rotateAnim.setValue(0);
-    Animated.timing(rotateAnim, {
-      toValue: 1,
-      duration: 500,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: Platform.OS !== "web",
-    }).start();
-  };
-
-  const spin = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "180deg"],
-  });
-
   const handlePress = () => {
-    triggerSpin();
     onPress?.();
     if (href) {
       router.push(href as Href);
@@ -65,10 +47,9 @@ export function ToggleViewButton({
     <Pressable
       accessibilityLabel={t("seller.toggleView.aria")}
       accessibilityRole="link"
-      onHoverIn={() => {
-        setIsHovered(true);
-        triggerSpin();
-      }}
+      // The icon-only button is 34-38px; this brings the tap area past 44px.
+      hitSlop={iconOnly ? 6 : undefined}
+      onHoverIn={() => setIsHovered(true)}
       onHoverOut={() => setIsHovered(false)}
       onPress={handlePress}
       style={({ pressed }) => [
@@ -81,13 +62,7 @@ export function ToggleViewButton({
         style,
       ]}
     >
-      <Animated.View style={{ transform: [{ rotate: spin }] }}>
-        <RefreshCw
-          color={colors.ink}
-          size={size === "sm" ? 14 : 15}
-          strokeWidth={2}
-        />
-      </Animated.View>
+      <Store color={colors.ink} size={size === "sm" ? 14 : 15} strokeWidth={2} />
       {iconOnly ? null : (
         <Text style={[styles.text, size === "sm" && styles.textSm]}>
           {t("seller.toggleView.label")}
