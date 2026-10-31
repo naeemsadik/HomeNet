@@ -11,7 +11,7 @@ import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
-import type { SellerNavKey } from "../screens/SellerDashboardScreen";
+import type { SellerNavKey } from "./SellerShell";
 
 export interface SellerNavItem {
   key: SellerNavKey;

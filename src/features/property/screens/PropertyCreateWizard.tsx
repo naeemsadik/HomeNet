@@ -427,28 +427,6 @@ export function PropertyCreateWizard() {
   };
 
   // Sidebar items - aligned with HomeNet standards (all seller tabs present)
-  const sidebarNavItems: {
-    key: string;
-    label: string;
-    icon: any;
-    href?: string;
-    active?: boolean;
-    danger?: boolean;
-    badgeCount?: number;
-  }[] = [
-    { key: "dashboard", label: t("wizard.nav.dashboard"), icon: LayoutDashboard, href: "/seller" },
-    { key: "listings", label: t("wizard.nav.myListings"), icon: Building2, href: "/my-properties" },
-    { key: "create", label: t("wizard.nav.createProperty"), icon: PlusCircle, href: "/property/create", active: true },
-    { key: "verification", label: t("wizard.nav.verification"), icon: ShieldCheck, href: "/verification" },
-    { key: "boost", label: t("wizard.nav.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights", label: t("wizard.nav.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
-    { key: "analytics", label: t("wizard.nav.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
-    { key: "payments", label: t("wizard.nav.payments"), icon: CreditCard, href: "/seller?tab=payments" },
-    { key: "profile", label: t("wizard.nav.profile"), icon: User, href: "/seller/profile" },
-    { key: "help", label: t("wizard.nav.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
-    { key: "logout", label: t("wizard.nav.logout"), icon: LogOut, danger: true, href: "/" },
-  ];
-
   return (
     <SellerShell
       activeNav="create"
