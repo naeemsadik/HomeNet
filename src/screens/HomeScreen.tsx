@@ -1,20 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
 import {
-  ChevronLeft,
-  ChevronRight,
-  LandPlot,
-  RotateCcw,
-} from "@/components/icons";
-import { memo, useMemo, useState, useRef, useEffect, useCallback, type ReactNode } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
   ImageBackground,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -26,19 +13,15 @@ import { MobileHeroSearchCard } from "@/components/MobileHeroSearchCard";
 import { MobileHomeSections } from "@/components/MobileHomeSections";
 import { FitText } from "@/components/FitText";
 import { NoTranslateText } from "@/components/NoTranslateText";
-import { PropertyCard } from "@/components/PropertyCard";
-import { AppButton, AppLink } from "@/components/ui";
 import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
 import { HomeNetExplainerSection } from "@/components/landing/HomeNetExplainerSection";
 import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
-import type { Property as ApiProperty } from "@/features/property/types/property";
+import { HomeMapExplorer } from "@/features/property/components/HomeMapExplorer";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { toApiError } from "@/services/apiClient";
-import { getProperties } from "@/services/propertyApi";
-import { colors, layout, webPointer } from "@/theme";
+import { layout, webPointer } from "@/theme";
 import { HERO_IMAGE_URL } from "@/lib/heroImage";
 import { styles } from "./HomeScreen.styles";
 
@@ -50,53 +33,6 @@ import { styles } from "./HomeScreen.styles";
  * the left-to-centre area uncluttered so the headline sits on calm pixels.
  */
 const HERO_IMAGE = { uri: HERO_IMAGE_URL };
-
-function PropertyResult({
-  children,
-  empty,
-  error,
-  loading,
-  onRetry,
-}: {
-  children: ReactNode;
-  empty: boolean;
-  error: string | null;
-  loading: boolean;
-  onRetry: () => void;
-}) {
-  const { t } = useTranslation();
-
-  if (loading) {
-    return (
-      <View style={styles.requestState}>
-        <ActivityIndicator color={colors.green} size="large" />
-        <Text style={styles.requestStateCopy}>{t("home.loadingProperties")}</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.requestState}>
-        <Text style={styles.requestStateTitle}>{t("home.couldNotLoadTitle")}</Text>
-        <Text style={styles.requestStateCopy}>{t("home.couldNotLoadCopy")}</Text>
-        <AppButton icon={RotateCcw} label={t("home.retry")} onPress={onRetry} />
-      </View>
-    );
-  }
-
-  if (empty) {
-    return (
-      <View style={styles.requestState}>
-        <LandPlot color={colors.green} size={26} />
-        <Text style={styles.requestStateTitle}>{t("home.noPropertiesTitle")}</Text>
-        <Text style={styles.requestStateCopy}>{t("home.noPropertiesCopy")}</Text>
-      </View>
-    );
-  }
-
-  return <>{children}</>;
-}
 
 export function HomeScreen() {
   const { t } = useTranslation();
@@ -179,18 +115,6 @@ export function HomeScreen() {
     </View>
   );
 
-  const popularQuery = useQuery({
-    queryKey: ["properties", "home", "popular"],
-    queryFn: () =>
-      getProperties({ status: "active", sort_by: "view_count_desc", page: 1, limit: 10 }),
-  });
-
-  const popularItems = popularQuery.data?.data?.items;
-  // Stable reference so the memoized rail skips unrelated re-renders.
-  const featuredProperties = useMemo(() => (popularItems ?? []).slice(0, 6), [popularItems]);
-  const popularError = popularQuery.error ? toApiError(popularQuery.error).message : null;
-
-
   const hero = (
       <View style={styles.heroBlock}>
         <View style={[styles.heroPhoto, { minHeight: heroMetrics.minHeight }]}>
@@ -254,7 +178,7 @@ export function HomeScreen() {
               accessibilityRole="button"
               accessibilityLabel={t("home.listYourPropertyCTA")}
               onPress={() => router.push("/property/create" as never)}
-              style={({ hovered, pressed }: any) => [
+              style={({ hovered, pressed }: { hovered?: boolean; pressed?: boolean }) => [
                 styles.ownerCta,
                 isPhone && styles.ownerCtaPhone,
                 hovered && styles.ownerCtaHovered,
@@ -283,29 +207,11 @@ export function HomeScreen() {
       ) : (
         <>
       {/* ─────────────────────────────────────────────────────────────
-          2. FEATURED PROPERTIES (live API), real listings answer the search
-          box first, before any explaining.
+          2. ACTIVE LISTINGS MAP EXPLORER: interactive map explorer
+          showing verified listings for sale and rent across Dhaka
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <View>
-            <Text style={styles.sectionTitle}>{t("home.featuredTitle")}</Text>
-            <Text style={styles.sectionSubtitle}>{t("home.featuredSubtitle")}</Text>
-          </View>
-          <AppLink href="/buy" style={styles.seeAllLink}>
-            <Text style={styles.seeAllText}>{t("home.seeAll")}</Text>
-            <ChevronRight color={colors.greenOnLight} size={16} />
-          </AppLink>
-        </View>
-
-        <PropertyResult
-          empty={!featuredProperties.length}
-          error={popularError}
-          loading={popularQuery.isLoading}
-          onRetry={() => void popularQuery.refetch()}
-        >
-          <FeaturedRail properties={featuredProperties} />
-        </PropertyResult>
+        <HomeMapExplorer />
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -340,226 +246,3 @@ export function HomeScreen() {
     </AppChrome>
   );
 }
-
-/**
- * The featured carousel owns its scroll state so scrolling re-renders only
- * the rail, not the whole home page.
- */
-const FeaturedRail = memo(function FeaturedRail({ properties }: { properties: ApiProperty[] }) {
-  const { t } = useTranslation();
-  const { isPhone, isTablet, width } = useResponsive();
-  const featuredScrollRef = useRef<FlatList<ApiProperty>>(null);
-  const featuredWrapperRef = useRef<View>(null);
-  const [featuredScrollX, setFeaturedScrollX] = useState(0);
-  const [trackWidth, setTrackWidth] = useState(200);
-  // Sizes change on layout, not on scroll, so they are measured there.
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [contentWidth, setContentWidth] = useState(0);
-  const maxFeaturedScroll =
-    containerWidth > 0 && contentWidth > 0
-      ? Math.max(1, contentWidth - containerWidth)
-      : 200;
-
-  const currentScrollXRef = useRef(0);
-  const maxScrollRef = useRef(maxFeaturedScroll);
-  maxScrollRef.current = maxFeaturedScroll;
-  const isWheelScrollingRef = useRef(false);
-
-  const cardStep = isPhone ? Math.min(width - 32, 340) + 20 : isTablet ? 440 : 540;
-
-  const handleFeaturedScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const x = e.nativeEvent.contentOffset.x;
-    currentScrollXRef.current = x;
-    setFeaturedScrollX(x);
-  };
-
-  const featuredProgress = Math.max(
-    0,
-    Math.min(1, maxFeaturedScroll > 0 ? featuredScrollX / maxFeaturedScroll : 0)
-  );
-  const canScrollLeft = featuredScrollX > 6;
-  const canScrollRight = featuredScrollX < maxFeaturedScroll - 6;
-  const calculatedThumb =
-    contentWidth > 0 && containerWidth > 0
-      ? (containerWidth / contentWidth) * 100
-      : 30;
-  const thumbPercent = Math.max(22, Math.min(42, calculatedThumb));
-
-  const scrollFeatured = (direction: "left" | "right") => {
-    const currentX = currentScrollXRef.current;
-    const targetX =
-      direction === "left"
-        ? Math.max(0, currentX - cardStep)
-        : Math.min(maxFeaturedScroll, currentX + cardStep);
-    currentScrollXRef.current = targetX;
-    featuredScrollRef.current?.scrollToOffset({ offset: targetX, animated: true });
-  };
-
-  const handleTrackPress = (e: any) => {
-    if (maxFeaturedScroll <= 0 || trackWidth <= 0) return;
-    const clickX = e.nativeEvent.locationX;
-    const ratio = Math.max(0, Math.min(1, clickX / trackWidth));
-    const targetX = ratio * maxFeaturedScroll;
-    currentScrollXRef.current = targetX;
-    featuredScrollRef.current?.scrollToOffset({ offset: targetX, animated: true });
-  };
-
-  useEffect(() => {
-    if (Platform.OS !== "web") return;
-
-    const getDomNode = (refObj: any) => {
-      if (!refObj) return null;
-      if (refObj instanceof HTMLElement) return refObj;
-      if (typeof refObj.getScrollableNode === "function") return refObj.getScrollableNode();
-      if (typeof refObj.getInnerViewNode === "function") return refObj.getInnerViewNode();
-      if (refObj._node instanceof HTMLElement) return refObj._node;
-      return null;
-    };
-
-    const targetNode = getDomNode(featuredWrapperRef.current);
-    if (!targetNode || typeof targetNode.addEventListener !== "function") return;
-
-    let wheelTimer: any = null;
-
-    const onWheel = (e: WheelEvent) => {
-      const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      if (Math.abs(delta) < 8) return;
-
-      const direction = delta > 0 ? "right" : "left";
-      const currentX = currentScrollXRef.current;
-      const maxScroll = maxScrollRef.current;
-
-      // Allow natural page vertical scroll if user has reached boundary:
-      if (direction === "left" && currentX <= 6) return;
-      if (direction === "right" && currentX >= maxScroll - 6) return;
-
-      // Intercept scroll wheel over featured section
-      e.preventDefault();
-
-      if (isWheelScrollingRef.current) return;
-      isWheelScrollingRef.current = true;
-
-      const nextTarget =
-        direction === "right"
-          ? Math.min(maxScroll, Math.floor((currentX + 30) / cardStep + 1) * cardStep)
-          : Math.max(0, Math.ceil((currentX - 30) / cardStep - 1) * cardStep);
-
-      currentScrollXRef.current = nextTarget;
-      featuredScrollRef.current?.scrollToOffset({ offset: nextTarget, animated: true });
-
-      clearTimeout(wheelTimer);
-      wheelTimer = setTimeout(() => {
-        isWheelScrollingRef.current = false;
-      }, 320);
-    };
-
-    targetNode.addEventListener("wheel", onWheel, { passive: false });
-    return () => {
-      targetNode.removeEventListener("wheel", onWheel);
-      clearTimeout(wheelTimer);
-    };
-  }, [cardStep, properties.length]);
-
-  const renderFeaturedItem = useCallback(
-    ({ item }: { item: ApiProperty }) => (
-      <PropertyCard
-        property={item}
-        variant="feature"
-        width={isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500}
-      />
-    ),
-    [isPhone, isTablet, width]
-  );
-
-  const featuredKeyExtractor = useCallback((item: ApiProperty) => item.id, []);
-
-  const getFeaturedItemLayout = useCallback(
-    (_: any, index: number) => {
-      const cardWidth = isPhone ? Math.min(width - 32, 340) : isTablet ? 420 : 500;
-      const step = cardWidth + 20;
-      return {
-        length: step,
-        offset: step * index,
-        index,
-      };
-    },
-    [isPhone, isTablet, width]
-  );
-
-  return (
-    <View ref={featuredWrapperRef} style={styles.featuredWrapper}>
-      <FlatList
-        ref={featuredScrollRef}
-        horizontal
-        data={properties}
-        renderItem={renderFeaturedItem}
-        keyExtractor={featuredKeyExtractor}
-        getItemLayout={getFeaturedItemLayout}
-        initialNumToRender={6}
-        maxToRenderPerBatch={8}
-        windowSize={5}
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleFeaturedScroll}
-        scrollEventThrottle={16}
-        // The widths were declared but never set, so the scroll limit stayed
-        // at its 200px fallback and "next" stopped after one short step.
-        onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
-        onContentSizeChange={(w) => setContentWidth(w)}
-        contentContainerStyle={styles.featuredCardsRow}
-      />
-
-      {/* Position Bar for Left-Right Move (Both Mobile & PC) */}
-      {properties.length > 1 && (
-        <View style={styles.featuredPositionBarWrap}>
-          <Pressable
-            onPress={() => scrollFeatured("left")}
-            disabled={!canScrollLeft}
-            style={({ pressed }) => [
-              styles.scrollArrowBtn,
-              !canScrollLeft && styles.scrollArrowBtnDisabled,
-              pressed && canScrollLeft && styles.scrollArrowBtnPressed,
-              webPointer,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel={t("home.scrollRailLeft")}
-          >
-            <ChevronLeft size={16} color={canScrollLeft ? colors.green : "#94A3B8"} strokeWidth={2.5} />
-          </Pressable>
-
-          <Pressable
-            onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
-            onPress={handleTrackPress}
-            style={[styles.featuredPositionTrack, isPhone && styles.featuredPositionTrackPhone, webPointer]}
-            accessibilityRole="progressbar"
-            accessibilityLabel="Featured properties position bar"
-          >
-            <View
-              style={[
-                styles.featuredPositionThumb,
-                {
-                  left: `${featuredProgress * (100 - thumbPercent)}%`,
-                  width: `${thumbPercent}%`,
-                },
-              ]}
-            />
-          </Pressable>
-
-          <Pressable
-            onPress={() => scrollFeatured("right")}
-            disabled={!canScrollRight}
-            style={({ pressed }) => [
-              styles.scrollArrowBtn,
-              !canScrollRight && styles.scrollArrowBtnDisabled,
-              pressed && canScrollRight && styles.scrollArrowBtnPressed,
-              webPointer,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel={t("home.scrollRailRight")}
-          >
-            <ChevronRight size={16} color={canScrollRight ? colors.green : "#94A3B8"} strokeWidth={2.5} />
-          </Pressable>
-        </View>
-      )}
-    </View>
-  );
-});

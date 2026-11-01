@@ -1,8 +1,20 @@
+import type { StyleProp, ViewStyle } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import { colorTokens } from "@/theme";
 
-export function WhatsAppIcon({ size = 18, color = "#25D366" }: { size?: number; color?: string }) {
+export interface WhatsAppIconProps {
+  size?: number;
+  color?: string;
+  style?: StyleProp<ViewStyle>;
+}
+
+export function WhatsAppIcon({
+  size = 18,
+  color = colorTokens.brand,
+  style,
+}: WhatsAppIconProps) {
   return (
-    <Svg height={size} viewBox="0 0 24 24" width={size} fill="none">
+    <Svg height={size} viewBox="0 0 24 24" width={size} fill="none" style={style}>
       <Path
         d="M20.52 3.48A11.93 11.93 0 0012.06 0C5.46 0 .09 5.37.09 11.97c0 2.11.55 4.17 1.6 5.99L0 24l6.19-1.62a11.93 11.93 0 005.87 1.51h.01c6.6 0 11.97-5.37 11.97-11.97 0-3.2-1.25-6.21-3.52-8.44z"
         fill={color}

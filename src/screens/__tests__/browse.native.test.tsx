@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Dimensions } from "react-native";
 import { router } from "expo-router";
 import { BrowseScreen } from "@/screens/BrowseScreen";
-import { getProperties } from "@/services/propertyApi";
+import { getProperties, getPropertiesInAreas } from "@/services/propertyApi";
 import { fetchAreas } from "@/services/areaApi";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -303,5 +303,53 @@ describe("the List | Map switcher in the app", () => {
     expect(text).toContain("List");
     expect(text).toContain("Map");
     act(() => floating.unmount());
+  });
+});
+
+describe("the filter sheet's result count", () => {
+  it("counts the area picked in the sheet before Show results is pressed", async () => {
+    // Picking Mohammadpur left the button on "Show 18 results": the count was
+    // asked for without the area, which the feed sends as an area id.
+    getAreas.mockResolvedValue({
+      data: {
+        items: [{ id: "mpur", name: "Mohammadpur", parent_area_id: null, city: "Dhaka" }],
+        total: 1,
+        page: 1,
+        limit: 100,
+      },
+    });
+    getProps.mockImplementation(async (filters: { area_id?: string }) => ({
+      data: { items: [villa], total: filters.area_id === "mpur" ? 2 : 18, page: 1, limit: 20 },
+    }));
+    // An area and its sub-areas are asked for by id, the way the feed does it.
+    (getPropertiesInAreas as jest.Mock).mockImplementation(async (_filters: unknown, ids: string[]) => ({
+      items: [villa, villa],
+      total: ids.includes("mpur") ? 2 : 0,
+    }));
+    mockParams = { filters: "open" };
+    const tree = await mount("rent");
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 450));
+    });
+    expect(pressableWithText(tree, "Show 18 results")).toBeDefined();
+
+    const box = pressableWithText(tree, "All areas");
+    expect(box).toBeDefined();
+    await act(async () => box!.props.onPress());
+    const row = tree.root
+      .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
+      .find((r) => textOf(r).trim() === "Mohammadpur");
+    expect(row).toBeDefined();
+    await act(async () => row!.props.onPress());
+
+    // The sheet waits 400 ms after the last change before it asks.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 450));
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+    expect(pressableWithText(tree, "Show 2 results")).toBeDefined();
+    expect(router.setParams).not.toHaveBeenCalled();
   });
 });

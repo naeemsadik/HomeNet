@@ -820,8 +820,10 @@ export function PropertyDetailScreen() {
                     !property.seller.phone && styles.actionBtnDisabled,
                   ]}
                 >
-                  <Phone color="#0B1A17" size={16} />
-                  <Text style={styles.sellerActionText}>{t("propertyDetail.callSeller")}</Text>
+                  <Phone color={colorTokens.ink} size={16} />
+                  <Text numberOfLines={1} ellipsizeMode="tail" style={styles.sellerActionText}>
+                    {t("propertyDetail.callSeller")}
+                  </Text>
                 </Pressable>
 
                 <Pressable
@@ -835,8 +837,10 @@ export function PropertyDetailScreen() {
                     !property.seller.phone && styles.actionBtnDisabled,
                   ]}
                 >
-                  <WhatsAppIcon size={18} color="#25D366" />
-                  <Text style={styles.whatsAppActionText}>{t("propertyDetail.whatsappAgent")}</Text>
+                  <WhatsAppIcon size={18} color={colorTokens.brand} style={styles.whatsAppIcon} />
+                  <Text numberOfLines={1} ellipsizeMode="tail" style={styles.whatsAppActionText}>
+                    {t("propertyDetail.whatsappAgent")}
+                  </Text>
                 </Pressable>
               </View>
 

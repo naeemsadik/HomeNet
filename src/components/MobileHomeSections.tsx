@@ -1,10 +1,11 @@
 import { memo } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { ChevronRight } from "@/components/icons";
 import { LIST_PROPERTY_PATH, startListing } from "@/lib/startListing";
 import { GooglePlayButton } from "@/components/Footer";
+import { HomeMapExplorer } from "@/features/property/components/HomeMapExplorer";
 import { usePropertyGuides } from "@/features/news/hooks/usePropertyGuides";
 import type { PropertyGuide } from "@/features/news/types/news";
 import { resolveGuideImage } from "@/features/news/utils/guideImageStrategy";
@@ -192,6 +193,12 @@ const AppDownloadCard = memo(function AppDownloadCard() {
 export function MobileHomeSections() {
   return (
     <View style={styles.wrap}>
+      {/* The map explorer is web only; the app has no native map yet. */}
+      {Platform.OS === "web" ? (
+        <View style={{ marginBottom: 8 }}>
+          <HomeMapExplorer />
+        </View>
+      ) : null}
       {FEATURE_CARDS.map((card) => (
         <FeatureCardView card={card} key={card.key} />
       ))}
