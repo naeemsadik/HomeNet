@@ -199,8 +199,60 @@ describe("Strict auth schemas", () => {
           full_name: "John Doe",
           email: "john@example.com",
           password: "Password123",
+          confirmPassword: "Password123",
         }).success,
       ).toBe(true);
+    });
+
+    it("rejects when confirmPassword does not match", () => {
+      const res = signUpModalSchema.safeParse({
+        full_name: "John Doe",
+        email: "john@example.com",
+        password: "Password123",
+        confirmPassword: "DifferentPassword456",
+      });
+      expect(res.success).toBe(false);
+      if (!res.success) {
+        expect(res.error.issues[0]?.message).toMatch(/passwords do not match/i);
+      }
+    });
+
+    it("rejects when confirmPassword is empty", () => {
+      const res = signUpModalSchema.safeParse({
+        full_name: "John Doe",
+        email: "john@example.com",
+        password: "Password123",
+        confirmPassword: "",
+      });
+      expect(res.success).toBe(false);
+    });
+
+    it("supports custom localized validation messages in authModalSchema", () => {
+      const localized = authModalSchema("signup", {
+        confirmPasswordRequired: "পাসওয়ার্ড নিশ্চিত করুন",
+        passwordsDoNotMatch: "পাসওয়ার্ড দুটি মেলেনি",
+      });
+      const emptyRes = localized.safeParse({
+        full_name: "John Doe",
+        email: "john@example.com",
+        password: "Password123",
+        confirmPassword: "",
+      });
+      expect(emptyRes.success).toBe(false);
+      if (!emptyRes.success) {
+        expect(emptyRes.error.issues[0]?.message).toBe("পাসওয়ার্ড নিশ্চিত করুন");
+      }
+
+      const mismatchRes = localized.safeParse({
+        full_name: "John Doe",
+        email: "john@example.com",
+        password: "Password123",
+        confirmPassword: "Mismatch123",
+      });
+      expect(mismatchRes.success).toBe(false);
+      if (!mismatchRes.success) {
+        expect(mismatchRes.error.issues[0]?.message).toBe("পাসওয়ার্ড দুটি মেলেনি");
+      }
     });
 
     it("rejects extra keys in authModalSchema in signin and signup modes", () => {
@@ -217,6 +269,7 @@ describe("Strict auth schemas", () => {
           full_name: "John Doe",
           email: "john@example.com",
           password: "Password123",
+          confirmPassword: "Password123",
           injected: "evil",
         }).success,
       ).toBe(false);
