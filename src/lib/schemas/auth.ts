@@ -119,32 +119,66 @@ export const changePasswordDtoSchema = z
 // ─── Auth modal ────────────────────────────────────────────────────────────
 
 /**
- * Sign-up inside the auth modal. No confirm-password field: the modal ships a
- * show-password toggle instead, so a second entry adds friction without catching
- * anything the toggle doesn't.
+ * Sign-up inside the auth modal. Includes confirmPassword to ensure
+ * client-side matching validation before account creation.
  */
 export const signUpModalSchema = z
   .object({
     full_name: nameBase,
     email: emailBase,
     password: passwordBase,
+    confirmPassword: z
+      .string()
+      .min(1, "Confirm your password")
+      .max(128),
   })
-  .strict();
+  .strict()
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 export type AuthModalFormData = {
   full_name?: string;
   email: string;
   password: string;
+  confirmPassword?: string;
 };
 
 /** Resolver schema for the modal, which swaps between sign-in and sign-up. */
-export function authModalSchema(mode: "signin" | "signup") {
-  return mode === "signin"
-    ? loginSchema
-        .extend({
-          full_name: z.string().max(100).optional(),
-        })
-        .strict()
-    : signUpModalSchema;
+export function authModalSchema(
+  mode: "signin" | "signup",
+  messages?: {
+    confirmPasswordRequired?: string;
+    passwordsDoNotMatch?: string;
+  },
+) {
+  if (mode === "signin") {
+    return loginSchema
+      .extend({
+        full_name: z.string().max(100).optional(),
+        confirmPassword: z.string().max(128).optional(),
+      })
+      .strict();
+  }
+
+  const confirmRequiredMsg = messages?.confirmPasswordRequired || "Confirm your password";
+  const mismatchMsg = messages?.passwordsDoNotMatch || "Passwords do not match";
+
+  return z
+    .object({
+      full_name: nameBase,
+      email: emailBase,
+      password: passwordBase,
+      confirmPassword: z
+        .string()
+        .min(1, confirmRequiredMsg)
+        .max(128),
+    })
+    .strict()
+    .refine((data) => data.password === data.confirmPassword, {
+      message: mismatchMsg,
+      path: ["confirmPassword"],
+    });
 }
 
