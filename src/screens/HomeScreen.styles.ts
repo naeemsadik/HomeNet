@@ -9,45 +9,13 @@ export const styles = StyleSheet.create({
   sectionGap: {
     height: 24,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
   sectionHeaderInner: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
     marginBottom: 16,
   },
-  sectionTitle: {
-    color: "#0B1A17",
-    fontFamily: fonts.headingBold,
-    fontSize: 20,
-    fontWeight: "700",
-    lineHeight: 30,
-    letterSpacing: -0.4,
-  },
-  sectionSubtitle: {
-    color: "#5C6B66",
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 2,
-  },
 
-  seeAllLink: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  seeAllText: {
-    color: colors.greenOnLight,
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    fontWeight: "600",
-  },
 
   /* 1. Hero Section */
   heroBlock: {
@@ -208,15 +176,6 @@ export const styles = StyleSheet.create({
 
 
   /* 3. Featured Properties */
-  featuredWrapper: {
-    width: "100%",
-  },
-  featuredCardsRow: {
-    flexDirection: "row",
-    gap: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 2,
-  },
   featuredCard: {
     width: 520,
     height: 325,
@@ -327,83 +286,8 @@ export const styles = StyleSheet.create({
   },
 
   /* Position Bar for Featured Properties (Both Mobile & PC) */
-  featuredPositionBarWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    marginTop: 18,
-    paddingHorizontal: 8,
-  },
-  featuredPositionTrack: {
-    flex: 1,
-    maxWidth: 220,
-    height: 6,
-    backgroundColor: "#DFEAE4",
-    borderRadius: 999,
-    position: "relative",
-    overflow: "hidden",
-  },
-  featuredPositionTrackPhone: {
-    maxWidth: 160,
-  },
-  featuredPositionThumb: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    backgroundColor: colors.green,
-    borderRadius: 999,
-  },
-  scrollArrowBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1.5,
-    borderColor: "#D3DFD8",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "rgba(0, 0, 0, 0.05)",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  scrollArrowBtnDisabled: {
-    opacity: 0.35,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#F8FAFC",
-  },
-  scrollArrowBtnPressed: {
-    backgroundColor: "#EAF7F1",
-    transform: [{ scale: 0.93 }],
-  },
 
 
-  requestState: {
-    minHeight: 180,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    padding: 28,
-    borderRadius: 16,
-    backgroundColor: "#F8FBF9",
-    borderWidth: 1,
-    borderColor: "#DDE8E3",
-  },
-  requestStateTitle: {
-    color: colors.ink,
-    fontFamily: fonts.bold,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  requestStateCopy: {
-    color: colors.muted,
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    lineHeight: 19,
-    textAlign: "center",
-  },
 
 
 
