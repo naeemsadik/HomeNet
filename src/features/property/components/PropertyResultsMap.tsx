@@ -62,7 +62,7 @@ export function PropertyResultsMap({
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     body, html, #map { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -168,47 +168,54 @@ export function PropertyResultsMap({
 
       {/* Selected Property Bottom Peek Card */}
       {selectedProperty ? (
-        <Pressable
-          accessibilityRole="button"
-          onPress={handleCardPress}
-          style={({ pressed }) => [
-            styles.peekCard,
-            webPointer,
-            pressed && { opacity: 0.95 },
-          ]}
-        >
-          <View style={styles.peekImageWrap}>
-            {originalPhoto ? (
-              <Image
-                source={{ uri: cdnImage(originalPhoto, 200, 160) }}
-                style={styles.peekImage}
-                contentFit="cover"
-              />
-            ) : (
-              <View style={styles.peekImagePlaceholder}>
-                <MapPin size={20} color={colorTokens.subtle} />
-              </View>
-            )}
-          </View>
-
-          <View style={styles.peekInfo}>
-            <Text style={styles.peekPrice}>
-              {formatLocalizedPrice(
-                selectedProperty.price,
-                selectedProperty.price_currency || "BDT",
-                language,
+        <View style={styles.peekCard}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${selectedProperty.title}, ${formatLocalizedPrice(
+              selectedProperty.price,
+              selectedProperty.price_currency || "BDT",
+              language,
+            )}`}
+            onPress={handleCardPress}
+            style={({ pressed }) => [
+              styles.peekContent,
+              webPointer,
+              pressed && { opacity: 0.95 },
+            ]}
+          >
+            <View style={styles.peekImageWrap}>
+              {originalPhoto ? (
+                <Image
+                  source={{ uri: cdnImage(originalPhoto, 200, 160) }}
+                  style={styles.peekImage}
+                  contentFit="cover"
+                />
+              ) : (
+                <View style={styles.peekImagePlaceholder}>
+                  <MapPin size={20} color={colorTokens.subtle} />
+                </View>
               )}
-              {selectedProperty.listing_type === "rent" ? (
-                <Text style={styles.peekPerMonth}> {t("propertyCard.perMonth")}</Text>
-              ) : null}
-            </Text>
-            <Text numberOfLines={1} style={styles.peekTitle}>
-              {selectedProperty.title}
-            </Text>
-            <Text numberOfLines={1} style={styles.peekLocation}>
-              {selectedProperty.area?.name || selectedProperty.address || "Dhaka"}
-            </Text>
-          </View>
+            </View>
+
+            <View style={styles.peekInfo}>
+              <Text style={styles.peekPrice}>
+                {formatLocalizedPrice(
+                  selectedProperty.price,
+                  selectedProperty.price_currency || "BDT",
+                  language,
+                )}
+                {selectedProperty.listing_type === "rent" ? (
+                  <Text style={styles.peekPerMonth}> {t("propertyCard.perMonth")}</Text>
+                ) : null}
+              </Text>
+              <Text numberOfLines={1} style={styles.peekTitle}>
+                {selectedProperty.title}
+              </Text>
+              <Text numberOfLines={1} style={styles.peekLocation}>
+                {selectedProperty.area?.name || selectedProperty.address || "Dhaka"}
+              </Text>
+            </View>
+          </Pressable>
 
           <Pressable
             accessibilityRole="button"
@@ -221,7 +228,7 @@ export function PropertyResultsMap({
           >
             <X size={14} color={colorTokens.subtle} />
           </Pressable>
-        </Pressable>
+        </View>
       ) : null}
     </View>
   );
@@ -261,6 +268,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     zIndex: 10,
+  },
+  peekContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    minWidth: 0,
   },
   peekImageWrap: {
     width: 72,

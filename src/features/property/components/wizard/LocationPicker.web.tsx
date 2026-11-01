@@ -1,5 +1,6 @@
 // Leaflet's stylesheet is imported statically: Metro's dev server can't load a CSS file through a
-// lazy import(). The script itself is still loaded only when this step opens.
+// lazy import(), and bundling it keeps it under the site's CSP (style-src 'self'), which blocks
+// CDN stylesheets such as unpkg. The script itself is still loaded only when this step opens.
 import "leaflet/dist/leaflet.css";
 import type { Map as LeafletMap, Marker } from "leaflet";
 import { useCallback, useEffect, useRef, useState } from "react";
