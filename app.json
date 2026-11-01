@@ -59,7 +59,8 @@
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ],
-      "predictiveBackGestureEnabled": false,
+      "softwareKeyboardLayoutMode": "resize",
+    "predictiveBackGestureEnabled": false,
       "allowBackup": false,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",

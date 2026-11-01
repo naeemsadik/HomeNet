@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ActivityIndicator,
   ImageBackground,
+  Platform,
   Pressable,
   ScrollView,
   StyleProp,
@@ -552,10 +553,15 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.surface,
     borderRadius: radius.xl,
     overflow: "hidden",
-    boxShadow: "0px 25px 50px rgba(0, 0, 0, 0.25)",
-    elevation: 12,
     borderWidth: 1.2,
     borderColor: colorTokens.border,
+    // Android elevation only: boxShadow is a CSS/web property that Android
+    // ignores, but if both are present the RN runtime on Android combines them
+    // into a doubled black halo. Keep them on separate branches.
+    ...Platform.select({
+      android: { elevation: 8 },
+      default: { boxShadow: "0px 25px 50px rgba(0, 0, 0, 0.25)" },
+    }),
   },
   modalCard: {
     maxHeight: "92%",
