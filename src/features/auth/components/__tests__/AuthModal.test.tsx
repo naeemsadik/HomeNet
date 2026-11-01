@@ -45,6 +45,7 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
     await act(async () => {
       useLanguageStore.getState().setLanguage("en");
       useAuthModalStore.setState({ visible: false });
+      useAuthStore.setState({ error: null, errorCode: null, loading: false, user: null });
     });
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -55,6 +56,7 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
     await act(async () => {
       useLanguageStore.getState().setLanguage("en");
       useAuthModalStore.setState({ visible: false });
+      useAuthStore.setState({ error: null, errorCode: null, loading: false, user: null });
       root.unmount();
     });
     container.remove();
@@ -240,6 +242,7 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
       // Validation should fail and display error message
       expect(container.textContent).toContain("Passwords do not match");
       expect(registerSpy).not.toHaveBeenCalled();
+      registerSpy.mockRestore();
     });
 
     it("blocks submission when confirm password is empty", async () => {
@@ -278,6 +281,7 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
 
       expect(container.textContent).toContain("Confirm your password");
       expect(registerSpy).not.toHaveBeenCalled();
+      registerSpy.mockRestore();
     });
 
     it("successfully submits when passwords match", async () => {
@@ -324,7 +328,55 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
         email: "rahim@example.com",
         password: "ValidPassword123",
       });
+      expect(registerSpy.mock.calls[0][0]).not.toHaveProperty("confirmPassword");
       expect(onSuccessMock).toHaveBeenCalled();
+      registerSpy.mockRestore();
+    });
+
+    it("displays inline error alert cleanly when registration fails without unhandled rejection", async () => {
+      const registerSpy = jest.spyOn(useAuthStore.getState(), "register").mockImplementation(async () => {
+        useAuthStore.setState({ error: "An account with this email already exists" });
+        return false;
+      });
+
+      await act(async () => {
+        root.render(<AuthCard initialMode="signup" />);
+      });
+
+      const nameInput = container.querySelector(
+        'input[placeholder="Enter your full name"]',
+      ) as HTMLInputElement;
+      const emailInput = container.querySelector(
+        'input[placeholder="Email address"]',
+      ) as HTMLInputElement;
+      const passwordInput = container.querySelector(
+        'input[placeholder="Create password"]',
+      ) as HTMLInputElement;
+      const confirmInput = container.querySelector(
+        'input[placeholder="Confirm password"]',
+      ) as HTMLInputElement;
+
+      await act(async () => {
+        setInputValue(nameInput, "Rahim Ahmed");
+        setInputValue(emailInput, "existing@example.com");
+        setInputValue(passwordInput, "ValidPassword123");
+        setInputValue(confirmInput, "ValidPassword123");
+      });
+
+      const submitBtn = container.querySelector(
+        '[data-testid="auth-submit-button"]',
+      ) as HTMLElement;
+
+      await act(async () => {
+        submitBtn.click();
+      });
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(registerSpy).toHaveBeenCalled();
+      expect(container.textContent).toContain("An account with this email already exists");
+      registerSpy.mockRestore();
     });
   });
 
@@ -375,6 +427,7 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
 
       expect(container.textContent).toContain("পাসওয়ার্ড দুটি মেলেনি");
       expect(registerSpy).not.toHaveBeenCalled();
+      registerSpy.mockRestore();
     });
   });
 });

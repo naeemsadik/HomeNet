@@ -161,19 +161,35 @@ export function AuthCard({
   };
 
   const onSubmit = async (data: AuthModalFormData) => {
-    const email = data.email.trim();
-    const ok =
-      mode === "signin"
-        ? await login({ email, password: data.password })
-        : await register({
-            full_name: (data.full_name ?? "").trim(),
-            email,
-            password: data.password,
-          });
+    try {
+      const email = data.email.trim();
+      const password = data.password;
 
-    if (ok) {
-      if (onClose) onClose();
-      if (onSuccess) onSuccess();
+      if (mode === "signin") {
+        const ok = await login({ email, password });
+        if (ok) {
+          if (onClose) onClose();
+          if (onSuccess) onSuccess();
+        }
+      } else {
+        // Strip client-only validation fields (confirmPassword) so only
+        // API-compliant fields are dispatched to the registration service.
+        const fullName = (data.full_name ?? "").trim();
+        const ok = await register({
+          full_name: fullName,
+          email,
+          password,
+        });
+
+        if (ok) {
+          if (onClose) onClose();
+          if (onSuccess) onSuccess();
+        }
+      }
+    } catch (err) {
+      if (__DEV__) {
+        console.warn("[AuthCard] Submission error handled:", err);
+      }
     }
   };
 
@@ -293,7 +309,12 @@ export function AuthCard({
 
         {/* Server-side error; field errors render inline below each input. */}
         {storeError ? (
-          <View style={styles.errorAlert}>
+          <View
+            style={styles.errorAlert}
+            testID="auth-error-alert"
+            accessibilityRole="alert"
+            accessibilityLiveRegion="polite"
+          >
             <Text style={styles.errorText}>{storeError}</Text>
           </View>
         ) : null}

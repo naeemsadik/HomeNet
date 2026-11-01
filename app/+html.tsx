@@ -13,6 +13,9 @@ export default function Root({ children }: PropsWithChildren) {
             copy: crawlers would see two. */}
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="stylesheet" href="/assets/leaflet/leaflet.css" />
+        <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.css" />
+        <link rel="stylesheet" href="/assets/leaflet/MarkerCluster.Default.css" />
         {/* The homepage hero preload lives in app/index.tsx: every page shares
             this file, and on the others an unused preload logs a console
             warning. */}
