@@ -75,12 +75,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   register: async (dto) => {
     set({ loading: true, error: null, errorCode: null });
     try {
-      const payload: RegisterDto = {
-        full_name: (dto.full_name ?? "").trim(),
-        email: (dto.email ?? "").trim(),
-        password: dto.password,
-      };
-      const response = await registerUser(payload);
+      const response = await registerUser(dto);
       if (!response.data) throw new Error(response.message || "Registration failed");
       await saveTokens(response.data.access_token, response.data.refresh_token);
       set({ user: response.data.user, loading: false });

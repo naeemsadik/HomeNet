@@ -245,6 +245,44 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
       registerSpy.mockRestore();
     });
 
+    it("clears the mismatch error when the password is edited to match", async () => {
+      const registerSpy = jest.spyOn(useAuthStore.getState(), "register").mockResolvedValue(true);
+
+      await act(async () => {
+        root.render(<AuthCard initialMode="signup" />);
+      });
+
+      const input = (placeholder: string) =>
+        container.querySelector(`input[placeholder="${placeholder}"]`) as HTMLInputElement;
+
+      await act(async () => {
+        setInputValue(input("Enter your full name"), "Rahim Ahmed");
+        setInputValue(input("Email address"), "rahim@example.com");
+        setInputValue(input("Create password"), "ValidPassword123");
+        setInputValue(input("Confirm password"), "DifferentPass456");
+      });
+
+      await act(async () => {
+        (container.querySelector('[data-testid="auth-submit-button"]') as HTMLElement).click();
+      });
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(container.textContent).toContain("Passwords do not match");
+
+      // Fix it from the password field, not the confirm field.
+      await act(async () => {
+        setInputValue(input("Create password"), "DifferentPass456");
+      });
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(container.textContent).not.toContain("Passwords do not match");
+      expect(registerSpy).not.toHaveBeenCalled();
+      registerSpy.mockRestore();
+    });
+
     it("blocks submission when confirm password is empty", async () => {
       const registerSpy = jest.spyOn(useAuthStore.getState(), "register").mockResolvedValue(true);
 

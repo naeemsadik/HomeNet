@@ -153,6 +153,9 @@ export function AuthCard({
     router.push(path as never);
   };
 
+  // There is no password-reset endpoint yet, so point people at the contact
+  // address the About page publishes (the old one was on a different domain,
+  // homenet.com, and "account settings" can't be reached while signed out).
   const handleForgotPassword = () => {
     notify(
       t("auth.forgotPasswordTitle"),
@@ -160,36 +163,22 @@ export function AuthCard({
     );
   };
 
+  // login/register catch their own errors and return false, so there is nothing to catch here.
+  // confirmPassword is client-only: sign-up sends just the three fields the API accepts.
   const onSubmit = async (data: AuthModalFormData) => {
-    try {
-      const email = data.email.trim();
-      const password = data.password;
+    const email = data.email.trim();
+    const ok =
+      mode === "signin"
+        ? await login({ email, password: data.password })
+        : await register({
+            full_name: (data.full_name ?? "").trim(),
+            email,
+            password: data.password,
+          });
 
-      if (mode === "signin") {
-        const ok = await login({ email, password });
-        if (ok) {
-          if (onClose) onClose();
-          if (onSuccess) onSuccess();
-        }
-      } else {
-        // Strip client-only validation fields (confirmPassword) so only
-        // API-compliant fields are dispatched to the registration service.
-        const fullName = (data.full_name ?? "").trim();
-        const ok = await register({
-          full_name: fullName,
-          email,
-          password,
-        });
-
-        if (ok) {
-          if (onClose) onClose();
-          if (onSuccess) onSuccess();
-        }
-      }
-    } catch (err) {
-      if (__DEV__) {
-        console.warn("[AuthCard] Submission error handled:", err);
-      }
+    if (ok) {
+      if (onClose) onClose();
+      if (onSuccess) onSuccess();
     }
   };
 
@@ -385,6 +374,9 @@ export function AuthCard({
               <Controller
                 control={control}
                 name="password"
+                // After a failed submit, editing the password re-checks the confirm field too,
+                // so a stale "Passwords do not match" clears as soon as they match.
+                rules={{ deps: ["confirmPassword"] }}
                 render={({ field: { onChange, value } }) => (
                   <TextInput
                     autoCapitalize="none"
@@ -395,6 +387,8 @@ export function AuthCard({
                     }}
                     placeholder={mode === "signin" ? t("auth.password") : t("auth.createPasswordPlaceholder")}
                     accessibilityLabel={mode === "signin" ? t("auth.password") : t("auth.createPasswordPlaceholder")}
+                    autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                    textContentType={mode === "signin" ? "password" : "newPassword"}
                     placeholderTextColor={colorTokens.muted}
                     secureTextEntry={!showPassword}
                     style={styles.textInput}
@@ -437,6 +431,8 @@ export function AuthCard({
                       }}
                       placeholder={t("auth.confirmPasswordPlaceholder")}
                       accessibilityLabel={t("auth.confirmPassword")}
+                      autoComplete="new-password"
+                      textContentType="newPassword"
                       placeholderTextColor={colorTokens.muted}
                       secureTextEntry={!showConfirmPassword}
                       style={styles.textInput}
@@ -498,6 +494,9 @@ export function AuthCard({
           </Pressable>
 
           {mode === "signup" ? (
+            // Terms and privacy acceptance: Google Play requires apps with
+            // user-generated content (listings, photos) to put terms in front of
+            // the user before they create anything.
             <Text style={styles.consentText}>
               {t("auth.consentPrefix")}
               <Text accessibilityRole="link" onPress={() => openLegalPage("/terms")} style={styles.consentLink}>

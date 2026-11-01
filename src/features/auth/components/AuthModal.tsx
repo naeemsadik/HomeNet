@@ -10,10 +10,12 @@ import {
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { goToPostAuthDestination } from "@/lib/postAuth";
 import { colorTokens } from "@/theme";
+import { useTranslation } from "@/i18n";
 import { AuthCard } from "./AuthCard";
 
 export function AuthModal() {
   const { visible, close, onSuccess } = useAuthModalStore();
+  const { t } = useTranslation();
 
   if (!visible) return null;
 
@@ -28,7 +30,7 @@ export function AuthModal() {
         <Pressable
           style={modalStyles.backdrop}
           onPress={close}
-          accessibilityLabel="Close modal overlay"
+          accessibilityLabel={t("auth.close")}
         />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}

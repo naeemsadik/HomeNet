@@ -118,25 +118,35 @@ export const changePasswordDtoSchema = z
 
 // ─── Auth modal ────────────────────────────────────────────────────────────
 
+/** Messages for the confirm-password checks; the modal passes translated ones. */
+export interface SignUpModalMessages {
+  confirmPasswordRequired?: string;
+  passwordsDoNotMatch?: string;
+}
+
 /**
- * Sign-up inside the auth modal. Includes confirmPassword to ensure
- * client-side matching validation before account creation.
+ * Sign-up inside the auth modal. confirmPassword is client-only: it is checked
+ * against password here and never sent to the API (registerUser strips it).
  */
-export const signUpModalSchema = z
-  .object({
-    full_name: nameBase,
-    email: emailBase,
-    password: passwordBase,
-    confirmPassword: z
-      .string()
-      .min(1, "Confirm your password")
-      .max(128),
-  })
-  .strict()
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+function buildSignUpModalSchema(messages?: SignUpModalMessages) {
+  return z
+    .object({
+      full_name: nameBase,
+      email: emailBase,
+      password: passwordBase,
+      confirmPassword: z
+        .string()
+        .min(1, messages?.confirmPasswordRequired || "Confirm your password")
+        .max(128),
+    })
+    .strict()
+    .refine((data) => data.password === data.confirmPassword, {
+      message: messages?.passwordsDoNotMatch || "Passwords do not match",
+      path: ["confirmPassword"],
+    });
+}
+
+export const signUpModalSchema = buildSignUpModalSchema();
 
 export type AuthModalFormData = {
   full_name?: string;
@@ -146,13 +156,7 @@ export type AuthModalFormData = {
 };
 
 /** Resolver schema for the modal, which swaps between sign-in and sign-up. */
-export function authModalSchema(
-  mode: "signin" | "signup",
-  messages?: {
-    confirmPasswordRequired?: string;
-    passwordsDoNotMatch?: string;
-  },
-) {
+export function authModalSchema(mode: "signin" | "signup", messages?: SignUpModalMessages) {
   if (mode === "signin") {
     return loginSchema
       .extend({
@@ -161,24 +165,6 @@ export function authModalSchema(
       })
       .strict();
   }
-
-  const confirmRequiredMsg = messages?.confirmPasswordRequired || "Confirm your password";
-  const mismatchMsg = messages?.passwordsDoNotMatch || "Passwords do not match";
-
-  return z
-    .object({
-      full_name: nameBase,
-      email: emailBase,
-      password: passwordBase,
-      confirmPassword: z
-        .string()
-        .min(1, confirmRequiredMsg)
-        .max(128),
-    })
-    .strict()
-    .refine((data) => data.password === data.confirmPassword, {
-      message: mismatchMsg,
-      path: ["confirmPassword"],
-    });
+  return buildSignUpModalSchema(messages);
 }
 
