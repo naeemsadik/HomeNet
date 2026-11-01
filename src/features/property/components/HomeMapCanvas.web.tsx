@@ -1,5 +1,8 @@
-// Leaflet and cluster stylesheets are served from /assets/leaflet/ under CSP 'self'.
-// The scripts load dynamically when the map mounts.
+// Leaflet and the cluster plugin's stylesheets are bundled, not loaded from a CDN: the site's
+// Content-Security-Policy (vercel.json) only allows stylesheets and scripts from 'self'. Metro
+// can't load CSS through a lazy import(), so these are static; the scripts load when the map mounts.
+import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
 import type { Map as LeafletMap, Marker, MarkerClusterGroup } from "leaflet";
 import { useEffect, useRef, useState } from "react";
 import { MAP_ATTRIBUTION, MAP_MAX_ZOOM, MAP_TILE_URL } from "../constants/map";
