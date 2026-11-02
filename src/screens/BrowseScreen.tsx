@@ -323,9 +323,12 @@ export function BrowseScreen({
     </SafeAreaView>
   ) : undefined;
 
-  // Phone web only: the pill is position: fixed over the page. The app has no
-  // map yet (PropertyResultsMap only draws a placeholder there), so the app
-  // doesn't offer the switch and always shows the list.
+  // Phone web only: the app has no map yet (PropertyResultsMap only draws a
+  // placeholder there), so the app doesn't offer the switch and shows the list.
+  // The pill goes in AppChrome's floating slot, outside the results' ScrollView.
+  // It can't be position: fixed inside it: react-native-web gives every
+  // ScrollView `transform: translateZ(0)`, which makes a fixed child behave like
+  // an absolute one, so the pill scrolled away with the cards.
   const viewSwitcher = (
     <View style={styles.floatingPill}>
       <Pressable
@@ -384,6 +387,7 @@ export function BrowseScreen({
 
   return (
     <AppChrome
+      floating={isMobile && Platform.OS === "web" ? viewSwitcher : undefined}
       active={mode === "rent" && filters.purpose === "short-let" ? "holiday" : mode || "buy"}
       customTopBar={mobileTopBar}
     >
@@ -601,13 +605,6 @@ export function BrowseScreen({
           visible={isFilterModalOpen}
         />
       </View>
-
-      {/* ── Mobile: Floating View Switcher Pill (List | Map) ─────────────── */}
-      {isMobile && Platform.OS === "web" ? (
-        <View style={styles.floatingPillContainer} pointerEvents="box-none">
-          {viewSwitcher}
-        </View>
-      ) : null}
 
       {/* ── Mobile: Sort Dropdown Sheet Modal ────────────────────────────── */}
       <Modal
@@ -856,21 +853,6 @@ const styles = StyleSheet.create({
   },
 
   /* ── Mobile Floating View Switcher Pill (List | Map) ───────────────────── */
-  floatingPillContainer: {
-    ...(Platform.select({
-      web: {
-        position: "fixed",
-      },
-      default: {
-        position: "absolute",
-      },
-    }) as any),
-    bottom: 74,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    zIndex: 99,
-  },
   floatingPill: {
     flexDirection: "row",
     alignItems: "center",
