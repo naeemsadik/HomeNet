@@ -14,6 +14,15 @@ jest.mock("expo-router", () => ({
   router: { push: jest.fn() },
 }));
 
+// Leaflet needs a real browser layout; these tests are about the card and the props the map gets.
+const mockCanvas = jest.fn();
+jest.mock("../HomeMapCanvas", () => ({
+  HomeMapCanvas: (props: unknown) => {
+    mockCanvas(props);
+    return <div data-testid="map-canvas" />;
+  },
+}));
+
 jest.mock("@/components/icons", () => ({
   MapPin: () => <span>MapPin</span>,
   X: () => <span>X</span>,
@@ -90,5 +99,20 @@ describe("PropertyResultsMap Component", () => {
       expect(button.closest("button") === button).toBe(true);
       expect(button.parentElement?.closest("button")).toBeNull();
     });
+  });
+
+  it("draws the map in the page, not in a srcdoc iframe the CSP would block", () => {
+    const unpinned: Property = { ...mockProperty, id: "prop-2", location_lat: null, location_lng: null } as Property;
+    act(() => {
+      root.render(<PropertyResultsMap properties={[mockProperty, unpinned]} />);
+    });
+
+    expect(container?.querySelector("iframe")).toBeNull();
+    expect(container?.querySelector('[data-testid="map-canvas"]')).not.toBeNull();
+
+    // Only the listing with a real pin goes on the map, and one finger pans it.
+    const props = mockCanvas.mock.calls.at(-1)?.[0] as { markers: { id: string }[]; touchDrag?: boolean };
+    expect(props.markers.map((m) => m.id)).toEqual(["prop-1"]);
+    expect(props.touchDrag).toBe(true);
   });
 });

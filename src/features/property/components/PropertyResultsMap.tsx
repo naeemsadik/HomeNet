@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -10,10 +10,23 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { MapPin, X } from "@/components/icons";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
-import { DHAKA_CENTER } from "../constants/areaCenters";
-import { formatLocalizedPrice, useTranslation } from "@/i18n";
+import { formatLocalizedPrice, isPriceOnRequest, useTranslation } from "@/i18n";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import type { Property } from "../types/property";
+import { HomeMapCanvas } from "./HomeMapCanvas";
+import type { HomeMapMarker } from "./HomeMapCanvas.types";
+
+type MappableProperty = Property & { location_lat: number; location_lng: number };
+
+function hasCoordinates(p: Property): p is MappableProperty {
+  return (
+    typeof p.location_lat === "number" &&
+    typeof p.location_lng === "number" &&
+    Number.isFinite(p.location_lat) &&
+    Number.isFinite(p.location_lng) &&
+    !(p.location_lat === 0 && p.location_lng === 0)
+  );
+}
 
 interface PropertyResultsMapProps {
   properties: Property[];
@@ -29,106 +42,37 @@ export function PropertyResultsMap({
   const { t, language } = useTranslation();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(() => properties[0] || null);
 
-  // Compute center
-  const center = useMemo(() => {
-    const firstWithCoords = properties.find((p) => p.location_lat && p.location_lng);
-    if (firstWithCoords && firstWithCoords.location_lat && firstWithCoords.location_lng) {
-      return { lat: firstWithCoords.location_lat, lng: firstWithCoords.location_lng };
-    }
-    return DHAKA_CENTER;
-  }, [properties]);
-
-  // Leaflet map HTML for web platform iframe
-  const mapHtml = useMemo(() => {
-    const validProps = properties
-      .map((p, idx) => {
-        const lat = p.location_lat || center.lat + (idx % 5 - 2) * 0.008;
-        const lng = p.location_lng || center.lng + (idx % 4 - 1.5) * 0.008;
+  // The map runs Leaflet in the page (HomeMapCanvas.web.tsx). It used to be a srcdoc
+  // iframe loading Leaflet from unpkg with an inline script, which the site's
+  // Content-Security-Policy blocks, so the map was a blank grey box in production.
+  // Only listings with a real pin go on the map; a made-up spot would mislead.
+  const perMonth = t("propertyCard.perMonth");
+  const markers = useMemo<HomeMapMarker[]>(
+    () =>
+      properties.filter(hasCoordinates).map((p) => {
+        const onRequest = isPriceOnRequest(p.price);
+        const isRent = p.listing_type === "rent";
         const price = formatLocalizedPrice(p.price, p.price_currency || "BDT", language);
         return {
-          id: p.id,
-          title: (p.title || "").replace(/'/g, "\\'"),
-          price,
-          lat,
-          lng,
+          id: String(p.id),
+          lat: p.location_lat,
+          lng: p.location_lng,
+          label: isRent && !onRequest ? `${price}${perMonth}` : price,
+          variant: onRequest ? "neutral" : isRent ? "rent" : "sale",
         };
-      })
-      .slice(0, 40);
+      }),
+    [properties, language, perMonth],
+  );
 
-    const markersJson = JSON.stringify(validProps);
-
-    return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    body, html, #map { margin: 0; padding: 0; width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    .price-marker {
-      background-color: #04cf92;
-      color: #0B1A17;
-      font-weight: 700;
-      font-size: 11px;
-      padding: 3px 7px;
-      border-radius: 12px;
-      border: 1.5px solid #0B1A17;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      white-space: nowrap;
-      text-align: center;
-      cursor: pointer;
-    }
-    .price-marker.active {
-      background-color: #0B1A17;
-      color: #FFFFFF;
-      border-color: #04cf92;
-    }
-  </style>
-</head>
-<body>
-  <div id="map"></div>
-  <script>
-    var map = L.map('map', { zoomControl: false }).setView([${center.lat}, ${center.lng}], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
-
-    var markersData = ${markersJson};
-    markersData.forEach(function(item) {
-      var icon = L.divIcon({
-        className: 'custom-icon',
-        html: '<div class="price-marker" id="marker-' + item.id + '">' + item.price + '</div>',
-        iconSize: [60, 24],
-        iconAnchor: [30, 12]
-      });
-      var marker = L.marker([item.lat, item.lng], { icon: icon }).addTo(map);
-      marker.on('click', function() {
-        window.parent.postMessage({ type: 'PROPERTY_SELECTED', id: item.id }, '*');
-      });
-    });
-  </script>
-</body>
-</html>`;
-  }, [properties, center, language]);
-
-  React.useEffect(() => {
-    if (Platform.OS !== "web" || typeof window === "undefined") return;
-
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === "PROPERTY_SELECTED") {
-        const found = properties.find((p) => p.id === event.data.id);
-        if (found) {
-          setSelectedProperty(found);
-          onSelectProperty?.(found);
-        }
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [properties, onSelectProperty]);
+  const handleSelect = useCallback(
+    (id: string) => {
+      const found = properties.find((p) => String(p.id) === id);
+      if (!found) return;
+      setSelectedProperty(found);
+      onSelectProperty?.(found);
+    },
+    [properties, onSelectProperty],
+  );
 
   const handleCardPress = () => {
     if (!selectedProperty) return;
@@ -147,15 +91,15 @@ export function PropertyResultsMap({
   return (
     <View style={styles.container}>
       {Platform.OS === "web" ? (
-        // Web Leaflet iframe embed
-        <iframe
-          srcDoc={mapHtml}
-          style={{
-            width: "100%",
-            height: "100%",
-            border: "none",
-          }}
-          title="HomeNet Map View"
+        <HomeMapCanvas
+          markers={markers}
+          selectedId={selectedProperty ? String(selectedProperty.id) : null}
+          onSelect={handleSelect}
+          accessibilityLabel={`${activeLocation || "Dhaka"} properties map`}
+          // The map is the whole view here, so one finger pans it. The zoom
+          // buttons move to the bottom because the listing card sits on top.
+          touchDrag
+          zoomControlPosition="bottomright"
         />
       ) : (
         <View style={styles.nativeFallback}>
@@ -166,7 +110,7 @@ export function PropertyResultsMap({
         </View>
       )}
 
-      {/* Selected Property Bottom Peek Card */}
+      {/* Selected property peek card */}
       {selectedProperty ? (
         <View style={styles.peekCard}>
           <Pressable
@@ -254,9 +198,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colorTokens.ink,
   },
+  // The card sits at the top of the map: on phones the List/Map pill floats over
+  // the bottom of the screen, which is where the card used to be.
   peekCard: {
     position: "absolute",
-    bottom: 12,
+    top: 12,
     left: 12,
     right: 12,
     backgroundColor: colorTokens.surface,

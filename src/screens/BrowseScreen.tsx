@@ -323,9 +323,9 @@ export function BrowseScreen({
     </SafeAreaView>
   ) : undefined;
 
-  // On the web the pill is position: fixed over the page. The app has no
-  // fixed positioning, so it goes in AppChrome's floating slot instead, which
-  // keeps it above the bottom tabs rather than at the end of the results.
+  // Phone web only: the pill is position: fixed over the page. The app has no
+  // map yet (PropertyResultsMap only draws a placeholder there), so the app
+  // doesn't offer the switch and always shows the list.
   const viewSwitcher = (
     <View style={styles.floatingPill}>
       <Pressable
@@ -384,7 +384,6 @@ export function BrowseScreen({
 
   return (
     <AppChrome
-      floating={isMobile && Platform.OS !== "web" ? viewSwitcher : undefined}
       active={mode === "rent" && filters.purpose === "short-let" ? "holiday" : mode || "buy"}
       customTopBar={mobileTopBar}
     >
@@ -492,7 +491,7 @@ export function BrowseScreen({
         )}
 
         {/* ── Mobile Map View Mode ────────────────────────────────────────── */}
-        {isMobile && mobileTabMode === "map" ? (
+        {isMobile && Platform.OS === "web" && mobileTabMode === "map" ? (
           <View style={styles.mobileMapContainer}>
             <PropertyResultsMap
               properties={sortedResults}

@@ -287,22 +287,12 @@ describe("BrowseScreen filters on Android", () => {
 });
 
 describe("the List | Map switcher in the app", () => {
-  it("is pinned by the chrome above the tabs, not placed at the end of the results", async () => {
+  it("isn't offered, because the app has no map yet", async () => {
     const tree = await mount("buy");
 
-    // Inside the scrolling page it sat at the bottom of the results, over the
-    // last card's Email and Call buttons.
-    expect(mockFloating).toBeTruthy();
-    expect(pressableWithText(tree, "List")).toBeUndefined();
-
-    let floating!: ReactTestRenderer;
-    act(() => {
-      floating = renderer.create(<>{mockFloating}</>);
-    });
-    const text = textOf(floating.root);
-    expect(text).toContain("List");
-    expect(text).toContain("Map");
-    act(() => floating.unmount());
+    // The app's map view was only a placeholder, so the app always shows the list.
+    expect(mockFloating).toBeFalsy();
+    expect(pressableWithText(tree, "Map")).toBeUndefined();
   });
 });
 

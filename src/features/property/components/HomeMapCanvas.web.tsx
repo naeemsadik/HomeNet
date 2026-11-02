@@ -78,7 +78,14 @@ function markerHtml(item: HomeMapMarker, active: boolean): string {
  * zooms after the map is clicked, and on touch screens one finger scrolls the
  * page while two fingers pan and zoom the map.
  */
-export function HomeMapCanvas({ markers, selectedId, onSelect, accessibilityLabel }: HomeMapCanvasProps) {
+export function HomeMapCanvas({
+  markers,
+  selectedId,
+  onSelect,
+  accessibilityLabel,
+  touchDrag = false,
+  zoomControlPosition = "topleft",
+}: HomeMapCanvasProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const leafletRef = useRef<LeafletModule | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -88,6 +95,8 @@ export function HomeMapCanvas({ markers, selectedId, onSelect, accessibilityLabe
   const onSelectRef = useRef(onSelect);
   const selectedRef = useRef(selectedId);
   const [ready, setReady] = useState(false);
+  // Read once when the map is created; these don't change for a mounted map.
+  const optionsRef = useRef({ touchDrag, zoomControlPosition });
 
   // Leaflet's handlers outlive renders; they read the latest props through these refs.
   useEffect(() => {
@@ -114,11 +123,12 @@ export function HomeMapCanvas({ markers, selectedId, onSelect, accessibilityLabe
           center: [DHAKA_CENTER.lat, DHAKA_CENTER.lng],
           zoom: 12,
           minZoom: 6,
-          zoomControl: true,
+          zoomControl: false,
           scrollWheelZoom: false,
           // One finger scrolls the page on phones; pinch still pans and zooms.
-          dragging: !touch,
+          dragging: !touch || optionsRef.current.touchDrag,
         });
+        L.control.zoom({ position: optionsRef.current.zoomControlPosition }).addTo(map);
         L.tileLayer(MAP_TILE_URL, { attribution: MAP_ATTRIBUTION, maxZoom: MAP_MAX_ZOOM }).addTo(map);
         map.on("click focus", () => map.scrollWheelZoom.enable());
         map.on("mouseout blur", () => map.scrollWheelZoom.disable());
