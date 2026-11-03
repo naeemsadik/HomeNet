@@ -225,7 +225,7 @@ export function AuthCard({
 
             {/* Center Logo Icon Tile (Node 282:6 - 67.37px x 67.37px) */}
             <View style={styles.logoIconTile}>
-              <BrandMark size={46} tone="light" />
+              <BrandMark size={64} />
             </View>
 
             {/* App Title (Node 282:10) */}
@@ -598,10 +598,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   logoIconTile: {
-    width: 67.37,
-    height: 67.37,
-    borderRadius: 14,
-    backgroundColor: "rgba(15, 109, 85, 0.59)",
+    width: 64,
+    height: 64,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
