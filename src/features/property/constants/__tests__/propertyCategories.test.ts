@@ -60,11 +60,13 @@ describe("findKnownSubtype", () => {
     expect(findKnownSubtype(residential, "  Duplex ")?.value).toBe("duplex");
     expect(findKnownSubtype(residential, "Independent House")?.value).toBe("house");
     expect(findKnownSubtype(residential, "short let")?.value).toBe("short-let");
+    expect(findKnownSubtype(residential, "student accommodation")?.value).toBe("student-accommodation");
     expect(findKnownSubtype(land, "residential plot")?.value).toBe("residential-plot");
   });
 
   it("matches one side of a 'A / B' label", () => {
     expect(findKnownSubtype(residential, "flat")?.value).toBe("apartment");
+    expect(findKnownSubtype(residential, "mess")?.value).toBe("student-accommodation");
     expect(findKnownSubtype(commercial, "retail")?.value).toBe("shop");
   });
 
@@ -90,6 +92,7 @@ describe("subtypeLabel", () => {
 describe("validateSubtype", () => {
   it("accepts a listed value", () => {
     expect(validateSubtype(residential, "apartment")).toBeNull();
+    expect(validateSubtype(residential, "student-accommodation")).toBeNull();
     expect(validateSubtype(parking, "garage")).toBeNull();
   });
 

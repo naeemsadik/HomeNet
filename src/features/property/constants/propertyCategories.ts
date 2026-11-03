@@ -61,6 +61,7 @@ export const PROPERTY_TYPE_CONFIGS: Record<PropertyType, PropertyTypeConfig> = {
       { value: "duplex", label: "Duplex", description: "Two-story independent or semi-detached residential unit" },
       { value: "condo", label: "Condominium", description: "Condominium unit with shared community amenities" },
       { value: "short-let", label: `${HOLIDAY_STAY_LABEL} / Serviced`, description: "Furnished serviced apartments for daily/monthly stays" },
+      { value: "student-accommodation", label: "Student Accommodation / Mess", description: "Shared student housing with per-seat availability" },
       { value: "penthouse", label: "Penthouse", description: "Top-floor luxury suite" },
       { value: "studio", label: "Studio", description: "Single-room open-plan living unit" },
     ],

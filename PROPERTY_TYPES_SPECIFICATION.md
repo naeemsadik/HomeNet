@@ -34,6 +34,7 @@ The database stores `subtype` as an open string (`String?`), allowing flexible c
 * **`duplex`** — Two-story independent or semi-detached residential unit
 * **`condo`** — Condominium unit
 * **`short-let`** — Short-term, serviced apartments *(linked to `/rent?subtype=short-let`)*
+* **`student-accommodation`** — Student accommodation or mess with seat-sharing
 * **`penthouse`** — Top floor luxury suite
 * **`studio`** — Single-room open-plan living unit
 
