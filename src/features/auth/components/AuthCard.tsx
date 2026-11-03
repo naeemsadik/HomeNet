@@ -35,7 +35,9 @@ import { authModalSchema, type AuthModalFormData } from "@/lib/schemas/auth";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 
-const authBuildingImage = require("../../../../assets/auth-hero-building.png");
+// WebP: 40 KB, against 890 KB for the PNG it replaces, with no visible difference at the size
+// it is shown (at most 448 wide, under the green gradient).
+const authBuildingImage = require("../../../../assets/auth-hero-building.webp");
 
 export type AuthMode = "signin" | "signup";
 
