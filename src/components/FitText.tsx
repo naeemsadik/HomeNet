@@ -23,10 +23,16 @@ export function FitText({
   minFontSize = 16,
   maxFontSize = 96,
   noTranslate = false,
+  wrapWhenTooLong = false,
   ...textProps
 }: Omit<TextProps, "numberOfLines"> & {
   minFontSize?: number;
   maxFontSize?: number;
+  /**
+   * When even `minFontSize` is too big for one line, show the text at that size over two lines
+   * instead of cutting it with "…". For short lines where both are better than tiny type.
+   */
+  wrapWhenTooLong?: boolean;
   /** Keep browser translation off this text (and its measuring copy), as NoTranslateText does. */
   noTranslate?: boolean;
 }) {
@@ -52,10 +58,10 @@ export function FitText({
     letterSpacing: spacingRatio * size,
   });
 
-  const fitted =
-    boxWidth > 0 && textWidth > 0
-      ? Math.min(maxFontSize, Math.max(minFontSize, ((MEASURE_SIZE * boxWidth) / textWidth) * SAFETY))
-      : baseSize;
+  // The size that would make the line exactly as wide as the box, once both widths are known.
+  const needed = boxWidth > 0 && textWidth > 0 ? ((MEASURE_SIZE * boxWidth) / textWidth) * SAFETY : null;
+  const wraps = wrapWhenTooLong && needed !== null && needed < minFontSize;
+  const fitted = needed === null ? baseSize : Math.min(maxFontSize, Math.max(minFontSize, needed));
 
   const onBox = (e: LayoutChangeEvent) => setBoxWidth(e.nativeEvent.layout.width);
   const onMeasure = (e: LayoutChangeEvent) => setTextWidth(e.nativeEvent.layout.width);
@@ -68,8 +74,8 @@ export function FitText({
         // 100, shown at about 30), so the worked-out size can still run a pixel or two past the edge,
         // and Android then cuts the line to "Find Your Dream With Tru…". The app lets the system take
         // the last pixel off instead. It only ever shrinks, from the size worked out here.
-        adjustsFontSizeToFit={Platform.OS !== "web"}
-        numberOfLines={1}
+        adjustsFontSizeToFit={Platform.OS !== "web" && !wraps}
+        numberOfLines={wraps ? 2 : 1}
         style={[style, scaled(fitted), styles.visible]}
       >
         {children}
