@@ -15,7 +15,14 @@ import type {
 } from "@/types/api";
 
 export async function registerUser(dto: RegisterDto) {
-  const validated = registerDtoSchema.parse(dto);
+  // Guarantee only API-compliant fields (full_name, email, password) are sent,
+  // stripping any client-side fields like confirmPassword prior to validation and API dispatch.
+  const payload: RegisterDto = {
+    full_name: (dto.full_name ?? "").trim(),
+    email: (dto.email ?? "").trim(),
+    password: dto.password,
+  };
+  const validated = registerDtoSchema.parse(payload);
   const { data } = await apiClient.post<ApiResponse<AuthResponse>>("/v1/auth/register", validated);
   return data;
 }

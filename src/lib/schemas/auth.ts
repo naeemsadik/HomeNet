@@ -118,33 +118,53 @@ export const changePasswordDtoSchema = z
 
 // ─── Auth modal ────────────────────────────────────────────────────────────
 
+/** Messages for the confirm-password checks; the modal passes translated ones. */
+export interface SignUpModalMessages {
+  confirmPasswordRequired?: string;
+  passwordsDoNotMatch?: string;
+}
+
 /**
- * Sign-up inside the auth modal. No confirm-password field: the modal ships a
- * show-password toggle instead, so a second entry adds friction without catching
- * anything the toggle doesn't.
+ * Sign-up inside the auth modal. confirmPassword is client-only: it is checked
+ * against password here and never sent to the API (registerUser strips it).
  */
-export const signUpModalSchema = z
-  .object({
-    full_name: nameBase,
-    email: emailBase,
-    password: passwordBase,
-  })
-  .strict();
+function buildSignUpModalSchema(messages?: SignUpModalMessages) {
+  return z
+    .object({
+      full_name: nameBase,
+      email: emailBase,
+      password: passwordBase,
+      confirmPassword: z
+        .string()
+        .min(1, messages?.confirmPasswordRequired || "Confirm your password")
+        .max(128),
+    })
+    .strict()
+    .refine((data) => data.password === data.confirmPassword, {
+      message: messages?.passwordsDoNotMatch || "Passwords do not match",
+      path: ["confirmPassword"],
+    });
+}
+
+export const signUpModalSchema = buildSignUpModalSchema();
 
 export type AuthModalFormData = {
   full_name?: string;
   email: string;
   password: string;
+  confirmPassword?: string;
 };
 
 /** Resolver schema for the modal, which swaps between sign-in and sign-up. */
-export function authModalSchema(mode: "signin" | "signup") {
-  return mode === "signin"
-    ? loginSchema
-        .extend({
-          full_name: z.string().max(100).optional(),
-        })
-        .strict()
-    : signUpModalSchema;
+export function authModalSchema(mode: "signin" | "signup", messages?: SignUpModalMessages) {
+  if (mode === "signin") {
+    return loginSchema
+      .extend({
+        full_name: z.string().max(100).optional(),
+        confirmPassword: z.string().max(128).optional(),
+      })
+      .strict();
+  }
+  return buildSignUpModalSchema(messages);
 }
 

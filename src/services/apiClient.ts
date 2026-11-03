@@ -45,9 +45,9 @@ export async function notifyUnauthorized() {
 }
 
 export function toApiError(error: unknown): ApiError {
-  reportError(error);
-
   if (error instanceof ApiError) return error;
+
+  reportError(error);
 
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<ApiResponse<unknown>>;
