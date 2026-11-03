@@ -345,12 +345,14 @@ export const styles = StyleSheet.create({
   },
   stepperRow: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    alignItems: "flex-start",
     width: "100%",
     maxWidth: 680,
   },
-  stepCircleWrap: {
+  // Equal slots: each circle sits at the centre of its own, whatever the label's length.
+  stepSlot: {
+    flex: 1,
+    minWidth: 0,
     alignItems: "center",
     gap: 6,
   },
@@ -380,7 +382,10 @@ export const styles = StyleSheet.create({
   stepCircleTextCurrent: {
     color: "#04cf92",
   },
+  // Long labels (Bangla, a narrow phone) wrap to a second line inside their slot.
   stepLabelText: {
+    alignSelf: "stretch",
+    paddingHorizontal: 2,
     fontSize: 12,
     fontFamily: fonts.regular,
     color: "#5C6B66",
@@ -393,13 +398,22 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     color: "#0B1A17",
   },
-  stepConnectorLine: {
-    flex: 1,
+  // Half of the line between two circles; it stops 6 short of the circle (18 radius + 6).
+  stepConnector: {
+    position: "absolute",
+    top: 17,
     height: 2,
     backgroundColor: "rgba(11,26,23,0.12)",
-    marginHorizontal: 6,
-    alignSelf: "flex-start",
-    marginTop: 17,
+  },
+  stepConnectorBefore: {
+    left: 0,
+    right: "50%",
+    marginRight: 24,
+  },
+  stepConnectorAfter: {
+    left: "50%",
+    right: 0,
+    marginLeft: 24,
   },
   stepConnectorLineDone: {
     backgroundColor: "#04cf92",
