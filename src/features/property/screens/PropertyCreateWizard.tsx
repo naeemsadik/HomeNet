@@ -7,7 +7,7 @@ import {
   Save,
   Send,
 } from "@/components/icons";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { PRICE_ON_REQUEST, useTranslation } from "@/i18n";
 import {
   ActivityIndicator,
@@ -440,9 +440,11 @@ export function PropertyCreateWizard() {
                 const isCurrent = st.num === store.currentStep;
 
                 return (
-                  <View key={st.num} style={styles.stepItemWrap}>
+                  <Fragment key={st.num}>
                     <View style={styles.stepCircleWrap}>
                       <Pressable
+                        accessibilityLabel={st.title}
+                        accessibilityRole="button"
                         onPress={() => {
                           if (st.num < store.currentStep) store.setCurrentStep(st.num as 1 | 2 | 3 | 4 | 5);
                         }}
@@ -462,15 +464,27 @@ export function PropertyCreateWizard() {
                         )}
                       </Pressable>
 
-                      <Text style={[styles.stepLabelText, (isDone || isCurrent) && styles.stepLabelTextActive]}>
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.stepLabelText,
+                          isPhone && styles.stepLabelTextPhone,
+                          (isDone || isCurrent) && styles.stepLabelTextActive,
+                        ]}
+                      >
                         {st.title}
                       </Text>
                     </View>
 
                     {idx < steps.length - 1 && (
-                      <View style={[styles.stepConnectorLine, st.num < store.currentStep && styles.stepConnectorLineDone]} />
+                      <View
+                        style={[
+                          styles.stepConnectorLine,
+                          st.num < store.currentStep && styles.stepConnectorLineDone,
+                        ]}
+                      />
                     )}
-                  </View>
+                  </Fragment>
                 );
               })}
             </View>

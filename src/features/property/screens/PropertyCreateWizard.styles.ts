@@ -317,12 +317,19 @@ export const styles = StyleSheet.create({
   workspaceScroll: {
     flexGrow: 1,
     justifyContent: "space-between",
+    width: "100%",
+    alignItems: "center",
   },
   scrollBody: {
+    width: "100%",
+    maxWidth: 860,
+    alignSelf: "center",
     padding: 24,
     gap: 20,
   },
   scrollBodyPhone: {
+    width: "100%",
+    maxWidth: "100%",
     padding: 12,
     gap: 16,
   },
@@ -331,20 +338,17 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   stepperContainer: {
+    width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   stepperRow: {
     flexDirection: "row",
     alignItems: "center",
-    maxWidth: 600,
+    justifyContent: "space-between",
     width: "100%",
-  },
-  stepItemWrap: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
+    maxWidth: 680,
   },
   stepCircleWrap: {
     alignItems: "center",
@@ -380,6 +384,10 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.regular,
     color: "#5C6B66",
+    textAlign: "center",
+  },
+  stepLabelTextPhone: {
+    fontSize: 11,
   },
   stepLabelTextActive: {
     fontFamily: fonts.bold,
@@ -389,13 +397,15 @@ export const styles = StyleSheet.create({
     flex: 1,
     height: 2,
     backgroundColor: "rgba(11,26,23,0.12)",
-    marginHorizontal: 8,
-    marginBottom: 20,
+    marginHorizontal: 6,
+    alignSelf: "flex-start",
+    marginTop: 17,
   },
   stepConnectorLineDone: {
     backgroundColor: "#04cf92",
   },
   stepCard: {
+    width: "100%",
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
     borderWidth: 1,
