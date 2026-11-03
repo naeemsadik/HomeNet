@@ -133,10 +133,10 @@ export function HomeMapCanvas({
         map.on("click focus", () => map.scrollWheelZoom.enable());
         map.on("mouseout blur", () => map.scrollWheelZoom.disable());
 
-        const cluster = (L as any).markerClusterGroup({
+        const cluster = L.markerClusterGroup({
           showCoverageOnHover: false,
           maxClusterRadius: 36,
-          iconCreateFunction: (group: any) =>
+          iconCreateFunction: (group) =>
             L.divIcon({
               html: `<div>${group.getChildCount()}</div>`,
               className: "hn-cluster",
