@@ -325,58 +325,54 @@ export function BrowseScreen({
 
   // Phone web only: the app has no map yet (PropertyResultsMap only draws a
   // placeholder there), so the app doesn't offer the switch and shows the list.
-  // The pill goes in AppChrome's floating slot, outside the results' ScrollView.
-  // It can't be position: fixed inside it: react-native-web gives every
-  // ScrollView `transform: translateZ(0)`, which makes a fixed child behave like
-  // an absolute one, so the pill scrolled away with the cards.
+  // It sits in the results row next to the count and sort, in the page flow,
+  // so it never covers a listing card.
   const viewSwitcher = (
-    <View style={styles.floatingPill}>
+    <View style={styles.viewSwitch}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t("search.listView")}
         onPress={() => setMobileTabMode("list")}
         style={[
-          styles.floatingPillBtn,
-          mobileTabMode === "list" && styles.floatingPillBtnActive,
+          styles.switchBtn,
+          mobileTabMode === "list" && styles.switchBtnActive,
           webPointer,
         ]}
       >
         <List
-          size={16}
+          size={14}
           color={mobileTabMode === "list" ? colorTokens.onBrand : colorTokens.ink}
           strokeWidth={2.4}
         />
         <Text
           style={[
-            styles.floatingPillText,
-            mobileTabMode === "list" && styles.floatingPillTextActive,
+            styles.switchText,
+            mobileTabMode === "list" && styles.switchTextActive,
           ]}
         >
           {t("search.listView")}
         </Text>
       </Pressable>
 
-      <View style={styles.floatingPillDivider} />
-
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t("search.mapView")}
         onPress={() => setMobileTabMode("map")}
         style={[
-          styles.floatingPillBtn,
-          mobileTabMode === "map" && styles.floatingPillBtnActive,
+          styles.switchBtn,
+          mobileTabMode === "map" && styles.switchBtnActive,
           webPointer,
         ]}
       >
         <MapIcon
-          size={16}
+          size={14}
           color={mobileTabMode === "map" ? colorTokens.onBrand : colorTokens.ink}
           strokeWidth={2.4}
         />
         <Text
           style={[
-            styles.floatingPillText,
-            mobileTabMode === "map" && styles.floatingPillTextActive,
+            styles.switchText,
+            mobileTabMode === "map" && styles.switchTextActive,
           ]}
         >
           {t("search.mapView")}
@@ -387,7 +383,6 @@ export function BrowseScreen({
 
   return (
     <AppChrome
-      floating={isMobile && Platform.OS === "web" ? viewSwitcher : undefined}
       active={mode === "rent" && filters.purpose === "short-let" ? "holiday" : mode || "buy"}
       customTopBar={mobileTopBar}
     >
@@ -423,17 +418,20 @@ export function BrowseScreen({
               })}
             </LiveText>
 
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`${t("search.sort.label")}: ${activeSortLabel}`}
-              onPress={() => setIsSortMenuOpen(true)}
-              style={[styles.mobileSortBtn, webPointer]}
-            >
-              <Text numberOfLines={1} style={styles.mobileSortBtnText}>
-                {activeSortLabel}
-              </Text>
-              <ChevronDown color={colorTokens.muted} size={14} strokeWidth={2.2} />
-            </Pressable>
+            <View style={styles.mobileSubHeaderRight}>
+              {Platform.OS === "web" ? viewSwitcher : null}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${t("search.sort.label")}: ${activeSortLabel}`}
+                onPress={() => setIsSortMenuOpen(true)}
+                style={[styles.mobileSortBtn, webPointer]}
+              >
+                <Text numberOfLines={1} style={styles.mobileSortBtnText}>
+                  {activeSortLabel}
+                </Text>
+                <ChevronDown color={colorTokens.muted} size={14} strokeWidth={2.2} />
+              </Pressable>
+            </View>
           </View>
         ) : (
           /* Desktop Results Count & View Toggle Toolbar */
@@ -751,6 +749,12 @@ const styles = StyleSheet.create({
     borderBottomColor: colorTokens.divider,
     marginBottom: 8,
   },
+  mobileSubHeaderRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexShrink: 1,
+  },
   mobileResultCount: {
     color: colorTokens.muted,
     fontFamily: fonts.semiBold,
@@ -852,45 +856,34 @@ const styles = StyleSheet.create({
     borderColor: colorTokens.divider,
   },
 
-  /* ── Mobile Floating View Switcher Pill (List | Map) ───────────────────── */
-  floatingPill: {
+  /* ── Mobile List | Map switch (in the results row) ─────────────────────── */
+  viewSwitch: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colorTokens.surface,
-    padding: 4,
+    backgroundColor: colorTokens.surfaceSunken,
+    padding: 2,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colorTokens.divider,
-    shadowColor: colorTokens.ink,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.16,
-    shadowRadius: 10,
-    elevation: 6,
   },
-  floatingPillBtn: {
+  switchBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: radius.pill,
   },
-  floatingPillBtnActive: {
+  switchBtnActive: {
     backgroundColor: colorTokens.brand,
   },
-  floatingPillText: {
+  switchText: {
     color: colorTokens.ink,
     fontFamily: fonts.semiBold,
-    fontSize: 13,
+    fontSize: 12,
   },
-  floatingPillTextActive: {
+  switchTextActive: {
     color: colorTokens.onBrand,
-  },
-  floatingPillDivider: {
-    width: 1,
-    height: 16,
-    backgroundColor: colorTokens.divider,
-    marginHorizontal: 2,
   },
 
   /* ── Sort Modal Sheet ──────────────────────────────────────────────────── */
