@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -90,25 +89,17 @@ export function PropertyResultsMap({
 
   return (
     <View style={styles.container}>
-      {Platform.OS === "web" ? (
-        <HomeMapCanvas
-          markers={markers}
-          selectedId={selectedProperty ? String(selectedProperty.id) : null}
-          onSelect={handleSelect}
-          accessibilityLabel={`${activeLocation || "Dhaka"} properties map`}
-          // The map is the whole view here, so one finger pans it. The zoom
-          // buttons move to the bottom because the listing card sits on top.
-          touchDrag
-          zoomControlPosition="bottomright"
-        />
-      ) : (
-        <View style={styles.nativeFallback}>
-          <MapPin size={32} color={colorTokens.brandText} />
-          <Text style={styles.nativeFallbackText}>
-            {activeLocation || "Dhaka"} Properties
-          </Text>
-        </View>
-      )}
+      {/* Leaflet in the page on the website, and the same map in a WebView in the app. */}
+      <HomeMapCanvas
+        markers={markers}
+        selectedId={selectedProperty ? String(selectedProperty.id) : null}
+        onSelect={handleSelect}
+        accessibilityLabel={`${activeLocation || "Dhaka"} properties map`}
+        // The map is the whole view here, so one finger pans it. The zoom
+        // buttons move to the bottom because the listing card sits on top.
+        touchDrag
+        zoomControlPosition="bottomright"
+      />
 
       {/* Selected property peek card */}
       {selectedProperty ? (
@@ -186,17 +177,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     overflow: "hidden",
     position: "relative",
-  },
-  nativeFallback: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-  nativeFallbackText: {
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    color: colorTokens.ink,
   },
   // The card sits at the top of the map: on phones the List/Map pill floats over
   // the bottom of the screen, which is where the card used to be.

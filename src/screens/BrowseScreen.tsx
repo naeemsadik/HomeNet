@@ -2,7 +2,6 @@ import React, { useCallback, useState } from "react";
 import {
   FlatList,
   Modal,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -323,10 +322,9 @@ export function BrowseScreen({
     </SafeAreaView>
   ) : undefined;
 
-  // Phone web only: the app has no map yet (PropertyResultsMap only draws a
-  // placeholder there), so the app doesn't offer the switch and shows the list.
-  // It sits in the results row next to the count and sort, in the page flow,
-  // so it never covers a listing card.
+  // On phones, on the website and in the app (which runs the same map in a
+  // WebView). It sits in the results row next to the count and sort, in the
+  // page flow, so it never covers a listing card.
   const viewSwitcher = (
     <View style={styles.viewSwitch}>
       <Pressable
@@ -419,7 +417,7 @@ export function BrowseScreen({
             </LiveText>
 
             <View style={styles.mobileSubHeaderRight}>
-              {Platform.OS === "web" ? viewSwitcher : null}
+              {viewSwitcher}
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`${t("search.sort.label")}: ${activeSortLabel}`}
@@ -493,7 +491,7 @@ export function BrowseScreen({
         )}
 
         {/* ── Mobile Map View Mode ────────────────────────────────────────── */}
-        {isMobile && Platform.OS === "web" && mobileTabMode === "map" ? (
+        {isMobile && mobileTabMode === "map" ? (
           <View style={styles.mobileMapContainer}>
             <PropertyResultsMap
               properties={sortedResults}
