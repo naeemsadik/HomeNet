@@ -58,6 +58,10 @@ export function Brand({
         <BrandWordmark height={isCompact ? 15 : isLarge ? 19 : 17} tone={tone} />
         {subtitle ? (
           <Text
+            // On a 360-wide phone the line is a few points wider than the room beside the logo; the
+            // app shrinks it slightly to fit instead of cutting it to "property mar…".
+            adjustsFontSizeToFit={Platform.OS !== "web"}
+            minimumFontScale={0.8}
             numberOfLines={1}
             ellipsizeMode="tail"
             style={[

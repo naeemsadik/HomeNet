@@ -62,7 +62,16 @@ export function FitText({
 
   return (
     <View onLayout={onBox} ref={boxRef} style={styles.box}>
-      <Text {...textProps} numberOfLines={1} style={[style, scaled(fitted), styles.visible]}>
+      <Text
+        {...textProps}
+        // Glyph widths do not scale exactly with the font size on Android (the copy is measured at
+        // 100, shown at about 30), so the worked-out size can still run a pixel or two past the edge,
+        // and Android then cuts the line to "Find Your Dream With Tru…". The app lets the system take
+        // the last pixel off instead. It only ever shrinks, from the size worked out here.
+        adjustsFontSizeToFit={Platform.OS !== "web"}
+        numberOfLines={1}
+        style={[style, scaled(fitted), styles.visible]}
+      >
         {children}
       </Text>
       {/* The measuring copy: clipped to nothing so it never shows or scrolls,

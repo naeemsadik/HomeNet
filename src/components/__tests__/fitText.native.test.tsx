@@ -49,6 +49,15 @@ describe("FitText", () => {
     }
   });
 
+  it("lets the app shrink the line the last pixel instead of cutting it to an ellipsis, and only the visible line", () => {
+    const { visible, measuring } = setup();
+    act(() => measuring.props.onLayout(layout(1160)));
+    expect(visible().props.adjustsFontSizeToFit).toBe(true);
+    expect(visible().props.numberOfLines).toBe(1);
+    // The measuring copy must keep its natural width, or the size worked out from it is wrong.
+    expect(measuring.props.adjustsFontSizeToFit).toBeFalsy();
+  });
+
   it("is read once: the measuring copy is hidden from screen readers", () => {
     const { tree, visible } = setup();
     expect(visible().props.accessibilityRole).toBe("header");
