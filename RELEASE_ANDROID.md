@@ -143,7 +143,9 @@ Fixed (each has a test):
   storage. It is now kept on the phone too.
 - **The Android app showed a "Get it on Google Play" badge and a "download the app"
   card inside itself**, plus social icons and about a dozen links that all went to
-  `/about`. It now has a small footer: Privacy, Terms, Delete account, Contact.
+  `/about`. It now uses the phone footer: collapsible sections whose links all open real
+  pages, then Privacy, Terms, Delete account and Contact always on screen (no tap needed),
+  the Facebook, LinkedIn and YouTube links, and the copyright line.
 - **Dependencies were off Expo SDK 57's tested versions** (AsyncStorage a whole major
   version ahead, plus patch drift in Expo and React Native). Aligned.
 - `app.json` had an invalid key (`usesCleartextTraffic`) that `expo doctor` rejected.
