@@ -12,6 +12,7 @@
     "build": "node scripts/generate-sitemap.mjs && expo export --platform web && node -e \"const fs=require('fs');fs.copyFileSync('dist/+not-found.html', 'dist/404.html');fs.rmSync('dist/_sitemap.html',{force:true})\" && node scripts/check-csp.mjs",
     "export:web": "expo export --platform web",
     "sitemap": "node scripts/generate-sitemap.mjs",
+    "map:native": "node scripts/build-native-map.mjs",
     "smoke:api": "node scripts/api-smoke.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
@@ -56,13 +57,14 @@
     "react-native-screens": "~4.26.0",
     "react-native-svg": "15.15.4",
     "react-native-web": "^0.21.2",
+    "react-native-webview": "13.16.1",
     "zod": "^4.6.4",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@react-native-community/cli": "^20.2.0",
     "@react-native/jest-preset": "0.86.3",
-    "@types/google.maps": "^3.66.7",
+    "@types/google.maps": "^3.66.9",
     "@types/jest": "^29.5.14",
     "@types/leaflet": "^1.9.22",
     "@types/leaflet.markercluster": "^1.5.6",

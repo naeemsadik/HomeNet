@@ -287,12 +287,24 @@ describe("BrowseScreen filters on Android", () => {
 });
 
 describe("the List | Map switcher in the app", () => {
-  it("isn't offered, because the app has no map yet", async () => {
+  const mapView = (tree: ReactTestRenderer) =>
+    tree.root.findAll((node) => (node.type as unknown) === "RNCWebView");
+
+  it("is offered as on the website: Map shows the listings map, List brings the cards back", async () => {
     const tree = await mount("buy");
 
-    // The app's map view was only a placeholder, so the app always shows the list.
+    // In the results row, not floating over the cards.
     expect(mockFloating).toBeFalsy();
-    expect(pressableWithText(tree, "Map")).toBeUndefined();
+    expect(mapView(tree)).toHaveLength(0);
+    expect(textOf(tree.root)).toContain("CARD The Villa");
+
+    await act(async () => pressableWithText(tree, "Map")!.props.onPress());
+    expect(mapView(tree)).toHaveLength(1);
+    expect(textOf(tree.root)).not.toContain("CARD The Villa");
+
+    await act(async () => pressableWithText(tree, "List")!.props.onPress());
+    expect(mapView(tree)).toHaveLength(0);
+    expect(textOf(tree.root)).toContain("CARD The Villa");
   });
 });
 

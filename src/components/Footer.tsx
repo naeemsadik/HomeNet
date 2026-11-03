@@ -1,6 +1,5 @@
 import { useResponsive } from "@/hooks/useResponsive";
-import { colors, fonts, webPointer } from "@/theme";
-import { SUPPORT_EMAIL } from "@/content/legal";
+import { fonts, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
 import { Sparkles } from "@/components/icons";
@@ -283,71 +282,14 @@ function WebFooter({ style }: FooterProps) {
 }
 
 /**
- * The footer inside the Android app. The website footer is a marketing page
- * (a "download the app" card and a Google Play badge, social icons, a dozen
- * links that all open /about); inside the app itself none of that makes sense, and
- * a store reviewer reads dead links as broken. This one has what the app needs:
- * the policies, a way to delete the account, and a way to write to us.
+ * The Android app and compact pages get the phone footer: its policy strip keeps Privacy, Terms,
+ * Delete account and Contact on screen without opening a section. The website's full footer
+ * (a Google Play badge, links that open /about) has no place inside the app.
  */
-function AppFooter({ style }: FooterProps) {
-  const { t } = useTranslation();
-  const links = [
-    { label: t("footer.privacyPolicy"), href: "/privacy" },
-    { label: t("footer.termsOfUse"), href: "/terms" },
-    { label: t("footer.deleteAccount"), href: "/delete-account" },
-    { label: t("footer.contactUs"), href: `mailto:${SUPPORT_EMAIL}` },
-  ];
-
-  return (
-    <View style={[appFooterStyles.wrap, style]}>
-      <View style={appFooterStyles.links}>
-        {links.map((link) => (
-          <AppLink key={link.href} href={link.href} style={appFooterStyles.link}>
-            <Text style={appFooterStyles.linkText}>{link.label}</Text>
-          </AppLink>
-        ))}
-      </View>
-      <Text style={appFooterStyles.copy}>{t("footer.copyright")}</Text>
-    </View>
-  );
-}
-
 export function Footer({ style, compact }: FooterProps = {}) {
-  if (Platform.OS !== "web") return <AppFooter style={style} />;
-  return compact ? <MobileFooter style={style} /> : <WebFooter style={style} />;
+  if (Platform.OS !== "web" || compact) return <MobileFooter style={style} />;
+  return <WebFooter style={style} />;
 }
-
-const appFooterStyles = StyleSheet.create({
-  wrap: {
-    paddingVertical: 24,
-    paddingHorizontal: 20,
-    gap: 14,
-    borderTopWidth: 1,
-    borderTopColor: colors.line,
-    backgroundColor: "#FFFFFF",
-  },
-  links: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  link: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  linkText: {
-    color: colors.ink,
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    textDecorationLine: "underline",
-  },
-  copy: {
-    color: colors.muted,
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    lineHeight: 18,
-  },
-});
 
 const styles = StyleSheet.create({
   footer: {

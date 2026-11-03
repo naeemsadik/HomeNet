@@ -30,9 +30,10 @@ function render(element: React.ReactElement): ReactTestRenderer {
 }
 
 describe("the footer inside the Android app", () => {
+  // As it first appears: no section opened.
   const text = textOf(render(<Footer />).toJSON());
 
-  it("has what a store reviewer and a user need: policies, deletion and a way to write to us", () => {
+  it("has what a store reviewer and a user need without opening anything: policies, deletion and a way to write to us", () => {
     expect(text).toContain("Privacy Policy");
     expect(text).toContain("Terms of Use");
     expect(text).toContain("Delete account");
