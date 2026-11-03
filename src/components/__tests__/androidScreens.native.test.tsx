@@ -30,9 +30,13 @@ function render(element: React.ReactElement): ReactTestRenderer {
 }
 
 describe("the footer inside the Android app", () => {
-  const text = textOf(render(<Footer />).toJSON());
-
   it("has what a store reviewer and a user need: policies, deletion and a way to write to us", () => {
+    const tree = render(<Footer />);
+    const homenetBtn = tree.root.findByProps({ accessibilityLabel: "Homenet" });
+    act(() => {
+      homenetBtn.props.onPress();
+    });
+    const text = textOf(tree.toJSON());
     expect(text).toContain("Privacy Policy");
     expect(text).toContain("Terms of Use");
     expect(text).toContain("Delete account");
@@ -40,6 +44,7 @@ describe("the footer inside the Android app", () => {
   });
 
   it("does not point back at the website or the store it was installed from", () => {
+    const text = textOf(render(<Footer />).toJSON());
     expect(text).not.toMatch(/google play/i);
     expect(text).not.toMatch(/get it on/i);
     expect(text).not.toMatch(/download the homenet app/i);

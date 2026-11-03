@@ -313,7 +313,7 @@ function AppFooter({ style }: FooterProps) {
 }
 
 export function Footer({ style, compact }: FooterProps = {}) {
-  if (Platform.OS !== "web") return <AppFooter style={style} />;
+  if (Platform.OS !== "web") return <MobileFooter style={style} />;
   return compact ? <MobileFooter style={style} /> : <WebFooter style={style} />;
 }
 
