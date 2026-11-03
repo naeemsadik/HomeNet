@@ -47,3 +47,25 @@ export const GOOGLE_MAPS_API_KEY: string | null = (() => {
   const key = (process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? "").trim();
   return Platform.OS === "web" && GOOGLE_MAPS_KEY_PATTERN.test(key) ? key : null;
 })();
+
+/**
+ * Seller workspace sections that are built but not ready: AI Insights, Analytics and Payments
+ * show sample content with no real data or payments behind them yet. Until each is ready it is
+ * left out of the seller menu (desktop sidebar and phone drawer), and /seller?tab=<name> opens
+ * the dashboard instead. Their screens stay in the code (SellerInsightsWorkspace,
+ * SellerAnalyticsWorkspace, SellerPaymentsWorkspace).
+ *
+ * To bring one back, set EXPO_PUBLIC_SELLER_INSIGHTS_ENABLED, ..._ANALYTICS_ENABLED or
+ * ..._PAYMENTS_ENABLED to "true" in the build's environment (fixed at build time), or change
+ * its default here once the feature is finished.
+ */
+export const SELLER_SECTIONS = {
+  insights: process.env.EXPO_PUBLIC_SELLER_INSIGHTS_ENABLED === "true",
+  analytics: process.env.EXPO_PUBLIC_SELLER_ANALYTICS_ENABLED === "true",
+  payments: process.env.EXPO_PUBLIC_SELLER_PAYMENTS_ENABLED === "true",
+} as const;
+
+/** False only for a seller section above that is switched off; every other menu item shows. */
+export function isSellerSectionOn(key: string): boolean {
+  return key in SELLER_SECTIONS ? SELLER_SECTIONS[key as keyof typeof SELLER_SECTIONS] : true;
+}

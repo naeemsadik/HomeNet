@@ -42,6 +42,7 @@ import { styles } from "./SellerDashboardScreen.styles";
 
 import { LiveText } from "@/components/LiveText";
 import { useTranslation, formatLocalizedNumber } from "@/i18n";
+import { isSellerSectionOn } from "@/lib/features";
 
 export type { SellerNavKey };
 
@@ -68,10 +69,12 @@ export function SellerDashboardScreen() {
   useEffect(() => {
     if (
       tab &&
-      ["dashboard", "boost", "insights", "analytics", "payments", "help"].includes(tab)
+      ["dashboard", "boost", "insights", "analytics", "payments", "help"].includes(tab) &&
+      // A section that is switched off opens the dashboard, even from an old link.
+      isSellerSectionOn(tab)
     ) {
       setActiveNav(tab as SellerNavKey);
-    } else if (!tab) {
+    } else if (!tab || !isSellerSectionOn(tab)) {
       setActiveNav("dashboard");
     }
   }, [tab]);
