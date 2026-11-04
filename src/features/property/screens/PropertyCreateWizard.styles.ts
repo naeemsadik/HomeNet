@@ -322,7 +322,11 @@ export const styles = StyleSheet.create({
   },
   scrollBody: {
     width: "100%",
-    maxWidth: 860,
+    // These base styles apply at every size; phones override them below. At 860 the
+    // desktop form shrank to a 746px column on every laptop, the category text was cut
+    // off and the subtype chips wrapped. 1200 fills a laptop and still centres the form
+    // on a very wide monitor.
+    maxWidth: 1200,
     alignSelf: "center",
     padding: 24,
     gap: 20,

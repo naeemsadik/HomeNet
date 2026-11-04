@@ -105,8 +105,8 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                 >
                   {cfg.label}
                 </Text>
+                {/* Wraps instead of a 2-line cut: in a narrow card "and living units" was lost to "…". */}
                 <Text
-                  numberOfLines={2}
                   style={[
                     styles.categoryDesc,
                     isSelected && styles.categoryDescSelected,
