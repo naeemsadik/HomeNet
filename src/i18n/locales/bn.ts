@@ -1949,9 +1949,11 @@ export const bn: TranslationSchema = {
     openPositionsTitle: "চলতি নিয়োগ",
     noOpeningsHeading: "বর্তমানে কোনো শূন্যপদ নেই",
     fallbackNotice:
-      "আপনার পছন্দের পদ খুঁজে পাচ্ছেন না? আপনার জীবনবৃত্তান্ত পাঠান careers@homenetbd.com ঠিকানায়।",
+      "আপনার পছন্দের পদ খুঁজে পাচ্ছেন না? আপনার জীবনবৃত্তান্ত পাঠান {{email}} ঠিকানায়।",
     sendApplication: "আবেদন পাঠান",
     emailSubject: "হোমনেট বিডিতে ক্যারিয়ার আবেদন",
+    mailtoFallback:
+      "মেইল ক্লায়েন্ট খোলা যায়নি। অনুগ্রহ করে সরাসরি {{email}} ঠিকানায় আপনার জীবনবৃত্তান্ত পাঠান।",
   },
   changePasswordScreen: {
     title: "পাসওয়ার্ড পরিবর্তন",

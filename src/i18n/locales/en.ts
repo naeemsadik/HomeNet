@@ -1947,9 +1947,11 @@ export const en = {
     openPositionsTitle: "Open Positions",
     noOpeningsHeading: "No Current Openings",
     fallbackNotice:
-      "Don't see your role? Send your resume to careers@homenetbd.com",
+      "Don't see your role? Send your resume to {{email}}",
     sendApplication: "Send Application",
     emailSubject: "Application for Open Role at HomeNet BD",
+    mailtoFallback:
+      "Could not open mail client. Please send your resume directly to {{email}}",
   },
   changePasswordScreen: {
     title: "Change Password",
