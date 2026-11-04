@@ -172,7 +172,7 @@ export function SellerDashboardScreen() {
       iconBg: colors.greenLight,
       iconColor: colors.green,
     },
-  ];
+  ].filter((s) => s.id !== "boosted" || isSellerSectionOn("boost"));
 
   const recentActivities: ActivityItem[] = allMyListings.slice(0, 5).map((p) => ({
     id: p.id,
@@ -216,7 +216,7 @@ export function SellerDashboardScreen() {
               name={sellerName}
               viewsThisWeek={totalViews}
               inquiriesThisWeek={0}
-              onBoostListing={() => setBoostModalVisible(true)}
+              onBoostListing={isSellerSectionOn("boost") ? () => setBoostModalVisible(true) : undefined}
             />
 
             {/* Stats Grid: Responsive */}

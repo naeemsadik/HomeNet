@@ -60,6 +60,7 @@ export const GOOGLE_MAPS_API_KEY: string | null = (() => {
  * its default here once the feature is finished.
  */
 export const SELLER_SECTIONS = {
+  boost: process.env.EXPO_PUBLIC_SELLER_BOOST_ENABLED === "true",
   insights: process.env.EXPO_PUBLIC_SELLER_INSIGHTS_ENABLED === "true",
   analytics: process.env.EXPO_PUBLIC_SELLER_ANALYTICS_ENABLED === "true",
   payments: process.env.EXPO_PUBLIC_SELLER_PAYMENTS_ENABLED === "true",
