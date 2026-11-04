@@ -35,6 +35,7 @@ const STATIC_PAGES = [
   { path: "/instant-valuation", file: "app/instant-valuation.tsx", changefreq: "monthly", priority: "0.8" },
   { path: "/guides", file: "app/guides/index.tsx", changefreq: "weekly", priority: "0.6" },
   { path: "/about", file: "app/about.tsx", changefreq: "yearly", priority: "0.4" },
+  { path: "/careers", file: "app/careers.tsx", changefreq: "monthly", priority: "0.4" },
   { path: "/privacy", file: "app/privacy.tsx", changefreq: "yearly", priority: "0.2" },
   { path: "/terms", file: "app/terms.tsx", changefreq: "yearly", priority: "0.2" },
 ];

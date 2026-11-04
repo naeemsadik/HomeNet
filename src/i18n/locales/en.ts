@@ -1926,6 +1926,31 @@ export const en = {
     helpCopy: "Our Dhaka property team can help you plan the next practical step.",
     contactBtn: "Contact HomeNet",
   },
+  careers: {
+    metaTitle: "Careers | HomeNet BD",
+    metaDescription:
+      "Explore careers at HomeNet BD. Join our team to transform real estate in Bangladesh with zero-brokerage, transparent listings and verified direct owners.",
+    eyebrow: "Careers at HomeNet",
+    headline: "Build the Future of Real Estate with HomeNet",
+    subheading:
+      "We are building Bangladesh's transparent, zero-brokerage property marketplace.",
+    valuesTitle: "Why Build with Us",
+    cultureTitle: "Culture First",
+    cultureDesc:
+      "Collaborative, mission-driven teams working with open communication, zero politics, and high empathy for home seekers.",
+    autonomyTitle: "High Autonomy",
+    autonomyDesc:
+      "Take ownership of high-impact challenges from day one. Move fast, experiment boldly, and build real value for users.",
+    trustTitle: "User Trust",
+    trustDesc:
+      "We obsess over listing transparency and data accuracy to protect Bangladeshi families making life-changing moves.",
+    openPositionsTitle: "Open Positions",
+    noOpeningsHeading: "No Current Openings",
+    fallbackNotice:
+      "Don't see your role? Send your resume to careers@homenetbd.com",
+    sendApplication: "Send Application",
+    emailSubject: "Application for Open Role at HomeNet BD",
+  },
   changePasswordScreen: {
     title: "Change Password",
     subtitle: "Enter your current password and your new password",
