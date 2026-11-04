@@ -27,6 +27,7 @@ export { default as BedDouble } from "lucide-react-native/icons/bed-double";
 export { default as Bell } from "lucide-react-native/icons/bell";
 export { default as Bookmark } from "lucide-react-native/icons/bookmark";
 export { default as BookOpen } from "lucide-react-native/icons/book-open";
+export { default as Briefcase } from "lucide-react-native/icons/briefcase";
 export { default as Building } from "lucide-react-native/icons/building";
 export { default as Building2 } from "lucide-react-native/icons/building-2";
 export { default as Calculator } from "lucide-react-native/icons/calculator";

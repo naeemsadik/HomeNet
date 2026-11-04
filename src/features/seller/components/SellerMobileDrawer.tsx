@@ -1,4 +1,4 @@
-import { Store, X } from "@/components/icons";
+import { ChevronRight, Store, X } from "@/components/icons";
 import {
   Modal,
   Pressable,
@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { AppLink } from "@/components/ui";
 import { Brand } from "@/components/Brand";
+import { DrawerLanguageDropdown } from "@/components/DrawerLanguageDropdown";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import type { SellerNavKey } from "./SellerShell";
@@ -39,6 +40,44 @@ export function SellerMobileDrawer({
 }: SellerMobileDrawerProps) {
   const { t } = useTranslation();
 
+  function renderItem(item: SellerNavItem) {
+    const IconComp = item.icon;
+    const isActive = activeNav === item.key;
+    const iconColor = item.danger
+      ? colorTokens.errorText
+      : isActive
+        ? colorTokens.brandText
+        : colorTokens.muted;
+
+    return (
+      <AppLink
+        href={item.href || "#"}
+        key={item.key}
+        onPress={() => {
+          onSelectNav(item.key);
+          onClose();
+        }}
+        style={[styles.navItem, isActive && styles.navItemActive]}
+      >
+        <IconComp color={iconColor} size={20} />
+        <Text
+          style={[
+            styles.navItemText,
+            isActive && styles.navItemTextActive,
+            item.danger && styles.navItemTextDanger,
+          ]}
+        >
+          {item.label}
+        </Text>
+        {item.badgeCount ? (
+          <View style={styles.badgeCountPill}>
+            <Text style={styles.badgeCountText}>{item.badgeCount}</Text>
+          </View>
+        ) : null}
+      </AppLink>
+    );
+  }
+
   return (
     <Modal
       animationType="fade"
@@ -65,7 +104,7 @@ export function SellerMobileDrawer({
               onPress={onClose}
               style={[styles.closeBtn, webPointer]}
             >
-              <X color="#5C6B66" size={18} />
+              <X color={colorTokens.muted} size={18} />
             </Pressable>
           </View>
 
@@ -85,63 +124,28 @@ export function SellerMobileDrawer({
           >
             <Store color={colorTokens.brandText} size={20} />
             <Text style={styles.switchToBuyerText}>{t("seller.toggleView.label")}</Text>
+            <ChevronRight color={colorTokens.muted} size={18} />
           </AppLink>
 
           {/* Navigation Links List */}
           <ScrollView
             contentContainerStyle={styles.navScroll}
             showsVerticalScrollIndicator={false}
+            style={styles.navList}
           >
-            {items.map((item) => {
-              const IconComp = item.icon;
-              const isActive = activeNav === item.key;
-
-              return (
-                <AppLink
-                  href={item.href || "#"}
-                  key={item.key}
-                  onPress={() => {
-                    onSelectNav(item.key);
-                    onClose();
-                  }}
-                  style={[
-                    styles.navItem,
-                    isActive && styles.navItemActive,
-                    item.danger && styles.navItemDanger,
-                  ]}
-                >
-                  <IconComp
-                    color={
-                      item.danger
-                        ? "#D4183D"
-                        : isActive
-                        ? "#04cf92"
-                        : "#5C6B66"
-                    }
-                    size={20}
-                  />
-                  <Text
-                    style={[
-                      styles.navItemText,
-                      isActive && styles.navItemTextActive,
-                      item.danger && styles.navItemTextDanger,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
-                  {item.badgeCount ? (
-                    <View style={styles.badgeCountPill}>
-                      <Text style={styles.badgeCountText}>{item.badgeCount}</Text>
-                    </View>
-                  ) : null}
-                </AppLink>
-              );
-            })}
+            {items.filter((item) => !item.danger).map(renderItem)}
           </ScrollView>
+
+          {/* Account actions, pinned to the bottom and set apart from the pages above. */}
+          <View style={styles.drawerFooter}>
+            <DrawerLanguageDropdown />
+            {items.filter((item) => item.danger).map(renderItem)}
+          </View>
         </View>
       </View>
     </Modal>
   );
+
 }
 
 const styles = StyleSheet.create({
@@ -155,14 +159,15 @@ const styles = StyleSheet.create({
     inset: 0,
   },
   drawerCard: {
+    flexDirection: "column",
     width: 280,
     maxWidth: "85%",
     height: "100%",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     paddingTop: 16,
     paddingBottom: 24,
     paddingHorizontal: 16,
-    shadowColor: "#0B1A17",
+    shadowColor: colorTokens.ink,
     shadowOffset: { width: 4, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 16,
@@ -174,32 +179,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingBottom: 12,
   },
-  brandRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  brandIconBg: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#04cf92",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  brandText: {
-    fontSize: 17,
-    fontFamily: fonts.extraBold,
-    color: "#0B1A17",
-  },
-  brandTextAccent: {
-    color: "#04cf92",
-  },
   closeBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: "#F4F6F5",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colorTokens.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -207,16 +191,27 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
   },
   sellerRolePill: {
-    backgroundColor: "#E8EEFC",
+    // Blue is kept for the verified badge (docs/COLOR_SYSTEM.md); this is a plain label.
+    backgroundColor: colorTokens.surfaceSunken,
     borderRadius: 999,
     paddingVertical: 5,
     paddingHorizontal: 12,
     alignSelf: "flex-start",
   },
   sellerRoleText: {
-    color: "#2251D6",
+    color: colorTokens.muted,
     fontSize: 12,
     fontFamily: fonts.semiBold,
+  },
+  navList: {
+    flex: 1,
+  },
+  drawerFooter: {
+    marginTop: 12,
+    paddingTop: 12,
+    gap: 4,
+    borderTopWidth: 1,
+    borderTopColor: colorTokens.divider,
   },
   navScroll: {
     gap: 2,
@@ -224,24 +219,25 @@ const styles = StyleSheet.create({
   },
   switchToBuyer: {
     minHeight: 48,
-    marginHorizontal: 16,
     marginBottom: 8,
     paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     borderRadius: 12,
-    backgroundColor: colorTokens.brandSurface,
+    // An action, not the current page: only the current page is mint.
+    backgroundColor: colorTokens.surface,
     borderWidth: 1,
-    borderColor: colorTokens.brandBorder,
+    borderColor: colorTokens.border,
   },
   switchToBuyerText: {
+    flex: 1,
     fontFamily: fonts.semiBold,
     fontSize: 15,
-    color: colorTokens.brandText,
+    color: colorTokens.ink,
   },
   navItem: {
-    minHeight: 42,
+    minHeight: 44,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -250,26 +246,24 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   navItemActive: {
-    backgroundColor: "#E6FAF4",
-  },
-  navItemDanger: {
-    marginTop: 8,
+    backgroundColor: colorTokens.brandSurface,
   },
   navItemText: {
     flex: 1,
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#5C6B66",
+    color: colorTokens.muted,
   },
   navItemTextActive: {
-    color: "#04cf92",
+    // Brand green fails contrast as text (2:1); brandText is 6.3:1.
+    color: colorTokens.brandText,
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
-    color: "#D4183D",
+    color: colorTokens.errorText,
   },
   badgeCountPill: {
-    backgroundColor: "#F4823A",
+    backgroundColor: colorTokens.notification,
     width: 20,
     height: 20,
     borderRadius: 10,

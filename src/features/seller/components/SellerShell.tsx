@@ -31,6 +31,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { confirmAction } from "@/lib/alert";
 import { colors, colorTokens, fonts } from "@/theme";
 import { useTranslation } from "@/i18n";
+import { isSellerSectionOn } from "@/lib/features";
 
 export type SellerNavKey =
   | "dashboard"
@@ -73,7 +74,7 @@ export function SellerShell({
   const logout = useAuthStore((s) => s.logout);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
-  const sidebarNavItems: {
+  const allNavItems: {
     key: SellerNavKey;
     label: string;
     icon: any;
@@ -92,6 +93,8 @@ export function SellerShell({
     { key: "help", label: t("dashboard.tabs.helpCenter"), icon: CircleHelp, href: "/seller?tab=help" },
     { key: "logout", label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
   ];
+  // AI Insights, Analytics and Payments stay out of the menu until they are ready (src/lib/features.ts).
+  const sidebarNavItems = allNavItems.filter((item) => isSellerSectionOn(item.key));
 
   const handleLogout = async () => {
     const confirmed = await confirmAction(

@@ -79,13 +79,7 @@ const SECTIONS: FooterSection[] = [
   {
     key: "homenet",
     title: "footer.homenet",
-    links: [
-      { label: "footer.aboutHomenet", href: "/about" },
-      { label: "footer.contactUs", href: `mailto:${SUPPORT_EMAIL}` },
-      { label: "footer.privacyPolicy", href: "/privacy" },
-      { label: "footer.termsOfUse", href: "/terms" },
-      { label: "footer.deleteAccount", href: "/delete-account" },
-    ],
+    links: [{ label: "footer.aboutHomenet", href: "/about" }],
   },
   {
     key: "professional",
@@ -96,6 +90,20 @@ const SECTIONS: FooterSection[] = [
     ],
   },
 ];
+
+/**
+ * Always on screen, under the sections: the policies, account deletion and a way to write to us.
+ * A store reviewer (and anyone else) finds them without opening anything.
+ */
+const LEGAL_LINKS: { label: TranslationKey; href: string }[] = [
+  { label: "footer.privacyPolicy", href: "/privacy" },
+  { label: "footer.termsOfUse", href: "/terms" },
+  { label: "footer.deleteAccount", href: "/delete-account" },
+  { label: "footer.contactUs", href: `mailto:${SUPPORT_EMAIL}` },
+];
+
+/** A divider and the space after it: each link starts with one, and the row starts this far left so the first in every row is cut off. */
+const LEGAL_DIVIDER_SPACE = 15;
 
 const Section = memo(function Section({
   section,
@@ -137,8 +145,9 @@ const Section = memo(function Section({
 });
 
 /**
- * The phone footer: collapsed sections that open on tap, followed by targeted social media links
- * (Facebook, LinkedIn, YouTube) and the copyright notice. The policy links sit once, in the Homenet section.
+ * The phone footer, on the website and in the Android app: collapsed sections that open on tap,
+ * then a white strip with the policy links (always visible, each once), the social links
+ * (Facebook, LinkedIn, YouTube) and the copyright notice.
  */
 export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
   const { t } = useTranslation();
@@ -157,8 +166,23 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
         {SECTIONS.map((section) => (
           <Section key={section.key} onToggle={toggle} open={openKey === section.key} section={section} />
         ))}
+      </View>
 
-        {/* Isolated Social Media Link Bar */}
+      <View style={styles.legal}>
+        {/* Clips the divider in front of the first link on each row. */}
+        <View style={styles.legalClip}>
+          <View style={styles.legalLinks}>
+            {LEGAL_LINKS.map((link) => (
+              <View key={link.href} style={styles.legalItem}>
+                <View style={styles.legalDivider} />
+                <AppLink href={link.href} style={styles.legalLink}>
+                  <Text style={styles.legalLinkText}>{t(link.label)}</Text>
+                </AppLink>
+              </View>
+            ))}
+          </View>
+        </View>
+
         <View style={styles.socialStrip}>
           {SOCIAL_LINKS.map(({ name, url, icon: Icon }) => (
             <Pressable
@@ -173,7 +197,7 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
             >
               {({ pressed, hovered }: any) => (
                 <Icon
-                  color={pressed || hovered ? colorTokens.brandText : colorTokens.muted}
+                  color={pressed || hovered ? colorTokens.brandText : colorTokens.ink}
                   size={20}
                   strokeWidth={2}
                 />
@@ -182,10 +206,7 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
           ))}
         </View>
 
-        {/* Copyright notice */}
-        <Text style={styles.copyrightText}>
-          {t("footer.copyright")}
-        </Text>
+        <Text style={styles.copyrightText}>{t("footer.copyright")}</Text>
       </View>
     </View>
   );
@@ -196,13 +217,13 @@ const styles = StyleSheet.create({
   root: {
     width: "100%",
     alignSelf: "stretch",
-    backgroundColor: colorTokens.surfaceSunken,
+    backgroundColor: colorTokens.surface,
   },
   sections: {
     backgroundColor: colorTokens.surfaceSunken,
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 24,
+    paddingBottom: 16,
     borderTopWidth: 1,
     borderTopColor: colorTokens.divider,
   },
@@ -236,25 +257,57 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colorTokens.ink,
   },
+  legal: {
+    backgroundColor: colorTokens.surface,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 28,
+    gap: 10,
+  },
+  legalClip: {
+    overflow: "hidden",
+  },
+  legalLinks: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginLeft: -LEGAL_DIVIDER_SPACE,
+  },
+  legalItem: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  legalDivider: {
+    width: 1,
+    height: 18,
+    marginRight: LEGAL_DIVIDER_SPACE - 1,
+    backgroundColor: colorTokens.divider,
+  },
+  legalLink: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingRight: LEGAL_DIVIDER_SPACE - 1,
+  },
+  legalLinkText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colorTokens.ink,
+  },
+  // Each icon has 10 of padding to make a 40-point target; the row starts 10 left so the icons line up with the text.
   socialStrip: {
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
-    gap: 20,
-    marginTop: 12,
-    marginBottom: 8,
+    gap: 12,
+    marginLeft: -10,
   },
   socialBtn: {
-    padding: 6,
+    padding: 10,
     alignItems: "center",
     justifyContent: "center",
   },
   copyrightText: {
     fontFamily: fonts.regular,
-    fontSize: 11,
-    lineHeight: 16,
+    fontSize: 12,
+    lineHeight: 17,
     color: colorTokens.muted,
-    textAlign: "center",
-    marginBottom: 8,
   },
 });

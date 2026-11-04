@@ -33,12 +33,14 @@ const connectSrc = csp.split(";").map((d) => d.trim()).find((d) => d.startsWith(
 
 function builtApiBaseUrl() {
   if (process.env.EXPO_PUBLIC_API_BASE_URL) return process.env.EXPO_PUBLIC_API_BASE_URL;
-  try {
-    // Expo reads .env at build time; real environment variables win, as here.
-    const line = readFileSync(".env", "utf8").split(String.fromCharCode(10)).map((l) => l.trim()).find((l) => l.startsWith("EXPO_PUBLIC_API_BASE_URL="));
-    const value = line?.slice(line.indexOf("=") + 1).trim().replace(/^["']|["']$/g, "");
-    if (value) return value;
-  } catch {}
+  // Expo loads .env.local first (higher priority than .env), so check it first.
+  for (const envFile of [".env.local", ".env"]) {
+    try {
+      const line = readFileSync(envFile, "utf8").split(String.fromCharCode(10)).map((l) => l.trim()).find((l) => l.startsWith("EXPO_PUBLIC_API_BASE_URL="));
+      const value = line?.slice(line.indexOf("=") + 1).trim().replace(/^["']|["']$/g, "");
+      if (value) return value;
+    } catch {}
+  }
   const source = readFileSync("src/services/apiClient.ts", "utf8");
   return source.match(/PRODUCTION_API_BASE_URL\s*=\s*"([^"]+)"/)?.[1];
 }

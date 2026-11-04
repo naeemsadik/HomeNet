@@ -435,41 +435,67 @@ export function PropertyCreateWizard() {
             {/* 5-Step Progress Stepper Bar */}
           <View style={styles.stepperContainer}>
             <View style={styles.stepperRow}>
+              {/* Five equal slots, each circle at the centre of its own, so the steps sit evenly
+                  across the page however long the labels are (the Bangla ones are much longer).
+                  The line between two circles is drawn in two halves, one in each slot. */}
               {steps.map((st, idx) => {
                 const isDone = st.num < store.currentStep;
                 const isCurrent = st.num === store.currentStep;
 
                 return (
-                  <View key={st.num} style={styles.stepItemWrap}>
-                    <View style={styles.stepCircleWrap}>
-                      <Pressable
-                        onPress={() => {
-                          if (st.num < store.currentStep) store.setCurrentStep(st.num as 1 | 2 | 3 | 4 | 5);
-                        }}
+                  <View key={st.num} style={styles.stepSlot}>
+                    {idx > 0 ? (
+                      <View
                         style={[
-                          styles.stepCircle,
-                          isDone && styles.stepCircleDone,
-                          isCurrent && styles.stepCircleCurrent,
-                          webPointer,
+                          styles.stepConnector,
+                          styles.stepConnectorBefore,
+                          st.num <= store.currentStep && styles.stepConnectorLineDone,
                         ]}
-                      >
-                        {isDone ? (
-                          <Check color={colorTokens.onBrand} size={16} />
-                        ) : (
-                          <Text style={[styles.stepCircleText, isCurrent && styles.stepCircleTextCurrent]}>
-                            {st.num}
-                          </Text>
-                        )}
-                      </Pressable>
+                      />
+                    ) : null}
+                    {idx < steps.length - 1 ? (
+                      <View
+                        style={[
+                          styles.stepConnector,
+                          styles.stepConnectorAfter,
+                          isDone && styles.stepConnectorLineDone,
+                        ]}
+                      />
+                    ) : null}
 
-                      <Text style={[styles.stepLabelText, (isDone || isCurrent) && styles.stepLabelTextActive]}>
-                        {st.title}
-                      </Text>
-                    </View>
+                    {/* Only a finished step can be pressed: it takes you back to it. */}
+                    <Pressable
+                      accessibilityLabel={st.title}
+                      accessibilityRole="button"
+                      accessibilityState={{ disabled: !isDone, selected: isCurrent }}
+                      disabled={!isDone}
+                      onPress={() => store.setCurrentStep(st.num as 1 | 2 | 3 | 4 | 5)}
+                      style={[
+                        styles.stepCircle,
+                        isDone && styles.stepCircleDone,
+                        isCurrent && styles.stepCircleCurrent,
+                        isDone && webPointer,
+                      ]}
+                    >
+                      {isDone ? (
+                        <Check color={colorTokens.onBrand} size={16} />
+                      ) : (
+                        <Text style={[styles.stepCircleText, isCurrent && styles.stepCircleTextCurrent]}>
+                          {st.num}
+                        </Text>
+                      )}
+                    </Pressable>
 
-                    {idx < steps.length - 1 && (
-                      <View style={[styles.stepConnectorLine, st.num < store.currentStep && styles.stepConnectorLineDone]} />
-                    )}
+                    <Text
+                      numberOfLines={2}
+                      style={[
+                        styles.stepLabelText,
+                        isPhone && styles.stepLabelTextPhone,
+                        (isDone || isCurrent) && styles.stepLabelTextActive,
+                      ]}
+                    >
+                      {st.title}
+                    </Text>
                   </View>
                 );
               })}

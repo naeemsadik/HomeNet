@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
-import { Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { colorTokens, fonts } from "@/theme";
 import { BrandMark, BrandWordmark } from "./BrandArt";
+import { FitText } from "./FitText";
 import { AppLink } from "./ui";
 
 /**
@@ -49,38 +50,46 @@ export function Brand({
       href={href as any}
       accessibilityLabel="HomeNet home"
       onPress={onPress}
-      style={[styles.link, isCompact && styles.linkCompact]}
+      style={[styles.link, isCompact && styles.linkCompact, subtitle ? styles.linkFill : null]}
     >
       <View style={styles.mark}>
         <BrandMark size={isCompact ? 30 : isLarge ? 40 : 36} tone={tone} />
       </View>
-      <View ref={brandRef} style={styles.textWrap}>
+      <View ref={brandRef} style={[styles.textWrap, subtitle ? styles.textWrapFill : null]}>
         <BrandWordmark height={isCompact ? 15 : isLarge ? 19 : 17} tone={tone} />
         {subtitle ? (
-          <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={[
-              styles.subtitle,
-              isLight && styles.subtitleLight,
-            ]}
+          // On a phone the line can be wider than the room beside the logo, and it was cut to
+          // "property mark…". It shrinks to fit (down to 85%), and where even that is too wide
+          // (signed out, the Sign in button takes the room) it wraps onto a second line, which the
+          // bar has height for. Website and app alike; with room to spare it keeps its own size.
+          <FitText
+            maxFontSize={SUBTITLE_SIZE}
+            minFontSize={SUBTITLE_SIZE * 0.85}
+            wrapWhenTooLong
+            style={[styles.subtitle, isLight && styles.subtitleLight]}
           >
             {subtitle}
-          </Text>
+          </FitText>
         ) : null}
       </View>
     </AppLink>
   );
 }
 
+const SUBTITLE_SIZE = 10.5;
+
 const styles = StyleSheet.create({
   link: { flexDirection: "row", alignItems: "center", gap: 9, flexShrink: 1, minWidth: 0, overflow: "hidden" },
   linkCompact: { gap: 6, flexShrink: 1, minWidth: 0, overflow: "hidden" },
   mark: { flexShrink: 0 },
   textWrap: { justifyContent: "center", gap: 2, flexShrink: 1, minWidth: 0, overflow: "hidden" },
+  // With a tagline, the brand takes the room up to the bar's right-hand buttons, so the tagline's
+  // width comes from the bar, not from the text (FitText sizes the text to that width).
+  linkFill: { flexGrow: 1 },
+  textWrapFill: { flexGrow: 1 },
   subtitle: {
     fontFamily: fonts.medium,
-    fontSize: 10.5,
+    fontSize: SUBTITLE_SIZE,
     lineHeight: 13,
     color: colorTokens.muted,
     letterSpacing: -0.1,

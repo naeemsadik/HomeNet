@@ -29,7 +29,7 @@ describe("MobileFooter", () => {
     });
   }
 
-  it("shows the social links and the copyright notice, and no dead-end legal strip", async () => {
+  it("shows the social links and the copyright notice, and no links to pages we do not have", async () => {
     const root = createRoot(container);
     await act(async () => {
       root.render(<MobileFooter />);
@@ -39,10 +39,33 @@ describe("MobileFooter", () => {
       expect(container.querySelector(`[aria-label="${name}"]`)).toBeTruthy();
     }
     expect(container.textContent).toContain("HomeNet Group Limited");
-    // These four used to all open /about.
+    // These used to all open /about.
     for (const word of ["Site map", "Safety and Security", "Accessibility"]) {
       expect(container.textContent).not.toContain(word);
     }
+
+    await act(async () => root.unmount());
+  });
+
+  it("keeps the policies, account deletion and contact on screen with every section closed, each once", async () => {
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<MobileFooter />);
+    });
+
+    const linkTo = (href: string) => container.querySelectorAll(`a[href="${href}"]`);
+    // Contact is a mailto: link, which AppLink opens itself rather than rendering as an <a>.
+    const contactLinks = () =>
+      Array.from(container.querySelectorAll('[role="link"]')).filter((el) => el.textContent === "Contact us");
+    const policyLinks = ["/privacy", "/terms", "/delete-account"];
+    for (const href of policyLinks) expect(linkTo(href)).toHaveLength(1);
+    expect(contactLinks()).toHaveLength(1);
+
+    // Opening the Homenet section does not list them a second time.
+    await open("Homenet");
+    expect(linkTo("/about")).toHaveLength(1);
+    for (const href of policyLinks) expect(linkTo(href)).toHaveLength(1);
+    expect(contactLinks()).toHaveLength(1);
 
     await act(async () => root.unmount());
   });

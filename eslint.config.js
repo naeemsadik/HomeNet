@@ -6,7 +6,7 @@ const unusedImports = require("eslint-plugin-unused-imports");
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: [".agents/*", ".claude/*", "dist/*", ".expo/*", "android/*", "ios/*", "web-build/*"],
+    ignores: [".agents/*", ".claude/*", "dist/*", ".expo/*", "android/*", "ios/*", "web-build/*", "**/*.generated.ts"],
   },
   {
     plugins: { "unused-imports": unusedImports },
@@ -57,7 +57,7 @@ module.exports = defineConfig([
   },
   {
     // Jest globals, and require() inside jest.isolateModules to reload a module.
-    files: ["jest.setup.js", "**/__tests__/**"],
+    files: ["jest.setup.js", "jest/**", "**/__tests__/**"],
     languageOptions: { globals: { jest: "readonly" } },
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
