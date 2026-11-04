@@ -166,7 +166,7 @@ Hidden or removed so a reviewer does not read it as broken:
 
 - Google and Facebook buttons: Android app only, until the backend supports them.
 - Phone and agency boxes on the profile pages: they showed made-up values
-  ("+880 1700-000000", "Homenet Verified Partner") and **Save never sent them**.
+  ("+880 1601-899318", "Homenet Verified Partner") and **Save never sent them**.
 
 ## Decisions for you
 
