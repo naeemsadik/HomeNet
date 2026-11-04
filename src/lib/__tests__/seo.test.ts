@@ -34,6 +34,7 @@ describe("isPrivatePath", () => {
     "/guides/namzari-mutation-bangladesh-guide",
     "/property/abc-123",
     "/about",
+    "/careers",
     "/privacy",
     "/terms",
     "/delete-account", // Google Play requires this one to be public

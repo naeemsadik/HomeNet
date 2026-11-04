@@ -106,7 +106,7 @@ function WebFooter({ style }: FooterProps) {
     { label: "Tech blog & AI models", href: "/about" },
     { label: "Press centre", href: "/about" },
     { label: "Investor relations", href: "/about" },
-    { label: "Careers", href: "/about" },
+    { label: "Careers", href: "/careers" },
     { label: "Contact us", href: "/about" },
   ];
 
