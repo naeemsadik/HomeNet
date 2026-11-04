@@ -112,6 +112,34 @@ export async function toggleSave(
   return unwrap(data);
 }
 
+export async function revealContact(id: string): Promise<{
+  contact_revealed: boolean;
+  contact_channels: {
+    allows_call: boolean;
+    allows_whatsapp: boolean;
+    masked_phone?: string;
+  };
+}> {
+  const { data } = await apiClient.post<
+    ApiResponse<{
+      contact_revealed: boolean;
+      contact_channels: {
+        allows_call: boolean;
+        allows_whatsapp: boolean;
+        masked_phone?: string;
+      };
+    }> | {
+      contact_revealed: boolean;
+      contact_channels: {
+        allows_call: boolean;
+        allows_whatsapp: boolean;
+        masked_phone?: string;
+      };
+    }
+  >(`${BASE_PATH}/${id}/reveal-contact`);
+  return unwrap(data);
+}
+
 export async function getMyAccommodations(): Promise<StudentAccommodationCardItem[]> {
   const { data } = await apiClient.get<
     ApiResponse<StudentAccommodationCardItem[]> | StudentAccommodationCardItem[]

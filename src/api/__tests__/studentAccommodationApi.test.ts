@@ -7,6 +7,7 @@ import {
   getAccommodations,
   getMyAccommodations,
   publishAccommodation,
+  revealContact,
   toggleSave,
   updateDraft,
   uploadMedia,
@@ -276,6 +277,29 @@ describe("studentAccommodationApi", () => {
         "/v1/student-accommodation/acc-1/save",
       );
       expect(result).toEqual({ is_saved: true });
+    });
+  });
+
+  describe("revealContact", () => {
+    it("calls POST /v1/student-accommodation/:id/reveal-contact", async () => {
+      const mockRevealData = {
+        contact_revealed: true,
+        contact_channels: {
+          allows_call: true,
+          allows_whatsapp: true,
+          masked_phone: "+88017****5678",
+        },
+      };
+
+      mockPost.mockResolvedValueOnce({
+        data: { success: true, data: mockRevealData },
+      });
+
+      const result = await revealContact("acc-1");
+      expect(mockPost).toHaveBeenCalledWith(
+        "/v1/student-accommodation/acc-1/reveal-contact",
+      );
+      expect(result).toEqual(mockRevealData);
     });
   });
 
