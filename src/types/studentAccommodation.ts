@@ -102,6 +102,7 @@ export interface StudentAccommodationSearchParams {
   max_rent?: number;
   has_lift?: boolean;
   has_meal?: boolean;
+  has_wifi?: boolean;
   page?: number;
   limit?: number;
   cursor?: string;
