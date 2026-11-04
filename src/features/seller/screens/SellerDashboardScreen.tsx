@@ -172,7 +172,7 @@ export function SellerDashboardScreen() {
       iconBg: colors.greenLight,
       iconColor: colors.green,
     },
-  ];
+  ].filter((s) => s.id !== "boosted" || isSellerSectionOn("boost"));
 
   const recentActivities: ActivityItem[] = allMyListings.slice(0, 5).map((p) => ({
     id: p.id,
