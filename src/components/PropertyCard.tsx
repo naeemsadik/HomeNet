@@ -31,6 +31,7 @@ import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { useTranslation, formatLocalizedPrice, isPriceOnRequest, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { isHolidayStayType } from "@/features/property/utils/listingType";
+import { AdminListingActions } from "@/features/property/components/AdminListingActions";
 import { useSavedStore } from "@/stores/savedStore";
 
 export type PropertyCardVariant = "standard" | "feature";
@@ -55,6 +56,13 @@ export interface PropertyCardProps {
   imageHeight?: number;
   width?: number;
   style?: StyleProp<ViewStyle>;
+  /**
+   * Marks a card as illustration rather than a real listing — the landing
+   * page's marketing preview, for instance. Such a card is backed by static
+   * sample data, so moderation controls must not appear on it: acting on one
+   * would send a request for an id that does not exist.
+   */
+  decorative?: boolean;
 }
 
 function readSpecs(property: Property, lang: SupportedLanguage) {
@@ -84,6 +92,7 @@ function PropertyCardComponent({
   imageHeight,
   width,
   style,
+  decorative = false,
 }: PropertyCardProps) {
   const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
@@ -168,6 +177,10 @@ function PropertyCardComponent({
       />
     </Pressable>
   );
+
+  // Renders nothing unless staff have armed moderation and hold
+  // `moderate_listing`; the card's geometry is identical either way.
+  const adminActions = decorative ? null : <AdminListingActions property={property} />;
 
   const placeholder = (
     <View style={styles.placeholder}>
@@ -405,6 +418,8 @@ function PropertyCardComponent({
             />
           </Pressable>
 
+          {adminActions}
+
           {/* 4. In-Card Bottom Action Row (3-column action footer) */}
           <View style={styles.actionFooter}>
             <Pressable
@@ -514,6 +529,7 @@ function PropertyCardComponent({
           </View>
         </Pressable>
         {saveButton}
+        {adminActions}
       </View>
     );
   }
@@ -589,6 +605,7 @@ function PropertyCardComponent({
         </View>
       </Pressable>
       {saveButton}
+      {adminActions}
     </View>
   );
 }

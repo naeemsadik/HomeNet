@@ -1,6 +1,8 @@
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, colorTokens, layout, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
+import { AdminContextBar, ADMIN_BAR_HEIGHT } from "@/components/AdminContextBar";
+import { hasAnyAdminPermission } from "@/lib/permissions";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
   Bell,
@@ -818,6 +820,19 @@ export function AppChrome({
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // Staff get one extra strip under the top bar. Signed-out visitors and the
+  // static export get zero, so the page geometry is unchanged for them.
+  const showAdminBar = useAuthStore(
+    (s) => s.hydrated && s.user !== null && hasAnyAdminPermission(s.userRoles),
+  );
+  const adminBarHeight = showAdminBar ? ADMIN_BAR_HEIGHT : 0;
+  const barOffset =
+    (isMobile
+      ? layout.navHeightPhone
+      : isTablet
+      ? layout.navHeightTablet
+      : layout.navHeight) + insets.top;
+
   const isCrystal = Boolean(bleed) && !isScrolled;
 
   useEffect(() => {
@@ -845,12 +860,7 @@ export function AppChrome({
         // (edge-to-edge on Android), so the page must start below both.
         // A custom bar (the phone search screen's) sits in the flow instead.
         !bleed && !customTopBar && {
-          paddingTop:
-            (isMobile
-              ? layout.navHeightPhone
-              : isTablet
-              ? layout.navHeightTablet
-              : layout.navHeight) + insets.top,
+          paddingTop: barOffset + adminBarHeight,
         },
       ]}
       keyboardShouldPersistTaps="handled"
@@ -885,6 +895,11 @@ export function AppChrome({
         {customTopBar ?? (
           <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} isCrystal={isCrystal} />
         )}
+        {showAdminBar ? (
+          <View style={[styles.adminBarSafe, { top: barOffset }]}>
+            <AdminContextBar />
+          </View>
+        ) : null}
         {floating ? (
           <View style={styles.scrollArea}>
             {scrollView}

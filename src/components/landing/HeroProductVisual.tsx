@@ -77,10 +77,12 @@ export function HeroProductVisual() {
             {/* Two Live Property Cards */}
             <View style={styles.cardsRow}>
               <View style={styles.cardCol}>
-                <PropertyCard property={p1} onPress={handleOpenApp} />
+                <PropertyCard
+          decorative property={p1} onPress={handleOpenApp} />
               </View>
               <View style={styles.cardCol}>
-                <PropertyCard property={p2} onPress={handleOpenApp} />
+                <PropertyCard
+          decorative property={p2} onPress={handleOpenApp} />
               </View>
             </View>
           </BrowserFrame>

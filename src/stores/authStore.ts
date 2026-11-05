@@ -8,7 +8,7 @@ import {
   logoutUser,
   registerUser,
 } from "@/services/authApi";
-import { getUserRoles } from "@/services/roleApi";
+import { getRoles, getUserRoles } from "@/services/roleApi";
 import { notifyUnauthorized, toApiError } from "@/services/apiClient";
 import { useSavedStore } from "@/stores/savedStore";
 import { withAvatarVersion } from "@/lib/avatarCache";
@@ -19,6 +19,61 @@ import type {
   RegisterDto,
   UserRole,
 } from "@/types/api";
+
+/** The role every new account is given; it carries no staff permissions. */
+const DEFAULT_ROLE_NAME = "buyer_seller";
+
+/**
+ * Fills in the permissions `GET /v1/roles/user/:id` leaves out.
+ *
+ * That endpoint returns each role without its `role_permissions`, while
+ * `GET /v1/roles` returns them in full. Without this merge `hasPermission()`
+ * is false for every user no matter what the backend has granted, so any
+ * permission-gated interface stays hidden from the staff who hold it.
+ *
+ * Best effort, and deliberately so:
+ *
+ * - It is skipped once a role already carries its permissions, so it costs
+ *   nothing extra the day the endpoint starts returning them.
+ * - It is skipped for accounts holding nothing but the default `buyer_seller`
+ *   role. `/v1/roles` is itself gated, and a rejection there would reach the
+ *   refresh interceptor on the way back; not asking at all keeps ordinary
+ *   sign-in on exactly the path it takes today. Every permission this merge
+ *   exists to recover belongs to a staff role anyway.
+ * - A failure still returns the roles as they arrived rather than dropping
+ *   them, so staff sign-in cannot be broken by this either.
+ *
+ * This decides only what the client renders. The API authorises every request
+ * against the token regardless of what is merged here.
+ */
+async function withRolePermissions(roles: UserRole[]): Promise<UserRole[]> {
+  if (roles.length === 0 || roles.some((ur) => ur.role?.role_permissions?.length)) {
+    return roles;
+  }
+
+  // Named rather than listed against ADMIN_ROLES: any staff role, including
+  // one added later, should reach the merge. Only the role every account is
+  // given at sign-up is excluded.
+  if (roles.every((ur) => ur.role.name === DEFAULT_ROLE_NAME)) {
+    return roles;
+  }
+
+  try {
+    const all = await getRoles();
+    const permissionsByRoleId = new Map(
+      (all.data ?? []).map((role) => [role.id, role.role_permissions]),
+    );
+
+    return roles.map((ur) => {
+      const permissions = permissionsByRoleId.get(ur.role.id);
+      return permissions
+        ? { ...ur, role: { ...ur.role, role_permissions: permissions } }
+        : ur;
+    });
+  } catch {
+    return roles;
+  }
+}
 
 interface AuthState {
   user: AuthUser | null;
@@ -159,7 +214,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   fetchUserRoles: async (userId) => {
     try {
       const response = await getUserRoles(userId);
-      set({ userRoles: response.data ?? [] });
+      set({ userRoles: await withRolePermissions(response.data ?? []) });
     } catch {
       set({ userRoles: [] });
     }
