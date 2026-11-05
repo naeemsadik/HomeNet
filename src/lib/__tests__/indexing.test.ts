@@ -22,11 +22,17 @@ describe("what Google is asked to index", () => {
   });
 
   it("gives every listing URL a canonical in the response, before any script runs", () => {
-    const rule = vercel.headers.find((h: { source: string }) => h.source === "/property/:id");
+    const rule = vercel.headers.find((h: { source: string }) => h.source.startsWith("/property/:id"));
     expect(rule.headers).toContainEqual({
       key: "Link",
       value: '<https://www.homenetbd.com/property/:id>; rel="canonical"',
     });
+    // ...but not the listing form's own pages, which are not listings.
+    expect(rule.source).toBe("/property/:id((?!(?:create|edit)$)[^/]+)");
+  });
+
+  it("answers an unknown guide with a real 404: every guide is exported, so there is no shell rewrite", () => {
+    expect(vercel.rewrites.map((r: { source: string }) => r.source)).not.toContain("/guides/:slug");
   });
 
   it("does not link to an alias page that redirects", () => {

@@ -33,6 +33,7 @@ import { PropertySkeletonFeed } from "@/features/property/components/PropertySke
 import { useAreas } from "@/features/property/hooks/useAreas";
 import { fetchBrowseTotal, useBrowseFeed } from "@/features/property/hooks/useBrowseFeed";
 import type { PropertyFilters } from "@/features/property/types/property";
+import type { BrowseSnapshot } from "@/lib/browseSnapshot";
 import {
   areaOptions as buildAreaOptions,
   fallbackAreaOptions,
@@ -53,7 +54,7 @@ import {
 } from "@/features/property/utils/searchFilters";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
 import { useTranslation, formatLocalizedNumber } from "@/i18n";
 import { showToast } from "@/lib/toast";
@@ -63,10 +64,13 @@ type SortKey = "newest" | "priceAsc" | "priceDesc" | "nearest" | "popular";
 export function BrowseScreen({
   mode,
   location: fixedLocation,
+  initialResults,
 }: {
   mode?: "buy" | "rent" | "sold";
   /** Pins the area filter, for the /buy/<area> and /rent/<area> landing pages. */
   location?: string;
+  /** The first page as the build saw it (route loader), shown until the feed answers. */
+  initialResults?: BrowseSnapshot;
 }) {
   const { t, language } = useTranslation();
   const { isPhone, width } = useResponsive();
@@ -165,7 +169,17 @@ export function BrowseScreen({
     refresh,
   } = useBrowseFeed(apiFilters, scope, feedReady);
 
-  const feed = apiProperties ?? [];
+  // The build-time first page (see browseSnapshot), shown until the live feed
+  // answers, so the exported HTML lists real listings with the real count
+  // rather than a skeleton and "0 found". Only for the page as exported: with
+  // filters in the URL it would show the wrong listings.
+  const hasUrlFilters = FILTER_PARAM_KEYS.some((key) => {
+    const value = (params as Record<string, unknown>)[key];
+    return value !== undefined && value !== "";
+  });
+  const snapshot = loading && !hasUrlFilters ? initialResults : undefined;
+  const feedLoading = loading && !snapshot;
+  const feed = snapshot ? snapshot.items : apiProperties ?? [];
   const isSoldView = filters.purpose === "sold";
 
   const results = applyClientFilters(feed, filters);
@@ -193,7 +207,30 @@ export function BrowseScreen({
 
   const totalCount = hasClientFilters(filters) || isSoldView
     ? results.length
-    : (total ?? results.length);
+    : ((snapshot ? snapshot.total : total) ?? results.length);
+
+  // The results line is the page's <h1>: what is listed and where, which is
+  // what a search for "flat rent gulshan" should land on. Until the feed has
+  // answered it names the page without a count, never "0 found".
+  const headingPurpose = t(
+    filters.purpose === "sale"
+      ? "browse.purposeSale"
+      : filters.purpose === "rent"
+      ? "browse.purposeRent"
+      : filters.purpose === "short-let"
+      ? "browse.purposeShortLet"
+      : filters.purpose === "sold"
+      ? "browse.purposeSold"
+      : "browse.purposeAll"
+  );
+  const headingPlace = locationParam || t("browse.everywhere");
+  const resultsHeading = feedLoading
+    ? t("browse.heading", { purpose: headingPurpose, place: headingPlace })
+    : t(totalCount === 1 ? "browse.headingOne" : "browse.headingCount", {
+        count: formatLocalizedNumber(totalCount, language),
+        purpose: headingPurpose,
+        place: headingPlace,
+      });
 
   // The sheet's count has to be asked for the way the feed is: the area and
   // distance are not part of toApiFilters, they become the scope. Asking with
@@ -410,10 +447,13 @@ export function BrowseScreen({
         {/* ── Mobile: Results Sub-Header Bar ──────────────────────────────── */}
         {isMobile ? (
           <View style={styles.mobileSubHeader}>
-            <LiveText style={styles.mobileResultCount}>
-              {t("search.resultsCount", {
-                count: formatLocalizedNumber(totalCount, language),
-              })}
+            <LiveText
+              accessibilityRole="header"
+              aria-level={1}
+              numberOfLines={2}
+              style={styles.mobileResultCount}
+            >
+              {resultsHeading}
             </LiveText>
 
             <View style={styles.mobileSubHeaderRight}>
@@ -435,14 +475,8 @@ export function BrowseScreen({
           /* Desktop Results Count & View Toggle Toolbar */
           <View style={styles.toolbar}>
             <View style={styles.toolbarLeft}>
-              <LiveText style={styles.resultCountText}>
-                {totalCount === 1
-                  ? t("browse.propertyFound", {
-                      count: formatLocalizedNumber(totalCount, language),
-                    })
-                  : t("browse.propertiesFound", {
-                      count: formatLocalizedNumber(totalCount, language),
-                    })}
+              <LiveText accessibilityRole="header" aria-level={1} style={styles.resultCountText}>
+                {resultsHeading}
               </LiveText>
 
               {activeFilterCount > 0 ? (
@@ -500,7 +534,7 @@ export function BrowseScreen({
           </View>
         ) : (
           /* ── Properties Grid / List ─────────────────────────────────────── */
-          loading ? (
+          feedLoading ? (
             <PropertySkeletonFeed />
           ) : isError && results.length === 0 ? (
             <View style={styles.centerContainer}>
@@ -757,11 +791,15 @@ const styles = StyleSheet.create({
     color: colorTokens.muted,
     fontFamily: fonts.semiBold,
     fontSize: 14,
+    // The heading names the place too; it wraps rather than push the sort out.
+    flexShrink: 1,
+    marginRight: 8,
   },
   mobileSortBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    minHeight: layout.touchTarget,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: radius.xs,
@@ -868,6 +906,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    minHeight: layout.touchTarget,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: radius.pill,

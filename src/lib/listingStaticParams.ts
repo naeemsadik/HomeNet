@@ -1,3 +1,6 @@
+import type { PropertyDetail } from "@/features/property/hooks/usePropertyDetail";
+import { buildTimeGet } from "@/lib/buildTimeApi";
+
 /**
  * The live listing ids, for `generateStaticParams` in app/property/[id].tsx.
  *
@@ -12,10 +15,8 @@
  * match the sitemap. A failed API call must not fail the deploy: it returns no
  * ids and the build ships with the shell only, as before.
  */
-const API_URL = (process.env.EXPO_PUBLIC_API_BASE_URL || "https://api.homenetbd.com").replace(/\/$/, "");
 const PAGE_SIZE = 100; // the API's maximum
 const MAX_PAGES = 50; // a runaway-loop guard: 5,000 listings
-const TIMEOUT_MS = 15_000;
 
 type ListingsPage = { data?: { items?: { id?: string; status?: string }[]; total?: number } };
 
@@ -23,11 +24,7 @@ export async function listingStaticParams(): Promise<{ id: string }[]> {
   const ids: string[] = [];
   try {
     for (let page = 1; page <= MAX_PAGES; page += 1) {
-      const response = await fetch(`${API_URL}/v1/properties?page=${page}&limit=${PAGE_SIZE}`, {
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-      });
-      if (!response.ok) throw new Error(`API returned HTTP ${response.status} on page ${page}`);
-      const body = (await response.json()) as ListingsPage;
+      const body = await buildTimeGet<ListingsPage>(`/v1/properties?page=${page}&limit=${PAGE_SIZE}`);
       const items = body?.data?.items;
       if (!Array.isArray(items)) throw new Error("API response has no data.items list");
       for (const item of items) {
@@ -40,4 +37,30 @@ export async function listingStaticParams(): Promise<{ id: string }[]> {
     return [];
   }
   return [...new Set(ids)].map((id) => ({ id }));
+}
+
+/**
+ * One listing as the build saw it, for the loader in app/property/[id].tsx.
+ * The page renders it into the exported HTML (title, price, photos, text and
+ * structured data), so crawlers and link previews that do not run JavaScript
+ * see the listing rather than a spinner.
+ *
+ * The snapshot is published inside the page, so the owner's phone numbers and
+ * sign-in identities are left out: the browser fetches them when the page
+ * loads, as before. Null when the API fails; the page then exports as the
+ * loading state, as it did before loaders.
+ */
+export async function listingSnapshot(id: string): Promise<PropertyDetail | null> {
+  try {
+    const body = await buildTimeGet<{ data?: PropertyDetail & { phone?: unknown } }>(
+      `/v1/properties/${encodeURIComponent(id)}`,
+    );
+    const detail = body?.data;
+    if (!detail?.id) throw new Error("API response has no listing");
+    const { phone, ...publicDetail } = detail;
+    return { ...publicDetail, user: detail.user ? { ...detail.user, auth_identities: [] } : null };
+  } catch (error) {
+    console.warn(`WARNING: listing ${id} exported without its content: ${(error as Error).message}`);
+    return null;
+  }
 }

@@ -41,10 +41,11 @@ import { breadcrumbSchema, listingCrumbs, listingSchema } from "@/lib/schema";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
+import { listingMetaDescription, listingMetaTitle, listingShareImage } from "@/lib/listingMeta";
 import { shareLink } from "@/lib/share";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { colorTokens, webPointer } from "@/theme";
-import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
+import { type PropertyDetail, usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
 import { useSavedStore } from "@/stores/savedStore";
 import { toApiError } from "@/services/apiClient";
 import { styles } from "./PropertyDetailScreen.styles";
@@ -71,14 +72,14 @@ type AiValuation = {
   trend: string;
 };
 
-export function PropertyDetailScreen() {
+export function PropertyDetailScreen({ initialDetail }: { initialDetail?: PropertyDetail } = {}) {
   const { t, language } = useTranslation();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const rawId = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
   const propertyId = (rawId ?? "").trim();
   const id = propertyId;
   const { isPhone, isTablet } = useResponsive();
-  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId);
+  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId, initialDetail);
   const {
     data: similarProperties = [],
     error: similarError,
@@ -403,12 +404,16 @@ export function PropertyDetailScreen() {
 
   return (
     <AppChrome active="property">
-      {/* The listing itself is the page title, that is what a search result
-          for this URL should read. */}
-      <PageMeta
-        title={`${property.title} | ${property.location} | HomeNet BD`}
-        description={`${property.listingType}: ${property.priceText}. ${property.address}.`}
-      />
+      {/* What a search result or a shared link for this URL reads: the kind of
+          property, the area and the price, with the first photo as the preview.
+          The owner's own title is the page's <h1>. */}
+      {apiDetail ? (
+        <PageMeta
+          title={listingMetaTitle(apiDetail)}
+          description={listingMetaDescription(apiDetail)}
+          image={listingShareImage(apiDetail)}
+        />
+      ) : null}
       {apiDetail ? (
         <JsonLd nodes={[listingSchema(apiDetail), breadcrumbSchema(listingCrumbs(apiDetail))]} />
       ) : null}
@@ -628,7 +633,7 @@ export function PropertyDetailScreen() {
                 ) : null}
               </View>
 
-              <Text style={styles.propertyTitle}>{property.title}</Text>
+              <Text accessibilityRole="header" aria-level={1} style={styles.propertyTitle}>{property.title}</Text>
 
               <View style={styles.locationSubRow}>
                 <MapPin color="#04cf92" size={16} />
@@ -717,7 +722,7 @@ export function PropertyDetailScreen() {
             <View style={styles.sectionCard}>
               <View style={styles.sectionHeaderBetween}>
                 <Text style={styles.sectionHeading}>{t("propertyDetail.similarProperties")}</Text>
-                <AppLink href="/buy">
+                <AppLink href="/buy" style={styles.seeAllTap}>
                   <Text style={styles.seeAllLink}>{t("propertyDetail.seeAll")}</Text>
                 </AppLink>
               </View>

@@ -1,5 +1,7 @@
 // First, so production is silent before anything else can log.
 import "@/lib/productionConsole";
+// Before the first render: a pre-rendered page's loader data, for hydration.
+import "@/lib/buildSnapshot";
 import { useEffect } from "react";
 import { useFonts } from "expo-font";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -80,7 +82,7 @@ export default function RootLayout() {
             empty <title> that Expo Router emits by default. */}
           <PageMeta
             title="HomeNet BD | Verified Property Listings in Bangladesh"
-            description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
+            description="HomeNet BD is a property marketplace for Bangladesh. Browse flats, houses and plots for sale or rent and contact the owners directly. Listing is free."
           />
           <StatusBar style="dark" />
           <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />

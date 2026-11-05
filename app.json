@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
     "plugins": [
-      "expo-router",
+      ["expo-router", { "unstable_useServerDataLoaders": true }],
       "expo-font",
       "expo-image",
       [
