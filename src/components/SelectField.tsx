@@ -25,6 +25,7 @@ export function SelectField({
   style,
   accessibilityLabel,
   disabled,
+  tone = "light",
 }: {
   value: string;
   options: { label: string; value: string }[];
@@ -32,7 +33,16 @@ export function SelectField({
   style?: any;
   accessibilityLabel?: string;
   disabled?: boolean;
+  /**
+   * `dark`: borderless white text, for the search results' ink filter bar.
+   * `plain`: borderless and transparent, for a select inside its own box.
+   * Web only; the app's sheet picker keeps its own look.
+   */
+  tone?: "light" | "dark" | "plain";
 }) {
+  const dark = tone === "dark";
+  // `plain`: no frame, for a select inside a box that draws its own.
+  const bare = dark || tone === "plain";
   if (Platform.OS === "web") {
     return (
       <View style={[styles.selectWrapper, style]}>
@@ -48,13 +58,16 @@ export function SelectField({
             minHeight: 42,
             display: "block",
             padding: "0 34px 0 14px",
-            backgroundColor: colorTokens.surface,
-            border: `1.5px solid ${CONTROL_BORDER}`,
+            backgroundColor: bare ? "transparent" : colorTokens.surface,
+            border: bare ? "1.5px solid transparent" : `1.5px solid ${CONTROL_BORDER}`,
+            // Keeps the open list readable: a dark select's options would
+            // otherwise be white text on the browser's white popup.
+            colorScheme: dark ? "dark" : undefined,
             borderRadius: 8,
             fontSize: 14,
             fontFamily: fonts.regular,
-            color: colorTokens.ink,
-            fontWeight: "500",
+            color: dark ? colorTokens.onInk : colorTokens.ink,
+            fontWeight: dark ? "600" : "500",
             appearance: "none",
             WebkitAppearance: "none",
             outline: "none",
@@ -70,7 +83,7 @@ export function SelectField({
           ))}
         </select>
         <View style={styles.chevronOverlay} pointerEvents="none">
-          <ChevronDown color={colorTokens.ink} size={16} strokeWidth={2.2} />
+          <ChevronDown color={dark ? colorTokens.brand : colorTokens.ink} size={16} strokeWidth={2.2} />
         </View>
       </View>
     );

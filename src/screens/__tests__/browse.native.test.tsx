@@ -355,3 +355,55 @@ describe("the filter sheet's result count", () => {
     expect(router.setParams).not.toHaveBeenCalled();
   });
 });
+
+describe("the Rightmove-style results layout", () => {
+  const mapView = (tree: ReactTestRenderer) =>
+    tree.root.findAll((node) => (node.type as unknown) === "RNCWebView");
+
+  it("swaps the desktop list for a full map from Map view, and back from List view", async () => {
+    withDesktopWindow();
+    const tree = await mount("buy");
+
+    // The sidebar's mini map is the only map while the list shows.
+    const mapsWithList = mapView(tree).length;
+    // Wide screens use the wide result card, with its owner contact row.
+    expect(textOf(tree.root)).toContain("Direct from owner");
+
+    await act(async () => pressableWithText(tree, "Map view")!.props.onPress());
+    expect(textOf(tree.root)).not.toContain("Direct from owner");
+    expect(mapView(tree).length).toBeGreaterThanOrEqual(1);
+    expect(textOf(tree.root)).toContain("Showing 1 of 1 properties");
+
+    await act(async () => pressableWithText(tree, "List view")!.props.onPress());
+    expect(textOf(tree.root)).toContain("Direct from owner");
+    expect(mapView(tree)).toHaveLength(mapsWithList);
+  });
+
+  it("puts the listings that have a pin in the phone map's card row", async () => {
+    getProps.mockResolvedValue({
+      data: {
+        items: [
+          { ...villa, location_lat: 23.79, location_lng: 90.41, price: 5000000, price_currency: "BDT" },
+          { ...villa, id: "v2", title: "No Pin Flat" },
+        ],
+        total: 2,
+        page: 1,
+        limit: 20,
+      },
+    });
+    const tree = await mount("buy");
+
+    await act(async () => pressableWithText(tree, "Map")!.props.onPress());
+    // The row only renders once it has been measured.
+    const row = tree.root.findAll((n) => typeof n.props.onLayout === "function" && n.props.style?.position === "absolute");
+    for (const node of row) {
+      await act(async () => node.props.onLayout({ nativeEvent: { layout: { width: 360, height: 130 } } }));
+    }
+
+    const links = tree.root
+      .findAll((n) => n.props.accessibilityRole === "link" && typeof n.props.onPress === "function")
+      .map((n) => n.props.accessibilityLabel);
+    expect(links).toContain("Open The Villa");
+    expect(links).not.toContain("Open No Pin Flat");
+  });
+});
