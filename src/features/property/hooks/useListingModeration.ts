@@ -105,6 +105,20 @@ export function useListingModeration() {
       const restore = removeFromCache(property.id);
       let undone = false;
 
+      // Sent first, and kept: Undo must not reach the server before it. Pressed
+      // straight away, an unarchive sent at once could land first and the archive
+      // after it, leaving the listing archived although the moderator undid it.
+      const archived = archiveProperty(property.id).then(
+        () => true,
+        (error) => {
+          if (!undone) {
+            restore();
+            showToast(toApiError(error).message);
+          }
+          return false;
+        },
+      );
+
       showToast(t("moderation.archived", { title: property.title }), {
         // The spec sets 7s; the store would otherwise default to 6s for a toast
         // that carries an action. Both sit inside the 5-10s convention, but the
@@ -114,24 +128,24 @@ export function useListingModeration() {
           label: t("moderation.undo"),
           onPress: () => {
             undone = true;
+            // Back on screen at once; the server is told once the archive has settled.
             restore();
-            void unarchiveProperty(property.id).catch((error) => {
-              // The row is already back on screen; say the server disagreed.
-              removeFromCache(property.id);
-              showToast(toApiError(error).message);
+            void archived.then(async (ok) => {
+              // The archive failed, so there is nothing to undo on the server.
+              if (!ok) return;
+              try {
+                await unarchiveProperty(property.id);
+              } catch (error) {
+                // The row is already back on screen; say the server disagreed.
+                removeFromCache(property.id);
+                showToast(toApiError(error).message);
+              }
             });
           },
         },
       });
 
-      try {
-        await archiveProperty(property.id);
-      } catch (error) {
-        if (!undone) {
-          restore();
-          showToast(toApiError(error).message);
-        }
-      }
+      await archived;
     },
     [removeFromCache, t],
   );
