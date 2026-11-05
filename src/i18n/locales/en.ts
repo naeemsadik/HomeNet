@@ -593,6 +593,7 @@ export const en = {
       boost: "Boost",
       archive: "Archive",
       unarchive: "Unarchive",
+      askToRestore: "Ask to restore",
     },
     filters: {
       all: "All",
@@ -611,6 +612,11 @@ export const en = {
     unarchiveConfirmTitle: "Unarchive Property",
     unarchiveConfirmMessage: "Unarchive \"{{title}}\"? This will make the listing active again.",
     unarchiveFailed: "Unarchive failed",
+    archiveConfirmMessageNoUndo: "Archive \"{{title}}\"? It will no longer be shown on the site. You can't restore it yourself yet: to bring it back, you'll need to email support.",
+    restoreViaSupportTitle: "Restore this listing",
+    restoreViaSupportMessage: "Archived listings can't be restored from your account yet. Email our support team and we'll restore \"{{title}}\" for you.",
+    restoreViaSupportConfirm: "Email support",
+    restoreViaSupportSubject: "Please restore my listing",
     toggleView: {
       aria: "Switch to the buyer view of the live site",
       label: "Switch to buyer",

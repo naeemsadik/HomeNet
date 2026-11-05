@@ -595,6 +595,7 @@ export const bn: TranslationSchema = {
       boost: "বুস্ট করুন",
       archive: "আর্কাইভ করুন",
       unarchive: "আন-আর্কাইভ করুন",
+      askToRestore: "পুনরুদ্ধারের অনুরোধ",
     },
     filters: {
       all: "সকল",
@@ -613,6 +614,11 @@ export const bn: TranslationSchema = {
     unarchiveConfirmTitle: "প্রপার্টি আন-আর্কাইভ করুন",
     unarchiveConfirmMessage: "\"{{title}}\" আন-আর্কাইভ করবেন? এটি আবার সক্রিয় তালিকায় প্রদর্শিত হবে।",
     unarchiveFailed: "আন-আর্কাইভ করা ব্যর্থ হয়েছে",
+    archiveConfirmMessageNoUndo: "\"{{title}}\" আর্কাইভ করবেন? এটি আর সাইটে দেখানো হবে না। এখনো নিজে এটি ফেরাতে পারবেন না: ফেরাতে সাপোর্টে ইমেইল করতে হবে।",
+    restoreViaSupportTitle: "লিস্টিং পুনরুদ্ধার",
+    restoreViaSupportMessage: "আর্কাইভ করা লিস্টিং এখনো আপনার অ্যাকাউন্ট থেকে ফেরানো যায় না। আমাদের সাপোর্ট টিমকে ইমেইল করুন, আমরা \"{{title}}\" ফিরিয়ে দেব।",
+    restoreViaSupportConfirm: "সাপোর্টে ইমেইল করুন",
+    restoreViaSupportSubject: "আমার লিস্টিং পুনরুদ্ধার করুন",
     toggleView: {
       aria: "ওয়েবসাইটের ক্রেতা ভিউতে যান",
       label: "ক্রেতা ভিউতে যান",

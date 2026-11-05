@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  archiveProperty,
-  unarchiveProperty,
+  staffArchiveProperty,
+  staffRestoreProperty,
   adminDeleteProperty,
 } from "@/services/propertyApi";
 import { toApiError } from "@/services/apiClient";
@@ -108,7 +108,7 @@ export function useListingModeration() {
       // Sent first, and kept: Undo must not reach the server before it. Pressed
       // straight away, an unarchive sent at once could land first and the archive
       // after it, leaving the listing archived although the moderator undid it.
-      const archived = archiveProperty(property.id).then(
+      const archived = staffArchiveProperty(property.id).then(
         () => true,
         (error) => {
           if (!undone) {
@@ -134,7 +134,7 @@ export function useListingModeration() {
               // The archive failed, so there is nothing to undo on the server.
               if (!ok) return;
               try {
-                await unarchiveProperty(property.id);
+                await staffRestoreProperty(property.id);
               } catch (error) {
                 // The row is already back on screen; say the server disagreed.
                 removeFromCache(property.id);

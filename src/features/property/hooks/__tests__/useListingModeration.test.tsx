@@ -2,20 +2,20 @@ import React from "react";
 import renderer, { act } from "react-test-renderer";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useListingModeration } from "@/features/property/hooks/useListingModeration";
-import { archiveProperty, unarchiveProperty } from "@/services/propertyApi";
+import { staffArchiveProperty, staffRestoreProperty } from "@/services/propertyApi";
 import { useToastStore } from "@/lib/toast";
 import type { Property } from "@/features/property/types/property";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 jest.mock("@/services/propertyApi", () => ({
-  archiveProperty: jest.fn(),
-  unarchiveProperty: jest.fn(),
+  staffArchiveProperty: jest.fn(),
+  staffRestoreProperty: jest.fn(),
   adminDeleteProperty: jest.fn(),
 }));
 
-const archive = archiveProperty as jest.Mock;
-const unarchive = unarchiveProperty as jest.Mock;
+const archive = staffArchiveProperty as jest.Mock;
+const unarchive = staffRestoreProperty as jest.Mock;
 const listing = { id: "p1", title: "Flat in Gulshan" } as Property;
 
 /** A promise the test settles by hand, standing in for a request still on its way. */
@@ -109,5 +109,14 @@ describe("archive and Undo", () => {
     expect(items()).toEqual([listing]);
     expect(useToastStore.getState().toast?.message).toBeTruthy();
     expect(useToastStore.getState().toast?.action).toBeUndefined();
+  });
+});
+
+describe("the routes it calls (backend PR 93)", () => {
+  it("archives and restores through the staff routes, not the owner ones that refuse other people's listings", () => {
+    const source = require("fs").readFileSync(require("path").resolve(__dirname, "../useListingModeration.ts"), "utf8");
+    expect(source).toContain("staffArchiveProperty(property.id)");
+    expect(source).toContain("staffRestoreProperty(property.id)");
+    expect(source).not.toMatch(/\b(archiveProperty|unarchiveProperty)\(/);
   });
 });
