@@ -12,7 +12,6 @@ jest.mock("expo-router", () => ({
   ...jest.requireActual("expo-router"),
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
 }));
-jest.mock("@/components/AiFinderModal", () => ({ AiFinderModal: () => null }));
 jest.mock("@/features/valuation/components/InstantValuationModal", () => ({ InstantValuationModal: () => null }));
 jest.mock("@/features/notification/components/NotificationPreview", () => ({ NotificationPreview: () => null }));
 jest.mock("@/features/notification/hooks/useNotifications", () => ({
