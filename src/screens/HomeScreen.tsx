@@ -17,7 +17,6 @@ import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
 import { HomeNetExplainerSection } from "@/components/landing/HomeNetExplainerSection";
 import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
-import { HomeMapExplorer } from "@/features/property/components/HomeMapExplorer";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -33,6 +32,12 @@ import { styles } from "./HomeScreen.styles";
  * the left-to-centre area uncluttered so the headline sits on calm pixels.
  */
 const HERO_IMAGE = { uri: HERO_IMAGE_URL };
+
+/**
+ * The "See How HomeNet Works" explainer video is hidden while a new video is
+ * produced. Set this back to true (and update the video source) to show it again.
+ */
+const SHOW_EXPLAINER_VIDEO = false;
 
 export function HomeScreen() {
   const { t } = useTranslation();
@@ -207,19 +212,14 @@ export function HomeScreen() {
       ) : (
         <>
       {/* ─────────────────────────────────────────────────────────────
-          2. ACTIVE LISTINGS MAP EXPLORER: interactive map explorer
-          showing verified listings for sale and rent across Dhaka
+          3. EXPLAINER VIDEO, 30s auto-preview + full walkthrough video.
+          Hidden until the new video is ready; see SHOW_EXPLAINER_VIDEO.
       ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <HomeMapExplorer />
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          3. EXPLAINER VIDEO, 30s auto-preview + full walkthrough video
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <HomeNetExplainerSection />
-      </View>
+      {SHOW_EXPLAINER_VIDEO ? (
+        <View style={styles.sectionSpacing}>
+          <HomeNetExplainerSection />
+        </View>
+      ) : null}
 
       {/* ─────────────────────────────────────────────────────────────
           5. PRODUCT VISUAL, browser + phone preview of real listings
