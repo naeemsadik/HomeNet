@@ -57,6 +57,7 @@ export const en = {
   propertyCard: {
     verified: "Verified",
     verifiedFull: "100% Verified Listing",
+    property: "Property",
     directOwner: "Direct Owner (0% Brokerage)",
     forRent: "For rent",
     forSale: "For sale",

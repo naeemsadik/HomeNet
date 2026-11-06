@@ -15,7 +15,6 @@ import {
   ChevronDown,
   ChevronRight,
   List,
-  MapIcon,
   MapPin,
   RotateCcw,
   Search,
@@ -425,29 +424,23 @@ export function BrowseScreen({
   ) : undefined;
 
   // On phones, on the website and in the app (which runs the same map in a
-  // WebView). It sits in the results row next to the count and sort, in the
+  // WebView): one link to the other view, "Map" with a pin as on Rightmove's
+  // phone results, "List" from the map. It sits in the results row, in the
   // page flow, so it never covers a listing card.
-  const viewSwitcher = (
-    <View style={styles.viewSwitch}>
-      {(["list", "map"] as const).map((key) => {
-        const active = view === key;
-        const Icon = key === "list" ? List : MapIcon;
-        const label = key === "list" ? t("search.listView") : t("search.mapView");
-        return (
-          <Pressable
-            key={key}
-            accessibilityRole="button"
-            accessibilityLabel={label}
-            accessibilityState={{ selected: active }}
-            onPress={() => setView(key)}
-            style={[styles.switchBtn, active && styles.switchBtnActive, webPointer]}
-          >
-            <Icon size={14} color={active ? colorTokens.onBrand : colorTokens.ink} strokeWidth={2.4} />
-            <Text style={[styles.switchText, active && styles.switchTextActive]}>{label}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
+  const viewToggle = (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={view === "list" ? t("search.results.mapView") : t("search.results.listView")}
+      onPress={() => setView(view === "list" ? "map" : "list")}
+      style={[styles.mobileViewLink, webPointer]}
+    >
+      {view === "list" ? (
+        <MapPin size={17} color={colorTokens.ink} strokeWidth={2.2} />
+      ) : (
+        <List size={17} color={colorTokens.ink} strokeWidth={2.2} />
+      )}
+      <Text style={styles.mobileViewLinkText}>{view === "list" ? t("search.mapView") : t("search.listView")}</Text>
+    </Pressable>
   );
 
   /** Save search and Create alert: by the heading on the list, over the map on the map. */
@@ -726,18 +719,18 @@ export function BrowseScreen({
   // ── Phone ────────────────────────────────────────────────────────────────
   const mobileContent = (
     <>
+      {/* The page's heading on its own line (Rightmove's "Properties For Sale
+          in M6"), so the row under it has room for the count, sort and Map. */}
+      <LiveText accessibilityRole="header" aria-level={1} numberOfLines={2} style={styles.mobileHeading}>
+        {resultsHeading}
+      </LiveText>
+
       <View style={styles.mobileSubHeader}>
-        <LiveText
-          accessibilityRole="header"
-          aria-level={1}
-          numberOfLines={2}
-          style={styles.mobileResultCount}
-        >
-          {resultsHeading}
+        <LiveText numberOfLines={1} style={styles.mobileResultCount}>
+          {feedLoading ? "" : t("search.resultsCount", { count: formatLocalizedNumber(totalCount, language) })}
         </LiveText>
 
         <View style={styles.mobileSubHeaderRight}>
-          {viewSwitcher}
           {view === "list" ? (
             <Pressable
               accessibilityRole="button"
@@ -748,9 +741,10 @@ export function BrowseScreen({
               <Text numberOfLines={1} style={styles.mobileSortBtnText}>
                 {activeSortLabel}
               </Text>
-              <ChevronDown color={colorTokens.muted} size={14} strokeWidth={2.2} />
+              <ChevronDown color={colorTokens.ink} size={16} strokeWidth={2.2} />
             </Pressable>
           ) : null}
+          {viewToggle}
         </View>
       </View>
 
@@ -933,28 +927,42 @@ const styles = StyleSheet.create({
     gap: 8,
     flexShrink: 1,
   },
+  mobileHeading: {
+    color: colorTokens.ink,
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    paddingTop: 10,
+    paddingHorizontal: 4,
+  },
   mobileResultCount: {
     color: colorTokens.ink,
     fontFamily: fonts.semiBold,
-    fontSize: 14,
-    // The heading names the place too; it wraps rather than push the sort out.
+    fontSize: 15,
     flexShrink: 1,
     marginRight: 8,
   },
+  mobileViewLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    minHeight: layout.touchTarget,
+    paddingHorizontal: 4,
+  },
+  mobileViewLinkText: { color: colorTokens.ink, fontFamily: fonts.semiBold, fontSize: 14 },
   mobileSortBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 4,
     minHeight: layout.touchTarget,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: radius.xs,
-    backgroundColor: colorTokens.surfaceSunken,
+    paddingHorizontal: 4,
+    flexShrink: 1,
   },
   mobileSortBtnText: {
+    flexShrink: 1,
     color: colorTokens.ink,
-    fontFamily: fonts.medium,
-    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
   },
   mobileMap: {
     borderRadius: 0,
@@ -1190,35 +1198,6 @@ const styles = StyleSheet.create({
   },
 
   /* ── Mobile List | Map switch (in the results row) ─────────────────────── */
-  viewSwitch: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colorTokens.surfaceSunken,
-    padding: 2,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colorTokens.divider,
-  },
-  switchBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    minHeight: layout.touchTarget,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: radius.pill,
-  },
-  switchBtnActive: {
-    backgroundColor: colorTokens.brand,
-  },
-  switchText: {
-    color: colorTokens.ink,
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-  },
-  switchTextActive: {
-    color: colorTokens.onBrand,
-  },
 
   /* ── Sort Modal Sheet ──────────────────────────────────────────────────── */
   modalOverlay: {
