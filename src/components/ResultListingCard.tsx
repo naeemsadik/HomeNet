@@ -26,6 +26,7 @@ import {
 } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { contactPhone, listerDisplay, whatsappUrl } from "@/features/property/utils/lister";
+import { listingPhotos } from "@/features/property/utils/listingMedia";
 
 export interface ResultListingCardProps {
   property: Property;
@@ -60,14 +61,7 @@ function ResultListingCardComponent({
 }: ResultListingCardProps) {
   const { t, language } = useTranslation();
 
-  const images = useMemo(
-    () =>
-      (property.media ?? [])
-        .filter((m) => m.media_type === "image" && m.url)
-        .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
-        .map((m) => m.url),
-    [property.media],
-  );
+  const images = useMemo(() => listingPhotos(property.media), [property.media]);
   const photoCount = property._count?.media ?? images.length;
 
   // "Contact for price" is words, so a "/mo" after it would be nonsense.

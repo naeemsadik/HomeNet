@@ -4,6 +4,7 @@ import { SITE_URL } from "@/lib/seo";
 import { INTENT_LABEL, type ListingIntent } from "./breadcrumb";
 import { ORGANIZATION_ID } from "./brand";
 import type { BreadcrumbCrumb, SchemaNode } from "./types";
+import { listingPhotos } from "@/features/property/utils/listingMedia";
 
 const APARTMENT_SUBTYPES = new Set(["apartment", "flat", "condo", "short-let", "studio", "penthouse"]);
 const HOUSE_SUBTYPES = new Set(["house", "villa", "duplex", "bungalow"]);
@@ -76,7 +77,7 @@ export function listingSchema(detail: PropertyDetail): SchemaNode {
   const amenities = detail.amenities ?? {};
   const subjectType = listingSubjectType(detail.type, detail.subtype);
   const isRent = detail.listing_type === "rent";
-  const images = (detail.media ?? []).filter((m) => m.media_type === "image").map((m) => m.url);
+  const images = listingPhotos(detail.media);
   const city = detail.area?.city || "Dhaka";
 
   const subject: SchemaNode = {
