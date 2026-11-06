@@ -52,7 +52,7 @@ export const en = {
     clearLocation: "Clear location",
     clearSearch: "Clear search",
     clearFilters: "Clear filters",
-    searchProperties: "Search properties",
+    searchProperties: "Search for Properties",
   },
   propertyCard: {
     verified: "Verified",
@@ -1602,7 +1602,7 @@ export const en = {
     rightmove: {
       moreFilters: "More filters",
       filtersWithCount: "Filters ({{count}})",
-      searchProperties: "Search properties",
+      searchProperties: "Search for Properties",
       searchCountedProperties: "Search {{count}} properties",
       includeSoldHelp:
         "Shows listings that are under offer or sold subject to contract alongside the available ones.",

@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   searchReplicaBtn: {
-    backgroundColor: "#04cf92",
+    backgroundColor: colorTokens.brand,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,

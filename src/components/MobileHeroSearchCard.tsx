@@ -217,9 +217,14 @@ export function MobileHeroSearchCard() {
             accessibilityRole="button"
             accessibilityLabel={primaryButtonLabel}
             onPress={handleSearch}
-            style={({ pressed }) => [styles.primaryButton, webPointer, pressed && { opacity: 0.9 }]}
+            style={({ hovered, pressed }: any) => [
+              styles.primaryButton,
+              webPointer,
+              hovered && { backgroundColor: colorTokens.brandHover },
+              pressed && { opacity: 0.9, backgroundColor: colorTokens.brandPressed },
+            ]}
           >
-            <Text style={styles.primaryButtonText}>{primaryButtonLabel}</Text>
+            <Text style={styles.primaryButtonText}>{t("hero.search")}</Text>
           </Pressable>
         </View>
       </View>

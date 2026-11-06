@@ -361,11 +361,11 @@ describe("the search card before a search", () => {
     mockParams = {};
     withDesktopWindow();
     const tree = await mount("buy");
-    expect(pressableWithText(tree, "Search properties")).toBeDefined();
+    expect(pressableWithText(tree, "Search for Properties")).toBeDefined();
     expect(textOf(tree.root)).not.toMatch(/propert(y|ies) for sale in/);
     expect(feedCalls()).toHaveLength(0);
 
-    await act(async () => pressableWithText(tree, "Search properties")!.props.onPress());
+    await act(async () => pressableWithText(tree, "Search for Properties")!.props.onPress());
     expect(router.setParams).toHaveBeenCalledWith(expect.objectContaining({ searched: "1" }));
   });
 
