@@ -51,6 +51,10 @@ export interface WizardState {
   primaryMediaIndex: number;
   virtualTourUrl: string;
 
+  // Contact
+  phone: string;
+  whatsappNumber: string;
+
   // Meta & Navigation
   propertyId: string | null;
   currentStep: 1 | 2 | 3 | 4 | 5;
@@ -69,6 +73,7 @@ export interface WizardState {
   setAmenities: (amenities: Record<string, boolean>) => void;
   toggleAmenity: (key: string) => void;
   setVirtualTourUrl: (url: string) => void;
+  setContact: (data: Partial<Pick<WizardState, "phone" | "whatsappNumber">>) => void;
   setPropertyId: (id: string | null) => void;
   setCurrentStep: (step: 1 | 2 | 3 | 4 | 5) => void;
   setIsSubmitting: (v: boolean) => void;
@@ -102,6 +107,9 @@ const initialState = {
   media: [] as WizardMediaItem[],
   primaryMediaIndex: 0,
   virtualTourUrl: "",
+
+  phone: "",
+  whatsappNumber: "",
 
   propertyId: null as string | null,
   currentStep: 1 as 1 | 2 | 3 | 4 | 5,
@@ -146,6 +154,8 @@ export const usePropertyWizardStore = create<WizardState>((set) => ({
     })),
 
   setVirtualTourUrl: (url) => set({ virtualTourUrl: url }),
+
+  setContact: (data) => set(data),
 
   setPropertyId: (id) => set({ propertyId: id }),
 

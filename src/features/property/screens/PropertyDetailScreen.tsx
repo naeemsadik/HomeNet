@@ -54,6 +54,7 @@ import { ReportListingModal } from "../components/ReportListingModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
 import { PropertyLocationSection, type NearbyPlace } from "../components/PropertyLocationSection";
 import { WhatsAppIcon } from "../components/WhatsAppIcon";
+import { contactPhone, listerDisplay } from "../utils/lister";
 import { NoTranslateText } from "@/components/NoTranslateText";
 
 import {
@@ -65,6 +66,7 @@ import {
   priceOnRequestLabel,
   translateAreaUnit,
 } from "@/i18n";
+import { listingCover, listingPhotos } from "@/features/property/utils/listingMedia";
 
 type AiValuation = {
   estimatedValue: string;
@@ -114,7 +116,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
     );
 
     const rawImages = apiDetail.media
-      ? apiDetail.media.filter((m) => m.media_type === "image").map((m) => m.url)
+      ? listingPhotos(apiDetail.media)
       : [];
 
     // The gallery is the largest image on the page, so it gets a generous
@@ -124,6 +126,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       .filter((url): url is string => Boolean(url));
 
     const identity = apiDetail.user?.auth_identities?.[0];
+    const lister = listerDisplay(apiDetail.user, t("propertyDetail.verifiedSeller"));
     const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
 
     const isHoliday = isHolidayStayType(apiDetail.listing_type);
@@ -163,11 +166,13 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       amenities: amenityList,
       mediaImages: images,
       seller: {
-        name: apiDetail.user?.full_name || t("propertyDetail.verifiedSeller"),
-        agency: null as string | null,
+        // A company shows its own name and logo; its contact person is the byline.
+        name: lister.isCompany ? apiDetail.user?.full_name || lister.name : lister.name,
+        agency: lister.isCompany ? lister.name : (null as string | null),
         isVerified: Boolean(apiDetail.is_verified),
-        avatarUrl: apiDetail.user?.avatar_url || null,
-        phone: identity?.phone || null,
+        avatarUrl: lister.logoUrl,
+        phone: contactPhone(apiDetail),
+        whatsapp: apiDetail.whatsapp_number || null,
         email: identity?.email || "",
       },
       // Placeholder, like aiValuation: no API field yet, so the
@@ -193,7 +198,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
             : `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? formatLocalizedNumber(sim.price.toLocaleString("en-BD"), language) : sim.price}`,
           specs: specParts.join(" · "),
           imageUrl: cdnImage(
-            sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
+            listingCover(sim.media) || sim.media?.[0]?.url,
             700,
             460,
           ),
@@ -214,7 +219,8 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   };
 
   const openWhatsApp = (message: string) => {
-    const rawPhone = property?.seller.phone;
+    // The WhatsApp number the owner gave, else the number they can be called on.
+    const rawPhone = property?.seller.whatsapp || property?.seller.phone;
     if (!rawPhone) {
       notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;

@@ -26,6 +26,7 @@ import { toApiError } from "@/services/apiClient";
 import { editProfileSchema } from "@/lib/schemas/user";
 import type { UploadInput } from "@/services/upload";
 import { SellerChangePasswordModal } from "../components/SellerChangePasswordModal";
+import { ListerTypeSection } from "../components/ListerTypeSection";
 import { SellerShell } from "../components/SellerShell";
 import { useTranslation } from "@/i18n";
 import { UserAvatar } from "@/components/UserAvatar";
@@ -259,6 +260,8 @@ export function SellerProfileScreen() {
                 </View>
               </View>
             </View>
+
+            <ListerTypeSection />
 
             {/* Section 2: Contact Information */}
             <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>

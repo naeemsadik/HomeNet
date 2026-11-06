@@ -37,6 +37,14 @@ const GIS_SRC = "https://accounts.google.com/gsi/client";
 /** Google draws the button between these widths. */
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 400;
+/**
+ * The height of Google's "large" button. The slot is held at exactly this
+ * height: Google draws a plain button first, then loads its own button in an
+ * iframe under it and only hides the plain one once the iframe is ready. For a
+ * frame or two both are on screen, and a slot that grew with them made the
+ * centred sign-in modal jump up and back (the "shaking" modal).
+ */
+const BUTTON_HEIGHT = 44;
 
 let scriptPromise: Promise<GoogleAccountsId> | null = null;
 
@@ -141,8 +149,13 @@ export function GoogleSignInButton({ mode, onCredential, disabled }: GoogleSignI
       style={{
         display: "flex",
         justifyContent: "center",
+        alignItems: "flex-start",
         width: "100%",
-        minHeight: 44,
+        height: BUTTON_HEIGHT,
+        // Clip only the vertical overflow, so the duplicate button never shows
+        // and the iframe's side margins and shadow are not cut off.
+        overflowX: "visible",
+        overflowY: "clip",
         opacity: disabled ? 0.5 : 1,
         pointerEvents: disabled ? "none" : "auto",
       }}
