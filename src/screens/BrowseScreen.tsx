@@ -368,10 +368,6 @@ export function BrowseScreen({
         }
       : null;
 
-  const countText = t("search.resultsCount", {
-    count: formatLocalizedNumber(totalCount, language),
-  });
-
   // ── Mobile Search Results Top App Bar ────────────────────────────────────
   const mobileTopBar = isMobile ? (
     <SafeAreaView edges={["top"]} style={styles.mobileTopBarSafe}>
@@ -493,47 +489,18 @@ export function BrowseScreen({
     </View>
     ) : null;
 
-  return (
-    <AppChrome
-      active={mode === "rent" && filters.purpose === "short-let" ? "holiday" : mode || "buy"}
-      customTopBar={mobileTopBar}
-    >
-      <View style={[styles.container, isMobile && styles.containerMobile]}>
-        {/* ── Desktop: Rightmove Search Filter Card ────────────────────────── */}
-        {!isMobile ? (
-          <RightmoveFilterCard
-            areaOptions={areaOptions}
-            filters={filters}
-            radiusAvailable={radiusAvailable}
-            radiusHint={
-              scope.kind === "areas"
-                ? t("search.rightmove.radiusUnavailable")
-                : t("search.rightmove.pickNeighbourhood")
-            }
-            locationName={locationParam || (filters.query ? filters.query : "Dhaka")}
-            onFilterChange={applyFilters}
-            onOpenMoreFilters={() => setIsFilterModalOpen(true)}
-            onSearch={(applied) => {
-              applyFilters(applied);
-              void refresh();
-            }}
-            totalResults={feedLoading ? undefined : totalCount}
-          />
-        ) : null}
+  const loadMoreButton = hasMore ? (
+    <View style={styles.loadMoreWrap}>
+      <AppButton
+        disabled={fetchingNextPage}
+        label={fetchingNextPage ? t("browse.loadingMore") : t("browse.loadMore")}
+        onPress={() => void loadMore()}
+        style={styles.loadMoreBtn}
+      />
+    </View>
+  ) : null;
 
-        {/* ── Mobile: Results Sub-Header Bar ──────────────────────────────── */}
-        {isMobile ? (
-          <View style={styles.mobileSubHeader}>
-            <LiveText
-              accessibilityRole="header"
-              aria-level={1}
-              numberOfLines={2}
-              style={styles.mobileResultCount}
-            >
-              {resultsHeading}
-            </LiveText>
-
-  const resultsBody = loading ? (
+  const resultsBody = feedLoading ? (
     <PropertySkeletonFeed />
   ) : isError && results.length === 0 ? (
     <View style={styles.centerContainer}>
@@ -552,12 +519,53 @@ export function BrowseScreen({
             saved={isSaved(prop.id)}
           />
         ) : (
-          /* Desktop Results Count & View Toggle Toolbar */
-          <View style={styles.toolbar}>
-            <View style={styles.toolbarLeft}>
-              <LiveText accessibilityRole="header" aria-level={1} style={styles.resultCountText}>
-                {resultsHeading}
-              </LiveText>
+          <ResultListingCard
+            key={prop.id}
+            compact={width < 1000}
+            onSave={handleToggleSaved}
+            property={prop}
+            saved={isSaved(prop.id)}
+          />
+        )
+      )}
+      {loadMoreButton}
+    </View>
+  ) : isSoldView ? (
+    <View style={styles.emptyContainer}>
+      <Search color={colorTokens.brand} size={32} />
+      <Text style={styles.emptyTitle}>{t("browse.noSoldTitle")}</Text>
+      <Text style={styles.emptySubtitle}>{t("browse.noSoldSubtitle")}</Text>
+    </View>
+  ) : (
+    <View style={styles.emptyContainer}>
+      <Search color={colorTokens.brand} size={32} />
+      <Text style={styles.emptyTitle}>{t("browse.noMatchingTitle")}</Text>
+      <Text style={styles.emptySubtitle}>{t("browse.noMatchingSubtitle")}</Text>
+      <Pressable onPress={handleResetFilters} style={[styles.clearAllBtn, webPointer]}>
+        <Text style={styles.clearAllBtnText}>{t("browse.resetAllFilters")}</Text>
+      </Pressable>
+    </View>
+  );
+
+  // Only listings with real coordinates get a pin, so that is what the pill counts.
+  const pinnedCount = React.useMemo(
+    () =>
+      sortedResults.filter(
+        (p) => typeof p.location_lat === "number" && typeof p.location_lng === "number"
+      ).length,
+    [sortedResults]
+  );
+
+  const showingPill = (
+    <View style={styles.showingPill} pointerEvents="none">
+      <Text style={styles.showingText}>
+        {t("search.results.showingOf", {
+          shown: formatLocalizedNumber(pinnedCount, language),
+          total: formatLocalizedNumber(totalCount, language),
+        })}
+      </Text>
+    </View>
+  );
 
   // ── Search card, before any search ───────────────────────────────────────
   const landingContent = (
@@ -617,15 +625,15 @@ export function BrowseScreen({
               ) : null}
             </View>
           </View>
-        ) : (
-          /* ── Properties Grid / List ─────────────────────────────────────── */
-          feedLoading ? (
-            <PropertySkeletonFeed />
-          ) : isError && results.length === 0 ? (
-            <View style={styles.centerContainer}>
-              <Text style={styles.emptyTitle}>{t("browse.loadErrorTitle")}</Text>
-              <Text style={styles.emptySubtitle}>{t("browse.loadErrorSubtitle")}</Text>
-              <AppButton icon={RotateCcw} label={t("browse.retry")} onPress={() => void refresh()} />
+        </PropertyResultsMap>
+      ) : (
+        <>
+          <View style={styles.breadcrumbRow}>
+            <View style={styles.breadcrumb}>
+              <Text style={styles.breadcrumbText} numberOfLines={1}>
+                {heading}
+              </Text>
+              <ChevronRight color={colorTokens.muted} size={15} strokeWidth={2.2} />
             </View>
             {searchActions(false)}
           </View>
@@ -634,14 +642,8 @@ export function BrowseScreen({
             <View style={styles.mainCol}>
               <View style={styles.toolbar}>
                 <View style={styles.toolbarLeft}>
-                  <LiveText style={styles.resultCountText}>
-                    {totalCount === 1
-                      ? t("browse.propertyFound", {
-                          count: formatLocalizedNumber(totalCount, language),
-                        })
-                      : t("browse.propertiesFound", {
-                          count: formatLocalizedNumber(totalCount, language),
-                        })}
+                  <LiveText accessibilityRole="header" aria-level={1} style={styles.resultCountText}>
+                    {resultsHeading}
                   </LiveText>
                   {activeFilterCount > 0 ? (
                     <Pressable
@@ -725,7 +727,14 @@ export function BrowseScreen({
   const mobileContent = (
     <>
       <View style={styles.mobileSubHeader}>
-        <LiveText style={styles.mobileResultCount}>{countText}</LiveText>
+        <LiveText
+          accessibilityRole="header"
+          aria-level={1}
+          numberOfLines={2}
+          style={styles.mobileResultCount}
+        >
+          {resultsHeading}
+        </LiveText>
 
         <View style={styles.mobileSubHeaderRight}>
           {viewSwitcher}

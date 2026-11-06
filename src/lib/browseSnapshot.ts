@@ -45,11 +45,11 @@ function allAreas(): Promise<Area[]> {
 
 /**
  * What a card needs, no more: the snapshot is published inside the page.
- * Descriptions are long and cards do not show them; owners' phone numbers
- * and sign-in identities stay out of the HTML (the browser fetches them).
+ * Descriptions are long and cards do not show them; owners' phone and WhatsApp
+ * numbers and sign-in identities stay out of the HTML (the browser fetches them).
  */
 function cardFields({ description, user, ...rest }: Property & { phone?: unknown }): Property {
-  const { phone, ...card } = rest;
+  const { phone, whatsapp_number, ...card } = rest;
   return { ...card, description: null, user: user ? { ...user, auth_identities: [] } : user };
 }
 

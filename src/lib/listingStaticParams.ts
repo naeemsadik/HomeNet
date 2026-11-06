@@ -44,9 +44,9 @@ export async function listingStaticParams(): Promise<{ id: string }[]> {
  * price, photos, text and structured data), so crawlers and link previews that
  * do not run JavaScript see the listing rather than a spinner.
  *
- * The snapshot is published inside the page, so the owner's phone numbers and
- * sign-in identities are left out: the browser fetches them when the page
- * loads, as before. Null when the API fails: the page then exports as the
+ * The snapshot is published inside the page, so the owner's phone and WhatsApp
+ * numbers and sign-in identities are left out: the browser fetches them when
+ * the page loads, as before. Null when the API fails: the page then exports as the
  * loading state, which is noindex, and the sitemap leaves it out.
  */
 export async function listingSnapshot(id: string): Promise<PropertyDetail | null> {
@@ -56,7 +56,7 @@ export async function listingSnapshot(id: string): Promise<PropertyDetail | null
     );
     const detail = body?.data;
     if (!detail?.id) throw new Error("API response has no listing");
-    const { phone, ...publicDetail } = detail;
+    const { phone, whatsapp_number, ...publicDetail } = detail;
     return { ...publicDetail, user: detail.user ? { ...detail.user, auth_identities: [] } : null };
   } catch (error) {
     console.warn(`WARNING: listing ${id} exported without its content: ${(error as Error).message}`);
