@@ -32,6 +32,9 @@ import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { SellerShell } from "@/features/seller/components/SellerShell";
+import { SUPPORT_EMAIL } from "@/content/legal";
+import { OWNER_UNARCHIVE_ENABLED } from "@/lib/features";
+import { openExternalUrl } from "@/lib/safeUrl";
 import { displaySubtype } from "../constants/holidayStay";
 import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
 import { useMyProperties } from "../hooks/useMyProperties";
@@ -159,7 +162,8 @@ export function MyPropertiesScreen() {
     setActiveMenu(null);
     const confirmed = await confirmAction(
       t("seller.archiveConfirmTitle"),
-      t("seller.archiveConfirmMessage", { title }),
+      // Owners can't restore an archive themselves yet, so say so before they do it.
+      t(OWNER_UNARCHIVE_ENABLED ? "seller.archiveConfirmMessage" : "seller.archiveConfirmMessageNoUndo", { title }),
       { confirmLabel: t("seller.actions.archive") }
     );
     if (!confirmed) return;
@@ -170,7 +174,24 @@ export function MyPropertiesScreen() {
     }
   };
 
+  // Until the API lets owners restore their own archive (OWNER_UNARCHIVE_ENABLED),
+  // "Ask to restore" opens an email to support naming the listing, instead of a
+  // restore call that would report success and change nothing.
+  const handleAskToRestore = async (id: string, title: string) => {
+    setActiveMenu(null);
+    const confirmed = await confirmAction(
+      t("seller.restoreViaSupportTitle"),
+      t("seller.restoreViaSupportMessage", { title }),
+      { confirmLabel: t("seller.restoreViaSupportConfirm") }
+    );
+    if (!confirmed) return;
+    const subject = encodeURIComponent(t("seller.restoreViaSupportSubject"));
+    const body = encodeURIComponent(`${title}\nListing ID: ${id}`);
+    openExternalUrl(`mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`);
+  };
+
   const handleUnarchive = async (id: string, title: string) => {
+    if (!OWNER_UNARCHIVE_ENABLED) return handleAskToRestore(id, title);
     setActiveMenu(null);
     const confirmed = await confirmAction(
       t("seller.unarchiveConfirmTitle"),
@@ -486,7 +507,7 @@ export function MyPropertiesScreen() {
                         {item.status === "archived" ? (
                           <Pressable onPress={() => handleUnarchive(item.id, item.title)} style={styles.mobileActionBtn}>
                             <ArchiveRestore color="#04cf92" size={14} />
-                            <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.unarchive")}</Text>
+                            <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t(OWNER_UNARCHIVE_ENABLED ? "seller.actions.unarchive" : "seller.actions.askToRestore")}</Text>
                           </Pressable>
                         ) : canArchive(item.status) ? (
                           <Pressable onPress={() => handleArchive(item.id, item.title)} style={styles.mobileActionBtn}>
@@ -559,7 +580,7 @@ export function MyPropertiesScreen() {
                   onPress={() => handleUnarchive(activeMenu.id, activeMenu.title)}
                 >
                   <ArchiveRestore color="#04cf92" size={15} />
-                  <Text style={[styles.menuItemText, { color: "#04cf92" }]}>{t("seller.actions.unarchive")}</Text>
+                  <Text style={[styles.menuItemText, { color: "#04cf92" }]}>{t(OWNER_UNARCHIVE_ENABLED ? "seller.actions.unarchive" : "seller.actions.askToRestore")}</Text>
                 </Pressable>
               ) : canArchive(activeMenu.status) ? (
                 <Pressable

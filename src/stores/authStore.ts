@@ -159,6 +159,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   fetchUserRoles: async (userId) => {
     try {
       const response = await getUserRoles(userId);
+      // Each role arrives with its permissions (GET /v1/roles/user/:id, backend PR 93).
       set({ userRoles: response.data ?? [] });
     } catch {
       set({ userRoles: [] });
