@@ -24,7 +24,7 @@ import {
   Phone,
   ShieldCheck,
 } from "@/components/icons";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
@@ -954,6 +954,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
     paddingVertical: 12,
+    minHeight: layout.touchTarget,
   },
   actionBtnText: {
     color: colorTokens.brandText,

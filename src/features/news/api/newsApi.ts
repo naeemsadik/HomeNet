@@ -200,6 +200,12 @@ function filterCuratedGuides(params: FetchPropertyGuidesParams): PropertyGuideLi
  * The API has no `/v1/guides` module yet. Asking anyway logged a 404 in the
  * browser console on every home and guides page view before the curated
  * fallback kicked in. Flip this once the backend ships the endpoint.
+ *
+ * While it is off, every guide is curated and exported as its own page, so
+ * vercel.json has no /guides/:slug rewrite and an unknown slug answers a real
+ * 404. Guides from the API would not be exported: when flipping this, add
+ * { "source": "/guides/:slug", "destination": "/guides/[slug]" } back to its
+ * rewrites.
  */
 const GUIDES_API_ENABLED = false;
 

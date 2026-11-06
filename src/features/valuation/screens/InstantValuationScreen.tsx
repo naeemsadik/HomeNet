@@ -70,7 +70,7 @@ export function InstantValuationScreen() {
             <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.4} />
             <Text style={styles.eyebrowText}>{t("valuation.engineEyebrow")}</Text>
           </View>
-          <Text style={[styles.mainHeading, isPhone && styles.mainHeadingPhone]}>
+          <Text accessibilityRole="header" aria-level={1} style={[styles.mainHeading, isPhone && styles.mainHeadingPhone]}>
             {t("valuation.title")}
           </Text>
           <Text style={styles.subHeading}>

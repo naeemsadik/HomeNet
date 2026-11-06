@@ -22,7 +22,7 @@ export function AboutScreen() {
     <AppChrome active="home">
       <View style={[styles.intro, isPhone && styles.introPhone]}>
         <Eyebrow style={styles.eyebrow}>{t("about.eyebrow")}</Eyebrow>
-        <Text style={[styles.title, isPhone && styles.titlePhone]}>
+        <Text accessibilityRole="header" aria-level={1} style={[styles.title, isPhone && styles.titlePhone]}>
           {t("about.title")}
         </Text>
         <Text style={[styles.copy, isPhone && styles.copyPhone]}>

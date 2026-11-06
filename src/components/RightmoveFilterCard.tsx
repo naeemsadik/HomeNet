@@ -269,15 +269,19 @@ export function RightmoveFilterCard({
           </Pressable>
         </View>
       ) : (
-        <Pressable
-          onPress={() => setIsEditingTitle(true)}
-          style={[styles.titlePressable, webPointer]}
-          accessibilityRole="button"
-          accessibilityLabel={t("search.rightmove.editLocationAria")}
-        >
-          <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>{heading}</Text>
-          <Edit3 color={colorTokens.muted} size={16} style={styles.editIcon} />
-        </Pressable>
+        // The page's <h1> on /buy, /rent and /sold, which open on this card. It
+        // goes around the button: a heading inside a button is invalid HTML.
+        <View accessibilityRole="header" aria-level={1}>
+          <Pressable
+            onPress={() => setIsEditingTitle(true)}
+            style={[styles.titlePressable, webPointer]}
+            accessibilityRole="button"
+            accessibilityLabel={`${heading}: ${t("search.rightmove.editLocationAria")}`}
+          >
+            <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>{heading}</Text>
+            <Edit3 color={colorTokens.muted} size={16} style={styles.editIcon} />
+          </Pressable>
+        </View>
       )}
     </View>
   );
