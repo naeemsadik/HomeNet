@@ -53,6 +53,7 @@ import { ReportListingModal } from "../components/ReportListingModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
 import { PropertyLocationSection, type NearbyPlace } from "../components/PropertyLocationSection";
 import { WhatsAppIcon } from "../components/WhatsAppIcon";
+import { contactPhone, listerDisplay } from "../utils/lister";
 import { NoTranslateText } from "@/components/NoTranslateText";
 
 import {
@@ -123,6 +124,7 @@ export function PropertyDetailScreen() {
       .filter((url): url is string => Boolean(url));
 
     const identity = apiDetail.user?.auth_identities?.[0];
+    const lister = listerDisplay(apiDetail.user, t("propertyDetail.verifiedSeller"));
     const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
 
     const isHoliday = isHolidayStayType(apiDetail.listing_type);
@@ -162,11 +164,13 @@ export function PropertyDetailScreen() {
       amenities: amenityList,
       mediaImages: images,
       seller: {
-        name: apiDetail.user?.full_name || t("propertyDetail.verifiedSeller"),
-        agency: null as string | null,
+        // A company shows its own name and logo; its contact person is the byline.
+        name: lister.isCompany ? apiDetail.user?.full_name || lister.name : lister.name,
+        agency: lister.isCompany ? lister.name : (null as string | null),
         isVerified: Boolean(apiDetail.is_verified),
-        avatarUrl: apiDetail.user?.avatar_url || null,
-        phone: identity?.phone || null,
+        avatarUrl: lister.logoUrl,
+        phone: contactPhone(apiDetail),
+        whatsapp: apiDetail.whatsapp_number || null,
         email: identity?.email || "",
       },
       // Placeholder, like aiValuation: no API field yet, so the
@@ -213,7 +217,8 @@ export function PropertyDetailScreen() {
   };
 
   const openWhatsApp = (message: string) => {
-    const rawPhone = property?.seller.phone;
+    // The WhatsApp number the owner gave, else the number they can be called on.
+    const rawPhone = property?.seller.whatsapp || property?.seller.phone;
     if (!rawPhone) {
       notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;

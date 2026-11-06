@@ -156,6 +156,8 @@ export function PropertyCreateWizard() {
       ),
     },
     virtual_tour_url: store.virtualTourUrl.trim() || undefined,
+    phone: store.phone.trim() ? [store.phone.trim()] : undefined,
+    whatsapp_number: store.whatsappNumber.trim().replace(/[\s-]/g, "") || undefined,
     status: "draft",
   });
 

@@ -12,6 +12,9 @@ export interface PropertyDetailUser {
   id: string;
   full_name: string;
   avatar_url: string | null;
+  account_type?: "individual" | "company";
+  company_name?: string | null;
+  company_logo_url?: string | null;
   auth_identities: { email: string | null; phone: string | null }[];
 }
 
@@ -37,6 +40,9 @@ export interface PropertyDetail {
   location_lat: number | null;
   location_lng: number | null;
   address: string | null;
+  /** Numbers the owner put on the listing, first one first. */
+  phone?: string[];
+  whatsapp_number?: string | null;
   amenities: Record<string, unknown> | null;
   status: "draft" | "active" | "pending" | "sold" | "archived";
   is_verified: boolean;

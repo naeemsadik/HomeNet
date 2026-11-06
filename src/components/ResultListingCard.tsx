@@ -10,6 +10,7 @@ import {
   LandPlot,
   Mail,
   Maximize2,
+  MessageSquare,
   Phone,
   ShieldCheck,
 } from "@/components/icons";
@@ -19,10 +20,12 @@ import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import {
   formatLocalizedNumber,
   formatLocalizedPrice,
+  isPriceOnRequest,
   translateAreaUnit,
   useTranslation,
 } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
+import { contactPhone, listerDisplay, whatsappUrl } from "@/features/property/utils/lister";
 
 export interface ResultListingCardProps {
   property: Property;
@@ -67,7 +70,8 @@ function ResultListingCardComponent({
   );
   const photoCount = property._count?.media ?? images.length;
 
-  const isRent = property.listing_type === "rent";
+  // "Contact for price" is words, so a "/mo" after it would be nonsense.
+  const showPerMonth = property.listing_type === "rent" && !isPriceOnRequest(property.price);
   const price = formatLocalizedPrice(property.price, property.price_currency || "BDT", language);
 
   const amenities = (property.amenities ?? {}) as Record<string, unknown>;
@@ -88,8 +92,12 @@ function ResultListingCardComponent({
 
   const address =
     [property.address, property.area?.name, property.area?.city]
-      .filter(Boolean)
-      .filter((part, i, all) => all.indexOf(part) === i)
+      .filter((part): part is string => Boolean(part))
+      // An address that already names the area or city does not need it again.
+      .filter(
+        (part, i, all) =>
+          !all.slice(0, i).some((earlier) => earlier.toLowerCase().includes(part.toLowerCase())),
+      )
       .join(", ") || t("propertyCard.locationUnavailable");
 
   const recency = useMemo(() => {
@@ -108,9 +116,14 @@ function ResultListingCardComponent({
     });
   }, [property.published_at, property.created_at, t, language]);
 
-  const ownerName = property.user?.full_name || t("search.results.owner");
-  const ownerPhone = property.user?.auth_identities?.find((id) => id.phone)?.phone ?? null;
-  const initials = (property.user?.full_name ?? "")
+  const lister = listerDisplay(property.user, t("search.results.owner"));
+  const ownerName = lister.name;
+  const ownerPhone = contactPhone(property);
+  const whatsappLink = whatsappUrl(
+    property.whatsapp_number,
+    t("search.results.whatsappMessage", { title: property.title }),
+  );
+  const initials = lister.name
     .split(/\s+/)
     .map((w) => w[0])
     .filter(Boolean)
@@ -120,6 +133,10 @@ function ResultListingCardComponent({
 
   const open = () => {
     if (property.id) router.push(`/property/${property.id}` as never);
+  };
+
+  const chat = () => {
+    if (whatsappLink && isSafeLinkUrl(whatsappLink)) openExternalUrl(whatsappLink);
   };
 
   const call = () => {
@@ -138,14 +155,23 @@ function ResultListingCardComponent({
     />
   );
 
-  // Three or more photos make a collage: one large, two stacked beside it.
-  const collage = images.length >= 3 && !compact;
+  // A verified listing is the featured kind: its photos make a collage (one
+  // large, two stacked beside it) over a dark price band. Every other listing
+  // shows two photos side by side over a light band.
+  const featured = Boolean(property.is_verified);
+  const collage = featured && images.length >= 3 && !compact;
+  const pair = !collage && images.length >= 2 && !compact;
   const media = (
     <View style={styles.mediaFrame}>
       {images.length === 0 ? (
         <View style={styles.placeholder}>
           <LandPlot color={colorTokens.subtle} size={30} />
           <Text style={styles.placeholderText}>{t("propertyCard.noPhoto")}</Text>
+        </View>
+      ) : pair ? (
+        <View style={styles.collage}>
+          {photo(images[0], 600, MEDIA_HEIGHT * 2, styles.pairPhoto, property.title)}
+          {photo(images[1], 600, MEDIA_HEIGHT * 2, styles.pairPhoto, `${property.title} 2`)}
         </View>
       ) : collage ? (
         <View style={styles.collage}>
@@ -189,10 +215,15 @@ function ResultListingCardComponent({
           style={[styles.mediaCol, compact && styles.mediaColCompact, webPointer]}
         >
           {media}
-          <View style={styles.priceBand}>
-            <Text style={styles.priceText}>
+          <View style={[styles.priceBand, featured && styles.priceBandFeatured]}>
+            <Text style={[styles.priceText, featured && styles.priceTextFeatured]}>
               {price}
-              {isRent ? <Text style={styles.priceSuffix}> {t("propertyCard.perMonth")}</Text> : null}
+              {showPerMonth ? (
+                <Text style={[styles.priceSuffix, featured && styles.priceSuffixFeatured]}>
+                  {" "}
+                  {t("propertyCard.perMonth")}
+                </Text>
+              ) : null}
             </Text>
           </View>
         </Pressable>
@@ -253,9 +284,15 @@ function ResultListingCardComponent({
           {/* Contact row: siblings of the link above, never inside it. */}
           <View style={styles.contactRow}>
             <View style={styles.owner}>
-              <View style={styles.avatar}>
-                {property.user?.avatar_url ? (
-                  <Image source={{ uri: property.user.avatar_url }} style={styles.fill} contentFit="cover" />
+              {/* An agent's logo or an owner's photo; initials when there is none. */}
+              <View style={[styles.avatar, lister.logoUrl ? styles.avatarLogo : null]}>
+                {lister.logoUrl ? (
+                  <Image
+                    source={{ uri: lister.logoUrl }}
+                    accessibilityLabel={ownerName}
+                    style={styles.fill}
+                    contentFit="contain"
+                  />
                 ) : (
                   <Text style={styles.avatarText}>{initials || "H"}</Text>
                 )}
@@ -265,12 +302,26 @@ function ResultListingCardComponent({
                   {ownerPhone ?? ownerName}
                 </Text>
                 <Text numberOfLines={1} style={styles.ownerSub}>
-                  {property.is_verified ? t("search.results.verifiedListing") : t("search.results.directOwner")}
+                  {lister.isCompany
+                    ? ownerName
+                    : property.is_verified
+                    ? t("search.results.verifiedListing")
+                    : t("search.results.directOwner")}
                 </Text>
               </View>
             </View>
 
             <View style={styles.actions}>
+              {whatsappLink ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t("search.results.whatsapp")}
+                  onPress={chat}
+                  style={({ hovered }: any) => [styles.iconBtn, hovered && styles.iconBtnHover, webPointer]}
+                >
+                  <MessageSquare color={colorTokens.ink} size={17} strokeWidth={2} />
+                </Pressable>
+              ) : null}
               {ownerPhone ? (
                 <Pressable
                   accessibilityRole="button"
@@ -285,9 +336,10 @@ function ResultListingCardComponent({
                 accessibilityRole="button"
                 accessibilityLabel={t("search.results.email")}
                 onPress={open}
-                style={({ hovered }: any) => [styles.iconBtn, hovered && styles.iconBtnHover, webPointer]}
+                style={({ hovered }: any) => [styles.saveBtn, hovered && styles.iconBtnHover, webPointer]}
               >
                 <Mail color={colorTokens.ink} size={17} strokeWidth={2} />
+                <Text style={styles.saveText}>{t("search.results.email")}</Text>
               </Pressable>
               <Pressable
                 accessibilityRole="button"
@@ -324,7 +376,7 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#DDE3E1",
+    borderColor: colorTokens.divider,
     overflow: "hidden",
   },
   cardHighlighted: {
@@ -410,19 +462,32 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 12,
   },
+  pairPhoto: {
+    flex: 1,
+    height: "100%",
+  },
   priceBand: {
-    backgroundColor: colorTokens.ink,
+    backgroundColor: colorTokens.surfaceSunken,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
+  priceBandFeatured: {
+    backgroundColor: colorTokens.ink,
+  },
   priceText: {
-    color: colorTokens.onInk,
+    color: colorTokens.ink,
     fontFamily: fonts.extraBold,
     fontSize: 20,
+  },
+  priceTextFeatured: {
+    color: colorTokens.onInk,
   },
   priceSuffix: {
     fontFamily: fonts.medium,
     fontSize: 13,
+    color: colorTokens.muted,
+  },
+  priceSuffixFeatured: {
     color: "rgba(255, 255, 255, 0.8)",
   },
   detailCol: {
@@ -439,7 +504,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   detailHover: {
-    backgroundColor: "#FAFCFB",
+    backgroundColor: colorTokens.surfaceSunken,
   },
   address: {
     color: colorTokens.ink,
@@ -514,6 +579,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
+  },
+  avatarLogo: {
+    backgroundColor: colorTokens.surface,
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
   },
   avatarText: {
     color: colorTokens.onInk,
