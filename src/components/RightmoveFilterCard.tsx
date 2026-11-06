@@ -338,13 +338,29 @@ export function RightmoveFilterCard({
 
       {/* ─── Grid Controls (3 columns x 2 rows on desktop) ─────────────── */}
       <View style={[styles.grid, isDesktop && styles.gridDesktop, !isDesktop && styles.gridResponsive]}>
-        {/* ROW 1, COL 1: Area */}
+        {/* Area leads, on a row of its own */}
         {showArea ? (
-          <View style={[styles.col, colStyle]}>
+          <View style={[styles.col, colStyle, isDesktop && !isCompact && styles.colFull]}>
             <Text style={styles.fieldLabel}>{t("search.rightmove.area")}</Text>
             {areaSelect}
           </View>
         ) : null}
+
+        {/* ROW 1, COL 1: Search radius, reads as "around the area above", so it
+            follows the area rather than leading the bar. */}
+        <View style={[styles.col, colStyle]}>
+          <Text style={styles.fieldLabel}>{t("search.rightmove.searchRadius")}</Text>
+          <SelectField
+            accessibilityLabel={t("search.rightmove.searchRadius")}
+            value={radiusAvailable ? filters.radius : ""}
+            options={radiusOptions}
+            disabled={!radiusAvailable}
+            onChange={(val) => handleUpdate({ radius: val })}
+          />
+          <Text style={styles.fieldHint}>
+            {!radiusAvailable && radiusHint ? radiusHint : t("search.rightmove.pickNeighbourhood")}
+          </Text>
+        </View>
 
         {/* ROW 1, COL 2: Property types */}
         <View style={[styles.col, colStyle]}>
@@ -413,22 +429,6 @@ export function RightmoveFilterCard({
           </View>
         </View>
 
-        {/* ROW 2, COL 1: Search radius, reads as "around the area above", so it
-            follows the area rather than leading the bar. */}
-        <View style={[styles.col, colStyle]}>
-          <Text style={styles.fieldLabel}>{t("search.rightmove.searchRadius")}</Text>
-          <SelectField
-            accessibilityLabel={t("search.rightmove.searchRadius")}
-            value={radiusAvailable ? filters.radius : ""}
-            options={radiusOptions}
-            disabled={!radiusAvailable}
-            onChange={(val) => handleUpdate({ radius: val })}
-          />
-          <Text style={styles.fieldHint}>
-            {!radiusAvailable && radiusHint ? radiusHint : t("search.rightmove.pickNeighbourhood")}
-          </Text>
-        </View>
-
         {/* ROW 2, COL 2: No. of bedrooms */}
         <View style={[styles.col, colStyle]}>
           <Text style={styles.fieldLabel}>{t("filters.bedrooms")}</Text>
@@ -462,6 +462,21 @@ export function RightmoveFilterCard({
           ) : null}
           <View style={styles.actionRow}>
             <Pressable
+              onPress={handleSearchPress}
+              style={({ pressed }) => [
+                styles.searchBtn,
+                webPointer,
+                pressed && styles.searchBtnPressed,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={t("search.rightmove.searchProperties")}
+            >
+              <Text style={styles.searchBtnText} numberOfLines={1}>
+                {searchLabel}
+              </Text>
+            </Pressable>
+
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel={
                 activeCount > 0
@@ -494,21 +509,6 @@ export function RightmoveFilterCard({
                   </Text>
                 </View>
               ) : null}
-            </Pressable>
-
-            <Pressable
-              onPress={handleSearchPress}
-              style={({ pressed }) => [
-                styles.searchBtn,
-                webPointer,
-                pressed && styles.searchBtnPressed,
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={t("search.rightmove.searchProperties")}
-            >
-              <Text style={styles.searchBtnText} numberOfLines={1}>
-                {searchLabel}
-              </Text>
             </Pressable>
           </View>
         </View>
@@ -656,9 +656,12 @@ const styles = StyleSheet.create({
   colDesktop: {
     flexGrow: 0,
     flexShrink: 1,
-    flexBasis: "23%",
+    flexBasis: "30%",
     minWidth: 200,
     maxWidth: "100%",
+  },
+  colFull: {
+    flexBasis: "100%",
   },
   colResponsive: {
     width: "100%",
@@ -669,7 +672,7 @@ const styles = StyleSheet.create({
   // and flex-end dropped the buttons below every other control in the row.
   actionCol: {
     justifyContent: "flex-start",
-    flexBasis: "48%",
+    flexBasis: "30%",
   },
   colCompact: {
     flexBasis: "48%",
@@ -682,9 +685,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   actionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 8,
   },
   fieldLabel: {
     fontFamily: fonts.medium,
@@ -796,7 +799,9 @@ const styles = StyleSheet.create({
   },
 
   searchBtn: {
-    flex: 1,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
     height: 44,
     backgroundColor: colorTokens.brand,
     borderRadius: 8,
