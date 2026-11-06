@@ -81,7 +81,7 @@ for (const file of htmlFiles(DIST)) {
   for (const m of html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)) {
     const body = m[2];
     if (!body.trim()) continue;
-    // JSON-LD structured data and the loader data block (scripts/loader-data-json.mjs)
+    // JSON-LD structured data and the build snapshot (src/lib/buildSnapshot.web.tsx)
     // are data blocks the browser never runs, so script-src does not govern them.
     if (/\btype=["']?application\/(ld\+)?json/i.test(m[1])) continue;
     inlineCount++;

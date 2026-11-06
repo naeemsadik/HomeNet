@@ -1,52 +1,52 @@
-import type { ReactNode } from "react";
-import { useLoaderData, usePathname } from "expo-router";
+import { useState, type ReactNode } from "react";
+import { usePathname } from "expo-router";
+import { buildSnapshotJson } from "@/lib/buildTimeApi";
 
-type LoaderDataGlobal = { __EXPO_ROUTER_LOADER_DATA__?: Record<string, unknown> };
+const BLOCK_ID = "build-snapshot";
 
 /**
- * Expo Router writes a page's loader data as an inline script that sets
- * globalThis.__EXPO_ROUTER_LOADER_DATA__. script-src has no 'unsafe-inline',
- * so scripts/loader-data-json.mjs rewrites that script into a JSON data block
- * after export (the browser never runs it), and this puts it back on the
- * global before React hydrates. Runs once, when app/_layout.tsx imports it.
+ * The block in the HTML the visitor landed on. Read once: it leaves the page
+ * with the first client-side navigation.
  */
-function adoptLoaderDataBlock() {
-  const global = globalThis as LoaderDataGlobal;
-  if (typeof document === "undefined" || global.__EXPO_ROUTER_LOADER_DATA__) return;
-  const block = document.getElementById("expo-router-data");
-  if (block?.getAttribute("type") !== "application/json" || !block.textContent) return;
-  try {
-    const data = JSON.parse(block.textContent) as Record<string, unknown>;
-    // useLoaderData looks the data up by path plus query string, and a shared
-    // link carries one ("?fbclid=…", "?utm_source=…"). The page was exported
-    // for the bare path, so file the data under both, or the lookup misses and
-    // the page suspends to fetch it again.
-    const path = window.location.pathname;
-    const search = new URLSearchParams(window.location.search).toString();
-    if (search && data[path] !== undefined) data[`${path}?${search}`] = data[path];
-    global.__EXPO_ROUTER_LOADER_DATA__ = data;
-  } catch {
-    // No snapshot: the page fetches its data in the browser, as without loaders.
+let landing: { path: string | null; json: string } | null | undefined;
+function landingBlock() {
+  if (landing === undefined) {
+    const block = document.getElementById(BLOCK_ID);
+    landing = block?.textContent ? { path: block.getAttribute("data-path"), json: block.textContent } : null;
   }
+  return landing;
 }
-adoptLoaderDataBlock();
+
+function snapshotJson(pathname: string): string | undefined {
+  if (typeof document === "undefined") return buildSnapshotJson(pathname);
+  const block = landingBlock();
+  return block?.path === pathname ? block.json : undefined;
+}
 
 /**
- * Renders the page with its route loader's build-time data when the page was
- * exported with it, else with `undefined`.
+ * Renders the page with the data the build fetched for it (see buildTimeApi),
+ * else with `undefined`.
  *
- * Only the page the visitor landed on has that data in its HTML. On a
- * client-side navigation useLoaderData would fetch /_expo/loaders/<path>, a
- * file that does not exist for a listing created after the build, so other
- * pages skip it and fetch from the API as before.
+ * The data goes into the page as a JSON block, so the browser hydrates from the
+ * same data the HTML was rendered with. It is a data block the browser never
+ * runs, so script-src, which has no 'unsafe-inline', does not apply to it.
+ *
+ * Only the page the visitor landed on has that block. Other pages, and listings
+ * created after the build, fetch from the API as usual.
  */
 export function BuildSnapshot<T>({ render }: { render: (snapshot: T | undefined) => ReactNode }) {
   const pathname = usePathname();
-  const exported = typeof window === "undefined" || Boolean((globalThis as LoaderDataGlobal).__EXPO_ROUTER_LOADER_DATA__?.[pathname]);
-  return exported ? <WithLoaderData render={render} /> : <>{render(undefined)}</>;
-}
-
-function WithLoaderData<T>({ render }: { render: (snapshot: T | undefined) => ReactNode }) {
-  const data = useLoaderData() as T | null | undefined;
-  return <>{render(data ?? undefined)}</>;
+  // Decided once: a screen stays mounted under the next one while the pathname
+  // moves on, and switching branches here would remount the whole page.
+  const [block] = useState(() => {
+    const json = snapshotJson(pathname);
+    return json === undefined ? null : { path: pathname, json, data: JSON.parse(json) as T };
+  });
+  if (!block) return <>{render(undefined)}</>;
+  return (
+    <>
+      <script id={BLOCK_ID} type="application/json" data-path={block.path} dangerouslySetInnerHTML={{ __html: block.json }} />
+      {render(block.data)}
+    </>
+  );
 }

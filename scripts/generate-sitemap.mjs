@@ -1,12 +1,12 @@
 // Writes dist/sitemap.xml: the public pages, the area pages that have
 // listings, the guides and every listing page the build exported. Runs after
 // `expo export` in `npm run build` and reads what the export saw, without
-// calling the API again (by then the export's loaders have used up its rate
-// limit):
-//   - each listing page's loader data (dist/_expo/loaders/property/<id>) is a
-//     listing that exists at this deploy, with the date it last changed;
-//   - each area page's (dist/_expo/loaders/<intent>/<slug>) says whether the
-//     area had any listings, and when the newest of them changed.
+// calling the API again (by then the export has used up its rate limit), from
+// the snapshot in each page's HTML (src/lib/buildSnapshot.web.tsx):
+//   - a listing page with one (dist/property/<id>.html) is a listing that
+//     exists at this deploy, with the date it last changed;
+//   - an area page's (dist/<intent>/<slug>.html) says whether the area had any
+//     listings, and when the newest of them changed.
 // So the sitemap lists exactly the pages that were pre-rendered.
 //
 // An area with no listings is exported noindex (AreaLandingScreen) and left
@@ -17,7 +17,7 @@
 //
 // robots.txt, llms.txt and llms-full.txt are plain files in public/.
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -110,42 +110,39 @@ function guides() {
   });
 }
 
-/** A loader data file the export wrote, parsed; null when missing or unreadable. */
-function loaderData(...segments) {
-  const file = resolve(DIST, "_expo", "loaders", ...segments);
-  if (!existsSync(file) || !statSync(file).isFile()) return null;
-  try {
-    return JSON.parse(readFileSync(file, "utf8"));
-  } catch {
-    return null;
-  }
+/** The build snapshot in an exported page's HTML, parsed; null when the page has none. */
+function pageSnapshot(...segments) {
+  const file = resolve(DIST, ...segments);
+  if (!existsSync(file)) return null;
+  const block = readFileSync(file, "utf8").match(/<script[^>]*\bid="build-snapshot"[^>]*>([\s\S]*?)<\/script>/);
+  return block ? JSON.parse(block[1]) : null;
 }
 
 /**
  * The listing pages the export wrote, with the day each listing last changed.
- * Ids come from the file names, so a listing whose details the build could not
- * fetch (its loader data is null) is still listed, just without a date. The
- * "[id]" shell is not a listing.
+ * A page with no snapshot is left out: the "[id]" shell, /property/create, and
+ * a listing the build could not fetch, which exports noindex until the next
+ * build.
  */
 function exportedListings() {
-  const dir = resolve(DIST, "_expo", "loaders", "property");
+  const dir = resolve(DIST, "property");
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
-    .filter((name) => !name.includes("[") && statSync(resolve(dir, name)).isFile())
+    .filter((name) => name.endsWith(".html"))
     .sort()
-    .map((id) => {
-      const detail = loaderData("property", id)?.detail;
-      return { id, lastmod: detail ? isoDay(detail.updated_at || detail.created_at) : null };
+    .flatMap((name) => {
+      const detail = pageSnapshot("property", name);
+      return detail ? [{ id: name.slice(0, -".html".length), lastmod: isoDay(detail.updated_at || detail.created_at) }] : [];
     });
 }
 
 /**
- * What the export saw for an area page: its listings, or null when there is no
- * loader file or the API failed at build time. Unknown is kept in the
- * sitemap; only an area known to be empty is left out.
+ * What the export saw for an area page: its listings, or null when the API
+ * failed at build time. Unknown is kept in the sitemap; only an area known to
+ * be empty is left out.
  */
 function areaListings(intent, slug) {
-  return loaderData(intent, slug)?.results ?? null;
+  return pageSnapshot(intent, `${slug}.html`);
 }
 
 function newestDay(items) {

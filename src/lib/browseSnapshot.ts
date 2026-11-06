@@ -6,9 +6,9 @@ import { buildTimeGet } from "@/lib/buildTimeApi";
 import type { ApiResponse, Area } from "@/types/api";
 
 /**
- * The first page of a browse page's results as the build saw them, for the
- * loaders of /buy, /rent, /buy/<area> and /rent/<area>. The page renders it
- * until the live feed answers, so the exported HTML lists real listings, with
+ * The first page of a browse page's results as the build saw them, for
+ * /buy/<area> and /rent/<area>. The page renders it until the live feed
+ * answers, so the exported HTML lists real listings, with
  * the real count, instead of a skeleton and "0 properties found".
  *
  * It asks the API the way BrowseScreen does (filtersFromParams, resolveScope,

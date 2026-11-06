@@ -11,9 +11,8 @@ import { buildTimeGet } from "@/lib/buildTimeApi";
  * user-selected canonical". A listing created after the deploy still works: it
  * falls through to the shell (vercel.json rewrite) until the next build.
  *
- * Mirrors liveListings() in scripts/generate-sitemap.mjs, so the exported pages
- * match the sitemap. A failed API call must not fail the deploy: it returns no
- * ids and the build ships with the shell only, as before.
+ * A failed API call must not fail the deploy: it returns no ids and the build
+ * ships with the shell only, as before.
  */
 const PAGE_SIZE = 100; // the API's maximum
 const MAX_PAGES = 50; // a runaway-loop guard: 5,000 listings
@@ -40,15 +39,15 @@ export async function listingStaticParams(): Promise<{ id: string }[]> {
 }
 
 /**
- * One listing as the build saw it, for the loader in app/property/[id].tsx.
- * The page renders it into the exported HTML (title, price, photos, text and
- * structured data), so crawlers and link previews that do not run JavaScript
- * see the listing rather than a spinner.
+ * One listing as the build saw it, for generateStaticParams in
+ * app/property/[id].tsx. The page renders it into the exported HTML (title,
+ * price, photos, text and structured data), so crawlers and link previews that
+ * do not run JavaScript see the listing rather than a spinner.
  *
  * The snapshot is published inside the page, so the owner's phone numbers and
  * sign-in identities are left out: the browser fetches them when the page
- * loads, as before. Null when the API fails; the page then exports as the
- * loading state, as it did before loaders.
+ * loads, as before. Null when the API fails: the page then exports as the
+ * loading state, which is noindex, and the sitemap leaves it out.
  */
 export async function listingSnapshot(id: string): Promise<PropertyDetail | null> {
   try {

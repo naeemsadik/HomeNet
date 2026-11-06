@@ -440,7 +440,7 @@ export function BrowseScreen({
               applyFilters(applied);
               void refresh();
             }}
-            totalResults={totalCount}
+            totalResults={feedLoading ? undefined : totalCount}
           />
         ) : null}
 

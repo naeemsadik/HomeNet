@@ -1,7 +1,5 @@
 // First, so production is silent before anything else can log.
 import "@/lib/productionConsole";
-// Before the first render: a pre-rendered page's loader data, for hydration.
-import "@/lib/buildSnapshot";
 import { useEffect } from "react";
 import { useFonts } from "expo-font";
 import { QueryClientProvider } from "@tanstack/react-query";

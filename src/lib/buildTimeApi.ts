@@ -1,7 +1,7 @@
 /**
- * The API as the web build sees it: `generateStaticParams` and route loaders
- * run at export time in Node, before any page exists, so they use plain fetch
- * rather than apiClient (which brings the browser's session and storage).
+ * The API as the web build sees it: `generateStaticParams` runs at export time
+ * in Node, before any page exists, so it uses plain fetch rather than apiClient
+ * (which brings the browser's session and storage).
  */
 export const BUILD_API_URL = (process.env.EXPO_PUBLIC_API_BASE_URL || "https://api.homenetbd.com").replace(/\/$/, "");
 const TIMEOUT_MS = 15_000;
@@ -10,11 +10,11 @@ const MAX_ATTEMPTS = 4;
 const MAX_PAUSE_MS = 60_000;
 
 /**
- * Expo exports every page at once, and each area page's and listing's loader
- * calls the API. Unthrottled, that is well over a hundred requests in a burst:
- * the API answers 429 (it rate-limits per endpoint), and on Windows the open
- * sockets ran the build out of file handles. So: two requests at a time, and
- * when the API says 429, everyone waits out its Retry-After before trying again.
+ * The routes' `generateStaticParams` fetch every area's and listing's data in
+ * one go: a few hundred requests, where the API allows 60 a minute per
+ * endpoint. Unthrottled, it answers 429 and the pages export empty. So: two
+ * requests at a time, and when the API says 429, everyone waits out its
+ * Retry-After before trying again.
  */
 const MAX_IN_FLIGHT = 2;
 let inFlight = 0;
@@ -61,4 +61,44 @@ export async function buildTimeGet<T>(path: string): Promise<T> {
       release();
     }
   }
+}
+
+/**
+ * What the build fetched, for the pages to render. `generateStaticParams` fills
+ * this before Expo renders anything, and every page then renders in the same
+ * process, so the fetching happens once, at a pace the API allows.
+ *
+ * Not Expo's route loaders (unstable_useServerDataLoaders): those re-bundle and
+ * re-evaluate the whole app for every page, all at once. That took the deploy
+ * from 3 minutes to over 25, past 6 GB of memory, and it failed on Vercel.
+ *
+ * On globalThis because Expo can evaluate the server bundle more than once, and
+ * each evaluation gets its own copy of this module.
+ */
+type BuildState = { snapshots: Map<string, string>; runs: Map<string, Promise<unknown>> };
+const buildState = ((globalThis as { __HOMENET_BUILD__?: BuildState }).__HOMENET_BUILD__ ??= {
+  snapshots: new Map(),
+  runs: new Map(),
+});
+
+/** Runs `work` the first time only: Expo calls `generateStaticParams` once per manifest it builds. */
+export function oncePerBuild<T>(key: string, work: () => Promise<T>): Promise<T> {
+  const runs = buildState.runs as Map<string, Promise<T>>;
+  const run = runs.get(key) ?? work();
+  runs.set(key, run);
+  return run;
+}
+
+/** JSON that is safe inside a <script>: a listing's own text cannot close the tag. */
+const scriptSafeJson = (value: unknown) =>
+  JSON.stringify(value).replace(/[<>&\u2028\u2029]/g, (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`);
+
+/** Keeps a page's data for its render. Null is a failed fetch: nothing is kept. */
+export function setBuildSnapshot(path: string, snapshot: unknown): void {
+  if (snapshot !== null && snapshot !== undefined) buildState.snapshots.set(path, scriptSafeJson(snapshot));
+}
+
+/** The page's data as script-safe JSON, or undefined when the build has none. */
+export function buildSnapshotJson(path: string): string | undefined {
+  return buildState.snapshots.get(path);
 }

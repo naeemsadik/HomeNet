@@ -58,4 +58,14 @@ describe("what Google is asked to index", () => {
     expect(script).toContain('path: "/areas"');
     expect(script).not.toContain('path: "/explore"');
   });
+
+  it("keeps a listing the build could not fetch out of the index, so one failed fetch cannot fail the deploy", () => {
+    // Exported as the loading state, with no <h1>. Were it indexable, check-seo would stop the build.
+    const screen = read("src/features/property/screens/PropertyDetailScreen.tsx");
+    expect(screen).toMatch(/isLoading && !property[\s\S]{0,400}<PageMeta [^>]*\bnoindex\b/);
+  });
+
+  it("does not use Expo's route loaders, which re-bundle the whole app for every page and failed the deploy", () => {
+    expect(read("app.json")).not.toContain("unstable_useServerDataLoaders");
+  });
 });

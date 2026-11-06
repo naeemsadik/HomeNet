@@ -4,22 +4,22 @@ import { SEO_AREAS, seoAreaBySlug } from "@/content/areas";
 import { useTranslation } from "@/i18n";
 import { areaPageMeta } from "@/lib/areaPageMeta";
 import { browseSnapshot, type BrowseSnapshot } from "@/lib/browseSnapshot";
+import { oncePerBuild, setBuildSnapshot } from "@/lib/buildTimeApi";
 import { areaCrumbs, breadcrumbSchema, itemListSchema, type ListingIntent } from "@/lib/schema";
 import { SITE_URL } from "@/lib/seo";
 import { BrowseScreen } from "@/screens/BrowseScreen";
 import { NotFoundScreen } from "@/screens/NotFoundScreen";
 
-/** For generateStaticParams: one exported page per area. */
-export function areaStaticParams(): { area: string }[] {
-  return SEO_AREAS.map((area) => ({ area: area.slug }));
-}
-
-export type AreaLoaderData = { results: BrowseSnapshot | null };
-
-/** For the route loaders: the area's listings as the build sees them. */
-export async function areaLoaderData(intent: ListingIntent, slug: string | string[] | undefined): Promise<AreaLoaderData> {
-  const area = seoAreaBySlug(Array.isArray(slug) ? slug[0] : slug);
-  return { results: area ? await browseSnapshot(intent, area.filter ?? area.name) : null };
+/** For generateStaticParams: one exported page per area, with the area's listings as the build sees them. */
+export function areaStaticParams(intent: ListingIntent): Promise<{ area: string }[]> {
+  return oncePerBuild(`${intent} areas`, async () => {
+    await Promise.all(
+      SEO_AREAS.map(async (area) =>
+        setBuildSnapshot(`/${intent}/${area.slug}`, await browseSnapshot(intent, area.filter ?? area.name)),
+      ),
+    );
+    return SEO_AREAS.map((area) => ({ area: area.slug }));
+  });
 }
 
 /**

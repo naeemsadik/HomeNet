@@ -374,9 +374,9 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   if (isLoading && !property) {
     return (
       <AppChrome active="property">
-        {/* The exported HTML for a listing is this state: it must still name
-            the page's canonical URL, which PageMeta builds from the path. */}
-        <PageMeta title="Property for sale or rent in Bangladesh | HomeNet BD" />
+        {/* A listing the build could not fetch exports as this state. A spinner
+            has nothing to index, so it stays out until the next build. */}
+        <PageMeta title="Property for sale or rent in Bangladesh | HomeNet BD" noindex />
         <View style={styles.requestState}>
           <ActivityIndicator color="#04cf92" size="large" />
           <Text style={styles.requestError}>{t("propertyDetail.loading")}</Text>
