@@ -42,7 +42,6 @@ import { Link, router, usePathname, type Href } from "expo-router";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { Brand } from "./Brand";
 import { UserAvatar } from "./UserAvatar";
-import { AiFinderModal } from "./AiFinderModal";
 import { InstantValuationModal } from "@/features/valuation/components/InstantValuationModal";
 import { LanguageToggle } from "./LanguageToggle";
 import { DrawerLanguageDropdown } from "./DrawerLanguageDropdown";
@@ -931,7 +930,6 @@ export function AppChrome({
           />
         </View>
       </Modal>
-      <AiFinderModal />
       <InstantValuationModal />
     </View>
   );
