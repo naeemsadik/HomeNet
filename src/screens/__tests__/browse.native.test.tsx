@@ -105,7 +105,7 @@ function withDesktopWindow() {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockParams = {};
+  mockParams = { searched: "1" };
   getProps.mockResolvedValue({ data: { items: [villa], total: 1, page: 1, limit: 20 } });
   getAreas.mockResolvedValue({ data: { items: [], total: 0, page: 1, limit: 100 } });
 });
@@ -123,7 +123,7 @@ function pressableWithText(tree: ReactTestRenderer, label: string) {
 
 describe("the browse screen on Android, on the Holiday stay tab", () => {
   beforeEach(() => {
-    mockParams = { subtype: "short-let" };
+    mockParams = { subtype: "short-let", searched: "1" };
   });
 
   it("asks the API for holiday stays by their listing type, not for rentals that mention the words", async () => {
@@ -328,7 +328,7 @@ describe("the filter sheet's result count", () => {
       items: [villa, villa],
       total: ids.includes("mpur") ? 2 : 0,
     }));
-    mockParams = { filters: "open" };
+    mockParams = { filters: "open", searched: "1" };
     const tree = await mount("rent");
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 450));
@@ -356,12 +356,37 @@ describe("the filter sheet's result count", () => {
   });
 });
 
+describe("the search card before a search", () => {
+  it("opens on the search card and asks the API for nothing until Search is pressed", async () => {
+    mockParams = {};
+    withDesktopWindow();
+    const tree = await mount("buy");
+    expect(pressableWithText(tree, "Search properties")).toBeDefined();
+    expect(textOf(tree.root)).not.toContain("properties found");
+    expect(feedCalls()).toHaveLength(0);
+
+    await act(async () => pressableWithText(tree, "Search properties")!.props.onPress());
+    expect(router.setParams).toHaveBeenCalledWith(expect.objectContaining({ searched: "1" }));
+  });
+
+  it("treats a filter carried by the link as a search already", async () => {
+    mockParams = { bathrooms: "2" };
+    withDesktopWindow();
+    const tree = await mount("buy");
+    expect(textOf(tree.root)).toContain("found");
+    expect(feedCalls().length).toBeGreaterThan(0);
+  });
+});
+
 describe("the Rightmove-style results layout", () => {
   const mapView = (tree: ReactTestRenderer) =>
     tree.root.findAll((node) => (node.type as unknown) === "RNCWebView");
 
   it("swaps the desktop list for a full map from Map view, and back from List view", async () => {
     withDesktopWindow();
+    getProps.mockResolvedValue({
+      data: { items: [{ ...villa, location_lat: 23.79, location_lng: 90.41 }], total: 1, page: 1, limit: 20 },
+    });
     const tree = await mount("buy");
 
     // The sidebar's mini map is the only map while the list shows.

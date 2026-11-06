@@ -77,7 +77,18 @@ export function SelectField({
           }}
         >
           {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+            // Colours set on the option itself: Chromium browsers such as Brave
+            // draw the open list on their own background and ignore
+            // `color-scheme`, which left a dark bar's white option text on a
+            // white list.
+            <option
+              key={opt.value}
+              value={opt.value}
+              style={{
+                backgroundColor: dark ? colorTokens.ink : colorTokens.surface,
+                color: dark ? colorTokens.onInk : colorTokens.ink,
+              }}
+            >
               {opt.label}
             </option>
           ))}

@@ -25,6 +25,7 @@ import {
 } from "@/components/icons";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
+import { RightmoveFilterCard } from "@/components/RightmoveFilterCard";
 import { ResultListingCard } from "@/components/ResultListingCard";
 import { SearchFilterBar } from "@/components/SearchFilterBar";
 import { SelectField } from "@/components/SelectField";
@@ -123,7 +124,11 @@ export function BrowseScreen({
   const [isSearchSaved, setIsSearchSaved] = useState(false);
   const [isAlertOn, setIsAlertOn] = useState(false);
 
-  const { toggleSaved, isSaved } = useSavedStore();
+  const toggleSaved = useSavedStore((state) => state.toggleSaved);
+  // Subscribing to the ids is what re-renders the hearts when one is toggled.
+  const savedIds = useSavedStore((state) => state.savedIds);
+  const savedSet = React.useMemo(() => new Set(savedIds.map(String)), [savedIds]);
+  const isSaved = useCallback((id: string) => savedSet.has(String(id)), [savedSet]);
 
   const applyFilters = useCallback(
     (next: SearchFilters) => {
@@ -162,6 +167,20 @@ export function BrowseScreen({
     });
   }, [t]);
 
+  // What the card holds before Search is pressed. Nothing reaches the URL (and
+  // so the API) until then.
+  const [draftFilters, setDraftFilters] = useState<SearchFilters>(filters);
+  const startSearch = useCallback(
+    (next: SearchFilters) => {
+      setSearchStarted(true);
+      router.setParams({
+        ...filtersToParamPatch(next, { fixedLocation, current: params }),
+        searched: "1",
+      });
+    },
+    [fixedLocation, params]
+  );
+
   const apiFilters = toApiFilters(filters);
 
   const { scope, radiusAvailable } = React.useMemo(
@@ -173,7 +192,21 @@ export function BrowseScreen({
       }),
     [filters.area, filters.radius, areas]
   );
-  const feedReady = !filters.area || isCityName(filters.area) || areasReady;
+  // The page opens on the search card, as Rightmove's does, and only turns
+  // into results once a search has been made. A shared link, an area page or
+  // any filter in the URL counts as a search already. Once a search has been
+  // made it stays one, so Reset filters does not bounce back to the card.
+  const searchedParam = [params.searched].flat()[0] === "1";
+  const hasSearchedNow =
+    searchedParam ||
+    Boolean(fixedLocation) ||
+    Boolean(filters.area) ||
+    Boolean(filters.query) ||
+    activeFilterCount > 0;
+  const [searchStarted, setSearchStarted] = useState(false);
+  if (hasSearchedNow && !searchStarted) setSearchStarted(true);
+  const hasSearched = hasSearchedNow || searchStarted;
+  const feedReady = hasSearched && (!filters.area || isCityName(filters.area) || areasReady);
 
   const {
     properties: apiProperties,
@@ -189,7 +222,9 @@ export function BrowseScreen({
   const feed = apiProperties ?? [];
   const isSoldView = filters.purpose === "sold";
 
-  const results = applyClientFilters(feed, filters);
+  // Memoised so the sort below, and every card under it, only recompute when
+  // the feed or the filters actually change rather than on each render.
+  const results = React.useMemo(() => applyClientFilters(feed, filters), [feed, filters]);
 
   const sortedResults = React.useMemo(() => {
     const list = [...results];
@@ -205,7 +240,7 @@ export function BrowseScreen({
           return timeB - timeA;
         });
       case "popular":
-        return list.sort((a, b) => ((b as any).view_count ?? 0) - ((a as any).view_count ?? 0));
+        return list.sort((a, b) => (b.view_count ?? 0) - (a.view_count ?? 0));
       case "nearest":
       default:
         return list;
@@ -239,9 +274,13 @@ export function BrowseScreen({
     queryFn: () => fetchBrowseTotal(previewApiFilters as PropertyFilters, previewScope),
     enabled: Boolean(previewFilters) && isFilterModalOpen && previewReady,
   });
+  // Before a search there is no feed to count, so the sheet has no number to
+  // show until it has asked for one.
   const previewCount = previewFilters
     ? previewQuery.data
-    : totalCount;
+    : hasSearched
+    ? totalCount
+    : undefined;
 
   const handleToggleSaved = useCallback(
     (property: (typeof results)[number] | string) => {
@@ -475,14 +514,38 @@ export function BrowseScreen({
     </View>
   );
 
+  // Only listings with real coordinates get a pin, so that is what the pill counts.
+  const pinnedCount = React.useMemo(
+    () =>
+      sortedResults.filter(
+        (p) => typeof p.location_lat === "number" && typeof p.location_lng === "number"
+      ).length,
+    [sortedResults]
+  );
+
   const showingPill = (
     <View style={styles.showingPill} pointerEvents="none">
       <Text style={styles.showingText}>
         {t("search.results.showingOf", {
-          shown: formatLocalizedNumber(sortedResults.length, language),
+          shown: formatLocalizedNumber(pinnedCount, language),
           total: formatLocalizedNumber(totalCount, language),
         })}
       </Text>
+    </View>
+  );
+
+  // ── Search card, before any search ───────────────────────────────────────
+  const landingContent = (
+    <View style={[styles.landing, isMobile && styles.landingMobile]}>
+      <RightmoveFilterCard
+        areaOptions={areaOptions}
+        filters={draftFilters}
+        locationName={activeLocationTitle}
+        onFilterChange={setDraftFilters}
+        onOpenMoreFilters={() => setIsFilterModalOpen(true)}
+        onSearch={startSearch}
+        radiusAvailable={radiusAvailable}
+      />
     </View>
   );
 
@@ -681,13 +744,13 @@ export function BrowseScreen({
       customTopBar={mobileTopBar}
     >
       <View style={[styles.container, isMobile && styles.containerMobile]}>
-        {isMobile ? mobileContent : desktopContent}
+        {!hasSearched ? landingContent : isMobile ? mobileContent : desktopContent}
 
         <AdvancedFiltersModal
           areaOptions={areaOptions}
-          filters={filters}
+          filters={hasSearched ? filters : draftFilters}
           fixedLocation={fixedLocation}
-          onApply={applyFilters}
+          onApply={hasSearched ? applyFilters : startSearch}
           onClose={closeFilterModal}
           onPreviewCount={setPreviewFilters}
           resultCount={previewCount}
@@ -743,6 +806,18 @@ export function BrowseScreen({
 }
 
 const styles = StyleSheet.create({
+  landing: {
+    width: "100%",
+    maxWidth: 820,
+    alignSelf: "center",
+    paddingTop: 8,
+    paddingBottom: 48,
+  },
+  landingMobile: {
+    maxWidth: "100%",
+    paddingHorizontal: 12,
+    paddingTop: 12,
+  },
   container: {
     width: "100%",
     paddingTop: 16,
