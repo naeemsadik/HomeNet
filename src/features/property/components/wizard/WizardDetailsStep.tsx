@@ -212,6 +212,31 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
           })}
         </View>
       </View>
+
+      <View style={styles.formGroup}>
+        <View style={styles.formLabelRow}>
+          <Text style={styles.formLabel}>{t("wizard.details.contactLabel")}</Text>
+          <Text style={styles.formHint}>{t("wizard.details.contactHint")}</Text>
+        </View>
+        <TextInput
+          accessibilityLabel={t("wizard.details.phoneLabel")}
+          keyboardType="phone-pad"
+          onChangeText={(phone) => store.setContact({ phone })}
+          placeholder={t("wizard.details.phonePlaceholder")}
+          placeholderTextColor="#899790"
+          style={styles.formInput}
+          value={store.phone}
+        />
+        <TextInput
+          accessibilityLabel={t("wizard.details.whatsappLabel")}
+          keyboardType="phone-pad"
+          onChangeText={(whatsappNumber) => store.setContact({ whatsappNumber })}
+          placeholder={t("wizard.details.whatsappPlaceholder")}
+          placeholderTextColor="#899790"
+          style={[styles.formInput, { marginTop: 10 }]}
+          value={store.whatsappNumber}
+        />
+      </View>
     </View>
   );
 }

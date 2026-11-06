@@ -105,7 +105,7 @@ function withDesktopWindow() {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockParams = {};
+  mockParams = { searched: "1" };
   getProps.mockResolvedValue({ data: { items: [villa], total: 1, page: 1, limit: 20 } });
   getAreas.mockResolvedValue({ data: { items: [], total: 0, page: 1, limit: 100 } });
 });
@@ -123,7 +123,7 @@ function pressableWithText(tree: ReactTestRenderer, label: string) {
 
 describe("the browse screen on Android, on the Holiday stay tab", () => {
   beforeEach(() => {
-    mockParams = { subtype: "short-let" };
+    mockParams = { subtype: "short-let", searched: "1" };
   });
 
   it("asks the API for holiday stays by their listing type, not for rentals that mention the words", async () => {
@@ -328,7 +328,7 @@ describe("the filter sheet's result count", () => {
       items: [villa, villa],
       total: ids.includes("mpur") ? 2 : 0,
     }));
-    mockParams = { filters: "open" };
+    mockParams = { filters: "open", searched: "1" };
     const tree = await mount("rent");
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 450));
@@ -353,5 +353,82 @@ describe("the filter sheet's result count", () => {
     });
     expect(pressableWithText(tree, "Show 2 results")).toBeDefined();
     expect(router.setParams).not.toHaveBeenCalled();
+  });
+});
+
+describe("the search card before a search", () => {
+  it("opens on the search card and asks the API for nothing until Search is pressed", async () => {
+    mockParams = {};
+    withDesktopWindow();
+    const tree = await mount("buy");
+    expect(pressableWithText(tree, "Search for Properties")).toBeDefined();
+    expect(textOf(tree.root)).not.toMatch(/propert(y|ies) for sale in/);
+    expect(feedCalls()).toHaveLength(0);
+
+    await act(async () => pressableWithText(tree, "Search for Properties")!.props.onPress());
+    expect(router.setParams).toHaveBeenCalledWith(expect.objectContaining({ searched: "1" }));
+  });
+
+  it("treats a filter carried by the link as a search already", async () => {
+    mockParams = { bathrooms: "2" };
+    withDesktopWindow();
+    const tree = await mount("buy");
+    expect(textOf(tree.root)).toMatch(/propert(y|ies) for sale in/);
+    expect(feedCalls().length).toBeGreaterThan(0);
+  });
+});
+
+describe("the Rightmove-style results layout", () => {
+  const mapView = (tree: ReactTestRenderer) =>
+    tree.root.findAll((node) => (node.type as unknown) === "RNCWebView");
+
+  it("swaps the desktop list for a full map from Map view, and back from List view", async () => {
+    withDesktopWindow();
+    getProps.mockResolvedValue({
+      data: { items: [{ ...villa, location_lat: 23.79, location_lng: 90.41 }], total: 1, page: 1, limit: 20 },
+    });
+    const tree = await mount("buy");
+
+    // The sidebar's mini map is the only map while the list shows.
+    const mapsWithList = mapView(tree).length;
+    // Wide screens use the wide result card, with its owner contact row.
+    expect(textOf(tree.root)).toContain("Direct from owner");
+
+    await act(async () => pressableWithText(tree, "Map view")!.props.onPress());
+    expect(textOf(tree.root)).not.toContain("Direct from owner");
+    expect(mapView(tree).length).toBeGreaterThanOrEqual(1);
+    expect(textOf(tree.root)).toContain("Showing 1 of 1 properties");
+
+    await act(async () => pressableWithText(tree, "List view")!.props.onPress());
+    expect(textOf(tree.root)).toContain("Direct from owner");
+    expect(mapView(tree)).toHaveLength(mapsWithList);
+  });
+
+  it("puts the listings that have a pin in the phone map's card row", async () => {
+    getProps.mockResolvedValue({
+      data: {
+        items: [
+          { ...villa, location_lat: 23.79, location_lng: 90.41, price: 5000000, price_currency: "BDT" },
+          { ...villa, id: "v2", title: "No Pin Flat" },
+        ],
+        total: 2,
+        page: 1,
+        limit: 20,
+      },
+    });
+    const tree = await mount("buy");
+
+    await act(async () => pressableWithText(tree, "Map")!.props.onPress());
+    // The row only renders once it has been measured.
+    const row = tree.root.findAll((n) => typeof n.props.onLayout === "function" && n.props.style?.position === "absolute");
+    for (const node of row) {
+      await act(async () => node.props.onLayout({ nativeEvent: { layout: { width: 360, height: 130 } } }));
+    }
+
+    const links = tree.root
+      .findAll((n) => n.props.accessibilityRole === "link" && typeof n.props.onPress === "function")
+      .map((n) => n.props.accessibilityLabel);
+    expect(links).toContain("Open The Villa");
+    expect(links).not.toContain("Open No Pin Flat");
   });
 });

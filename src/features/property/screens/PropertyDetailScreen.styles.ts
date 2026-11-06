@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from "react-native";
-import { colorTokens, fonts, radius, shadow } from "@/theme";
+import { colorTokens, fonts, layout, radius, shadow } from "@/theme";
 
 export const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
@@ -62,9 +62,9 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   actionCircleBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: layout.touchTarget,
+    height: layout.touchTarget,
+    borderRadius: layout.touchTarget / 2,
     backgroundColor: "#FFFFFF",
     borderWidth: 0.8,
     borderColor: "rgba(11,26,23,0.08)",
@@ -498,6 +498,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  seeAllTap: {
+    minHeight: layout.touchTarget,
+    justifyContent: "center",
   },
   seeAllLink: {
     fontSize: 14,

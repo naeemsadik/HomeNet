@@ -22,11 +22,17 @@ describe("what Google is asked to index", () => {
   });
 
   it("gives every listing URL a canonical in the response, before any script runs", () => {
-    const rule = vercel.headers.find((h: { source: string }) => h.source === "/property/:id");
+    const rule = vercel.headers.find((h: { source: string }) => h.source.startsWith("/property/:id"));
     expect(rule.headers).toContainEqual({
       key: "Link",
       value: '<https://www.homenetbd.com/property/:id>; rel="canonical"',
     });
+    // ...but not the listing form's own pages, which are not listings.
+    expect(rule.source).toBe("/property/:id((?!(?:create|edit)$)[^/]+)");
+  });
+
+  it("answers an unknown guide with a real 404: every guide is exported, so there is no shell rewrite", () => {
+    expect(vercel.rewrites.map((r: { source: string }) => r.source)).not.toContain("/guides/:slug");
   });
 
   it("does not link to an alias page that redirects", () => {
@@ -51,5 +57,15 @@ describe("what Google is asked to index", () => {
     const script = read("scripts/generate-sitemap.mjs");
     expect(script).toContain('path: "/areas"');
     expect(script).not.toContain('path: "/explore"');
+  });
+
+  it("keeps a listing the build could not fetch out of the index, so one failed fetch cannot fail the deploy", () => {
+    // Exported as the loading state, with no <h1>. Were it indexable, check-seo would stop the build.
+    const screen = read("src/features/property/screens/PropertyDetailScreen.tsx");
+    expect(screen).toMatch(/isLoading && !property[\s\S]{0,400}<PageMeta [^>]*\bnoindex\b/);
+  });
+
+  it("does not use Expo's route loaders, which re-bundle the whole app for every page and failed the deploy", () => {
+    expect(read("app.json")).not.toContain("unstable_useServerDataLoaders");
   });
 });

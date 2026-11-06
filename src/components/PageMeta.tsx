@@ -5,7 +5,7 @@ import {
   ANDROID_PACKAGE,
   APP_SCHEME,
   isPrivatePath,
-  languageAlternates,
+  isShellPath,
   SITE_NAME,
   SITE_SHARE_IMAGE,
   SITE_URL,
@@ -25,11 +25,11 @@ import {
  * never carries two. Tags that are not set by a deeper PageMeta fall back to the
  * one in `app/_layout.tsx`, since react-helmet keeps the last tag of each kind.
  *
- * Signed-in pages (see `isPrivatePath`) are marked noindex automatically.
+ * Signed-in pages (see `isPrivatePath`) and dynamic-route shells (see
+ * `isShellPath`) are marked noindex automatically.
  *
- * Public pages also say which languages they serve (hreflang) and how to open
- * the same screen in the Android app (App Links meta, read by Facebook,
- * WhatsApp and other in-app browsers).
+ * Public pages also say how to open the same screen in the Android app (App
+ * Links meta, read by Facebook, WhatsApp and other in-app browsers).
  *
  * Every user-reachable route should render this.
  */
@@ -38,21 +38,25 @@ export function PageMeta({
   description,
   noindex,
   canonicalPath,
+  image,
 }: {
   title: string;
   description?: string;
-  /** Force noindex on or off. Defaults to on for signed-in pages only. */
+  /** Force noindex on or off. Defaults to on for signed-in pages and shells only. */
   noindex?: boolean;
   /** The page this one duplicates, when it should not be indexed under its own address. */
   canonicalPath?: string;
+  /** The share preview image (absolute URL, about 1200 wide). Defaults to the site's. */
+  image?: string;
 }) {
   const pathname = usePathname();
-  const hidden = noindex ?? isPrivatePath(pathname);
+  const hidden = noindex ?? (isPrivatePath(pathname) || isShellPath(pathname));
   // A dynamic route is exported once as a shell whose path still reads
   // "/property/[id]". A canonical built from that would be wrong for every
   // listing, so none is emitted until the browser knows the real path.
   const canonicalPart = canonicalPath ?? pathname;
-  const canonical = canonicalPart.includes("[") ? null : `${SITE_URL}${canonicalPart === "/" ? "" : canonicalPart}`;
+  const canonical = isShellPath(canonicalPart) ? null : `${SITE_URL}${canonicalPart === "/" ? "" : canonicalPart}`;
+  const shareImage = image || SITE_SHARE_IMAGE;
 
   return (
     <Head>
@@ -61,11 +65,6 @@ export function PageMeta({
       {hidden ? <meta name="robots" content="noindex, nofollow" /> : null}
       {canonical ? <link rel="canonical" href={canonical} /> : null}
       {canonical ? <meta property="og:url" content={canonical} /> : null}
-      {canonical && !hidden
-        ? languageAlternates(canonical).map((alt) => (
-            <link key={alt.hrefLang} rel="alternate" hrefLang={alt.hrefLang} href={alt.href} />
-          ))
-        : null}
       {canonical && !hidden ? <meta property="al:android:url" content={`${APP_SCHEME}:/${pathname}`} /> : null}
       {canonical && !hidden ? <meta property="al:android:package" content={ANDROID_PACKAGE} /> : null}
       {canonical && !hidden ? <meta property="al:android:app_name" content={SITE_NAME} /> : null}
@@ -74,14 +73,13 @@ export function PageMeta({
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="en_BD" />
-      <meta property="og:locale:alternate" content="bn_BD" />
       <meta property="og:title" content={title} />
       {description ? <meta property="og:description" content={description} /> : null}
-      <meta property="og:image" content={SITE_SHARE_IMAGE} />
+      <meta property="og:image" content={shareImage} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       {description ? <meta name="twitter:description" content={description} /> : null}
-      <meta name="twitter:image" content={SITE_SHARE_IMAGE} />
+      <meta name="twitter:image" content={shareImage} />
     </Head>
   );
 }

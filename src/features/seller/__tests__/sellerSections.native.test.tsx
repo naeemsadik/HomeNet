@@ -43,7 +43,7 @@ describe("seller sections that are not ready", () => {
       );
     });
     const menu = textOf(tree.root);
-    for (const shown of ["Dashboard", "Help Center"]) expect(menu).toContain(shown);
+    for (const shown of ["Dashboard", "My Listings", "Help Center"]) expect(menu).toContain(shown);
     for (const hidden of ["Boost Listings", "AI Insights", "Analytics", "Payments"]) expect(menu).not.toContain(hidden);
     act(() => tree.unmount());
     jest.restoreAllMocks();

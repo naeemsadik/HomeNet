@@ -4,6 +4,7 @@ import { SITE_URL } from "@/lib/seo";
 import { INTENT_LABEL, type ListingIntent } from "./breadcrumb";
 import { ORGANIZATION_ID } from "./brand";
 import type { BreadcrumbCrumb, SchemaNode } from "./types";
+import { listingPhotos } from "@/features/property/utils/listingMedia";
 
 const APARTMENT_SUBTYPES = new Set(["apartment", "flat", "condo", "short-let", "studio", "penthouse"]);
 const HOUSE_SUBTYPES = new Set(["house", "villa", "duplex", "bungalow"]);
@@ -67,6 +68,25 @@ export function listingUrl(id: string): string {
 }
 
 /**
+ * The listings a browse or area page shows, in order. Pass the items the page
+ * actually renders: search engines check the list against the page.
+ */
+export function itemListSchema(items: { id: string; title: string }[], pageUrl: string): SchemaNode {
+  return {
+    "@type": "ItemList",
+    "@id": `${pageUrl}#listings`,
+    url: pageUrl,
+    numberOfItems: items.length,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: listingUrl(item.id),
+      name: item.title,
+    })),
+  };
+}
+
+/**
  * A listing page's structured data: the listing, the home or plot it offers,
  * and the price. Contact details are left out on purpose: owners' phone
  * numbers are shown to visitors, not handed to scrapers.
@@ -76,7 +96,7 @@ export function listingSchema(detail: PropertyDetail): SchemaNode {
   const amenities = detail.amenities ?? {};
   const subjectType = listingSubjectType(detail.type, detail.subtype);
   const isRent = detail.listing_type === "rent";
-  const images = (detail.media ?? []).filter((m) => m.media_type === "image").map((m) => m.url);
+  const images = listingPhotos(detail.media);
   const city = detail.area?.city || "Dhaka";
 
   const subject: SchemaNode = {

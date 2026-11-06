@@ -80,7 +80,7 @@ export default function RootLayout() {
             empty <title> that Expo Router emits by default. */}
           <PageMeta
             title="HomeNet BD | Verified Property Listings in Bangladesh"
-            description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
+            description="HomeNet BD is a property marketplace for Bangladesh. Browse flats, houses and plots for sale or rent and contact the owners directly. Listing is free."
           />
           <StatusBar style="dark" />
           <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
