@@ -59,6 +59,7 @@ export const bn: TranslationSchema = {
   propertyCard: {
     verified: "যাচাইকৃত",
     verifiedFull: "১০০% যাচাইকৃত প্রোপার্টি",
+    property: "প্রপার্টি",
     directOwner: "সরাসরি ফ্ল্যাট/জমির মালিক (০% ব্রোকার কমিশন)",
     forRent: "ভাড়ার জন্য",
     forSale: "বিক্রির জন্য",
