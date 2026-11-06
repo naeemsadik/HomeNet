@@ -249,6 +249,8 @@ export function RightmoveFilterCard({
       ? t("search.rightmove.searchCountedProperties", {
           count: formatLocalizedNumber(totalResults, language),
         })
+      : isPhone
+      ? t("hero.search")
       : t("search.rightmove.searchProperties");
 
   const titleBlock = (
@@ -317,10 +319,11 @@ export function RightmoveFilterCard({
         </Pressable>
         <Pressable
           onPress={handleSearchPress}
-          style={({ pressed }) => [
+          style={({ pressed, hovered }: any) => [
             styles.searchBtn,
             styles.searchBtnPhone,
             webPointer,
+            hovered && styles.searchBtnHovered,
             pressed && styles.searchBtnPressed,
           ]}
           accessibilityRole="button"
@@ -498,9 +501,10 @@ export function RightmoveFilterCard({
 
             <Pressable
               onPress={handleSearchPress}
-              style={({ pressed }) => [
+              style={({ pressed, hovered }: any) => [
                 styles.searchBtn,
                 webPointer,
+                hovered && styles.searchBtnHovered,
                 pressed && styles.searchBtnPressed,
               ]}
               accessibilityRole="button"
@@ -808,6 +812,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 2,
+  },
+  searchBtnHovered: {
+    backgroundColor: colorTokens.brandHover,
   },
   // `flex: 0` resolves to a 0% basis, which collapses the button to no height
   // in the card's column layout and throws away the 44 above.

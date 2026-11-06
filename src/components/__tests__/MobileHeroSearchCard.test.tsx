@@ -59,8 +59,9 @@ describe("MobileHeroSearchCard", () => {
     expect(container.textContent).toContain("Holiday stay");
     expect(container.textContent).toContain("Sold");
 
-    // Dynamic search button for Buy (default)
-    expect(container.textContent).toContain("Search properties for sale");
+    // Mobile search button displays "Search"
+    expect(container.textContent).toContain("Search");
+    expect(container.querySelector('[aria-label="Search properties for sale"]')).toBeTruthy();
 
     // Quick navigation list
     expect(container.textContent).toContain("Request property valuation");
@@ -85,8 +86,9 @@ describe("MobileHeroSearchCard", () => {
     expect(container.textContent).toContain("হলিডে স্টে");
     expect(container.textContent).toContain("বিক্রি হয়েছে");
 
-    // Dynamic search button in Bengali
-    expect(container.textContent).toContain("বিক্রির জন্য প্রপার্টি খুঁজুন");
+    // Mobile search button in Bengali displays "অনুসন্ধান"
+    expect(container.textContent).toContain("অনুসন্ধান");
+    expect(container.querySelector('[aria-label="বিক্রির জন্য প্রপার্টি খুঁজুন"]')).toBeTruthy();
 
     // Quick navigation list in Bengali
     expect(container.textContent).toContain("প্রপার্টি মূল্যায়নের আবেদন করুন");
@@ -111,11 +113,7 @@ describe("MobileHeroSearchCard", () => {
       holidayTab?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(container.textContent).toContain("Search holiday stays");
-
-    const primaryBtn = Array.from(container.querySelectorAll('[role="button"]')).find(
-      (el) => el.textContent?.includes("Search holiday stays")
-    );
+    const primaryBtn = container.querySelector('[aria-label="Search holiday stays"]');
     expect(primaryBtn).toBeTruthy();
 
     await act(async () => {

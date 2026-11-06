@@ -19,9 +19,9 @@ const textOf = (node: ReactTestInstance): string =>
 
 describe("seller sections that are not ready", () => {
   it("are switched off unless the build turns them on", () => {
-    expect(SELLER_SECTIONS).toEqual({ insights: false, analytics: false, payments: false });
-    for (const key of ["insights", "analytics", "payments"]) expect(isSellerSectionOn(key)).toBe(false);
-    for (const key of ["dashboard", "listings", "create", "boost", "profile", "help", "logout"]) {
+    expect(SELLER_SECTIONS).toEqual({ boost: false, insights: false, analytics: false, payments: false });
+    for (const key of ["boost", "insights", "analytics", "payments"]) expect(isSellerSectionOn(key)).toBe(false);
+    for (const key of ["dashboard", "listings", "create", "profile", "help", "logout"]) {
       expect(isSellerSectionOn(key)).toBe(true);
     }
   });
@@ -43,8 +43,8 @@ describe("seller sections that are not ready", () => {
       );
     });
     const menu = textOf(tree.root);
-    for (const shown of ["Dashboard", "Boost Listings", "Help Center"]) expect(menu).toContain(shown);
-    for (const hidden of ["AI Insights", "Analytics", "Payments"]) expect(menu).not.toContain(hidden);
+    for (const shown of ["Dashboard", "Help Center"]) expect(menu).toContain(shown);
+    for (const hidden of ["Boost Listings", "AI Insights", "Analytics", "Payments"]) expect(menu).not.toContain(hidden);
     act(() => tree.unmount());
     jest.restoreAllMocks();
   });
