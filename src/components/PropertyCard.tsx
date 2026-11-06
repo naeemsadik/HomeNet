@@ -33,6 +33,7 @@ import type { Property } from "@/features/property/types/property";
 import { isHolidayStayType } from "@/features/property/utils/listingType";
 import { AdminListingActions } from "@/features/property/components/AdminListingActions";
 import { useSavedStore } from "@/stores/savedStore";
+import { listingCover, listingPhotos } from "@/features/property/utils/listingMedia";
 
 export type PropertyCardVariant = "standard" | "feature";
 
@@ -97,10 +98,7 @@ function PropertyCardComponent({
   const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
 
-  const original =
-    property.media?.find((m) => m.media_type === "image")?.url ??
-    property.media?.[0]?.url ??
-    null;
+  const original = listingCover(property.media) ?? property.media?.[0]?.url ?? null;
 
   const location =
     [property.area?.name, property.area?.city].filter(Boolean).join(", ") ||
@@ -191,7 +189,7 @@ function PropertyCardComponent({
 
   // ── Mobile Rightmove Alignment (< 768px / isPhone) ──────────────────────
   const images = React.useMemo(() => {
-    const list = property.media?.filter((m) => m.media_type === "image" && m.url).map((m) => m.url) ?? [];
+    const list = listingPhotos(property.media);
     if (list.length > 0) return list;
     if (original) return [original];
     return [];

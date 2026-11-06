@@ -65,6 +65,7 @@ import {
   priceOnRequestLabel,
   translateAreaUnit,
 } from "@/i18n";
+import { listingCover, listingPhotos } from "@/features/property/utils/listingMedia";
 
 type AiValuation = {
   estimatedValue: string;
@@ -114,7 +115,7 @@ export function PropertyDetailScreen() {
     );
 
     const rawImages = apiDetail.media
-      ? apiDetail.media.filter((m) => m.media_type === "image").map((m) => m.url)
+      ? listingPhotos(apiDetail.media)
       : [];
 
     // The gallery is the largest image on the page, so it gets a generous
@@ -196,7 +197,7 @@ export function PropertyDetailScreen() {
             : `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? formatLocalizedNumber(sim.price.toLocaleString("en-BD"), language) : sim.price}`,
           specs: specParts.join(" · "),
           imageUrl: cdnImage(
-            sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
+            listingCover(sim.media) || sim.media?.[0]?.url,
             700,
             460,
           ),

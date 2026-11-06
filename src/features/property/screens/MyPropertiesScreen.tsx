@@ -45,6 +45,7 @@ import { cdnImage } from "@/lib/cloudinaryImage";
 import { LiveText } from "@/components/LiveText";
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { formatLocalizedNumber, isPriceOnRequest, priceOnRequestLabel, translateListingStatus, useTranslation } from "@/i18n";
+import { listingCover } from "@/features/property/utils/listingMedia";
 
 export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
 
@@ -91,7 +92,7 @@ export function MyPropertiesScreen() {
       title: p.title || "Untitled Property",
       location: [p.area?.name, (p.area as any)?.city].filter(Boolean).join(", ") || p.address || "Location unavailable",
       imageUrl: cdnImage(
-        p.media?.find((media) => media.media_type === "image")?.url || p.media?.[0]?.url,
+        listingCover(p.media) || p.media?.[0]?.url,
         700,
         460,
       ),
