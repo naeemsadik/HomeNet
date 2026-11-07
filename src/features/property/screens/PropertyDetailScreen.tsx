@@ -466,74 +466,157 @@ export function PropertyDetailScreen() {
           <View style={styles.leftColumn}>
             {/* Hero Image Gallery */}
             <View style={styles.galleryContainer}>
-              <Pressable
-                onPress={() => setLightboxVisible(true)}
-                style={[styles.mainImageWrap, isPhone && styles.mainImageWrapPhone, webPointer]}
-                onTouchStart={(e) => {
-                  touchStartX.current = e.nativeEvent.pageX;
-                  touchStartY.current = e.nativeEvent.pageY;
-                }}
-                onTouchEnd={(e) => {
-                  const dx = touchStartX.current - e.nativeEvent.pageX;
-                  const dy = touchStartY.current - e.nativeEvent.pageY;
-                  if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
-                    if (dx > 0) {
-                      handleNextPhoto();
-                    } else {
-                      handlePrevPhoto();
-                    }
-                  }
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={t("propertyDetail.viewAllPhotos", { count: formatLocalizedNumber(totalPhotos, language) })}
-              >
-                {property.mediaImages.length ? (
-                  <Image
-                    source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
-                    accessibilityLabel={`${property.title}, photo ${activeImageIndex + 1}`}
-                    style={styles.mainImage}
-                  />
-                ) : (
-                  <View style={styles.mediaPlaceholder}>
-                    <Building2 color="#6B7D78" size={48} />
-                    <Text style={styles.mediaPlaceholderText}>{t("propertyDetail.noPhotos")}</Text>
-                  </View>
-                )}
+              {!isTablet && property.mediaImages.length >= 3 ? (
+                <View style={styles.mosaicContainer}>
+                  {/* Left Main Featured Photo */}
+                  <Pressable
+                    onPress={() => {
+                      setActiveImageIndex(0);
+                      setLightboxVisible(true);
+                    }}
+                    style={[styles.mosaicMain, webPointer]}
+                    accessibilityRole="button"
+                    accessibilityLabel={t("propertyDetail.viewAllPhotos", { count: formatLocalizedNumber(totalPhotos, language) })}
+                  >
+                    <Image
+                      source={{ uri: property.mediaImages[0] }}
+                      accessibilityLabel={`${property.title}, photo 1`}
+                      style={styles.mainImage}
+                    />
+                    {/* Status Badges Overlay */}
+                    <View style={styles.galleryBadgesRow}>
+                      {property.isVerified ? (
+                        <View style={styles.verifiedTag}>
+                          <ShieldCheck color="#04cf92" size={14} />
+                          <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
+                        </View>
+                      ) : null}
 
-                {/* Status Badges Overlay */}
-                <View style={styles.galleryBadgesRow}>
-                  {property.isVerified ? (
-                    <View style={styles.verifiedTag}>
-                      <ShieldCheck color="#04cf92" size={14} />
-                      <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
+                      <View style={styles.forRentTag}>
+                        <Text style={styles.forRentTagText}>
+                          {isHolidayStayType(apiDetail?.listing_type)
+                            ? t("propertyCard.holidayStay")
+                            : apiDetail?.listing_type === "rent"
+                            ? t("propertyDetail.forRent")
+                            : t("propertyDetail.forSale")}
+                        </Text>
+                      </View>
                     </View>
-                  ) : null}
+                  </Pressable>
 
-                  <View style={styles.forRentTag}>
-                    <Text style={styles.forRentTagText}>
-                      {isHolidayStayType(apiDetail?.listing_type)
-                        ? t("propertyCard.holidayStay")
-                        : apiDetail?.listing_type === "rent"
-                        ? t("propertyDetail.forRent")
-                        : t("propertyDetail.forSale")}
-                    </Text>
+                  {/* Right Column: 2 Stacked Photos */}
+                  <View style={styles.mosaicSideCol}>
+                    <Pressable
+                      onPress={() => {
+                        setActiveImageIndex(1);
+                        setLightboxVisible(true);
+                      }}
+                      style={[styles.mosaicSideItem, webPointer]}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${property.title}, photo 2`}
+                    >
+                      <Image
+                        source={{ uri: property.mediaImages[1] }}
+                        accessibilityLabel={`${property.title}, photo 2`}
+                        style={styles.mosaicSideImage}
+                      />
+                    </Pressable>
+
+                    <Pressable
+                      onPress={() => {
+                        setActiveImageIndex(2);
+                        setLightboxVisible(true);
+                      }}
+                      style={[styles.mosaicSideItem, webPointer]}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${property.title}, photo 3`}
+                    >
+                      <Image
+                        source={{ uri: property.mediaImages[2] }}
+                        accessibilityLabel={`${property.title}, photo 3`}
+                        style={styles.mosaicSideImage}
+                      />
+                      {/* Photo Counter Pill Overlay */}
+                      <View style={[styles.photoCountPill, webPointer]}>
+                        <Camera color="#FFFFFF" size={13} />
+                        <Text style={styles.photoCountText}>
+                          1/{formatLocalizedNumber(property.mediaImages.length, language)}
+                        </Text>
+                        <Maximize2 color="rgba(255, 255, 255, 0.75)" size={12} style={{ marginLeft: 3 }} />
+                      </View>
+                    </Pressable>
                   </View>
                 </View>
+              ) : (
+                <Pressable
+                  onPress={() => setLightboxVisible(true)}
+                  style={[styles.mainImageWrap, isPhone && styles.mainImageWrapPhone, webPointer]}
+                  onTouchStart={(e) => {
+                    touchStartX.current = e.nativeEvent.pageX;
+                    touchStartY.current = e.nativeEvent.pageY;
+                  }}
+                  onTouchEnd={(e) => {
+                    const dx = touchStartX.current - e.nativeEvent.pageX;
+                    const dy = touchStartY.current - e.nativeEvent.pageY;
+                    if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
+                      if (dx > 0) {
+                        handleNextPhoto();
+                      } else {
+                        handlePrevPhoto();
+                      }
+                    }
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("propertyDetail.viewAllPhotos", { count: formatLocalizedNumber(totalPhotos, language) })}
+                >
+                  {property.mediaImages.length ? (
+                    <Image
+                      source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
+                      accessibilityLabel={`${property.title}, photo ${activeImageIndex + 1}`}
+                      style={styles.mainImage}
+                    />
+                  ) : (
+                    <View style={styles.mediaPlaceholder}>
+                      <Building2 color="#6B7D78" size={48} />
+                      <Text style={styles.mediaPlaceholderText}>{t("propertyDetail.noPhotos")}</Text>
+                    </View>
+                  )}
 
-                {/* Photo Counter & Fullscreen Trigger Badge */}
-                {property.mediaImages.length > 0 ? (
-                  <View style={[styles.photoCountPill, webPointer]}>
-                    <Camera color="#FFFFFF" size={13} />
-                    <Text style={styles.photoCountText}>
-                      {t("propertyDetail.photoOf", {
-                        current: formatLocalizedNumber(activeImageIndex + 1, language),
-                        total: formatLocalizedNumber(property.mediaImages.length, language),
-                      })}
-                    </Text>
-                    <Maximize2 color="rgba(255, 255, 255, 0.75)" size={12} style={{ marginLeft: 3 }} />
+                  {/* Status Badges Overlay */}
+                  <View style={styles.galleryBadgesRow}>
+                    {property.isVerified ? (
+                      <View style={styles.verifiedTag}>
+                        <ShieldCheck color="#04cf92" size={14} />
+                        <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
+                      </View>
+                    ) : null}
+
+                    <View style={styles.forRentTag}>
+                      <Text style={styles.forRentTagText}>
+                        {isHolidayStayType(apiDetail?.listing_type)
+                          ? t("propertyCard.holidayStay")
+                          : apiDetail?.listing_type === "rent"
+                          ? t("propertyDetail.forRent")
+                          : t("propertyDetail.forSale")}
+                      </Text>
+                    </View>
                   </View>
-                ) : null}
-              </Pressable>
+
+                  {/* Photo Counter & Fullscreen Trigger Badge */}
+                  {property.mediaImages.length > 0 ? (
+                    <View style={[styles.photoCountPill, webPointer]}>
+                      <Camera color="#FFFFFF" size={13} />
+                      <Text style={styles.photoCountText}>
+                        {t("propertyDetail.photoOf", {
+                          current: formatLocalizedNumber(activeImageIndex + 1, language),
+                          total: formatLocalizedNumber(property.mediaImages.length, language),
+                        })}
+                      </Text>
+                      <Maximize2 color="rgba(255, 255, 255, 0.75)" size={12} style={{ marginLeft: 3 }} />
+                    </View>
+                  ) : null}
+                </Pressable>
+              )}
 
               {/* Thumbnails Row with navigation arrows for both PC & Mobile */}
               <View
@@ -640,34 +723,60 @@ export function PropertyDetailScreen() {
                 <Text style={styles.locationSubText}>{property.location}</Text>
               </View>
 
-              {/* Key Specs Bar */}
+              {/* Key Specs Bar - Rightmove Micro-label + Value Layout */}
               <View style={styles.keySpecsRow}>
                 <View style={styles.specItem}>
-                  <BedDouble color="#04cf92" size={18} />
-                  <Text style={styles.specText}>
-                    {formatLocalizedNumber(property.bedrooms, language)} {t("propertyDetail.beds")}
-                  </Text>
+                  <Text style={styles.specLabel}>{t("propertyDetail.propertyType") || "PROPERTY TYPE"}</Text>
+                  <View style={styles.specValueRow}>
+                    <Building2 color="#04cf92" size={16} />
+                    <Text style={styles.specText}>{translatePropertyType(property.type, language)}</Text>
+                  </View>
                 </View>
 
-                <View style={styles.specDivider} />
+                {property.bedrooms > 0 ? (
+                  <>
+                    <View style={styles.specDivider} />
+                    <View style={styles.specItem}>
+                      <Text style={styles.specLabel}>{t("propertyDetail.bedrooms") || "BEDROOMS"}</Text>
+                      <View style={styles.specValueRow}>
+                        <BedDouble color="#04cf92" size={16} />
+                        <Text style={styles.specText}>
+                          {formatLocalizedNumber(property.bedrooms, language)} {t("propertyDetail.beds")}
+                        </Text>
+                      </View>
+                    </View>
+                  </>
+                ) : null}
 
-                <View style={styles.specItem}>
-                  <Bath color="#04cf92" size={18} />
-                  <Text style={styles.specText}>
-                    {formatLocalizedNumber(property.bathrooms, language)} {t("propertyDetail.baths")}
-                  </Text>
-                </View>
+                {property.bathrooms > 0 ? (
+                  <>
+                    <View style={styles.specDivider} />
+                    <View style={styles.specItem}>
+                      <Text style={styles.specLabel}>{t("propertyDetail.bathrooms") || "BATHROOMS"}</Text>
+                      <View style={styles.specValueRow}>
+                        <Bath color="#04cf92" size={16} />
+                        <Text style={styles.specText}>
+                          {formatLocalizedNumber(property.bathrooms, language)} {t("propertyDetail.baths")}
+                        </Text>
+                      </View>
+                    </View>
+                  </>
+                ) : null}
 
-                <View style={styles.specDivider} />
-
-                <View style={styles.specItem}>
-                  <Maximize2 color="#04cf92" size={18} />
-                  <Text style={styles.specText}>
-                    {property.areaSqft
-                      ? t("propertyDetail.areaSqft", { count: formatLocalizedNumber(property.areaSqft, language) })
-                      : null}
-                  </Text>
-                </View>
+                {property.areaSqft ? (
+                  <>
+                    <View style={styles.specDivider} />
+                    <View style={styles.specItem}>
+                      <Text style={styles.specLabel}>{t("propertyDetail.size") || "SIZE"}</Text>
+                      <View style={styles.specValueRow}>
+                        <Maximize2 color="#04cf92" size={16} />
+                        <Text style={styles.specText}>
+                          {t("propertyDetail.areaSqft", { count: formatLocalizedNumber(property.areaSqft, language) })}
+                        </Text>
+                      </View>
+                    </View>
+                  </>
+                ) : null}
               </View>
             </View>
 
@@ -842,21 +951,21 @@ export function PropertyDetailScreen() {
                     !property.seller.phone && styles.actionBtnDisabled,
                   ]}
                 >
-                  <WhatsAppIcon size={18} color={colorTokens.brand} style={styles.whatsAppIcon} />
+                  <WhatsAppIcon size={18} color="#25D366" style={styles.whatsAppIcon} />
                   <Text numberOfLines={1} ellipsizeMode="tail" style={styles.whatsAppActionText}>
                     {t("propertyDetail.whatsappAgent")}
                   </Text>
                 </Pressable>
-              </View>
 
-              {/* Book a visit Primary Button */}
-              <Pressable
-                onPress={() => setBookModalVisible(true)}
-                style={({ pressed }) => [styles.bookVisitBtn, webPointer, pressed && styles.pressed]}
-              >
-                <Calendar color={colorTokens.onAccent} size={18} />
-                <Text style={styles.bookVisitBtnText}>{t("propertyDetail.bookViewing")}</Text>
-              </Pressable>
+                {/* Book a visit Button */}
+                <Pressable
+                  onPress={() => setBookModalVisible(true)}
+                  style={({ pressed }) => [styles.bookVisitBtn, webPointer, pressed && styles.pressed]}
+                >
+                  <Calendar color="#0B1A17" size={16} />
+                  <Text style={styles.bookVisitBtnText}>{t("propertyDetail.bookViewing")}</Text>
+                </Pressable>
+              </View>
 
               <Pressable
                 accessibilityRole="button"

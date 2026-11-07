@@ -1,13 +1,13 @@
 import { styles } from "../PropertyDetailScreen.styles";
-import { colorTokens, fonts, radius } from "@/theme";
+import { fonts } from "@/theme";
 import { en } from "@/i18n/locales/en";
 import { bn } from "@/i18n/locales/bn";
 
 describe("PropertyDetailScreen WhatsApp & Seller Action Button Styles", () => {
   it("conforms to compact geometry and production real estate UI specifications", () => {
     expect(styles.whatsAppActionBtn).toMatchObject({
-      height: 40,
-      minHeight: 40,
+      height: 44,
+      minHeight: 44,
       maxHeight: 44,
       flexDirection: "row",
       alignItems: "center",
@@ -15,10 +15,9 @@ describe("PropertyDetailScreen WhatsApp & Seller Action Button Styles", () => {
       gap: 8,
       paddingVertical: 0,
       paddingHorizontal: 16,
-      borderRadius: radius.pill,
-      borderWidth: 1.25,
-      borderColor: colorTokens.brand,
-      backgroundColor: colorTokens.surface,
+      borderRadius: 4,
+      borderWidth: 0,
+      backgroundColor: "#0B1A17",
     });
   });
 
@@ -30,9 +29,9 @@ describe("PropertyDetailScreen WhatsApp & Seller Action Button Styles", () => {
 
   it("ensures sleek single-line containment and typography tokens", () => {
     expect(styles.whatsAppActionText).toMatchObject({
-      fontSize: 13,
-      fontFamily: fonts.semiBold,
-      color: colorTokens.brandText,
+      fontSize: 14,
+      fontFamily: fonts.bold,
+      color: "#FFFFFF",
       letterSpacing: 0.1,
       flexShrink: 1,
     });
@@ -40,8 +39,8 @@ describe("PropertyDetailScreen WhatsApp & Seller Action Button Styles", () => {
 
   it("ensures action row cohesion with companion Call Seller button", () => {
     expect(styles.sellerActionBtn).toMatchObject({
-      height: 40,
-      minHeight: 40,
+      height: 44,
+      minHeight: 44,
       maxHeight: 44,
       flexDirection: "row",
       alignItems: "center",
@@ -49,16 +48,15 @@ describe("PropertyDetailScreen WhatsApp & Seller Action Button Styles", () => {
       gap: 8,
       paddingVertical: 0,
       paddingHorizontal: 16,
-      borderRadius: radius.pill,
-      borderWidth: 1.25,
-      borderColor: colorTokens.border,
-      backgroundColor: colorTokens.surface,
+      borderRadius: 4,
+      borderWidth: 0,
+      backgroundColor: "#00D284",
     });
 
     expect(styles.sellerActionText).toMatchObject({
-      fontSize: 13,
-      fontFamily: fonts.semiBold,
-      color: colorTokens.ink,
+      fontSize: 14,
+      fontFamily: fonts.bold,
+      color: "#0B1A17",
       letterSpacing: 0.1,
       flexShrink: 1,
     });

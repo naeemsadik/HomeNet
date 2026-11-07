@@ -875,6 +875,8 @@ export const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     backgroundColor: "#F8FAF9",
+    justifyContent: "space-between",
+    minHeight: Platform.select({ web: "100vh", default: undefined }),
   },
 
   bleed: {
@@ -887,6 +889,7 @@ export const styles = StyleSheet.create({
     maxWidth: layout.containerMaxWidth,
     paddingTop: 16,
     paddingBottom: 48,
+    flexGrow: 1,
   },
   // `fluid` pages (guides) run edge to edge instead of in the container.
   mainGutterFluid: {
@@ -894,6 +897,7 @@ export const styles = StyleSheet.create({
     maxWidth: "100%",
     paddingTop: 16,
     paddingBottom: 48,
+    flexGrow: 1,
   },
   mainGutterPhone: {
     paddingTop: 10,

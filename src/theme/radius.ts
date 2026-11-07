@@ -5,12 +5,12 @@
  * values ad hoc. Pick the closest tier rather than a new magic number.
  */
 export const radiusTokens = {
-  xs: 6,
-  sm: 10,
-  md: 14,
-  lg: 18,
-  card: 18,
-  xl: 24,
+  xs: 4,
+  sm: 6,
+  md: 8,
+  lg: 10,
+  card: 6,
+  xl: 12,
   pill: 999,
 } as const;
 
