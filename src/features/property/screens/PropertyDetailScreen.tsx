@@ -732,7 +732,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
               {/* Key Specs Bar - Rightmove Micro-label + Value Layout */}
               <View style={styles.keySpecsRow}>
                 <View style={styles.specItem}>
-                  <Text style={styles.specLabel}>{t("propertyDetail.propertyType") || "PROPERTY TYPE"}</Text>
+                  <Text style={styles.specLabel}>{t("propertyDetail.propertyType")}</Text>
                   <View style={styles.specValueRow}>
                     <Building2 color="#04cf92" size={16} />
                     <Text style={styles.specText}>{translatePropertyType(property.type, language)}</Text>
@@ -743,7 +743,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                   <>
                     <View style={styles.specDivider} />
                     <View style={styles.specItem}>
-                      <Text style={styles.specLabel}>{t("propertyDetail.bedrooms") || "BEDROOMS"}</Text>
+                      <Text style={styles.specLabel}>{t("propertyDetail.bedrooms")}</Text>
                       <View style={styles.specValueRow}>
                         <BedDouble color="#04cf92" size={16} />
                         <Text style={styles.specText}>
@@ -758,7 +758,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                   <>
                     <View style={styles.specDivider} />
                     <View style={styles.specItem}>
-                      <Text style={styles.specLabel}>{t("propertyDetail.bathrooms") || "BATHROOMS"}</Text>
+                      <Text style={styles.specLabel}>{t("propertyDetail.bathrooms")}</Text>
                       <View style={styles.specValueRow}>
                         <Bath color="#04cf92" size={16} />
                         <Text style={styles.specText}>
@@ -773,7 +773,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                   <>
                     <View style={styles.specDivider} />
                     <View style={styles.specItem}>
-                      <Text style={styles.specLabel}>{t("propertyDetail.size") || "SIZE"}</Text>
+                      <Text style={styles.specLabel}>{t("propertyDetail.size")}</Text>
                       <View style={styles.specValueRow}>
                         <Maximize2 color="#04cf92" size={16} />
                         <Text style={styles.specText}>

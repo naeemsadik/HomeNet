@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   outerContainer: {
     width: "100%",
     flex: 1,
-    minHeight: Platform.select({ web: "100vh", default: undefined }),
+    minHeight: (Platform.OS === "web" ? "100vh" : undefined) as unknown as number | undefined,
     flexDirection: "row",
     backgroundColor: "#F8FAF9",
   },
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   workspaceScroll: {
     flexGrow: 1,
     justifyContent: "space-between",
-    minHeight: Platform.select({ web: "100vh", default: undefined }),
+    minHeight: (Platform.OS === "web" ? "100vh" : undefined) as unknown as number | undefined,
   },
   contentWrapper: {
     flex: 1,

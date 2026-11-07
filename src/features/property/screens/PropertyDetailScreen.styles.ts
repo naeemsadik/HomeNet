@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from "react-native";
-import { colorTokens, fonts, layout, radius, shadow } from "@/theme";
+import { colorTokens, fonts, layout, shadow } from "@/theme";
 
 export const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
   retryButton: {
     alignItems: "center",
     backgroundColor: "#04cf92",
-    borderRadius: 10,
+    borderRadius: 4,
     flexDirection: "row",
     gap: 8,
     paddingHorizontal: 18,
@@ -948,7 +948,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 420,
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
+    borderRadius: 6,
     padding: 24,
     gap: 16,
   },
@@ -985,7 +985,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     backgroundColor: colorTokens.brand,
-    borderRadius: 999,
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,
@@ -1021,7 +1021,7 @@ export const styles = StyleSheet.create({
   },
   modalCallBtn: {
     height: 44,
-    borderRadius: 999,
+    borderRadius: 4,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",

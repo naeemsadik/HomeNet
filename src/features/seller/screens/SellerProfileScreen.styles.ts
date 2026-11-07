@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
   },
   sellerRolePill: {
     backgroundColor: "#E8EEFC",
-    borderRadius: 999,
+    borderRadius: 4,
     paddingVertical: 4,
     paddingHorizontal: 12,
     alignItems: "center",
@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 6,
     ...webPointer,
   },
   navItemActive: {
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     backgroundColor: "#F4F6F5",
-    borderRadius: 999,
+    borderRadius: 4,
     paddingHorizontal: 14,
     width: 220,
     height: 38,
@@ -167,7 +167,7 @@ export const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 14,
     height: 38,
-    borderRadius: 999,
+    borderRadius: 4,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "rgba(11,26,23,0.08)",
@@ -197,7 +197,7 @@ export const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
     backgroundColor: "#EBEFEA",
-    borderRadius: 14,
+    borderRadius: 6,
     padding: 4,
     marginBottom: 20,
     width: "100%",
@@ -213,7 +213,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 4,
   },
   tabBtnActive: {
     backgroundColor: "#0F6D55",
@@ -240,7 +240,7 @@ export const styles = StyleSheet.create({
   // Cards
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: "rgba(11,26,23,0.08)",
     padding: 24,
@@ -258,7 +258,7 @@ export const styles = StyleSheet.create({
   },
   cardPhone: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 6,
   },
   sectionSpacing: {
     marginTop: 16,
@@ -289,7 +289,7 @@ export const styles = StyleSheet.create({
   avatarWrap: {
     width: 76,
     height: 76,
-    borderRadius: 20,
+    borderRadius: 6,
     overflow: "hidden",
     backgroundColor: "#E2E8F0",
     borderWidth: 1,
@@ -299,7 +299,7 @@ export const styles = StyleSheet.create({
   avatarWrapPhone: {
     width: 60,
     height: 60,
-    borderRadius: 16,
+    borderRadius: 6,
   },
   avatarImage: {
     width: "100%",
@@ -339,7 +339,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#E7F2EE",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 999,
+    borderRadius: 4,
   },
   verifiedText: {
     fontSize: 12,
