@@ -278,6 +278,8 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   const DESKTOP_VISIBLE_COUNT = 8;
   const totalPhotos = property?.mediaImages.length || 0;
   const hasExtraPhotos = totalPhotos > DESKTOP_VISIBLE_COUNT;
+  // The desktop mosaic shows the first three photos; narrower screens keep the single photo and thumbnails.
+  const isMosaic = !isTablet && totalPhotos >= 3;
   const extraPhotosCount = totalPhotos - DESKTOP_VISIBLE_COUNT;
 
   const scrollThumbTo = (index: number) => {
@@ -408,6 +410,27 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
     );
   }
 
+  const galleryBadges = (
+    <View style={styles.galleryBadgesRow}>
+      {property.isVerified ? (
+        <View style={styles.verifiedTag}>
+          <ShieldCheck color="#04cf92" size={14} />
+          <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
+        </View>
+      ) : null}
+
+      <View style={styles.forRentTag}>
+        <Text style={styles.forRentTagText}>
+          {isHolidayStayType(apiDetail?.listing_type)
+            ? t("propertyCard.holidayStay")
+            : apiDetail?.listing_type === "rent"
+            ? t("propertyDetail.forRent")
+            : t("propertyDetail.forSale")}
+        </Text>
+      </View>
+    </View>
+  );
+
   return (
     <AppChrome active="property">
       {/* What a search result or a shared link for this URL reads: the kind of
@@ -472,7 +495,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
           <View style={styles.leftColumn}>
             {/* Hero Image Gallery */}
             <View style={styles.galleryContainer}>
-              {!isTablet && property.mediaImages.length >= 3 ? (
+              {isMosaic ? (
                 <View style={styles.mosaicContainer}>
                   {/* Left Main Featured Photo */}
                   <Pressable
@@ -489,25 +512,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                       accessibilityLabel={`${property.title}, photo 1`}
                       style={styles.mainImage}
                     />
-                    {/* Status Badges Overlay */}
-                    <View style={styles.galleryBadgesRow}>
-                      {property.isVerified ? (
-                        <View style={styles.verifiedTag}>
-                          <ShieldCheck color="#04cf92" size={14} />
-                          <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
-                        </View>
-                      ) : null}
-
-                      <View style={styles.forRentTag}>
-                        <Text style={styles.forRentTagText}>
-                          {isHolidayStayType(apiDetail?.listing_type)
-                            ? t("propertyCard.holidayStay")
-                            : apiDetail?.listing_type === "rent"
-                            ? t("propertyDetail.forRent")
-                            : t("propertyDetail.forSale")}
-                        </Text>
-                      </View>
-                    </View>
+                    {galleryBadges}
                   </Pressable>
 
                   {/* Right Column: 2 Stacked Photos */}
@@ -545,9 +550,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                       {/* Photo Counter Pill Overlay */}
                       <View style={[styles.photoCountPill, webPointer]}>
                         <Camera color="#FFFFFF" size={13} />
-                        <Text style={styles.photoCountText}>
-                          1/{formatLocalizedNumber(property.mediaImages.length, language)}
-                        </Text>
+                        <Text style={styles.photoCountText}>{formatLocalizedNumber(totalPhotos, language)}</Text>
                         <Maximize2 color="rgba(255, 255, 255, 0.75)" size={12} style={{ marginLeft: 3 }} />
                       </View>
                     </Pressable>
@@ -588,25 +591,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                     </View>
                   )}
 
-                  {/* Status Badges Overlay */}
-                  <View style={styles.galleryBadgesRow}>
-                    {property.isVerified ? (
-                      <View style={styles.verifiedTag}>
-                        <ShieldCheck color="#04cf92" size={14} />
-                        <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
-                      </View>
-                    ) : null}
-
-                    <View style={styles.forRentTag}>
-                      <Text style={styles.forRentTagText}>
-                        {isHolidayStayType(apiDetail?.listing_type)
-                          ? t("propertyCard.holidayStay")
-                          : apiDetail?.listing_type === "rent"
-                          ? t("propertyDetail.forRent")
-                          : t("propertyDetail.forSale")}
-                      </Text>
-                    </View>
-                  </View>
+                  {galleryBadges}
 
                   {/* Photo Counter & Fullscreen Trigger Badge */}
                   {property.mediaImages.length > 0 ? (
@@ -624,88 +609,90 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                 </Pressable>
               )}
 
-              {/* Thumbnails Row with navigation arrows for both PC & Mobile */}
-              <View
-                style={styles.thumbnailsContainer}
-                onLayout={(e) => {
-                  const w = e.nativeEvent.layout.width;
-                  if (w > 0) setThumbContainerWidth(w);
-                }}
-              >
-                {thumbScrollX > 8 ? (
-                  <Pressable
-                    onPress={handleScrollLeft}
-                    style={({ pressed }) => [
-                      styles.thumbScrollBtn,
-                      styles.thumbScrollBtnLeft,
-                      webPointer,
-                      pressed && styles.pressed,
-                    ]}
-                    accessibilityLabel={t("propertyDetail.prevThumbnails")}
-                  >
-                    <ChevronLeft color="#FFFFFF" size={18} />
-                  </Pressable>
-                ) : null}
-
-                <ScrollView
-                  ref={thumbScrollRef}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.thumbnailsScrollContent}
-                  scrollEventThrottle={16}
-                  onScroll={(e) => setThumbScrollX(e.nativeEvent.contentOffset.x)}
-                  onContentSizeChange={(contentWidth) => {
-                    setMaxThumbScroll(Math.max(0, contentWidth - thumbContainerWidth));
+              {/* Thumbnails Row with navigation arrows for both PC & Mobile (the mosaic replaces it) */}
+              {!isMosaic ? (
+                <View
+                  style={styles.thumbnailsContainer}
+                  onLayout={(e) => {
+                    const w = e.nativeEvent.layout.width;
+                    if (w > 0) setThumbContainerWidth(w);
                   }}
                 >
-                  {property.mediaImages.map((img, idx) => {
-                    const isEighthCard = idx === 7;
-                    const showPlusBadge = !isPhone && hasExtraPhotos && isEighthCard && thumbScrollX < 40;
+                  {thumbScrollX > 8 ? (
+                    <Pressable
+                      onPress={handleScrollLeft}
+                      style={({ pressed }) => [
+                        styles.thumbScrollBtn,
+                        styles.thumbScrollBtnLeft,
+                        webPointer,
+                        pressed && styles.pressed,
+                      ]}
+                      accessibilityLabel={t("propertyDetail.prevThumbnails")}
+                    >
+                      <ChevronLeft color="#FFFFFF" size={18} />
+                    </Pressable>
+                  ) : null}
 
-                    return (
-                      <Pressable
-                        key={idx}
-                        onPress={() => {
-                          setActiveImageIndex(idx);
-                          if (showPlusBadge) {
-                            handleExpandMore();
-                          }
-                        }}
-                        style={[
-                          styles.thumbnailCard,
-                          isPhone && styles.thumbnailCardPhone,
-                          activeImageIndex === idx ? styles.thumbnailCardActive : styles.thumbnailCardInactive,
-                          webPointer,
-                        ]}
-                      >
-                        <Image source={{ uri: img }} accessibilityLabel={`${property.title}, photo ${idx + 1}`} style={styles.thumbnailImg} />
-                        {showPlusBadge ? (
-                          <View style={styles.moreImagesOverlay}>
-                            <Text style={styles.moreImagesText}>
-                              {t("propertyDetail.moreImages", { count: formatLocalizedNumber(extraPhotosCount, language) })}
-                            </Text>
-                          </View>
-                        ) : null}
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-
-                {maxThumbScroll > 10 && thumbScrollX < maxThumbScroll - 8 ? (
-                  <Pressable
-                    onPress={handleScrollRight}
-                    style={({ pressed }) => [
-                      styles.thumbScrollBtn,
-                      styles.thumbScrollBtnRight,
-                      webPointer,
-                      pressed && styles.pressed,
-                    ]}
-                    accessibilityLabel={t("propertyDetail.moreThumbnails")}
+                  <ScrollView
+                    ref={thumbScrollRef}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.thumbnailsScrollContent}
+                    scrollEventThrottle={16}
+                    onScroll={(e) => setThumbScrollX(e.nativeEvent.contentOffset.x)}
+                    onContentSizeChange={(contentWidth) => {
+                      setMaxThumbScroll(Math.max(0, contentWidth - thumbContainerWidth));
+                    }}
                   >
-                    <ChevronRight color="#FFFFFF" size={18} />
-                  </Pressable>
-                ) : null}
-              </View>
+                    {property.mediaImages.map((img, idx) => {
+                      const isEighthCard = idx === 7;
+                      const showPlusBadge = !isPhone && hasExtraPhotos && isEighthCard && thumbScrollX < 40;
+
+                      return (
+                        <Pressable
+                          key={idx}
+                          onPress={() => {
+                            setActiveImageIndex(idx);
+                            if (showPlusBadge) {
+                              handleExpandMore();
+                            }
+                          }}
+                          style={[
+                            styles.thumbnailCard,
+                            isPhone && styles.thumbnailCardPhone,
+                            activeImageIndex === idx ? styles.thumbnailCardActive : styles.thumbnailCardInactive,
+                            webPointer,
+                          ]}
+                        >
+                          <Image source={{ uri: img }} accessibilityLabel={`${property.title}, photo ${idx + 1}`} style={styles.thumbnailImg} />
+                          {showPlusBadge ? (
+                            <View style={styles.moreImagesOverlay}>
+                              <Text style={styles.moreImagesText}>
+                                {t("propertyDetail.moreImages", { count: formatLocalizedNumber(extraPhotosCount, language) })}
+                              </Text>
+                            </View>
+                          ) : null}
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+
+                  {maxThumbScroll > 10 && thumbScrollX < maxThumbScroll - 8 ? (
+                    <Pressable
+                      onPress={handleScrollRight}
+                      style={({ pressed }) => [
+                        styles.thumbScrollBtn,
+                        styles.thumbScrollBtnRight,
+                        webPointer,
+                        pressed && styles.pressed,
+                      ]}
+                      accessibilityLabel={t("propertyDetail.moreThumbnails")}
+                    >
+                      <ChevronRight color="#FFFFFF" size={18} />
+                    </Pressable>
+                  ) : null}
+                </View>
+              ) : null}
             </View>
 
             {/* Property Overview Header */}

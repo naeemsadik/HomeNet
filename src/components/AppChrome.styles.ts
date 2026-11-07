@@ -888,7 +888,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F8FAF9",
     justifyContent: "space-between",
-    minHeight: (Platform.OS === "web" ? "100vh" : undefined) as unknown as number | undefined,
+    minHeight: (Platform.OS === "web" ? "100dvh" : undefined) as unknown as number | undefined,
   },
 
   bleed: {
