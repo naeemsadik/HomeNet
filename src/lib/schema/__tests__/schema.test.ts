@@ -1,8 +1,11 @@
 import type { PropertyDetail } from "@/features/property/hooks/usePropertyDetail";
 import {
   areaCrumbs,
+  articleSchema,
   breadcrumbSchema,
   faqPageSchema,
+  guideCrumbs,
+  itemListSchema,
   jsonLdDocument,
   listingCrumbs,
   listingSchema,
@@ -13,6 +16,7 @@ import {
   websiteSchema,
 } from "..";
 import { seoAreaBySlug } from "@/content/areas";
+import { CURATED_PROPERTY_GUIDES } from "@/content/curatedGuides";
 
 const detail = (overrides: Partial<PropertyDetail> = {}): PropertyDetail => ({
   id: "abc-123",
@@ -137,5 +141,54 @@ describe("faqPageSchema", () => {
     const node = faqPageSchema(VALUATION_FAQ, "https://www.homenetbd.com/instant-valuation") as Record<string, any>;
     expect(node.mainEntity).toHaveLength(VALUATION_FAQ.length);
     expect(node.mainEntity[1].acceptedAnswer.text).toContain("720 square feet");
+  });
+});
+
+describe("articleSchema", () => {
+  const guide = CURATED_PROPERTY_GUIDES[0];
+
+  it("states the guide's headline, dates and publisher", () => {
+    const node = articleSchema(guide) as Record<string, any>;
+    expect(node["@type"]).toBe("Article");
+    expect(node.url).toBe(`https://www.homenetbd.com/guides/${guide.slug}`);
+    expect(node.headline).toBe(guide.title);
+    expect(node.datePublished).toBe(guide.publishedAt);
+    expect(node.dateModified).toBe(guide.updatedAt);
+    expect(node.author).toEqual({ "@type": "Organization", name: "HomeNet Team", url: "https://www.homenetbd.com" });
+    expect(node.publisher["@id"]).toBe("https://www.homenetbd.com/#organization");
+  });
+
+  it("leaves out dates the guide does not have", () => {
+    const doc = jsonLdDocument(articleSchema({ ...guide, publishedAt: null, updatedAt: null }));
+    expect(doc["@graph"][0]).not.toHaveProperty("datePublished");
+    expect(doc["@graph"][0]).not.toHaveProperty("dateModified");
+  });
+
+  it("every curated guide fits Google's 110-character headline limit", () => {
+    for (const g of CURATED_PROPERTY_GUIDES) expect(g.title.length).toBeLessThanOrEqual(110);
+  });
+
+  it("sits under Home › Guides in the breadcrumb", () => {
+    expect(guideCrumbs(guide).map((crumb) => crumb.name)).toEqual(["Home", "Guides", guide.title]);
+  });
+});
+
+describe("itemListSchema", () => {
+  it("lists the page's listings in order, each at its own URL", () => {
+    const node = itemListSchema(
+      [
+        { id: "a1", title: "3 bed flat" },
+        { id: "b2", title: "Office floor" },
+      ],
+      "https://www.homenetbd.com/rent/gulshan",
+    ) as Record<string, any>;
+    expect(node["@type"]).toBe("ItemList");
+    expect(node.numberOfItems).toBe(2);
+    expect(node.itemListElement[1]).toEqual({
+      "@type": "ListItem",
+      position: 2,
+      url: "https://www.homenetbd.com/property/b2",
+      name: "Office floor",
+    });
   });
 });

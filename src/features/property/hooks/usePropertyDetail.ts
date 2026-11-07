@@ -64,7 +64,13 @@ const BACKOFF_POLL_INTERVAL_MS = 30_000;
 const INITIAL_POLL_ATTEMPTS = 3; // fetches at the initial interval before backing off
 const MAX_POLL_ATTEMPTS = 10;
 
-export function usePropertyDetail(id: string) {
+/**
+ * `initial` is the build-time copy a pre-rendered page carries (see
+ * listingSnapshot). It renders at once, matching the exported HTML, and is
+ * treated as stale so the browser refetches straight away for the current
+ * price and the owner's contact details.
+ */
+export function usePropertyDetail(id: string, initial?: PropertyDetail) {
   const cleanId = (typeof id === "string" ? id : String(id || "")).trim();
   return useQuery({
     queryKey: ["property", cleanId],
@@ -73,6 +79,8 @@ export function usePropertyDetail(id: string) {
       if (!response.data) throw new Error(response.message || "Property not found");
       return response.data as PropertyDetail;
     },
+    initialData: initial,
+    initialDataUpdatedAt: 0,
     enabled: Boolean(cleanId && cleanId !== "undefined" && cleanId !== "null"),
     refetchInterval: (query) => {
       const attempts = query.state.dataUpdateCount;

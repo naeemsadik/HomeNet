@@ -39,12 +39,11 @@
   ],
   "rewrites": [
     { "source": "/property/:id", "destination": "/property/[id]" },
-    { "source": "/guides/:slug", "destination": "/guides/[slug]" },
     { "source": "/users/:id", "destination": "/users/[id]" }
   ],
   "headers": [
     {
-      "source": "/property/:id",
+      "source": "/property/:id((?!(?:create|edit)$)[^/]+)",
       "headers": [
         {
           "key": "Link",

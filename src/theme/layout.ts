@@ -13,6 +13,8 @@ export const layoutTokens = {
   navHeight: 72,
   navHeightTablet: 64,
   navHeightPhone: 56,
+  /** The smallest tap area for any control, in both directions (WCAG 2.5.5, Apple HIG). */
+  touchTarget: 44,
 } as const;
 
 export type LayoutTokens = typeof layoutTokens;

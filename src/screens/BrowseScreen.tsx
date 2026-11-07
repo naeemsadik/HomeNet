@@ -15,7 +15,6 @@ import {
   ChevronDown,
   ChevronRight,
   List,
-  MapIcon,
   MapPin,
   RotateCcw,
   Search,
@@ -36,6 +35,7 @@ import { PropertySkeletonFeed } from "@/features/property/components/PropertySke
 import { useAreas } from "@/features/property/hooks/useAreas";
 import { fetchBrowseTotal, useBrowseFeed } from "@/features/property/hooks/useBrowseFeed";
 import type { PropertyFilters } from "@/features/property/types/property";
+import type { BrowseSnapshot } from "@/lib/browseSnapshot";
 import {
   areaOptions as buildAreaOptions,
   fallbackAreaOptions,
@@ -56,7 +56,7 @@ import {
 } from "@/features/property/utils/searchFilters";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useSavedStore } from "@/stores/savedStore";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
 import { useTranslation, formatLocalizedNumber, type TranslationKey } from "@/i18n";
 import { showToast } from "@/lib/toast";
@@ -74,10 +74,13 @@ type SortKey = "newest" | "priceAsc" | "priceDesc" | "nearest" | "popular";
 export function BrowseScreen({
   mode,
   location: fixedLocation,
+  initialResults,
 }: {
   mode?: "buy" | "rent" | "sold";
   /** Pins the area filter, for the /buy/<area> and /rent/<area> landing pages. */
   location?: string;
+  /** The first page as the build saw it (route loader), shown until the feed answers. */
+  initialResults?: BrowseSnapshot;
 }) {
   const { t, language } = useTranslation();
   const { isPhone, width, height } = useResponsive();
@@ -219,7 +222,17 @@ export function BrowseScreen({
     refresh,
   } = useBrowseFeed(apiFilters, scope, feedReady);
 
-  const feed = apiProperties ?? [];
+  // The build-time first page (see browseSnapshot), shown until the live feed
+  // answers, so the exported HTML lists real listings with the real count
+  // rather than a skeleton and "0 found". Only for the page as exported: with
+  // filters in the URL it would show the wrong listings.
+  const hasUrlFilters = FILTER_PARAM_KEYS.some((key) => {
+    const value = (params as Record<string, unknown>)[key];
+    return value !== undefined && value !== "";
+  });
+  const snapshot = loading && !hasUrlFilters ? initialResults : undefined;
+  const feedLoading = loading && !snapshot;
+  const feed = snapshot ? snapshot.items : apiProperties ?? [];
   const isSoldView = filters.purpose === "sold";
 
   // Memoised so the sort below, and every card under it, only recompute when
@@ -249,7 +262,30 @@ export function BrowseScreen({
 
   const totalCount = hasClientFilters(filters) || isSoldView
     ? results.length
-    : (total ?? results.length);
+    : ((snapshot ? snapshot.total : total) ?? results.length);
+
+  // The results line is the page's <h1>: what is listed and where, which is
+  // what a search for "flat rent gulshan" should land on. Until the feed has
+  // answered it names the page without a count, never "0 found".
+  const headingPurpose = t(
+    filters.purpose === "sale"
+      ? "browse.purposeSale"
+      : filters.purpose === "rent"
+      ? "browse.purposeRent"
+      : filters.purpose === "short-let"
+      ? "browse.purposeShortLet"
+      : filters.purpose === "sold"
+      ? "browse.purposeSold"
+      : "browse.purposeAll"
+  );
+  const headingPlace = locationParam || t("browse.everywhere");
+  const resultsHeading = feedLoading
+    ? t("browse.heading", { purpose: headingPurpose, place: headingPlace })
+    : t(totalCount === 1 ? "browse.headingOne" : "browse.headingCount", {
+        count: formatLocalizedNumber(totalCount, language),
+        purpose: headingPurpose,
+        place: headingPlace,
+      });
 
   // The sheet's count has to be asked for the way the feed is: the area and
   // distance are not part of toApiFilters, they become the scope. Asking with
@@ -331,10 +367,6 @@ export function BrowseScreen({
         }
       : null;
 
-  const countText = t("search.resultsCount", {
-    count: formatLocalizedNumber(totalCount, language),
-  });
-
   // ── Mobile Search Results Top App Bar ────────────────────────────────────
   const mobileTopBar = isMobile ? (
     <SafeAreaView edges={["top"]} style={styles.mobileTopBarSafe}>
@@ -392,29 +424,23 @@ export function BrowseScreen({
   ) : undefined;
 
   // On phones, on the website and in the app (which runs the same map in a
-  // WebView). It sits in the results row next to the count and sort, in the
+  // WebView): one link to the other view, "Map" with a pin as on Rightmove's
+  // phone results, "List" from the map. It sits in the results row, in the
   // page flow, so it never covers a listing card.
-  const viewSwitcher = (
-    <View style={styles.viewSwitch}>
-      {(["list", "map"] as const).map((key) => {
-        const active = view === key;
-        const Icon = key === "list" ? List : MapIcon;
-        const label = key === "list" ? t("search.listView") : t("search.mapView");
-        return (
-          <Pressable
-            key={key}
-            accessibilityRole="button"
-            accessibilityLabel={label}
-            accessibilityState={{ selected: active }}
-            onPress={() => setView(key)}
-            style={[styles.switchBtn, active && styles.switchBtnActive, webPointer]}
-          >
-            <Icon size={14} color={active ? colorTokens.onBrand : colorTokens.ink} strokeWidth={2.4} />
-            <Text style={[styles.switchText, active && styles.switchTextActive]}>{label}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
+  const viewToggle = (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={view === "list" ? t("search.results.mapView") : t("search.results.listView")}
+      onPress={() => setView(view === "list" ? "map" : "list")}
+      style={[styles.mobileViewLink, webPointer]}
+    >
+      {view === "list" ? (
+        <MapPin size={17} color={colorTokens.ink} strokeWidth={2.2} />
+      ) : (
+        <List size={17} color={colorTokens.ink} strokeWidth={2.2} />
+      )}
+      <Text style={styles.mobileViewLinkText}>{view === "list" ? t("search.mapView") : t("search.listView")}</Text>
+    </Pressable>
   );
 
   /** Save search and Create alert: by the heading on the list, over the map on the map. */
@@ -467,7 +493,7 @@ export function BrowseScreen({
     </View>
   ) : null;
 
-  const resultsBody = loading ? (
+  const resultsBody = feedLoading ? (
     <PropertySkeletonFeed />
   ) : isError && results.length === 0 ? (
     <View style={styles.centerContainer}>
@@ -609,14 +635,8 @@ export function BrowseScreen({
             <View style={styles.mainCol}>
               <View style={styles.toolbar}>
                 <View style={styles.toolbarLeft}>
-                  <LiveText style={styles.resultCountText}>
-                    {totalCount === 1
-                      ? t("browse.propertyFound", {
-                          count: formatLocalizedNumber(totalCount, language),
-                        })
-                      : t("browse.propertiesFound", {
-                          count: formatLocalizedNumber(totalCount, language),
-                        })}
+                  <LiveText accessibilityRole="header" aria-level={1} style={styles.resultCountText}>
+                    {resultsHeading}
                   </LiveText>
                   {activeFilterCount > 0 ? (
                     <Pressable
@@ -699,11 +719,18 @@ export function BrowseScreen({
   // ── Phone ────────────────────────────────────────────────────────────────
   const mobileContent = (
     <>
+      {/* The page's heading on its own line (Rightmove's "Properties For Sale
+          in M6"), so the row under it has room for the count, sort and Map. */}
+      <LiveText accessibilityRole="header" aria-level={1} numberOfLines={2} style={styles.mobileHeading}>
+        {resultsHeading}
+      </LiveText>
+
       <View style={styles.mobileSubHeader}>
-        <LiveText style={styles.mobileResultCount}>{countText}</LiveText>
+        <LiveText numberOfLines={1} style={styles.mobileResultCount}>
+          {feedLoading ? "" : t("search.resultsCount", { count: formatLocalizedNumber(totalCount, language) })}
+        </LiveText>
 
         <View style={styles.mobileSubHeaderRight}>
-          {viewSwitcher}
           {view === "list" ? (
             <Pressable
               accessibilityRole="button"
@@ -714,9 +741,10 @@ export function BrowseScreen({
               <Text numberOfLines={1} style={styles.mobileSortBtnText}>
                 {activeSortLabel}
               </Text>
-              <ChevronDown color={colorTokens.muted} size={14} strokeWidth={2.2} />
+              <ChevronDown color={colorTokens.ink} size={16} strokeWidth={2.2} />
             </Pressable>
           ) : null}
+          {viewToggle}
         </View>
       </View>
 
@@ -899,24 +927,42 @@ const styles = StyleSheet.create({
     gap: 8,
     flexShrink: 1,
   },
+  mobileHeading: {
+    color: colorTokens.ink,
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    paddingTop: 10,
+    paddingHorizontal: 4,
+  },
   mobileResultCount: {
     color: colorTokens.ink,
     fontFamily: fonts.semiBold,
-    fontSize: 14,
+    fontSize: 15,
+    flexShrink: 1,
+    marginRight: 8,
   },
+  mobileViewLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    minHeight: layout.touchTarget,
+    paddingHorizontal: 4,
+  },
+  mobileViewLinkText: { color: colorTokens.ink, fontFamily: fonts.semiBold, fontSize: 14 },
   mobileSortBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: radius.xs,
-    backgroundColor: colorTokens.surfaceSunken,
+    gap: 4,
+    minHeight: layout.touchTarget,
+    paddingHorizontal: 4,
+    flexShrink: 1,
   },
   mobileSortBtnText: {
+    flexShrink: 1,
     color: colorTokens.ink,
-    fontFamily: fonts.medium,
-    fontSize: 13,
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
   },
   mobileMap: {
     borderRadius: 0,
@@ -1152,34 +1198,6 @@ const styles = StyleSheet.create({
   },
 
   /* ── Mobile List | Map switch (in the results row) ─────────────────────── */
-  viewSwitch: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colorTokens.surfaceSunken,
-    padding: 2,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colorTokens.divider,
-  },
-  switchBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: radius.pill,
-  },
-  switchBtnActive: {
-    backgroundColor: colorTokens.brand,
-  },
-  switchText: {
-    color: colorTokens.ink,
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-  },
-  switchTextActive: {
-    color: colorTokens.onBrand,
-  },
 
   /* ── Sort Modal Sheet ──────────────────────────────────────────────────── */
   modalOverlay: {

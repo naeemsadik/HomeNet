@@ -59,6 +59,7 @@ export const bn: TranslationSchema = {
   propertyCard: {
     verified: "যাচাইকৃত",
     verifiedFull: "১০০% যাচাইকৃত প্রোপার্টি",
+    property: "প্রপার্টি",
     directOwner: "সরাসরি ফ্ল্যাট/জমির মালিক (০% ব্রোকার কমিশন)",
     forRent: "ভাড়ার জন্য",
     forSale: "বিক্রির জন্য",
@@ -130,6 +131,22 @@ export const bn: TranslationSchema = {
     close: "বন্ধ করুন",
     notice: "বিজ্ঞপ্তি",
     back: "ফিরে যান",
+  },
+  moderation: {
+    staff: "স্টাফ",
+    moderate: "মডারেট",
+    moderating: "মডারেশন চালু",
+    toggleLabel: "এই পেজে মডারেশন চালু বা বন্ধ করুন",
+    backToAdmin: "অ্যাডমিনে ফিরুন",
+    archive: "আর্কাইভ",
+    archiveLabel: "{{title}} আর্কাইভ করুন",
+    archived: "“{{title}}” আর্কাইভ করা হয়েছে",
+    undo: "ফিরিয়ে আনুন",
+    deleteLabel: "{{title}} মুছে ফেলুন",
+    deleteTitle: "লিস্টিংটি মুছে ফেলবেন?",
+    deleteMessage: "“{{title}}” স্থায়ীভাবে মুছে যাবে। এটি আর ফেরানো যাবে না।",
+    deleteConfirm: "মুছে ফেলুন",
+    deleted: "“{{title}}” মুছে ফেলা হয়েছে",
   },
   filters: {
     title: "অ্যাডভান্সড ফিল্টার",
@@ -217,6 +234,16 @@ export const bn: TranslationSchema = {
   browse: {
     propertiesFound: "{{count}}টি প্রপার্টি পাওয়া গেছে",
     propertyFound: "{{count}}টি প্রপার্টি পাওয়া গেছে",
+    // ফলাফলের লাইন, যা পেজের <h1>-ও।
+    heading: "{{place}}-এ {{purpose}} প্রপার্টি",
+    headingCount: "{{place}}-এ {{purpose}} {{count}}টি প্রপার্টি",
+    headingOne: "{{place}}-এ {{purpose}} {{count}}টি প্রপার্টি",
+    purposeSale: "বিক্রয়ের জন্য",
+    purposeRent: "ভাড়ার জন্য",
+    purposeShortLet: "স্বল্পমেয়াদি থাকার জন্য",
+    purposeSold: "বিক্রিত",
+    purposeAll: "বিক্রয় বা ভাড়ার জন্য",
+    everywhere: "বাংলাদেশ",
     gridView: "গ্রিড ভিউ",
     listView: "লিস্ট ভিউ",
     loadErrorTitle: "লাইভ প্রপার্টি লোড করা যায়নি",
@@ -578,6 +605,7 @@ export const bn: TranslationSchema = {
       boost: "বুস্ট করুন",
       archive: "আর্কাইভ করুন",
       unarchive: "আন-আর্কাইভ করুন",
+      askToRestore: "পুনরুদ্ধারের অনুরোধ",
     },
     filters: {
       all: "সকল",
@@ -596,6 +624,11 @@ export const bn: TranslationSchema = {
     unarchiveConfirmTitle: "প্রপার্টি আন-আর্কাইভ করুন",
     unarchiveConfirmMessage: "\"{{title}}\" আন-আর্কাইভ করবেন? এটি আবার সক্রিয় তালিকায় প্রদর্শিত হবে।",
     unarchiveFailed: "আন-আর্কাইভ করা ব্যর্থ হয়েছে",
+    archiveConfirmMessageNoUndo: "\"{{title}}\" আর্কাইভ করবেন? এটি আর সাইটে দেখানো হবে না। এখনো নিজে এটি ফেরাতে পারবেন না: ফেরাতে সাপোর্টে ইমেইল করতে হবে।",
+    restoreViaSupportTitle: "লিস্টিং পুনরুদ্ধার",
+    restoreViaSupportMessage: "আর্কাইভ করা লিস্টিং এখনো আপনার অ্যাকাউন্ট থেকে ফেরানো যায় না। আমাদের সাপোর্ট টিমকে ইমেইল করুন, আমরা \"{{title}}\" ফিরিয়ে দেব।",
+    restoreViaSupportConfirm: "সাপোর্টে ইমেইল করুন",
+    restoreViaSupportSubject: "আমার লিস্টিং পুনরুদ্ধার করুন",
     toggleView: {
       aria: "ওয়েবসাইটের ক্রেতা ভিউতে যান",
       label: "ক্রেতা ভিউতে যান",
@@ -2107,15 +2140,15 @@ export const bn: TranslationSchema = {
     },
     buy: {
       title: "ঢাকায় ফ্ল্যাট ও প্রোপার্টি বিক্রয় | HomeNet BD",
-      description: "ঢাকা এবং বাংলাদেশ জুড়ে যাচাইকৃত অ্যাপার্টমেন্ট, বাড়ি এবং জমি বিক্রয়ের তালিকা ব্রাউজ করুন।",
+      description: "ঢাকা, চট্টগ্রাম ও বাংলাদেশ জুড়ে বিক্রয়ের জন্য ফ্ল্যাট, বাড়ি, প্লট ও বাণিজ্যিক জায়গা। ছবি, দাম ও ম্যাপ দেখুন, তারপর সরাসরি মালিকের সাথে যোগাযোগ করুন।",
     },
     rent: {
       title: "ঢাকায় বাসা ও ফ্ল্যাট ভাড়া (টু-লেট) | HomeNet BD",
-      description: "ঢাকা এবং বাংলাদেশ জুড়ে পরিবার ও ব্যাচেলরদের জন্য যাচাইকৃত বাসা ও ফ্ল্যাট ভাড়ার বিজ্ঞাপন।",
+      description: "ঢাকা ও বাংলাদেশ জুড়ে ফ্যামিলি বাসা, ব্যাচেলর ফ্ল্যাট, সাবলেট ও অফিস ভাড়া। ভাড়া, ছবি ও লোকেশন তুলনা করুন এবং সরাসরি বাড়িওয়ালার সাথে যোগাযোগ করুন।",
     },
     sold: {
       title: "সম্প্রতি বিক্রি হওয়া প্রোপার্টির দাম | HomeNet BD",
-      description: "ঢাকা এবং বাংলাদেশ জুড়ে প্রোপার্টির নিশ্চিত বিক্রয়মূল্য দেখুন।",
+      description: "HomeNet BD-এর মাধ্যমে ঢাকা ও বাংলাদেশ জুড়ে বিক্রি হওয়া ফ্ল্যাট, বাড়ি ও প্লটের বিক্রয়মূল্য, প্রতিটি বিক্রয় সম্পন্ন ও নিশ্চিত হওয়ার পর প্রকাশিত।",
     },
     saved: {
       title: "পছন্দের সংরক্ষিত প্রোপার্টি | HomeNet BD",

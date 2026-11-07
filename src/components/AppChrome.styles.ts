@@ -152,6 +152,18 @@ export const styles = StyleSheet.create({
     left: 0,
     width: "100%",
   },
+  // The staff strip, pinned just under the top bar. One z below it, so the
+  // bar's own shadow still reads over the strip.
+  adminBarSafe: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    zIndex: 49,
+    ...(Platform.select({
+      web: { position: "fixed", left: 0, right: 0 },
+      default: {},
+    }) as any),
+  },
   topbarSafe: {
     position: "absolute",
     top: 0,

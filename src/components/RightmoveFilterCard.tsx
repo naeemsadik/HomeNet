@@ -249,6 +249,8 @@ export function RightmoveFilterCard({
       ? t("search.rightmove.searchCountedProperties", {
           count: formatLocalizedNumber(totalResults, language),
         })
+      : isPhone
+      ? t("hero.search")
       : t("search.rightmove.searchProperties");
 
   const titleBlock = (
@@ -269,15 +271,19 @@ export function RightmoveFilterCard({
           </Pressable>
         </View>
       ) : (
-        <Pressable
-          onPress={() => setIsEditingTitle(true)}
-          style={[styles.titlePressable, webPointer]}
-          accessibilityRole="button"
-          accessibilityLabel={t("search.rightmove.editLocationAria")}
-        >
-          <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>{heading}</Text>
-          <Edit3 color={colorTokens.muted} size={16} style={styles.editIcon} />
-        </Pressable>
+        // The page's <h1> on /buy, /rent and /sold, which open on this card. It
+        // goes around the button: a heading inside a button is invalid HTML.
+        <View accessibilityRole="header" aria-level={1}>
+          <Pressable
+            onPress={() => setIsEditingTitle(true)}
+            style={[styles.titlePressable, webPointer]}
+            accessibilityRole="button"
+            accessibilityLabel={`${heading}: ${t("search.rightmove.editLocationAria")}`}
+          >
+            <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>{heading}</Text>
+            <Edit3 color={colorTokens.muted} size={16} style={styles.editIcon} />
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -317,10 +323,11 @@ export function RightmoveFilterCard({
         </Pressable>
         <Pressable
           onPress={handleSearchPress}
-          style={({ pressed }) => [
+          style={({ pressed, hovered }: any) => [
             styles.searchBtn,
             styles.searchBtnPhone,
             webPointer,
+            hovered && styles.searchBtnHovered,
             pressed && styles.searchBtnPressed,
           ]}
           accessibilityRole="button"
@@ -463,9 +470,10 @@ export function RightmoveFilterCard({
           <View style={styles.actionRow}>
             <Pressable
               onPress={handleSearchPress}
-              style={({ pressed }) => [
+              style={({ pressed, hovered }: any) => [
                 styles.searchBtn,
                 webPointer,
+                hovered && styles.searchBtnHovered,
                 pressed && styles.searchBtnPressed,
               ]}
               accessibilityRole="button"
@@ -813,6 +821,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 2,
+  },
+  searchBtnHovered: {
+    backgroundColor: colorTokens.brandHover,
   },
   // `flex: 0` resolves to a 0% basis, which collapses the button to no height
   // in the card's column layout and throws away the 44 above.

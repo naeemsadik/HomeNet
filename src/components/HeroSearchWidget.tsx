@@ -230,7 +230,9 @@ export function HeroSearchWidget({
           ]}
         >
           <Search color={colorTokens.onBrand} size={17} strokeWidth={2.4} />
-          <Text style={styles.searchLabel}>{t("hero.search")}</Text>
+          <Text style={styles.searchLabel}>
+            {isPhone ? t("hero.search") : t("hero.searchProperties")}
+          </Text>
         </Pressable>
       </View>
 
@@ -435,11 +437,11 @@ const styles = StyleSheet.create({
     gap: 9,
     paddingHorizontal: 32,
     borderRadius: radius.sm,
-    backgroundColor: colors.green,
+    backgroundColor: colorTokens.brand,
   },
   searchButtonPhone: { height: 50, paddingHorizontal: 20 },
-  searchButtonHovered: { backgroundColor: colors.greenOnLight },
-  searchButtonPressed: { opacity: 0.9 },
+  searchButtonHovered: { backgroundColor: colorTokens.brandHover },
+  searchButtonPressed: { opacity: 0.9, backgroundColor: colorTokens.brandPressed },
   searchLabel: {
     color: colorTokens.onBrand,
     fontFamily: fonts.bold,

@@ -24,14 +24,17 @@ import {
   Phone,
   ShieldCheck,
 } from "@/components/icons";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { useTranslation, formatLocalizedPrice, isPriceOnRequest, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { isHolidayStayType } from "@/features/property/utils/listingType";
+import { AdminListingActions } from "@/features/property/components/AdminListingActions";
 import { useSavedStore } from "@/stores/savedStore";
+import { listingCover, listingPhotos } from "@/features/property/utils/listingMedia";
+import { listingAddress, listingTypeName } from "@/features/property/utils/typeName";
 
 export type PropertyCardVariant = "standard" | "feature";
 
@@ -55,6 +58,13 @@ export interface PropertyCardProps {
   imageHeight?: number;
   width?: number;
   style?: StyleProp<ViewStyle>;
+  /**
+   * Marks a card as illustration rather than a real listing — the landing
+   * page's marketing preview, for instance. Such a card is backed by static
+   * sample data, so moderation controls must not appear on it: acting on one
+   * would send a request for an id that does not exist.
+   */
+  decorative?: boolean;
 }
 
 function readSpecs(property: Property, lang: SupportedLanguage) {
@@ -84,14 +94,12 @@ function PropertyCardComponent({
   imageHeight,
   width,
   style,
+  decorative = false,
 }: PropertyCardProps) {
   const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
 
-  const original =
-    property.media?.find((m) => m.media_type === "image")?.url ??
-    property.media?.[0]?.url ??
-    null;
+  const original = listingCover(property.media) ?? property.media?.[0]?.url ?? null;
 
   const location =
     [property.area?.name, property.area?.city].filter(Boolean).join(", ") ||
@@ -169,6 +177,10 @@ function PropertyCardComponent({
     </Pressable>
   );
 
+  // Renders nothing unless staff have armed moderation and hold
+  // `moderate_listing`; the card's geometry is identical either way.
+  const adminActions = decorative ? null : <AdminListingActions property={property} />;
+
   const placeholder = (
     <View style={styles.placeholder}>
       <LandPlot color={colorTokens.subtle} size={30} />
@@ -178,7 +190,7 @@ function PropertyCardComponent({
 
   // ── Mobile Rightmove Alignment (< 768px / isPhone) ──────────────────────
   const images = React.useMemo(() => {
-    const list = property.media?.filter((m) => m.media_type === "image" && m.url).map((m) => m.url) ?? [];
+    const list = listingPhotos(property.media);
     if (list.length > 0) return list;
     if (original) return [original];
     return [];
@@ -250,11 +262,8 @@ function PropertyCardComponent({
   };
 
   if (isPhone) {
-    const bedCount = property.bedrooms || specs.beds;
-    const typeName =
-      property.subtype ||
-      (property.type ? property.type.charAt(0).toUpperCase() + property.type.slice(1) : "Property");
-    const specTitle = bedCount ? `${bedCount} bed ${typeName}` : typeName;
+    // A readable kind ("Apartment Project"), not the stored code ("apartment_project").
+    const typeName = listingTypeName(property) ?? t("propertyCard.property");
 
     return (
       <View
@@ -322,10 +331,11 @@ function PropertyCardComponent({
               )}
 
               {/* Top-left image counter badge */}
+              {images.length > 0 ? (
               <View style={styles.imageCounterBadge} pointerEvents="none">
                 <Camera size={13} color={colorTokens.onInk} strokeWidth={2.2} />
                 <Text style={styles.imageCounterText}>
-                  {images.length > 0 ? `${activeImageIndex + 1}/${images.length}` : "1/1"}
+                  {`${activeImageIndex + 1}/${images.length}`}
                 </Text>
                 {hasFloorPlan ? (
                   <>
@@ -334,6 +344,7 @@ function PropertyCardComponent({
                   </>
                 ) : null}
               </View>
+              ) : null}
 
               {/* Bottom dots */}
               {images.length > 1 ? (
@@ -351,35 +362,53 @@ function PropertyCardComponent({
               ) : null}
             </View>
 
-            {/* 2. Status Badge Ribbon */}
-            {property.is_verified ? (
-              <View style={styles.ribbonVerified}>
-                <ShieldCheck size={14} color={colorTokens.brandText} strokeWidth={2.4} />
-                <Text style={styles.ribbonVerifiedText}>{t("propertyCard.verifiedFull")}</Text>
-              </View>
-            ) : (
-              <View style={styles.ribbonOwner}>
-                <Text style={styles.ribbonOwnerText}>{t("propertyCard.directOwner")}</Text>
-              </View>
-            )}
-
-            {/* 3. Card Typography & Information Hierarchy */}
-            <View style={styles.mobileBody}>
-              <Text style={styles.mobilePrice}>
+            {/* 2. The price in a band under the photo, as on Rightmove's phone
+                results. A verified listing gets the dark brand band with its label
+                (Rightmove's "Featured property"); any other a light one. */}
+            <View style={[styles.priceBand, property.is_verified && styles.priceBandVerified]}>
+              {property.is_verified ? (
+                <View style={styles.priceBandLabelRow}>
+                  <ShieldCheck size={13} color={colorTokens.onInk} strokeWidth={2.4} />
+                  <Text style={styles.priceBandLabel}>{t("propertyCard.verifiedFull")}</Text>
+                </View>
+              ) : null}
+              <Text style={[styles.priceBandPrice, property.is_verified && styles.priceBandPriceVerified]}>
                 {price}
-                {isRent ? <Text style={styles.mobilePriceSuffix}>{t("propertyCard.perMonth")}</Text> : null}
+                {isRent ? (
+                  <Text style={[styles.priceBandSuffix, property.is_verified && styles.priceBandSuffixVerified]}>
+                    {t("propertyCard.perMonth")}
+                  </Text>
+                ) : null}
+              </Text>
+            </View>
+
+            {/* 3. Where it is, then what it is: kind, bedrooms, bathrooms. */}
+            <View style={styles.mobileBody}>
+              <Text numberOfLines={2} style={styles.mobileAddress}>
+                {listingAddress(property) ?? location}
               </Text>
 
-              <Text numberOfLines={1} style={styles.mobileSpecTitle}>
-                {specTitle}
-              </Text>
-
-              <View style={styles.mobileLocationRow}>
-                <MapPin color={colorTokens.muted} size={14} strokeWidth={2} />
-                <Text numberOfLines={1} style={styles.mobileLocationText}>
-                  {location}
+              <View style={styles.mobileFactsRow}>
+                <Text numberOfLines={1} style={styles.mobileFactText}>
+                  {typeName}
                 </Text>
+                {specs.beds ? (
+                  <View style={styles.mobileFact} accessibilityLabel={`${specs.beds} ${t("propertyDetail.beds")}`}>
+                    <BedDouble color={colorTokens.ink} size={16} strokeWidth={1.8} />
+                    <Text style={styles.mobileFactText}>{specs.beds}</Text>
+                  </View>
+                ) : null}
+                {specs.baths ? (
+                  <View style={styles.mobileFact} accessibilityLabel={`${specs.baths} ${t("propertyDetail.baths")}`}>
+                    <Bath color={colorTokens.ink} size={16} strokeWidth={1.8} />
+                    <Text style={styles.mobileFactText}>{specs.baths}</Text>
+                  </View>
+                ) : null}
               </View>
+
+              {!property.is_verified ? (
+                <Text style={styles.mobileOwnerText}>{t("propertyCard.directOwner")}</Text>
+              ) : null}
 
               {recencyText ? (
                 <Text style={styles.mobileRecencyText}>{recencyText}</Text>
@@ -404,6 +433,8 @@ function PropertyCardComponent({
               size={18}
             />
           </Pressable>
+
+          {adminActions}
 
           {/* 4. In-Card Bottom Action Row (3-column action footer) */}
           <View style={styles.actionFooter}>
@@ -514,6 +545,7 @@ function PropertyCardComponent({
           </View>
         </Pressable>
         {saveButton}
+        {adminActions}
       </View>
     );
   }
@@ -589,6 +621,7 @@ function PropertyCardComponent({
         </View>
       </Pressable>
       {saveButton}
+      {adminActions}
     </View>
   );
 }
@@ -852,72 +885,55 @@ const styles = StyleSheet.create({
     width: 16,
     backgroundColor: colorTokens.surface,
   },
-  ribbonVerified: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+  priceBand: {
     paddingHorizontal: 14,
-    paddingVertical: 7,
-    backgroundColor: colorTokens.brandSurface,
-    borderBottomWidth: 1,
-    borderBottomColor: colorTokens.brandBorder,
+    paddingVertical: 10,
+    backgroundColor: colorTokens.surfaceSunken,
+    // Keeps the band apart from a grey "no photo" placeholder above it.
+    borderTopWidth: 1,
+    borderTopColor: colorTokens.divider,
   },
-  ribbonVerifiedText: {
-    color: colorTokens.brandText,
-    fontFamily: fonts.bold,
+  // Dark green with white type: 6.3:1 (white on the bright brand green fails).
+  priceBandVerified: { backgroundColor: colorTokens.brandText, gap: 4, paddingVertical: 12 },
+  priceBandLabelRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  priceBandLabel: {
+    color: colorTokens.onInk,
+    fontFamily: fonts.semiBold,
     fontSize: 11.5,
     letterSpacing: 0.5,
     textTransform: "uppercase",
   },
-  ribbonOwner: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    backgroundColor: colorTokens.surfaceSunken,
-    borderBottomWidth: 1,
-    borderBottomColor: colorTokens.divider,
+  priceBandPrice: {
+    color: colorTokens.ink,
+    fontFamily: fonts.headingExtraBold,
+    fontSize: 21,
+    letterSpacing: -0.4,
   },
-  ribbonOwnerText: {
+  priceBandPriceVerified: { color: colorTokens.onInk },
+  priceBandSuffix: { color: colorTokens.muted, fontFamily: fonts.regular, fontSize: 14, letterSpacing: 0 },
+  priceBandSuffixVerified: { color: colorTokens.onInk },
+  mobileAddress: {
+    color: colorTokens.ink,
+    fontFamily: fonts.headingBold,
+    fontSize: 15.5,
+    lineHeight: 21,
+  },
+  mobileFactsRow: { flexDirection: "row", alignItems: "center", gap: 14, marginTop: 2 },
+  mobileFact: { flexDirection: "row", alignItems: "center", gap: 5 },
+  mobileFactText: { flexShrink: 1, color: colorTokens.ink, fontFamily: fonts.regular, fontSize: 14 },
+  mobileOwnerText: {
     color: colorTokens.muted,
     fontFamily: fonts.semiBold,
     fontSize: 11,
     letterSpacing: 0.4,
     textTransform: "uppercase",
+    marginTop: 4,
   },
   mobileBody: {
     paddingHorizontal: 14,
     paddingTop: 12,
     paddingBottom: 14,
     gap: 4,
-  },
-  mobilePrice: {
-    color: colorTokens.brandText,
-    fontFamily: fonts.headingExtraBold,
-    fontSize: 21,
-    letterSpacing: -0.4,
-  },
-  mobilePriceSuffix: {
-    color: colorTokens.muted,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    letterSpacing: 0,
-  },
-  mobileSpecTitle: {
-    color: colorTokens.ink,
-    fontFamily: fonts.headingBold,
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  mobileLocationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    marginTop: 2,
-  },
-  mobileLocationText: {
-    flex: 1,
-    color: colorTokens.muted,
-    fontFamily: fonts.regular,
-    fontSize: 13,
   },
   mobileRecencyText: {
     color: colorTokens.subtle,
@@ -939,6 +955,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
     paddingVertical: 12,
+    minHeight: layout.touchTarget,
   },
   actionBtnText: {
     color: colorTokens.brandText,

@@ -52,11 +52,12 @@ export const en = {
     clearLocation: "Clear location",
     clearSearch: "Clear search",
     clearFilters: "Clear filters",
-    searchProperties: "Search properties",
+    searchProperties: "Search for Properties",
   },
   propertyCard: {
     verified: "Verified",
     verifiedFull: "100% Verified Listing",
+    property: "Property",
     directOwner: "Direct Owner (0% Brokerage)",
     forRent: "For rent",
     forSale: "For sale",
@@ -128,6 +129,22 @@ export const en = {
     close: "Close",
     notice: "Notice",
     back: "Back",
+  },
+  moderation: {
+    staff: "Staff",
+    moderate: "Moderate",
+    moderating: "Moderating",
+    toggleLabel: "Turn moderation on or off for this page",
+    backToAdmin: "Back to admin",
+    archive: "Archive",
+    archiveLabel: "Archive {{title}}",
+    archived: "“{{title}}” archived",
+    undo: "Undo",
+    deleteLabel: "Delete {{title}}",
+    deleteTitle: "Delete this listing?",
+    deleteMessage: "“{{title}}” will be permanently removed. This cannot be undone.",
+    deleteConfirm: "Delete",
+    deleted: "“{{title}}” deleted",
   },
   filters: {
     title: "Advanced filters",
@@ -215,6 +232,16 @@ export const en = {
   browse: {
     propertiesFound: "{{count}} properties found",
     propertyFound: "{{count}} property found",
+    // The results line, which is also the page's <h1>.
+    heading: "Property {{purpose}} in {{place}}",
+    headingCount: "{{count}} properties {{purpose}} in {{place}}",
+    headingOne: "{{count}} property {{purpose}} in {{place}}",
+    purposeSale: "for sale",
+    purposeRent: "for rent",
+    purposeShortLet: "for short stays",
+    purposeSold: "sold",
+    purposeAll: "for sale or rent",
+    everywhere: "Bangladesh",
     gridView: "Grid view",
     listView: "List view",
     loadErrorTitle: "Could not load live properties",
@@ -576,6 +603,7 @@ export const en = {
       boost: "Boost",
       archive: "Archive",
       unarchive: "Unarchive",
+      askToRestore: "Ask to restore",
     },
     filters: {
       all: "All",
@@ -594,6 +622,11 @@ export const en = {
     unarchiveConfirmTitle: "Unarchive Property",
     unarchiveConfirmMessage: "Unarchive \"{{title}}\"? This will make the listing active again.",
     unarchiveFailed: "Unarchive failed",
+    archiveConfirmMessageNoUndo: "Archive \"{{title}}\"? It will no longer be shown on the site. You can't restore it yourself yet: to bring it back, you'll need to email support.",
+    restoreViaSupportTitle: "Restore this listing",
+    restoreViaSupportMessage: "Archived listings can't be restored from your account yet. Email our support team and we'll restore \"{{title}}\" for you.",
+    restoreViaSupportConfirm: "Email support",
+    restoreViaSupportSubject: "Please restore my listing",
     toggleView: {
       aria: "Switch to the buyer view of the live site",
       label: "Switch to buyer",
@@ -1570,7 +1603,7 @@ export const en = {
     rightmove: {
       moreFilters: "More filters",
       filtersWithCount: "Filters ({{count}})",
-      searchProperties: "Search properties",
+      searchProperties: "Search for Properties",
       searchCountedProperties: "Search {{count}} properties",
       includeSoldHelp:
         "Shows listings that are under offer or sold subject to contract alongside the available ones.",
@@ -2101,19 +2134,19 @@ export const en = {
   seo: {
     areas: {
       title: "Property by Area in Bangladesh | HomeNet BD",
-      description: "Browse homes for sale and to rent area by area across Dhaka, Chattogram, Sylhet and Cox's Bazar on HomeNet BD.",
+      description: "Browse flats, houses and plots for sale and to rent, area by area, across Dhaka, Chattogram, Sylhet and Cox's Bazar. Contact owners directly on HomeNet BD.",
     },
     buy: {
       title: "Property for Sale in Dhaka | HomeNet BD",
-      description: "Browse verified apartments, houses and land for sale across Dhaka and Bangladesh.",
+      description: "Flats, houses, plots and commercial space for sale in Dhaka, Chattogram and across Bangladesh. See photos, prices and maps, then contact owners directly.",
     },
     rent: {
       title: "Property to Rent in Dhaka | HomeNet BD",
-      description: "Browse verified apartments and houses to rent across Dhaka and Bangladesh.",
+      description: "Family flats, bachelor flats, sublets and offices to rent in Dhaka and across Bangladesh. Compare rents, photos and locations, and contact landlords directly.",
     },
     sold: {
       title: "Recently Sold Property Prices | HomeNet BD",
-      description: "See confirmed sale prices for properties across Dhaka and Bangladesh.",
+      description: "Sale prices of flats, houses and plots sold through HomeNet BD in Dhaka and across Bangladesh, published once each sale has completed and been confirmed.",
     },
     saved: {
       title: "Saved Properties | HomeNet BD",

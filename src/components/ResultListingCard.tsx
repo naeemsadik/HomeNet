@@ -26,6 +26,8 @@ import {
 } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { contactPhone, listerDisplay, whatsappUrl } from "@/features/property/utils/lister";
+import { listingPhotos } from "@/features/property/utils/listingMedia";
+import { listingAddress, listingTypeName } from "@/features/property/utils/typeName";
 
 export interface ResultListingCardProps {
   property: Property;
@@ -39,11 +41,6 @@ export interface ResultListingCardProps {
 
 const MEDIA_HEIGHT = 268;
 
-function titleCase(value: string) {
-  return value
-    .replace(/[_-]+/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
 /**
  * One search result on a wide screen: a photo collage on the left with the
@@ -60,14 +57,7 @@ function ResultListingCardComponent({
 }: ResultListingCardProps) {
   const { t, language } = useTranslation();
 
-  const images = useMemo(
-    () =>
-      (property.media ?? [])
-        .filter((m) => m.media_type === "image" && m.url)
-        .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
-        .map((m) => m.url),
-    [property.media],
-  );
+  const images = useMemo(() => listingPhotos(property.media), [property.media]);
   const photoCount = property._count?.media ?? images.length;
 
   // "Contact for price" is words, so a "/mo" after it would be nonsense.
@@ -84,21 +74,9 @@ function ResultListingCardComponent({
   const size = property.area_size
     ? `${formatLocalizedNumber(property.area_size.toLocaleString("en-BD"), language)} ${translateAreaUnit(property.area_unit, language)}`
     : null;
-  const typeName = property.subtype
-    ? titleCase(property.subtype)
-    : property.type
-    ? titleCase(property.type)
-    : null;
+  const typeName = listingTypeName(property);
 
-  const address =
-    [property.address, property.area?.name, property.area?.city]
-      .filter((part): part is string => Boolean(part))
-      // An address that already names the area or city does not need it again.
-      .filter(
-        (part, i, all) =>
-          !all.slice(0, i).some((earlier) => earlier.toLowerCase().includes(part.toLowerCase())),
-      )
-      .join(", ") || t("propertyCard.locationUnavailable");
+  const address = listingAddress(property) ?? t("propertyCard.locationUnavailable");
 
   const recency = useMemo(() => {
     const raw = property.published_at || property.created_at;

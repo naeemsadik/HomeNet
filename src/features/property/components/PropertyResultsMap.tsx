@@ -20,6 +20,7 @@ import { cdnImage } from "@/lib/cloudinaryImage";
 import type { Property } from "../types/property";
 import { HomeMapCanvas } from "./HomeMapCanvas";
 import type { HomeMapMarker } from "./HomeMapCanvas.types";
+import { listingCover } from "@/features/property/utils/listingMedia";
 
 type MappableProperty = Property & { location_lat: number; location_lng: number };
 
@@ -140,7 +141,7 @@ export function PropertyResultsMap({
   };
 
   const originalPhoto =
-    selectedProperty?.media?.find((m) => m.media_type === "image")?.url ??
+    listingCover(selectedProperty?.media) ??
     selectedProperty?.media?.[0]?.url ??
     null;
 
@@ -283,7 +284,7 @@ function CarouselCard({
 }) {
   const { t, language } = useTranslation();
   const photo =
-    property.media?.find((m) => m.media_type === "image")?.url ?? property.media?.[0]?.url ?? null;
+    listingCover(property.media) ?? property.media?.[0]?.url ?? null;
   const price = formatLocalizedPrice(property.price, property.price_currency || "BDT", language);
   const beds = Number(property.bedrooms ?? (property.amenities as Record<string, unknown> | null)?.bedrooms);
   const type = property.subtype || property.type;
