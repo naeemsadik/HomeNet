@@ -27,7 +27,7 @@ export const styles = StyleSheet.create({
   },
   sellerRolePill: {
     backgroundColor: "#E8EEFC",
-    borderRadius: 999,
+    borderRadius: 4,
     paddingVertical: 4,
     paddingHorizontal: 12,
     alignItems: "center",
@@ -48,7 +48,7 @@ export const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 6,
     ...webPointer,
   },
   navItemActive: {
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     backgroundColor: "#F4F6F5",
-    borderRadius: 999,
+    borderRadius: 4,
     paddingHorizontal: 14,
     width: 220,
     height: 38,
@@ -167,7 +167,7 @@ export const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 14,
     height: 38,
-    borderRadius: 999,
+    borderRadius: 4,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "rgba(11,26,23,0.08)",
@@ -197,7 +197,7 @@ export const styles = StyleSheet.create({
   tabBar: {
     flexDirection: "row",
     backgroundColor: "#EBEFEA",
-    borderRadius: 14,
+    borderRadius: 6,
     padding: 4,
     marginBottom: 20,
     width: "100%",
@@ -213,13 +213,13 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 4,
   },
   tabBtnActive: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: colorTokens.brand,
     ...(Platform.OS === "web"
       ? {
-          boxShadow: "0 2px 8px rgba(15, 109, 85, 0.25)",
+          boxShadow: "0 2px 8px rgba(4, 207, 146, 0.25)",
         }
       : {
           elevation: 2,
@@ -235,18 +235,18 @@ export const styles = StyleSheet.create({
     fontSize: 13,
   },
   tabBtnTextActive: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   // Cards
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    borderWidth: 1.13,
+    borderRadius: 6,
+    borderWidth: 1,
     borderColor: "rgba(11,26,23,0.08)",
     padding: 24,
     ...(Platform.OS === "web"
       ? {
-          boxShadow: "0px 2px 8px rgba(11, 26, 23, 0.04)",
+          boxShadow: "0px 1px 3px rgba(11, 26, 23, 0.04), 0px 4px 12px rgba(11, 26, 23, 0.02)",
         }
       : {
           elevation: 1,
@@ -258,23 +258,23 @@ export const styles = StyleSheet.create({
   },
   cardPhone: {
     padding: 16,
-    borderRadius: 18,
+    borderRadius: 6,
   },
   sectionSpacing: {
-    marginTop: 20,
+    marginTop: 16,
   },
   cardHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 20,
+    gap: 10,
+    marginBottom: 18,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
     color: "#0B1A17",
-    letterSpacing: -0.36,
+    letterSpacing: -0.2,
   },
   // Profile Row
   profileRow: {
@@ -287,17 +287,19 @@ export const styles = StyleSheet.create({
     gap: 12,
   },
   avatarWrap: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
+    width: 76,
+    height: 76,
+    borderRadius: 6,
     overflow: "hidden",
     backgroundColor: "#E2E8F0",
+    borderWidth: 1,
+    borderColor: "rgba(11,26,23,0.08)",
     position: "relative",
   },
   avatarWrapPhone: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
+    width: 60,
+    height: 60,
+    borderRadius: 6,
   },
   avatarImage: {
     width: "100%",
@@ -337,7 +339,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#E7F2EE",
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 999,
+    borderRadius: 4,
   },
   verifiedText: {
     fontSize: 12,
@@ -404,24 +406,29 @@ export const styles = StyleSheet.create({
   inputWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F6F5",
-    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     height: 48,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "rgba(11,26,23,0.06)",
+    borderColor: "rgba(11,26,23,0.12)",
+    ...(Platform.OS === "web"
+      ? {
+          boxShadow: "0px 1px 2px rgba(11, 26, 23, 0.03)",
+        }
+      : {}),
   },
   inputWrapPhone: {
-    height: 44,
-    paddingHorizontal: 12,
+    height: 46,
+    paddingHorizontal: 14,
   },
   textInput: {
     flex: 1,
     height: "100%",
-    fontSize: 14,
-    fontFamily: fonts.regular,
-    fontWeight: "300",
-    color: "rgba(11, 26, 23, 0.45)",
+    fontSize: 14.5,
+    fontFamily: fonts.medium,
+    fontWeight: "500",
+    color: "#0B1A17",
     paddingVertical: 0,
     ...(Platform.OS === "web" ? ({ outlineStyle: "none" } as any) : {}),
   },
@@ -430,6 +437,66 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 8,
+  },
+  // Segmented Control
+  segmentedTrack: {
+    flexDirection: "row",
+    backgroundColor: "#F0F4F2",
+    borderRadius: 12,
+    padding: 4,
+    gap: 4,
+  },
+  segmentItem: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 10,
+    borderRadius: 9,
+    backgroundColor: "transparent",
+  },
+  segmentItemActive: {
+    backgroundColor: "#FFFFFF",
+    ...(Platform.OS === "web"
+      ? {
+          boxShadow: "0px 1px 3px rgba(11, 26, 23, 0.08)",
+        }
+      : {
+          elevation: 1,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.06,
+          shadowRadius: 2,
+        }),
+  },
+  segmentItemText: {
+    fontSize: 13.5,
+    fontFamily: fonts.medium,
+    fontWeight: "500",
+    color: "#5C6B66",
+  },
+  segmentItemTextActive: {
+    fontFamily: fonts.semiBold,
+    fontWeight: "600",
+    color: "#0B1A17",
+  },
+  listerSaveRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 16,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(11,26,23,0.06)",
+  },
+  listerSaveBtn: {
+    backgroundColor: colorTokens.brand,
+    paddingHorizontal: 20,
+    paddingVertical: 9,
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 110,
   },
   // Quick Chips
   quickChipsRow: {
@@ -498,32 +565,37 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 999,
-    borderWidth: 1.2,
-    borderColor: "rgba(4, 207, 146, 0.35)",
-    backgroundColor: "rgba(4, 207, 146, 0.12)",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(11, 26, 23, 0.12)",
+    backgroundColor: "#FFFFFF",
+    ...(Platform.OS === "web"
+      ? {
+          boxShadow: "0px 1px 2px rgba(11, 26, 23, 0.04)",
+        }
+      : {}),
   },
   changePasswordBtnText: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#03a675",
+    color: "#0B1A17",
   },
   deleteAccountBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 999,
-    borderWidth: 1.2,
-    borderColor: "rgba(212, 24, 61, 0.3)",
-    backgroundColor: "#FFF5F6",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(212, 24, 61, 0.2)",
+    backgroundColor: "#FFF9F9",
   },
   deleteAccountBtnText: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
     color: "#D4183D",
@@ -568,21 +640,29 @@ export const styles = StyleSheet.create({
     color: "#D4183D",
   },
   saveBtn: {
-    backgroundColor: "#04cf92",
-    paddingHorizontal: 24,
+    backgroundColor: colorTokens.brand,
+    paddingHorizontal: 28,
     paddingVertical: 11,
-    borderRadius: 999,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 130,
+    minWidth: 140,
+    ...(Platform.OS === "web"
+      ? {
+          boxShadow: "0px 1px 3px rgba(15, 109, 85, 0.2), 0px 4px 12px rgba(15, 109, 85, 0.15)",
+        }
+      : {
+          elevation: 2,
+        }),
   },
   saveBtnPhone: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     paddingVertical: 10,
-    minWidth: 110,
+    minWidth: 120,
+    borderRadius: 10,
   },
   btnDisabled: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   saveBtnText: {
     fontSize: 14,

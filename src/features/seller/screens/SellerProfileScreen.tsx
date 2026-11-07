@@ -2,6 +2,7 @@ import * as ImagePicker from "expo-image-picker";
 import {
   CheckCircle2,
   KeyRound,
+  Mail,
   Shield,
   ShieldAlert,
   Trash2,
@@ -266,6 +267,7 @@ export function SellerProfileScreen() {
             {/* Section 2: Contact Information */}
             <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
               <View style={styles.cardHeaderRow}>
+                <Mail color="#0B1A17" size={20} />
                 <Text style={styles.cardTitle}>{t("seller.profile.contactInfoTitle")}</Text>
               </View>
 

@@ -118,33 +118,37 @@ export function ListerTypeSection() {
   return (
     <View style={[styles.card, styles.sectionSpacing, isPhone && styles.cardPhone]}>
       <View style={styles.cardHeaderRow}>
+        <Building2 color="#0B1A17" size={20} />
         <Text style={styles.cardTitle}>{t("seller.profile.lister.title")}</Text>
       </View>
       <Text style={styles.securityDesc}>{t("seller.profile.lister.desc")}</Text>
 
-      <View style={[styles.formGroup, { flexDirection: "row", gap: 10 }]}>
-        {options.map(({ key, label, Icon }) => {
-          const active = accountType === key;
-          return (
-            <Pressable
-              key={key}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: active }}
-              // react-native-web ignores accessibilityState.checked.
-              {...({ "aria-checked": active } as object)}
-              onPress={() => setAccountType(key)}
-              style={[
-                styles.changePasswordBtn,
-                { flex: 1, flexDirection: "row", gap: 8, justifyContent: "center" },
-                active && { borderColor: colorTokens.brand, backgroundColor: colorTokens.brandSurface },
-                webPointer,
-              ]}
-            >
-              <Icon color={active ? colorTokens.brandText : colorTokens.body} size={17} />
-              <Text style={styles.changePhotoText}>{label}</Text>
-            </Pressable>
-          );
-        })}
+      <View style={[styles.formGroup, { marginTop: 12 }]}>
+        <View style={styles.segmentedTrack}>
+          {options.map(({ key, label, Icon }) => {
+            const active = accountType === key;
+            return (
+              <Pressable
+                key={key}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: active }}
+                // react-native-web ignores accessibilityState.checked.
+                {...({ "aria-checked": active } as object)}
+                onPress={() => setAccountType(key)}
+                style={[
+                  styles.segmentItem,
+                  active && styles.segmentItemActive,
+                  webPointer,
+                ]}
+              >
+                <Icon color={active ? "#0F6D55" : "#5C6B66"} size={16} />
+                <Text style={[styles.segmentItemText, active && styles.segmentItemTextActive]}>
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
 
       {isCompany ? (
@@ -193,18 +197,20 @@ export function ListerTypeSection() {
         </>
       ) : null}
 
-      <Pressable
-        accessibilityRole="button"
-        disabled={busy !== null || profile.isLoading}
-        onPress={save}
-        style={[styles.saveBtn, isPhone && styles.saveBtnPhone, webPointer, busy !== null && styles.btnDisabled]}
-      >
-        {busy === "save" ? (
-          <ActivityIndicator color={colorTokens.onBrand} size="small" />
-        ) : (
-          <Text style={styles.saveBtnText}>{t("seller.profile.saveChangesBtn")}</Text>
-        )}
-      </Pressable>
+      <View style={styles.listerSaveRow}>
+        <Pressable
+          accessibilityRole="button"
+          disabled={busy !== null || profile.isLoading}
+          onPress={save}
+          style={[styles.listerSaveBtn, isPhone && styles.fullWidthBtnPhone, webPointer, busy !== null && styles.btnDisabled]}
+        >
+          {busy === "save" ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <Text style={styles.saveBtnText}>{t("seller.profile.saveChangesBtn")}</Text>
+          )}
+        </Pressable>
+      </View>
     </View>
   );
 }

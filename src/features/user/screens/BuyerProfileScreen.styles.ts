@@ -324,10 +324,10 @@ export const styles = StyleSheet.create({
     color: "#D4183D",
   },
   saveBtn: {
-    backgroundColor: "#04cf92",
+    backgroundColor: colorTokens.brand,
     paddingHorizontal: 24,
     paddingVertical: 11,
-    borderRadius: 999,
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     minWidth: 130,
