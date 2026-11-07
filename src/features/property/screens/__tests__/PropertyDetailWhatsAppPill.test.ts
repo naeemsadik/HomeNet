@@ -1,5 +1,5 @@
 import { styles } from "../PropertyDetailScreen.styles";
-import { fonts } from "@/theme";
+import { colorTokens, fonts } from "@/theme";
 import { en } from "@/i18n/locales/en";
 import { bn } from "@/i18n/locales/bn";
 
@@ -50,7 +50,7 @@ describe("PropertyDetailScreen WhatsApp & Seller Action Button Styles", () => {
       paddingHorizontal: 16,
       borderRadius: 4,
       borderWidth: 0,
-      backgroundColor: "#00D284",
+      backgroundColor: colorTokens.brand,
     });
 
     expect(styles.sellerActionText).toMatchObject({

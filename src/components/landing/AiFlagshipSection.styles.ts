@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from 'react-native';
-import { colors, radius, fonts } from '../../theme';
+import { colors, colorTokens, radius, fonts } from '../../theme';
 
 export const styles = StyleSheet.create({
   sectionRoot: {
@@ -333,7 +333,7 @@ export const styles = StyleSheet.create({
       : {}),
   },
   analyzeBtnHovered: {
-    backgroundColor: '#04BD84',
+    backgroundColor: colorTokens.brandHover,
     transform: [{ translateY: -1 }],
   },
   analyzeBtnText: {
@@ -567,7 +567,7 @@ export const styles = StyleSheet.create({
     ...(Platform.OS === 'web' ? { cursor: 'pointer', transition: 'all 0.15s ease' } : {}),
   },
   applyBtnHovered: {
-    backgroundColor: '#04BD84',
+    backgroundColor: colorTokens.brandHover,
     transform: [{ translateY: -1 }],
   },
   applyBtnText: {

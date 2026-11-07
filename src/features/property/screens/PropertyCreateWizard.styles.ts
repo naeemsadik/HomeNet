@@ -544,7 +544,7 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
   },
   formTextareaFocused: {
-    borderColor: "#00C885",
+    borderColor: colorTokens.brand,
     backgroundColor: "#FFFFFF",
     shadowColor: "#00C885",
     shadowOffset: { width: 0, height: 2 },

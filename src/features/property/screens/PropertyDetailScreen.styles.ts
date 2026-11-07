@@ -845,7 +845,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 4,
     borderWidth: 0,
-    backgroundColor: "#00D284",
+    backgroundColor: colorTokens.brand,
   },
   actionBtnDisabled: {
     opacity: 0.45,

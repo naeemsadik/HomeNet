@@ -216,10 +216,10 @@ export const styles = StyleSheet.create({
     borderRadius: 4,
   },
   tabBtnActive: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: colorTokens.brand,
     ...(Platform.OS === "web"
       ? {
-          boxShadow: "0 2px 8px rgba(15, 109, 85, 0.25)",
+          boxShadow: "0 2px 8px rgba(4, 207, 146, 0.25)",
         }
       : {
           elevation: 2,
@@ -235,7 +235,7 @@ export const styles = StyleSheet.create({
     fontSize: 13,
   },
   tabBtnTextActive: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   // Cards
   card: {
@@ -490,10 +490,10 @@ export const styles = StyleSheet.create({
     borderTopColor: "rgba(11,26,23,0.06)",
   },
   listerSaveBtn: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: colorTokens.brand,
     paddingHorizontal: 20,
     paddingVertical: 9,
-    borderRadius: 10,
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     minWidth: 110,
@@ -640,7 +640,7 @@ export const styles = StyleSheet.create({
     color: "#D4183D",
   },
   saveBtn: {
-    backgroundColor: "#0F6D55",
+    backgroundColor: colorTokens.brand,
     paddingHorizontal: 28,
     paddingVertical: 11,
     borderRadius: 12,
@@ -668,7 +668,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.semiBold,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
   },
   // Change Password Modal
   modalBackdrop: {
