@@ -11,7 +11,7 @@ Last reviewed: 20 October 2026. Figures described as indicative are broad market
 - Verification gate: a listing is reviewed before it is published, and cannot go live without photos, a full address, map coordinates and confirmed specifications (size, bedrooms and bathrooms where they apply, floor, facing, amenities). Verified listings carry a badge.
 - Plain-language listing: an owner can paste a description such as "1800 sqft, 3 bed, south facing, 4th floor, lift and generator, 2.5 crore" and HomeNet fills in the listing fields from it, for the owner to check.
 - Languages: English and Bangla.
-- Contact: hello@homenet.com.bd
+- Contact: support@homenetbd.com
 
 ## 2. How the site is organised
 
