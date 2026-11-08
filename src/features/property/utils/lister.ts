@@ -42,9 +42,26 @@ export function contactPhone(property: Pick<Property, "phone" | "user">): string
   return property.user?.auth_identities?.find((id) => id.phone)?.phone ?? null;
 }
 
-/** A wa.me link for a WhatsApp number, or null when it has no digits. */
+/**
+ * A phone number in the international form WhatsApp needs, +880 for Bangladesh.
+ * "01711000000" → "+8801711000000"; "00880 1711 000000" → "+8801711000000".
+ * The one rule for saving a WhatsApp number and for building a link to one.
+ */
+export function toWhatsAppFormat(phone: string): string {
+  let cleaned = phone.trim().replace(/[\s\-().]/g, "");
+  if (!cleaned) return "";
+  // 00 is the dialling prefix for "international" ("00880…"), the same as "+".
+  if (cleaned.startsWith("00")) cleaned = `+${cleaned.slice(2)}`;
+  if (cleaned.startsWith("+")) return cleaned;
+  if (cleaned.startsWith("880")) return `+${cleaned}`;
+  if (cleaned.startsWith("0") && cleaned.length >= 10) return `+880${cleaned.slice(1)}`;
+  if (/^1[3-9]\d{8}$/.test(cleaned)) return `+880${cleaned}`;
+  return cleaned;
+}
+
+/** A wa.me link for a WhatsApp number, or null when it has too few digits to be one. */
 export function whatsappUrl(number: string | null | undefined, message?: string): string | null {
-  const digits = (number ?? "").replace(/\D/g, "");
+  const digits = toWhatsAppFormat(number ?? "").replace(/\D/g, "");
   if (digits.length < 7) return null;
   return `https://wa.me/${digits}${message ? `?text=${encodeURIComponent(message)}` : ""}`;
 }

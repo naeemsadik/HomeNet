@@ -7,16 +7,18 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { PlusCircle, Rocket } from "@/components/icons";
-import Svg, { Path } from "react-native-svg";
+import { PlusCircle, Zap } from "@/components/icons";
 import { AppLink } from "@/components/ui";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
 import { useTranslation, formatLocalizedNumber } from "@/i18n";
+import { useResponsive } from "@/hooks/useResponsive";
 
 export interface SellerWelcomeBannerProps {
   name?: string;
-  viewsThisWeek?: string | number;
-  inquiriesThisWeek?: string | number;
+  activeListingsCount?: number;
+  totalListingsCount?: number;
+  /** While the listings load, say nothing rather than "add your first property". */
+  loading?: boolean;
   onAddNewProperty?: () => void;
   onBoostListing?: () => void;
   addPropertyHref?: string;
@@ -25,115 +27,81 @@ export interface SellerWelcomeBannerProps {
 
 export function SellerWelcomeBanner({
   name = "Partner",
-  viewsThisWeek = 0,
-  inquiriesThisWeek = 0,
+  activeListingsCount = 0,
+  totalListingsCount = 0,
+  loading = false,
   onAddNewProperty,
   onBoostListing,
   addPropertyHref = "/property/create",
   style,
 }: SellerWelcomeBannerProps) {
   const { t, language } = useTranslation();
+  const { isPhone } = useResponsive();
+
+  const subtext = loading
+    ? null
+    : activeListingsCount === 1
+      ? t("seller.welcomeBanner.activeListingSubOne")
+      : activeListingsCount > 1
+      ? t("seller.welcomeBanner.activeListingsSub", {
+          count: formatLocalizedNumber(activeListingsCount, language),
+        })
+      : totalListingsCount > 0
+      ? t("seller.welcomeBanner.draftListingsSub")
+      : t("seller.welcomeBanner.noListingsSub");
 
   return (
-    <View style={[styles.container, style]}>
-      <View style={styles.contentLeft}>
-        {/* Subtitle */}
-        <Text style={styles.subtitle}>{t("dashboard.welcomeBack")}</Text>
+    <View style={[styles.container, isPhone && styles.containerPhone, style]}>
+      <View style={styles.headerLeft}>
+        <Text style={styles.overlineText}>{t("seller.welcomeBanner.portal")}</Text>
 
-        {/* Heading */}
-        <Text style={styles.title}>{name} 👋</Text>
-
-        {/* Description */}
-        <Text style={styles.description}>
-          {t("dashboard.bannerDescription", {
-            views: formatLocalizedNumber(viewsThisWeek, language),
-            inquiries: formatLocalizedNumber(inquiriesThisWeek, language),
-          })}
+        {/* "Welcome back," already ends in its comma, in both languages. */}
+        <Text style={styles.title}>
+          {t("dashboard.welcomeBack")} {name}
         </Text>
 
-        {/* Action Buttons Row */}
-        <View style={styles.buttonRow}>
-          {addPropertyHref ? (
-            <AppLink
-              href={addPropertyHref}
-              onPress={onAddNewProperty}
-              style={[styles.primaryBtn, webPointer]}
-            >
-              <PlusCircle color="#04cf92" size={16} strokeWidth={2} />
-              <Text style={styles.primaryBtnText}>{t("dashboard.addNewProperty")}</Text>
-            </AppLink>
-          ) : (
-            <Pressable
-              onPress={onAddNewProperty}
-              style={({ pressed }) => [
-                styles.primaryBtn,
-                pressed && styles.btnPressed,
-                webPointer,
-              ]}
-            >
-              <PlusCircle color="#04cf92" size={16} strokeWidth={2} />
-              <Text style={styles.primaryBtnText}>{t("dashboard.addNewProperty")}</Text>
-            </Pressable>
-          )}
-
-          {onBoostListing && (
-            <Pressable
-              accessibilityLabel={t("dashboard.boostListing")}
-              onPress={onBoostListing}
-              style={({ pressed }) => [
-                styles.secondaryBtn,
-                pressed && styles.btnPressed,
-                webPointer,
-              ]}
-            >
-              <Rocket color="#FFFFFF" size={16} strokeWidth={2} />
-              <Text style={styles.secondaryBtnText}>{t("dashboard.boostListing")}</Text>
-            </Pressable>
-          )}
-        </View>
+        {subtext ? <Text style={styles.description}>{subtext}</Text> : null}
       </View>
 
-      {/* Decorative Rocket Watermark SVG (Figma Node 220:8903) */}
-      <View pointerEvents="none" style={styles.watermarkContainer}>
-        <Svg
-          fill="none"
-          height={160}
-          viewBox="0 0 160 160"
-          width={160}
-        >
-          <Path
-            d="M29.9996 109.999C19.9997 118.399 16.6665 143.332 16.6665 143.332C16.6665 143.332 41.5995 139.998 49.9994 129.998C54.7326 124.398 54.666 115.799 49.3994 110.599C46.8081 108.125 43.3947 106.696 39.8143 106.586C36.2339 106.475 32.7388 107.69 29.9996 109.999Z"
-            stroke="white"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeOpacity={0.1}
-            strokeWidth={13.3332}
-          />
-          <Path
-            d="M79.999 99.9988L59.9992 79.999C63.5468 70.7953 68.0138 61.973 73.3324 53.666C81.1002 41.2461 91.9163 31.0199 104.752 23.9603C117.588 16.9007 132.016 13.2423 146.665 13.3332C146.665 31.4663 141.465 63.3325 106.665 86.6656C98.2447 91.9903 89.3112 96.4571 79.999 99.9988Z"
-            stroke="white"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeOpacity={0.1}
-            strokeWidth={13.3332}
-          />
-          <Path
-            d="M59.9992 79.999H26.6663C26.6663 79.999 30.333 59.7993 39.9995 53.3327C50.7994 46.1328 73.3324 53.3327 73.3324 53.3327"
-            stroke="white"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeOpacity={0.1}
-            strokeWidth={13.3332}
-          />
-          <Path
-            d="M79.999 99.9987V133.332C79.999 133.332 100.199 129.665 106.665 119.998C113.865 109.199 106.665 86.6656 106.665 86.6656"
-            stroke="white"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeOpacity={0.1}
-            strokeWidth={13.3332}
-          />
-        </Svg>
+      {/* Action Buttons Row */}
+      <View style={styles.buttonRow}>
+        {addPropertyHref ? (
+          <AppLink
+            href={addPropertyHref}
+            onPress={onAddNewProperty}
+            style={[styles.primaryBtn, webPointer]}
+          >
+            <PlusCircle color={colorTokens.onBrand} size={16} strokeWidth={2.4} />
+            <Text style={styles.primaryBtnText}>{t("dashboard.addNewProperty")}</Text>
+          </AppLink>
+        ) : (
+          <Pressable
+            onPress={onAddNewProperty}
+            style={({ pressed }) => [
+              styles.primaryBtn,
+              pressed && styles.btnPressed,
+              webPointer,
+            ]}
+          >
+            <PlusCircle color={colorTokens.onBrand} size={16} strokeWidth={2.4} />
+            <Text style={styles.primaryBtnText}>{t("dashboard.addNewProperty")}</Text>
+          </Pressable>
+        )}
+
+        {onBoostListing && (
+          <Pressable
+            accessibilityLabel={t("dashboard.boostListing")}
+            onPress={onBoostListing}
+            style={({ pressed }) => [
+              styles.secondaryBtn,
+              pressed && styles.btnPressed,
+              webPointer,
+            ]}
+          >
+            <Zap color={colors.ink} size={15} strokeWidth={2} />
+            <Text style={styles.secondaryBtnText}>{t("dashboard.boostListing")}</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );
@@ -141,100 +109,88 @@ export function SellerWelcomeBanner({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#04cf92",
-    borderRadius: 24,
+    backgroundColor: colors.white,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.line,
     padding: 24,
-    position: "relative",
-    overflow: "hidden",
-    justifyContent: "center",
+    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: 16,
   },
-  contentLeft: {
-    zIndex: 1,
-    maxWidth: 520,
+  containerPhone: {
+    padding: 16,
+    marginBottom: 16,
   },
-  subtitle: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: "rgba(255, 255, 255, 0.8)",
-    fontFamily: fonts.regular,
+  headerLeft: {
+    flex: 1,
+    minWidth: 260,
+  },
+  overlineText: {
+    fontSize: 11,
+    fontFamily: fonts.semiBold,
+    color: colors.muted,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 25.6,
-    lineHeight: 38.4,
-    fontWeight: "800",
-    color: "#FFFFFF",
-    fontFamily: fonts.headingBold,
-    letterSpacing: -0.512,
-    marginTop: 2,
+    fontSize: 22,
+    fontFamily: fonts.bold,
+    color: colors.ink,
+    letterSpacing: -0.3,
   },
   description: {
     fontSize: 14,
-    lineHeight: 20,
-    color: "rgba(255, 255, 255, 0.85)",
     fontFamily: fonts.regular,
-    marginTop: 8,
-  },
-  boldText: {
-    fontWeight: "700",
-    fontFamily: fonts.bold,
-    color: "#FFFFFF",
+    color: colors.body,
+    marginTop: 6,
+    lineHeight: 20,
+    maxWidth: 640,
   },
   buttonRow: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 10,
     flexWrap: "wrap",
-    gap: 12,
-    marginTop: 20,
   },
   primaryBtn: {
-    height: 40,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 9999,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: colors.green,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: radius.card,
+    minHeight: 40,
   },
+  // Dark text on the brand green, like every other primary button (white was under 2:1).
   primaryBtnText: {
-    color: "#04cf92",
-    fontSize: 14,
-    fontWeight: "600",
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
-    lineHeight: 20,
+    fontSize: 13.5,
   },
   secondaryBtn: {
-    height: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 9999,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 7,
+    backgroundColor: colors.sunken,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: colors.line,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: radius.card,
+    minHeight: 40,
   },
   secondaryBtnText: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
-    fontFamily: fonts.semiBold,
-    lineHeight: 20,
+    color: colors.ink,
+    fontFamily: fonts.medium,
+    fontSize: 13.5,
   },
   btnPressed: {
     opacity: 0.85,
-    transform: [{ scale: 0.98 }],
-  },
-  watermarkContainer: {
-    position: "absolute",
-    right: 12,
-    bottom: -15,
-    opacity: 0.95,
   },
 });

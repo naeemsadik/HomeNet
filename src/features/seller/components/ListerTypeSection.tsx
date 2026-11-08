@@ -13,7 +13,7 @@ import { toApiError } from "@/services/apiClient";
 import { deleteCompanyLogo, getUser, updateUser, uploadCompanyLogo } from "@/services/userApi";
 import type { UploadInput } from "@/services/upload";
 import type { AccountType } from "@/types/api";
-import { styles } from "../screens/SellerProfileScreen.styles";
+import { styles } from "./ListerTypeSection.styles";
 
 /**
  * Whether the account lists as a person or as a company. A company's name and

@@ -219,7 +219,7 @@ export function HeroSearchWidget({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t("hero.searchProperties")}
+          accessibilityLabel={t("hero.search")}
           onPress={handleSearch}
           style={({ hovered, pressed }: any) => [
             styles.searchButton,
@@ -231,7 +231,7 @@ export function HeroSearchWidget({
         >
           <Search color={colorTokens.onBrand} size={17} strokeWidth={2.4} />
           <Text style={styles.searchLabel}>
-            {isPhone ? t("hero.search") : t("hero.searchProperties")}
+            {t("hero.search")}
           </Text>
         </Pressable>
       </View>

@@ -28,6 +28,7 @@ import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
+import { whatsappUrl } from "@/features/property/utils/lister";
 import { useTranslation, formatLocalizedPrice, isPriceOnRequest, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { isHolidayStayType } from "@/features/property/utils/listingType";
@@ -244,15 +245,18 @@ function PropertyCardComponent({
       open();
       return;
     }
-    const clean = sellerPhone.replace(/[^\d]/g, "");
     const defaultSeller = language === "bn" ? "মালিক" : "Seller";
     const defaultProp = language === "bn" ? "প্রোপার্টি" : "Property";
     const greeting = language === "bn"
       ? `আসসালামু আলাইকুম ${property.user?.full_name || defaultSeller}, আমি HomeNet-এ আপনার প্রোপার্টি "${property.title || defaultProp}" সম্পর্কে আগ্রহী। এটি কি এখনো পাওয়া যাচ্ছে?`
       : `Hello ${property.user?.full_name || defaultSeller}, I am interested in your property "${property.title || defaultProp}" on HomeNet. Is it currently available?`;
-    const waUrl = `https://wa.me/${clean}?text=${encodeURIComponent(greeting)}`;
-    if (isSafeLinkUrl(waUrl)) {
+    // The shared builder adds Bangladesh's 88 to a local 01... number; wa.me needs it.
+    const waUrl = whatsappUrl(sellerPhone, greeting);
+    if (waUrl && isSafeLinkUrl(waUrl)) {
       openExternalUrl(waUrl);
+    } else {
+      // A number too short to dial: offer the enquiry form, as for no number at all.
+      open();
     }
   };
 
