@@ -1,4 +1,4 @@
-import { contactPhone, listerDisplay, whatsappUrl } from "../lister";
+import { contactPhone, listerDisplay, toWhatsAppFormat, whatsappUrl } from "../lister";
 
 const person = {
   id: "u1",
@@ -75,9 +75,43 @@ describe("contactPhone", () => {
   });
 });
 
+describe("toWhatsAppFormat", () => {
+  it("converts a standard Bangladesh 01... phone to +8801...", () => {
+    expect(toWhatsAppFormat("01711000000")).toBe("+8801711000000");
+    expect(toWhatsAppFormat(" 01812-345678 ")).toBe("+8801812345678");
+  });
+
+  it("reads the 00 international prefix as +, instead of as a local 0", () => {
+    expect(toWhatsAppFormat("00880 1711 000000")).toBe("+8801711000000");
+    expect(toWhatsAppFormat("00447911123456")).toBe("+447911123456");
+  });
+
+  it("builds the same link from every way of writing one number", () => {
+    const forms = ["01711000000", "+880 1711-000000", "8801711000000", "008801711000000", "1711000000"];
+    expect(new Set(forms.map((n) => whatsappUrl(n)))).toEqual(new Set(["https://wa.me/8801711000000"]));
+  });
+
+  it("leaves international numbers starting with +880 or + intact", () => {
+    expect(toWhatsAppFormat("+8801711000000")).toBe("+8801711000000");
+    expect(toWhatsAppFormat("+447911123456")).toBe("+447911123456");
+  });
+
+  it("adds + when 880 is typed without +", () => {
+    expect(toWhatsAppFormat("8801711000000")).toBe("+8801711000000");
+  });
+
+  it("returns empty string for empty input", () => {
+    expect(toWhatsAppFormat("")).toBe("");
+  });
+});
+
 describe("whatsappUrl", () => {
   it("builds a wa.me link from the digits only", () => {
     expect(whatsappUrl("+880 1711-000000")).toBe("https://wa.me/8801711000000");
+  });
+
+  it("automatically prepends 88 to an 11-digit Bangladesh 01... number", () => {
+    expect(whatsappUrl("01711000000")).toBe("https://wa.me/8801711000000");
   });
 
   it("adds the message, encoded", () => {

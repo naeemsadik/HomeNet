@@ -18,6 +18,8 @@
     "lint": "expo lint",
     "test": "jest",
     "check": "npm run typecheck && npm run lint && npm test && npm run test:native && npm run check:android",
+    "check:push": "npm run typecheck && npm run lint && npm test",
+    "prepare": "node scripts/install-git-hooks.cjs",
     "test:native": "jest -c jest.native.config.js",
     "check:android": "node scripts/check-android-release.cjs",
     "android:aab": "eas build --platform android --profile production",

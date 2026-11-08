@@ -1,0 +1,4 @@
+# Git hooks and shell scripts must keep LF endings: with CRLF, "#!/bin/sh"
+# fails on Git for Windows and the pre-push check would never run.
+.githooks/* text eol=lf
+*.sh text eol=lf

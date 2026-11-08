@@ -54,7 +54,7 @@ import { ReportListingModal } from "../components/ReportListingModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
 import { PropertyLocationSection, type NearbyPlace } from "../components/PropertyLocationSection";
 import { WhatsAppIcon } from "../components/WhatsAppIcon";
-import { contactPhone, listerDisplay } from "../utils/lister";
+import { contactPhone, listerDisplay, whatsappUrl } from "../utils/lister";
 import { NoTranslateText } from "@/components/NoTranslateText";
 
 import {
@@ -225,9 +225,13 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;
     }
-    const cleanPhone = rawPhone.replace(/[^\d]/g, "");
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-    void Linking.openURL(whatsappUrl).catch(() => {
+    // The shared builder adds Bangladesh's 88 to a local 01... number; wa.me needs it.
+    const url = whatsappUrl(rawPhone, message);
+    if (!url) {
+      notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
+      return;
+    }
+    void Linking.openURL(url).catch(() => {
       notify(
         t("propertyDetail.whatsappUnavailableTitle"),
         t("propertyDetail.whatsappUnavailableBody", { phone: rawPhone }),

@@ -48,7 +48,7 @@ describe("HeroSearchWidget", () => {
     container.remove();
   });
 
-  it("renders 'Search for Properties' on desktop/web screens", async () => {
+  it("renders 'Search' on desktop/web screens to match mobile view", async () => {
     mockUseResponsive.mockReturnValue({
       isPhone: false,
       isTablet: false,
@@ -70,7 +70,11 @@ describe("HeroSearchWidget", () => {
       root.render(<HeroSearchWidget />);
     });
 
-    expect(container.textContent).toContain("Search for Properties");
+    expect(container.textContent).not.toContain("Search for Properties");
+    const searchButtons = Array.from(container.querySelectorAll("div, button")).filter(
+      (el) => el.getAttribute("aria-label") === "Search" || el.textContent === "Search"
+    );
+    expect(searchButtons.length).toBeGreaterThan(0);
 
     await act(async () => {
       root.unmount();
@@ -99,7 +103,11 @@ describe("HeroSearchWidget", () => {
       root.render(<HeroSearchWidget />);
     });
 
-    expect(container.textContent).toContain("Search");
+    expect(container.textContent).not.toContain("Search for Properties");
+    const searchButtons = Array.from(container.querySelectorAll("div, button")).filter(
+      (el) => el.getAttribute("aria-label") === "Search" || el.textContent === "Search"
+    );
+    expect(searchButtons.length).toBeGreaterThan(0);
     expect(container.textContent).not.toContain("Search for Properties");
 
     await act(async () => {

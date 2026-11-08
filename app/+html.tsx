@@ -1,5 +1,6 @@
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { PropsWithChildren } from "react";
+import { FIELD_FOCUS_CSS, STYLE_ID as FIELD_FOCUS_STYLE_ID } from "@/lib/fieldFocus";
 
 export default function Root({ children }: PropsWithChildren) {
   return (
@@ -44,19 +45,9 @@ export default function Root({ children }: PropsWithChildren) {
           * {
             box-sizing: border-box;
           }
-          input, textarea, select, [contenteditable] {
-            outline: none !important;
-            outline-style: none !important;
-            box-shadow: none !important;
-            -webkit-tap-highlight-color: transparent !important;
-          }
-          input:focus, textarea:focus, select:focus, [contenteditable]:focus,
-          input:focus-visible, textarea:focus-visible, select:focus-visible {
-            outline: none !important;
-            outline-style: none !important;
-            box-shadow: none !important;
-          }
         ` }} />
+        {/* The field focus rules, under the id installFieldFocus checks so they are not added twice. */}
+        <style id={FIELD_FOCUS_STYLE_ID} dangerouslySetInnerHTML={{ __html: FIELD_FOCUS_CSS }} />
       </head>
       <body>
         {children}

@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     maxWidth: "48.5%",
     minWidth: 140,
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    borderRadius: 6,
     borderWidth: 1.154,
     borderColor: "rgba(11,26,23,0.08)",
     padding: 16,
