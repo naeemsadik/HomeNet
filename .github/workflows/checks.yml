@@ -1,0 +1,37 @@
+# Runs the same checks as the local pre-push hook on every push and pull
+# request, so a push that skipped the hook (or came from a machine without it)
+# is still caught. See docs/AGENT_RULES.md, section 3.
+name: Checks
+
+# Pushes to main, and every pull request (which covers each push to its branch),
+# so a PR branch is not checked twice per push.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Tests
+        run: npm test -- --ci
