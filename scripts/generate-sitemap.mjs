@@ -138,7 +138,8 @@ function exportedListings() {
 
 /**
  * What the export saw for an area page: its listings, or null when the API
- * failed at build time. Only an area with active listings is included in the sitemap.
+ * failed at build time. Unknown is kept in the sitemap; only an area known to
+ * be empty is left out.
  */
 function areaListings(intent, slug) {
   return pageSnapshot(intent, `${slug}.html`);
@@ -170,18 +171,21 @@ function main() {
   for (const page of STATIC_PAGES) xml += urlEntry(page.path, { ...page, lastmod: page.lastmod ?? gitDay(page.file) });
 
   let areaPages = 0;
+  let unknown = 0;
   const empty = [];
   for (const intent of AREA_INTENTS) {
     for (const slug of areas) {
       const seen = areaListings(intent, slug);
-      // Ensure the sitemap ONLY generates URLs for locations that have at least one active listing.
-      if (!seen || (seen.total ?? 0) <= 0 || (seen.items?.length ?? 0) === 0) {
+      // Left out only when the build saw it with no listings. When the build could not fetch it,
+      // it stays: one failed request must not drop every area page from the sitemap.
+      if (seen && (seen.total ?? 0) <= 0) {
         empty.push(`${intent}/${slug}`);
         continue;
       }
+      if (!seen) unknown += 1;
       areaPages += 1;
       xml += urlEntry(`/${intent}/${encodeURIComponent(slug)}`, {
-        lastmod: newestDay(seen.items ?? []),
+        lastmod: seen ? newestDay(seen.items ?? []) : null,
         changefreq: "daily",
         priority: "0.8",
       });
@@ -196,12 +200,9 @@ function main() {
   xml += `</urlset>\n`;
 
   writeFileSync(resolve(DIST, "sitemap.xml"), xml, "utf8");
-  const publicSitemap = resolve(ROOT, "public/sitemap.xml");
-  if (existsSync(publicSitemap)) {
-    writeFileSync(publicSitemap, xml, "utf8");
-  }
   console.log(
-    `sitemap: ${STATIC_PAGES.length} pages, ${areaPages} area pages (${empty.length} with no active listings left out), ${guideList.length} guides, ${listings.length} listings`,
+    `sitemap: ${STATIC_PAGES.length} pages, ${areaPages} area pages (${empty.length} with no listings left out` +
+      `${unknown ? `, ${unknown} kept without build-time data` : ""}), ${guideList.length} guides, ${listings.length} listings`,
   );
 }
 

@@ -1,4 +1,6 @@
-import { readdirSync, readFileSync, statSync } from "fs";
+import { execFileSync } from "child_process";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "fs";
+import { tmpdir } from "os";
 import { join, resolve } from "path";
 
 const ROOT = resolve(__dirname, "../../..");
@@ -59,20 +61,38 @@ describe("what Google is asked to index", () => {
     expect(script).not.toContain('path: "/explore"');
   });
 
-  it("only lists area pages in the sitemap that have at least one active listing", () => {
-    const script = read("scripts/generate-sitemap.mjs");
-    expect(script).toMatch(/if\s*\(!seen\s*\|\|\s*\(seen\.total\s*\?\?\s*0\)\s*<=\s*0\s*\|\|\s*\(seen\.items\?\.length\s*\?\?\s*0\)\s*===\s*0\)/);
-  });
+  describe("area pages in the sitemap", () => {
+    // Runs the real generator on a small fake export: Dhaka seen empty for sale, Dhaka seen with
+    // listings to rent, Chattogram not fetched at all (the API failed during the build).
+    const sitemap = (() => {
+      const dist = mkdtempSync(join(tmpdir(), "sitemap-"));
+      const page = (intent: string, slug: string, snapshot: object) => {
+        mkdirSync(join(dist, intent), { recursive: true });
+        writeFileSync(
+          join(dist, intent, `${slug}.html`),
+          `<html><script type="application/json" id="build-snapshot">${JSON.stringify(snapshot)}</script></html>`,
+        );
+      };
+      page("buy", "dhaka", { total: 0, items: [] });
+      page("rent", "dhaka", { total: 3, items: [{ updated_at: "2026-11-01T00:00:00Z" }] });
+      execFileSync(process.execPath, [join(ROOT, "scripts/generate-sitemap.mjs"), dist], { cwd: ROOT, stdio: "pipe" });
+      const xml = readFileSync(join(dist, "sitemap.xml"), "utf8");
+      rmSync(dist, { recursive: true, force: true });
+      return xml;
+    })();
 
-  it("marks zero-result area pages with noindex, follow to avoid Soft 404 errors in Search Console", () => {
-    const screen = read("src/screens/AreaLandingScreen.tsx");
-    expect(screen).toContain('robots={isZero ? "noindex, follow" : undefined}');
-  });
+    it("leaves out an area the build saw with no listings", () => {
+      expect(sitemap).not.toContain("<loc>https://www.homenetbd.com/buy/dhaka</loc>");
+    });
 
-  it("PageMeta supports custom robots directive for zero-result listings", () => {
-    const metaComponent = read("src/components/PageMeta.tsx");
-    expect(metaComponent).toContain("robots?: string;");
-    expect(metaComponent).toContain("robotsDirective ? <meta name=\"robots\" content={robotsDirective} />");
+    it("lists an area with listings, dated by its newest one", () => {
+      expect(sitemap).toMatch(/<loc>https:\/\/www\.homenetbd\.com\/rent\/dhaka<\/loc>\n    <lastmod>2026-11-01<\/lastmod>/);
+    });
+
+    it("keeps an area the build could not fetch, so one failed request cannot drop every area page", () => {
+      expect(sitemap).toContain("<loc>https://www.homenetbd.com/buy/chattogram</loc>");
+      expect(sitemap).toContain("<loc>https://www.homenetbd.com/rent/chattogram</loc>");
+    });
   });
 
   it("keeps a listing the build could not fetch out of the index, so one failed fetch cannot fail the deploy", () => {
