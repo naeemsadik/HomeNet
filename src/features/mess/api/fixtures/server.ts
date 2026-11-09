@@ -15,6 +15,7 @@ import { allAreasQuery, type AllAreas } from "@/hooks/useAllAreas";
 import type { PaginatedResponse } from "@/features/property/types/property";
 import { FRESHNESS_HIDE_DAYS, REQUIRED_MEDIA_LABELS } from "../../constants/vocabulary";
 import { cheapestAllIn, costsComplete } from "../../utils/allInCost";
+import { estimatedWalk, straightMetres } from "../../utils/geo";
 import { deriveRuleKeys } from "../../utils/rules";
 import { minutesOfDay } from "../../utils/time";
 import type {
@@ -54,14 +55,6 @@ const currentUser = () => useAuthStore.getState().user;
 
 // ─── Derivations (PRD 2.4 and 2.5) ──────────────────────────────────────────
 
-function straightMetres(aLat: number, aLng: number, bLat: number, bLng: number): number {
-  const rad = Math.PI / 180;
-  const dLat = (bLat - aLat) * rad;
-  const dLng = (bLng - aLng) * rad;
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(aLat * rad) * Math.cos(bLat * rad) * Math.sin(dLng / 2) ** 2;
-  return Math.round(2 * 6_371_000 * Math.asin(Math.sqrt(h)));
-}
-
 /**
  * The routing fallback from PRD 2.4.1: 1.35 × straight line at 80 m a minute.
  * One seeded listing is marked approximate so the UI's fallback state shows.
@@ -74,13 +67,13 @@ function distancesFor(listing: StoredListing): CampusDistance[] {
     for (const campus of university.campuses) {
       const straight = straightMetres(lat, lng, campus.lat, campus.lng);
       if (straight > SEARCH_RADIUS_M) continue;
-      const walking_m = Math.round(straight * 1.35);
+      const { walking_m, walking_min } = estimatedWalk(straight);
       rows.push({
         campus_id: campus.id,
         campus_name: campus.name,
         university_short: university.short_name,
         walking_m,
-        walking_min: Math.max(1, Math.ceil(walking_m / 80)),
+        walking_min,
         approximate: id === "fx-mess-4" || !id.startsWith("fx-mess-"),
       });
     }

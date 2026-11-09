@@ -16,6 +16,7 @@ export { default as Archive } from "lucide-react-native/icons/archive";
 export { default as ArchiveRestore } from "lucide-react-native/icons/archive-restore";
 export { default as ArrowLeft } from "lucide-react-native/icons/arrow-left";
 export { default as ArrowRight } from "lucide-react-native/icons/arrow-right";
+export { default as ArrowUp } from "lucide-react-native/icons/arrow-up";
 export { default as ArrowUpDown } from "lucide-react-native/icons/arrow-up-down";
 export { default as ArrowUpRight } from "lucide-react-native/icons/arrow-up-right";
 export { default as AtSign } from "lucide-react-native/icons/at-sign";
