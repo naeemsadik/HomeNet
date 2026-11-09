@@ -5,13 +5,16 @@ import { toApiError } from "@/services/apiClient";
 import { getInstantValuation } from "../services/valuationService";
 import type {
   PropertyCondition,
+  LegalPapers,
   PropertyFacing,
+  RoadAccess,
   ValuationAmenities,
   ValuationPropertyType,
   ValuationPurpose,
   ValuationRequestPayload,
   ValuationResponseData,
   ValuationStep,
+  Waterlogging,
 } from "../types/valuationTypes";
 
 export interface ValuationFormState {
@@ -35,6 +38,10 @@ export interface ValuationFormState {
   propertyAge: PropertyCondition;
 
   amenities: ValuationAmenities;
+
+  roadAccess: RoadAccess;
+  legalPapers: LegalPapers;
+  waterlogging: Waterlogging;
 }
 
 const defaultFormState: ValuationFormState = {
@@ -66,6 +73,11 @@ const defaultFormState: ValuationFormState = {
     rooftop: true,
     lakeParkView: false,
   },
+
+  // The neutral choices: they change nothing until the owner says otherwise.
+  roadAccess: "wide_road",
+  legalPapers: "complete",
+  waterlogging: "never",
 };
 
 export interface InstantValuationStoreState {
@@ -185,6 +197,9 @@ export const useInstantValuationStore = create<InstantValuationStoreState>((set,
       facing: form.facing,
       propertyAge: form.propertyAge,
       amenities: form.amenities,
+      roadAccess: form.roadAccess,
+      legalPapers: form.legalPapers,
+      waterlogging: form.waterlogging,
     };
 
     // Animate through progression stages
