@@ -159,7 +159,8 @@ export function toApiParams(filters: MessFilters, page: number, limit: number): 
 /** How many filters the person set, for the Filters button. Campus and sort are not filters. */
 export function countActiveFilters(filters: MessFilters): number {
   let count = 0;
-  if (filters.max_walk_min) count += 1;
+  // The walk limit is not applied without a campus, so it does not count either.
+  if (filters.max_walk_min && filters.campus_id) count += 1;
   if (filters.gender) count += 1;
   if (filters.min_all_in || filters.max_all_in) count += 1;
   if (filters.seat_type) count += 1;

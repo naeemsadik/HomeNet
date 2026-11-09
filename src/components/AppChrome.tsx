@@ -71,7 +71,8 @@ export type ActivePage =
   | "messages"
   | "enquiries"
   | "valuation"
-  | "guides";
+  | "guides"
+  | "mess";
 
 /** Below this width the phone bar is used (matches the phone home and search screens). */
 export const isMobileWidth = (width: number) => width < 768;
