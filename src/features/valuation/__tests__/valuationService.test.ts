@@ -1,5 +1,7 @@
+import { getProperties } from "@/services/propertyApi";
 import {
   calculateDhakaValuation,
+  findComparables,
   formatBdtPerSqft,
   formatBdtPrice,
   formatMonthlyRent,
@@ -7,6 +9,29 @@ import {
   USE_MOCK_VALUATION_API,
 } from "../services/valuationService";
 import type { ValuationRequestPayload } from "../types/valuationTypes";
+
+jest.mock("@/services/propertyApi", () => ({ getProperties: jest.fn() }));
+const mockGetProperties = getProperties as jest.Mock;
+
+/** A live listing as the API returns it. */
+const listing = (id: string, over: Record<string, unknown> = {}) => ({
+  id,
+  title: `Flat ${id}`,
+  listing_type: "sale",
+  type: "residential",
+  price: 30000000,
+  area_size: 2000,
+  area_unit: "sqft",
+  bedrooms: 3,
+  bathrooms: 3,
+  is_verified: false,
+  address: "Road 11, Gulshan",
+  area: { id: "a", name: "Gulshan" },
+  media: [{ media_type: "image", url: "https://example.com/p.jpg" }],
+  ...over,
+});
+const answer = (items: unknown[]) => mockGetProperties.mockResolvedValue({ data: { items, total: items.length, page: 1, limit: 20 } });
+beforeEach(() => mockGetProperties.mockReset());
 
 describe("Instant Valuation Engine (Dhaka Real Estate Benchmark)", () => {
   const basePayload: ValuationRequestPayload = {
@@ -137,11 +162,83 @@ describe("Instant Valuation Engine (Dhaka Real Estate Benchmark)", () => {
     expect(formatMonthlyRent(150000)).toBe("BDT 1.50 Lakh/mo");
   });
 
-  test("getInstantValuation adapter returns simulated data in mock mode", async () => {
+  test("getInstantValuation adapter returns the estimate with live comparables in mock mode", async () => {
     expect(USE_MOCK_VALUATION_API).toBe(true);
+    answer([listing("x1")]);
     const result = await getInstantValuation(basePayload);
-    expect(result).toBeDefined();
     expect(result.estimatedValueFormatted).toContain("BDT");
-    expect(result.comparables.length).toBeGreaterThan(0);
+    expect(result.comparables.map((c) => c.id)).toEqual(["x1"]);
+  });
+
+  test("the calculation invents no comparable listings", () => {
+    expect(calculateDhakaValuation(basePayload).comparables).toEqual([]);
+  });
+});
+
+describe("comparable listings", () => {
+  const payload: ValuationRequestPayload = {
+    purpose: "sale",
+    propertyType: "apartment",
+    areaId: "3f2b8c1e-9a4d-4e6f-8b2a-1c3d5e7f9a0b",
+    areaName: "Gulshan",
+    sizeSqft: 2000,
+    sizeUnit: "sqft",
+    bedrooms: 3,
+    bathrooms: 3,
+    balconies: 2,
+    floorLevel: "6",
+    facing: "south",
+    propertyAge: "resale",
+    amenities: { lift: true, generator: true, parking: true, gas: true, cctv: false, rooftop: false, lakeParkView: false },
+  };
+
+  test("asks for live listings in the same area, sale or rent and kind of property", async () => {
+    answer([]);
+    await findComparables(payload);
+    expect(mockGetProperties).toHaveBeenCalledWith(
+      expect.objectContaining({ area_id: payload.areaId, listing_type: "sale", type: "residential", status: "active" }),
+    );
+  });
+
+  test("searches by area name when the area id is not a real one (quick chips, old links)", async () => {
+    answer([]);
+    await findComparables({ ...payload, areaId: "gulshan-dhaka" });
+    const filters = mockGetProperties.mock.calls[0][0];
+    expect(filters.area_id).toBeUndefined();
+    expect(filters.search).toBe("Gulshan");
+  });
+
+  test("shows the three closest in size, a listing without a size last", async () => {
+    answer([
+      listing("far", { area_size: 4000 }),
+      listing("nosize", { area_size: null }),
+      listing("close", { area_size: 2100 }),
+      listing("katha", { area_size: 3, area_unit: "katha" }), // 2,160 sqft
+      listing("closest", { area_size: 1990 }),
+    ]);
+    const comps = await findComparables(payload);
+    expect(comps.map((c) => c.id)).toEqual(["closest", "close", "katha"]);
+    expect(comps[2].sizeSqft).toBe(2160);
+  });
+
+  test("keeps only what the listing says: no made-up match score, size or verified badge", async () => {
+    answer([listing("v", { is_verified: true }), listing("n", { area_size: null, bedrooms: undefined, media: [] })]);
+    const [verified, bare] = await findComparables(payload);
+    expect(verified.isVerified).toBe(true);
+    expect(verified).not.toHaveProperty("similarityScore");
+    expect(bare.isVerified).toBe(false);
+    expect(bare.sizeSqft).toBe(0);
+    expect(bare.bedrooms).toBe(0);
+    expect(bare.imageUrl).toBe("");
+  });
+
+  test("leaves out listings for the other purpose and listings without a price", async () => {
+    answer([listing("rent", { listing_type: "rent" }), listing("free", { price: 0 }), listing("ok")]);
+    expect((await findComparables(payload)).map((c) => c.id)).toEqual(["ok"]);
+  });
+
+  test("shows none, rather than made-up ones, when the request fails", async () => {
+    mockGetProperties.mockRejectedValue(new Error("network down"));
+    expect(await findComparables(payload)).toEqual([]);
   });
 });

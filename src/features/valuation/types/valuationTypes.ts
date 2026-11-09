@@ -78,7 +78,6 @@ export interface ComparableProperty {
   imageUrl: string;
   listingType: "sale" | "rent";
   isVerified: boolean;
-  similarityScore: number; // e.g. 96 (%)
 }
 
 export interface AreaMarketMetric {

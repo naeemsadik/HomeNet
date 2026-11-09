@@ -1,5 +1,8 @@
 import apiClient from "@/services/apiClient";
-import { previewProperties } from "@/data/landingPreview";
+import { getProperties } from "@/services/propertyApi";
+import { cdnImage } from "@/lib/cloudinaryImage";
+import type { Property, PropertyFilters } from "@/features/property/types/property";
+import type { PropertyType } from "@/types/api";
 import type {
   AreaMarketMetric,
   ComparableProperty,
@@ -385,82 +388,6 @@ export function calculateDhakaValuation(
       ? `Based on HomeNet's price benchmark for ${payload.areaName}, adjusted for your property's details.`
       : `Based on the ${payload.areaName} average. Add the road or block for a closer estimate.`;
 
-  // Comparable Properties Selection
-  const areaNameLower = payload.areaName.toLowerCase();
-  const matchedComparables: ComparableProperty[] = previewProperties
-    .filter((p) => {
-      const pArea = (p.area?.name || "").toLowerCase();
-      return (
-        pArea.includes(areaNameLower) ||
-        areaNameLower.includes(pArea) ||
-        p.listing_type === payload.purpose
-      );
-    })
-    .slice(0, 3)
-    .map((p, idx) => {
-      const sqft = p.sqft || p.area_size || 1800;
-      const pricePerSq = Math.round(p.price / sqft);
-      return {
-        id: p.id,
-        title: p.title,
-        areaName: p.area?.name || payload.areaName,
-        address: p.address || `${p.area?.name || payload.areaName}, Dhaka`,
-        price: p.price,
-        priceFormatted: formatBdtPrice(p.price),
-        pricePerSqft: pricePerSq,
-        sizeSqft: sqft,
-        bedrooms: p.bedrooms || 3,
-        bathrooms: p.bathrooms || 3,
-        imageUrl:
-          p.media?.[0]?.url ||
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-        listingType: (p.listing_type as "sale" | "rent") || "sale",
-        isVerified: p.is_verified ?? true,
-        similarityScore: 95 - idx * 3,
-      };
-    });
-
-  // If no direct area matches from previewProperties, generate high-quality fallback comparables
-  if (matchedComparables.length === 0) {
-    const fallbackBasePrice = estimatedValue;
-    matchedComparables.push(
-      {
-        id: "comp-sim-01",
-        title: `Verified ${payload.bedrooms || 3}BR Flat in ${payload.areaName}`,
-        areaName: payload.areaName,
-        address: `${payload.roadOrBlock || "Road 7"}, ${payload.areaName}, Dhaka`,
-        price: Math.round(fallbackBasePrice * 0.98),
-        priceFormatted: formatBdtPrice(Math.round(fallbackBasePrice * 0.98)),
-        pricePerSqft: Math.round(calculatedRatePerSqft * 0.98),
-        sizeSqft: effectiveSqft,
-        bedrooms: payload.bedrooms || 3,
-        bathrooms: payload.bathrooms || 3,
-        imageUrl:
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-        listingType: payload.purpose,
-        isVerified: true,
-        similarityScore: 96,
-      },
-      {
-        id: "comp-sim-02",
-        title: `Modern ${payload.bedrooms || 3}BR Apartment with Generator`,
-        areaName: payload.areaName,
-        address: `${payload.roadOrBlock || "Sector 4"}, ${payload.areaName}, Dhaka`,
-        price: Math.round(fallbackBasePrice * 1.03),
-        priceFormatted: formatBdtPrice(Math.round(fallbackBasePrice * 1.03)),
-        pricePerSqft: Math.round(calculatedRatePerSqft * 1.03),
-        sizeSqft: Math.round(effectiveSqft * 1.05),
-        bedrooms: payload.bedrooms || 3,
-        bathrooms: payload.bathrooms || 3,
-        imageUrl:
-          "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-        listingType: payload.purpose,
-        isVerified: true,
-        similarityScore: 92,
-      }
-    );
-  }
-
   const breakdownFactors: PriceBreakdownFactors = {
     baseRatePerSqft,
     floorAdjustmentPct: Number((floorAdjustmentPct * 100).toFixed(1)),
@@ -517,10 +444,86 @@ export function calculateDhakaValuation(
     confidenceReason,
     valueDrivers,
     breakdownFactors,
-    comparables: matchedComparables,
+    // Filled from live listings by getInstantValuation (findComparables); the calculation itself invents none.
+    comparables: [],
     marketMetric,
     generatedAt: new Date().toISOString(),
   };
+}
+
+// ============================================================================
+// COMPARABLE LISTINGS (LIVE, FROM HOMENET)
+// ============================================================================
+
+const SQFT_PER_KATHA = 720;
+const COMPARABLES_SHOWN = 3;
+
+/** An area id from the picker is a real one; the quick chips and old links make up "gulshan-dhaka". */
+const isRealAreaId = (id: string | undefined) =>
+  Boolean(id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
+
+const LISTING_TYPE: Record<ValuationRequestPayload["propertyType"], PropertyType> = {
+  apartment: "residential",
+  house: "residential",
+  commercial: "commercial",
+  land: "land",
+};
+
+/** A listing's size in square feet, or null when it has none or uses a unit we can't convert. */
+function listingSqft(p: Property): number | null {
+  if (typeof p.sqft === "number" && p.sqft > 0) return p.sqft;
+  if (typeof p.area_size !== "number" || p.area_size <= 0) return null;
+  const unit = (p.area_unit ?? "sqft").toLowerCase();
+  if (unit === "sqft") return p.area_size;
+  if (unit === "katha") return p.area_size * SQFT_PER_KATHA;
+  return null;
+}
+
+/**
+ * Live HomeNet listings like the one being valued: the same area, sale or rent and kind of
+ * property, closest in size first. They are asking prices on the site, not sale records, and
+ * nothing is made up: when the request fails or finds none, there are none to show.
+ */
+export async function findComparables(payload: ValuationRequestPayload): Promise<ComparableProperty[]> {
+  const filters: PropertyFilters = {
+    listing_type: payload.purpose,
+    type: LISTING_TYPE[payload.propertyType],
+    status: "active",
+    limit: 20,
+    ...(isRealAreaId(payload.areaId) ? { area_id: payload.areaId } : { search: payload.areaName }),
+  };
+  let items: Property[];
+  try {
+    items = (await getProperties(filters)).data?.items ?? [];
+  } catch {
+    return [];
+  }
+
+  const targetSqft = payload.sizeUnit === "katha" ? payload.sizeSqft * SQFT_PER_KATHA : payload.sizeSqft;
+  return items
+    .filter((p) => p.listing_type === payload.purpose && p.price > 0)
+    .map((p) => ({ p, sqft: listingSqft(p) }))
+    // Closest in size first; a listing without a size goes last.
+    .sort((x, y) => (x.sqft === null ? Infinity : Math.abs(x.sqft - targetSqft)) - (y.sqft === null ? Infinity : Math.abs(y.sqft - targetSqft)))
+    .slice(0, COMPARABLES_SHOWN)
+    .map(({ p, sqft }) => {
+      const photo = p.media?.find((m) => m.media_type === "image")?.url ?? null;
+      return {
+        id: p.id,
+        title: p.title,
+        areaName: p.area?.name ?? payload.areaName,
+        address: p.address ?? p.area?.name ?? payload.areaName,
+        price: p.price,
+        priceFormatted: p.listing_type === "rent" ? formatMonthlyRent(p.price) : formatBdtPrice(p.price),
+        pricePerSqft: sqft ? Math.round(p.price / sqft) : 0,
+        sizeSqft: sqft ?? 0,
+        bedrooms: p.bedrooms ?? 0,
+        bathrooms: p.bathrooms ?? 0,
+        imageUrl: (photo ? cdnImage(photo, 480, 320) : null) ?? "",
+        listingType: p.listing_type === "rent" ? "rent" : "sale",
+        isVerified: p.is_verified,
+      };
+    });
 }
 
 // ============================================================================
@@ -540,7 +543,8 @@ export async function getInstantValuation(
   if (USE_MOCK_VALUATION_API) {
     // Simulate real-world network latency and server computation
     await new Promise((resolve) => setTimeout(resolve, 1400));
-    return calculateDhakaValuation(payload);
+    const result = calculateDhakaValuation(payload);
+    return { ...result, comparables: await findComparables(payload) };
   }
 
   // Real backend call:

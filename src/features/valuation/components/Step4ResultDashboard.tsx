@@ -26,6 +26,7 @@ import {
 import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
+import { router } from "expo-router";
 import { notify } from "@/lib/alert";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 
@@ -300,17 +301,36 @@ export function Step4ResultDashboard() {
           </Text>
 
           <View style={[styles.comparablesGrid, isPhone && styles.comparablesGridPhone]}>
-            {result.comparables.map((comp) => (
-              <View key={comp.id} style={[styles.compCard, isPhone && styles.compCardPhone]}>
-                <Image source={{ uri: comp.imageUrl }} style={styles.compImage} />
+            {result.comparables.map((comp) => {
+              // Only what the listing says: a missing size or room count is left out, not shown as 0.
+              const meta = [
+                comp.bedrooms ? t("valuation.step4.compBeds", { count: String(comp.bedrooms) }) : null,
+                comp.bathrooms ? t("valuation.step4.compBaths", { count: String(comp.bathrooms) }) : null,
+                comp.sizeSqft ? `${comp.sizeSqft.toLocaleString("en-IN")} sqft` : null,
+              ].filter(Boolean).join(" · ");
+              return (
+              <Pressable
+                key={comp.id}
+                accessibilityRole="link"
+                accessibilityLabel={`${comp.title}, ${comp.priceFormatted}`}
+                onPress={() => router.push(`/property/${comp.id}` as never)}
+                style={({ hovered }: any) => [styles.compCard, isPhone && styles.compCardPhone, hovered && styles.compCardHovered, webPointer]}
+              >
+                {comp.imageUrl ? (
+                  <Image source={{ uri: comp.imageUrl }} style={styles.compImage} />
+                ) : (
+                  <View style={[styles.compImage, styles.compImageEmpty]}>
+                    <Building2 color={colors.muted} size={28} strokeWidth={1.8} />
+                  </View>
+                )}
                 <View style={styles.compBody}>
                   <View style={styles.compHeaderRow}>
                     <Text style={styles.compPrice}>{comp.priceFormatted}</Text>
-                    <View style={styles.similarityBadge}>
-                      <Text style={styles.similarityText}>
-                        {t("valuation.step4.matchPercent", { score: String(comp.similarityScore) })}
-                      </Text>
-                    </View>
+                    {comp.isVerified ? (
+                      <View style={styles.similarityBadge}>
+                        <Text style={styles.similarityText}>{t("valuation.step4.compVerified")}</Text>
+                      </View>
+                    ) : null}
                   </View>
                   <Text numberOfLines={1} style={styles.compTitle}>
                     {comp.title}
@@ -318,14 +338,15 @@ export function Step4ResultDashboard() {
                   <Text numberOfLines={1} style={styles.compAddress}>
                     {comp.address}
                   </Text>
-                  <View style={styles.compMetaRow}>
-                    <Text style={styles.compMetaText}>
-                      {comp.bedrooms} Beds · {comp.bathrooms} Baths · {comp.sizeSqft} Sqft
-                    </Text>
-                  </View>
+                  {meta ? (
+                    <View style={styles.compMetaRow}>
+                      <Text style={styles.compMetaText}>{meta}</Text>
+                    </View>
+                  ) : null}
                 </View>
-              </View>
-            ))}
+              </Pressable>
+              );
+            })}
           </View>
         </View>
       )}
@@ -817,6 +838,14 @@ const styles = StyleSheet.create({
   },
   compCardPhone: {
     width: "100%",
+  },
+  compCardHovered: {
+    borderColor: colorTokens.brand,
+  },
+  compImageEmpty: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colorTokens.surfaceSunken,
   },
   compImage: {
     width: "100%",
