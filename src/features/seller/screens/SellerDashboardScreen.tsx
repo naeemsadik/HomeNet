@@ -206,6 +206,7 @@ export function SellerDashboardScreen() {
   const titles: Record<SellerNavKey, string> = {
     dashboard: t("dashboard.tabs.dashboard"),
     listings: t("dashboard.tabs.myListings"),
+    seats: t("mess.my.title"),
     create: t("dashboard.tabs.createProperty"),
     boost: t("dashboard.tabs.boostListings"),
     insights: t("dashboard.tabs.aiInsights"),

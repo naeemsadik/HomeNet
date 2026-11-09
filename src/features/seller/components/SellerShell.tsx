@@ -1,5 +1,6 @@
 import {
   BarChart2,
+  BedDouble,
   Building2,
   CircleHelp,
   CreditCard,
@@ -32,11 +33,12 @@ import { useAuthStore } from "@/stores/authStore";
 import { confirmAction } from "@/lib/alert";
 import { colors, colorTokens, fonts } from "@/theme";
 import { useTranslation } from "@/i18n";
-import { isSellerSectionOn } from "@/lib/features";
+import { isSellerSectionOn, MESS_ENABLED } from "@/lib/features";
 
 export type SellerNavKey =
   | "dashboard"
   | "listings"
+  | "seats"
   | "create"
   | "boost"
   | "insights"
@@ -85,6 +87,7 @@ export function SellerShell({
   }[] = [
     { key: "dashboard", label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
     { key: "listings", label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties" },
+    { key: "seats", label: t("mess.my.title"), icon: BedDouble, href: "/mess/my" },
     { key: "create", label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
     { key: "boost", label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
     { key: "insights", label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
@@ -95,7 +98,8 @@ export function SellerShell({
     { key: "logout", label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
   ];
   // AI Insights, Analytics and Payments stay out of the menu until they are ready (src/lib/features.ts).
-  const sidebarNavItems = allNavItems.filter((item) => isSellerSectionOn(item.key));
+  // Seat listings appear with the mess module (MESS_ENABLED).
+  const sidebarNavItems = allNavItems.filter((item) => isSellerSectionOn(item.key) && (item.key !== "seats" || MESS_ENABLED));
 
   const handleLogout = async () => {
     const confirmed = await confirmAction(
