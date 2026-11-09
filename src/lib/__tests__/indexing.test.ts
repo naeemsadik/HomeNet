@@ -59,6 +59,22 @@ describe("what Google is asked to index", () => {
     expect(script).not.toContain('path: "/explore"');
   });
 
+  it("only lists area pages in the sitemap that have at least one active listing", () => {
+    const script = read("scripts/generate-sitemap.mjs");
+    expect(script).toMatch(/if\s*\(!seen\s*\|\|\s*\(seen\.total\s*\?\?\s*0\)\s*<=\s*0\s*\|\|\s*\(seen\.items\?\.length\s*\?\?\s*0\)\s*===\s*0\)/);
+  });
+
+  it("marks zero-result area pages with noindex, follow to avoid Soft 404 errors in Search Console", () => {
+    const screen = read("src/screens/AreaLandingScreen.tsx");
+    expect(screen).toContain('robots={isZero ? "noindex, follow" : undefined}');
+  });
+
+  it("PageMeta supports custom robots directive for zero-result listings", () => {
+    const metaComponent = read("src/components/PageMeta.tsx");
+    expect(metaComponent).toContain("robots?: string;");
+    expect(metaComponent).toContain("robotsDirective ? <meta name=\"robots\" content={robotsDirective} />");
+  });
+
   it("keeps a listing the build could not fetch out of the index, so one failed fetch cannot fail the deploy", () => {
     // Exported as the loading state, with no <h1>. Were it indexable, check-seo would stop the build.
     const screen = read("src/features/property/screens/PropertyDetailScreen.tsx");

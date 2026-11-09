@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -75,12 +75,15 @@ export function BrowseScreen({
   mode,
   location: fixedLocation,
   initialResults,
+  onTotalChange,
 }: {
   mode?: "buy" | "rent" | "sold";
   /** Pins the area filter, for the /buy/<area> and /rent/<area> landing pages. */
   location?: string;
   /** The first page as the build saw it (route loader), shown until the feed answers. */
   initialResults?: BrowseSnapshot;
+  /** Called when the feed finishes loading with the active total count. */
+  onTotalChange?: (total: number) => void;
 }) {
   const { t, language } = useTranslation();
   const { isPhone, width, height } = useResponsive();
@@ -263,6 +266,12 @@ export function BrowseScreen({
   const totalCount = hasClientFilters(filters) || isSoldView
     ? results.length
     : ((snapshot ? snapshot.total : total) ?? results.length);
+
+  useEffect(() => {
+    if (!feedLoading && typeof onTotalChange === "function") {
+      onTotalChange(totalCount);
+    }
+  }, [feedLoading, totalCount, onTotalChange]);
 
   // The results line is the page's <h1>: what is listed and where, which is
   // what a search for "flat rent gulshan" should land on. Until the feed has

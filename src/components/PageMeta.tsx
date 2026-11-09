@@ -37,6 +37,7 @@ export function PageMeta({
   title,
   description,
   noindex,
+  robots,
   canonicalPath,
   image,
 }: {
@@ -44,6 +45,11 @@ export function PageMeta({
   description?: string;
   /** Force noindex on or off. Defaults to on for signed-in pages and shells only. */
   noindex?: boolean;
+  /**
+   * Custom robots directive, e.g. "noindex, follow" for zero-result listing pages.
+   * Takes precedence over the default "noindex, nofollow" emitted when noindex / hidden is true.
+   */
+  robots?: string;
   /** The page this one duplicates, when it should not be indexed under its own address. */
   canonicalPath?: string;
   /** The share preview image (absolute URL, about 1200 wide). Defaults to the site's. */
@@ -51,6 +57,8 @@ export function PageMeta({
 }) {
   const pathname = usePathname();
   const hidden = noindex ?? (isPrivatePath(pathname) || isShellPath(pathname));
+  const robotsDirective = robots ?? (hidden ? "noindex, nofollow" : undefined);
+  const isHidden = Boolean(robotsDirective?.includes("noindex") || hidden);
   // A dynamic route is exported once as a shell whose path still reads
   // "/property/[id]". A canonical built from that would be wrong for every
   // listing, so none is emitted until the browser knows the real path.
@@ -62,14 +70,14 @@ export function PageMeta({
     <Head>
       <title>{title}</title>
       {description ? <meta name="description" content={description} /> : null}
-      {hidden ? <meta name="robots" content="noindex, nofollow" /> : null}
+      {robotsDirective ? <meta name="robots" content={robotsDirective} /> : null}
       {canonical ? <link rel="canonical" href={canonical} /> : null}
       {canonical ? <meta property="og:url" content={canonical} /> : null}
-      {canonical && !hidden ? <meta property="al:android:url" content={`${APP_SCHEME}:/${pathname}`} /> : null}
-      {canonical && !hidden ? <meta property="al:android:package" content={ANDROID_PACKAGE} /> : null}
-      {canonical && !hidden ? <meta property="al:android:app_name" content={SITE_NAME} /> : null}
-      {canonical && !hidden ? <meta property="al:web:url" content={canonical} /> : null}
-      {canonical && !hidden ? <meta name="google-play-app" content={`app-id=${ANDROID_PACKAGE}`} /> : null}
+      {canonical && !isHidden ? <meta property="al:android:url" content={`${APP_SCHEME}:/${pathname}`} /> : null}
+      {canonical && !isHidden ? <meta property="al:android:package" content={ANDROID_PACKAGE} /> : null}
+      {canonical && !isHidden ? <meta property="al:android:app_name" content={SITE_NAME} /> : null}
+      {canonical && !isHidden ? <meta property="al:web:url" content={canonical} /> : null}
+      {canonical && !isHidden ? <meta name="google-play-app" content={`app-id=${ANDROID_PACKAGE}`} /> : null}
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="en_BD" />
