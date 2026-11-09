@@ -10,7 +10,7 @@ export default function IndexRoute() {
     <>
       <PageMeta
         title="HomeNet BD | Verified Property Listings in Bangladesh"
-        description="Search verified apartments, houses and land across Dhaka. Contact property owners directly."
+        description="Flats, houses, plots and commercial space for sale or rent in Dhaka and across Bangladesh. Listing is free, and you contact property owners directly."
       />
       {/* The hero is the LCP element and a CSS background image, which the
           preload scanner cannot see until the bundle has rendered. Announcing

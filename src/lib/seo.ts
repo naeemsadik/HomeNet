@@ -20,6 +20,7 @@ const PRIVATE_PREFIXES = [
   "/profile",
   "/settings",
   "/notifications",
+  "/enquiries",
   "/saved",
   "/verification",
   "/messages",
@@ -38,15 +39,19 @@ export const ANDROID_PACKAGE = "com.homenet.app";
 /** Must match `expo.scheme` in app.json. Deep links read homenet://property/<id>. */
 export const APP_SCHEME = "homenet";
 
-/**
- * The page's URL in each language. Bangla is served at the same address (the
- * language toggle translates in place), so every alternate points at the
- * canonical URL. If Bangla ever gets its own URLs, change bn-BD here.
+/*
+ * No hreflang alternates: Bangla is the same page translated in place, not a
+ * page of its own, and an alternate that points back at the same URL tells
+ * search engines nothing. Add them when Bangla gets its own URLs.
  */
-export function languageAlternates(canonical: string): { hrefLang: string; href: string }[] {
-  return [
-    { hrefLang: "en-BD", href: canonical },
-    { hrefLang: "bn-BD", href: canonical },
-    { hrefLang: "x-default", href: canonical },
-  ];
+
+/**
+ * A dynamic route's shell: exported once with the pattern still in its path
+ * ("/property/[id]"), and served by the vercel.json rewrite for any id that was
+ * not pre-rendered, whether a listing created after the build or one that does
+ * not exist. It has no content of its own, so it stays out of the index; the
+ * next build exports a new listing as its own page.
+ */
+export function isShellPath(pathname: string): boolean {
+  return pathname.includes("[");
 }

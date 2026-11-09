@@ -41,10 +41,11 @@ import { breadcrumbSchema, listingCrumbs, listingSchema } from "@/lib/schema";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
+import { listingMetaDescription, listingMetaTitle, listingShareImage } from "@/lib/listingMeta";
 import { shareLink } from "@/lib/share";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { colorTokens, webPointer } from "@/theme";
-import { usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
+import { type PropertyDetail, usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
 import { useSavedStore } from "@/stores/savedStore";
 import { toApiError } from "@/services/apiClient";
 import { styles } from "./PropertyDetailScreen.styles";
@@ -53,6 +54,7 @@ import { ReportListingModal } from "../components/ReportListingModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
 import { PropertyLocationSection, type NearbyPlace } from "../components/PropertyLocationSection";
 import { WhatsAppIcon } from "../components/WhatsAppIcon";
+import { contactPhone, listerDisplay, whatsappUrl } from "../utils/lister";
 import { NoTranslateText } from "@/components/NoTranslateText";
 
 import {
@@ -64,6 +66,7 @@ import {
   priceOnRequestLabel,
   translateAreaUnit,
 } from "@/i18n";
+import { listingCover, listingPhotos } from "@/features/property/utils/listingMedia";
 
 type AiValuation = {
   estimatedValue: string;
@@ -71,14 +74,14 @@ type AiValuation = {
   trend: string;
 };
 
-export function PropertyDetailScreen() {
+export function PropertyDetailScreen({ initialDetail }: { initialDetail?: PropertyDetail } = {}) {
   const { t, language } = useTranslation();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const rawId = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
   const propertyId = (rawId ?? "").trim();
   const id = propertyId;
   const { isPhone, isTablet } = useResponsive();
-  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId);
+  const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId, initialDetail);
   const {
     data: similarProperties = [],
     error: similarError,
@@ -113,7 +116,7 @@ export function PropertyDetailScreen() {
     );
 
     const rawImages = apiDetail.media
-      ? apiDetail.media.filter((m) => m.media_type === "image").map((m) => m.url)
+      ? listingPhotos(apiDetail.media)
       : [];
 
     // The gallery is the largest image on the page, so it gets a generous
@@ -123,6 +126,7 @@ export function PropertyDetailScreen() {
       .filter((url): url is string => Boolean(url));
 
     const identity = apiDetail.user?.auth_identities?.[0];
+    const lister = listerDisplay(apiDetail.user, t("propertyDetail.verifiedSeller"));
     const location = [apiDetail.area?.name, (apiDetail.area as any)?.city].filter(Boolean).join(", ");
 
     const isHoliday = isHolidayStayType(apiDetail.listing_type);
@@ -162,11 +166,13 @@ export function PropertyDetailScreen() {
       amenities: amenityList,
       mediaImages: images,
       seller: {
-        name: apiDetail.user?.full_name || t("propertyDetail.verifiedSeller"),
-        agency: null as string | null,
+        // A company shows its own name and logo; its contact person is the byline.
+        name: lister.isCompany ? apiDetail.user?.full_name || lister.name : lister.name,
+        agency: lister.isCompany ? lister.name : (null as string | null),
         isVerified: Boolean(apiDetail.is_verified),
-        avatarUrl: apiDetail.user?.avatar_url || null,
-        phone: identity?.phone || null,
+        avatarUrl: lister.logoUrl,
+        phone: contactPhone(apiDetail),
+        whatsapp: apiDetail.whatsapp_number || null,
         email: identity?.email || "",
       },
       // Placeholder, like aiValuation: no API field yet, so the
@@ -192,7 +198,7 @@ export function PropertyDetailScreen() {
             : `${sim.price_currency || "৳"} ${typeof sim.price === "number" ? formatLocalizedNumber(sim.price.toLocaleString("en-BD"), language) : sim.price}`,
           specs: specParts.join(" · "),
           imageUrl: cdnImage(
-            sim.media?.find((m) => m.media_type === "image")?.url || sim.media?.[0]?.url,
+            listingCover(sim.media) || sim.media?.[0]?.url,
             700,
             460,
           ),
@@ -213,14 +219,19 @@ export function PropertyDetailScreen() {
   };
 
   const openWhatsApp = (message: string) => {
-    const rawPhone = property?.seller.phone;
+    // The WhatsApp number the owner gave, else the number they can be called on.
+    const rawPhone = property?.seller.whatsapp || property?.seller.phone;
     if (!rawPhone) {
       notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;
     }
-    const cleanPhone = rawPhone.replace(/[^\d]/g, "");
-    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-    void Linking.openURL(whatsappUrl).catch(() => {
+    // The shared builder adds Bangladesh's 88 to a local 01... number; wa.me needs it.
+    const url = whatsappUrl(rawPhone, message);
+    if (!url) {
+      notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
+      return;
+    }
+    void Linking.openURL(url).catch(() => {
       notify(
         t("propertyDetail.whatsappUnavailableTitle"),
         t("propertyDetail.whatsappUnavailableBody", { phone: rawPhone }),
@@ -271,6 +282,8 @@ export function PropertyDetailScreen() {
   const DESKTOP_VISIBLE_COUNT = 8;
   const totalPhotos = property?.mediaImages.length || 0;
   const hasExtraPhotos = totalPhotos > DESKTOP_VISIBLE_COUNT;
+  // The desktop mosaic shows the first three photos; narrower screens keep the single photo and thumbnails.
+  const isMosaic = !isTablet && totalPhotos >= 3;
   const extraPhotosCount = totalPhotos - DESKTOP_VISIBLE_COUNT;
 
   const scrollThumbTo = (index: number) => {
@@ -373,9 +386,9 @@ export function PropertyDetailScreen() {
   if (isLoading && !property) {
     return (
       <AppChrome active="property">
-        {/* The exported HTML for a listing is this state: it must still name
-            the page's canonical URL, which PageMeta builds from the path. */}
-        <PageMeta title="Property for sale or rent in Bangladesh | HomeNet BD" />
+        {/* A listing the build could not fetch exports as this state. A spinner
+            has nothing to index, so it stays out until the next build. */}
+        <PageMeta title="Property for sale or rent in Bangladesh | HomeNet BD" noindex />
         <View style={styles.requestState}>
           <ActivityIndicator color="#04cf92" size="large" />
           <Text style={styles.requestError}>{t("propertyDetail.loading")}</Text>
@@ -401,14 +414,39 @@ export function PropertyDetailScreen() {
     );
   }
 
+  const galleryBadges = (
+    <View style={styles.galleryBadgesRow}>
+      {property.isVerified ? (
+        <View style={styles.verifiedTag}>
+          <ShieldCheck color="#04cf92" size={14} />
+          <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
+        </View>
+      ) : null}
+
+      <View style={styles.forRentTag}>
+        <Text style={styles.forRentTagText}>
+          {isHolidayStayType(apiDetail?.listing_type)
+            ? t("propertyCard.holidayStay")
+            : apiDetail?.listing_type === "rent"
+            ? t("propertyDetail.forRent")
+            : t("propertyDetail.forSale")}
+        </Text>
+      </View>
+    </View>
+  );
+
   return (
     <AppChrome active="property">
-      {/* The listing itself is the page title, that is what a search result
-          for this URL should read. */}
-      <PageMeta
-        title={`${property.title} | ${property.location} | HomeNet BD`}
-        description={`${property.listingType}: ${property.priceText}. ${property.address}.`}
-      />
+      {/* What a search result or a shared link for this URL reads: the kind of
+          property, the area and the price, with the first photo as the preview.
+          The owner's own title is the page's <h1>. */}
+      {apiDetail ? (
+        <PageMeta
+          title={listingMetaTitle(apiDetail)}
+          description={listingMetaDescription(apiDetail)}
+          image={listingShareImage(apiDetail)}
+        />
+      ) : null}
       {apiDetail ? (
         <JsonLd nodes={[listingSchema(apiDetail), breadcrumbSchema(listingCrumbs(apiDetail))]} />
       ) : null}
@@ -461,157 +499,204 @@ export function PropertyDetailScreen() {
           <View style={styles.leftColumn}>
             {/* Hero Image Gallery */}
             <View style={styles.galleryContainer}>
-              <Pressable
-                onPress={() => setLightboxVisible(true)}
-                style={[styles.mainImageWrap, isPhone && styles.mainImageWrapPhone, webPointer]}
-                onTouchStart={(e) => {
-                  touchStartX.current = e.nativeEvent.pageX;
-                  touchStartY.current = e.nativeEvent.pageY;
-                }}
-                onTouchEnd={(e) => {
-                  const dx = touchStartX.current - e.nativeEvent.pageX;
-                  const dy = touchStartY.current - e.nativeEvent.pageY;
-                  if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
-                    if (dx > 0) {
-                      handleNextPhoto();
-                    } else {
-                      handlePrevPhoto();
-                    }
-                  }
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={t("propertyDetail.viewAllPhotos", { count: formatLocalizedNumber(totalPhotos, language) })}
-              >
-                {property.mediaImages.length ? (
-                  <Image
-                    source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
-                    accessibilityLabel={`${property.title}, photo ${activeImageIndex + 1}`}
-                    style={styles.mainImage}
-                  />
-                ) : (
-                  <View style={styles.mediaPlaceholder}>
-                    <Building2 color="#6B7D78" size={48} />
-                    <Text style={styles.mediaPlaceholderText}>{t("propertyDetail.noPhotos")}</Text>
-                  </View>
-                )}
+              {isMosaic ? (
+                <View style={styles.mosaicContainer}>
+                  {/* Left Main Featured Photo */}
+                  <Pressable
+                    onPress={() => {
+                      setActiveImageIndex(0);
+                      setLightboxVisible(true);
+                    }}
+                    style={[styles.mosaicMain, webPointer]}
+                    accessibilityRole="button"
+                    accessibilityLabel={t("propertyDetail.viewAllPhotos", { count: formatLocalizedNumber(totalPhotos, language) })}
+                  >
+                    <Image
+                      source={{ uri: property.mediaImages[0] }}
+                      accessibilityLabel={`${property.title}, photo 1`}
+                      style={styles.mainImage}
+                    />
+                    {galleryBadges}
+                  </Pressable>
 
-                {/* Status Badges Overlay */}
-                <View style={styles.galleryBadgesRow}>
-                  {property.isVerified ? (
-                    <View style={styles.verifiedTag}>
-                      <ShieldCheck color="#04cf92" size={14} />
-                      <Text style={styles.verifiedTagText}>{t("propertyDetail.verifiedBadge")}</Text>
-                    </View>
-                  ) : null}
+                  {/* Right Column: 2 Stacked Photos */}
+                  <View style={styles.mosaicSideCol}>
+                    <Pressable
+                      onPress={() => {
+                        setActiveImageIndex(1);
+                        setLightboxVisible(true);
+                      }}
+                      style={[styles.mosaicSideItem, webPointer]}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${property.title}, photo 2`}
+                    >
+                      <Image
+                        source={{ uri: property.mediaImages[1] }}
+                        accessibilityLabel={`${property.title}, photo 2`}
+                        style={styles.mosaicSideImage}
+                      />
+                    </Pressable>
 
-                  <View style={styles.forRentTag}>
-                    <Text style={styles.forRentTagText}>
-                      {isHolidayStayType(apiDetail?.listing_type)
-                        ? t("propertyCard.holidayStay")
-                        : apiDetail?.listing_type === "rent"
-                        ? t("propertyDetail.forRent")
-                        : t("propertyDetail.forSale")}
-                    </Text>
+                    <Pressable
+                      onPress={() => {
+                        setActiveImageIndex(2);
+                        setLightboxVisible(true);
+                      }}
+                      style={[styles.mosaicSideItem, webPointer]}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${property.title}, photo 3`}
+                    >
+                      <Image
+                        source={{ uri: property.mediaImages[2] }}
+                        accessibilityLabel={`${property.title}, photo 3`}
+                        style={styles.mosaicSideImage}
+                      />
+                      {/* Photo Counter Pill Overlay */}
+                      <View style={[styles.photoCountPill, webPointer]}>
+                        <Camera color="#FFFFFF" size={13} />
+                        <Text style={styles.photoCountText}>{formatLocalizedNumber(totalPhotos, language)}</Text>
+                        <Maximize2 color="rgba(255, 255, 255, 0.75)" size={12} style={{ marginLeft: 3 }} />
+                      </View>
+                    </Pressable>
                   </View>
                 </View>
+              ) : (
+                <Pressable
+                  onPress={() => setLightboxVisible(true)}
+                  style={[styles.mainImageWrap, isPhone && styles.mainImageWrapPhone, webPointer]}
+                  onTouchStart={(e) => {
+                    touchStartX.current = e.nativeEvent.pageX;
+                    touchStartY.current = e.nativeEvent.pageY;
+                  }}
+                  onTouchEnd={(e) => {
+                    const dx = touchStartX.current - e.nativeEvent.pageX;
+                    const dy = touchStartY.current - e.nativeEvent.pageY;
+                    if (Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
+                      if (dx > 0) {
+                        handleNextPhoto();
+                      } else {
+                        handlePrevPhoto();
+                      }
+                    }
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("propertyDetail.viewAllPhotos", { count: formatLocalizedNumber(totalPhotos, language) })}
+                >
+                  {property.mediaImages.length ? (
+                    <Image
+                      source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
+                      accessibilityLabel={`${property.title}, photo ${activeImageIndex + 1}`}
+                      style={styles.mainImage}
+                    />
+                  ) : (
+                    <View style={styles.mediaPlaceholder}>
+                      <Building2 color="#6B7D78" size={48} />
+                      <Text style={styles.mediaPlaceholderText}>{t("propertyDetail.noPhotos")}</Text>
+                    </View>
+                  )}
 
-                {/* Photo Counter & Fullscreen Trigger Badge */}
-                {property.mediaImages.length > 0 ? (
-                  <View style={[styles.photoCountPill, webPointer]}>
-                    <Camera color="#FFFFFF" size={13} />
-                    <Text style={styles.photoCountText}>
-                      {t("propertyDetail.photoOf", {
-                        current: formatLocalizedNumber(activeImageIndex + 1, language),
-                        total: formatLocalizedNumber(property.mediaImages.length, language),
-                      })}
-                    </Text>
-                    <Maximize2 color="rgba(255, 255, 255, 0.75)" size={12} style={{ marginLeft: 3 }} />
-                  </View>
-                ) : null}
-              </Pressable>
+                  {galleryBadges}
 
-              {/* Thumbnails Row with navigation arrows for both PC & Mobile */}
-              <View
-                style={styles.thumbnailsContainer}
-                onLayout={(e) => {
-                  const w = e.nativeEvent.layout.width;
-                  if (w > 0) setThumbContainerWidth(w);
-                }}
-              >
-                {thumbScrollX > 8 ? (
-                  <Pressable
-                    onPress={handleScrollLeft}
-                    style={({ pressed }) => [
-                      styles.thumbScrollBtn,
-                      styles.thumbScrollBtnLeft,
-                      webPointer,
-                      pressed && styles.pressed,
-                    ]}
-                    accessibilityLabel={t("propertyDetail.prevThumbnails")}
-                  >
-                    <ChevronLeft color="#FFFFFF" size={18} />
-                  </Pressable>
-                ) : null}
+                  {/* Photo Counter & Fullscreen Trigger Badge */}
+                  {property.mediaImages.length > 0 ? (
+                    <View style={[styles.photoCountPill, webPointer]}>
+                      <Camera color="#FFFFFF" size={13} />
+                      <Text style={styles.photoCountText}>
+                        {t("propertyDetail.photoOf", {
+                          current: formatLocalizedNumber(activeImageIndex + 1, language),
+                          total: formatLocalizedNumber(property.mediaImages.length, language),
+                        })}
+                      </Text>
+                      <Maximize2 color="rgba(255, 255, 255, 0.75)" size={12} style={{ marginLeft: 3 }} />
+                    </View>
+                  ) : null}
+                </Pressable>
+              )}
 
-                <ScrollView
-                  ref={thumbScrollRef}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.thumbnailsScrollContent}
-                  scrollEventThrottle={16}
-                  onScroll={(e) => setThumbScrollX(e.nativeEvent.contentOffset.x)}
-                  onContentSizeChange={(contentWidth) => {
-                    setMaxThumbScroll(Math.max(0, contentWidth - thumbContainerWidth));
+              {/* Thumbnails Row with navigation arrows for both PC & Mobile (the mosaic replaces it) */}
+              {!isMosaic ? (
+                <View
+                  style={styles.thumbnailsContainer}
+                  onLayout={(e) => {
+                    const w = e.nativeEvent.layout.width;
+                    if (w > 0) setThumbContainerWidth(w);
                   }}
                 >
-                  {property.mediaImages.map((img, idx) => {
-                    const isEighthCard = idx === 7;
-                    const showPlusBadge = !isPhone && hasExtraPhotos && isEighthCard && thumbScrollX < 40;
+                  {thumbScrollX > 8 ? (
+                    <Pressable
+                      onPress={handleScrollLeft}
+                      style={({ pressed }) => [
+                        styles.thumbScrollBtn,
+                        styles.thumbScrollBtnLeft,
+                        webPointer,
+                        pressed && styles.pressed,
+                      ]}
+                      accessibilityLabel={t("propertyDetail.prevThumbnails")}
+                    >
+                      <ChevronLeft color="#FFFFFF" size={18} />
+                    </Pressable>
+                  ) : null}
 
-                    return (
-                      <Pressable
-                        key={idx}
-                        onPress={() => {
-                          setActiveImageIndex(idx);
-                          if (showPlusBadge) {
-                            handleExpandMore();
-                          }
-                        }}
-                        style={[
-                          styles.thumbnailCard,
-                          isPhone && styles.thumbnailCardPhone,
-                          activeImageIndex === idx ? styles.thumbnailCardActive : styles.thumbnailCardInactive,
-                          webPointer,
-                        ]}
-                      >
-                        <Image source={{ uri: img }} accessibilityLabel={`${property.title}, photo ${idx + 1}`} style={styles.thumbnailImg} />
-                        {showPlusBadge ? (
-                          <View style={styles.moreImagesOverlay}>
-                            <Text style={styles.moreImagesText}>
-                              {t("propertyDetail.moreImages", { count: formatLocalizedNumber(extraPhotosCount, language) })}
-                            </Text>
-                          </View>
-                        ) : null}
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-
-                {maxThumbScroll > 10 && thumbScrollX < maxThumbScroll - 8 ? (
-                  <Pressable
-                    onPress={handleScrollRight}
-                    style={({ pressed }) => [
-                      styles.thumbScrollBtn,
-                      styles.thumbScrollBtnRight,
-                      webPointer,
-                      pressed && styles.pressed,
-                    ]}
-                    accessibilityLabel={t("propertyDetail.moreThumbnails")}
+                  <ScrollView
+                    ref={thumbScrollRef}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.thumbnailsScrollContent}
+                    scrollEventThrottle={16}
+                    onScroll={(e) => setThumbScrollX(e.nativeEvent.contentOffset.x)}
+                    onContentSizeChange={(contentWidth) => {
+                      setMaxThumbScroll(Math.max(0, contentWidth - thumbContainerWidth));
+                    }}
                   >
-                    <ChevronRight color="#FFFFFF" size={18} />
-                  </Pressable>
-                ) : null}
-              </View>
+                    {property.mediaImages.map((img, idx) => {
+                      const isEighthCard = idx === 7;
+                      const showPlusBadge = !isPhone && hasExtraPhotos && isEighthCard && thumbScrollX < 40;
+
+                      return (
+                        <Pressable
+                          key={idx}
+                          onPress={() => {
+                            setActiveImageIndex(idx);
+                            if (showPlusBadge) {
+                              handleExpandMore();
+                            }
+                          }}
+                          style={[
+                            styles.thumbnailCard,
+                            isPhone && styles.thumbnailCardPhone,
+                            activeImageIndex === idx ? styles.thumbnailCardActive : styles.thumbnailCardInactive,
+                            webPointer,
+                          ]}
+                        >
+                          <Image source={{ uri: img }} accessibilityLabel={`${property.title}, photo ${idx + 1}`} style={styles.thumbnailImg} />
+                          {showPlusBadge ? (
+                            <View style={styles.moreImagesOverlay}>
+                              <Text style={styles.moreImagesText}>
+                                {t("propertyDetail.moreImages", { count: formatLocalizedNumber(extraPhotosCount, language) })}
+                              </Text>
+                            </View>
+                          ) : null}
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+
+                  {maxThumbScroll > 10 && thumbScrollX < maxThumbScroll - 8 ? (
+                    <Pressable
+                      onPress={handleScrollRight}
+                      style={({ pressed }) => [
+                        styles.thumbScrollBtn,
+                        styles.thumbScrollBtnRight,
+                        webPointer,
+                        pressed && styles.pressed,
+                      ]}
+                      accessibilityLabel={t("propertyDetail.moreThumbnails")}
+                    >
+                      <ChevronRight color="#FFFFFF" size={18} />
+                    </Pressable>
+                  ) : null}
+                </View>
+              ) : null}
             </View>
 
             {/* Property Overview Header */}
@@ -628,41 +713,67 @@ export function PropertyDetailScreen() {
                 ) : null}
               </View>
 
-              <Text style={styles.propertyTitle}>{property.title}</Text>
+              <Text accessibilityRole="header" aria-level={1} style={styles.propertyTitle}>{property.title}</Text>
 
               <View style={styles.locationSubRow}>
                 <MapPin color="#04cf92" size={16} />
                 <Text style={styles.locationSubText}>{property.location}</Text>
               </View>
 
-              {/* Key Specs Bar */}
+              {/* Key Specs Bar - Rightmove Micro-label + Value Layout */}
               <View style={styles.keySpecsRow}>
                 <View style={styles.specItem}>
-                  <BedDouble color="#04cf92" size={18} />
-                  <Text style={styles.specText}>
-                    {formatLocalizedNumber(property.bedrooms, language)} {t("propertyDetail.beds")}
-                  </Text>
+                  <Text style={styles.specLabel}>{t("propertyDetail.propertyType")}</Text>
+                  <View style={styles.specValueRow}>
+                    <Building2 color="#04cf92" size={16} />
+                    <Text style={styles.specText}>{translatePropertyType(property.type, language)}</Text>
+                  </View>
                 </View>
 
-                <View style={styles.specDivider} />
+                {property.bedrooms > 0 ? (
+                  <>
+                    <View style={styles.specDivider} />
+                    <View style={styles.specItem}>
+                      <Text style={styles.specLabel}>{t("propertyDetail.bedrooms")}</Text>
+                      <View style={styles.specValueRow}>
+                        <BedDouble color="#04cf92" size={16} />
+                        <Text style={styles.specText}>
+                          {formatLocalizedNumber(property.bedrooms, language)} {t("propertyDetail.beds")}
+                        </Text>
+                      </View>
+                    </View>
+                  </>
+                ) : null}
 
-                <View style={styles.specItem}>
-                  <Bath color="#04cf92" size={18} />
-                  <Text style={styles.specText}>
-                    {formatLocalizedNumber(property.bathrooms, language)} {t("propertyDetail.baths")}
-                  </Text>
-                </View>
+                {property.bathrooms > 0 ? (
+                  <>
+                    <View style={styles.specDivider} />
+                    <View style={styles.specItem}>
+                      <Text style={styles.specLabel}>{t("propertyDetail.bathrooms")}</Text>
+                      <View style={styles.specValueRow}>
+                        <Bath color="#04cf92" size={16} />
+                        <Text style={styles.specText}>
+                          {formatLocalizedNumber(property.bathrooms, language)} {t("propertyDetail.baths")}
+                        </Text>
+                      </View>
+                    </View>
+                  </>
+                ) : null}
 
-                <View style={styles.specDivider} />
-
-                <View style={styles.specItem}>
-                  <Maximize2 color="#04cf92" size={18} />
-                  <Text style={styles.specText}>
-                    {property.areaSqft
-                      ? t("propertyDetail.areaSqft", { count: formatLocalizedNumber(property.areaSqft, language) })
-                      : null}
-                  </Text>
-                </View>
+                {property.areaSqft ? (
+                  <>
+                    <View style={styles.specDivider} />
+                    <View style={styles.specItem}>
+                      <Text style={styles.specLabel}>{t("propertyDetail.size")}</Text>
+                      <View style={styles.specValueRow}>
+                        <Maximize2 color="#04cf92" size={16} />
+                        <Text style={styles.specText}>
+                          {t("propertyDetail.areaSqft", { count: formatLocalizedNumber(property.areaSqft, language) })}
+                        </Text>
+                      </View>
+                    </View>
+                  </>
+                ) : null}
               </View>
             </View>
 
@@ -717,7 +828,7 @@ export function PropertyDetailScreen() {
             <View style={styles.sectionCard}>
               <View style={styles.sectionHeaderBetween}>
                 <Text style={styles.sectionHeading}>{t("propertyDetail.similarProperties")}</Text>
-                <AppLink href="/buy">
+                <AppLink href="/buy" style={styles.seeAllTap}>
                   <Text style={styles.seeAllLink}>{t("propertyDetail.seeAll")}</Text>
                 </AppLink>
               </View>
@@ -837,21 +948,21 @@ export function PropertyDetailScreen() {
                     !property.seller.phone && styles.actionBtnDisabled,
                   ]}
                 >
-                  <WhatsAppIcon size={18} color={colorTokens.brand} style={styles.whatsAppIcon} />
+                  <WhatsAppIcon size={18} color="#25D366" style={styles.whatsAppIcon} />
                   <Text numberOfLines={1} ellipsizeMode="tail" style={styles.whatsAppActionText}>
                     {t("propertyDetail.whatsappAgent")}
                   </Text>
                 </Pressable>
-              </View>
 
-              {/* Book a visit Primary Button */}
-              <Pressable
-                onPress={() => setBookModalVisible(true)}
-                style={({ pressed }) => [styles.bookVisitBtn, webPointer, pressed && styles.pressed]}
-              >
-                <Calendar color={colorTokens.onAccent} size={18} />
-                <Text style={styles.bookVisitBtnText}>{t("propertyDetail.bookViewing")}</Text>
-              </Pressable>
+                {/* Book a visit Button */}
+                <Pressable
+                  onPress={() => setBookModalVisible(true)}
+                  style={({ pressed }) => [styles.bookVisitBtn, webPointer, pressed && styles.pressed]}
+                >
+                  <Calendar color="#0B1A17" size={16} />
+                  <Text style={styles.bookVisitBtnText}>{t("propertyDetail.bookViewing")}</Text>
+                </Pressable>
+              </View>
 
               <Pressable
                 accessibilityRole="button"

@@ -126,6 +126,26 @@ export async function archiveProperty(id: string) {
   return data;
 }
 
+/**
+ * Staff archive (needs `moderate_listing`): hides anyone's listing and keeps it.
+ * POST /v1/properties/:id/archive, from backend PR 93. The owner route above
+ * refuses a listing the caller does not own, staff included.
+ */
+export async function staffArchiveProperty(id: string) {
+  const { data } = await apiClient.post<ApiResponse<{ id: string }>>(`/v1/properties/${id}/archive`);
+  return data;
+}
+
+/**
+ * Staff restore (needs `moderate_listing`): brings an archived listing back.
+ * The API works out the status it returns to (active, pending or draft).
+ * 400 with error_code 1520 if the listing is not archived.
+ */
+export async function staffRestoreProperty(id: string) {
+  const { data } = await apiClient.post<ApiResponse<{ id: string; status: string }>>(`/v1/properties/${id}/restore`);
+  return data;
+}
+
 /** Owner-only permanent delete, any listing status or category (removes the row and its media). */
 export async function deleteProperty(id: string) {
   const { data } = await apiClient.delete<ApiResponse<{ id: string }>>(`/v1/property-delete/${id}`);

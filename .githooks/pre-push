@@ -1,0 +1,24 @@
+#!/bin/sh
+# HomeNet pre-push gate. Every person and every agent pushes through the same
+# checks: typecheck, lint and tests (npm run check:push). CI runs them again.
+# The design, accessibility, code-review and security steps that a script
+# cannot run are listed in docs/AGENT_RULES.md, section 3.
+#
+# Turned on by `npm install` (scripts/install-git-hooks.cjs). Skip it only when
+# a person asks: git push --no-verify
+
+# GUI git clients can run hooks without Node on PATH; CI still checks the push.
+if ! command -v npm >/dev/null 2>&1; then
+  echo "pre-push: npm not found on PATH, skipping local checks (CI will run them)."
+  exit 0
+fi
+
+echo "pre-push: running typecheck, lint and tests (npm run check:push)..."
+if ! npm run --silent check:push; then
+  echo ""
+  echo "pre-push: checks failed, so nothing was pushed."
+  echo "Fix the errors above, then push again."
+  echo "Also before pushing: check changed screens on desktop and at 375 px, and review the diff."
+  exit 1
+fi
+echo "pre-push: all checks passed."

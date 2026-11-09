@@ -1,5 +1,5 @@
 import { useResponsive } from "@/hooks/useResponsive";
-import { fonts, webPointer } from "@/theme";
+import { fonts, layout, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
 import { Sparkles } from "@/components/icons";
@@ -62,7 +62,7 @@ export interface FooterProps {
 
 function WebFooter({ style }: FooterProps) {
   const { t } = useTranslation();
-  const { isPhone, isTablet } = useResponsive();
+  const { isPhone, isTablet, containerMaxWidth } = useResponsive();
 
   const resourcesLinks = [
     { label: "Stamp Duty & Tax Guide", href: "/about" },
@@ -178,6 +178,7 @@ function WebFooter({ style }: FooterProps) {
         style={[
           styles.footerInner,
           isTablet && styles.footerInnerTablet,
+          { maxWidth: containerMaxWidth },
         ]}
       >
         {/* Main Columns (Desktop / PC) */}
@@ -301,13 +302,13 @@ const styles = StyleSheet.create({
   },
   footerInner: {
     width: "100%",
-    maxWidth: 1400,
-    paddingHorizontal: 40,
+    maxWidth: layout.containerMaxWidth,
+    paddingHorizontal: layout.gutter,
     paddingTop: 48,
     paddingBottom: 36,
   },
   footerInnerTablet: {
-    paddingHorizontal: 24,
+    paddingHorizontal: layout.gutterTablet,
     paddingTop: 36,
     paddingBottom: 28,
   },

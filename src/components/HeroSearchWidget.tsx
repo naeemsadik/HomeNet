@@ -6,12 +6,10 @@ import {
   MapPin,
   Search,
   SlidersHorizontal,
-  Sparkles,
   X,
 } from "@/components/icons";
 import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useAiFinderModalStore } from "@/stores/useAiFinderModalStore";
 import { useTranslation } from "@/i18n";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
 import { AreaPicker } from "./AreaPicker";
@@ -74,24 +72,10 @@ export function HeroSearchWidget({
     }));
   };
 
-  const openAiModal = useAiFinderModalStore((state) => state.open);
-
   const locationParams = (params: URLSearchParams) => {
     if (!selectedArea) return;
     if (selectedArea.city) params.set("city", selectedArea.city);
     params.set("location", selectedArea.name);
-  };
-
-  const handleAiSearch = () => {
-    if (!isPhone) {
-      openAiModal(query.trim());
-      return;
-    }
-    const params = new URLSearchParams();
-    if (query.trim()) params.set("prompt", query.trim());
-    locationParams(params);
-    const qs = params.toString();
-    router.push((qs ? `/ai-finder?${qs}` : "/ai-finder") as never);
   };
 
   const handleSearch = () => {
@@ -235,7 +219,7 @@ export function HeroSearchWidget({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t("hero.searchProperties")}
+          accessibilityLabel={t("hero.search")}
           onPress={handleSearch}
           style={({ hovered, pressed }: any) => [
             styles.searchButton,
@@ -246,38 +230,28 @@ export function HeroSearchWidget({
           ]}
         >
           <Search color={colorTokens.onBrand} size={17} strokeWidth={2.4} />
-          <Text style={styles.searchLabel}>{t("hero.search")}</Text>
+          <Text style={styles.searchLabel}>
+            {t("hero.search")}
+          </Text>
         </Pressable>
       </View>
 
-      <View style={styles.linkRow}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Search with AI"
-          onPress={handleAiSearch}
-          style={({ hovered }: any) => [styles.aiLink, hovered && styles.aiLinkHovered, webPointer]}
-        >
-          <Sparkles color={colors.greenOnLight} size={15} strokeWidth={2.2} />
-          <Text style={styles.aiText}>
-            {t("hero.aiPrompt")}
-          </Text>
-        </Pressable>
-
-        {hasActiveFilters ? (
+      {hasActiveFilters ? (
+        <View style={styles.linkRow}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t("hero.clearFilters")}
             onPress={() => setFilters(defaultSearchFilters)}
             style={({ hovered }: any) => [
               styles.clearFiltersLink,
-              hovered && styles.aiLinkHovered,
+              hovered && styles.linkHovered,
               webPointer,
             ]}
           >
             <Text style={styles.clearFiltersText}>{t("hero.clearFilters")}</Text>
           </Pressable>
-        ) : null}
-      </View>
+        </View>
+      ) : null}
 
       <AreaPicker
         visible={areaPickerOpen}
@@ -463,11 +437,11 @@ const styles = StyleSheet.create({
     gap: 9,
     paddingHorizontal: 32,
     borderRadius: radius.sm,
-    backgroundColor: colors.green,
+    backgroundColor: colorTokens.brand,
   },
   searchButtonPhone: { height: 50, paddingHorizontal: 20 },
-  searchButtonHovered: { backgroundColor: colors.greenOnLight },
-  searchButtonPressed: { opacity: 0.9 },
+  searchButtonHovered: { backgroundColor: colorTokens.brandHover },
+  searchButtonPressed: { opacity: 0.9, backgroundColor: colorTokens.brandPressed },
   searchLabel: {
     color: colorTokens.onBrand,
     fontFamily: fonts.bold,
@@ -480,14 +454,6 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 16,
   },
-  aiLink: {
-    alignSelf: "flex-start",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 16,
-    paddingVertical: 2,
-  },
   clearFiltersLink: {
     alignSelf: "flex-start",
     marginTop: 16,
@@ -498,12 +464,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 14,
   },
-  aiLinkHovered: { opacity: 0.75 },
-  aiText: {
-    color: colors.greenOnLight,
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    textDecorationLine: "underline",
-    ...(Platform.OS === "web" ? { textUnderlineOffset: 3 } : {}),
-  } as any,
+  linkHovered: { opacity: 0.75 },
 });

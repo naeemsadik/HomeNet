@@ -43,7 +43,7 @@ YOUR DATA
 • Delete your account and listings inside the app
 • No ads. No tracking.
 
-Questions: hello@homenet.com.bd
+Questions: support@homenetbd.com
 ```
 
 ⚠ *"Listings are reviewed before they are published"*: true only if the review step
@@ -67,7 +67,7 @@ transactions (none can be backed up pre-launch), and the disabled
 ## Category and contact
 
 - **Category:** House & Home
-- **Email:** hello@homenet.com.bd (confirm it is read: Play shows it publicly, and Google writes to it)
+- **Email:** support@homenetbd.com (confirm it is read: Play shows it publicly, and Google writes to it)
 - **Website:** https://www.homenetbd.com (confirm the domain)
 - **Privacy policy URL:** https://www.homenetbd.com/privacy
 

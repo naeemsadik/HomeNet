@@ -33,7 +33,8 @@ export function LegalScreen({ document }: { document: LegalDocument }) {
     <AppChrome active="home">
       <View style={[styles.page, isPhone && styles.pagePhone]}>
         <Eyebrow style={styles.eyebrow}>{t("legal.eyebrow")}</Eyebrow>
-        <Text accessibilityRole="header" style={[styles.title, isPhone && styles.titlePhone]}>
+        {/* React Native Web renders a header with no aria-level as <h1>: say the level. */}
+        <Text accessibilityRole="header" aria-level={1} style={[styles.title, isPhone && styles.titlePhone]}>
           {document.title}
         </Text>
         <Text style={styles.summary}>{document.summary}</Text>
@@ -41,7 +42,7 @@ export function LegalScreen({ document }: { document: LegalDocument }) {
 
         {document.sections.map((section) => (
           <View key={section.heading} style={styles.section}>
-            <Text accessibilityRole="header" style={styles.heading}>
+            <Text accessibilityRole="header" aria-level={2} style={styles.heading}>
               {section.heading}
             </Text>
             {section.paragraphs?.map((text) => (

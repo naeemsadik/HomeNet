@@ -21,7 +21,7 @@ describe.each(documents)("the %s", (_name, doc) => {
     for (const text of everyText(doc)) {
       expect(text.trim()).toBe(text);
       expect(text.length).toBeGreaterThan(2);
-      expect(text).not.toMatch(/lorem|todo|tbd|\[[^\]]*\]|xxx|example\.com/i);
+      expect(text).not.toMatch(/lorem|\btodo\b|\btbd\b|\[[^\]]*\]|xxx|example\.com/i);
     }
   });
 

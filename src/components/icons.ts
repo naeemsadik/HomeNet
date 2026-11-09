@@ -88,6 +88,7 @@ export { default as Maximize } from "lucide-react-native/icons/maximize";
 export { default as Maximize2 } from "lucide-react-native/icons/maximize-2";
 export { default as Menu } from "lucide-react-native/icons/menu";
 export { default as MessageSquare } from "lucide-react-native/icons/message-square";
+export { default as Minus } from "lucide-react-native/icons/minus";
 export { default as MoreVertical } from "lucide-react-native/icons/ellipsis-vertical";
 export { default as Pencil } from "lucide-react-native/icons/pencil";
 export { default as Phone } from "lucide-react-native/icons/phone";

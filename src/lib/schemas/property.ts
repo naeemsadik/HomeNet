@@ -129,6 +129,12 @@ export const upsertPropertyDtoSchema = z
       .max(300)
       .refine((v) => !/[<>{}\x00-\x1F]/.test(v), "Address contains invalid characters")
       .optional(),
+    phone: z.array(z.string().trim().min(5).max(20)).max(5).optional(),
+    // International form, or empty to clear it; the backend checks the same shape.
+    whatsapp_number: z
+      .string()
+      .regex(/^(\+?[0-9]{7,15})?$/, "WhatsApp number must be 7 to 15 digits")
+      .optional(),
     amenities: z.record(z.string().max(50), z.unknown()).optional(),
     virtual_tour_url: z
       .string()

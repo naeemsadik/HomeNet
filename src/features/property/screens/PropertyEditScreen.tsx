@@ -12,6 +12,7 @@ import { colorTokens, fonts } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
 import { getPropertyById } from "@/services/propertyApi";
 import { toApiError } from "@/services/apiClient";
+import { isListingPhoto } from "@/features/property/utils/listingMedia";
 
 export function PropertyEditScreen() {
   const { t } = useTranslation();
@@ -87,8 +88,9 @@ export function PropertyEditScreen() {
     virtual_tour_url: propertyData.virtual_tour_url ?? undefined,
   };
 
+  // The edit form shows every photo the listing has (see listingMedia.ts).
   const initialImages = (propertyData.media ?? [])
-    .filter((m) => m.media_type === "image")
+    .filter(isListingPhoto)
     .map((m) => ({ uri: m.url }));
 
   return (

@@ -53,7 +53,7 @@ export function SellerHelpWorkspace() {
             <Phone color={colors.green} size={20} />
           </View>
           <Text style={styles.supportChannelTitle}>{t("seller.help.phoneSupport")}</Text>
-          <Text style={styles.supportChannelValue}>+880 1700-000000</Text>
+          <Text style={styles.supportChannelValue}>+880 1601-899318</Text>
           <Text style={styles.supportChannelSub}>{t("seller.help.phoneSupportHours")}</Text>
         </View>
 
@@ -62,7 +62,7 @@ export function SellerHelpWorkspace() {
             <Mail color={colors.blue} size={20} />
           </View>
           <Text style={styles.supportChannelTitle}>{t("seller.help.emailSupport")}</Text>
-          <Text style={styles.supportChannelValue}>partner@homenet.com.bd</Text>
+          <Text style={styles.supportChannelValue}>support@homenetbd.com</Text>
           <Text style={styles.supportChannelSub}>{t("seller.help.emailSupportSub")}</Text>
         </View>
 
@@ -71,7 +71,7 @@ export function SellerHelpWorkspace() {
             <MessageSquare color={colors.green} size={20} />
           </View>
           <Text style={styles.supportChannelTitle}>{t("seller.help.whatsappSupport")}</Text>
-          <Text style={styles.supportChannelValue}>+880 1700-000000</Text>
+          <Text style={styles.supportChannelValue}>+880 1601-899318</Text>
           <Text style={styles.supportChannelSub}>{t("seller.help.whatsappSupportSub")}</Text>
         </View>
       </View>

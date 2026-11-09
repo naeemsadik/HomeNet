@@ -166,7 +166,7 @@ Hidden or removed so a reviewer does not read it as broken:
 
 - Google and Facebook buttons: Android app only, until the backend supports them.
 - Phone and agency boxes on the profile pages: they showed made-up values
-  ("+880 1700-000000", "Homenet Verified Partner") and **Save never sent them**.
+  ("+880 1601-899318", "Homenet Verified Partner") and **Save never sent them**.
 
 ## Decisions for you
 
@@ -179,7 +179,6 @@ Hidden or removed so a reviewer does not read it as broken:
 - **Legal text** was drafted from what the app does. Have someone qualified read the
   Privacy Policy and Terms of Use before launch, particularly the Terms' limits of
   liability. There is no "governing law" clause because that is a legal choice.
-- **Forgot password** has no flow: the app tells people to write to hello@homenet.com.bd.
+- **Forgot password** has no flow: the app tells people to write to support@homenetbd.com.
   That is allowed, but check the mailbox is monitored.
-- **Contact email domain.** The app's existing contact is `hello@homenet.com.bd`, but the
-  website and API are on `homenetbd.com`. Make sure the mailbox exists and is read.
+- **Contact email domain.** The app's contact is `support@homenetbd.com`. Make sure the mailbox exists and is read.
