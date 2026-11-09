@@ -47,8 +47,45 @@ describe("Instant Valuation Engine (Dhaka Real Estate Benchmark)", () => {
     expect(result.lowEstimate).toBeLessThan(result.estimatedValue);
     expect(result.highEstimate).toBeGreaterThan(result.estimatedValue);
     expect(result.confidenceScore).toBe("high");
-    expect(result.confidencePct).toBeGreaterThanOrEqual(90);
     expect(result.valueDrivers.length).toBeGreaterThan(0);
+  });
+
+  test("the area sets the price first: the same flat is worth far more in Gulshan than in Mirpur", () => {
+    const gulshan = calculateDhakaValuation(basePayload);
+    const mirpur = calculateDhakaValuation({ ...basePayload, areaName: "Mirpur", areaId: "mirpur" });
+    expect(gulshan.estimatedValue).toBeGreaterThan(mirpur.estimatedValue * 2);
+  });
+
+  test("road access, papers and waterlogging move the price, and say why", () => {
+    const neutral = calculateDhakaValuation(basePayload);
+    const mainRoad = calculateDhakaValuation({ ...basePayload, roadAccess: "main_road" });
+    const lane = calculateDhakaValuation({ ...basePayload, roadAccess: "narrow_lane" });
+    const unsure = calculateDhakaValuation({ ...basePayload, legalPapers: "unsure" });
+    const flooded = calculateDhakaValuation({ ...basePayload, waterlogging: "sometimes" });
+
+    expect(mainRoad.estimatedValue).toBeGreaterThan(neutral.estimatedValue);
+    expect(lane.estimatedValue).toBeLessThan(neutral.estimatedValue);
+    expect(unsure.estimatedValue).toBeLessThan(neutral.estimatedValue);
+    expect(flooded.estimatedValue).toBeLessThan(neutral.estimatedValue);
+
+    const laneDriver = lane.valueDrivers.find((d) => d.id === "vd-road")!;
+    expect(laneDriver.deltaBdtPerSqft).toBeLessThan(0);
+    expect(laneDriver.formattedDelta).toMatch(/^-BDT/);
+    expect(lane.breakdownFactors.siteAdjustmentPct).toBe(-10);
+    // Left out, they change nothing: an older client keeps getting the same price.
+    expect(neutral.breakdownFactors.siteAdjustmentPct).toBe(0);
+  });
+
+  test("an area without its own benchmark is a rough guide, and says so", () => {
+    const result = calculateDhakaValuation({ ...basePayload, areaName: "Keraniganj", areaId: "keraniganj" });
+    expect(result.confidenceScore).toBe("low");
+    expect(result.confidenceReason).toMatch(/Dhaka-wide average/);
+  });
+
+  test("claims no transaction records or listing counts it does not have", () => {
+    const result = calculateDhakaValuation(basePayload);
+    expect(result.confidenceReason).not.toMatch(/verified transaction/i);
+    expect(result.marketMetric.verifiedListingCount).toBe(0);
   });
 
   test("applies south-facing bonus and sweet-spot floor premium", () => {

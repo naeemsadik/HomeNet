@@ -14,6 +14,7 @@ import {
   Check,
   CheckCircle2,
   LineChart,
+  Minus,
   PlusCircle,
   RotateCcw,
   Share2,
@@ -156,8 +157,9 @@ export function Step4ResultDashboard() {
             <Text style={styles.confidencePillText}>
               {result.confidenceScore === "high"
                 ? t("valuation.step4.highConfidence")
-                : t("valuation.step4.mediumConfidence")}{" "}
-              ({result.confidencePct}%)
+                : result.confidenceScore === "medium"
+                  ? t("valuation.step4.mediumConfidence")
+                  : t("valuation.step4.lowConfidence")}
             </Text>
           </View>
         </View>
@@ -256,22 +258,30 @@ export function Step4ResultDashboard() {
           </Text>
 
           <View style={styles.driversList}>
-            {result.valueDrivers.map((driver) => (
+            {result.valueDrivers.map((driver) => {
+              // A factor that lowers the price (a narrow lane, unclear papers) must not read as a plus.
+              const lowers = driver.deltaBdtPerSqft < 0;
+              return (
               <View key={driver.id} style={styles.driverRow}>
                 <View style={styles.driverLeft}>
-                  <View style={styles.driverCheckCircle}>
-                    <Check color={colorTokens.onBrand} size={12} strokeWidth={3} />
+                  <View style={[styles.driverCheckCircle, lowers && styles.driverCircleLowers]}>
+                    {lowers ? (
+                      <Minus color={colorTokens.surface} size={12} strokeWidth={3} />
+                    ) : (
+                      <Check color={colorTokens.onBrand} size={12} strokeWidth={3} />
+                    )}
                   </View>
                   <View style={styles.driverInfo}>
                     <Text style={styles.driverName}>{driver.name}</Text>
                     <Text style={styles.driverDesc}>{driver.description}</Text>
                   </View>
                 </View>
-                <View style={styles.driverDeltaBadge}>
-                  <Text style={styles.driverDeltaText}>{driver.formattedDelta}</Text>
+                <View style={[styles.driverDeltaBadge, lowers && styles.driverDeltaBadgeLowers]}>
+                  <Text style={[styles.driverDeltaText, lowers && styles.driverDeltaTextLowers]}>{driver.formattedDelta}</Text>
                 </View>
               </View>
-            ))}
+              );
+            })}
           </View>
         </View>
       )}
@@ -755,6 +765,15 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.brand,
     alignItems: "center",
     justifyContent: "center",
+  },
+  driverCircleLowers: {
+    backgroundColor: colorTokens.muted,
+  },
+  driverDeltaBadgeLowers: {
+    backgroundColor: colorTokens.surfaceSunken,
+  },
+  driverDeltaTextLowers: {
+    color: colorTokens.body,
   },
   driverInfo: {
     flex: 1,

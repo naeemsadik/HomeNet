@@ -20,6 +20,15 @@ export type PropertyCondition =
   | "under_construction"
   | "resale";
 
+/** How wide the road at the property's gate is. In Dhaka a narrow lane can take a tenth off. */
+export type RoadAccess = "main_road" | "wide_road" | "narrow_lane";
+
+/** Whether the papers a buyer's bank and lawyer ask for are in order (RAJUK approval, mutation). */
+export type LegalPapers = "complete" | "unsure";
+
+/** Whether water stands on the road or in the building in the monsoon. */
+export type Waterlogging = "never" | "sometimes";
+
 export interface ValuationAmenities {
   lift: boolean;
   generator: boolean;
@@ -49,6 +58,10 @@ export interface ValuationRequestPayload {
   facing: PropertyFacing;
   propertyAge: PropertyCondition;
   amenities: ValuationAmenities;
+  /** Optional so an older client or a backend without them still works; treated as the neutral choice. */
+  roadAccess?: RoadAccess;
+  legalPapers?: LegalPapers;
+  waterlogging?: Waterlogging;
 }
 
 export interface ComparableProperty {
@@ -84,7 +97,7 @@ export interface ValueDriverImpact {
   deltaBdtPerSqft: number;
   formattedDelta: string;
   description: string;
-  category: "location" | "facing" | "amenity" | "floor" | "condition";
+  category: "location" | "facing" | "amenity" | "floor" | "condition" | "access" | "legal";
 }
 
 export interface PriceBreakdownFactors {
@@ -93,6 +106,8 @@ export interface PriceBreakdownFactors {
   facingAdjustmentPct: number;
   amenitiesAdjustmentPct: number;
   conditionAdjustmentPct: number;
+  /** Road access, papers and monsoon waterlogging together. */
+  siteAdjustmentPct: number;
   calculatedRatePerSqft: number;
 }
 
@@ -129,7 +144,7 @@ export interface ValuationResponseData {
   pricePerSqftDeltaPct: number; // e.g. +6.5% vs area average
 
   /** Confidence assessment */
-  confidenceScore: "high" | "medium";
+  confidenceScore: "high" | "medium" | "low";
   confidencePct: number;
   confidenceReason: string;
 

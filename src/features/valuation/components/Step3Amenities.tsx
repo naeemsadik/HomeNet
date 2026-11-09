@@ -22,6 +22,54 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 import type { ValuationAmenities } from "../types/valuationTypes";
+import type { ValuationFormState } from "../stores/useInstantValuationStore";
+
+type SiteField = "roadAccess" | "legalPapers" | "waterlogging";
+
+/** One either/or question about the site, as a row of choices (a radio group). */
+function SiteQuestion<K extends SiteField>({
+  label,
+  field,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  field: K;
+  value: ValuationFormState[K];
+  options: { value: ValuationFormState[K]; label: string; tag?: string }[];
+  onChange: (field: K, value: ValuationFormState[K]) => void;
+}) {
+  return (
+    <View style={styles.siteQuestion}>
+      <Text style={styles.siteLabel}>{label}</Text>
+      <View accessibilityRole="radiogroup" accessibilityLabel={label} style={styles.siteOptions}>
+        {options.map((option) => {
+          const selected = option.value === value;
+          return (
+            <Pressable
+              key={option.value}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: selected }}
+              onPress={() => onChange(field, option.value)}
+              style={({ hovered }: any) => [
+                styles.siteOption,
+                selected && styles.siteOptionSelected,
+                hovered && !selected && styles.amenityCardHovered,
+                webPointer,
+              ]}
+            >
+              <Text style={[styles.siteOptionText, selected && styles.siteOptionTextSelected]}>{option.label}</Text>
+              {option.tag ? (
+                <Text style={[styles.siteOptionTag, selected && styles.siteOptionTagSelected]}>{option.tag}</Text>
+              ) : null}
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
 
 interface AmenityOption {
   key: keyof ValuationAmenities;
@@ -33,7 +81,7 @@ interface AmenityOption {
 
 export function Step3Amenities() {
   const { t } = useTranslation();
-  const { form, toggleAmenity, executeValuation, prevStep } = useInstantValuation();
+  const { form, toggleAmenity, executeValuation, prevStep, setFormField } = useInstantValuation();
   const { isPhone } = useResponsive();
 
   const dhakaAmenities: AmenityOption[] = [
@@ -97,6 +145,42 @@ export function Step3Amenities() {
         <Text style={styles.subtitle}>
           {t("valuation.step3.subtitle")}
         </Text>
+      </View>
+
+      {/* After the area, these move a Dhaka price the most. */}
+      <View style={styles.siteSection}>
+        <Text style={styles.siteSectionTitle}>{t("valuation.step3.site.title")}</Text>
+        <SiteQuestion
+          field="roadAccess"
+          label={t("valuation.step3.site.roadLabel")}
+          value={form.roadAccess}
+          onChange={setFormField}
+          options={[
+            { value: "main_road", label: t("valuation.step3.site.mainRoad"), tag: "+8%" },
+            { value: "wide_road", label: t("valuation.step3.site.wideRoad") },
+            { value: "narrow_lane", label: t("valuation.step3.site.narrowLane"), tag: "−10%" },
+          ]}
+        />
+        <SiteQuestion
+          field="legalPapers"
+          label={t("valuation.step3.site.papersLabel")}
+          value={form.legalPapers}
+          onChange={setFormField}
+          options={[
+            { value: "complete", label: t("valuation.step3.site.papersComplete") },
+            { value: "unsure", label: t("valuation.step3.site.papersUnsure"), tag: "−6%" },
+          ]}
+        />
+        <SiteQuestion
+          field="waterlogging"
+          label={t("valuation.step3.site.waterLabel")}
+          value={form.waterlogging}
+          onChange={setFormField}
+          options={[
+            { value: "never", label: t("valuation.step3.site.waterNever") },
+            { value: "sometimes", label: t("valuation.step3.site.waterSometimes"), tag: "−7%" },
+          ]}
+        />
       </View>
 
       {/* Selected Counter Chip */}
@@ -219,6 +303,63 @@ export function Step3Amenities() {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
+  },
+  siteSection: {
+    gap: 16,
+    marginBottom: 24,
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: colorTokens.divider,
+  },
+  siteSectionTitle: {
+    fontSize: 16,
+    fontFamily: fonts.bold,
+    color: colorTokens.ink,
+  },
+  siteQuestion: {
+    gap: 8,
+  },
+  siteLabel: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    color: colorTokens.ink,
+  },
+  siteOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  siteOption: {
+    minHeight: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colorTokens.border,
+    backgroundColor: colorTokens.surface,
+  },
+  siteOptionSelected: {
+    borderColor: colorTokens.brand,
+    backgroundColor: colorTokens.brandSurface,
+  },
+  siteOptionText: {
+    fontSize: 14,
+    fontFamily: fonts.medium,
+    color: colorTokens.body,
+  },
+  siteOptionTextSelected: {
+    fontFamily: fonts.semiBold,
+    color: colorTokens.ink,
+  },
+  siteOptionTag: {
+    fontSize: 12,
+    fontFamily: fonts.semiBold,
+    color: colorTokens.muted,
+  },
+  siteOptionTagSelected: {
+    color: colorTokens.brandText,
   },
   header: {
     marginBottom: 20,

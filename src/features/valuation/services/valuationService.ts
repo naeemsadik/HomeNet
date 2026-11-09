@@ -117,6 +117,11 @@ const DEFAULT_BENCHMARK: AreaBenchmark = {
   subzones: ["Central", "North Zone", "South Zone"],
 };
 
+/** True when the area has its own benchmark; otherwise the estimate uses the Dhaka-wide average. */
+export function hasAreaBenchmark(areaName: string): boolean {
+  return normalizeAreaKey(areaName) !== "default";
+}
+
 function normalizeAreaKey(areaName: string): string {
   const clean = areaName.toLowerCase().replace(/[^a-z0-9]/g, "");
   for (const key of Object.keys(DHAKA_AREA_BENCHMARKS)) {
@@ -290,13 +295,45 @@ export function calculateDhakaValuation(
     conditionAdjustmentPct = -0.05;
   }
 
-  // 6. Net Rate per Sqft Calculation
+  // 6. The site: road access, papers and monsoon waterlogging. After the area, these move a Dhaka
+  // price the most: buyers and banks discount a narrow lane, unclear papers and standing water.
+  let siteAdjustmentPct = 0;
+  const siteDriver = (id: string, name: string, pct: number, description: string, category: ValueDriverImpact["category"]) => {
+    const delta = Math.round(baseRatePerSqft * pct);
+    valueDrivers.push({
+      id,
+      name,
+      deltaBdtPerSqft: delta,
+      formattedDelta: `${delta >= 0 ? "+" : "-"}BDT ${Math.abs(delta).toLocaleString("en-IN")}/sqft`,
+      description,
+      category,
+    });
+  };
+  const road = payload.roadAccess ?? "wide_road";
+  if (road === "main_road") {
+    siteAdjustmentPct += 0.08;
+    siteDriver("vd-road", "On a main road (40 ft or wider)", 0.08, "Easy car access and frontage, which buyers and shops pay for.", "access");
+  } else if (road === "narrow_lane") {
+    siteAdjustmentPct -= 0.1;
+    siteDriver("vd-road", "Narrow lane (under 20 ft)", -0.1, "Hard for cars, ambulances and fire service to reach; buyers discount it.", "access");
+  }
+  if ((payload.legalPapers ?? "complete") === "unsure") {
+    siteAdjustmentPct -= 0.06;
+    siteDriver("vd-papers", "Papers not confirmed", -0.06, "Banks lend less and buyers ask a discount until RAJUK approval and mutation are confirmed.", "legal");
+  }
+  if ((payload.waterlogging ?? "never") === "sometimes") {
+    siteAdjustmentPct -= 0.07;
+    siteDriver("vd-water", "Waterlogging in the monsoon", -0.07, "Standing water on the road or in the building lowers what buyers and tenants pay.", "location");
+  }
+
+  // 7. Net Rate per Sqft Calculation
   const totalMultiplier =
     1 +
     floorAdjustmentPct +
     facingAdjustmentPct +
     amenitiesAdjustmentPct +
-    conditionAdjustmentPct;
+    conditionAdjustmentPct +
+    siteAdjustmentPct;
 
   const calculatedRatePerSqft = Math.round(baseRatePerSqft * totalMultiplier);
 
@@ -329,16 +366,24 @@ export function calculateDhakaValuation(
     ).toFixed(1)
   );
 
-  // Confidence Score
+  // How much to trust it. The area matters most, so an area without its own benchmark is low,
+  // whatever else is filled in. It is an estimate from area averages, not a survey or a sale record.
+  const knownArea = areaKey !== "default";
   const hasDetailedSpecs =
     Boolean(payload.roadOrBlock) &&
     payload.bedrooms > 0 &&
     payload.bathrooms > 0;
-  const confidenceScore = hasDetailedSpecs ? "high" : "medium";
-  const confidencePct = hasDetailedSpecs ? 94 : 82;
-  const confidenceReason = hasDetailedSpecs
-    ? `Calculated using verified transaction records and verified listing density in ${payload.areaName}.`
-    : `Estimated based on general ${payload.areaName} sector averages. Add road/block for high accuracy.`;
+  const confidenceScore: ValuationResponseData["confidenceScore"] = !knownArea
+    ? "low"
+    : hasDetailedSpecs
+      ? "high"
+      : "medium";
+  const confidencePct = confidenceScore === "high" ? 85 : confidenceScore === "medium" ? 70 : 50;
+  const confidenceReason = !knownArea
+    ? `We don't have price data for ${payload.areaName} yet, so this uses a Dhaka-wide average. Treat it as a rough guide.`
+    : hasDetailedSpecs
+      ? `Based on HomeNet's price benchmark for ${payload.areaName}, adjusted for your property's details.`
+      : `Based on the ${payload.areaName} average. Add the road or block for a closer estimate.`;
 
   // Comparable Properties Selection
   const areaNameLower = payload.areaName.toLowerCase();
@@ -422,6 +467,7 @@ export function calculateDhakaValuation(
     facingAdjustmentPct: Number((facingAdjustmentPct * 100).toFixed(1)),
     amenitiesAdjustmentPct: Number((amenitiesAdjustmentPct * 100).toFixed(1)),
     conditionAdjustmentPct: Number((conditionAdjustmentPct * 100).toFixed(1)),
+    siteAdjustmentPct: Number((siteAdjustmentPct * 100).toFixed(1)),
     calculatedRatePerSqft,
   };
 
@@ -431,7 +477,8 @@ export function calculateDhakaValuation(
     avgPriceSqftRent: benchmark.rentPerSqft,
     yearOverYearGrowthPct: benchmark.yoyGrowth,
     marketDemand: benchmark.demand,
-    verifiedListingCount: 42,
+    // Not measured yet: no listing count is claimed.
+    verifiedListingCount: 0,
     popularSubzones: benchmark.subzones,
   };
 
