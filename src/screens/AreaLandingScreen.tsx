@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
 import { SEO_AREAS, seoAreaBySlug } from "@/content/areas";
@@ -41,18 +42,33 @@ export function AreaLandingScreen({
 }) {
   const { language } = useTranslation();
   const area = seoAreaBySlug(slug);
+  const [liveTotal, setLiveTotal] = useState<number | undefined>(initialResults?.total);
+
   if (!area) return <NotFoundScreen />;
   const meta = areaPageMeta(area, intent, language);
   const pageUrl = `${SITE_URL}/${intent}/${area.slug}`;
   const listed = initialResults?.items ?? [];
+  // Hidden only when known to be empty: the live feed or the build saw zero listings. A page
+  // the build could not fetch stays indexable; Google may not run the script that would clear
+  // a noindex written into the exported HTML.
+  const isZero = liveTotal !== undefined ? liveTotal === 0 : initialResults?.total === 0;
 
   return (
     <>
-      <PageMeta title={meta.title} description={meta.description} noindex={initialResults?.total === 0 ? true : undefined} />
+      <PageMeta
+        title={meta.title}
+        description={meta.description}
+        robots={isZero ? "noindex, follow" : undefined}
+      />
       <JsonLd
         nodes={[breadcrumbSchema(areaCrumbs(area, intent)), ...(listed.length ? [itemListSchema(listed, pageUrl)] : [])]}
       />
-      <BrowseScreen mode={intent} location={area.filter ?? area.name} initialResults={initialResults} />
+      <BrowseScreen
+        mode={intent}
+        location={area.filter ?? area.name}
+        initialResults={initialResults}
+        onTotalChange={setLiveTotal}
+      />
     </>
   );
 }

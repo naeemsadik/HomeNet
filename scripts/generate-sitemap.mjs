@@ -176,7 +176,9 @@ function main() {
   for (const intent of AREA_INTENTS) {
     for (const slug of areas) {
       const seen = areaListings(intent, slug);
-      if (seen && seen.total === 0) {
+      // Left out only when the build saw it with no listings. When the build could not fetch it,
+      // it stays: one failed request must not drop every area page from the sitemap.
+      if (seen && (seen.total ?? 0) <= 0) {
         empty.push(`${intent}/${slug}`);
         continue;
       }

@@ -72,14 +72,17 @@ const textOf = (node: ReactTestInstance): string =>
 /** Torn down after each test, so the modal's debounce timer cannot outlive it. */
 const mounted: ReactTestRenderer[] = [];
 
-async function mount(mode: "buy" | "rent" | "sold" = "rent"): Promise<ReactTestRenderer> {
+async function mount(
+  mode: "buy" | "rent" | "sold" = "rent",
+  onTotalChange?: (total: number) => void,
+): Promise<ReactTestRenderer> {
   // gcTime: Infinity schedules no cache-cleanup timer, which would keep Jest from exiting.
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
   let tree!: ReactTestRenderer;
   await act(async () => {
     tree = renderer.create(
       <QueryClientProvider client={client}>
-        <BrowseScreen mode={mode} />
+        <BrowseScreen mode={mode} onTotalChange={onTotalChange} />
       </QueryClientProvider>,
     );
   });
@@ -430,5 +433,32 @@ describe("the Rightmove-style results layout", () => {
       .map((n) => n.props.accessibilityLabel);
     expect(links).toContain("Open The Villa");
     expect(links).not.toContain("Open No Pin Flat");
+  });
+});
+
+describe("the result count the page uses to keep empty pages out of Google", () => {
+  it("reports zero when a search really finds nothing", async () => {
+    mockParams = { searched: "1" };
+    getProps.mockResolvedValue({ data: { items: [], total: 0, page: 1, limit: 20 } });
+    const onTotalChange = jest.fn();
+    await mount("buy", onTotalChange);
+    expect(onTotalChange).toHaveBeenLastCalledWith(0);
+  });
+
+  it("reports nothing when the listings could not load, so an outage never marks the page noindex", async () => {
+    mockParams = { searched: "1" };
+    getProps.mockRejectedValue(new Error("network down"));
+    const onTotalChange = jest.fn();
+    await mount("buy", onTotalChange);
+    expect(onTotalChange).not.toHaveBeenCalled();
+  });
+
+  it("reports nothing before a search, while the desktop page shows the search card", async () => {
+    mockParams = {};
+    withDesktopWindow();
+    const onTotalChange = jest.fn();
+    await mount("buy", onTotalChange);
+    expect(feedCalls()).toHaveLength(0);
+    expect(onTotalChange).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -75,12 +75,15 @@ export function BrowseScreen({
   mode,
   location: fixedLocation,
   initialResults,
+  onTotalChange,
 }: {
   mode?: "buy" | "rent" | "sold";
   /** Pins the area filter, for the /buy/<area> and /rent/<area> landing pages. */
   location?: string;
   /** The first page as the build saw it (route loader), shown until the feed answers. */
   initialResults?: BrowseSnapshot;
+  /** Called with the result count once the feed has loaded; not called while loading or after an error. */
+  onTotalChange?: (total: number) => void;
 }) {
   const { t, language } = useTranslation();
   const { isPhone, width, height } = useResponsive();
@@ -263,6 +266,13 @@ export function BrowseScreen({
   const totalCount = hasClientFilters(filters) || isSoldView
     ? results.length
     : ((snapshot ? snapshot.total : total) ?? results.length);
+
+  // Only a total from a load that worked: a failed feed has no total, and reporting 0 would mark
+  // a page with listings noindex whenever the API is down.
+  useEffect(() => {
+    if (feedLoading || isError || typeof onTotalChange !== "function") return;
+    onTotalChange(totalCount);
+  }, [feedLoading, isError, totalCount, onTotalChange]);
 
   // The results line is the page's <h1>: what is listed and where, which is
   // what a search for "flat rent gulshan" should land on. Until the feed has
