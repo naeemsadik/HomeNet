@@ -10,9 +10,15 @@ export interface ReportListingModalProps {
   onClose: () => void;
   propertyId: string;
   propertyTitle: string;
+  /**
+   * Sends the report through an API instead of the mail app (mess listings:
+   * POST /v1/mess/:id/report). Rejecting keeps the form open with `failedMessage`.
+   */
+  onSubmit?: (reason: ReportReasonKey) => Promise<void>;
+  failedMessage?: string;
 }
 
-type ReportReasonKey = "fakeListing" | "brokerSpam" | "incorrectPrice" | "inappropriate" | "other";
+export type ReportReasonKey = "fakeListing" | "brokerSpam" | "incorrectPrice" | "inappropriate" | "other";
 
 const REPORT_REASONS: { key: ReportReasonKey; titleKey: string; descKey: string }[] = [
   {
@@ -47,17 +53,31 @@ export function ReportListingModal({
   onClose,
   propertyId,
   propertyTitle,
+  onSubmit,
+  failedMessage,
 }: ReportListingModalProps) {
   const { t } = useTranslation();
   const [selectedReason, setSelectedReason] = useState<ReportReasonKey>("fakeListing");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const handleClose = () => {
     setIsSubmitted(false);
+    setFailed(false);
     onClose();
   };
 
   const handleSubmit = () => {
+    if (onSubmit) {
+      setSending(true);
+      setFailed(false);
+      onSubmit(selectedReason)
+        .then(() => setIsSubmitted(true))
+        .catch(() => setFailed(true))
+        .finally(() => setSending(false));
+      return;
+    }
     // Open prepared email report
     const mailtoUrl = reportListingMailto({ id: propertyId, title: propertyTitle });
     Linking.openURL(mailtoUrl).catch(() => {
@@ -133,6 +153,12 @@ export function ReportListingModal({
                 })}
               </View>
 
+              {failed && failedMessage ? (
+                <Text accessibilityLiveRegion="polite" style={modalStyles.failedText}>
+                  {failedMessage}
+                </Text>
+              ) : null}
+
               <View style={modalStyles.actionsRow}>
                 <Pressable
                   accessibilityRole="button"
@@ -144,8 +170,10 @@ export function ReportListingModal({
 
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityState={{ busy: sending, disabled: sending }}
+                  disabled={sending}
                   onPress={handleSubmit}
-                  style={[modalStyles.primaryBtn, webPointer]}
+                  style={[modalStyles.primaryBtn, sending && modalStyles.primaryBtnBusy, webPointer]}
                 >
                   <Text style={modalStyles.primaryBtnText}>{t("reportModal.submit")}</Text>
                 </Pressable>
@@ -285,6 +313,14 @@ const modalStyles = StyleSheet.create({
     color: colorTokens.onBrand,
     fontSize: 14,
     fontFamily: fonts.bold,
+  },
+  primaryBtnBusy: {
+    opacity: 0.6,
+  },
+  failedText: {
+    color: colorTokens.errorText,
+    fontSize: 13,
+    fontFamily: fonts.medium,
   },
   successBody: {
     alignItems: "center",
