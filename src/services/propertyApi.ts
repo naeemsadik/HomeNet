@@ -164,11 +164,14 @@ export async function uploadPropertyMedia(
   file: UploadInput,
   mediaType: "image" | "video",
   displayOrder?: number,
+  /** What the photo shows (room, washroom, building...). Mess listings require it at submit. */
+  label?: string,
 ) {
   const formData = new FormData();
   appendUpload(formData, "file", file, mediaType === "image" ? "property.jpg" : "property.mp4");
   formData.append("media_type", mediaType);
   if (displayOrder !== undefined) formData.append("display_order", String(displayOrder));
+  if (label) formData.append("label", label);
 
   const { data } = await apiClient.post<ApiResponse<PropertyMedia>>(
     `/v1/properties/${id}/media`,
