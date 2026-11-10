@@ -240,11 +240,17 @@ export function calculateDhakaValuation(
   // In Dhaka, 4th to 8th floors command a sweet-spot premium (less dust/mosquitoes, reliable lift).
   // Ground floor has privacy and security discounts.
   let floorAdjustmentPct = 0;
-  const numericFloor = typeof payload.floorLevel === "number"
-    ? payload.floorLevel
-    : parseInt(String(payload.floorLevel).replace(/\D/g, ""), 10) || 4;
+  // Without a floor there is nothing to adjust: assuming one would add or take off a few percent unseen.
+  const floorGiven = payload.floorLevel !== undefined && String(payload.floorLevel).trim() !== "";
+  const numericFloor = !floorGiven
+    ? NaN
+    : typeof payload.floorLevel === "number"
+      ? payload.floorLevel
+      : parseInt(String(payload.floorLevel).replace(/\D/g, ""), 10);
 
-  if (numericFloor === 1 || numericFloor === 0) {
+  if (Number.isNaN(numericFloor)) {
+    floorAdjustmentPct = 0;
+  } else if (numericFloor === 1 || numericFloor === 0) {
     floorAdjustmentPct = -0.06;
   } else if (numericFloor >= 4 && numericFloor <= 8) {
     floorAdjustmentPct = 0.04;
@@ -369,6 +375,29 @@ export function calculateDhakaValuation(
       category,
     });
   };
+  // The floor and the age move the price too, so they are listed with the other drivers.
+  if (floorAdjustmentPct !== 0) {
+    siteDriver(
+      "vd-floor",
+      floorAdjustmentPct > 0 ? "Higher floor" : "Ground floor",
+      floorAdjustmentPct,
+      "",
+      "floor",
+    );
+  }
+  if (conditionAdjustmentPct !== 0) {
+    siteDriver(
+      "vd-condition",
+      payload.propertyAge === "brand_new"
+        ? "Newly built"
+        : payload.propertyAge === "under_construction"
+          ? "Still under construction"
+          : "Previously lived in",
+      conditionAdjustmentPct,
+      "",
+      "condition",
+    );
+  }
   const road = payload.roadAccess ?? "wide_road";
   if (road === "main_road") {
     siteAdjustmentPct += 0.08;
@@ -436,17 +465,13 @@ export function calculateDhakaValuation(
   const primary = payload.purpose === "rent" ? rentListings : saleListings;
   const otherRate = payload.purpose === "rent" ? saleListings : rentListings;
   const basis = isApartment ? primary : null;
-  const hasDetailedSpecs =
-    Boolean(payload.roadOrBlock) &&
-    payload.bedrooms > 0 &&
-    payload.bathrooms > 0;
   // One site deciding most of the figure, or a rent whose yield rests on an estimated sale price,
   // keeps it from being high.
   const mostlyOneSite = Boolean(basis && basis.largestSourceShare > MAX_SINGLE_SOURCE_SHARE);
   const capped = mostlyOneSite || (payload.purpose === "rent" && !saleListings);
   const confidenceScore: ValuationResponseData["confidenceScore"] = !basis
     ? "low"
-    : hasDetailedSpecs && !capped
+    : !capped
       ? "high"
       : "medium";
   const confidencePct = confidenceScore === "high" ? 85 : confidenceScore === "medium" ? 70 : 50;
@@ -456,7 +481,6 @@ export function calculateDhakaValuation(
         listings: basis.n,
         asOf: BENCHMARK_DATA.asOf,
         mostlyOneSite,
-        needsRoadOrBlock: !hasDetailedSpecs,
         estimatedYieldInput: otherRate ? undefined : payload.purpose === "rent" ? "sale" : "rent",
       }
     : primary

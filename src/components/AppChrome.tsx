@@ -372,6 +372,8 @@ function TopBar({
     authGated?: boolean;
   }[] = [
     ...browseNavLinks,
+    // The valuation page used to be reachable only from the footer and the phone menu.
+    { translationKey: "nav.valuation", href: "/instant-valuation", key: "valuation" },
     { translationKey: "nav.saved", href: "/saved", key: "saved", authGated: true },
   ];
 
