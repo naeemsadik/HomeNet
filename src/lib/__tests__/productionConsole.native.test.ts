@@ -6,6 +6,20 @@
  */
 describe("productionConsole on Android", () => {
   const original = (globalThis as { __DEV__?: boolean }).__DEV__;
+  let originalLocalStorage: unknown;
+
+  beforeAll(() => {
+    originalLocalStorage = (globalThis as { localStorage?: unknown }).localStorage;
+    // Node 25+ defines globalThis.localStorage by default.
+    // Emulate Android Hermes environment where localStorage is undefined.
+    delete (globalThis as { localStorage?: unknown }).localStorage;
+  });
+
+  afterAll(() => {
+    if (originalLocalStorage !== undefined) {
+      (globalThis as { localStorage?: unknown }).localStorage = originalLocalStorage;
+    }
+  });
 
   afterEach(() => {
     (globalThis as { __DEV__?: boolean }).__DEV__ = original;

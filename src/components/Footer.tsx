@@ -66,7 +66,7 @@ function WebFooter({ style }: FooterProps) {
 
   const resourcesLinks = [
     { label: "Stamp Duty & Tax Guide", href: "/resources/stamp-duty-tax-guide" },
-    { label: "Property Price Index", href: "/market" },
+    { label: "Property Price Index", href: "/resources/property-price-index" },
     { label: "Property Valuation Guide", href: "/about" },
     { label: "Property News & Trends", href: "/about" },
     { label: "Buyer Guides", href: "/about" },
