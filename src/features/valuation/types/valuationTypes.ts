@@ -80,12 +80,28 @@ export interface ComparableProperty {
   isVerified: boolean;
 }
 
+/**
+ * What the confidence badge rests on, so the sentence under it can be written in
+ * either language. confidenceReason is the same thing in English.
+ */
+export interface ConfidenceBasis {
+  kind: "listings" | "apartmentsOnly" | "builtInRate" | "noData";
+  /** kind "listings": how many asking prices (or rents) the area's figure rests on. */
+  listings?: number;
+  /** kind "listings": the date the listings were collected, YYYY-MM-DD. */
+  asOf?: string;
+  /** One site supplied most of those listings. */
+  mostlyOneSite?: boolean;
+  /** The road or block was left out, so the estimate is not as close as it could be. */
+  needsRoadOrBlock?: boolean;
+  /** The other figure on the page (the rent for a sale, the sale price for a rent) is an estimate, not from listings. */
+  estimatedYieldInput?: "rent" | "sale";
+}
+
 export interface AreaMarketMetric {
   areaName: string;
   avgPriceSqftSale: number;
   avgPriceSqftRent: number;
-  yearOverYearGrowthPct: number;
-  marketDemand: "Very High" | "High" | "Moderate";
   verifiedListingCount: number;
   popularSubzones: string[];
 }
@@ -146,6 +162,7 @@ export interface ValuationResponseData {
   confidenceScore: "high" | "medium" | "low";
   confidencePct: number;
   confidenceReason: string;
+  confidenceBasis?: ConfidenceBasis;
 
   /** Dhaka Value Drivers Breakdown */
   valueDrivers: ValueDriverImpact[];

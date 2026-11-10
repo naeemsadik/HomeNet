@@ -320,6 +320,7 @@ export function cleanListings(listings: Listing[], limits: Thresholds = DEFAULT_
   };
   const unmappedCounts = new Map<string, number>();
   const seen = new Set<string>();
+  const flats = new Map<string, Set<SourceName>>();
   const kept: Priced[] = [];
 
   for (const listing of listings) {
@@ -342,16 +343,20 @@ export function cleanListings(listings: Listing[], limits: Thresholds = DEFAULT_
       dropped["price-per-sqft-out-of-range"]++;
       continue;
     }
-    // The same site's id, or the same flat advertised twice (same area, price, size).
-    const keys = [
-      `${listing.source}:${listing.id}`,
-      `${listing.purpose}:${area}:${listing.price}:${listing.sizeSqft}`,
-    ];
-    if (keys.some((k) => seen.has(k))) {
+    // The same site's id twice is a repeat. The same flat on two different sites (same area,
+    // price and size) is one flat advertised twice. The same price and size twice on ONE site is
+    // not a repeat: a developer lists identical units, and each is a real flat.
+    const idKey = `${listing.source}:${listing.id}`;
+    const flatKey = `${listing.purpose}:${area}:${listing.price}:${listing.sizeSqft}`;
+    const sitesWithFlat = flats.get(flatKey);
+    const onAnotherSite = sitesWithFlat !== undefined && [...sitesWithFlat].some((s) => s !== listing.source);
+    if (seen.has(idKey) || onAnotherSite) {
       dropped.duplicate++;
       continue;
     }
-    keys.forEach((k) => seen.add(k));
+    seen.add(idKey);
+    if (sitesWithFlat) sitesWithFlat.add(listing.source);
+    else flats.set(flatKey, new Set([listing.source]));
     kept.push({ source: listing.source, purpose: listing.purpose, area, perSqft, id: listing.id });
   }
 
@@ -394,7 +399,11 @@ const round = (value: number, places = 0) => {
   return Math.round(value * f) / f;
 };
 
-export function statsFor(items: Priced[], limits: Thresholds = DEFAULT_THRESHOLDS): PriceStats {
+export function statsFor(
+  items: Priced[],
+  purpose: Purpose,
+  limits: Thresholds = DEFAULT_THRESHOLDS,
+): PriceStats {
   const values = items.map((i) => i.perSqft).sort((a, b) => a - b);
   const bySource: Partial<Record<SourceName, number>> = {};
   for (const item of items) bySource[item.source] = (bySource[item.source] ?? 0) + 1;
@@ -402,7 +411,7 @@ export function statsFor(items: Priced[], limits: Thresholds = DEFAULT_THRESHOLD
   const status: Status =
     values.length >= limits.minListings ? "ok" : values.length >= limits.thinListings ? "thin" : "insufficient";
   // Rent is a small number (tens of Taka), so it keeps one decimal; sale does not need it.
-  const places = items[0]?.purpose === "rent" ? 1 : 0;
+  const places = purpose === "rent" ? 1 : 0;
   return {
     n: values.length,
     median: round(percentile(values, 50), places),
@@ -455,7 +464,7 @@ export function buildBenchmarks(
   const areas: BenchmarkFile["areas"] = {};
   for (const key of [...grouped.keys()].sort()) {
     const [area, purpose] = key.split("|") as [string, Purpose];
-    (areas[area] ??= {})[purpose] = statsFor(grouped.get(key) ?? [], limits);
+    (areas[area] ??= {})[purpose] = statsFor(grouped.get(key) ?? [], purpose, limits);
   }
 
   return {

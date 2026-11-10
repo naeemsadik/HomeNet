@@ -2,10 +2,13 @@ import apiClient from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import areaBenchmarkData from "../data/areaBenchmarks.json";
+import { translate } from "@/i18n";
+import { confidenceReasonText } from "../utils/confidenceText";
 import type { Property, PropertyFilters } from "@/features/property/types/property";
 import type { PropertyType } from "@/types/api";
 import type {
   AreaMarketMetric,
+  ConfidenceBasis,
   ComparableProperty,
   PriceBreakdownFactors,
   ValuationRequestPayload,
@@ -35,8 +38,6 @@ export const VALUATION_API_ENDPOINT = "/v1/properties/instant-valuation";
 interface AreaBenchmark {
   salePerSqft: number;
   rentPerSqft: number;
-  yoyGrowth: number;
-  demand: "Very High" | "High" | "Moderate";
   subzones: string[];
 }
 
@@ -44,71 +45,51 @@ const DHAKA_AREA_BENCHMARKS: Record<string, AreaBenchmark> = {
   gulshan: {
     salePerSqft: 18500,
     rentPerSqft: 72,
-    yoyGrowth: 9.4,
-    demand: "Very High",
     subzones: ["Gulshan-1", "Gulshan-2", "South Avenue", "Gushan Lake Park"],
   },
   banani: {
     salePerSqft: 16200,
     rentPerSqft: 64,
-    yoyGrowth: 8.7,
-    demand: "Very High",
     subzones: ["Block C", "Block D", "Block F", "Road 11"],
   },
   baridhara: {
     salePerSqft: 22000,
     rentPerSqft: 88,
-    yoyGrowth: 11.2,
-    demand: "Very High",
     subzones: ["Diplomatic Zone", "Baridhara DOHS", "Parkway"],
   },
   dhanmondi: {
     salePerSqft: 13500,
     rentPerSqft: 52,
-    yoyGrowth: 7.8,
-    demand: "High",
     subzones: ["Road 27", "Road 8A", "Satmasjid Road", "Lakeside"],
   },
   uttara: {
     salePerSqft: 9400,
     rentPerSqft: 36,
-    yoyGrowth: 8.1,
-    demand: "High",
     subzones: ["Sector 3", "Sector 7", "Sector 11", "Sector 13", "Uttara Model Town"],
   },
   bashundhara: {
     salePerSqft: 8800,
     rentPerSqft: 34,
-    yoyGrowth: 10.5,
-    demand: "Very High",
     subzones: ["Block C", "Block D", "Block I", "Near Evercare", "North South Univ"],
   },
   mirpur: {
     salePerSqft: 6200,
     rentPerSqft: 25,
-    yoyGrowth: 6.5,
-    demand: "Moderate",
     subzones: ["Mirpur-1", "Mirpur-2", "Mirpur-10", "Mirpur DOHS"],
   },
   mohammadpur: {
     salePerSqft: 7600,
     rentPerSqft: 30,
-    yoyGrowth: 7.0,
-    demand: "Moderate",
     subzones: ["Kaderabad Housing", "Japan Garden City", "Salimullah Road"],
   },
   banasree: {
     salePerSqft: 7200,
     rentPerSqft: 28,
-    yoyGrowth: 7.2,
-    demand: "Moderate",
     subzones: ["Block B", "Block C", "Block E", "Rampura Road"],
   },
   motijheel: {
     salePerSqft: 11000,
     rentPerSqft: 45,
-    yoyGrowth: 5.5,
-    demand: "Moderate",
     subzones: ["Dilkusha", "Arambagh", "Purana Paltan"],
   },
 };
@@ -116,8 +97,6 @@ const DHAKA_AREA_BENCHMARKS: Record<string, AreaBenchmark> = {
 const DEFAULT_BENCHMARK: AreaBenchmark = {
   salePerSqft: 7800,
   rentPerSqft: 30,
-  yoyGrowth: 6.8,
-  demand: "Moderate",
   subzones: ["Central", "North Zone", "South Zone"],
 };
 
@@ -135,6 +114,8 @@ interface ListingRate {
   median: number;
   p25: number;
   p75: number;
+  /** The biggest single site's share of n, 0 to 1. */
+  largestSourceShare: number;
 }
 
 interface BenchmarkFile {
@@ -152,8 +133,17 @@ const BENCHMARK_DATA = areaBenchmarkData as unknown as BenchmarkFile;
 function listingRate(areaKey: string, purpose: "sale" | "rent"): ListingRate | null {
   const stats = BENCHMARK_DATA.areas[areaKey]?.[purpose];
   if (!stats || stats.status !== "ok") return null;
-  return { n: stats.n, median: stats.median, p25: stats.p25, p75: stats.p75 };
+  return {
+    n: stats.n,
+    median: stats.median,
+    p25: stats.p25,
+    p75: stats.p75,
+    largestSourceShare: stats.largestSourceShare ?? 0,
+  };
 }
+
+/** Above this share from one site, a figure is capped at medium confidence. */
+const MAX_SINGLE_SOURCE_SHARE = 0.75;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -227,6 +217,8 @@ export function calculateDhakaValuation(
 ): ValuationResponseData {
   const areaKey = normalizeAreaKey(payload.areaName);
   const baseBenchmark = DHAKA_AREA_BENCHMARKS[areaKey] || DEFAULT_BENCHMARK;
+  // The listings are apartments, so they speak for an apartment and for nothing else.
+  const isApartment = payload.propertyType === "apartment";
   // Where there are enough listings, their median replaces the built-in rate.
   const saleListings = listingRate(areaKey, "sale");
   const rentListings = listingRate(areaKey, "rent");
@@ -411,7 +403,7 @@ export function calculateDhakaValuation(
 
   const estimatedValue = Math.round(calculatedRatePerSqft * effectiveSqft);
 
-  const spread = estimateSpread(saleListings);
+  const spread = estimateSpread(isApartment ? saleListings : null);
   const lowEstimate = Math.round(estimatedValue * spread.low);
   const highEstimate = Math.round(estimatedValue * spread.high);
 
@@ -435,28 +427,45 @@ export function calculateDhakaValuation(
   );
 
   // How much to trust it. The area matters most: only an area with enough listings behind its
-  // price can be medium or high. An area we only have a built-in rate for is a rough guide, and
-  // so is any other, whatever else is filled in. Asking prices are not sale records.
+  // price can be medium or high, and only for an apartment, which is all the listings cover. An
+  // area we only have a built-in rate for, or none, is a rough guide. Asking prices are not sale records.
   const knownArea = areaKey !== "default";
-  const basis = payload.purpose === "rent" ? rentListings : saleListings;
+  const primary = payload.purpose === "rent" ? rentListings : saleListings;
+  const otherRate = payload.purpose === "rent" ? saleListings : rentListings;
+  const basis = isApartment ? primary : null;
   const hasDetailedSpecs =
     Boolean(payload.roadOrBlock) &&
     payload.bedrooms > 0 &&
     payload.bathrooms > 0;
+  // One site deciding most of the figure, or a rent whose yield rests on an estimated sale price,
+  // keeps it from being high.
+  const mostlyOneSite = Boolean(basis && basis.largestSourceShare > MAX_SINGLE_SOURCE_SHARE);
+  const capped = mostlyOneSite || (payload.purpose === "rent" && !saleListings);
   const confidenceScore: ValuationResponseData["confidenceScore"] = !basis
     ? "low"
-    : hasDetailedSpecs
+    : hasDetailedSpecs && !capped
       ? "high"
       : "medium";
   const confidencePct = confidenceScore === "high" ? 85 : confidenceScore === "medium" ? 70 : 50;
-  const collected = new Date(BENCHMARK_DATA.asOf).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
-  const confidenceReason = basis
-    ? `Based on ${basis.n} asking ${payload.purpose === "rent" ? "rents" : "prices"} for ${payload.areaName} flats on listing sites (${collected}), adjusted for your property's details.${
-        hasDetailedSpecs ? "" : " Add the road or block for a closer estimate."
-      }`
-    : knownArea
-      ? `We don't have enough listings for ${payload.areaName} yet, so this uses an estimated rate. Treat it as a rough guide.`
-      : `We don't have price data for ${payload.areaName} yet, so this uses a Dhaka-wide average. Treat it as a rough guide.`;
+  const confidenceBasis: ConfidenceBasis = basis
+    ? {
+        kind: "listings",
+        listings: basis.n,
+        asOf: BENCHMARK_DATA.asOf,
+        mostlyOneSite,
+        needsRoadOrBlock: !hasDetailedSpecs,
+        estimatedYieldInput: otherRate ? undefined : payload.purpose === "rent" ? "sale" : "rent",
+      }
+    : primary
+      ? { kind: "apartmentsOnly" }
+      : knownArea
+        ? { kind: "builtInRate" }
+        : { kind: "noData" };
+  const confidenceReason = confidenceReasonText(
+    confidenceBasis,
+    { areaName: payload.areaName, purpose: payload.purpose, language: "en" },
+    (key, params) => translate("en", key, params),
+  );
 
   const breakdownFactors: PriceBreakdownFactors = {
     baseRatePerSqft,
@@ -472,8 +481,6 @@ export function calculateDhakaValuation(
     areaName: payload.areaName,
     avgPriceSqftSale: benchmark.salePerSqft,
     avgPriceSqftRent: benchmark.rentPerSqft,
-    yearOverYearGrowthPct: benchmark.yoyGrowth,
-    marketDemand: benchmark.demand,
     // Not measured yet: no listing count is claimed.
     verifiedListingCount: 0,
     popularSubzones: benchmark.subzones,
@@ -512,6 +519,7 @@ export function calculateDhakaValuation(
     confidenceScore,
     confidencePct,
     confidenceReason,
+    confidenceBasis,
     valueDrivers,
     breakdownFactors,
     // Filled from live listings by getInstantValuation (findComparables); the calculation itself invents none.

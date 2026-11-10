@@ -220,6 +220,26 @@ describe("cleanListings", () => {
     expect(kept).toHaveLength(1);
     expect(dropped.duplicate).toBe(2);
   });
+
+  it("keeps identical units a developer lists on one site: each is a real flat", () => {
+    const { kept, dropped } = cleanListings([
+      listing({ id: "a" }),
+      listing({ id: "b" }),
+      listing({ id: "c" }),
+    ]);
+    expect(kept).toHaveLength(3);
+    expect(dropped.duplicate).toBe(0);
+  });
+
+  it("still drops a listing on a second site that matches one already kept", () => {
+    const { kept, dropped } = cleanListings([
+      listing({ id: "a" }),
+      listing({ id: "b" }),
+      listing({ source: "bikroy", id: "https://x/1" }),
+    ]);
+    expect(kept.map((k) => k.source)).toEqual(["bproperty", "bproperty"]);
+    expect(dropped.duplicate).toBe(1);
+  });
 });
 
 describe("percentile", () => {
@@ -246,21 +266,21 @@ describe("statsFor", () => {
     }));
 
   it("calls 15 or more listings ok, 5 to 14 thin and fewer insufficient", () => {
-    expect(statsFor(priced(15)).status).toBe("ok");
-    expect(statsFor(priced(14)).status).toBe("thin");
-    expect(statsFor(priced(5)).status).toBe("thin");
-    expect(statsFor(priced(4)).status).toBe("insufficient");
+    expect(statsFor(priced(15), "sale").status).toBe("ok");
+    expect(statsFor(priced(14), "sale").status).toBe("thin");
+    expect(statsFor(priced(5), "sale").status).toBe("thin");
+    expect(statsFor(priced(4), "sale").status).toBe("insufficient");
   });
 
   it("gives the median, the quartiles and the spread", () => {
-    const s = statsFor(priced(5));
+    const s = statsFor(priced(5), "sale");
     expect(s).toMatchObject({ n: 5, median: 10_200, p25: 10_100, p75: 10_300, min: 10_000, max: 10_400 });
   });
 
   it("says how much one source decides the figure", () => {
     const mixed = [...priced(6, "bikroy"), ...priced(2, "jominly")];
-    expect(statsFor(mixed).bySource).toEqual({ bikroy: 6, jominly: 2 });
-    expect(statsFor(mixed).largestSourceShare).toBe(0.75);
+    expect(statsFor(mixed, "sale").bySource).toEqual({ bikroy: 6, jominly: 2 });
+    expect(statsFor(mixed, "sale").largestSourceShare).toBe(0.75);
   });
 
   it("keeps one decimal on a rent, which is a small number", () => {
@@ -271,7 +291,7 @@ describe("statsFor", () => {
       perSqft,
       id: String(i),
     }));
-    expect(statsFor(rent).median).toBe(50.5);
+    expect(statsFor(rent, "rent").median).toBe(50.5);
   });
 });
 

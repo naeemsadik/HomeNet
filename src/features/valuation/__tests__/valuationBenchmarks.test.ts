@@ -10,25 +10,29 @@ jest.mock("../data/areaBenchmarks.json", () => ({
     areas: {
       // Enough listings for both a sale and a rent figure.
       gulshan: {
-        sale: { n: 40, median: 20000, p25: 18000, p75: 24000, status: "ok" },
-        rent: { n: 30, median: 50, p25: 40, p75: 60, status: "ok" },
+        sale: { n: 40, median: 20000, p25: 18000, p75: 24000, largestSourceShare: 0.5, status: "ok" },
+        rent: { n: 30, median: 50, p25: 40, p75: 60, largestSourceShare: 0.5, status: "ok" },
       },
       // Rent is solid, sale is not: a few asking prices only.
       banani: {
-        sale: { n: 3, median: 5000, p25: 4000, p75: 6000, status: "insufficient" },
-        rent: { n: 20, median: 45, p25: 38, p75: 55, status: "ok" },
+        sale: { n: 3, median: 5000, p25: 4000, p75: 6000, largestSourceShare: 1, status: "insufficient" },
+        rent: { n: 20, median: 45, p25: 38, p75: 55, largestSourceShare: 0.5, status: "ok" },
       },
       // A thin sale sample is not used either.
       dhanmondi: {
-        sale: { n: 9, median: 5000, p25: 4000, p75: 6000, status: "thin" },
+        sale: { n: 9, median: 5000, p25: 4000, p75: 6000, largestSourceShare: 0.5, status: "thin" },
       },
       // One site's odd listings stretch the top of the range.
       mirpur: {
-        sale: { n: 20, median: 6000, p25: 3000, p75: 12000, status: "ok" },
+        sale: { n: 20, median: 6000, p25: 3000, p75: 12000, largestSourceShare: 0.5, status: "ok" },
+      },
+      // Enough listings, but one site supplied nearly all of them.
+      uttara: {
+        sale: { n: 30, median: 9000, p25: 8000, p75: 10000, largestSourceShare: 0.9, status: "ok" },
       },
       // Priced from listings although the engine has no built-in rate for it.
       badda: {
-        sale: { n: 25, median: 6500, p25: 5800, p75: 7400, status: "ok" },
+        sale: { n: 25, median: 6500, p25: 5800, p75: 7400, largestSourceShare: 0.5, status: "ok" },
       },
     },
   },
@@ -132,7 +136,49 @@ describe("how much to trust it", () => {
   });
 
   it("judges a rent by the rent listings and a sale by the sale listings", () => {
-    expect(estimate({ areaName: "Banani", purpose: "rent" }).confidenceScore).toBe("high");
+    expect(estimate({ areaName: "Gulshan", purpose: "rent" }).confidenceScore).toBe("high");
     expect(estimate({ areaName: "Banani", purpose: "sale" }).confidenceScore).toBe("low");
+  });
+
+  it("is only medium for a rent whose yield rests on an estimated sale price, and says so", () => {
+    // Banani: the rent is from listings, the sale price is the built-in rate.
+    const result = estimate({ areaName: "Banani", purpose: "rent" });
+    expect(result.confidenceScore).toBe("medium");
+    expect(result.confidenceReason).toMatch(/The sale price used for the yield is an estimate/);
+    expect(result.confidenceBasis).toMatchObject({ kind: "listings", estimatedYieldInput: "sale" });
+  });
+
+  it("says when the rent shown next to a sale price is an estimate", () => {
+    const result = estimate({ areaName: "Mirpur" });
+    expect(result.confidenceReason).toMatch(/The rent shown for the yield is an estimate/);
+    expect(result.confidenceBasis).toMatchObject({ estimatedYieldInput: "rent" });
+  });
+
+  it("caps at medium when one site supplied most of the listings, and says so", () => {
+    const result = estimate({ areaName: "Uttara" });
+    expect(result.confidenceScore).toBe("medium");
+    expect(result.confidenceReason).toMatch(/Most of them come from one site/);
+    expect(result.confidenceBasis?.mostlyOneSite).toBe(true);
+  });
+
+  it("is a rough guide for a house, commercial property or land: the listings are apartments", () => {
+    for (const propertyType of ["house", "commercial", "land"] as const) {
+      const result = estimate({ propertyType });
+      expect(result.confidenceScore).toBe("low");
+      expect(result.confidenceReason).toMatch(/apartments only/);
+      expect(result.confidenceReason).not.toMatch(/flats on listing sites/);
+      // Nor does the listing spread widen its range.
+      expect(result.lowEstimate / result.estimatedValue).toBeCloseTo(0.94, 2);
+    }
+  });
+
+  it("keeps the collection month the same whatever the timezone", () => {
+    const previous = process.env.TZ;
+    process.env.TZ = "America/New_York";
+    try {
+      expect(estimate({}).confidenceReason).toMatch(/\(October 2026\)/);
+    } finally {
+      process.env.TZ = previous;
+    }
   });
 });

@@ -18,31 +18,41 @@
  *   --out     JSON to write (default src/features/valuation/data/areaBenchmarks.json)
  *   --report  also write the text report to this file
  *
- * Runs with Node 22.6 or newer: the npm script passes --experimental-strip-types.
+ * Runs on any current Node with no flag: the pipeline is TypeScript, and this script
+ * compiles it itself with the `typescript` package that is already a dev dependency.
  */
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-
-import {
-  buildBenchmarks,
-  csvToRecords,
-  readAabason,
-  readBikroy,
-  readBproperty,
-  readJominly,
-  renderReport,
-} from "../../src/features/valuation/pipeline/benchmarkPipeline.ts";
+import ts from "typescript";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
+
+/**
+ * Loads the TypeScript pipeline without a build step or a runtime flag: it is
+ * compiled in memory and imported as a data URL. The file has no imports of its
+ * own, which is what makes this work.
+ */
+async function loadPipeline() {
+  const source = readFileSync(join(root, "src/features/valuation/pipeline/benchmarkPipeline.ts"), "utf8");
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+  });
+  return import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
+}
+
+const { buildBenchmarks, csvToRecords, readAabason, readBikroy, readBproperty, readJominly, renderReport } =
+  await loadPipeline();
 
 function parseArgs(argv) {
   const args = {};
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (!arg.startsWith("--")) continue;
-    const [key, inline] = arg.slice(2).split("=");
-    args[key] = inline ?? argv[++i];
+    // --key=value (the value may itself contain "="), or --key value.
+    const eq = arg.indexOf("=");
+    if (eq > 0) args[arg.slice(2, eq)] = arg.slice(eq + 1);
+    else args[arg.slice(2)] = argv[++i];
   }
   return args;
 }
