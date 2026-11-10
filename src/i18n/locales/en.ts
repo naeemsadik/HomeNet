@@ -2468,6 +2468,128 @@ export const en = {
     disclaimerDesc:
       "The news analysis, regulatory summaries, and material cost indices published on this page are compiled for informational purposes using gazette notifications, Bangladesh Bank releases, and verified industry reports. HomeNet BD does not provide statutory legal advice or guaranteed investment yields.",
   },
+  buyerGuides: {
+    metaTitle: "Bangladesh Property Buyer's Guide 2026 | HomeNet BD",
+    metaDescription:
+      "Complete property buying guide for Bangladesh. Verify Khatian, Namzari, RAJUK approvals, Baina-nama, and Saf-Kabala deeds to prevent real estate fraud.",
+    eyebrow: "Legal & Acquisition Due Diligence",
+    headline: "Bangladesh Property Buyer's Guide",
+    subheading:
+      "Step-by-step legal roadmap, statutory document checks, and contract safeguards to buy apartments and land with zero legal risk.",
+    badgeDueDiligence: "Transfer of Property Act 1882 Aligned",
+    badgeRegistry: "Sub-Registry & AC Land Verified",
+    badgeRajuk: "RAJUK Building Code 2024",
+    checklistTitle: "Interactive Buyer Due Diligence Checklist",
+    checklistSubtitle:
+      "Tick each document and clearance verified. Track your legal safety score before signing contracts or transferring funds.",
+    readinessScore: "Buyer Legal Safety Score",
+    scoreLow: "High Risk — Missing Vital Records",
+    scoreMedium: "Moderate Clearance — Additional Verification Needed",
+    scoreHigh: "Legally Secure — Ready for Contract Execution",
+    check1Title: "Chain of Title (বায়া দলিল / Baya Deed)",
+    check1Desc:
+      "25–30 year unbroken chain of ownership deeds verifying rightful title passage.",
+    check2Title: "Survey Khatians (CS, SA, RS & City/BS)",
+    check2Desc:
+      "Matching ownership names and plot boundaries across all historical land surveys.",
+    check3Title: "e-Namjari Mutation & DCR Receipt",
+    check3Desc:
+      "Current seller's name registered in Upazila/Circle AC Land records with valid DCR.",
+    check4Title: "Non-Encumbrance Certificate (NEC)",
+    check4Desc:
+      "Official search from Sub-Registry proving no hidden mortgage or bank lien on the property.",
+    check5Title: "Sanctioned RAJUK / CDA Building Plan",
+    check5Desc:
+      "Architectural approval letter, setback compliance, and occupancy certificate for apartments.",
+    check6Title: "Updated Land Development Tax (Khajna)",
+    check6Desc:
+      "Paid-up Dakhila proving current fiscal year revenue clearance with the government.",
+    phasesTitle: "The 4 Essential Phases of Buying Property in Bangladesh",
+    phasesSubtitle:
+      "From title search to mutation, follow this chronological procedure to secure indisputable ownership.",
+    phaseDocsLabel: "Essential Docs:",
+    phase1Tag: "Phase 01",
+    phase1Title: "Legal Due Diligence & Title Search",
+    phase1Desc:
+      "Never make a financial deposit before reviewing certified deed copies. Check CS, SA, RS, and City/BS records at the District Collectorate and Sub-Registry. Ensure land is not declared Vested (অর্পিত), Waqf, or Abandoned property.",
+    phase1Docs: "Baya Deed, Khatians, e-Namjari, NEC",
+    phase1Time: "10–15 Days",
+    phase1Warning:
+      "Warning: A missing Baya Deed can invalidate your future title in civil courts.",
+    phase2Tag: "Phase 02",
+    phase2Title: "Developer Sanctions & RAJUK Compliance",
+    phase2Desc:
+      "For apartments, inspect the registered Landowner-Developer Joint Venture Agreement and Irrevocable Power of Attorney. Confirm the developer is an active REHAB member and the built structure does not exceed sanctioned Floor Area Ratio (FAR).",
+    phase2Docs: "RAJUK Sanction, Power of Attorney, REHAB Cert",
+    phase2Time: "5–7 Days",
+    phase2Warning:
+      "Warning: Extra floors constructed beyond approved plans cannot be registered or mutated.",
+    phase3Tag: "Phase 03",
+    phase3Title: "Registered Baina-Nama & Payment Safeguards",
+    phase3Desc:
+      "Execute a formal Agreement to Sell (বায়নানামা) on statutory non-judicial stamp and register it at the Sub-Registry within 30 days under Section 54A of the Transfer of Property Act. Pay token and installments strictly via Account Payee Cheques or Bank Pay Orders.",
+    phase3Docs: "Registered Baina, Bank Pay Orders, Cheque Copies",
+    phase3Time: "1–3 Days",
+    phase3Warning:
+      "Warning: Unregistered Baina-nama carries zero legal standing for specific performance suits.",
+    phase4Tag: "Phase 04",
+    phase4Title: "Deed Execution, Tax Clearance & Post-Purchase Mutation",
+    phase4Desc:
+      "Execute the final Saf-Kabala deed at the Sub-Registry. Pay Stamp Duty (1.5%), Registration Fee (1%), Local Govt Tax (2%), and AIT. Within 30 days of registration, apply for e-Namjari mutation in your name at the AC Land office.",
+    phase4Docs: "Saf-Kabala Deed, Tax Receipts, New e-Namjari",
+    phase4Time: "1 Day (Registry) + 28 Days (Mutation)",
+    phase4Warning:
+      "Warning: Purchase is legally incomplete until your name is recorded in the government mutation register.",
+    guidesTitle: "Curated Deep-Dive Guides & Tools",
+    guidesSubtitle:
+      "Master specific legal and financial steps with HomeNet's comprehensive guides.",
+    guide1Category: "Land Records",
+    guide1Title:
+      "How to Verify CS, SA, RS, and City Survey Khatians in Bangladesh",
+    guide1Desc:
+      "Detailed guide on deciphering cadastral maps, porcha seals, and recognizing fraudulent Khatians.",
+    guide2Category: "Title Perfection",
+    guide2Title:
+      "Complete Step-by-Step Guide to e-Namjari Mutation in Bangladesh",
+    guide2Desc:
+      "How to apply online, submit DCR fees, and obtain your mutation Khatian without middlemen.",
+    guide3Category: "Contracts & Sales",
+    guide3Title:
+      "Baina-Nama: Why Registering Your Agreement to Sell is Mandatory",
+    guide3Desc:
+      "Understanding Section 54A, statutory stamp requirements, and standard clauses to safeguard your deposit.",
+    guide4Category: "Apartment Safety",
+    guide4Title:
+      "How to Verify RAJUK & CDA Approved Building Plans for Apartments",
+    guide4Desc:
+      "Checking layout approvals, setbacks, occupancy certificates, and identifying unapproved rooftop extensions.",
+    guide5Category: "Financial Planning",
+    guide5Title:
+      "Bangladesh Stamp Duty & Property Registration Tax Calculator",
+    guide5Desc:
+      "Calculate exact stamp duties, registration fees, AIT gain tax, and local taxes across Dhaka and Chittagong.",
+    faqTitle: "Frequently Asked Buyer Questions",
+    faqSubtitle:
+      "Essential answers on property verification, developer disputes, and deed laws.",
+    faq1Q:
+      "What happens if I buy an apartment constructed without RAJUK approval?",
+    faq1A:
+      "An unapproved apartment cannot be legally registered or mutated under your name. Commercial banks will refuse home loan financing, utility companies may deny permanent gas and electricity meters, and RAJUK retains demolition authority over unauthorized structures under the Building Construction Act.",
+    faq2Q: "Why is an unregistered Baina-nama (বায়নানামা) legally perilous?",
+    faq2A:
+      "Under Section 54A of the Transfer of Property Act, an unregistered contract for sale has no legal force in court to compel property transfer. If the seller breaches or sells to a third party, your only recourse is a protracted criminal case for fraud, rather than securing court-ordered title transfer.",
+    faq3Q:
+      "Why is checking 25 to 30 years of Baya Deeds (বায়া দলিল) necessary?",
+    faq3A:
+      "In Bangladesh, real estate disputes often trace back to unresolved inheritance shares, unpartitioned joint family land (এওয়াজ/বাটোয়ারা), or unauthorized transfers made decades ago. A 25–30 year title search confirms that every previous owner had undisputed legal title.",
+    faq4Q:
+      "How soon after property registration must I apply for mutation (নামজারি)?",
+    faq4A:
+      "You should apply for e-Namjari immediately after receiving your registered deed receipt (সাধারণ রসিদ), ideally within 30 days. Without mutation in the AC Land office, the government tax roll remains in the previous owner's name, leaving the property vulnerable to fraudulent second sales.",
+    disclaimerTitle: "Legal Due Diligence Disclaimer",
+    disclaimerDesc:
+      "This guide is intended for educational purposes and provides general workflow advice under Bangladesh property legislation. Real estate acquisitions involve complex legal, inheritance, and tax liabilities. HomeNet BD strongly advises engaging a qualified civil lawyer to conduct independent title and document searches prior to executing property transactions.",
+  },
   changePasswordScreen: {
     title: "Change Password",
     subtitle: "Enter your current password and your new password",
