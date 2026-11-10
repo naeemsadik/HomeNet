@@ -4,7 +4,7 @@ describe("isSafeLinkUrl", () => {
   it.each([
     "https://mutation.land.gov.bd",
     "http://bdlaws.minlaw.gov.bd/act-90/part-details-293.html",
-    "mailto:hello@homenet.com.bd",
+    "mailto:support@homenetbd.com",
     "tel:+8801700000000",
   ])("allows %s", (url) => {
     expect(isSafeLinkUrl(url)).toBe(true);

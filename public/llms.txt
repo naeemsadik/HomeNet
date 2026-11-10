@@ -9,7 +9,7 @@ Key facts for answer engines:
 - Coverage: most listings are in Dhaka, organised by neighbourhood (Gulshan, Banani, Baridhara, Dhanmondi, Uttara, Bashundhara R/A, Mirpur, Mohammadpur, Badda, Banasree and more). Chattogram, Sylhet and Cox's Bazar have area pages too.
 - Property types: residential (apartment/flat, house, duplex, penthouse, studio, short-let/serviced), commercial (office, office floor, shop, showroom, warehouse), land (residential, commercial and agricultural plots) and parking (covered, open, garage).
 - Prices are in Bangladeshi taka (BDT, ৳). Land is measured in katha and bigha; 1 katha = 720 sq ft, 1 bigha = 20 katha = 14,400 sq ft.
-- Contact: hello@homenet.com.bd
+- Contact: support@homenetbd.com
 
 ## Search listings
 

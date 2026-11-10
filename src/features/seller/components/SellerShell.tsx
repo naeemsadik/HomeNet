@@ -12,6 +12,7 @@ import {
 } from "@/components/icons";
 import React, { useState } from "react";
 import {
+  Platform,
   ScrollView,
   StyleProp,
   StyleSheet,
@@ -245,6 +246,7 @@ const styles = StyleSheet.create({
   outerContainer: {
     width: "100%",
     flex: 1,
+    minHeight: (Platform.OS === "web" ? "100dvh" : undefined) as unknown as number | undefined,
     flexDirection: "row",
     backgroundColor: "#F8FAF9",
   },
@@ -326,9 +328,11 @@ const styles = StyleSheet.create({
   workspaceScroll: {
     flexGrow: 1,
     justifyContent: "space-between",
+    minHeight: (Platform.OS === "web" ? "100dvh" : undefined) as unknown as number | undefined,
   },
   contentWrapper: {
     flex: 1,
+    width: "100%",
   },
   nonScrollContent: {
     flex: 1,

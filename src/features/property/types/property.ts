@@ -33,6 +33,10 @@ export interface Property {
   location_lat: number | null;
   location_lng: number | null;
   address: string | null;
+  /** Numbers the owner put on the listing, first one first. */
+  phone?: string[];
+  /** WhatsApp number, when the owner gave one. */
+  whatsapp_number?: string | null;
   amenities: Record<string, unknown> | null;
   status: PropertyStatus;
   is_verified: boolean;
@@ -47,6 +51,10 @@ export interface Property {
     id: string;
     full_name: string;
     avatar_url: string | null;
+    /** `individual` unless the owner lists for a company. */
+    account_type?: "individual" | "company";
+    company_name?: string | null;
+    company_logo_url?: string | null;
     auth_identities?: { email: string | null; phone: string | null }[];
   } | null;
   media?: PropertyMedia[];

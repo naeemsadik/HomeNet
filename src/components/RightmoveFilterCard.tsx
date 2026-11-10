@@ -249,6 +249,8 @@ export function RightmoveFilterCard({
       ? t("search.rightmove.searchCountedProperties", {
           count: formatLocalizedNumber(totalResults, language),
         })
+      : isPhone
+      ? t("hero.search")
       : t("search.rightmove.searchProperties");
 
   const titleBlock = (
@@ -269,15 +271,19 @@ export function RightmoveFilterCard({
           </Pressable>
         </View>
       ) : (
-        <Pressable
-          onPress={() => setIsEditingTitle(true)}
-          style={[styles.titlePressable, webPointer]}
-          accessibilityRole="button"
-          accessibilityLabel={t("search.rightmove.editLocationAria")}
-        >
-          <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>{heading}</Text>
-          <Edit3 color={colorTokens.muted} size={16} style={styles.editIcon} />
-        </Pressable>
+        // The page's <h1> on /buy, /rent and /sold, which open on this card. It
+        // goes around the button: a heading inside a button is invalid HTML.
+        <View accessibilityRole="header" aria-level={1}>
+          <Pressable
+            onPress={() => setIsEditingTitle(true)}
+            style={[styles.titlePressable, webPointer]}
+            accessibilityRole="button"
+            accessibilityLabel={`${heading}: ${t("search.rightmove.editLocationAria")}`}
+          >
+            <Text style={[styles.headingText, isPhone && styles.headingTextPhone]}>{heading}</Text>
+            <Edit3 color={colorTokens.muted} size={16} style={styles.editIcon} />
+          </Pressable>
+        </View>
       )}
     </View>
   );
@@ -317,10 +323,11 @@ export function RightmoveFilterCard({
         </Pressable>
         <Pressable
           onPress={handleSearchPress}
-          style={({ pressed }) => [
+          style={({ pressed, hovered }: any) => [
             styles.searchBtn,
             styles.searchBtnPhone,
             webPointer,
+            hovered && styles.searchBtnHovered,
             pressed && styles.searchBtnPressed,
           ]}
           accessibilityRole="button"
@@ -338,13 +345,29 @@ export function RightmoveFilterCard({
 
       {/* ─── Grid Controls (3 columns x 2 rows on desktop) ─────────────── */}
       <View style={[styles.grid, isDesktop && styles.gridDesktop, !isDesktop && styles.gridResponsive]}>
-        {/* ROW 1, COL 1: Area */}
+        {/* Area leads, on a row of its own */}
         {showArea ? (
-          <View style={[styles.col, colStyle]}>
+          <View style={[styles.col, colStyle, isDesktop && !isCompact && styles.colFull]}>
             <Text style={styles.fieldLabel}>{t("search.rightmove.area")}</Text>
             {areaSelect}
           </View>
         ) : null}
+
+        {/* ROW 1, COL 1: Search radius, reads as "around the area above", so it
+            follows the area rather than leading the bar. */}
+        <View style={[styles.col, colStyle]}>
+          <Text style={styles.fieldLabel}>{t("search.rightmove.searchRadius")}</Text>
+          <SelectField
+            accessibilityLabel={t("search.rightmove.searchRadius")}
+            value={radiusAvailable ? filters.radius : ""}
+            options={radiusOptions}
+            disabled={!radiusAvailable}
+            onChange={(val) => handleUpdate({ radius: val })}
+          />
+          <Text style={styles.fieldHint}>
+            {!radiusAvailable && radiusHint ? radiusHint : t("search.rightmove.pickNeighbourhood")}
+          </Text>
+        </View>
 
         {/* ROW 1, COL 2: Property types */}
         <View style={[styles.col, colStyle]}>
@@ -413,22 +436,6 @@ export function RightmoveFilterCard({
           </View>
         </View>
 
-        {/* ROW 2, COL 1: Search radius, reads as "around the area above", so it
-            follows the area rather than leading the bar. */}
-        <View style={[styles.col, colStyle]}>
-          <Text style={styles.fieldLabel}>{t("search.rightmove.searchRadius")}</Text>
-          <SelectField
-            accessibilityLabel={t("search.rightmove.searchRadius")}
-            value={radiusAvailable ? filters.radius : ""}
-            options={radiusOptions}
-            disabled={!radiusAvailable}
-            onChange={(val) => handleUpdate({ radius: val })}
-          />
-          <Text style={styles.fieldHint}>
-            {!radiusAvailable && radiusHint ? radiusHint : t("search.rightmove.pickNeighbourhood")}
-          </Text>
-        </View>
-
         {/* ROW 2, COL 2: No. of bedrooms */}
         <View style={[styles.col, colStyle]}>
           <Text style={styles.fieldLabel}>{t("filters.bedrooms")}</Text>
@@ -462,6 +469,22 @@ export function RightmoveFilterCard({
           ) : null}
           <View style={styles.actionRow}>
             <Pressable
+              onPress={handleSearchPress}
+              style={({ pressed, hovered }: any) => [
+                styles.searchBtn,
+                webPointer,
+                hovered && styles.searchBtnHovered,
+                pressed && styles.searchBtnPressed,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={t("search.rightmove.searchProperties")}
+            >
+              <Text style={styles.searchBtnText} numberOfLines={1}>
+                {searchLabel}
+              </Text>
+            </Pressable>
+
+            <Pressable
               accessibilityRole="button"
               accessibilityLabel={
                 activeCount > 0
@@ -494,21 +517,6 @@ export function RightmoveFilterCard({
                   </Text>
                 </View>
               ) : null}
-            </Pressable>
-
-            <Pressable
-              onPress={handleSearchPress}
-              style={({ pressed }) => [
-                styles.searchBtn,
-                webPointer,
-                pressed && styles.searchBtnPressed,
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={t("search.rightmove.searchProperties")}
-            >
-              <Text style={styles.searchBtnText} numberOfLines={1}>
-                {searchLabel}
-              </Text>
             </Pressable>
           </View>
         </View>
@@ -656,9 +664,12 @@ const styles = StyleSheet.create({
   colDesktop: {
     flexGrow: 0,
     flexShrink: 1,
-    flexBasis: "23%",
+    flexBasis: "30%",
     minWidth: 200,
     maxWidth: "100%",
+  },
+  colFull: {
+    flexBasis: "100%",
   },
   colResponsive: {
     width: "100%",
@@ -669,7 +680,7 @@ const styles = StyleSheet.create({
   // and flex-end dropped the buttons below every other control in the row.
   actionCol: {
     justifyContent: "flex-start",
-    flexBasis: "48%",
+    flexBasis: "30%",
   },
   colCompact: {
     flexBasis: "48%",
@@ -682,9 +693,9 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   actionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 8,
   },
   fieldLabel: {
     fontFamily: fonts.medium,
@@ -796,7 +807,9 @@ const styles = StyleSheet.create({
   },
 
   searchBtn: {
-    flex: 1,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: "auto",
     height: 44,
     backgroundColor: colorTokens.brand,
     borderRadius: 8,
@@ -808,6 +821,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 2,
+  },
+  searchBtnHovered: {
+    backgroundColor: colorTokens.brandHover,
   },
   // `flex: 0` resolves to a 0% basis, which collapses the button to no height
   // in the card's column layout and throws away the 44 above.

@@ -11,6 +11,7 @@ import { AppChrome } from "@/components/AppChrome";
 import { AppLink, Eyebrow, FeatureCard } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
+import { SUPPORT_EMAIL } from "@/content/legal";
 
 import { useTranslation } from "@/i18n";
 
@@ -22,7 +23,7 @@ export function AboutScreen() {
     <AppChrome active="home">
       <View style={[styles.intro, isPhone && styles.introPhone]}>
         <Eyebrow style={styles.eyebrow}>{t("about.eyebrow")}</Eyebrow>
-        <Text style={[styles.title, isPhone && styles.titlePhone]}>
+        <Text accessibilityRole="header" aria-level={1} style={[styles.title, isPhone && styles.titlePhone]}>
           {t("about.title")}
         </Text>
         <Text style={[styles.copy, isPhone && styles.copyPhone]}>
@@ -79,7 +80,7 @@ export function AboutScreen() {
         </View>
 
         <AppLink
-          href="mailto:hello@homenet.com.bd"
+          href={`mailto:${SUPPORT_EMAIL}`}
           style={[styles.contactLink, isPhone && styles.contactLinkPhone, webPointer]}
         >
           <Text style={styles.contactLinkText}>{t("about.contactBtn")}</Text>
