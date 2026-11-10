@@ -44,6 +44,7 @@ const STATIC_PAGES = [
   { path: "/guides", file: "app/guides/index.tsx", changefreq: "weekly", priority: "0.6" },
   { path: "/about", file: "app/about.tsx", changefreq: "yearly", priority: "0.4" },
   { path: "/careers", file: "app/careers.tsx", changefreq: "monthly", priority: "0.4" },
+  { path: "/resources/stamp-duty-tax-guide", file: "app/resources/stamp-duty-tax-guide.tsx", changefreq: "monthly", priority: "0.7" },
   { path: "/privacy", file: "app/privacy.tsx", changefreq: "yearly", priority: "0.2", lastmod: LEGAL_UPDATED },
   { path: "/terms", file: "app/terms.tsx", changefreq: "yearly", priority: "0.2", lastmod: LEGAL_UPDATED },
 ];

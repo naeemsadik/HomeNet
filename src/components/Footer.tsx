@@ -65,7 +65,7 @@ function WebFooter({ style }: FooterProps) {
   const { isPhone, isTablet, containerMaxWidth } = useResponsive();
 
   const resourcesLinks = [
-    { label: "Stamp Duty & Tax Guide", href: "/about" },
+    { label: "Stamp Duty & Tax Guide", href: "/resources/stamp-duty-tax-guide" },
     { label: "Property Price Index", href: "/market" },
     { label: "Property Valuation Guide", href: "/about" },
     { label: "Property News & Trends", href: "/about" },

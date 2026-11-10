@@ -2069,6 +2069,115 @@ export const en = {
     mailtoFallback:
       "Could not open mail client. Please send your resume directly to {{email}}",
   },
+  stampDutyGuide: {
+    metaTitle: "Stamp Duty & Property Tax Guide | HomeNet BD",
+    metaDescription:
+      "Calculate Bangladesh property registration fees, stamp duty, AIT, and local taxes with our interactive tool. Comprehensive guide to legal land transfer costs.",
+    eyebrow: "Tax & Legal Guide",
+    headline: "Bangladesh Property Registration, Stamp Duty & Tax Guide",
+    subheading:
+      "Calculate statutory registration fees, deed valuations, stamp duty, local taxes, and AIT before buying or selling property in Bangladesh.",
+    calculatorTitle: "Property Registration Fee Calculator",
+    calculatorSubtitle:
+      "Estimate total government fees and legal transfer costs based on the deed value and location.",
+    deedValueLabel: "Deed Value (BDT)",
+    deedValuePlaceholder: "Enter property deed value",
+    preset50L: "50 Lakh",
+    preset1C: "1 Crore",
+    preset2C: "2 Crore",
+    preset5C: "5 Crore",
+    locationLabel: "Property Location",
+    locDhakaCtg: "City Corporation (Dhaka / Chattogram)",
+    locOtherCity: "Other City Corporations",
+    locMunicipality: "Municipality (Pourashava)",
+    locRural: "Rural / Union Parishad",
+    propertyTypeLabel: "Property Type",
+    typeSecondary: "Secondary / Individual Resale",
+    typeDeveloper: "Developer / New Construction",
+    flatSizeLabel: "Apartment Size",
+    sizeUnder1600: "Up to 1,600 sq ft",
+    sizeOver1600: "Above 1,600 sq ft",
+    breakdownTitle: "Cost Breakdown",
+    stampDutyLabel: "Stamp Duty (1.5%)",
+    regFeeLabel: "Registration Fee (1.0%)",
+    localGovtTaxLabel: "Local Government Tax (LGT)",
+    aitLabel: "Advance Income Tax (AIT / Sec. 125)",
+    vatLabel: "Value Added Tax (VAT)",
+    vatExempt: "Exempt (0% for Secondary Resale)",
+    totalGovtCost: "Estimated Statutory Total",
+    effectiveRateLabel: "Effective Rate",
+    whoPaysBuyer: "Paid by Buyer",
+    whoPaysSeller: "Paid by Seller (Withheld at Source)",
+    whoPaysDeveloper: "Paid by Developer",
+    resetBtn: "Reset Calculator",
+    customInputNotice: "Enter custom deed value above to recalculate statutory fees.",
+    workflowTitle: "6-Step Property Registration Workflow",
+    workflowSubtitle:
+      "A structured step-by-step procedure to legally register property at the Sub-Registry office.",
+    step1Title: "1. Title & Mutation Verification",
+    step1Desc:
+      "Verify CS, SA, RS, and BS Khatians, Porcha, and ensure Mutation (Namjari) is completed in the seller's name with up-to-date DCR and Khajna receipts.",
+    step2Title: "2. Non-Encumbrance Certificate (NEC)",
+    step2Desc:
+      "Apply for Form 12 at the relevant Sub-Registry office to verify that the property has not been mortgaged, sold, or tied in dispute.",
+    step3Title: "3. Bayna Nama & Deed Drafting",
+    step3Desc:
+      "Execute a registered Bayna Nama (Agreement to Sell) and have a licensed deed writer or advocate draft the Saf-Kabala deed.",
+    step4Title: "4. e-Chalan Payment of Fees",
+    step4Desc:
+      "Deposit Stamp Duty, Registration fees, Local Govt Tax, and AIT into the designated government treasury code via e-Chalan.",
+    step5Title: "5. Sub-Registry Presentation & Biometrics",
+    step5Desc:
+      "Both buyer and seller appear before the Sub-Registrar with NID and witnesses for biometric verification, photo capture, and signature.",
+    step6Title: "6. Receipt (T-form) & Original Deed",
+    step6Desc:
+      "Receive the registration receipt (T-form / Irad-patra). Use it to collect the certified copy promptly and the original deed once bound.",
+    documentsTitle: "Required Legal Documents Checklist",
+    documentsSubtitle:
+      "Ensure all legal deeds, records, and clearances are organized before visiting the Sub-Registry.",
+    doc1Title: "Original Title Deed (Bia Dalil)",
+    doc1Desc:
+      "Chain of previous title deeds tracing ownership history for at least 25-30 years.",
+    doc2Title: "Khatian & Porcha Records",
+    doc2Desc:
+      "Certified copies of CS, SA, RS, and City/BS surveys proving legitimate lineage.",
+    doc3Title: "Mutation (Namjari) & DCR",
+    doc3Desc:
+      "AC Land office Mutation Khatian with duplicate carbon receipt proving land revenue acceptance.",
+    doc4Title: "Up-to-Date Land Tax (Khajna)",
+    doc4Desc:
+      "Current fiscal year Land Development Tax receipt with QR verification.",
+    doc5Title: "Non-Encumbrance Certificate (NEC)",
+    doc5Desc:
+      "Search report issued by the Sub-Registry showing zero prior legal encumbrances.",
+    doc6Title: "National ID & Passport Photos",
+    doc6Desc:
+      "Smart NID cards and verified color photos of buyer, seller, and legal witnesses.",
+    doc7Title: "Approved Building Plan (For Flats)",
+    doc7Desc:
+      "RAJUK / CDA / KDA sanctioned plan and allotment letter from developer or original owner.",
+    faqTitle: "Frequently Asked Questions",
+    faqSubtitle:
+      "Essential answers regarding statutory fees, mouza rates, and Bangladesh property law.",
+    faq1Q: "Who is legally responsible for paying Advance Income Tax (AIT / Gain Tax)?",
+    faq1A:
+      "Under Section 125 of the Income Tax Act 2023, AIT is the statutory liability of the seller (deducted at source on transfer). However, in local Bangladesh real estate transactions, contracts often negotiate fee allocations beforehand. Always clarify this in your registered Bayna.",
+    faq2Q: "What is the difference between Mouza Rate and Deed Value?",
+    faq2A:
+      "The Mouza Rate is the government's minimum benchmark land rate fixed by the Registration Directorate for each local mouza. Stamp duty and registration taxes are charged on whichever is higher: the actual negotiated transaction price or the official Mouza rate valuation.",
+    faq3Q: "Are there additional deed writer or advocate fees beyond government taxes?",
+    faq3A:
+      "Yes. The statutory calculator covers only government duties deposited through e-Chalan. Drafting fees for deed writers (Mohurer) or property lawyers typically range between 0.25% to 0.5% (or fixed negotiation), plus minor stamp stamping charges.",
+    faq4Q: "How is VAT applied to newly constructed apartments?",
+    faq4A:
+      "Under NBR regulations, developer sales attract 2% VAT for apartments up to 1,600 sq ft, and 4.5% VAT for apartments exceeding 1,600 sq ft. Individual resale (secondary market) properties are fully exempt from VAT.",
+    faq5Q: "What is an e-Chalan and why is it mandatory?",
+    faq5A:
+      "e-Chalan is Bangladesh's official digital treasury deposit slip. Cash payments directly to sub-registry counters are prohibited for major duties. All fees must be deposited directly to Bangladesh Bank or Sonali Bank treasury accounts with verifiable automated receipts.",
+    disclaimerTitle: "Statutory Legal Disclaimer",
+    disclaimerBody:
+      "Calculations and legal guidelines provided on this page are based on the Stamp Act 1899, Registration Act 1908, Income Tax Act 2023, and current Bangladesh Finance Acts. They are intended for educational and informational purposes only and do not constitute formal legal or tax advisory. Statutory rates, mouza valuations, and local rules may vary by jurisdiction. Always verify current fee structures with your local Sub-Registry office, the National Board of Revenue (NBR), or a qualified property lawyer before completing any financial transactions.",
+  },
   changePasswordScreen: {
     title: "Change Password",
     subtitle: "Enter your current password and your new password",
