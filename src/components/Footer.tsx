@@ -71,7 +71,7 @@ function WebFooter({ style }: FooterProps) {
     { label: "Property News & Trends", href: "/resources/property-news-trends" },
     { label: "Buyer Guides", href: "/resources/buyer-guides" },
     { label: "Seller Guides", href: "/resources/seller-guides" },
-    { label: "Renter Guides", href: "/rent" },
+    { label: "Renter Guides", href: "/resources/renter-guides" },
     { label: "Landlord Guides", href: "/seller" },
     { label: "Mortgage Calculator", href: "/market" },
   ];

@@ -2708,6 +2708,124 @@ export const en = {
     disclaimerDesc:
       "This guide provides educational insight into real estate sales procedures under Bangladesh laws. Property transactions involve critical tax liabilities, inheritance verifications, and contractual commitments. HomeNet BD strongly recommends engaging an advocate or licensed deed writer (সনদপ্রাপ্ত দলিল লেখক) to review all title instruments and verify government receipts prior to execution.",
   },
+  renterGuides: {
+    metaTitle: "Bangladesh Tenant & Renter's Guide 2026 | HomeNet BD",
+    metaDescription:
+      "Complete tenant guide for Bangladesh. Master Rent Control Act 1991, ৳300 stamp rent agreements, advance deposit limits, and DMP police verification compliance.",
+    eyebrow: "Tenant Rights & Tenancy Legislation",
+    headline: "Tenant & Renter's Guide: Rights & Standards",
+    subheading:
+      "Master rent agreements, statutory advance deposit protections, DMP tenant verification, and dispute resolution under the Premises Rent Control Act.",
+    badgeRentAct: "Premises Rent Control Act 1991",
+    badgeStamp: "৳300 Non-Judicial Stamp Agreement",
+    badgePolice: "DMP Tenant Verification (CIMS)",
+    checklistTitle: "Interactive Move-In Readiness Checklist",
+    checklistSubtitle:
+      "Verify every contractual term, meter reading, and police clearance before paying advance rent or moving furniture.",
+    readinessScore: "Tenant Protection Score",
+    scoreLow: "Unprotected — Missing Written Agreement",
+    scoreMedium: "Basic Tenancy — Missing Utility or Police Clearance",
+    scoreHigh: "Legally Protected — Fully Compliant Move-In",
+    check1Title: "Written Agreement on ৳300 Stamp",
+    check1Desc:
+      "Executed tenancy deed detailing monthly rent, deposit amount, and exact 1 to 2 month notice period terms.",
+    check2Title: "Signed Advance Deposit Money Receipt",
+    check2Desc:
+      "Landlord's signed receipt specifying whether advance payment is refundable security or adjustable rent.",
+    check3Title: "Dedicated Electricity Meter Day-One Reading",
+    check3Desc:
+      "Documented starting kilowatt-hour unit or prepaid card balance signed off by both tenant and owner.",
+    check4Title: "Building Service Charge & Generator Terms",
+    check4Desc:
+      "Clear breakdown of lift, security, common area cleaning, and diesel fuel surcharges during load shedding.",
+    check5Title: "Completed DMP CIMS Verification Form",
+    check5Desc:
+      "Filled tenant information form with NID and passport photos submitted to the local Thana / Police Station.",
+    check6Title: "Annual Rent Review Cap Specified",
+    check6Desc:
+      "Explicit covenant barring mid-year rent increases, restricting revisions to a maximum of once every 12 months.",
+    phasesTitle: "The 4 Essential Pillars of Renting in Bangladesh",
+    phasesSubtitle:
+      "From neighborhood due diligence to deposit recovery, follow this statutory framework for a peaceful tenancy.",
+    phaseDocsLabel: "Essential Docs:",
+    phase1Tag: "Pillar 01",
+    phase1Title: "Pre-Lease Due Diligence & Budgeting",
+    phase1Desc:
+      "Inspect the apartment in daylight for dampness, water pressure, and mobile network reception. Confirm whether the building uses prepaid gas cylinders or pipeline Titas, verify individual DESCO/DPDC meter separation, and calculate full monthly overheads including society service charges.",
+    phase1Docs: "Building Rulebook, Recent Utility Bills, Sample Lease",
+    phase1Time: "3–7 Days",
+    phase1Warning:
+      "Warning: Shared electricity sub-meters often lead to inflated tariff calculations and disputes.",
+    phase2Tag: "Pillar 02",
+    phase2Title: "Tenancy Agreement Clauses to Insist On",
+    phase2Desc:
+      "Execute the agreement on ৳300 non-judicial stamp paper. Insist on clear clauses covering notice periods (usually 1 or 2 months for both sides), structural repair obligations on the landlord, zero deductions for normal wear and tear, and mandatory written rent receipts under Section 13.",
+    phase2Docs: "৳300 Non-Judicial Stamp Deed, NID Photocopies",
+    phase2Time: "1–3 Days",
+    phase2Warning:
+      "Warning: Verbal rent agreements offer zero legal standing if a landlord attempts arbitrary eviction.",
+    phase3Tag: "Pillar 03",
+    phase3Title: "Move-In Formalities & DMP Police Verification",
+    phase3Desc:
+      "Fill out the Dhaka Metropolitan Police (DMP) Citizen Information Management System (CIMS) tenant profile with passport-sized photos, emergency contacts, and NID copies. Submit one copy to the local Thana and retain an acknowledged copy. Record baseline meter readings with photos.",
+    phase3Docs: "DMP Tenant Form, Meter Baseline Photos, Key Handover Log",
+    phase3Time: "First 7 Days",
+    phase3Warning:
+      "Warning: Failure to submit police verification violates DMP civic regulations and can lead to administrative scrutiny.",
+    phase4Tag: "Pillar 04",
+    phase4Title: "Dispute Handling & Deposit Recovery",
+    phase4Desc:
+      "Know your statutory rights under the Premises Rent Control Act 1991. Landlords cannot disconnect electricity, water, or gas during rent disputes. When vacating, provide written notice matching your agreement, settle final utility bills, and request full return of your refundable deposit.",
+    phase4Docs: "Written Notice Copy, Final Utility Slips, Handover Receipt",
+    phase4Time: "30–60 Days Notice",
+    phase4Warning:
+      "Warning: Section 18 criminalizes cutting off water or power; tenants can petition the Rent Controller for emergency relief.",
+    guidesTitle: "Curated Renter Tools & Neighborhood Benchmarks",
+    guidesSubtitle:
+      "Compare neighborhood rental rates, verify stamp rules, and find verified rentals across Dhaka.",
+    guide1Category: "Rental Benchmarks",
+    guide1Title: "Dhaka Property Price & Rental Index",
+    guide1Desc:
+      "Compare square-foot rental benchmarks across Mirpur, Dhanmondi, Uttara, Bashundhara, and Gulshan.",
+    guide2Category: "Agreements",
+    guide2Title: "Stamp Duty & Lease Registration Calculator",
+    guide2Desc:
+      "Understand statutory stamp duties for tenancy agreements, notary verification, and legal deed costs.",
+    guide3Category: "Student Housing",
+    guide3Title: "Verified Student & Bachelor Accommodation",
+    guide3Desc:
+      "Browse dedicated bachelor messes, student hostels, and shared flats near major Dhaka universities.",
+    guide4Category: "Property Search",
+    guide4Title: "Explore Homes for Rent in Dhaka",
+    guide4Desc:
+      "Search thousands of verified residential apartments, family suites, and duplexes for rent across Dhaka.",
+    guide5Category: "Valuation",
+    guide5Title: "Property Valuation & Yield Estimator",
+    guide5Desc:
+      "Inspect underlying property values to evaluate whether your asking rent represents fair market value.",
+    faqTitle: "Frequently Asked Tenant Questions",
+    faqSubtitle:
+      "Statutory answers on utility disconnections, deposit disputes, and Rent Controller legal remedies.",
+    faq1Q:
+      "Can a landlord legally disconnect water, gas, or electricity during a tenancy dispute?",
+    faq1A:
+      "No. Under Section 18 of the Premises Rent Control Act 1991, disconnecting essential utility supplies (electricity, water, gas, lift services) without an order from the Rent Controller is a criminal offense punishable by fines and imprisonment. Tenants can file an urgent application with the local Rent Controller to restore utilities immediately.",
+    faq2Q:
+      "What is the statutory limit for advance rent and security deposits in Bangladesh?",
+    faq2A:
+      "Under Section 10 of the Premises Rent Control Act 1991, landlords are prohibited from claiming arbitrary 'salami' or premiums exceeding one month's rent as a condition of granting or renewing a residential lease. In modern Dhaka practice, 1 to 2 months' advance is customary and must be stipulated in writing as refundable security.",
+    faq3Q:
+      "How does the Dhaka Metropolitan Police (DMP) tenant verification form protect renters?",
+    faq3A:
+      "Submitting the DMP Citizen Information Management System (CIMS) form creates an official police registry of your lawful domicile in that property. It deters unlawful harassment, protects tenants against arbitrary lockouts or false criminal allegations, and serves as statutory evidence of residence.",
+    faq4Q:
+      "What legal recourse do I have if a landlord refuses to refund my security deposit?",
+    faq4A:
+      "If the landlord withholds your deposit after peaceful vacant handover and cleared utility slips, first issue an Advocate's Legal Notice citing your written agreement and meter readings. If unresolved, you may file an application before the Rent Controller under the 1991 Act or initiate a summary money recovery suit in civil court.",
+    disclaimerTitle: "Statutory Tenancy Disclaimer",
+    disclaimerDesc:
+      "This guide summarizes tenant rights and workflows under the Premises Rent Control Act 1991 and DMP civic guidelines. Tenancy relationships involve binding contractual commitments. HomeNet BD strongly encourages executing written stamp agreements and seeking legal counsel or community mediation in complex eviction disputes.",
+  },
   changePasswordScreen: {
     title: "Change Password",
     subtitle: "Enter your current password and your new password",

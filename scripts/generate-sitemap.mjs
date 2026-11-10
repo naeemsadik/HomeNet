@@ -50,6 +50,7 @@ const STATIC_PAGES = [
   { path: "/resources/property-news-trends", file: "app/resources/property-news-trends.tsx", changefreq: "weekly", priority: "0.8" },
   { path: "/resources/buyer-guides", file: "app/resources/buyer-guides.tsx", changefreq: "monthly", priority: "0.8" },
   { path: "/resources/seller-guides", file: "app/resources/seller-guides.tsx", changefreq: "monthly", priority: "0.8" },
+  { path: "/resources/renter-guides", file: "app/resources/renter-guides.tsx", changefreq: "monthly", priority: "0.8" },
   { path: "/privacy", file: "app/privacy.tsx", changefreq: "yearly", priority: "0.2", lastmod: LEGAL_UPDATED },
   { path: "/terms", file: "app/terms.tsx", changefreq: "yearly", priority: "0.2", lastmod: LEGAL_UPDATED },
 ];
