@@ -1057,7 +1057,7 @@ export const en = {
       subtitle: "In Dhaka, building utilities (standby generator, lift, gas line) drive massive resale value and rental yields.",
       counterBanner: "{{count}} key value drivers selected for valuation",
       verificationTipTitle: "How this estimate is made",
-      verificationTipDesc: "It starts from HomeNet's price benchmark for your area and adjusts it for what you tell us here. It is a guide, not a formal valuation.",
+      verificationTipDesc: "It starts from asking prices for your area on listing sites, where there are enough of them, and adjusts them for what you tell us here. It is a guide, not a formal valuation.",
       site: {
         title: "Road, papers and monsoon",
         roadLabel: "How wide is the road at the gate?",

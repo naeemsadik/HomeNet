@@ -1,6 +1,7 @@
 import apiClient from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import areaBenchmarkData from "../data/areaBenchmarks.json";
 import type { Property, PropertyFilters } from "@/features/property/types/property";
 import type { PropertyType } from "@/types/api";
 import type {
@@ -120,6 +121,56 @@ const DEFAULT_BENCHMARK: AreaBenchmark = {
   subzones: ["Central", "North Zone", "South Zone"],
 };
 
+// ============================================================================
+// PRICES FROM LISTINGS
+// ============================================================================
+
+/**
+ * What areaBenchmarks.json holds for one area and purpose. The file is built
+ * offline from listing sites (see pipeline/benchmarkPipeline.ts) and holds only
+ * counts and quartiles of asking prices.
+ */
+interface ListingRate {
+  n: number;
+  median: number;
+  p25: number;
+  p75: number;
+}
+
+interface BenchmarkFile {
+  asOf: string;
+  areas: Record<string, Partial<Record<"sale" | "rent", ListingRate & { status: "ok" | "thin" | "insufficient" }>>>;
+}
+
+const BENCHMARK_DATA = areaBenchmarkData as unknown as BenchmarkFile;
+
+/**
+ * An area's price from listings, only when there are enough of them (status
+ * "ok"). A thin sample is not used: a figure from a handful of asking prices
+ * is worse than saying we only have a rough rate.
+ */
+function listingRate(areaKey: string, purpose: "sale" | "rent"): ListingRate | null {
+  const stats = BENCHMARK_DATA.areas[areaKey]?.[purpose];
+  if (!stats || stats.status !== "ok") return null;
+  return { n: stats.n, median: stats.median, p25: stats.p25, p75: stats.p75 };
+}
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+/**
+ * The range around the estimate. From listings it follows the spread of the
+ * area's asking prices (the middle half), kept between a tenth and 30% either
+ * way so one odd listing cannot make the range useless. Without listings it is
+ * the flat -6% / +6% the estimate always used.
+ */
+function estimateSpread(rate: ListingRate | null): { low: number; high: number } {
+  if (!rate) return { low: 0.94, high: 1.06 };
+  return {
+    low: clamp(rate.p25 / rate.median, 0.7, 0.94),
+    high: clamp(rate.p75 / rate.median, 1.06, 1.3),
+  };
+}
+
 /** True when the area has its own benchmark; otherwise the estimate uses the Dhaka-wide average. */
 export function hasAreaBenchmark(areaName: string): boolean {
   return normalizeAreaKey(areaName) !== "default";
@@ -129,6 +180,12 @@ function normalizeAreaKey(areaName: string): string {
   const clean = areaName.toLowerCase().replace(/[^a-z0-9]/g, "");
   for (const key of Object.keys(DHAKA_AREA_BENCHMARKS)) {
     if (clean.includes(key)) return key;
+  }
+  // An area with no built-in rate can still be priced from listings, once there are enough.
+  for (const key of Object.keys(BENCHMARK_DATA.areas)) {
+    if (clean.includes(key.replace(/[^a-z0-9]/g, "")) && (listingRate(key, "sale") || listingRate(key, "rent"))) {
+      return key;
+    }
   }
   return "default";
 }
@@ -169,7 +226,15 @@ export function calculateDhakaValuation(
   payload: ValuationRequestPayload
 ): ValuationResponseData {
   const areaKey = normalizeAreaKey(payload.areaName);
-  const benchmark = DHAKA_AREA_BENCHMARKS[areaKey] || DEFAULT_BENCHMARK;
+  const baseBenchmark = DHAKA_AREA_BENCHMARKS[areaKey] || DEFAULT_BENCHMARK;
+  // Where there are enough listings, their median replaces the built-in rate.
+  const saleListings = listingRate(areaKey, "sale");
+  const rentListings = listingRate(areaKey, "rent");
+  const benchmark: AreaBenchmark = {
+    ...baseBenchmark,
+    salePerSqft: saleListings?.median ?? baseBenchmark.salePerSqft,
+    rentPerSqft: rentListings?.median ?? baseBenchmark.rentPerSqft,
+  };
 
   // 1. Property Type Multiplier
   let propertyTypeMultiplier = 1.0;
@@ -346,9 +411,9 @@ export function calculateDhakaValuation(
 
   const estimatedValue = Math.round(calculatedRatePerSqft * effectiveSqft);
 
-  // Reasonable market spread (-5% to +6%)
-  const lowEstimate = Math.round(estimatedValue * 0.94);
-  const highEstimate = Math.round(estimatedValue * 1.06);
+  const spread = estimateSpread(saleListings);
+  const lowEstimate = Math.round(estimatedValue * spread.low);
+  const highEstimate = Math.round(estimatedValue * spread.high);
 
   // Estimated Monthly Rent & Gross Yield
   // Typical Dhaka gross yield ranges between 4.2% - 5.6%
@@ -369,24 +434,29 @@ export function calculateDhakaValuation(
     ).toFixed(1)
   );
 
-  // How much to trust it. The area matters most, so an area without its own benchmark is low,
-  // whatever else is filled in. It is an estimate from area averages, not a survey or a sale record.
+  // How much to trust it. The area matters most: only an area with enough listings behind its
+  // price can be medium or high. An area we only have a built-in rate for is a rough guide, and
+  // so is any other, whatever else is filled in. Asking prices are not sale records.
   const knownArea = areaKey !== "default";
+  const basis = payload.purpose === "rent" ? rentListings : saleListings;
   const hasDetailedSpecs =
     Boolean(payload.roadOrBlock) &&
     payload.bedrooms > 0 &&
     payload.bathrooms > 0;
-  const confidenceScore: ValuationResponseData["confidenceScore"] = !knownArea
+  const confidenceScore: ValuationResponseData["confidenceScore"] = !basis
     ? "low"
     : hasDetailedSpecs
       ? "high"
       : "medium";
   const confidencePct = confidenceScore === "high" ? 85 : confidenceScore === "medium" ? 70 : 50;
-  const confidenceReason = !knownArea
-    ? `We don't have price data for ${payload.areaName} yet, so this uses a Dhaka-wide average. Treat it as a rough guide.`
-    : hasDetailedSpecs
-      ? `Based on HomeNet's price benchmark for ${payload.areaName}, adjusted for your property's details.`
-      : `Based on the ${payload.areaName} average. Add the road or block for a closer estimate.`;
+  const collected = new Date(BENCHMARK_DATA.asOf).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  const confidenceReason = basis
+    ? `Based on ${basis.n} asking ${payload.purpose === "rent" ? "rents" : "prices"} for ${payload.areaName} flats on listing sites (${collected}), adjusted for your property's details.${
+        hasDetailedSpecs ? "" : " Add the road or block for a closer estimate."
+      }`
+    : knownArea
+      ? `We don't have enough listings for ${payload.areaName} yet, so this uses an estimated rate. Treat it as a rough guide.`
+      : `We don't have price data for ${payload.areaName} yet, so this uses a Dhaka-wide average. Treat it as a rough guide.`;
 
   const breakdownFactors: PriceBreakdownFactors = {
     baseRatePerSqft,
