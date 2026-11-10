@@ -2073,45 +2073,11 @@ export const en = {
   stampDutyGuide: {
     metaTitle: "Stamp Duty & Property Tax Guide | HomeNet BD",
     metaDescription:
-      "Calculate Bangladesh property registration fees, stamp duty, AIT, and local taxes with our interactive tool. Comprehensive guide to legal land transfer costs.",
+      "A plain guide to the fees, steps and documents involved in registering property in Bangladesh: stamp duty, registration fee, local government tax and the Sub-Registry process.",
     eyebrow: "Tax & Legal Guide",
     headline: "Bangladesh Property Registration, Stamp Duty & Tax Guide",
     subheading:
-      "Calculate statutory registration fees, deed valuations, stamp duty, local taxes, and AIT before buying or selling property in Bangladesh.",
-    calculatorTitle: "Property Registration Fee Calculator",
-    calculatorSubtitle:
-      "Estimate total government fees and legal transfer costs based on the deed value and location.",
-    deedValueLabel: "Deed Value (BDT)",
-    deedValuePlaceholder: "Enter property deed value",
-    preset50L: "50 Lakh",
-    preset1C: "1 Crore",
-    preset2C: "2 Crore",
-    preset5C: "5 Crore",
-    locationLabel: "Property Location",
-    locDhakaCtg: "City Corporation (Dhaka / Chattogram)",
-    locOtherCity: "Other City Corporations",
-    locMunicipality: "Municipality (Pourashava)",
-    locRural: "Rural / Union Parishad",
-    propertyTypeLabel: "Property Type",
-    typeSecondary: "Secondary / Individual Resale",
-    typeDeveloper: "Developer / New Construction",
-    flatSizeLabel: "Apartment Size",
-    sizeUnder1600: "Up to 1,600 sq ft",
-    sizeOver1600: "Above 1,600 sq ft",
-    breakdownTitle: "Cost Breakdown",
-    stampDutyLabel: "Stamp Duty (1.5%)",
-    regFeeLabel: "Registration Fee (1.0%)",
-    localGovtTaxLabel: "Local Government Tax (LGT)",
-    aitLabel: "Advance Income Tax (AIT / Sec. 125)",
-    vatLabel: "Value Added Tax (VAT)",
-    vatExempt: "Exempt (0% for Secondary Resale)",
-    totalGovtCost: "Estimated Statutory Total",
-    effectiveRateLabel: "Effective Rate",
-    whoPaysBuyer: "Paid by Buyer",
-    whoPaysSeller: "Paid by Seller (Withheld at Source)",
-    whoPaysDeveloper: "Paid by Developer",
-    resetBtn: "Reset Calculator",
-    customInputNotice: "Enter custom deed value above to recalculate statutory fees.",
+      "Which fees apply when you buy or sell property in Bangladesh, the steps at the Sub-Registry, and the documents to bring.",
     workflowTitle: "6-Step Property Registration Workflow",
     workflowSubtitle:
       "A structured step-by-step procedure to legally register property at the Sub-Registry office.",
@@ -2120,25 +2086,25 @@ export const en = {
       "Verify CS, SA, RS, and BS Khatians, Porcha, and ensure Mutation (Namjari) is completed in the seller's name with up-to-date DCR and Khajna receipts.",
     step2Title: "2. Non-Encumbrance Certificate (NEC)",
     step2Desc:
-      "Apply for Form 12 at the relevant Sub-Registry office to verify that the property has not been mortgaged, sold, or tied in dispute.",
+      "Ask the relevant Sub-Registry office to search its records, so you know the property has not been mortgaged, sold or tied up in a dispute.",
     step3Title: "3. Bayna Nama & Deed Drafting",
     step3Desc:
       "Execute a registered Bayna Nama (Agreement to Sell) and have a licensed deed writer or advocate draft the Saf-Kabala deed.",
     step4Title: "4. e-Chalan Payment of Fees",
     step4Desc:
-      "Deposit Stamp Duty, Registration fees, Local Govt Tax, and AIT into the designated government treasury code via e-Chalan.",
+      "Pay the fees the Sub-Registry tells you to pay, through e-Chalan where it is required, and keep the receipts.",
     step5Title: "5. Sub-Registry Presentation & Biometrics",
     step5Desc:
       "Both buyer and seller appear before the Sub-Registrar with NID and witnesses for biometric verification, photo capture, and signature.",
     step6Title: "6. Receipt (T-form) & Original Deed",
     step6Desc:
-      "Receive the registration receipt (T-form / Irad-patra). Use it to collect the certified copy promptly and the original deed once bound.",
+      "Collect the registration receipt and ask when the registered deed can be collected.",
     documentsTitle: "Required Legal Documents Checklist",
     documentsSubtitle:
       "Ensure all legal deeds, records, and clearances are organized before visiting the Sub-Registry.",
     doc1Title: "Original Title Deed (Bia Dalil)",
     doc1Desc:
-      "Chain of previous title deeds tracing ownership history for at least 25-30 years.",
+      "The chain of earlier deeds that shows who owned the property before.",
     doc2Title: "Khatian & Porcha Records",
     doc2Desc:
       "Certified copies of CS, SA, RS, and City/BS surveys proving legitimate lineage.",
@@ -2160,150 +2126,128 @@ export const en = {
     faqTitle: "Frequently Asked Questions",
     faqSubtitle:
       "Essential answers regarding statutory fees, mouza rates, and Bangladesh property law.",
-    faq1Q: "Who is legally responsible for paying Advance Income Tax (AIT / Gain Tax)?",
+    faq1Q:
+      "Who normally pays the gain or source tax?",
     faq1A:
-      "Under Section 125 of the Income Tax Act 2023, AIT is the statutory liability of the seller (deducted at source on transfer). However, in local Bangladesh real estate transactions, contracts often negotiate fee allocations beforehand. Always clarify this in your registered Bayna.",
+      "Usually the seller pays it, and it is collected when the property is transferred. In practice the sale agreement (Bayna) often settles who bears each fee, so write it down in the registered Bayna.",
     faq2Q: "What is the difference between Mouza Rate and Deed Value?",
     faq2A:
-      "The Mouza Rate is the government's minimum benchmark land rate fixed by the Registration Directorate for each local mouza. Stamp duty and registration taxes are charged on whichever is higher: the actual negotiated transaction price or the official Mouza rate valuation.",
+      "Fees are worked out from the deed value, and the Sub-Registry can compare it with the government's rate for the area. Ask the Sub-Registry how your property will be assessed.",
     faq3Q: "Are there additional deed writer or advocate fees beyond government taxes?",
     faq3A:
-      "Yes. The statutory calculator covers only government duties deposited through e-Chalan. Drafting fees for deed writers (Mohurer) or property lawyers typically range between 0.25% to 0.5% (or fixed negotiation), plus minor stamp stamping charges.",
+      "Yes. Government fees are only part of the cost. A deed writer or a property lawyer charges their own fee, which you agree with them. Ask for it in writing before you start.",
     faq4Q: "How is VAT applied to newly constructed apartments?",
     faq4A:
-      "Under NBR regulations, developer sales attract 2% VAT for apartments up to 1,600 sq ft, and 4.5% VAT for apartments exceeding 1,600 sq ft. Individual resale (secondary market) properties are fully exempt from VAT.",
-    faq5Q: "What is an e-Chalan and why is it mandatory?",
+      "A new flat bought from a developer carries VAT. A resale between individuals is treated differently. The rate depends on the current rules, so ask the developer and check with the NBR before you sign.",
+    faq5Q:
+      "What is an e-Chalan?",
     faq5A:
-      "e-Chalan is Bangladesh's official digital treasury deposit slip. Cash payments directly to sub-registry counters are prohibited for major duties. All fees must be deposited directly to Bangladesh Bank or Sonali Bank treasury accounts with verifiable automated receipts.",
+      "An e-Chalan is the government's online payment slip. Ask the Sub-Registry which fees must be paid through it, and keep the receipt, because you will need it when you register.",
     disclaimerTitle: "Statutory Legal Disclaimer",
     disclaimerBody:
-      "Calculations and legal guidelines provided on this page are based on the Stamp Act 1899, Registration Act 1908, Income Tax Act 2023, and current Bangladesh Finance Acts. They are intended for educational and informational purposes only and do not constitute formal legal or tax advisory. Statutory rates, mouza valuations, and local rules may vary by jurisdiction. Always verify current fee structures with your local Sub-Registry office, the National Board of Revenue (NBR), or a qualified property lawyer before completing any financial transactions.",
+      "This page explains the process in general terms, for information only. It is not legal or tax advice. Rates, mouza values and procedures change and can differ by area. Check the current position with the Sub-Registry office, the National Board of Revenue (NBR) or a qualified property lawyer before you pay or sign anything.",
+    feesTitle:
+      "Which fees and taxes apply",
+    feesSubtitle:
+      "These are the costs that usually come up when a deed is registered. Agree who pays each one and write it into the sale agreement.",
+    fee1Title:
+      "Stamp duty",
+    fee1Desc:
+      "A percentage of the deed value, charged under the Stamp Act 1899.",
+    fee2Title:
+      "Registration fee",
+    fee2Desc:
+      "A percentage of the deed value, paid when the deed is registered at the Sub-Registry (Registration Act 1908).",
+    fee3Title:
+      "Local government tax",
+    fee3Desc:
+      "A further percentage of the deed value, which can differ by area.",
+    fee4Title:
+      "VAT",
+    fee4Desc:
+      "Applies when you buy a new flat from a developer. A resale from an individual is treated differently.",
+    fee5Title:
+      "Gain or source tax",
+    fee5Desc:
+      "A tax on the seller's gain or on the deed value, collected when the property is transferred. Who bears it is agreed in the sale agreement.",
+    feesNote:
+      "The percentages change with each year's Finance Act and budget, and sources do not agree on every rate, so we do not show them here. Ask the Sub-Registry office or the NBR which rates apply on the day you register.",
   },
   propertyPriceIndex: {
-    metaTitle: "Dhaka Property Price Index 2026 | HomeNet BD",
+    metaTitle:
+      "Dhaka Property Price Index | HomeNet BD",
     metaDescription:
-      "Explore Dhaka property price trends, average rates per sqft across prime and emerging zones, and calculate apartment values with HomeNet's verified index.",
-    eyebrow: "Real Estate Market Intelligence",
-    headline: "Dhaka Property Price Index",
+      "Asking prices per square foot for apartments in Dhaka areas, worked out from listings on property sites. Shows how many listings each figure rests on.",
+    eyebrow:
+      "Price Index",
+    headline:
+      "Dhaka apartment prices by area",
     subheading:
-      "Square-foot pricing benchmarks and year-over-year trends across Dhaka's prime, residential, and emerging corridors.",
-    lastUpdated: "Q4 2026 Verified Index",
-    explorerTitle: "Area Price Explorer",
-    explorerSubtitle:
-      "Compare average price per square foot, annual price appreciation, and typical apartment values.",
-    filterAll: "All Zones",
-    filterPrime: "Prime Residential",
-    filterHighDemand: "High Demand",
-    filterEmerging: "Emerging Corridors",
-    searchPlaceholder: "Search neighborhood (e.g. Gulshan, Uttara)...",
-    colArea: "Area / Zone",
-    colAvgRate: "Avg Rate / Sqft",
-    colRange: "Price Range / Sqft",
-    colYoY: "YoY Trend",
-    colTypical3Bed: "Typical 3-Bed (1,500 sqft)",
-    calculatorTitle: "Property Value Estimator",
-    calculatorSubtitle:
-      "Select an area and enter the apartment floor size to calculate the expected market value range.",
-    selectAreaLabel: "Select Neighborhood",
-    flatSizeLabel: "Apartment Size (SQFT)",
-    flatSizePlaceholder: "e.g. 1500",
-    preset1000: "1,000 sqft",
-    preset1250: "1,250 sqft",
-    preset1500: "1,500 sqft",
-    preset2000: "2,000 sqft",
-    estimatedValue: "Estimated Market Value",
-    estimatedRange: "Estimated Range",
-    avgRateAt: "Benchmark average rate",
-    driversTitle: "Key Market Drivers Shaping 2026 Prices",
-    driversSubtitle:
-      "Crucial urban infrastructure and regulatory shifts impacting Dhaka property valuations.",
-    driver1Title: "MRT & Commuter Connectivity",
-    driver1Desc:
-      "Areas along MRT Line-6 (Uttara to Mirpur and Motijheel) and planned MRT Line-1/5 corridors consistently exhibit 8-12% higher capital appreciation.",
-    driver2Title: "RAJUK DAP (2022-2035) Regulations",
-    driver2Desc:
-      "Adjusted Floor Area Ratio (FAR) caps in dense central sectors have reduced developable residential units, constraining supply and supporting premium per-sqft valuations.",
-    driver3Title: "Construction & Material Inflation",
-    driver3Desc:
-      "Surges in structural rebar, Portland cement, and finishing imported materials have driven replacement costs up 25-35%, setting a higher floor for new builds.",
-    methodologyTitle: "Methodology & PropTech Data Standard",
-    methodologyDesc:
-      "The HomeNet Property Price Index synthesizes active verified direct-owner listings, registered deed values recorded across Dhaka Sub-Registry offices, and real-time transaction reports. Statutory minimum Mouza rates are not reflected here as official market values often diverge significantly from government valuation registries. Figures are updated quarterly to maintain statistical fidelity.",
-    gulshanName: "Gulshan",
-    gulshanZone: "Prime Diplomatic",
-    bananiName: "Banani",
-    bananiZone: "Commercial & Residential",
-    baridharaName: "Baridhara R/A",
-    baridharaZone: "Diplomatic Enclave",
-    dhanmondiName: "Dhanmondi",
-    dhanmondiZone: "Central Residential",
-    bashundharaName: "Bashundhara R/A",
-    bashundharaZone: "Planned Gated Community",
-    uttaraName: "Uttara",
-    uttaraZone: "MRT-6 Connected Suburb",
-    mirpurName: "Mirpur (DOHS / Sectors)",
-    mirpurZone: "Accessible Urban Center",
-    mohammadpurName: "Mohammadpur",
-    mohammadpurZone: "Established Residential Hub",
-    aftabnagarName: "Aftabnagar / Badda",
-    aftabnagarZone: "Lakeside Expansion Zone",
-    purbachalName: "Purbachal Expressway",
-    purbachalZone: "High-Speed Growth Corridor",
+      "Asking prices per square foot, worked out from {{count}} apartment listings on {{sites}} property sites, collected in {{date}}.",
+    areasTitle:
+      "Areas with enough listings",
+    areasSubtitle:
+      "The middle asking price in each area, collected in {{date}}. These are asking prices, not what flats sold for.",
+    perSqft:
+      "per sqft",
+    rateA11y:
+      "Middle asking price {{rate}} per square foot",
+    range:
+      "Middle half of listings: {{low}} to {{high}}",
+    basedOn:
+      "Based on {{count}} listings",
+    oneSite:
+      "Most of these listings come from one site.",
+    none:
+      "No area has enough listings to publish a price yet.",
+    buildingTitle:
+      "Areas we are still collecting",
+    buildingSubtitle:
+      "We publish a price only when an area has at least {{min}} listings. These have fewer.",
+    buildingItem:
+      "{{area}} ({{count}})",
+    howTitle:
+      "How these figures are made",
+    howBody:
+      "We read apartment listings from property sites that state both a price and a size, drop the ones that are duplicates or look wrong, and take the middle value for each area. A listing's asking price is usually higher than the price a flat sells at, and we do not have sale prices. These figures say nothing about where prices are heading.",
+    ctaTitle:
+      "Want a number for your own flat?",
+    ctaBody:
+      "The free estimate adjusts the area price for size, floor, age and facing.",
+    ctaButton:
+      "Get a free estimate",
+    noteTitle:
+      "A guide, not a valuation",
+    noteBody:
+      "Use these figures to compare areas. For a loan or a sale, a surveyor or an agent who visits the property may value it differently.",
   },
   propertyValuationGuide: {
     metaTitle: "Property Valuation Guide Bangladesh 2026 | HomeNet",
     metaDescription:
-      "Learn how property is valued in Bangladesh. Estimate apartment and land market prices, understand Mouza rates, building depreciation, and bank loan ceilings.",
-    eyebrow: "Valuation & Assessment Standards",
+      "How property is valued in Bangladesh: what raises or lowers a price, how the government Mouza rate differs from market value, and what a bank surveyor checks.",
+    eyebrow:
+      "Valuation guide",
     headline: "Bangladesh Property Valuation Guide",
     subheading:
-      "How real estate appraisers, banks, and sub-registry offices determine real market value, government Mouza rates, and loan eligibility.",
-    lastUpdated: "Updated for FY 2025–2026 Regulations",
-    calculatorTitle: "Interactive Property Valuation Estimator",
-    calculatorSubtitle:
-      "Select your property characteristics to calculate fair market range, baseline government Mouza value, and bank loan ceilings.",
-    typeLabel: "Property Type",
-    typeApartment: "Apartment / Flat",
-    typeLand: "Residential Plot / Land",
-    locationLabel: "Select Location / Zone",
-    sizeLabelApartment: "Floor Area (SQFT)",
-    sizePlaceholderApartment: "e.g. 1500",
-    sizeLabelLand: "Plot Size (Katha)",
-    sizePlaceholderLand: "e.g. 3",
-    buildingAgeLabel: "Building Age",
-    ageNew: "New (< 5 Years)",
-    ageMedium: "5 to 15 Years",
-    ageOld: "15+ Years",
-    roadWidthLabel: "Front Road Width",
-    roadNarrow: "Narrow (< 20 ft)",
-    roadStandard: "Standard (20–40 ft)",
-    roadWide: "Wide Avenue (40+ ft)",
-    estimatedMarketRange: "Estimated Fair Market Value",
-    mouzaBenchmark: "Government Mouza Registry Value",
-    bankLoanCeiling: "Max Bank Mortgage Ceiling (~70%)",
-    marketRateApplied: "Applied Base Market Benchmark",
-    ageAdjustment: "Age & Depreciation Factor",
-    roadAdjustment: "Road Width Adjustment",
-    disclaimerEstimator:
-      "Estimates reflect prevailing market transactions and surveyor benchmarks. Formal bank mortgages require accredited valuer inspections.",
+      "How appraisers, banks and the Sub-Registry look at a property's value, and what affects the price.",
     factorsTitle: "5 Core Factors Determining Valuation in Bangladesh",
     factorsSubtitle:
       "Professional surveyors weigh structural, regulatory, and environmental metrics during an inspection.",
     factor1Title: "Location, Frontage & Road Access",
     factor1Desc:
-      "Properties on 40ft+ wide roads qualify for superior RAJUK Floor Area Ratios (FAR). Corner plots and plots with wide frontages command an 8%–15% market premium over interior lane properties.",
+      "A property on a wide road, or a corner plot, is usually worth more than one on a narrow inner lane. The width of the road also affects what may legally be built.",
     factor2Title: "RAJUK / CDA Plan Approval & Legal Clearances",
     factor2Desc:
-      "Approved architectural and structural drawings, valid occupancy certificates (বাসস্থান সনদ), and flawless mutation / porcha documentation are mandatory. Deviations reduce bank loan approval limits.",
+      "Approved drawings, a valid occupancy certificate and clean mutation and porcha papers are expected. Gaps in these papers can stop a bank from approving a loan.",
     factor3Title: "Developer Brand & Structural Construction Quality",
     factor3Desc:
-      "Grade-1 REHAB-member developers with proven earthquake-resistant structural engineering, premium MEP fittings, and high-spec lifts command significantly higher resale values.",
+      "A developer with a good record, sound structural work and well-kept lifts and fittings usually helps a flat keep its value.",
     factor4Title: "Building Age & Depreciation Schedules",
     factor4Desc:
-      "Apartments undergo ~1.5%–2% annual structural depreciation after 5 years. Beyond 20 years, value predominantly reflects the undivided proportionate land share (অনূদিত জমির অংশ).",
+      "An older building is usually worth less than a newer one. As a building gets very old, more of the value rests on the land share than on the building itself.",
     factor5Title: "Building Utilities & Amenities",
     factor5Desc:
-      "Dedicated electrical substations, full generator power backup, certified firefighting systems, modern lifts, CCTV surveillance, and reserved basement parking directly inflate net property value.",
+      "Backup power, a working lift, fire safety, security and parking make a flat easier to sell and can raise what buyers will pay.",
     mouzaVsMarketTitle: "Government Mouza Rate vs. Fair Market Value",
     mouzaVsMarketSubtitle:
       "Understanding why Sub-Registry deed values differ fundamentally from commercial market prices.",
@@ -2311,7 +2255,7 @@ export const en = {
     mouzaCardPoint1:
       "Determined periodically by the Registration Directorate & District Collectorates based on historical averages.",
     mouzaCardPoint2:
-      "Acts as the statutory minimum deed base for calculating Stamp Duty (1.5%), Registration Fees (1%), and Local Govt Taxes (2%).",
+      "Can be used by the Sub-Registry as a reference when it assesses a deed.",
     mouzaCardPoint3:
       "Cannot be used as a realistic indicator of purchase price, especially in high-appreciation urban centers.",
     marketCardTitle: "Fair Market Value (ন্যায্য বাজার মূল্য)",
@@ -2320,7 +2264,7 @@ export const en = {
     marketCardPoint2:
       "Governs bank surveyor mortgage assessments, insurance appraisals, and secondary market resales.",
     marketCardPoint3:
-      "Typically 1.5x to 3.5x higher than official Mouza rates across prime Dhaka corridors.",
+      "Can be well above the official Mouza rate, especially in high-demand parts of Dhaka.",
     checklistTitle: "Step-by-Step Bank Surveyor Inspection Checklist",
     checklistSubtitle:
       "What accredited engineering surveyors verify when assessing a property for mortgage approval.",
@@ -2342,132 +2286,59 @@ export const en = {
     faqTitle: "Frequently Asked Questions",
     faqSubtitle:
       "Essential answers regarding real estate valuation, bank mortgages, and Bangladesh property laws.",
-    faq1Q: "Why do commercial banks value properties 20% to 30% lower than asking prices?",
+    faq1Q:
+      "Why do banks often value a property lower than the asking price?",
     faq1A:
-      "Banks employ a 'forced sale value' (FSV) approach. If a borrower defaults, the bank must be able to liquidate the collateral quickly at auction. Surveyors intentionally disregard speculative premiums and apply a conservative 20%–30% haircut to fair market value.",
+      "A bank values what it could recover if the borrower defaulted and it had to sell quickly. So a surveyor leaves out any hopeful premium and is cautious, and the bank's figure is often lower than the asking price.",
     faq2Q: "How is the undivided proportionate land share calculated for an apartment?",
     faq2A:
-      "The undivided land share is calculated by dividing your apartment's floor area by the total buildable floor area of the entire building, then multiplying that fraction by the total plot size (in Katha or decimals). As a building ages past 25–30 years, this land share represents nearly all of your asset's residual worth.",
+      "The undivided land share is worked out by dividing your flat's floor area by the building's total floor area, then multiplying by the plot size. As a building gets very old, this share represents most of what the flat is worth.",
     faq3Q: "Does a higher floor command a higher valuation in Dhaka?",
     faq3A:
-      "Generally yes. In modern high-rises (10+ floors), upper floors (5th floor and above) often command a 5%–10% premium due to better airflow, natural daylight, reduced street noise, and pleasant skyline views, provided the building has reliable high-speed lifts and generator backup.",
+      "Often yes. In tall buildings, higher floors can be worth more for the light, air and view, as long as the lifts and backup power are reliable. How much more depends on the building and the area.",
     faq4Q: "How can a seller maximize property valuation before listing?",
     faq4A:
-      "Ensure all documentation (up-to-date holding tax, utility bills, mutation, original deeds) is perfectly organized. Minor cosmetic repairs (fresh coat of paint, fixing damp spots, updated electrical fittings) and professional deep cleaning typically return 3x to 5x their cost in perceived buyer value.",
-    ctaTitle: "Need an Instant Digital Valuation for Your Property?",
+      "Get the paperwork in order: up-to-date holding tax, utility bills, mutation and the original deeds. Small repairs and a thorough clean help buyers see the flat at its best. Do not count on getting the cost back.",
+    ctaTitle:
+      "Need an estimate for your property?",
     ctaDesc:
-      "Use HomeNet's automated valuation model to get a real-time data-backed assessment of your apartment or commercial space.",
+      "HomeNet's free estimate starts from asking prices on listing sites for your area, then adjusts for your flat's details.",
     ctaButton: "Try Instant Valuation",
     disclaimerTitle: "Official Legal & Financial Disclaimer",
     disclaimerDesc:
-      "The guides, benchmarks, and interactive calculations on this page are provided for educational and informational purposes only. Official bank financing, capital gain taxation, and property registration require formal surveys by certified civil engineers and verification from relevant Sub-Registry offices. HomeNet BD does not provide statutory appraisal certificates.",
-    gulshanName: "Gulshan",
-    bananiName: "Banani",
-    dhanmondiName: "Dhanmondi",
-    bashundharaName: "Bashundhara R/A",
-    uttaraName: "Uttara",
-    mirpurName: "Mirpur",
-    mohammadpurName: "Mohammadpur",
+      "This guide is for general information only. A bank loan, a tax calculation or a registration needs a formal survey by a certified engineer and checks at the relevant Sub-Registry. HomeNet BD does not issue valuation certificates.",
   },
   propertyNewsTrends: {
-    metaTitle: "Bangladesh Property News & Trends 2026 | HomeNet BD",
+    metaTitle:
+      "Property News & Trends | HomeNet BD",
     metaDescription:
-      "Stay informed on Bangladesh real estate policies, RAJUK DAP rules, MRT corridor growth, housing loan rates, and building material price trends in Dhaka.",
-    eyebrow: "Real Estate Market Intelligence",
-    headline: "Bangladesh Property News & Trends",
+      "HomeNet does not publish property news yet. See the price index, the valuation guide and the registration guide instead.",
+    eyebrow:
+      "News & Trends",
+    headline:
+      "Property news and trends",
     subheading:
-      "Verified updates on real estate policies, RAJUK DAP regulations, infrastructure corridors, and quarterly housing indices.",
-    lastUpdated: "Updated for Q4 2026",
-    digestBadge: "Quarterly Housing Digest",
-    tabAll: "All News & Analysis",
-    tabPolicy: "Policy & Regulations",
-    tabInfrastructure: "Infrastructure Corridors",
-    tabMarketTrends: "Market Trends & Material Index",
-    featuredBadge: "Lead Editorial",
-    featuredCategory: "Policy & Regulations",
-    featuredDate: "October 2026",
-    featuredReadTime: "6 min read",
-    featuredTitle:
-      "RAJUK DAP Revisions: Floor Area Ratio (FAR) Adjustments Approved for Dhaka Residential Plots",
-    featuredSummary:
-      "The Ministry of Housing has approved critical relaxations in Floor Area Ratio (FAR) calculations for narrow road plots (under 30ft), restoring feasibility for joint-venture developer projects across Dhanmondi, Mirpur, and Uttara.",
-    featuredTakeaway:
-      "Key Impact: Up to 18% higher buildable floor area on 5–10 katha plots, improving apartment supply over the next 24 months.",
-    readArticleAction: "Read Analysis",
-    gridTitle: "Market Intelligence & Regulatory Reports",
-    gridSubtitle:
-      "In-depth coverage on infrastructure expansion, bank financing schemes, and raw construction material benchmarks.",
-    art1Category: "Infrastructure Corridors",
-    art1Topic: "Metro Rail Connectivity",
-    art1Date: "November 2026",
-    art1ReadTime: "4 min read",
-    art1Title:
-      "MRT Line-6 Motijheel to Kamalapur Extension Enters Final Commissioning Phase",
-    art1Summary:
-      "Commercial and rental yields in Motijheel and adjacent South Kamalapur have appreciated by 14% year-over-year as commuter travel time from Uttara drops to 38 minutes.",
-    art1Takeaway:
-      "High rental demand from corporate executives shifting closer to multimodal transit interchanges.",
-    art2Category: "Policy & Regulations",
-    art2Topic: "Home Loan Refinancing",
-    art2Date: "October 2026",
-    art2ReadTime: "5 min read",
-    art2Title:
-      "Bangladesh Bank Enhances Affordable Housing Refinancing Fund to ৳3,000 Crore",
-    art2Summary:
-      "Single-digit 8.5% interest rates made available for first-time apartment buyers purchasing units under 1,250 sqft outside central Dhaka city corporation limits.",
-    art2Takeaway:
-      "Surge in suburban apartment bookings in Savar, Keraniganj, and Gazipur periphery.",
-    art3Category: "Market Trends & Material Index",
-    art3Topic: "Construction Material Cost",
-    art3Date: "September 2026",
-    art3ReadTime: "4 min read",
-    art3Title:
-      "Structural Rebar & Portland Cement Prices Moderate Following Import Tariff Rationalization",
-    art3Summary:
-      "60-grade MS rod prices dropped from ৳98,000 to 89,500 per ton, easing construction expenditure pressure on active residential handovers across Dhaka.",
-    art3Takeaway:
-      "Developers forecast stable per-square-foot baseline pricing for ready flats through early 2027.",
-    art4Category: "Infrastructure Corridors",
-    art4Topic: "Expressway Expansion",
-    art4Date: "August 2026",
-    art4ReadTime: "3 min read",
-    art4Title:
-      "Dhaka Elevated Expressway Phase-3 Linkage Boosts Ashulia & Airport Corridor Land Value",
-    art4Summary:
-      "Smooth access between Hazrat Shahjalal International Airport and southern industrial hubs has pushed planned residential township inquiries up by 22%.",
-    art4Takeaway:
-      "Purbachal and Ashulia border sectors leading secondary land sales volume.",
-    art5Category: "Market Trends & Material Index",
-    art5Topic: "Secondary Market Boom",
-    art5Date: "July 2026",
-    art5ReadTime: "5 min read",
-    art5Title:
-      "Secondary Resale Apartments Surge in Demand Amid Rising Cost of New Developer Units",
-    art5Summary:
-      "Buyers in Dhanmondi and Mirpur increasingly favor 5–10 year-old resale flats offering immediate utility connections, ready mutation documents, and zero handover delays.",
-    art5Takeaway:
-      "Secondary flats trade at a 15%–25% discount per square foot compared to newly launched under-construction projects.",
-    snapshotTitle: "Q4 2026 Market Snapshot",
-    snapshotSubtitle:
-      "Key macro indicators governing property acquisitions and bank mortgages across Bangladesh.",
-    stat1Label: "Avg Housing Loan Rate",
-    stat1Value: "9.25% – 10.5%",
-    stat1Note: "Fixed & Floating blend",
-    stat2Label: "Top Appreciating Corridor",
-    stat2Value: "Purbachal (+14.6%)",
-    stat2Note: "12-month capital gain",
-    stat3Label: "Construction Material Index",
-    stat3Value: "142.4 (-2.8% QoQ)",
-    stat3Note: "Rebar & cement moderation",
-    newsletterTitle: "Subscribe to HomeNet Monthly Intelligence Digest",
-    newsletterSubtitle:
-      "Get verified legal updates, RAJUK circulars, and quarterly price movement indices delivered directly to your inbox.",
-    emailPlaceholder: "Enter your email address...",
-    subscribeButton: "Subscribe",
-    subscribedSuccess: "Thank you for subscribing to HomeNet BD Market Digest.",
-    disclaimerTitle: "Editorial & Market Intelligence Disclaimer",
-    disclaimerDesc:
-      "The news analysis, regulatory summaries, and material cost indices published on this page are compiled for informational purposes using gazette notifications, Bangladesh Bank releases, and verified industry reports. HomeNet BD does not provide statutory legal advice or guaranteed investment yields.",
+      "We do not publish news or market commentary yet. Rather than fill this page with stories we cannot stand behind, we point you to the pages that hold real information.",
+    dataTitle:
+      "What we can show you today",
+    dataBody:
+      "Our price figures come from {{count}} apartment listings on {{sites}} property sites, collected in {{date}}.",
+    linkIndexTitle:
+      "Dhaka price index",
+    linkIndexBody:
+      "Asking prices per square foot by area, with the number of listings behind each.",
+    linkGuideTitle:
+      "Property valuation guide",
+    linkGuideBody:
+      "How a property is valued, and what raises or lowers its price.",
+    linkDutyTitle:
+      "Registration and stamp duty guide",
+    linkDutyBody:
+      "The fees, steps and documents involved in registering a property.",
+    noteTitle:
+      "Looking for news?",
+    noteBody:
+      "For news on policy, interest rates or new projects, use official sources such as Bangladesh Bank, the National Board of Revenue and RAJUK.",
   },
   buyerGuides: {
     metaTitle: "Bangladesh Property Buyer's Guide 2026 | HomeNet BD",
