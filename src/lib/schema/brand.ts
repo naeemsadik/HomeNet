@@ -1,4 +1,5 @@
 import { SUPPORT_EMAIL } from "@/content/legal";
+import { socialProfileUrls } from "@/content/socialProfiles";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
 
 /**
@@ -10,7 +11,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/seo";
  *   - telephone: public support number, in +880 form
  *   - address: the registered office
  *   - geo: the office's coordinates (from Google Maps, 4+ decimals)
- *   - sameAs: official social profiles (Facebook page, LinkedIn, YouTube)
+ *   - sameAs: comes from src/content/socialProfiles.ts, add new accounts there
  */
 export const BRAND = {
   name: SITE_NAME,
@@ -30,7 +31,7 @@ export const BRAND = {
     postalCode: string;
   } | null,
   geo: null as { latitude: number; longitude: number } | null,
-  sameAs: [] as string[],
+  sameAs: socialProfileUrls(),
   areaServed: ["Dhaka", "Chattogram", "Sylhet", "Cox's Bazar"],
 };
 

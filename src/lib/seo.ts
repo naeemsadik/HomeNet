@@ -2,6 +2,12 @@
 export const SITE_URL = "https://www.homenetbd.com";
 /** The name people and search engines should use: other companies are also called "HomeNet". */
 export const SITE_NAME = "HomeNet BD";
+
+/** The full public address of a path on the site: "/property/12" becomes "https://www.homenetbd.com/property/12". */
+export function absoluteUrl(path: string): string {
+  const clean = path.startsWith("/") ? path : `/${path}`;
+  return `${SITE_URL}${clean === "/" ? "" : clean}`;
+}
 /** Shown when a link is shared (WhatsApp, Facebook, X). Lives in `public/`. */
 export const SITE_SHARE_IMAGE = `${SITE_URL}/og-image.png`;
 

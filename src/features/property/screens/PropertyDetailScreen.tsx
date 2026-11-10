@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
 import {
   ArrowLeft,
   Bath,
@@ -42,7 +42,7 @@ import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { notify } from "@/lib/alert";
 import { listingMetaDescription, listingMetaTitle, listingShareImage } from "@/lib/listingMeta";
-import { shareLink } from "@/lib/share";
+import { appShareUrl, shareLink } from "@/lib/share";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { colorTokens, webPointer } from "@/theme";
 import { type PropertyDetail, usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
@@ -81,6 +81,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   const propertyId = (rawId ?? "").trim();
   const id = propertyId;
   const { isPhone, isTablet } = useResponsive();
+  const pathname = usePathname();
   const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId, initialDetail);
   const {
     data: similarProperties = [],
@@ -251,7 +252,10 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   // There is no visit-booking API, so the request goes to the seller directly
   // instead of a confirmation screen promising a callback nobody schedules.
   const handleRequestVisit = () => {
-    const link = Platform.OS === "web" && typeof window !== "undefined" ? ` (${window.location.href})` : "";
+    const link =
+      Platform.OS === "web" && typeof window !== "undefined"
+        ? ` (${window.location.href})`
+        : ` (${appShareUrl(pathname)})`;
     const defaultSeller = language === "bn" ? "মালিক" : "Seller";
     const defaultProp = language === "bn" ? "প্রোপার্টি" : "Property";
     const visitMsg = language === "bn"
@@ -263,7 +267,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   // Used to claim the link was copied without copying anything.
   const handleShare = () => {
     if (!property) return;
-    void shareLink({ title: property.title });
+    void shareLink({ title: property.title, path: pathname });
   };
 
   // Google Play requires a way to report user-generated content from inside the app.

@@ -21,7 +21,7 @@ import {
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 import { openExternalUrl } from "@/lib/safeUrl";
 import { shareLink } from "@/lib/share";
 import { AppChrome } from "@/components/AppChrome";
@@ -119,6 +119,7 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
 export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
   const { t, language } = useTranslation();
   const { isPhone, isWide, width } = useResponsive();
+  const pathname = usePathname();
   const isMobile = isPhone || width < 900;
 
   const { data: guide, isLoading, isError } = usePropertyGuide(slug);
@@ -161,7 +162,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
 
   const handleShare = () => {
     if (!guide) return;
-    void shareLink({ title: guideTitle });
+    void shareLink({ title: guideTitle, path: pathname });
   };
 
   return (

@@ -2,6 +2,7 @@ import { memo, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { AppLink } from "@/components/ui";
 import { ChevronDown, Facebook, Linkedin, Youtube } from "@/components/icons";
+import { socialProfileUrl } from "@/content/socialProfiles";
 import { SUPPORT_EMAIL } from "@/content/legal";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { useTranslation, type TranslationKey } from "@/i18n";
@@ -21,24 +22,17 @@ interface FooterSection {
 
 const isKey = (label: string): label is TranslationKey => label.includes(".");
 
-/** Targeted mobile social media links: Facebook, LinkedIn, YouTube only. */
-const SOCIAL_LINKS = [
-  {
-    name: "Facebook",
-    url: "https://www.facebook.com/homenetbd",
-    icon: Facebook,
-  },
-  {
-    name: "LinkedIn",
-    url: "https://www.linkedin.com/company/homenetbd",
-    icon: Linkedin,
-  },
-  {
-    name: "YouTube",
-    url: "https://www.youtube.com/@homenetbd",
-    icon: Youtube,
-  },
-] as const;
+/** Mobile footer social links: the networks HomeNet has an account on (see socialProfiles.ts). */
+const SOCIAL_LINKS = (
+  [
+    { name: "Facebook", network: "facebook", icon: Facebook },
+    { name: "LinkedIn", network: "linkedin", icon: Linkedin },
+    { name: "YouTube", network: "youtube", icon: Youtube },
+  ] as const
+).flatMap(({ name, network, icon }) => {
+  const url = socialProfileUrl(network);
+  return url ? [{ name, url, icon }] : [];
+});
 
 /** Every link opens a page that exists. */
 const SECTIONS: FooterSection[] = [
