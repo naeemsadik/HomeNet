@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { colorTokens, radius, shadow } from "@/theme";
+import { colorTokens, radius } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 import { ValuationStepIndicator } from "./ValuationStepIndicator";
@@ -30,20 +30,16 @@ export function InstantValuationWizard() {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colorTokens.surface,
-    borderRadius: radius.xl,
-    borderWidth: 1.5,
-    borderColor: "rgba(11, 26, 23, 0.08)",
-    padding: 28,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colorTokens.divider,
+    padding: 32,
     width: "100%",
-    maxWidth: 860,
+    maxWidth: 760,
     alignSelf: "center",
-    ...shadow,
   },
   cardPhone: {
     padding: 16,
-    borderRadius: radius.lg,
   },
-  contentWrap: {
-    marginTop: 12,
-  },
+  contentWrap: {},
 });
