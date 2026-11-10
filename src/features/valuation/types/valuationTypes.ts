@@ -148,6 +148,11 @@ export interface ValuationResponseData {
 
   /** Estimated Monthly Rental Yield */
   estimatedMonthlyRent: number;
+  /** The range around the monthly rent, from the rent listings' spread (-6% / +6% without them). */
+  lowMonthlyRent: number;
+  highMonthlyRent: number;
+  lowMonthlyRentFormatted: string;
+  highMonthlyRentFormatted: string;
   estimatedMonthlyRentFormatted: string;
   grossRentalYieldPct: number;
 

@@ -99,6 +99,12 @@ export function Step4ResultDashboard() {
     );
   }
 
+  // A rent shows the monthly rent and its range; a sale shows the value and its range.
+  const isRent = result.purpose === "rent";
+  const headline = isRent ? result.estimatedMonthlyRentFormatted : result.estimatedValueFormatted;
+  const lowLabel = isRent ? result.lowMonthlyRentFormatted : result.lowEstimateFormatted;
+  const highLabel = isRent ? result.highMonthlyRentFormatted : result.highEstimateFormatted;
+
   const handleShare = () => {
     notify(
       t("valuation.step4.shareCopiedTitle"),
@@ -150,7 +156,7 @@ export function Step4ResultDashboard() {
                 ? t("valuation.step4.estimatedMonthlyRent")
                 : t("valuation.step4.estimatedMarketValue")}
             </Text>
-            <Text style={styles.heroEstimatedValue}>{result.estimatedValueFormatted}</Text>
+            <Text style={styles.heroEstimatedValue}>{headline}</Text>
           </View>
 
           <View style={styles.confidencePill}>
@@ -170,17 +176,17 @@ export function Step4ResultDashboard() {
           <View style={styles.rangeLabelsRow}>
             <View>
               <Text style={styles.rangeSubLabel}>{t("valuation.step4.lowEstimate")}</Text>
-              <Text style={styles.rangeValueText}>{result.lowEstimateFormatted}</Text>
+              <Text style={styles.rangeValueText}>{lowLabel}</Text>
             </View>
 
             <View style={styles.midPointIndicator}>
               <Text style={styles.rangeMidLabel}>{t("valuation.step4.midMarket")}</Text>
-              <Text style={styles.rangeMidValueText}>{result.estimatedValueFormatted}</Text>
+              <Text style={styles.rangeMidValueText}>{headline}</Text>
             </View>
 
             <View style={styles.rangeHighAlign}>
               <Text style={styles.rangeSubLabel}>{t("valuation.step4.highEstimate")}</Text>
-              <Text style={styles.rangeValueText}>{result.highEstimateFormatted}</Text>
+              <Text style={styles.rangeValueText}>{highLabel}</Text>
             </View>
           </View>
 

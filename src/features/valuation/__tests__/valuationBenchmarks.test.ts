@@ -86,6 +86,22 @@ describe("estimate from listing benchmarks", () => {
   });
 });
 
+describe("a rent valuation", () => {
+  it("has its own range, from the rent listings' spread", () => {
+    const result = estimate({ purpose: "rent" });
+    // Gulshan rent: median 50, p25 40, p75 60, so 0.8 and 1.2 of the monthly rent.
+    expect(result.lowMonthlyRent / result.estimatedMonthlyRent).toBeCloseTo(0.8, 2);
+    expect(result.highMonthlyRent / result.estimatedMonthlyRent).toBeCloseTo(1.2, 2);
+    expect(result.lowMonthlyRentFormatted).toMatch(/\/mo$/);
+  });
+
+  it("keeps -6% / +6% for an area with no rent listings", () => {
+    const result = estimate({ areaName: "Mirpur", purpose: "rent" });
+    expect(result.lowMonthlyRent / result.estimatedMonthlyRent).toBeCloseTo(0.94, 2);
+    expect(result.highMonthlyRent / result.estimatedMonthlyRent).toBeCloseTo(1.06, 2);
+  });
+});
+
 describe("the range around the estimate", () => {
   it("follows the area's spread of asking prices, not a flat 6%", () => {
     const result = estimate({});

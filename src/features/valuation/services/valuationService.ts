@@ -412,6 +412,9 @@ export function calculateDhakaValuation(
   const annualRentalRate = benchmark.rentPerSqft * 12 * (1 + amenitiesAdjustmentPct * 0.5);
   const estimatedAnnualRent = annualRentalRate * effectiveSqft;
   const estimatedMonthlyRent = Math.round(estimatedAnnualRent / 12);
+  const rentSpread = estimateSpread(isApartment ? rentListings : null);
+  const lowMonthlyRent = Math.round(estimatedMonthlyRent * rentSpread.low);
+  const highMonthlyRent = Math.round(estimatedMonthlyRent * rentSpread.high);
   const grossRentalYieldPct = Number(
     ((estimatedAnnualRent / estimatedValue) * 100).toFixed(2)
   );
@@ -510,6 +513,10 @@ export function calculateDhakaValuation(
     highEstimateFormatted: formatBdtPrice(highEstimate),
     estimatedMonthlyRent,
     estimatedMonthlyRentFormatted: formatMonthlyRent(estimatedMonthlyRent),
+    lowMonthlyRent,
+    highMonthlyRent,
+    lowMonthlyRentFormatted: formatMonthlyRent(lowMonthlyRent),
+    highMonthlyRentFormatted: formatMonthlyRent(highMonthlyRent),
     grossRentalYieldPct,
     pricePerSqft: calculatedRatePerSqft,
     pricePerSqftFormatted: formatBdtPerSqft(calculatedRatePerSqft),
