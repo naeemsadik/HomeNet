@@ -2,13 +2,13 @@
  * The mess API (PRD v1.0, section 2.3), one function per endpoint.
  *
  * Listing media, submit and saved listings reuse the existing /v1/properties
- * routes: a mess listing is a Property row. With MESS_FIXTURES on, every call is
- * answered by the in-memory demo backend in ./fixtures instead.
+ * routes: a mess listing is a Property row. In a build made with
+ * EXPO_PUBLIC_MESS_FIXTURES=true every call is answered by the in-memory demo
+ * backend in ./fixtures instead (see fixtureBackend below).
  */
 import apiClient, { ApiError } from "@/services/apiClient";
 import { deletePropertyMedia, submitProperty, uploadPropertyMedia } from "@/services/propertyApi";
 import type { UploadInput } from "@/services/upload";
-import { MESS_FIXTURES } from "@/lib/features";
 import type { ApiResponse } from "@/types/api";
 import type { PaginatedResponse } from "@/features/property/types/property";
 import { toApiParams } from "../utils/filterParams";
@@ -28,7 +28,6 @@ import type {
   University,
   UpsertMessDto,
 } from "../types/mess";
-import { fixtureBackend } from "./fixtures/server";
 
 export interface MessBackend {
   getUniversities(): Promise<University[]>;
@@ -128,7 +127,22 @@ export const httpBackend: MessBackend = {
   },
 };
 
-const backend = (): MessBackend => (MESS_FIXTURES ? fixtureBackend : httpBackend);
+/**
+ * The demo backend, for development and demos before the API exists. Its
+ * listings, phone numbers and campus coordinates are made up: never set
+ * EXPO_PUBLIC_MESS_FIXTURES on a production deploy.
+ *
+ * The env check is written out here, not read from a constant elsewhere, so
+ * the production build sees a branch that is always false and leaves the demo
+ * module out of the bundle entirely.
+ */
+const fixtureBackend: MessBackend | null =
+  process.env.EXPO_PUBLIC_MESS_FIXTURES === "true"
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      (require("./fixtures/server") as typeof import("./fixtures/server")).fixtureBackend
+    : null;
+
+const backend = (): MessBackend => fixtureBackend ?? httpBackend;
 
 export const getUniversities = () => backend().getUniversities();
 export const searchMess = (filters: MessFilters, page: number, limit: number) => backend().searchMess(filters, page, limit);

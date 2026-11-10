@@ -86,14 +86,10 @@ export const OWNER_UNARCHIVE_ENABLED = false;
  * is not deployed yet. Off: no navigation entry, and every /mess page is the
  * not-found page. To switch it on, set EXPO_PUBLIC_MESS_ENABLED=true and
  * redeploy: the web build is static, so the value is fixed at build time.
+ *
+ * EXPO_PUBLIC_MESS_FIXTURES=true answers the mess API from made-up demo data
+ * instead, for development before the API exists. It is read in
+ * src/features/mess/api/messApi.ts, where the bundler can drop the demo data
+ * from builds without it.
  */
 export const MESS_ENABLED = process.env.EXPO_PUBLIC_MESS_ENABLED === "true";
-
-/**
- * Answers every mess API call from an in-memory demo backend
- * (src/features/mess/api/fixtures) instead of the network, so the screens can
- * be built and shown before the API exists. Development and demos only: the
- * listings, phone numbers and campus coordinates in it are made up. Never set
- * EXPO_PUBLIC_MESS_FIXTURES on a production deploy.
- */
-export const MESS_FIXTURES = process.env.EXPO_PUBLIC_MESS_FIXTURES === "true";

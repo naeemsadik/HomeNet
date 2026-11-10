@@ -1,5 +1,5 @@
 /**
- * An in-memory mess backend for development and demos (MESS_FIXTURES). It
+ * An in-memory mess backend for development and demos (EXPO_PUBLIC_MESS_FIXTURES). It
  * mirrors the API's behaviour as the PRD describes it, so the screens exercise
  * the same states they will meet for real: derived costs and rules, the search
  * filters, submit-time completeness checks (422), sign-in and rate limits on
