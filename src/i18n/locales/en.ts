@@ -2297,6 +2297,364 @@ export const en = {
     noteBody:
       "For news on policy, interest rates or new projects, use official sources such as Bangladesh Bank, the National Board of Revenue and RAJUK.",
   },
+  buyerGuides: {
+    metaTitle: "Bangladesh Property Buyer's Guide 2026 | HomeNet BD",
+    metaDescription:
+      "Complete property buying guide for Bangladesh. Verify Khatian, Namzari, RAJUK approvals, Baina-nama, and Saf-Kabala deeds to prevent real estate fraud.",
+    eyebrow: "Legal & Acquisition Due Diligence",
+    headline: "Bangladesh Property Buyer's Guide",
+    subheading:
+      "Step-by-step legal roadmap, statutory document checks, and contract safeguards to buy apartments and land with zero legal risk.",
+    badgeDueDiligence: "Transfer of Property Act 1882 Aligned",
+    badgeRegistry: "Sub-Registry & AC Land Verified",
+    badgeRajuk: "RAJUK Building Code 2024",
+    checklistTitle: "Interactive Buyer Due Diligence Checklist",
+    checklistSubtitle:
+      "Tick each document and clearance verified. Track your legal safety score before signing contracts or transferring funds.",
+    readinessScore: "Buyer Legal Safety Score",
+    scoreLow: "High Risk — Missing Vital Records",
+    scoreMedium: "Moderate Clearance — Additional Verification Needed",
+    scoreHigh: "Legally Secure — Ready for Contract Execution",
+    check1Title: "Chain of Title (বায়া দলিল / Baya Deed)",
+    check1Desc:
+      "25–30 year unbroken chain of ownership deeds verifying rightful title passage.",
+    check2Title: "Survey Khatians (CS, SA, RS & City/BS)",
+    check2Desc:
+      "Matching ownership names and plot boundaries across all historical land surveys.",
+    check3Title: "e-Namjari Mutation & DCR Receipt",
+    check3Desc:
+      "Current seller's name registered in Upazila/Circle AC Land records with valid DCR.",
+    check4Title: "Non-Encumbrance Certificate (NEC)",
+    check4Desc:
+      "Official search from Sub-Registry proving no hidden mortgage or bank lien on the property.",
+    check5Title: "Sanctioned RAJUK / CDA Building Plan",
+    check5Desc:
+      "Architectural approval letter, setback compliance, and occupancy certificate for apartments.",
+    check6Title: "Updated Land Development Tax (Khajna)",
+    check6Desc:
+      "Paid-up Dakhila proving current fiscal year revenue clearance with the government.",
+    phasesTitle: "The 4 Essential Phases of Buying Property in Bangladesh",
+    phasesSubtitle:
+      "From title search to mutation, follow this chronological procedure to secure indisputable ownership.",
+    phaseDocsLabel: "Essential Docs:",
+    phase1Tag: "Phase 01",
+    phase1Title: "Legal Due Diligence & Title Search",
+    phase1Desc:
+      "Never make a financial deposit before reviewing certified deed copies. Check CS, SA, RS, and City/BS records at the District Collectorate and Sub-Registry. Ensure land is not declared Vested (অর্পিত), Waqf, or Abandoned property.",
+    phase1Docs: "Baya Deed, Khatians, e-Namjari, NEC",
+    phase1Time: "10–15 Days",
+    phase1Warning:
+      "Warning: A missing Baya Deed can invalidate your future title in civil courts.",
+    phase2Tag: "Phase 02",
+    phase2Title: "Developer Sanctions & RAJUK Compliance",
+    phase2Desc:
+      "For apartments, inspect the registered Landowner-Developer Joint Venture Agreement and Irrevocable Power of Attorney. Confirm the developer is an active REHAB member and the built structure does not exceed sanctioned Floor Area Ratio (FAR).",
+    phase2Docs: "RAJUK Sanction, Power of Attorney, REHAB Cert",
+    phase2Time: "5–7 Days",
+    phase2Warning:
+      "Warning: Extra floors constructed beyond approved plans cannot be registered or mutated.",
+    phase3Tag: "Phase 03",
+    phase3Title: "Registered Baina-Nama & Payment Safeguards",
+    phase3Desc:
+      "Execute a formal Agreement to Sell (বায়নানামা) on statutory non-judicial stamp and register it at the Sub-Registry within 30 days under Section 54A of the Transfer of Property Act. Pay token and installments strictly via Account Payee Cheques or Bank Pay Orders.",
+    phase3Docs: "Registered Baina, Bank Pay Orders, Cheque Copies",
+    phase3Time: "1–3 Days",
+    phase3Warning:
+      "Warning: Unregistered Baina-nama carries zero legal standing for specific performance suits.",
+    phase4Tag: "Phase 04",
+    phase4Title: "Deed Execution, Tax Clearance & Post-Purchase Mutation",
+    phase4Desc:
+      "Execute the final Saf-Kabala deed at the Sub-Registry. Pay Stamp Duty (1.5%), Registration Fee (1%), Local Govt Tax (2%), and AIT. Within 30 days of registration, apply for e-Namjari mutation in your name at the AC Land office.",
+    phase4Docs: "Saf-Kabala Deed, Tax Receipts, New e-Namjari",
+    phase4Time: "1 Day (Registry) + 28 Days (Mutation)",
+    phase4Warning:
+      "Warning: Purchase is legally incomplete until your name is recorded in the government mutation register.",
+    guidesTitle: "Curated Deep-Dive Guides & Tools",
+    guidesSubtitle:
+      "Master specific legal and financial steps with HomeNet's comprehensive guides.",
+    guide1Category: "Land Records",
+    guide1Title:
+      "How to Verify CS, SA, RS, and City Survey Khatians in Bangladesh",
+    guide1Desc:
+      "Detailed guide on deciphering cadastral maps, porcha seals, and recognizing fraudulent Khatians.",
+    guide2Category: "Title Perfection",
+    guide2Title:
+      "Complete Step-by-Step Guide to e-Namjari Mutation in Bangladesh",
+    guide2Desc:
+      "How to apply online, submit DCR fees, and obtain your mutation Khatian without middlemen.",
+    guide3Category: "Contracts & Sales",
+    guide3Title:
+      "Baina-Nama: Why Registering Your Agreement to Sell is Mandatory",
+    guide3Desc:
+      "Understanding Section 54A, statutory stamp requirements, and standard clauses to safeguard your deposit.",
+    guide4Category: "Apartment Safety",
+    guide4Title:
+      "How to Verify RAJUK & CDA Approved Building Plans for Apartments",
+    guide4Desc:
+      "Checking layout approvals, setbacks, occupancy certificates, and identifying unapproved rooftop extensions.",
+    guide5Category: "Financial Planning",
+    guide5Title:
+      "Bangladesh Stamp Duty & Property Registration Tax Calculator",
+    guide5Desc:
+      "Calculate exact stamp duties, registration fees, AIT gain tax, and local taxes across Dhaka and Chittagong.",
+    faqTitle: "Frequently Asked Buyer Questions",
+    faqSubtitle:
+      "Essential answers on property verification, developer disputes, and deed laws.",
+    faq1Q:
+      "What happens if I buy an apartment constructed without RAJUK approval?",
+    faq1A:
+      "An unapproved apartment cannot be legally registered or mutated under your name. Commercial banks will refuse home loan financing, utility companies may deny permanent gas and electricity meters, and RAJUK retains demolition authority over unauthorized structures under the Building Construction Act.",
+    faq2Q: "Why is an unregistered Baina-nama (বায়নানামা) legally perilous?",
+    faq2A:
+      "Under Section 54A of the Transfer of Property Act, an unregistered contract for sale has no legal force in court to compel property transfer. If the seller breaches or sells to a third party, your only recourse is a protracted criminal case for fraud, rather than securing court-ordered title transfer.",
+    faq3Q:
+      "Why is checking 25 to 30 years of Baya Deeds (বায়া দলিল) necessary?",
+    faq3A:
+      "In Bangladesh, real estate disputes often trace back to unresolved inheritance shares, unpartitioned joint family land (এওয়াজ/বাটোয়ারা), or unauthorized transfers made decades ago. A 25–30 year title search confirms that every previous owner had undisputed legal title.",
+    faq4Q:
+      "How soon after property registration must I apply for mutation (নামজারি)?",
+    faq4A:
+      "You should apply for e-Namjari immediately after receiving your registered deed receipt (সাধারণ রসিদ), ideally within 30 days. Without mutation in the AC Land office, the government tax roll remains in the previous owner's name, leaving the property vulnerable to fraudulent second sales.",
+    disclaimerTitle: "Legal Due Diligence Disclaimer",
+    disclaimerDesc:
+      "This guide is intended for educational purposes and provides general workflow advice under Bangladesh property legislation. Real estate acquisitions involve complex legal, inheritance, and tax liabilities. HomeNet BD strongly advises engaging a qualified civil lawyer to conduct independent title and document searches prior to executing property transactions.",
+  },
+  sellerGuides: {
+    metaTitle: "Bangladesh Property Seller's Guide 2026 | HomeNet BD",
+    metaDescription:
+      "Complete seller guide for Bangladesh property. Prepare e-Namjari, clear land taxes, calculate Section 53H AIT, and execute registered Saf-Kabala deeds safely.",
+    eyebrow: "Sales Execution & Legal Cleanliness",
+    headline: "Property Seller's Guide: Real Estate in Bangladesh",
+    subheading:
+      "Master title perfection, fair market valuation, registered Baina-nama safeguards, and Section 53H seller tax clearance to sell property smoothly.",
+    badgeTaxAct: "Income Tax Act 2023 (Section 53H AIT)",
+    badgeBainaAct: "Transfer of Property Act 1882 (Sec 54A)",
+    badgeNamjari: "Land Ministry e-Namjari & AC Land",
+    checklistTitle: "Interactive Seller Readiness Checklist",
+    checklistSubtitle:
+      "Verify every statutory record and clearance before advertising or accepting token earnest deposits.",
+    readinessScore: "Seller Legal Safety Score",
+    scoreLow: "Incomplete Documentation — Missing Critical Titles",
+    scoreMedium: "Partial Clearance — Outstanding Taxes or Approvals",
+    scoreHigh: "Market-Ready — Full Legal Clearance to Execute Sale",
+    check1Title: "e-Namjari Mutation Khatian & Valid DCR",
+    check1Desc:
+      "Seller's exclusive name recorded in the Upazila/Circle AC Land revenue register with genuine Duplicate Carbon Receipt.",
+    check2Title: "Land Development Tax (Khajna) Clearance",
+    check2Desc:
+      "Current fiscal year Khajna Dakhila paid through the online Land Revenue portal with zero government arrears.",
+    check3Title: "Original Title Deed & Unbroken Baya Chain",
+    check3Desc:
+      "Certified original Saf-Kabala deed or developer allotment with chronological 25–30 year previous chain deeds.",
+    check4Title: "All Utility Bills & Society NOC Cleared",
+    check4Desc:
+      "Zero dues certificates from DESCO/DPDC, WASA, Titas Gas, and formal No Objection Certificate from building association.",
+    check5Title: "Registered Partition Deed (Ancestral Land)",
+    check5Desc:
+      "Registered Apas-Bonton-nama (বণ্টননামা) and Warishan Sanad if property was inherited across joint family members.",
+    check6Title: "Section 53H Advance Income Tax (AIT) Prepared",
+    check6Desc:
+      "Accurate calculation and liquidity set aside for source gain tax payable at Sub-Registry upon deed registration.",
+    phasesTitle: "The 4 Essential Phases of Selling Property in Bangladesh",
+    phasesSubtitle:
+      "From paperwork cleanup to registration day, follow this statutory roadmap for a dispute-free sale.",
+    phaseDocsLabel: "Essential Docs:",
+    phase1Tag: "Phase 01",
+    phase1Title: "Ownership Title Preparation & Legal Cleanliness",
+    phase1Desc:
+      "Before listing, assemble the original Saf-Kabala deed, 25-year Baya deeds, mutation Khatian with DCR, and current Khajna Dakhila. If inherited property, obtain an official Warishan Sanad and execute a registered partition deed to avoid future heir injunctions.",
+    phase1Docs: "Saf-Kabala, Baya Deeds, Mutation Khatian, DCR, Khajna",
+    phase1Time: "15–30 Days",
+    phase1Warning:
+      "Warning: Buyers cannot obtain bank home loans without seller's updated e-Namjari and clear DCR.",
+    phase2Tag: "Phase 02",
+    phase2Title: "Property Valuation & Pricing Strategy",
+    phase2Desc:
+      "Understand the difference between the government minimum Mouza rate (used for Sub-Registry stamp duty calculations) and Fair Market Value. Price accurately by benchmarking against Dhaka micro-market rates, factoring road access width, floor position, and building age.",
+    phase2Docs: "Mouza Rate Sheet, HomeNet Price Index, Building Age Log",
+    phase2Time: "3–7 Days",
+    phase2Warning:
+      "Warning: Overpricing based on emotion causes listings to stagnate, while underpricing forfeits real capital appreciation.",
+    phase3Tag: "Phase 03",
+    phase3Title: "Registered Baina-Nama & Financial Shielding",
+    phase3Desc:
+      "Execute an Agreement to Sell (বায়নানামা) on statutory non-judicial stamp and register it at the Sub-Registry within 30 days under Section 54A. Collect 10%–20% earnest money strictly via Account Payee Bank Pay Order with a defined 60–90 day timeline for deed completion.",
+    phase3Docs: "Registered Baina, Account Payee Pay Order, Timeline Terms",
+    phase3Time: "2–5 Days",
+    phase3Warning:
+      "Warning: Unregistered Baina-nama leaves sellers vulnerable to buyer cancellation and title clouding.",
+    phase4Tag: "Phase 04",
+    phase4Title: "Tax Liabilities & Saf-Kabala Execution",
+    phase4Desc:
+      "Calculate your Section 53H Advance Income Tax (AIT / উৎসে কর) liability. Attend the Sub-Registry for biometric identification, verify remaining consideration via bank pay order, hand over original keys and deeds, and execute the final registered Saf-Kabala deed.",
+    phase4Docs: "Bank Pay Orders, AIT Challan, Utility NOCs, Saf-Kabala",
+    phase4Time: "1 Day (Registry Day)",
+    phase4Warning:
+      "Warning: Never hand over physical vacant possession before confirming the buyer's balance pay order has cleared.",
+    guidesTitle: "Curated Tools & Deep-Dive Seller Guides",
+    guidesSubtitle:
+      "Leverage HomeNet's valuation and regulatory toolsets to prepare your transaction.",
+    guide1Category: "Valuation",
+    guide1Title: "Dhaka Property Valuation Guide & Estimator",
+    guide1Desc:
+      "Calculate estimated fair market value vs government Mouza rates across Dhanmondi, Gulshan, Banani, and Uttara.",
+    guide2Category: "Market Intel",
+    guide2Title: "Dhaka Property Price Index & Area Trends",
+    guide2Desc:
+      "Inspect current square-foot asking benchmarks to price your apartment competitively without leaving money on the table.",
+    guide3Category: "Taxation",
+    guide3Title: "Stamp Duty & Property Registration Tax Calculator",
+    guide3Desc:
+      "Determine seller Section 53H Advance Income Tax (AIT) rates and understand total closing cost breakdown.",
+    guide4Category: "Title Perfection",
+    guide4Title: "Complete Step-by-Step Guide to e-Namjari Mutation",
+    guide4Desc:
+      "Ensure your mutation records and DCR receipts are 100% verified in the AC Land portal prior to listing.",
+    guide5Category: "Contracts",
+    guide5Title: "Baina-Nama: Mandatory Agreement to Sell Rules",
+    guide5Desc:
+      "Safeguard your seller rights with Section 54A registered Baina agreements, earnest money rules, and default clauses.",
+    faqTitle: "Frequently Asked Seller Questions",
+    faqSubtitle:
+      "Authoritative answers on seller tax liabilities, developer flats, and default remedies.",
+    faq1Q:
+      "Who is legally liable to pay Advance Income Tax (AIT / উৎসে কর) at the Sub-Registry?",
+    faq1A:
+      "Under Section 53H of the Income Tax Act 2023, the seller/transferor is legally responsible for Advance Income Tax (AIT). The Sub-Registrar collects this tax at source via Treasury Challan prior to executing the Saf-Kabala deed, calculated based on the designated commercial/residential mouza rate or deed value.",
+    faq2Q:
+      "Can I sell an apartment if the developer has not yet issued the final Saf-Kabala deed?",
+    faq2A:
+      "Yes, but you cannot execute a direct Saf-Kabala. You must execute a registered Tripartite Deed of Transfer (ত্রিপক্ষীয় হস্তান্তর দলিল) where the developer joins as a confirming party, or execute a registered assignment of rights backed by the original registered Power of Attorney and developer Allotment Letter.",
+    faq3Q:
+      "How binding is a registered Baina-nama if the buyer defaults on paying the balance consideration?",
+    faq3A:
+      "A registered Baina-nama under Section 54A binds both parties to statutory timelines (typically 60–90 days). If the buyer fails to pay within the stipulated date, the seller can issue a legal notice to perform within 15 days. If the default continues, standard contractual forfeiture clauses (usually 10%–20% deposit) take effect, and the seller can move to rescind the contract.",
+    faq4Q:
+      "What documents must be resolved before selling inherited ancestral land (পৈতৃক সম্পত্তি)?",
+    faq4A:
+      "You must provide an official Warishan Sanad (উত্তরাধিকার সনদ) from the local City Corporation or Union Parishad, a registered Partition Deed (আপস বণ্টননামা) executed among all surviving legal heirs, and individual e-Namjari mutation in your name with up-to-date Khajna receipts.",
+    disclaimerTitle: "Seller Advisory & Legal Notice",
+    disclaimerDesc:
+      "This guide provides educational insight into real estate sales procedures under Bangladesh laws. Property transactions involve critical tax liabilities, inheritance verifications, and contractual commitments. HomeNet BD strongly recommends engaging an advocate or licensed deed writer (সনদপ্রাপ্ত দলিল লেখক) to review all title instruments and verify government receipts prior to execution.",
+  },
+  renterGuides: {
+    metaTitle: "Bangladesh Tenant & Renter's Guide 2026 | HomeNet BD",
+    metaDescription:
+      "Complete tenant guide for Bangladesh. Master Rent Control Act 1991, ৳300 stamp rent agreements, advance deposit limits, and DMP police verification compliance.",
+    eyebrow: "Tenant Rights & Tenancy Legislation",
+    headline: "Tenant & Renter's Guide: Rights & Standards",
+    subheading:
+      "Master rent agreements, statutory advance deposit protections, DMP tenant verification, and dispute resolution under the Premises Rent Control Act.",
+    badgeRentAct: "Premises Rent Control Act 1991",
+    badgeStamp: "৳300 Non-Judicial Stamp Agreement",
+    badgePolice: "DMP Tenant Verification (CIMS)",
+    checklistTitle: "Interactive Move-In Readiness Checklist",
+    checklistSubtitle:
+      "Verify every contractual term, meter reading, and police clearance before paying advance rent or moving furniture.",
+    readinessScore: "Tenant Protection Score",
+    scoreLow: "Unprotected — Missing Written Agreement",
+    scoreMedium: "Basic Tenancy — Missing Utility or Police Clearance",
+    scoreHigh: "Legally Protected — Fully Compliant Move-In",
+    check1Title: "Written Agreement on ৳300 Stamp",
+    check1Desc:
+      "Executed tenancy deed detailing monthly rent, deposit amount, and exact 1 to 2 month notice period terms.",
+    check2Title: "Signed Advance Deposit Money Receipt",
+    check2Desc:
+      "Landlord's signed receipt specifying whether advance payment is refundable security or adjustable rent.",
+    check3Title: "Dedicated Electricity Meter Day-One Reading",
+    check3Desc:
+      "Documented starting kilowatt-hour unit or prepaid card balance signed off by both tenant and owner.",
+    check4Title: "Building Service Charge & Generator Terms",
+    check4Desc:
+      "Clear breakdown of lift, security, common area cleaning, and diesel fuel surcharges during load shedding.",
+    check5Title: "Completed DMP CIMS Verification Form",
+    check5Desc:
+      "Filled tenant information form with NID and passport photos submitted to the local Thana / Police Station.",
+    check6Title: "Annual Rent Review Cap Specified",
+    check6Desc:
+      "Explicit covenant barring mid-year rent increases, restricting revisions to a maximum of once every 12 months.",
+    phasesTitle: "The 4 Essential Pillars of Renting in Bangladesh",
+    phasesSubtitle:
+      "From neighborhood due diligence to deposit recovery, follow this statutory framework for a peaceful tenancy.",
+    phaseDocsLabel: "Essential Docs:",
+    phase1Tag: "Pillar 01",
+    phase1Title: "Pre-Lease Due Diligence & Budgeting",
+    phase1Desc:
+      "Inspect the apartment in daylight for dampness, water pressure, and mobile network reception. Confirm whether the building uses prepaid gas cylinders or pipeline Titas, verify individual DESCO/DPDC meter separation, and calculate full monthly overheads including society service charges.",
+    phase1Docs: "Building Rulebook, Recent Utility Bills, Sample Lease",
+    phase1Time: "3–7 Days",
+    phase1Warning:
+      "Warning: Shared electricity sub-meters often lead to inflated tariff calculations and disputes.",
+    phase2Tag: "Pillar 02",
+    phase2Title: "Tenancy Agreement Clauses to Insist On",
+    phase2Desc:
+      "Execute the agreement on ৳300 non-judicial stamp paper. Insist on clear clauses covering notice periods (usually 1 or 2 months for both sides), structural repair obligations on the landlord, zero deductions for normal wear and tear, and mandatory written rent receipts under Section 13.",
+    phase2Docs: "৳300 Non-Judicial Stamp Deed, NID Photocopies",
+    phase2Time: "1–3 Days",
+    phase2Warning:
+      "Warning: Verbal rent agreements offer zero legal standing if a landlord attempts arbitrary eviction.",
+    phase3Tag: "Pillar 03",
+    phase3Title: "Move-In Formalities & DMP Police Verification",
+    phase3Desc:
+      "Fill out the Dhaka Metropolitan Police (DMP) Citizen Information Management System (CIMS) tenant profile with passport-sized photos, emergency contacts, and NID copies. Submit one copy to the local Thana and retain an acknowledged copy. Record baseline meter readings with photos.",
+    phase3Docs: "DMP Tenant Form, Meter Baseline Photos, Key Handover Log",
+    phase3Time: "First 7 Days",
+    phase3Warning:
+      "Warning: Failure to submit police verification violates DMP civic regulations and can lead to administrative scrutiny.",
+    phase4Tag: "Pillar 04",
+    phase4Title: "Dispute Handling & Deposit Recovery",
+    phase4Desc:
+      "Know your statutory rights under the Premises Rent Control Act 1991. Landlords cannot disconnect electricity, water, or gas during rent disputes. When vacating, provide written notice matching your agreement, settle final utility bills, and request full return of your refundable deposit.",
+    phase4Docs: "Written Notice Copy, Final Utility Slips, Handover Receipt",
+    phase4Time: "30–60 Days Notice",
+    phase4Warning:
+      "Warning: Section 18 criminalizes cutting off water or power; tenants can petition the Rent Controller for emergency relief.",
+    guidesTitle: "Curated Renter Tools & Neighborhood Benchmarks",
+    guidesSubtitle:
+      "Compare neighborhood rental rates, verify stamp rules, and find verified rentals across Dhaka.",
+    guide1Category: "Rental Benchmarks",
+    guide1Title: "Dhaka Property Price & Rental Index",
+    guide1Desc:
+      "Compare square-foot rental benchmarks across Mirpur, Dhanmondi, Uttara, Bashundhara, and Gulshan.",
+    guide2Category: "Agreements",
+    guide2Title: "Stamp Duty & Lease Registration Calculator",
+    guide2Desc:
+      "Understand statutory stamp duties for tenancy agreements, notary verification, and legal deed costs.",
+    guide3Category: "Student Housing",
+    guide3Title: "Verified Student & Bachelor Accommodation",
+    guide3Desc:
+      "Browse dedicated bachelor messes, student hostels, and shared flats near major Dhaka universities.",
+    guide4Category: "Property Search",
+    guide4Title: "Explore Homes for Rent in Dhaka",
+    guide4Desc:
+      "Search thousands of verified residential apartments, family suites, and duplexes for rent across Dhaka.",
+    guide5Category: "Valuation",
+    guide5Title: "Property Valuation & Yield Estimator",
+    guide5Desc:
+      "Inspect underlying property values to evaluate whether your asking rent represents fair market value.",
+    faqTitle: "Frequently Asked Tenant Questions",
+    faqSubtitle:
+      "Statutory answers on utility disconnections, deposit disputes, and Rent Controller legal remedies.",
+    faq1Q:
+      "Can a landlord legally disconnect water, gas, or electricity during a tenancy dispute?",
+    faq1A:
+      "No. Under Section 18 of the Premises Rent Control Act 1991, disconnecting essential utility supplies (electricity, water, gas, lift services) without an order from the Rent Controller is a criminal offense punishable by fines and imprisonment. Tenants can file an urgent application with the local Rent Controller to restore utilities immediately.",
+    faq2Q:
+      "What is the statutory limit for advance rent and security deposits in Bangladesh?",
+    faq2A:
+      "Under Section 10 of the Premises Rent Control Act 1991, landlords are prohibited from claiming arbitrary 'salami' or premiums exceeding one month's rent as a condition of granting or renewing a residential lease. In modern Dhaka practice, 1 to 2 months' advance is customary and must be stipulated in writing as refundable security.",
+    faq3Q:
+      "How does the Dhaka Metropolitan Police (DMP) tenant verification form protect renters?",
+    faq3A:
+      "Submitting the DMP Citizen Information Management System (CIMS) form creates an official police registry of your lawful domicile in that property. It deters unlawful harassment, protects tenants against arbitrary lockouts or false criminal allegations, and serves as statutory evidence of residence.",
+    faq4Q:
+      "What legal recourse do I have if a landlord refuses to refund my security deposit?",
+    faq4A:
+      "If the landlord withholds your deposit after peaceful vacant handover and cleared utility slips, first issue an Advocate's Legal Notice citing your written agreement and meter readings. If unresolved, you may file an application before the Rent Controller under the 1991 Act or initiate a summary money recovery suit in civil court.",
+    disclaimerTitle: "Statutory Tenancy Disclaimer",
+    disclaimerDesc:
+      "This guide summarizes tenant rights and workflows under the Premises Rent Control Act 1991 and DMP civic guidelines. Tenancy relationships involve binding contractual commitments. HomeNet BD strongly encourages executing written stamp agreements and seeking legal counsel or community mediation in complex eviction disputes.",
+  },
   changePasswordScreen: {
     title: "Change Password",
     subtitle: "Enter your current password and your new password",
