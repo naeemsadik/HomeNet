@@ -13,7 +13,6 @@ import {
   Building2,
   Check,
   CheckCircle2,
-  LineChart,
   Minus,
   PlusCircle,
   RotateCcw,
@@ -23,6 +22,7 @@ import {
   TrendingUp,
   WalletCards,
 } from "@/components/icons";
+import { confidenceReasonText } from "../utils/confidenceText";
 import { colorTokens, colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
@@ -31,7 +31,7 @@ import { notify } from "@/lib/alert";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 
 export function Step4ResultDashboard() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const {
     form,
     result,
@@ -99,6 +99,12 @@ export function Step4ResultDashboard() {
     );
   }
 
+  // A rent shows the monthly rent and its range; a sale shows the value and its range.
+  const isRent = result.purpose === "rent";
+  const headline = isRent ? result.estimatedMonthlyRentFormatted : result.estimatedValueFormatted;
+  const lowLabel = isRent ? result.lowMonthlyRentFormatted : result.lowEstimateFormatted;
+  const highLabel = isRent ? result.highMonthlyRentFormatted : result.highEstimateFormatted;
+
   const handleShare = () => {
     notify(
       t("valuation.step4.shareCopiedTitle"),
@@ -150,7 +156,7 @@ export function Step4ResultDashboard() {
                 ? t("valuation.step4.estimatedMonthlyRent")
                 : t("valuation.step4.estimatedMarketValue")}
             </Text>
-            <Text style={styles.heroEstimatedValue}>{result.estimatedValueFormatted}</Text>
+            <Text style={styles.heroEstimatedValue}>{headline}</Text>
           </View>
 
           <View style={styles.confidencePill}>
@@ -170,17 +176,17 @@ export function Step4ResultDashboard() {
           <View style={styles.rangeLabelsRow}>
             <View>
               <Text style={styles.rangeSubLabel}>{t("valuation.step4.lowEstimate")}</Text>
-              <Text style={styles.rangeValueText}>{result.lowEstimateFormatted}</Text>
+              <Text style={styles.rangeValueText}>{lowLabel}</Text>
             </View>
 
             <View style={styles.midPointIndicator}>
               <Text style={styles.rangeMidLabel}>{t("valuation.step4.midMarket")}</Text>
-              <Text style={styles.rangeMidValueText}>{result.estimatedValueFormatted}</Text>
+              <Text style={styles.rangeMidValueText}>{headline}</Text>
             </View>
 
             <View style={styles.rangeHighAlign}>
               <Text style={styles.rangeSubLabel}>{t("valuation.step4.highEstimate")}</Text>
-              <Text style={styles.rangeValueText}>{result.highEstimateFormatted}</Text>
+              <Text style={styles.rangeValueText}>{highLabel}</Text>
             </View>
           </View>
 
@@ -191,10 +197,18 @@ export function Step4ResultDashboard() {
           </View>
         </View>
 
-        <Text style={styles.confidenceExplanation}>{result.confidenceReason}</Text>
+        <Text style={styles.confidenceExplanation}>
+          {result.confidenceBasis
+            ? confidenceReasonText(
+                result.confidenceBasis,
+                { areaName: result.areaName, purpose: result.purpose, language },
+                t,
+              )
+            : result.confidenceReason}
+        </Text>
       </View>
 
-      {/* Metrics Grid: Rate per Sqft, Rental Yield, YoY Growth */}
+      {/* Metrics Grid: Rate per Sqft, Rental Yield */}
       <View style={[styles.metricsGrid, isPhone && styles.metricsGridPhone]}>
         {/* Metric 1: Rate Per Sqft */}
         <View style={styles.metricCard}>
@@ -225,24 +239,6 @@ export function Step4ResultDashboard() {
           <Text style={styles.metricMainValue}>{result.estimatedMonthlyRentFormatted}</Text>
           <Text style={styles.metricFootnote}>
             {t("valuation.step4.grossYield", { yield: String(result.grossRentalYieldPct) })}
-          </Text>
-        </View>
-
-        {/* Metric 3: Market Demand */}
-        <View style={styles.metricCard}>
-          <View style={styles.metricHeader}>
-            <Text style={styles.metricTitle}>
-              {t("valuation.step4.marketDemand", { area: result.areaName })}
-            </Text>
-            <LineChart color={colorTokens.info} size={16} strokeWidth={2} />
-          </View>
-          <Text style={[styles.metricMainValue, { color: colorTokens.info }]}>
-            {result.marketMetric.marketDemand}
-          </Text>
-          <Text style={styles.metricFootnote}>
-            {t("valuation.step4.appreciationYoY", {
-              growth: String(result.marketMetric.yearOverYearGrowthPct),
-            })}
           </Text>
         </View>
       </View>

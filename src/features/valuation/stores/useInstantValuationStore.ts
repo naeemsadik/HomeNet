@@ -227,14 +227,20 @@ export const useInstantValuationStore = create<InstantValuationStoreState>((set,
     wizardStore.reset();
 
     const title = `${form.bedrooms}BR ${form.propertyType === "apartment" ? "Apartment" : "Property"} in ${form.areaName}`;
-    const priceStr = result?.estimatedValue ? String(result.estimatedValue) : "25000000";
+    // A rent is listed at the estimated monthly rent, a sale at the estimated value.
+    const isRent = form.purpose === "rent";
+    const amount = isRent ? result?.estimatedMonthlyRent : result?.estimatedValue;
+    const priceStr = amount ? String(amount) : isRent ? "" : "25000000";
+    const estimateText = isRent
+      ? `Estimated monthly rent: ${result?.estimatedMonthlyRentFormatted || ""}.`
+      : `Estimated market valuation: ${result?.estimatedValueFormatted || ""}.`;
 
     wizardStore.setBasics({
       title,
       type: form.propertyType === "commercial" ? "commercial" : form.propertyType === "land" ? "land" : "residential",
       subtype: form.propertyType === "apartment" ? "apartment" : form.propertyType,
       listingType: form.purpose === "rent" ? "rent" : "sale",
-      description: `Spacious ${form.sizeInput} ${form.sizeUnit} property in ${form.areaName}. Features ${form.bedrooms} bedrooms, ${form.bathrooms} bathrooms, ${form.facing}-facing orientation, lift, generator, and dedicated parking. Estimated market valuation: ${result?.estimatedValueFormatted || ""}.`,
+      description: `Spacious ${form.sizeInput} ${form.sizeUnit} property in ${form.areaName}. Features ${form.bedrooms} bedrooms, ${form.bathrooms} bathrooms, ${form.facing}-facing orientation, lift, generator, and dedicated parking. ${estimateText}`,
       price: priceStr,
       areaSize: form.sizeInput,
       areaUnit: form.sizeUnit,

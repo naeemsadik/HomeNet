@@ -22,6 +22,7 @@
     "prepare": "node scripts/install-git-hooks.cjs",
     "test:native": "jest -c jest.native.config.js",
     "check:android": "node scripts/check-android-release.cjs",
+    "valuation:benchmarks": "node scripts/valuation/build-benchmarks.mjs",
     "android:aab": "eas build --platform android --profile production",
     "android:apk": "eas build --platform android --profile preview"
   },
