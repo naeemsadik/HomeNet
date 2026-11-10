@@ -1,142 +1,94 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Check, MapPin, SlidersHorizontal, Sparkles, TrendingUp } from "@/components/icons";
-import { colorTokens, colors, fonts } from "@/theme";
+import { Check } from "@/components/icons";
+import { colorTokens, fonts } from "@/theme";
+import { useTranslation, type TranslationKey } from "@/i18n";
 import type { ValuationStep } from "../types/valuationTypes";
 
 interface ValuationStepIndicatorProps {
   currentStep: ValuationStep;
+  /** On a phone only the current step is named, with a progress bar. */
   compact?: boolean;
 }
 
-const STEPS = [
-  { step: 1 as ValuationStep, label: "Location", icon: MapPin },
-  { step: 2 as ValuationStep, label: "Property Specs", icon: SlidersHorizontal },
-  { step: 3 as ValuationStep, label: "Amenities", icon: Sparkles },
-  { step: 4 as ValuationStep, label: "Valuation Report", icon: TrendingUp },
+const STEPS: { step: ValuationStep; label: TranslationKey }[] = [
+  { step: 1, label: "valuation.wizard.steps.location" },
+  { step: 2, label: "valuation.wizard.steps.property" },
+  { step: 3, label: "valuation.wizard.steps.features" },
+  { step: 4, label: "valuation.wizard.steps.estimate" },
 ];
 
-export function ValuationStepIndicator({
-  currentStep,
-  compact = false,
-}: ValuationStepIndicatorProps) {
+/** Where you are in the four steps. Numbers and words, not icons: done steps get a tick, the current one is filled. */
+export function ValuationStepIndicator({ currentStep, compact = false }: ValuationStepIndicatorProps) {
+  const { t } = useTranslation();
+  const current = STEPS.find((s) => s.step === currentStep) ?? STEPS[0];
+
+  if (compact) {
+    return (
+      <View accessibilityRole="progressbar" accessibilityValue={{ min: 1, max: STEPS.length, now: currentStep }}>
+        <Text style={styles.compactText}>
+          {t("valuation.wizard.stepOf", { current: currentStep, total: STEPS.length })} · {t(current.label)}
+        </Text>
+        <View style={styles.bar}>
+          <View style={[styles.barFill, { width: `${(currentStep / STEPS.length) * 100}%` }]} />
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.stepsRow}>
-        {STEPS.map((item, index) => {
-          const isCompleted = currentStep > item.step;
-          const isCurrent = currentStep === item.step;
-          const Icon = item.icon;
-
-          return (
-            <React.Fragment key={item.step}>
-              <View style={styles.stepItem}>
-                <View
-                  style={[
-                    styles.circle,
-                    isCompleted && styles.circleCompleted,
-                    isCurrent && styles.circleCurrent,
-                  ]}
-                >
-                  {isCompleted ? (
-                    <Check color={colorTokens.onBrand} size={14} strokeWidth={2.8} />
-                  ) : (
-                    <Icon
-                      color={isCurrent ? colorTokens.onBrand : colors.muted}
-                      size={14}
-                      strokeWidth={2.2}
-                    />
-                  )}
-                </View>
-
-                {!compact && (
-                  <Text
-                    style={[
-                      styles.stepLabel,
-                      isCurrent && styles.stepLabelCurrent,
-                      isCompleted && styles.stepLabelCompleted,
-                    ]}
-                  >
-                    {item.label}
-                  </Text>
+    <View
+      accessibilityLabel={t("valuation.wizard.stepOf", { current: currentStep, total: STEPS.length })}
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 1, max: STEPS.length, now: currentStep }}
+      style={styles.row}
+    >
+      {STEPS.map((item, index) => {
+        const done = currentStep > item.step;
+        const isCurrent = currentStep === item.step;
+        return (
+          <React.Fragment key={item.step}>
+            <View style={styles.item}>
+              <View style={[styles.circle, done && styles.circleDone, isCurrent && styles.circleCurrent]}>
+                {done ? (
+                  <Check color={colorTokens.onInk} size={14} strokeWidth={3} />
+                ) : (
+                  <Text style={[styles.number, isCurrent && styles.numberCurrent]}>{item.step}</Text>
                 )}
               </View>
-
-              {index < STEPS.length - 1 && (
-                <View
-                  style={[
-                    styles.connector,
-                    currentStep > item.step && styles.connectorCompleted,
-                  ]}
-                />
-              )}
-            </React.Fragment>
-          );
-        })}
-      </View>
+              <Text style={[styles.label, (isCurrent || done) && styles.labelOn]}>{t(item.label)}</Text>
+            </View>
+            {index < STEPS.length - 1 ? <View style={[styles.line, done && styles.lineDone]} /> : null}
+          </React.Fragment>
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    paddingVertical: 14,
-    paddingHorizontal: 8,
-  },
-  stepsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  stepItem: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
+  row: { flexDirection: "row", alignItems: "center", marginBottom: 28 },
+  item: { flexDirection: "row", alignItems: "center", gap: 8 },
   circle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colorTokens.surfaceSunken,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: colorTokens.muted,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: "rgba(11, 26, 23, 0.12)",
+    backgroundColor: colorTokens.surface,
   },
-  circleCompleted: {
-    backgroundColor: colorTokens.brand,
-    borderColor: colorTokens.brand,
-  },
-  circleCurrent: {
-    backgroundColor: colorTokens.brand,
-    borderColor: colorTokens.brand,
-    shadowColor: colorTokens.brand,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  stepLabel: {
-    fontSize: 13,
-    fontFamily: fonts.medium,
-    color: colors.muted,
-  },
-  stepLabelCurrent: {
-    color: colorTokens.ink,
-    fontFamily: fonts.semiBold,
-  },
-  stepLabelCompleted: {
-    color: colorTokens.brandText,
-    fontFamily: fonts.medium,
-  },
-  connector: {
-    flex: 1,
-    height: 2,
-    backgroundColor: "rgba(11, 26, 23, 0.08)",
-    marginHorizontal: 8,
-  },
-  connectorCompleted: {
-    backgroundColor: colorTokens.brand,
-  },
+  circleDone: { backgroundColor: colorTokens.ink, borderColor: colorTokens.ink },
+  circleCurrent: { backgroundColor: colorTokens.ink, borderColor: colorTokens.ink },
+  number: { fontSize: 13, fontFamily: fonts.semiBold, color: colorTokens.muted },
+  numberCurrent: { color: colorTokens.onInk },
+  label: { fontSize: 14, fontFamily: fonts.medium, color: colorTokens.muted },
+  labelOn: { color: colorTokens.ink },
+  line: { flex: 1, height: 1.5, marginHorizontal: 12, backgroundColor: colorTokens.divider },
+  lineDone: { backgroundColor: colorTokens.ink },
+
+  compactText: { fontSize: 13, fontFamily: fonts.semiBold, color: colorTokens.ink },
+  bar: { height: 4, marginTop: 8, marginBottom: 20, borderRadius: 2, backgroundColor: colorTokens.divider },
+  barFill: { height: 4, borderRadius: 2, backgroundColor: colorTokens.ink },
 });

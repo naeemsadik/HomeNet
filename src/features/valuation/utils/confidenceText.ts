@@ -39,7 +39,6 @@ export function confidenceReasonText(basis: ConfidenceBasis, context: ReasonCont
         }),
       );
       if (basis.mostlyOneSite) parts.push(tr("valuation.reason.oneSite"));
-      if (basis.needsRoadOrBlock) parts.push(tr("valuation.reason.addRoad"));
       if (basis.estimatedYieldInput === "rent") parts.push(tr("valuation.reason.yieldRentEstimated"));
       if (basis.estimatedYieldInput === "sale") parts.push(tr("valuation.reason.yieldSaleEstimated"));
       break;

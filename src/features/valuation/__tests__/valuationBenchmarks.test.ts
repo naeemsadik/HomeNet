@@ -86,6 +86,37 @@ describe("estimate from listing benchmarks", () => {
   });
 });
 
+describe("what the owner did not say", () => {
+  const bare = (over: Partial<ValuationRequestPayload> = {}) =>
+    estimate({ floorLevel: undefined, facing: undefined, propertyAge: undefined, ...over });
+
+  it("makes no floor, facing or age adjustment", () => {
+    const result = bare();
+    expect(result.breakdownFactors.floorAdjustmentPct).toBe(0);
+    expect(result.breakdownFactors.facingAdjustmentPct).toBe(0);
+    expect(result.breakdownFactors.conditionAdjustmentPct).toBe(0);
+    expect(result.valueDrivers).toEqual([]);
+  });
+
+  it("treats a blank floor the same as no floor", () => {
+    expect(bare({ floorLevel: "" }).estimatedValue).toBe(bare().estimatedValue);
+  });
+
+  it("lists the floor and the age among what moved the price once they are given", () => {
+    const result = bare({ floorLevel: "6", propertyAge: "resale" });
+    const ids = result.valueDrivers.map((d) => d.id);
+    expect(ids).toEqual(expect.arrayContaining(["vd-floor", "vd-condition"]));
+    expect(result.valueDrivers.find((d) => d.id === "vd-floor")!.deltaBdtPerSqft).toBeGreaterThan(0);
+    expect(result.valueDrivers.find((d) => d.id === "vd-condition")!.deltaBdtPerSqft).toBeLessThan(0);
+  });
+
+  it("lists a ground floor as a reduction", () => {
+    const driver = bare({ floorLevel: "1" }).valueDrivers.find((d) => d.id === "vd-floor")!;
+    expect(driver.name).toBe("Ground floor");
+    expect(driver.deltaBdtPerSqft).toBeLessThan(0);
+  });
+});
+
 describe("a rent valuation", () => {
   it("has its own range, from the rent listings' spread", () => {
     const result = estimate({ purpose: "rent" });
@@ -123,14 +154,16 @@ describe("the range around the estimate", () => {
 });
 
 describe("how much to trust it", () => {
-  it("is high with listings behind the area and the building details filled in", () => {
+  it("is high with enough listings behind the area", () => {
     expect(estimate({}).confidenceScore).toBe("high");
   });
 
-  it("is medium with listings behind the area but no road or block", () => {
-    const result = estimate({ roadOrBlock: "" });
-    expect(result.confidenceScore).toBe("medium");
-    expect(result.confidenceReason).toMatch(/Add the road or block/);
+  it("does not depend on how many optional boxes were filled in", () => {
+    // The road, the building name and the rooms do not change the price, so they cannot change the trust.
+    const bare = estimate({ roadOrBlock: "", buildingName: "", bedrooms: 0, bathrooms: 0 });
+    expect(bare.confidenceScore).toBe("high");
+    expect(bare.confidenceReason).not.toMatch(/road or block/i);
+    expect(bare.estimatedValue).toBe(estimate({}).estimatedValue);
   });
 
   it("says how many asking prices it rests on and when they were collected", () => {

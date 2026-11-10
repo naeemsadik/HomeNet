@@ -50,11 +50,10 @@ describe("confidenceReasonText", () => {
       listings: 12,
       asOf: "2026-10-30",
       mostlyOneSite: true,
-      needsRoadOrBlock: true,
       estimatedYieldInput: "rent",
     });
     expect(text.indexOf("Most of them come from one site")).toBeGreaterThan(text.indexOf("Based on 12"));
-    expect(text.indexOf("Add the road or block")).toBeGreaterThan(text.indexOf("one site"));
+    expect(text.indexOf("The rent shown for the yield")).toBeGreaterThan(text.indexOf("one site"));
     expect(text).toMatch(/The rent shown for the yield is an estimate\.$/);
   });
 

@@ -77,7 +77,7 @@ export function InstantValuationScreen() {
   ];
 
   return (
-    <AppChrome active="search">
+    <AppChrome active="valuation">
       <JsonLd nodes={[valuationToolSchema(PAGE_PATH), breadcrumbSchema(PAGE_CRUMBS), faqPageSchema(VALUATION_FAQ, PAGE_URL)]} />
 
       {/* Hero: the one question, beside what the estimate looks at. */}

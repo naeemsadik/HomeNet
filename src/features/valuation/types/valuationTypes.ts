@@ -54,9 +54,12 @@ export interface ValuationRequestPayload {
   bedrooms: number;
   bathrooms: number;
   balconies: number;
-  floorLevel: number | string; // e.g. 4 or "Mid Floor (4-8)"
-  facing: PropertyFacing;
-  propertyAge: PropertyCondition;
+  /** Left out when the owner does not say: no floor adjustment is then made. */
+  floorLevel?: number | string; // e.g. 4 or "Mid Floor (4-8)"
+  /** Left out when the owner does not say: no facing adjustment is then made. */
+  facing?: PropertyFacing;
+  /** Left out when the owner does not say: no age adjustment is then made. */
+  propertyAge?: PropertyCondition;
   amenities: ValuationAmenities;
   /** Optional so an older client or a backend without them still works; treated as the neutral choice. */
   roadAccess?: RoadAccess;
@@ -92,8 +95,6 @@ export interface ConfidenceBasis {
   asOf?: string;
   /** One site supplied most of those listings. */
   mostlyOneSite?: boolean;
-  /** The road or block was left out, so the estimate is not as close as it could be. */
-  needsRoadOrBlock?: boolean;
   /** The other figure on the page (the rent for a sale, the sale price for a rent) is an estimate, not from listings. */
   estimatedYieldInput?: "rent" | "sale";
 }
