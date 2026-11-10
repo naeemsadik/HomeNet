@@ -2249,6 +2249,125 @@ export const en = {
     purbachalName: "Purbachal Expressway",
     purbachalZone: "High-Speed Growth Corridor",
   },
+  propertyValuationGuide: {
+    metaTitle: "Property Valuation Guide Bangladesh 2026 | HomeNet",
+    metaDescription:
+      "Learn how property is valued in Bangladesh. Estimate apartment and land market prices, understand Mouza rates, building depreciation, and bank loan ceilings.",
+    eyebrow: "Valuation & Assessment Standards",
+    headline: "Bangladesh Property Valuation Guide",
+    subheading:
+      "How real estate appraisers, banks, and sub-registry offices determine real market value, government Mouza rates, and loan eligibility.",
+    lastUpdated: "Updated for FY 2025–2026 Regulations",
+    calculatorTitle: "Interactive Property Valuation Estimator",
+    calculatorSubtitle:
+      "Select your property characteristics to calculate fair market range, baseline government Mouza value, and bank loan ceilings.",
+    typeLabel: "Property Type",
+    typeApartment: "Apartment / Flat",
+    typeLand: "Residential Plot / Land",
+    locationLabel: "Select Location / Zone",
+    sizeLabelApartment: "Floor Area (SQFT)",
+    sizePlaceholderApartment: "e.g. 1500",
+    sizeLabelLand: "Plot Size (Katha)",
+    sizePlaceholderLand: "e.g. 3",
+    buildingAgeLabel: "Building Age",
+    ageNew: "New (< 5 Years)",
+    ageMedium: "5 to 15 Years",
+    ageOld: "15+ Years",
+    roadWidthLabel: "Front Road Width",
+    roadNarrow: "Narrow (< 20 ft)",
+    roadStandard: "Standard (20–40 ft)",
+    roadWide: "Wide Avenue (40+ ft)",
+    estimatedMarketRange: "Estimated Fair Market Value",
+    mouzaBenchmark: "Government Mouza Registry Value",
+    bankLoanCeiling: "Max Bank Mortgage Ceiling (~70%)",
+    marketRateApplied: "Applied Base Market Benchmark",
+    ageAdjustment: "Age & Depreciation Factor",
+    roadAdjustment: "Road Width Adjustment",
+    disclaimerEstimator:
+      "Estimates reflect prevailing market transactions and surveyor benchmarks. Formal bank mortgages require accredited valuer inspections.",
+    factorsTitle: "5 Core Factors Determining Valuation in Bangladesh",
+    factorsSubtitle:
+      "Professional surveyors weigh structural, regulatory, and environmental metrics during an inspection.",
+    factor1Title: "Location, Frontage & Road Access",
+    factor1Desc:
+      "Properties on 40ft+ wide roads qualify for superior RAJUK Floor Area Ratios (FAR). Corner plots and plots with wide frontages command an 8%–15% market premium over interior lane properties.",
+    factor2Title: "RAJUK / CDA Plan Approval & Legal Clearances",
+    factor2Desc:
+      "Approved architectural and structural drawings, valid occupancy certificates (বাসস্থান সনদ), and flawless mutation / porcha documentation are mandatory. Deviations reduce bank loan approval limits.",
+    factor3Title: "Developer Brand & Structural Construction Quality",
+    factor3Desc:
+      "Grade-1 REHAB-member developers with proven earthquake-resistant structural engineering, premium MEP fittings, and high-spec lifts command significantly higher resale values.",
+    factor4Title: "Building Age & Depreciation Schedules",
+    factor4Desc:
+      "Apartments undergo ~1.5%–2% annual structural depreciation after 5 years. Beyond 20 years, value predominantly reflects the undivided proportionate land share (অনূদিত জমির অংশ).",
+    factor5Title: "Building Utilities & Amenities",
+    factor5Desc:
+      "Dedicated electrical substations, full generator power backup, certified firefighting systems, modern lifts, CCTV surveillance, and reserved basement parking directly inflate net property value.",
+    mouzaVsMarketTitle: "Government Mouza Rate vs. Fair Market Value",
+    mouzaVsMarketSubtitle:
+      "Understanding why Sub-Registry deed values differ fundamentally from commercial market prices.",
+    mouzaCardTitle: "Government Mouza Rate (সরকারি মৌজা দর)",
+    mouzaCardPoint1:
+      "Determined periodically by the Registration Directorate & District Collectorates based on historical averages.",
+    mouzaCardPoint2:
+      "Acts as the statutory minimum deed base for calculating Stamp Duty (1.5%), Registration Fees (1%), and Local Govt Taxes (2%).",
+    mouzaCardPoint3:
+      "Cannot be used as a realistic indicator of purchase price, especially in high-appreciation urban centers.",
+    marketCardTitle: "Fair Market Value (ন্যায্য বাজার মূল্য)",
+    marketCardPoint1:
+      "Reflects actual willing buyer - willing seller transactions based on real-time supply and demand.",
+    marketCardPoint2:
+      "Governs bank surveyor mortgage assessments, insurance appraisals, and secondary market resales.",
+    marketCardPoint3:
+      "Typically 1.5x to 3.5x higher than official Mouza rates across prime Dhaka corridors.",
+    checklistTitle: "Step-by-Step Bank Surveyor Inspection Checklist",
+    checklistSubtitle:
+      "What accredited engineering surveyors verify when assessing a property for mortgage approval.",
+    step1Title: "1. Title Deed & Cadastral Verification",
+    step1Desc:
+      "Checking chain of title (বায়া দলিল), CS/SA/RS/City Survey Khatian, DCR, and mutation records against Sub-Registry records.",
+    step2Title: "2. Physical Boundary & Demarcation",
+    step2Desc:
+      "Measuring plot dimensions, road frontage, setbacks, and confirming alignment with official cadastral survey maps.",
+    step3Title: "3. Structural Audit & Finish Quality",
+    step3Desc:
+      "Inspecting concrete beams, column integrity, dampness or settlement cracks, elevator specifications, and utility connections.",
+    step4Title: "4. RAJUK Approval Adherence",
+    step4Desc:
+      "Checking whether the actual built layout matches the RAJUK approved plan without illegal cantilevers or unapproved floor extensions.",
+    step5Title: "5. Local Market Inquiry",
+    step5Desc:
+      "Consulting local deed writers (Mohorar) and verifying recent authenticated sales in the immediate vicinity.",
+    faqTitle: "Frequently Asked Questions",
+    faqSubtitle:
+      "Essential answers regarding real estate valuation, bank mortgages, and Bangladesh property laws.",
+    faq1Q: "Why do commercial banks value properties 20% to 30% lower than asking prices?",
+    faq1A:
+      "Banks employ a 'forced sale value' (FSV) approach. If a borrower defaults, the bank must be able to liquidate the collateral quickly at auction. Surveyors intentionally disregard speculative premiums and apply a conservative 20%–30% haircut to fair market value.",
+    faq2Q: "How is the undivided proportionate land share calculated for an apartment?",
+    faq2A:
+      "The undivided land share is calculated by dividing your apartment's floor area by the total buildable floor area of the entire building, then multiplying that fraction by the total plot size (in Katha or decimals). As a building ages past 25–30 years, this land share represents nearly all of your asset's residual worth.",
+    faq3Q: "Does a higher floor command a higher valuation in Dhaka?",
+    faq3A:
+      "Generally yes. In modern high-rises (10+ floors), upper floors (5th floor and above) often command a 5%–10% premium due to better airflow, natural daylight, reduced street noise, and pleasant skyline views, provided the building has reliable high-speed lifts and generator backup.",
+    faq4Q: "How can a seller maximize property valuation before listing?",
+    faq4A:
+      "Ensure all documentation (up-to-date holding tax, utility bills, mutation, original deeds) is perfectly organized. Minor cosmetic repairs (fresh coat of paint, fixing damp spots, updated electrical fittings) and professional deep cleaning typically return 3x to 5x their cost in perceived buyer value.",
+    ctaTitle: "Need an Instant Digital Valuation for Your Property?",
+    ctaDesc:
+      "Use HomeNet's automated valuation model to get a real-time data-backed assessment of your apartment or commercial space.",
+    ctaButton: "Try Instant Valuation",
+    disclaimerTitle: "Official Legal & Financial Disclaimer",
+    disclaimerDesc:
+      "The guides, benchmarks, and interactive calculations on this page are provided for educational and informational purposes only. Official bank financing, capital gain taxation, and property registration require formal surveys by certified civil engineers and verification from relevant Sub-Registry offices. HomeNet BD does not provide statutory appraisal certificates.",
+    gulshanName: "Gulshan",
+    bananiName: "Banani",
+    dhanmondiName: "Dhanmondi",
+    bashundharaName: "Bashundhara R/A",
+    uttaraName: "Uttara",
+    mirpurName: "Mirpur",
+    mohammadpurName: "Mohammadpur",
+  },
   changePasswordScreen: {
     title: "Change Password",
     subtitle: "Enter your current password and your new password",
