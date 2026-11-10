@@ -1,0 +1,589 @@
+{
+  "basis": "Asking prices from listing sites, in Taka per sqft (sale) and Taka per sqft per month (rent), for apartments that state both a price and a size. Not sale prices. The sources are not a random sample.",
+  "asOf": "2026-10-30",
+  "generatedBy": "scripts/valuation/build-benchmarks.mjs",
+  "thresholds": {
+    "minListings": 15,
+    "thinListings": 5,
+    "minSizeSqft": 200,
+    "maxSizeSqft": 10000,
+    "salePerSqft": {
+      "min": 1000,
+      "max": 60000
+    },
+    "rentPerSqft": {
+      "min": 5,
+      "max": 400
+    }
+  },
+  "sources": [
+    {
+      "name": "bproperty",
+      "listingsRead": 273
+    },
+    {
+      "name": "bikroy",
+      "listingsRead": 91
+    },
+    {
+      "name": "jominly",
+      "listingsRead": 121
+    },
+    {
+      "name": "aabason",
+      "listingsRead": 14
+    }
+  ],
+  "totals": {
+    "read": 499,
+    "kept": 453,
+    "dropped": {
+      "unmapped-area": 11,
+      "size-out-of-range": 3,
+      "price-per-sqft-out-of-range": 2,
+      "duplicate": 30
+    }
+  },
+  "areas": {
+    "adabor": {
+      "sale": {
+        "n": 4,
+        "median": 6792,
+        "p25": 6467,
+        "p75": 7517,
+        "min": 6412,
+        "max": 8768,
+        "bySource": {
+          "jominly": 1,
+          "aabason": 3
+        },
+        "largestSourceShare": 0.75,
+        "status": "insufficient"
+      }
+    },
+    "aftabnagar": {
+      "rent": {
+        "n": 1,
+        "median": 17.5,
+        "p25": 17.5,
+        "p75": 17.5,
+        "min": 17.5,
+        "max": 17.5,
+        "bySource": {
+          "bproperty": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      },
+      "sale": {
+        "n": 1,
+        "median": 7407,
+        "p25": 7407,
+        "p75": 7407,
+        "min": 7407,
+        "max": 7407,
+        "bySource": {
+          "bikroy": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "agargaon": {
+      "sale": {
+        "n": 1,
+        "median": 6295,
+        "p25": 6295,
+        "p75": 6295,
+        "min": 6295,
+        "max": 6295,
+        "bySource": {
+          "bikroy": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "badda": {
+      "sale": {
+        "n": 3,
+        "median": 6500,
+        "p25": 6497,
+        "p75": 6798,
+        "min": 6494,
+        "max": 7097,
+        "bySource": {
+          "bproperty": 2,
+          "jominly": 1
+        },
+        "largestSourceShare": 0.67,
+        "status": "insufficient"
+      }
+    },
+    "banani": {
+      "rent": {
+        "n": 37,
+        "median": 43.8,
+        "p25": 37.3,
+        "p75": 56.3,
+        "min": 28.6,
+        "max": 80,
+        "bySource": {
+          "bproperty": 18,
+          "bikroy": 18,
+          "jominly": 1
+        },
+        "largestSourceShare": 0.49,
+        "status": "ok"
+      },
+      "sale": {
+        "n": 1,
+        "median": 14339,
+        "p25": 14339,
+        "p75": 14339,
+        "min": 14339,
+        "max": 14339,
+        "bySource": {
+          "bikroy": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "banasree": {
+      "rent": {
+        "n": 1,
+        "median": 62.1,
+        "p25": 62.1,
+        "p75": 62.1,
+        "min": 62.1,
+        "max": 62.1,
+        "bySource": {
+          "bproperty": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      },
+      "sale": {
+        "n": 3,
+        "median": 3448,
+        "p25": 2579,
+        "p75": 5391,
+        "min": 1709,
+        "max": 7333,
+        "bySource": {
+          "bikroy": 2,
+          "jominly": 1
+        },
+        "largestSourceShare": 0.67,
+        "status": "insufficient"
+      }
+    },
+    "baridhara": {
+      "rent": {
+        "n": 18,
+        "median": 49.6,
+        "p25": 43.3,
+        "p75": 78.7,
+        "min": 35,
+        "max": 112.5,
+        "bySource": {
+          "bproperty": 11,
+          "bikroy": 3,
+          "jominly": 4
+        },
+        "largestSourceShare": 0.61,
+        "status": "ok"
+      },
+      "sale": {
+        "n": 5,
+        "median": 28514,
+        "p25": 15000,
+        "p75": 30270,
+        "min": 9228,
+        "max": 31407,
+        "bySource": {
+          "bproperty": 1,
+          "bikroy": 1,
+          "jominly": 3
+        },
+        "largestSourceShare": 0.6,
+        "status": "thin"
+      }
+    },
+    "basabo": {
+      "rent": {
+        "n": 1,
+        "median": 12.8,
+        "p25": 12.8,
+        "p75": 12.8,
+        "min": 12.8,
+        "max": 12.8,
+        "bySource": {
+          "bikroy": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "bashundhara": {
+      "rent": {
+        "n": 48,
+        "median": 22.9,
+        "p25": 20.4,
+        "p75": 28.8,
+        "min": 14.2,
+        "max": 54.7,
+        "bySource": {
+          "bproperty": 17,
+          "bikroy": 3,
+          "jominly": 28
+        },
+        "largestSourceShare": 0.58,
+        "status": "ok"
+      },
+      "sale": {
+        "n": 48,
+        "median": 10763,
+        "p25": 9316,
+        "p75": 13890,
+        "min": 7200,
+        "max": 18000,
+        "bySource": {
+          "bproperty": 8,
+          "bikroy": 6,
+          "jominly": 31,
+          "aabason": 3
+        },
+        "largestSourceShare": 0.65,
+        "status": "ok"
+      }
+    },
+    "cantonment": {
+      "sale": {
+        "n": 2,
+        "median": 10254,
+        "p25": 7746,
+        "p75": 12762,
+        "min": 5238,
+        "max": 15269,
+        "bySource": {
+          "bproperty": 2
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "dhanmondi": {
+      "rent": {
+        "n": 1,
+        "median": 32,
+        "p25": 32,
+        "p75": 32,
+        "min": 32,
+        "max": 32,
+        "bySource": {
+          "bproperty": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      },
+      "sale": {
+        "n": 19,
+        "median": 10839,
+        "p25": 9167,
+        "p75": 14484,
+        "min": 6000,
+        "max": 24000,
+        "bySource": {
+          "bproperty": 7,
+          "bikroy": 6,
+          "jominly": 5,
+          "aabason": 1
+        },
+        "largestSourceShare": 0.37,
+        "status": "ok"
+      }
+    },
+    "eskaton": {
+      "sale": {
+        "n": 1,
+        "median": 11193,
+        "p25": 11193,
+        "p75": 11193,
+        "min": 11193,
+        "max": 11193,
+        "bySource": {
+          "bikroy": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "farmgate": {
+      "rent": {
+        "n": 1,
+        "median": 23,
+        "p25": 23,
+        "p75": 23,
+        "min": 23,
+        "max": 23,
+        "bySource": {
+          "bproperty": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "gulshan": {
+      "rent": {
+        "n": 152,
+        "median": 48.7,
+        "p25": 38.7,
+        "p75": 68.4,
+        "min": 25,
+        "max": 112.5,
+        "bySource": {
+          "bproperty": 129,
+          "bikroy": 8,
+          "jominly": 15
+        },
+        "largestSourceShare": 0.85,
+        "status": "ok"
+      },
+      "sale": {
+        "n": 37,
+        "median": 17021,
+        "p25": 15556,
+        "p75": 22642,
+        "min": 1176,
+        "max": 33803,
+        "bySource": {
+          "bproperty": 27,
+          "bikroy": 4,
+          "jominly": 5,
+          "aabason": 1
+        },
+        "largestSourceShare": 0.73,
+        "status": "ok"
+      }
+    },
+    "kalabagan": {
+      "sale": {
+        "n": 1,
+        "median": 10185,
+        "p25": 10185,
+        "p75": 10185,
+        "min": 10185,
+        "max": 10185,
+        "bySource": {
+          "aabason": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "khilgaon": {
+      "sale": {
+        "n": 3,
+        "median": 10000,
+        "p25": 9839,
+        "p75": 11537,
+        "min": 9677,
+        "max": 13074,
+        "bySource": {
+          "bproperty": 1,
+          "bikroy": 1,
+          "jominly": 1
+        },
+        "largestSourceShare": 0.33,
+        "status": "insufficient"
+      }
+    },
+    "khilkhet": {
+      "sale": {
+        "n": 1,
+        "median": 4733,
+        "p25": 4733,
+        "p75": 4733,
+        "min": 4733,
+        "max": 4733,
+        "bySource": {
+          "bikroy": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "lalmatia": {
+      "sale": {
+        "n": 3,
+        "median": 18182,
+        "p25": 16758,
+        "p75": 18229,
+        "min": 15333,
+        "max": 18275,
+        "bySource": {
+          "jominly": 3
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "malibagh": {
+      "sale": {
+        "n": 1,
+        "median": 6742,
+        "p25": 6742,
+        "p75": 6742,
+        "min": 6742,
+        "max": 6742,
+        "bySource": {
+          "bikroy": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "mirpur": {
+      "rent": {
+        "n": 1,
+        "median": 14.6,
+        "p25": 14.6,
+        "p75": 14.6,
+        "min": 14.6,
+        "max": 14.6,
+        "bySource": {
+          "aabason": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      },
+      "sale": {
+        "n": 18,
+        "median": 7179,
+        "p25": 5559,
+        "p75": 11392,
+        "min": 4457,
+        "max": 20455,
+        "bySource": {
+          "bproperty": 5,
+          "bikroy": 11,
+          "jominly": 1,
+          "aabason": 1
+        },
+        "largestSourceShare": 0.61,
+        "status": "ok"
+      }
+    },
+    "mogbazar": {
+      "sale": {
+        "n": 1,
+        "median": 7778,
+        "p25": 7778,
+        "p75": 7778,
+        "min": 7778,
+        "max": 7778,
+        "bySource": {
+          "bikroy": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "mohammadpur": {
+      "rent": {
+        "n": 2,
+        "median": 14.9,
+        "p25": 14.2,
+        "p75": 15.5,
+        "min": 13.6,
+        "max": 16.1,
+        "bySource": {
+          "bproperty": 1,
+          "bikroy": 1
+        },
+        "largestSourceShare": 0.5,
+        "status": "insufficient"
+      },
+      "sale": {
+        "n": 11,
+        "median": 6818,
+        "p25": 5378,
+        "p75": 8617,
+        "min": 4815,
+        "max": 19248,
+        "bySource": {
+          "bproperty": 2,
+          "bikroy": 3,
+          "jominly": 5,
+          "aabason": 1
+        },
+        "largestSourceShare": 0.45,
+        "status": "thin"
+      }
+    },
+    "rajarbagh": {
+      "sale": {
+        "n": 1,
+        "median": 12900,
+        "p25": 12900,
+        "p75": 12900,
+        "min": 12900,
+        "max": 12900,
+        "bySource": {
+          "bproperty": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "rampura": {
+      "sale": {
+        "n": 1,
+        "median": 8344,
+        "p25": 8344,
+        "p75": 8344,
+        "min": 8344,
+        "max": 8344,
+        "bySource": {
+          "bikroy": 1
+        },
+        "largestSourceShare": 1,
+        "status": "insufficient"
+      }
+    },
+    "uttara": {
+      "rent": {
+        "n": 11,
+        "median": 40.6,
+        "p25": 34.3,
+        "p75": 43.4,
+        "min": 23.6,
+        "max": 50,
+        "bySource": {
+          "bproperty": 7,
+          "bikroy": 4
+        },
+        "largestSourceShare": 0.64,
+        "status": "thin"
+      },
+      "sale": {
+        "n": 13,
+        "median": 9125,
+        "p25": 8333,
+        "p75": 9931,
+        "min": 6860,
+        "max": 15464,
+        "bySource": {
+          "bproperty": 9,
+          "bikroy": 1,
+          "jominly": 2,
+          "aabason": 1
+        },
+        "largestSourceShare": 0.69,
+        "status": "thin"
+      }
+    }
+  }
+}
