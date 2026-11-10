@@ -119,7 +119,7 @@ function SideBar({
   onNavigate,
   modal = false,
 }: {
-  active: ActivePage;
+  active?: ActivePage;
   onNavigate?: () => void;
   modal?: boolean;
 }) {
@@ -714,7 +714,7 @@ function TopBar({
 }
 
 /** The phone and tablet bottom bar. Seller pages show it too, so it never disappears. */
-export function MobileNav({ active }: { active: ActivePage }) {
+export function MobileNav({ active }: { active?: ActivePage }) {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const links: {
@@ -799,7 +799,7 @@ export function AppChrome({
   floating,
 }: {
   children: ReactNode;
-  active: ActivePage;
+  active?: ActivePage;
   bleed?: ReactNode;
   fluid?: boolean;
   customTopBar?: ReactNode;

@@ -12,6 +12,9 @@
 /** Where people write to us: reports, deletion requests, privacy questions. */
 export const SUPPORT_EMAIL = "support@homenetbd.com";
 
+/** Where candidates send their resumes and applications for open roles. */
+export const CAREERS_EMAIL = "careers@homenet.com.bd";
+
 export interface LegalSection {
   heading: string;
   paragraphs?: string[];

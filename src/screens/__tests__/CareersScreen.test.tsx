@@ -1,15 +1,24 @@
 import React from "react";
 import renderer, { act, type ReactTestInstance } from "react-test-renderer";
 import { Linking } from "react-native";
-import { CareersScreen } from "@/screens/CareersScreen";
+import { CareersScreen, CAREERS_EMAIL } from "@/screens/CareersScreen";
 import { en } from "@/i18n";
+import { interpolate } from "@/i18n/useTranslation";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 jest.mock("@/components/icons", () => new Proxy({}, { get: () => () => null }));
 
+let mockAppChromeProps: Record<string, unknown> = {};
 jest.mock("@/components/AppChrome", () => ({
-  AppChrome: ({ children }: { children: React.ReactNode }) => children,
+  AppChrome: (props: { children: React.ReactNode; active?: string }) => {
+    mockAppChromeProps = props;
+    return props.children;
+  },
+}));
+
+jest.mock("@/lib/alert", () => ({
+  notify: jest.fn(),
 }));
 
 const textOf = (node: ReactTestInstance): string =>
@@ -18,6 +27,15 @@ const textOf = (node: ReactTestInstance): string =>
 describe("CareersScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAppChromeProps = {};
+  });
+
+  it("renders AppChrome without active='home' so bottom navigation does not highlight Home", () => {
+    act(() => {
+      renderer.create(<CareersScreen />);
+    });
+
+    expect(mockAppChromeProps.active).toBeUndefined();
   });
 
   it("renders the hero heading with accessibilityRole header and aria-level 1", () => {
@@ -62,7 +80,7 @@ describe("CareersScreen", () => {
     expect(fullText).toContain(en.careers.trustDesc);
   });
 
-  it("renders the open positions fallback notice", () => {
+  it("renders the open positions fallback notice with the interpolated email", () => {
     let tree: renderer.ReactTestRenderer;
     act(() => {
       tree = renderer.create(<CareersScreen />);
@@ -70,7 +88,8 @@ describe("CareersScreen", () => {
 
     const fullText = textOf(tree!.root);
     expect(fullText).toContain(en.careers.noOpeningsHeading);
-    expect(fullText).toContain(en.careers.fallbackNotice);
+    const expectedNotice = interpolate(en.careers.fallbackNotice, { email: CAREERS_EMAIL });
+    expect(fullText).toContain(expectedNotice);
   });
 
   it("triggers Linking.openURL with the careers mailto link on CTA press", () => {
@@ -95,7 +114,39 @@ describe("CareersScreen", () => {
 
     expect(openURLSpy).toHaveBeenCalledTimes(1);
     expect(openURLSpy).toHaveBeenCalledWith(
-      expect.stringContaining("mailto:careers@homenetbd.com?subject="),
+      expect.stringContaining(`mailto:${CAREERS_EMAIL}?subject=`),
     );
+  });
+
+  it("displays an accessible inline alert when Linking.openURL fails", async () => {
+    jest.spyOn(Linking, "openURL").mockRejectedValue(new Error("No email client installed"));
+
+    let tree: renderer.ReactTestRenderer;
+    act(() => {
+      tree = renderer.create(<CareersScreen />);
+    });
+
+    const applyButton = tree!.root
+      .findAll((node) => node.props.accessibilityRole === "button" && node.props.onPress)
+      .find((btn) => textOf(btn).includes(en.careers.sendApplication));
+
+    expect(applyButton).toBeDefined();
+
+    // Before error: no alert is shown
+    expect(
+      tree!.root.findAll((node) => node.props.accessibilityRole === "alert"),
+    ).toHaveLength(0);
+
+    // Trigger failure
+    await act(async () => {
+      applyButton!.props.onPress();
+    });
+
+    // After failure: accessible inline alert is rendered
+    const alertBox = tree!.root.findAll((node) => node.props.accessibilityRole === "alert");
+    expect(alertBox.length).toBe(1);
+
+    const expectedFallback = interpolate(en.careers.mailtoFallback, { email: CAREERS_EMAIL });
+    expect(textOf(alertBox[0])).toContain(expectedFallback);
   });
 });

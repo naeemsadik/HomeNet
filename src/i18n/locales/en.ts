@@ -2021,9 +2021,768 @@ export const en = {
     openPositionsTitle: "Open Positions",
     noOpeningsHeading: "No Current Openings",
     fallbackNotice:
-      "Don't see your role? Send your resume to careers@homenetbd.com",
+      "Don't see your role? Send your resume to {{email}}",
     sendApplication: "Send Application",
     emailSubject: "Application for Open Role at HomeNet BD",
+    mailtoFallback:
+      "Could not open mail client. Please send your resume directly to {{email}}",
+  },
+  stampDutyGuide: {
+    metaTitle: "Stamp Duty & Property Tax Guide | HomeNet BD",
+    metaDescription:
+      "Calculate Bangladesh property registration fees, stamp duty, AIT, and local taxes with our interactive tool. Comprehensive guide to legal land transfer costs.",
+    eyebrow: "Tax & Legal Guide",
+    headline: "Bangladesh Property Registration, Stamp Duty & Tax Guide",
+    subheading:
+      "Calculate statutory registration fees, deed valuations, stamp duty, local taxes, and AIT before buying or selling property in Bangladesh.",
+    calculatorTitle: "Property Registration Fee Calculator",
+    calculatorSubtitle:
+      "Estimate total government fees and legal transfer costs based on the deed value and location.",
+    deedValueLabel: "Deed Value (BDT)",
+    deedValuePlaceholder: "Enter property deed value",
+    preset50L: "50 Lakh",
+    preset1C: "1 Crore",
+    preset2C: "2 Crore",
+    preset5C: "5 Crore",
+    locationLabel: "Property Location",
+    locDhakaCtg: "City Corporation (Dhaka / Chattogram)",
+    locOtherCity: "Other City Corporations",
+    locMunicipality: "Municipality (Pourashava)",
+    locRural: "Rural / Union Parishad",
+    propertyTypeLabel: "Property Type",
+    typeSecondary: "Secondary / Individual Resale",
+    typeDeveloper: "Developer / New Construction",
+    flatSizeLabel: "Apartment Size",
+    sizeUnder1600: "Up to 1,600 sq ft",
+    sizeOver1600: "Above 1,600 sq ft",
+    breakdownTitle: "Cost Breakdown",
+    stampDutyLabel: "Stamp Duty (1.5%)",
+    regFeeLabel: "Registration Fee (1.0%)",
+    localGovtTaxLabel: "Local Government Tax (LGT)",
+    aitLabel: "Advance Income Tax (AIT / Sec. 125)",
+    vatLabel: "Value Added Tax (VAT)",
+    vatExempt: "Exempt (0% for Secondary Resale)",
+    totalGovtCost: "Estimated Statutory Total",
+    effectiveRateLabel: "Effective Rate",
+    whoPaysBuyer: "Paid by Buyer",
+    whoPaysSeller: "Paid by Seller (Withheld at Source)",
+    whoPaysDeveloper: "Paid by Developer",
+    resetBtn: "Reset Calculator",
+    customInputNotice: "Enter custom deed value above to recalculate statutory fees.",
+    workflowTitle: "6-Step Property Registration Workflow",
+    workflowSubtitle:
+      "A structured step-by-step procedure to legally register property at the Sub-Registry office.",
+    step1Title: "1. Title & Mutation Verification",
+    step1Desc:
+      "Verify CS, SA, RS, and BS Khatians, Porcha, and ensure Mutation (Namjari) is completed in the seller's name with up-to-date DCR and Khajna receipts.",
+    step2Title: "2. Non-Encumbrance Certificate (NEC)",
+    step2Desc:
+      "Apply for Form 12 at the relevant Sub-Registry office to verify that the property has not been mortgaged, sold, or tied in dispute.",
+    step3Title: "3. Bayna Nama & Deed Drafting",
+    step3Desc:
+      "Execute a registered Bayna Nama (Agreement to Sell) and have a licensed deed writer or advocate draft the Saf-Kabala deed.",
+    step4Title: "4. e-Chalan Payment of Fees",
+    step4Desc:
+      "Deposit Stamp Duty, Registration fees, Local Govt Tax, and AIT into the designated government treasury code via e-Chalan.",
+    step5Title: "5. Sub-Registry Presentation & Biometrics",
+    step5Desc:
+      "Both buyer and seller appear before the Sub-Registrar with NID and witnesses for biometric verification, photo capture, and signature.",
+    step6Title: "6. Receipt (T-form) & Original Deed",
+    step6Desc:
+      "Receive the registration receipt (T-form / Irad-patra). Use it to collect the certified copy promptly and the original deed once bound.",
+    documentsTitle: "Required Legal Documents Checklist",
+    documentsSubtitle:
+      "Ensure all legal deeds, records, and clearances are organized before visiting the Sub-Registry.",
+    doc1Title: "Original Title Deed (Bia Dalil)",
+    doc1Desc:
+      "Chain of previous title deeds tracing ownership history for at least 25-30 years.",
+    doc2Title: "Khatian & Porcha Records",
+    doc2Desc:
+      "Certified copies of CS, SA, RS, and City/BS surveys proving legitimate lineage.",
+    doc3Title: "Mutation (Namjari) & DCR",
+    doc3Desc:
+      "AC Land office Mutation Khatian with duplicate carbon receipt proving land revenue acceptance.",
+    doc4Title: "Up-to-Date Land Tax (Khajna)",
+    doc4Desc:
+      "Current fiscal year Land Development Tax receipt with QR verification.",
+    doc5Title: "Non-Encumbrance Certificate (NEC)",
+    doc5Desc:
+      "Search report issued by the Sub-Registry showing zero prior legal encumbrances.",
+    doc6Title: "National ID & Passport Photos",
+    doc6Desc:
+      "Smart NID cards and verified color photos of buyer, seller, and legal witnesses.",
+    doc7Title: "Approved Building Plan (For Flats)",
+    doc7Desc:
+      "RAJUK / CDA / KDA sanctioned plan and allotment letter from developer or original owner.",
+    faqTitle: "Frequently Asked Questions",
+    faqSubtitle:
+      "Essential answers regarding statutory fees, mouza rates, and Bangladesh property law.",
+    faq1Q: "Who is legally responsible for paying Advance Income Tax (AIT / Gain Tax)?",
+    faq1A:
+      "Under Section 125 of the Income Tax Act 2023, AIT is the statutory liability of the seller (deducted at source on transfer). However, in local Bangladesh real estate transactions, contracts often negotiate fee allocations beforehand. Always clarify this in your registered Bayna.",
+    faq2Q: "What is the difference between Mouza Rate and Deed Value?",
+    faq2A:
+      "The Mouza Rate is the government's minimum benchmark land rate fixed by the Registration Directorate for each local mouza. Stamp duty and registration taxes are charged on whichever is higher: the actual negotiated transaction price or the official Mouza rate valuation.",
+    faq3Q: "Are there additional deed writer or advocate fees beyond government taxes?",
+    faq3A:
+      "Yes. The statutory calculator covers only government duties deposited through e-Chalan. Drafting fees for deed writers (Mohurer) or property lawyers typically range between 0.25% to 0.5% (or fixed negotiation), plus minor stamp stamping charges.",
+    faq4Q: "How is VAT applied to newly constructed apartments?",
+    faq4A:
+      "Under NBR regulations, developer sales attract 2% VAT for apartments up to 1,600 sq ft, and 4.5% VAT for apartments exceeding 1,600 sq ft. Individual resale (secondary market) properties are fully exempt from VAT.",
+    faq5Q: "What is an e-Chalan and why is it mandatory?",
+    faq5A:
+      "e-Chalan is Bangladesh's official digital treasury deposit slip. Cash payments directly to sub-registry counters are prohibited for major duties. All fees must be deposited directly to Bangladesh Bank or Sonali Bank treasury accounts with verifiable automated receipts.",
+    disclaimerTitle: "Statutory Legal Disclaimer",
+    disclaimerBody:
+      "Calculations and legal guidelines provided on this page are based on the Stamp Act 1899, Registration Act 1908, Income Tax Act 2023, and current Bangladesh Finance Acts. They are intended for educational and informational purposes only and do not constitute formal legal or tax advisory. Statutory rates, mouza valuations, and local rules may vary by jurisdiction. Always verify current fee structures with your local Sub-Registry office, the National Board of Revenue (NBR), or a qualified property lawyer before completing any financial transactions.",
+  },
+  propertyPriceIndex: {
+    metaTitle: "Dhaka Property Price Index 2026 | HomeNet BD",
+    metaDescription:
+      "Explore Dhaka property price trends, average rates per sqft across prime and emerging zones, and calculate apartment values with HomeNet's verified index.",
+    eyebrow: "Real Estate Market Intelligence",
+    headline: "Dhaka Property Price Index",
+    subheading:
+      "Square-foot pricing benchmarks and year-over-year trends across Dhaka's prime, residential, and emerging corridors.",
+    lastUpdated: "Q4 2026 Verified Index",
+    explorerTitle: "Area Price Explorer",
+    explorerSubtitle:
+      "Compare average price per square foot, annual price appreciation, and typical apartment values.",
+    filterAll: "All Zones",
+    filterPrime: "Prime Residential",
+    filterHighDemand: "High Demand",
+    filterEmerging: "Emerging Corridors",
+    searchPlaceholder: "Search neighborhood (e.g. Gulshan, Uttara)...",
+    colArea: "Area / Zone",
+    colAvgRate: "Avg Rate / Sqft",
+    colRange: "Price Range / Sqft",
+    colYoY: "YoY Trend",
+    colTypical3Bed: "Typical 3-Bed (1,500 sqft)",
+    calculatorTitle: "Property Value Estimator",
+    calculatorSubtitle:
+      "Select an area and enter the apartment floor size to calculate the expected market value range.",
+    selectAreaLabel: "Select Neighborhood",
+    flatSizeLabel: "Apartment Size (SQFT)",
+    flatSizePlaceholder: "e.g. 1500",
+    preset1000: "1,000 sqft",
+    preset1250: "1,250 sqft",
+    preset1500: "1,500 sqft",
+    preset2000: "2,000 sqft",
+    estimatedValue: "Estimated Market Value",
+    estimatedRange: "Estimated Range",
+    avgRateAt: "Benchmark average rate",
+    driversTitle: "Key Market Drivers Shaping 2026 Prices",
+    driversSubtitle:
+      "Crucial urban infrastructure and regulatory shifts impacting Dhaka property valuations.",
+    driver1Title: "MRT & Commuter Connectivity",
+    driver1Desc:
+      "Areas along MRT Line-6 (Uttara to Mirpur and Motijheel) and planned MRT Line-1/5 corridors consistently exhibit 8-12% higher capital appreciation.",
+    driver2Title: "RAJUK DAP (2022-2035) Regulations",
+    driver2Desc:
+      "Adjusted Floor Area Ratio (FAR) caps in dense central sectors have reduced developable residential units, constraining supply and supporting premium per-sqft valuations.",
+    driver3Title: "Construction & Material Inflation",
+    driver3Desc:
+      "Surges in structural rebar, Portland cement, and finishing imported materials have driven replacement costs up 25-35%, setting a higher floor for new builds.",
+    methodologyTitle: "Methodology & PropTech Data Standard",
+    methodologyDesc:
+      "The HomeNet Property Price Index synthesizes active verified direct-owner listings, registered deed values recorded across Dhaka Sub-Registry offices, and real-time transaction reports. Statutory minimum Mouza rates are not reflected here as official market values often diverge significantly from government valuation registries. Figures are updated quarterly to maintain statistical fidelity.",
+    gulshanName: "Gulshan",
+    gulshanZone: "Prime Diplomatic",
+    bananiName: "Banani",
+    bananiZone: "Commercial & Residential",
+    baridharaName: "Baridhara R/A",
+    baridharaZone: "Diplomatic Enclave",
+    dhanmondiName: "Dhanmondi",
+    dhanmondiZone: "Central Residential",
+    bashundharaName: "Bashundhara R/A",
+    bashundharaZone: "Planned Gated Community",
+    uttaraName: "Uttara",
+    uttaraZone: "MRT-6 Connected Suburb",
+    mirpurName: "Mirpur (DOHS / Sectors)",
+    mirpurZone: "Accessible Urban Center",
+    mohammadpurName: "Mohammadpur",
+    mohammadpurZone: "Established Residential Hub",
+    aftabnagarName: "Aftabnagar / Badda",
+    aftabnagarZone: "Lakeside Expansion Zone",
+    purbachalName: "Purbachal Expressway",
+    purbachalZone: "High-Speed Growth Corridor",
+  },
+  propertyValuationGuide: {
+    metaTitle: "Property Valuation Guide Bangladesh 2026 | HomeNet",
+    metaDescription:
+      "Learn how property is valued in Bangladesh. Estimate apartment and land market prices, understand Mouza rates, building depreciation, and bank loan ceilings.",
+    eyebrow: "Valuation & Assessment Standards",
+    headline: "Bangladesh Property Valuation Guide",
+    subheading:
+      "How real estate appraisers, banks, and sub-registry offices determine real market value, government Mouza rates, and loan eligibility.",
+    lastUpdated: "Updated for FY 2025–2026 Regulations",
+    calculatorTitle: "Interactive Property Valuation Estimator",
+    calculatorSubtitle:
+      "Select your property characteristics to calculate fair market range, baseline government Mouza value, and bank loan ceilings.",
+    typeLabel: "Property Type",
+    typeApartment: "Apartment / Flat",
+    typeLand: "Residential Plot / Land",
+    locationLabel: "Select Location / Zone",
+    sizeLabelApartment: "Floor Area (SQFT)",
+    sizePlaceholderApartment: "e.g. 1500",
+    sizeLabelLand: "Plot Size (Katha)",
+    sizePlaceholderLand: "e.g. 3",
+    buildingAgeLabel: "Building Age",
+    ageNew: "New (< 5 Years)",
+    ageMedium: "5 to 15 Years",
+    ageOld: "15+ Years",
+    roadWidthLabel: "Front Road Width",
+    roadNarrow: "Narrow (< 20 ft)",
+    roadStandard: "Standard (20–40 ft)",
+    roadWide: "Wide Avenue (40+ ft)",
+    estimatedMarketRange: "Estimated Fair Market Value",
+    mouzaBenchmark: "Government Mouza Registry Value",
+    bankLoanCeiling: "Max Bank Mortgage Ceiling (~70%)",
+    marketRateApplied: "Applied Base Market Benchmark",
+    ageAdjustment: "Age & Depreciation Factor",
+    roadAdjustment: "Road Width Adjustment",
+    disclaimerEstimator:
+      "Estimates reflect prevailing market transactions and surveyor benchmarks. Formal bank mortgages require accredited valuer inspections.",
+    factorsTitle: "5 Core Factors Determining Valuation in Bangladesh",
+    factorsSubtitle:
+      "Professional surveyors weigh structural, regulatory, and environmental metrics during an inspection.",
+    factor1Title: "Location, Frontage & Road Access",
+    factor1Desc:
+      "Properties on 40ft+ wide roads qualify for superior RAJUK Floor Area Ratios (FAR). Corner plots and plots with wide frontages command an 8%–15% market premium over interior lane properties.",
+    factor2Title: "RAJUK / CDA Plan Approval & Legal Clearances",
+    factor2Desc:
+      "Approved architectural and structural drawings, valid occupancy certificates (বাসস্থান সনদ), and flawless mutation / porcha documentation are mandatory. Deviations reduce bank loan approval limits.",
+    factor3Title: "Developer Brand & Structural Construction Quality",
+    factor3Desc:
+      "Grade-1 REHAB-member developers with proven earthquake-resistant structural engineering, premium MEP fittings, and high-spec lifts command significantly higher resale values.",
+    factor4Title: "Building Age & Depreciation Schedules",
+    factor4Desc:
+      "Apartments undergo ~1.5%–2% annual structural depreciation after 5 years. Beyond 20 years, value predominantly reflects the undivided proportionate land share (অনূদিত জমির অংশ).",
+    factor5Title: "Building Utilities & Amenities",
+    factor5Desc:
+      "Dedicated electrical substations, full generator power backup, certified firefighting systems, modern lifts, CCTV surveillance, and reserved basement parking directly inflate net property value.",
+    mouzaVsMarketTitle: "Government Mouza Rate vs. Fair Market Value",
+    mouzaVsMarketSubtitle:
+      "Understanding why Sub-Registry deed values differ fundamentally from commercial market prices.",
+    mouzaCardTitle: "Government Mouza Rate (সরকারি মৌজা দর)",
+    mouzaCardPoint1:
+      "Determined periodically by the Registration Directorate & District Collectorates based on historical averages.",
+    mouzaCardPoint2:
+      "Acts as the statutory minimum deed base for calculating Stamp Duty (1.5%), Registration Fees (1%), and Local Govt Taxes (2%).",
+    mouzaCardPoint3:
+      "Cannot be used as a realistic indicator of purchase price, especially in high-appreciation urban centers.",
+    marketCardTitle: "Fair Market Value (ন্যায্য বাজার মূল্য)",
+    marketCardPoint1:
+      "Reflects actual willing buyer - willing seller transactions based on real-time supply and demand.",
+    marketCardPoint2:
+      "Governs bank surveyor mortgage assessments, insurance appraisals, and secondary market resales.",
+    marketCardPoint3:
+      "Typically 1.5x to 3.5x higher than official Mouza rates across prime Dhaka corridors.",
+    checklistTitle: "Step-by-Step Bank Surveyor Inspection Checklist",
+    checklistSubtitle:
+      "What accredited engineering surveyors verify when assessing a property for mortgage approval.",
+    step1Title: "1. Title Deed & Cadastral Verification",
+    step1Desc:
+      "Checking chain of title (বায়া দলিল), CS/SA/RS/City Survey Khatian, DCR, and mutation records against Sub-Registry records.",
+    step2Title: "2. Physical Boundary & Demarcation",
+    step2Desc:
+      "Measuring plot dimensions, road frontage, setbacks, and confirming alignment with official cadastral survey maps.",
+    step3Title: "3. Structural Audit & Finish Quality",
+    step3Desc:
+      "Inspecting concrete beams, column integrity, dampness or settlement cracks, elevator specifications, and utility connections.",
+    step4Title: "4. RAJUK Approval Adherence",
+    step4Desc:
+      "Checking whether the actual built layout matches the RAJUK approved plan without illegal cantilevers or unapproved floor extensions.",
+    step5Title: "5. Local Market Inquiry",
+    step5Desc:
+      "Consulting local deed writers (Mohorar) and verifying recent authenticated sales in the immediate vicinity.",
+    faqTitle: "Frequently Asked Questions",
+    faqSubtitle:
+      "Essential answers regarding real estate valuation, bank mortgages, and Bangladesh property laws.",
+    faq1Q: "Why do commercial banks value properties 20% to 30% lower than asking prices?",
+    faq1A:
+      "Banks employ a 'forced sale value' (FSV) approach. If a borrower defaults, the bank must be able to liquidate the collateral quickly at auction. Surveyors intentionally disregard speculative premiums and apply a conservative 20%–30% haircut to fair market value.",
+    faq2Q: "How is the undivided proportionate land share calculated for an apartment?",
+    faq2A:
+      "The undivided land share is calculated by dividing your apartment's floor area by the total buildable floor area of the entire building, then multiplying that fraction by the total plot size (in Katha or decimals). As a building ages past 25–30 years, this land share represents nearly all of your asset's residual worth.",
+    faq3Q: "Does a higher floor command a higher valuation in Dhaka?",
+    faq3A:
+      "Generally yes. In modern high-rises (10+ floors), upper floors (5th floor and above) often command a 5%–10% premium due to better airflow, natural daylight, reduced street noise, and pleasant skyline views, provided the building has reliable high-speed lifts and generator backup.",
+    faq4Q: "How can a seller maximize property valuation before listing?",
+    faq4A:
+      "Ensure all documentation (up-to-date holding tax, utility bills, mutation, original deeds) is perfectly organized. Minor cosmetic repairs (fresh coat of paint, fixing damp spots, updated electrical fittings) and professional deep cleaning typically return 3x to 5x their cost in perceived buyer value.",
+    ctaTitle: "Need an Instant Digital Valuation for Your Property?",
+    ctaDesc:
+      "Use HomeNet's automated valuation model to get a real-time data-backed assessment of your apartment or commercial space.",
+    ctaButton: "Try Instant Valuation",
+    disclaimerTitle: "Official Legal & Financial Disclaimer",
+    disclaimerDesc:
+      "The guides, benchmarks, and interactive calculations on this page are provided for educational and informational purposes only. Official bank financing, capital gain taxation, and property registration require formal surveys by certified civil engineers and verification from relevant Sub-Registry offices. HomeNet BD does not provide statutory appraisal certificates.",
+    gulshanName: "Gulshan",
+    bananiName: "Banani",
+    dhanmondiName: "Dhanmondi",
+    bashundharaName: "Bashundhara R/A",
+    uttaraName: "Uttara",
+    mirpurName: "Mirpur",
+    mohammadpurName: "Mohammadpur",
+  },
+  propertyNewsTrends: {
+    metaTitle: "Bangladesh Property News & Trends 2026 | HomeNet BD",
+    metaDescription:
+      "Stay informed on Bangladesh real estate policies, RAJUK DAP rules, MRT corridor growth, housing loan rates, and building material price trends in Dhaka.",
+    eyebrow: "Real Estate Market Intelligence",
+    headline: "Bangladesh Property News & Trends",
+    subheading:
+      "Verified updates on real estate policies, RAJUK DAP regulations, infrastructure corridors, and quarterly housing indices.",
+    lastUpdated: "Updated for Q4 2026",
+    digestBadge: "Quarterly Housing Digest",
+    tabAll: "All News & Analysis",
+    tabPolicy: "Policy & Regulations",
+    tabInfrastructure: "Infrastructure Corridors",
+    tabMarketTrends: "Market Trends & Material Index",
+    featuredBadge: "Lead Editorial",
+    featuredCategory: "Policy & Regulations",
+    featuredDate: "October 2026",
+    featuredReadTime: "6 min read",
+    featuredTitle:
+      "RAJUK DAP Revisions: Floor Area Ratio (FAR) Adjustments Approved for Dhaka Residential Plots",
+    featuredSummary:
+      "The Ministry of Housing has approved critical relaxations in Floor Area Ratio (FAR) calculations for narrow road plots (under 30ft), restoring feasibility for joint-venture developer projects across Dhanmondi, Mirpur, and Uttara.",
+    featuredTakeaway:
+      "Key Impact: Up to 18% higher buildable floor area on 5–10 katha plots, improving apartment supply over the next 24 months.",
+    readArticleAction: "Read Analysis",
+    gridTitle: "Market Intelligence & Regulatory Reports",
+    gridSubtitle:
+      "In-depth coverage on infrastructure expansion, bank financing schemes, and raw construction material benchmarks.",
+    art1Category: "Infrastructure Corridors",
+    art1Topic: "Metro Rail Connectivity",
+    art1Date: "November 2026",
+    art1ReadTime: "4 min read",
+    art1Title:
+      "MRT Line-6 Motijheel to Kamalapur Extension Enters Final Commissioning Phase",
+    art1Summary:
+      "Commercial and rental yields in Motijheel and adjacent South Kamalapur have appreciated by 14% year-over-year as commuter travel time from Uttara drops to 38 minutes.",
+    art1Takeaway:
+      "High rental demand from corporate executives shifting closer to multimodal transit interchanges.",
+    art2Category: "Policy & Regulations",
+    art2Topic: "Home Loan Refinancing",
+    art2Date: "October 2026",
+    art2ReadTime: "5 min read",
+    art2Title:
+      "Bangladesh Bank Enhances Affordable Housing Refinancing Fund to ৳3,000 Crore",
+    art2Summary:
+      "Single-digit 8.5% interest rates made available for first-time apartment buyers purchasing units under 1,250 sqft outside central Dhaka city corporation limits.",
+    art2Takeaway:
+      "Surge in suburban apartment bookings in Savar, Keraniganj, and Gazipur periphery.",
+    art3Category: "Market Trends & Material Index",
+    art3Topic: "Construction Material Cost",
+    art3Date: "September 2026",
+    art3ReadTime: "4 min read",
+    art3Title:
+      "Structural Rebar & Portland Cement Prices Moderate Following Import Tariff Rationalization",
+    art3Summary:
+      "60-grade MS rod prices dropped from ৳98,000 to 89,500 per ton, easing construction expenditure pressure on active residential handovers across Dhaka.",
+    art3Takeaway:
+      "Developers forecast stable per-square-foot baseline pricing for ready flats through early 2027.",
+    art4Category: "Infrastructure Corridors",
+    art4Topic: "Expressway Expansion",
+    art4Date: "August 2026",
+    art4ReadTime: "3 min read",
+    art4Title:
+      "Dhaka Elevated Expressway Phase-3 Linkage Boosts Ashulia & Airport Corridor Land Value",
+    art4Summary:
+      "Smooth access between Hazrat Shahjalal International Airport and southern industrial hubs has pushed planned residential township inquiries up by 22%.",
+    art4Takeaway:
+      "Purbachal and Ashulia border sectors leading secondary land sales volume.",
+    art5Category: "Market Trends & Material Index",
+    art5Topic: "Secondary Market Boom",
+    art5Date: "July 2026",
+    art5ReadTime: "5 min read",
+    art5Title:
+      "Secondary Resale Apartments Surge in Demand Amid Rising Cost of New Developer Units",
+    art5Summary:
+      "Buyers in Dhanmondi and Mirpur increasingly favor 5–10 year-old resale flats offering immediate utility connections, ready mutation documents, and zero handover delays.",
+    art5Takeaway:
+      "Secondary flats trade at a 15%–25% discount per square foot compared to newly launched under-construction projects.",
+    snapshotTitle: "Q4 2026 Market Snapshot",
+    snapshotSubtitle:
+      "Key macro indicators governing property acquisitions and bank mortgages across Bangladesh.",
+    stat1Label: "Avg Housing Loan Rate",
+    stat1Value: "9.25% – 10.5%",
+    stat1Note: "Fixed & Floating blend",
+    stat2Label: "Top Appreciating Corridor",
+    stat2Value: "Purbachal (+14.6%)",
+    stat2Note: "12-month capital gain",
+    stat3Label: "Construction Material Index",
+    stat3Value: "142.4 (-2.8% QoQ)",
+    stat3Note: "Rebar & cement moderation",
+    newsletterTitle: "Subscribe to HomeNet Monthly Intelligence Digest",
+    newsletterSubtitle:
+      "Get verified legal updates, RAJUK circulars, and quarterly price movement indices delivered directly to your inbox.",
+    emailPlaceholder: "Enter your email address...",
+    subscribeButton: "Subscribe",
+    subscribedSuccess: "Thank you for subscribing to HomeNet BD Market Digest.",
+    disclaimerTitle: "Editorial & Market Intelligence Disclaimer",
+    disclaimerDesc:
+      "The news analysis, regulatory summaries, and material cost indices published on this page are compiled for informational purposes using gazette notifications, Bangladesh Bank releases, and verified industry reports. HomeNet BD does not provide statutory legal advice or guaranteed investment yields.",
+  },
+  buyerGuides: {
+    metaTitle: "Bangladesh Property Buyer's Guide 2026 | HomeNet BD",
+    metaDescription:
+      "Complete property buying guide for Bangladesh. Verify Khatian, Namzari, RAJUK approvals, Baina-nama, and Saf-Kabala deeds to prevent real estate fraud.",
+    eyebrow: "Legal & Acquisition Due Diligence",
+    headline: "Bangladesh Property Buyer's Guide",
+    subheading:
+      "Step-by-step legal roadmap, statutory document checks, and contract safeguards to buy apartments and land with zero legal risk.",
+    badgeDueDiligence: "Transfer of Property Act 1882 Aligned",
+    badgeRegistry: "Sub-Registry & AC Land Verified",
+    badgeRajuk: "RAJUK Building Code 2024",
+    checklistTitle: "Interactive Buyer Due Diligence Checklist",
+    checklistSubtitle:
+      "Tick each document and clearance verified. Track your legal safety score before signing contracts or transferring funds.",
+    readinessScore: "Buyer Legal Safety Score",
+    scoreLow: "High Risk — Missing Vital Records",
+    scoreMedium: "Moderate Clearance — Additional Verification Needed",
+    scoreHigh: "Legally Secure — Ready for Contract Execution",
+    check1Title: "Chain of Title (বায়া দলিল / Baya Deed)",
+    check1Desc:
+      "25–30 year unbroken chain of ownership deeds verifying rightful title passage.",
+    check2Title: "Survey Khatians (CS, SA, RS & City/BS)",
+    check2Desc:
+      "Matching ownership names and plot boundaries across all historical land surveys.",
+    check3Title: "e-Namjari Mutation & DCR Receipt",
+    check3Desc:
+      "Current seller's name registered in Upazila/Circle AC Land records with valid DCR.",
+    check4Title: "Non-Encumbrance Certificate (NEC)",
+    check4Desc:
+      "Official search from Sub-Registry proving no hidden mortgage or bank lien on the property.",
+    check5Title: "Sanctioned RAJUK / CDA Building Plan",
+    check5Desc:
+      "Architectural approval letter, setback compliance, and occupancy certificate for apartments.",
+    check6Title: "Updated Land Development Tax (Khajna)",
+    check6Desc:
+      "Paid-up Dakhila proving current fiscal year revenue clearance with the government.",
+    phasesTitle: "The 4 Essential Phases of Buying Property in Bangladesh",
+    phasesSubtitle:
+      "From title search to mutation, follow this chronological procedure to secure indisputable ownership.",
+    phaseDocsLabel: "Essential Docs:",
+    phase1Tag: "Phase 01",
+    phase1Title: "Legal Due Diligence & Title Search",
+    phase1Desc:
+      "Never make a financial deposit before reviewing certified deed copies. Check CS, SA, RS, and City/BS records at the District Collectorate and Sub-Registry. Ensure land is not declared Vested (অর্পিত), Waqf, or Abandoned property.",
+    phase1Docs: "Baya Deed, Khatians, e-Namjari, NEC",
+    phase1Time: "10–15 Days",
+    phase1Warning:
+      "Warning: A missing Baya Deed can invalidate your future title in civil courts.",
+    phase2Tag: "Phase 02",
+    phase2Title: "Developer Sanctions & RAJUK Compliance",
+    phase2Desc:
+      "For apartments, inspect the registered Landowner-Developer Joint Venture Agreement and Irrevocable Power of Attorney. Confirm the developer is an active REHAB member and the built structure does not exceed sanctioned Floor Area Ratio (FAR).",
+    phase2Docs: "RAJUK Sanction, Power of Attorney, REHAB Cert",
+    phase2Time: "5–7 Days",
+    phase2Warning:
+      "Warning: Extra floors constructed beyond approved plans cannot be registered or mutated.",
+    phase3Tag: "Phase 03",
+    phase3Title: "Registered Baina-Nama & Payment Safeguards",
+    phase3Desc:
+      "Execute a formal Agreement to Sell (বায়নানামা) on statutory non-judicial stamp and register it at the Sub-Registry within 30 days under Section 54A of the Transfer of Property Act. Pay token and installments strictly via Account Payee Cheques or Bank Pay Orders.",
+    phase3Docs: "Registered Baina, Bank Pay Orders, Cheque Copies",
+    phase3Time: "1–3 Days",
+    phase3Warning:
+      "Warning: Unregistered Baina-nama carries zero legal standing for specific performance suits.",
+    phase4Tag: "Phase 04",
+    phase4Title: "Deed Execution, Tax Clearance & Post-Purchase Mutation",
+    phase4Desc:
+      "Execute the final Saf-Kabala deed at the Sub-Registry. Pay Stamp Duty (1.5%), Registration Fee (1%), Local Govt Tax (2%), and AIT. Within 30 days of registration, apply for e-Namjari mutation in your name at the AC Land office.",
+    phase4Docs: "Saf-Kabala Deed, Tax Receipts, New e-Namjari",
+    phase4Time: "1 Day (Registry) + 28 Days (Mutation)",
+    phase4Warning:
+      "Warning: Purchase is legally incomplete until your name is recorded in the government mutation register.",
+    guidesTitle: "Curated Deep-Dive Guides & Tools",
+    guidesSubtitle:
+      "Master specific legal and financial steps with HomeNet's comprehensive guides.",
+    guide1Category: "Land Records",
+    guide1Title:
+      "How to Verify CS, SA, RS, and City Survey Khatians in Bangladesh",
+    guide1Desc:
+      "Detailed guide on deciphering cadastral maps, porcha seals, and recognizing fraudulent Khatians.",
+    guide2Category: "Title Perfection",
+    guide2Title:
+      "Complete Step-by-Step Guide to e-Namjari Mutation in Bangladesh",
+    guide2Desc:
+      "How to apply online, submit DCR fees, and obtain your mutation Khatian without middlemen.",
+    guide3Category: "Contracts & Sales",
+    guide3Title:
+      "Baina-Nama: Why Registering Your Agreement to Sell is Mandatory",
+    guide3Desc:
+      "Understanding Section 54A, statutory stamp requirements, and standard clauses to safeguard your deposit.",
+    guide4Category: "Apartment Safety",
+    guide4Title:
+      "How to Verify RAJUK & CDA Approved Building Plans for Apartments",
+    guide4Desc:
+      "Checking layout approvals, setbacks, occupancy certificates, and identifying unapproved rooftop extensions.",
+    guide5Category: "Financial Planning",
+    guide5Title:
+      "Bangladesh Stamp Duty & Property Registration Tax Calculator",
+    guide5Desc:
+      "Calculate exact stamp duties, registration fees, AIT gain tax, and local taxes across Dhaka and Chittagong.",
+    faqTitle: "Frequently Asked Buyer Questions",
+    faqSubtitle:
+      "Essential answers on property verification, developer disputes, and deed laws.",
+    faq1Q:
+      "What happens if I buy an apartment constructed without RAJUK approval?",
+    faq1A:
+      "An unapproved apartment cannot be legally registered or mutated under your name. Commercial banks will refuse home loan financing, utility companies may deny permanent gas and electricity meters, and RAJUK retains demolition authority over unauthorized structures under the Building Construction Act.",
+    faq2Q: "Why is an unregistered Baina-nama (বায়নানামা) legally perilous?",
+    faq2A:
+      "Under Section 54A of the Transfer of Property Act, an unregistered contract for sale has no legal force in court to compel property transfer. If the seller breaches or sells to a third party, your only recourse is a protracted criminal case for fraud, rather than securing court-ordered title transfer.",
+    faq3Q:
+      "Why is checking 25 to 30 years of Baya Deeds (বায়া দলিল) necessary?",
+    faq3A:
+      "In Bangladesh, real estate disputes often trace back to unresolved inheritance shares, unpartitioned joint family land (এওয়াজ/বাটোয়ারা), or unauthorized transfers made decades ago. A 25–30 year title search confirms that every previous owner had undisputed legal title.",
+    faq4Q:
+      "How soon after property registration must I apply for mutation (নামজারি)?",
+    faq4A:
+      "You should apply for e-Namjari immediately after receiving your registered deed receipt (সাধারণ রসিদ), ideally within 30 days. Without mutation in the AC Land office, the government tax roll remains in the previous owner's name, leaving the property vulnerable to fraudulent second sales.",
+    disclaimerTitle: "Legal Due Diligence Disclaimer",
+    disclaimerDesc:
+      "This guide is intended for educational purposes and provides general workflow advice under Bangladesh property legislation. Real estate acquisitions involve complex legal, inheritance, and tax liabilities. HomeNet BD strongly advises engaging a qualified civil lawyer to conduct independent title and document searches prior to executing property transactions.",
+  },
+  sellerGuides: {
+    metaTitle: "Bangladesh Property Seller's Guide 2026 | HomeNet BD",
+    metaDescription:
+      "Complete seller guide for Bangladesh property. Prepare e-Namjari, clear land taxes, calculate Section 53H AIT, and execute registered Saf-Kabala deeds safely.",
+    eyebrow: "Sales Execution & Legal Cleanliness",
+    headline: "Property Seller's Guide: Real Estate in Bangladesh",
+    subheading:
+      "Master title perfection, fair market valuation, registered Baina-nama safeguards, and Section 53H seller tax clearance to sell property smoothly.",
+    badgeTaxAct: "Income Tax Act 2023 (Section 53H AIT)",
+    badgeBainaAct: "Transfer of Property Act 1882 (Sec 54A)",
+    badgeNamjari: "Land Ministry e-Namjari & AC Land",
+    checklistTitle: "Interactive Seller Readiness Checklist",
+    checklistSubtitle:
+      "Verify every statutory record and clearance before advertising or accepting token earnest deposits.",
+    readinessScore: "Seller Legal Safety Score",
+    scoreLow: "Incomplete Documentation — Missing Critical Titles",
+    scoreMedium: "Partial Clearance — Outstanding Taxes or Approvals",
+    scoreHigh: "Market-Ready — Full Legal Clearance to Execute Sale",
+    check1Title: "e-Namjari Mutation Khatian & Valid DCR",
+    check1Desc:
+      "Seller's exclusive name recorded in the Upazila/Circle AC Land revenue register with genuine Duplicate Carbon Receipt.",
+    check2Title: "Land Development Tax (Khajna) Clearance",
+    check2Desc:
+      "Current fiscal year Khajna Dakhila paid through the online Land Revenue portal with zero government arrears.",
+    check3Title: "Original Title Deed & Unbroken Baya Chain",
+    check3Desc:
+      "Certified original Saf-Kabala deed or developer allotment with chronological 25–30 year previous chain deeds.",
+    check4Title: "All Utility Bills & Society NOC Cleared",
+    check4Desc:
+      "Zero dues certificates from DESCO/DPDC, WASA, Titas Gas, and formal No Objection Certificate from building association.",
+    check5Title: "Registered Partition Deed (Ancestral Land)",
+    check5Desc:
+      "Registered Apas-Bonton-nama (বণ্টননামা) and Warishan Sanad if property was inherited across joint family members.",
+    check6Title: "Section 53H Advance Income Tax (AIT) Prepared",
+    check6Desc:
+      "Accurate calculation and liquidity set aside for source gain tax payable at Sub-Registry upon deed registration.",
+    phasesTitle: "The 4 Essential Phases of Selling Property in Bangladesh",
+    phasesSubtitle:
+      "From paperwork cleanup to registration day, follow this statutory roadmap for a dispute-free sale.",
+    phaseDocsLabel: "Essential Docs:",
+    phase1Tag: "Phase 01",
+    phase1Title: "Ownership Title Preparation & Legal Cleanliness",
+    phase1Desc:
+      "Before listing, assemble the original Saf-Kabala deed, 25-year Baya deeds, mutation Khatian with DCR, and current Khajna Dakhila. If inherited property, obtain an official Warishan Sanad and execute a registered partition deed to avoid future heir injunctions.",
+    phase1Docs: "Saf-Kabala, Baya Deeds, Mutation Khatian, DCR, Khajna",
+    phase1Time: "15–30 Days",
+    phase1Warning:
+      "Warning: Buyers cannot obtain bank home loans without seller's updated e-Namjari and clear DCR.",
+    phase2Tag: "Phase 02",
+    phase2Title: "Property Valuation & Pricing Strategy",
+    phase2Desc:
+      "Understand the difference between the government minimum Mouza rate (used for Sub-Registry stamp duty calculations) and Fair Market Value. Price accurately by benchmarking against Dhaka micro-market rates, factoring road access width, floor position, and building age.",
+    phase2Docs: "Mouza Rate Sheet, HomeNet Price Index, Building Age Log",
+    phase2Time: "3–7 Days",
+    phase2Warning:
+      "Warning: Overpricing based on emotion causes listings to stagnate, while underpricing forfeits real capital appreciation.",
+    phase3Tag: "Phase 03",
+    phase3Title: "Registered Baina-Nama & Financial Shielding",
+    phase3Desc:
+      "Execute an Agreement to Sell (বায়নানামা) on statutory non-judicial stamp and register it at the Sub-Registry within 30 days under Section 54A. Collect 10%–20% earnest money strictly via Account Payee Bank Pay Order with a defined 60–90 day timeline for deed completion.",
+    phase3Docs: "Registered Baina, Account Payee Pay Order, Timeline Terms",
+    phase3Time: "2–5 Days",
+    phase3Warning:
+      "Warning: Unregistered Baina-nama leaves sellers vulnerable to buyer cancellation and title clouding.",
+    phase4Tag: "Phase 04",
+    phase4Title: "Tax Liabilities & Saf-Kabala Execution",
+    phase4Desc:
+      "Calculate your Section 53H Advance Income Tax (AIT / উৎসে কর) liability. Attend the Sub-Registry for biometric identification, verify remaining consideration via bank pay order, hand over original keys and deeds, and execute the final registered Saf-Kabala deed.",
+    phase4Docs: "Bank Pay Orders, AIT Challan, Utility NOCs, Saf-Kabala",
+    phase4Time: "1 Day (Registry Day)",
+    phase4Warning:
+      "Warning: Never hand over physical vacant possession before confirming the buyer's balance pay order has cleared.",
+    guidesTitle: "Curated Tools & Deep-Dive Seller Guides",
+    guidesSubtitle:
+      "Leverage HomeNet's valuation and regulatory toolsets to prepare your transaction.",
+    guide1Category: "Valuation",
+    guide1Title: "Dhaka Property Valuation Guide & Estimator",
+    guide1Desc:
+      "Calculate estimated fair market value vs government Mouza rates across Dhanmondi, Gulshan, Banani, and Uttara.",
+    guide2Category: "Market Intel",
+    guide2Title: "Dhaka Property Price Index & Area Trends",
+    guide2Desc:
+      "Inspect current square-foot asking benchmarks to price your apartment competitively without leaving money on the table.",
+    guide3Category: "Taxation",
+    guide3Title: "Stamp Duty & Property Registration Tax Calculator",
+    guide3Desc:
+      "Determine seller Section 53H Advance Income Tax (AIT) rates and understand total closing cost breakdown.",
+    guide4Category: "Title Perfection",
+    guide4Title: "Complete Step-by-Step Guide to e-Namjari Mutation",
+    guide4Desc:
+      "Ensure your mutation records and DCR receipts are 100% verified in the AC Land portal prior to listing.",
+    guide5Category: "Contracts",
+    guide5Title: "Baina-Nama: Mandatory Agreement to Sell Rules",
+    guide5Desc:
+      "Safeguard your seller rights with Section 54A registered Baina agreements, earnest money rules, and default clauses.",
+    faqTitle: "Frequently Asked Seller Questions",
+    faqSubtitle:
+      "Authoritative answers on seller tax liabilities, developer flats, and default remedies.",
+    faq1Q:
+      "Who is legally liable to pay Advance Income Tax (AIT / উৎসে কর) at the Sub-Registry?",
+    faq1A:
+      "Under Section 53H of the Income Tax Act 2023, the seller/transferor is legally responsible for Advance Income Tax (AIT). The Sub-Registrar collects this tax at source via Treasury Challan prior to executing the Saf-Kabala deed, calculated based on the designated commercial/residential mouza rate or deed value.",
+    faq2Q:
+      "Can I sell an apartment if the developer has not yet issued the final Saf-Kabala deed?",
+    faq2A:
+      "Yes, but you cannot execute a direct Saf-Kabala. You must execute a registered Tripartite Deed of Transfer (ত্রিপক্ষীয় হস্তান্তর দলিল) where the developer joins as a confirming party, or execute a registered assignment of rights backed by the original registered Power of Attorney and developer Allotment Letter.",
+    faq3Q:
+      "How binding is a registered Baina-nama if the buyer defaults on paying the balance consideration?",
+    faq3A:
+      "A registered Baina-nama under Section 54A binds both parties to statutory timelines (typically 60–90 days). If the buyer fails to pay within the stipulated date, the seller can issue a legal notice to perform within 15 days. If the default continues, standard contractual forfeiture clauses (usually 10%–20% deposit) take effect, and the seller can move to rescind the contract.",
+    faq4Q:
+      "What documents must be resolved before selling inherited ancestral land (পৈতৃক সম্পত্তি)?",
+    faq4A:
+      "You must provide an official Warishan Sanad (উত্তরাধিকার সনদ) from the local City Corporation or Union Parishad, a registered Partition Deed (আপস বণ্টননামা) executed among all surviving legal heirs, and individual e-Namjari mutation in your name with up-to-date Khajna receipts.",
+    disclaimerTitle: "Seller Advisory & Legal Notice",
+    disclaimerDesc:
+      "This guide provides educational insight into real estate sales procedures under Bangladesh laws. Property transactions involve critical tax liabilities, inheritance verifications, and contractual commitments. HomeNet BD strongly recommends engaging an advocate or licensed deed writer (সনদপ্রাপ্ত দলিল লেখক) to review all title instruments and verify government receipts prior to execution.",
+  },
+  renterGuides: {
+    metaTitle: "Bangladesh Tenant & Renter's Guide 2026 | HomeNet BD",
+    metaDescription:
+      "Complete tenant guide for Bangladesh. Master Rent Control Act 1991, ৳300 stamp rent agreements, advance deposit limits, and DMP police verification compliance.",
+    eyebrow: "Tenant Rights & Tenancy Legislation",
+    headline: "Tenant & Renter's Guide: Rights & Standards",
+    subheading:
+      "Master rent agreements, statutory advance deposit protections, DMP tenant verification, and dispute resolution under the Premises Rent Control Act.",
+    badgeRentAct: "Premises Rent Control Act 1991",
+    badgeStamp: "৳300 Non-Judicial Stamp Agreement",
+    badgePolice: "DMP Tenant Verification (CIMS)",
+    checklistTitle: "Interactive Move-In Readiness Checklist",
+    checklistSubtitle:
+      "Verify every contractual term, meter reading, and police clearance before paying advance rent or moving furniture.",
+    readinessScore: "Tenant Protection Score",
+    scoreLow: "Unprotected — Missing Written Agreement",
+    scoreMedium: "Basic Tenancy — Missing Utility or Police Clearance",
+    scoreHigh: "Legally Protected — Fully Compliant Move-In",
+    check1Title: "Written Agreement on ৳300 Stamp",
+    check1Desc:
+      "Executed tenancy deed detailing monthly rent, deposit amount, and exact 1 to 2 month notice period terms.",
+    check2Title: "Signed Advance Deposit Money Receipt",
+    check2Desc:
+      "Landlord's signed receipt specifying whether advance payment is refundable security or adjustable rent.",
+    check3Title: "Dedicated Electricity Meter Day-One Reading",
+    check3Desc:
+      "Documented starting kilowatt-hour unit or prepaid card balance signed off by both tenant and owner.",
+    check4Title: "Building Service Charge & Generator Terms",
+    check4Desc:
+      "Clear breakdown of lift, security, common area cleaning, and diesel fuel surcharges during load shedding.",
+    check5Title: "Completed DMP CIMS Verification Form",
+    check5Desc:
+      "Filled tenant information form with NID and passport photos submitted to the local Thana / Police Station.",
+    check6Title: "Annual Rent Review Cap Specified",
+    check6Desc:
+      "Explicit covenant barring mid-year rent increases, restricting revisions to a maximum of once every 12 months.",
+    phasesTitle: "The 4 Essential Pillars of Renting in Bangladesh",
+    phasesSubtitle:
+      "From neighborhood due diligence to deposit recovery, follow this statutory framework for a peaceful tenancy.",
+    phaseDocsLabel: "Essential Docs:",
+    phase1Tag: "Pillar 01",
+    phase1Title: "Pre-Lease Due Diligence & Budgeting",
+    phase1Desc:
+      "Inspect the apartment in daylight for dampness, water pressure, and mobile network reception. Confirm whether the building uses prepaid gas cylinders or pipeline Titas, verify individual DESCO/DPDC meter separation, and calculate full monthly overheads including society service charges.",
+    phase1Docs: "Building Rulebook, Recent Utility Bills, Sample Lease",
+    phase1Time: "3–7 Days",
+    phase1Warning:
+      "Warning: Shared electricity sub-meters often lead to inflated tariff calculations and disputes.",
+    phase2Tag: "Pillar 02",
+    phase2Title: "Tenancy Agreement Clauses to Insist On",
+    phase2Desc:
+      "Execute the agreement on ৳300 non-judicial stamp paper. Insist on clear clauses covering notice periods (usually 1 or 2 months for both sides), structural repair obligations on the landlord, zero deductions for normal wear and tear, and mandatory written rent receipts under Section 13.",
+    phase2Docs: "৳300 Non-Judicial Stamp Deed, NID Photocopies",
+    phase2Time: "1–3 Days",
+    phase2Warning:
+      "Warning: Verbal rent agreements offer zero legal standing if a landlord attempts arbitrary eviction.",
+    phase3Tag: "Pillar 03",
+    phase3Title: "Move-In Formalities & DMP Police Verification",
+    phase3Desc:
+      "Fill out the Dhaka Metropolitan Police (DMP) Citizen Information Management System (CIMS) tenant profile with passport-sized photos, emergency contacts, and NID copies. Submit one copy to the local Thana and retain an acknowledged copy. Record baseline meter readings with photos.",
+    phase3Docs: "DMP Tenant Form, Meter Baseline Photos, Key Handover Log",
+    phase3Time: "First 7 Days",
+    phase3Warning:
+      "Warning: Failure to submit police verification violates DMP civic regulations and can lead to administrative scrutiny.",
+    phase4Tag: "Pillar 04",
+    phase4Title: "Dispute Handling & Deposit Recovery",
+    phase4Desc:
+      "Know your statutory rights under the Premises Rent Control Act 1991. Landlords cannot disconnect electricity, water, or gas during rent disputes. When vacating, provide written notice matching your agreement, settle final utility bills, and request full return of your refundable deposit.",
+    phase4Docs: "Written Notice Copy, Final Utility Slips, Handover Receipt",
+    phase4Time: "30–60 Days Notice",
+    phase4Warning:
+      "Warning: Section 18 criminalizes cutting off water or power; tenants can petition the Rent Controller for emergency relief.",
+    guidesTitle: "Curated Renter Tools & Neighborhood Benchmarks",
+    guidesSubtitle:
+      "Compare neighborhood rental rates, verify stamp rules, and find verified rentals across Dhaka.",
+    guide1Category: "Rental Benchmarks",
+    guide1Title: "Dhaka Property Price & Rental Index",
+    guide1Desc:
+      "Compare square-foot rental benchmarks across Mirpur, Dhanmondi, Uttara, Bashundhara, and Gulshan.",
+    guide2Category: "Agreements",
+    guide2Title: "Stamp Duty & Lease Registration Calculator",
+    guide2Desc:
+      "Understand statutory stamp duties for tenancy agreements, notary verification, and legal deed costs.",
+    guide3Category: "Student Housing",
+    guide3Title: "Verified Student & Bachelor Accommodation",
+    guide3Desc:
+      "Browse dedicated bachelor messes, student hostels, and shared flats near major Dhaka universities.",
+    guide4Category: "Property Search",
+    guide4Title: "Explore Homes for Rent in Dhaka",
+    guide4Desc:
+      "Search thousands of verified residential apartments, family suites, and duplexes for rent across Dhaka.",
+    guide5Category: "Valuation",
+    guide5Title: "Property Valuation & Yield Estimator",
+    guide5Desc:
+      "Inspect underlying property values to evaluate whether your asking rent represents fair market value.",
+    faqTitle: "Frequently Asked Tenant Questions",
+    faqSubtitle:
+      "Statutory answers on utility disconnections, deposit disputes, and Rent Controller legal remedies.",
+    faq1Q:
+      "Can a landlord legally disconnect water, gas, or electricity during a tenancy dispute?",
+    faq1A:
+      "No. Under Section 18 of the Premises Rent Control Act 1991, disconnecting essential utility supplies (electricity, water, gas, lift services) without an order from the Rent Controller is a criminal offense punishable by fines and imprisonment. Tenants can file an urgent application with the local Rent Controller to restore utilities immediately.",
+    faq2Q:
+      "What is the statutory limit for advance rent and security deposits in Bangladesh?",
+    faq2A:
+      "Under Section 10 of the Premises Rent Control Act 1991, landlords are prohibited from claiming arbitrary 'salami' or premiums exceeding one month's rent as a condition of granting or renewing a residential lease. In modern Dhaka practice, 1 to 2 months' advance is customary and must be stipulated in writing as refundable security.",
+    faq3Q:
+      "How does the Dhaka Metropolitan Police (DMP) tenant verification form protect renters?",
+    faq3A:
+      "Submitting the DMP Citizen Information Management System (CIMS) form creates an official police registry of your lawful domicile in that property. It deters unlawful harassment, protects tenants against arbitrary lockouts or false criminal allegations, and serves as statutory evidence of residence.",
+    faq4Q:
+      "What legal recourse do I have if a landlord refuses to refund my security deposit?",
+    faq4A:
+      "If the landlord withholds your deposit after peaceful vacant handover and cleared utility slips, first issue an Advocate's Legal Notice citing your written agreement and meter readings. If unresolved, you may file an application before the Rent Controller under the 1991 Act or initiate a summary money recovery suit in civil court.",
+    disclaimerTitle: "Statutory Tenancy Disclaimer",
+    disclaimerDesc:
+      "This guide summarizes tenant rights and workflows under the Premises Rent Control Act 1991 and DMP civic guidelines. Tenancy relationships involve binding contractual commitments. HomeNet BD strongly encourages executing written stamp agreements and seeking legal counsel or community mediation in complex eviction disputes.",
   },
   changePasswordScreen: {
     title: "Change Password",
