@@ -68,7 +68,7 @@ function WebFooter({ style }: FooterProps) {
     { label: "Stamp Duty & Tax Guide", href: "/resources/stamp-duty-tax-guide" },
     { label: "Property Price Index", href: "/resources/property-price-index" },
     { label: "Property Valuation Guide", href: "/resources/property-valuation-guide" },
-    { label: "Property News & Trends", href: "/about" },
+    { label: "Property News & Trends", href: "/resources/property-news-trends" },
     { label: "Buyer Guides", href: "/about" },
     { label: "Seller Guides", href: "/sell" },
     { label: "Renter Guides", href: "/rent" },

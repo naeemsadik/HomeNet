@@ -2368,6 +2368,106 @@ export const en = {
     mirpurName: "Mirpur",
     mohammadpurName: "Mohammadpur",
   },
+  propertyNewsTrends: {
+    metaTitle: "Bangladesh Property News & Trends 2026 | HomeNet BD",
+    metaDescription:
+      "Stay informed on Bangladesh real estate policies, RAJUK DAP rules, MRT corridor growth, housing loan rates, and building material price trends in Dhaka.",
+    eyebrow: "Real Estate Market Intelligence",
+    headline: "Bangladesh Property News & Trends",
+    subheading:
+      "Verified updates on real estate policies, RAJUK DAP regulations, infrastructure corridors, and quarterly housing indices.",
+    lastUpdated: "Updated for Q4 2026",
+    digestBadge: "Quarterly Housing Digest",
+    tabAll: "All News & Analysis",
+    tabPolicy: "Policy & Regulations",
+    tabInfrastructure: "Infrastructure Corridors",
+    tabMarketTrends: "Market Trends & Material Index",
+    featuredBadge: "Lead Editorial",
+    featuredCategory: "Policy & Regulations",
+    featuredDate: "October 2026",
+    featuredReadTime: "6 min read",
+    featuredTitle:
+      "RAJUK DAP Revisions: Floor Area Ratio (FAR) Adjustments Approved for Dhaka Residential Plots",
+    featuredSummary:
+      "The Ministry of Housing has approved critical relaxations in Floor Area Ratio (FAR) calculations for narrow road plots (under 30ft), restoring feasibility for joint-venture developer projects across Dhanmondi, Mirpur, and Uttara.",
+    featuredTakeaway:
+      "Key Impact: Up to 18% higher buildable floor area on 5–10 katha plots, improving apartment supply over the next 24 months.",
+    readArticleAction: "Read Analysis",
+    gridTitle: "Market Intelligence & Regulatory Reports",
+    gridSubtitle:
+      "In-depth coverage on infrastructure expansion, bank financing schemes, and raw construction material benchmarks.",
+    art1Category: "Infrastructure Corridors",
+    art1Topic: "Metro Rail Connectivity",
+    art1Date: "November 2026",
+    art1ReadTime: "4 min read",
+    art1Title:
+      "MRT Line-6 Motijheel to Kamalapur Extension Enters Final Commissioning Phase",
+    art1Summary:
+      "Commercial and rental yields in Motijheel and adjacent South Kamalapur have appreciated by 14% year-over-year as commuter travel time from Uttara drops to 38 minutes.",
+    art1Takeaway:
+      "High rental demand from corporate executives shifting closer to multimodal transit interchanges.",
+    art2Category: "Policy & Regulations",
+    art2Topic: "Home Loan Refinancing",
+    art2Date: "October 2026",
+    art2ReadTime: "5 min read",
+    art2Title:
+      "Bangladesh Bank Enhances Affordable Housing Refinancing Fund to ৳3,000 Crore",
+    art2Summary:
+      "Single-digit 8.5% interest rates made available for first-time apartment buyers purchasing units under 1,250 sqft outside central Dhaka city corporation limits.",
+    art2Takeaway:
+      "Surge in suburban apartment bookings in Savar, Keraniganj, and Gazipur periphery.",
+    art3Category: "Market Trends & Material Index",
+    art3Topic: "Construction Material Cost",
+    art3Date: "September 2026",
+    art3ReadTime: "4 min read",
+    art3Title:
+      "Structural Rebar & Portland Cement Prices Moderate Following Import Tariff Rationalization",
+    art3Summary:
+      "60-grade MS rod prices dropped from ৳98,000 to 89,500 per ton, easing construction expenditure pressure on active residential handovers across Dhaka.",
+    art3Takeaway:
+      "Developers forecast stable per-square-foot baseline pricing for ready flats through early 2027.",
+    art4Category: "Infrastructure Corridors",
+    art4Topic: "Expressway Expansion",
+    art4Date: "August 2026",
+    art4ReadTime: "3 min read",
+    art4Title:
+      "Dhaka Elevated Expressway Phase-3 Linkage Boosts Ashulia & Airport Corridor Land Value",
+    art4Summary:
+      "Smooth access between Hazrat Shahjalal International Airport and southern industrial hubs has pushed planned residential township inquiries up by 22%.",
+    art4Takeaway:
+      "Purbachal and Ashulia border sectors leading secondary land sales volume.",
+    art5Category: "Market Trends & Material Index",
+    art5Topic: "Secondary Market Boom",
+    art5Date: "July 2026",
+    art5ReadTime: "5 min read",
+    art5Title:
+      "Secondary Resale Apartments Surge in Demand Amid Rising Cost of New Developer Units",
+    art5Summary:
+      "Buyers in Dhanmondi and Mirpur increasingly favor 5–10 year-old resale flats offering immediate utility connections, ready mutation documents, and zero handover delays.",
+    art5Takeaway:
+      "Secondary flats trade at a 15%–25% discount per square foot compared to newly launched under-construction projects.",
+    snapshotTitle: "Q4 2026 Market Snapshot",
+    snapshotSubtitle:
+      "Key macro indicators governing property acquisitions and bank mortgages across Bangladesh.",
+    stat1Label: "Avg Housing Loan Rate",
+    stat1Value: "9.25% – 10.5%",
+    stat1Note: "Fixed & Floating blend",
+    stat2Label: "Top Appreciating Corridor",
+    stat2Value: "Purbachal (+14.6%)",
+    stat2Note: "12-month capital gain",
+    stat3Label: "Construction Material Index",
+    stat3Value: "142.4 (-2.8% QoQ)",
+    stat3Note: "Rebar & cement moderation",
+    newsletterTitle: "Subscribe to HomeNet Monthly Intelligence Digest",
+    newsletterSubtitle:
+      "Get verified legal updates, RAJUK circulars, and quarterly price movement indices delivered directly to your inbox.",
+    emailPlaceholder: "Enter your email address...",
+    subscribeButton: "Subscribe",
+    subscribedSuccess: "Thank you for subscribing to HomeNet BD Market Digest.",
+    disclaimerTitle: "Editorial & Market Intelligence Disclaimer",
+    disclaimerDesc:
+      "The news analysis, regulatory summaries, and material cost indices published on this page are compiled for informational purposes using gazette notifications, Bangladesh Bank releases, and verified industry reports. HomeNet BD does not provide statutory legal advice or guaranteed investment yields.",
+  },
   changePasswordScreen: {
     title: "Change Password",
     subtitle: "Enter your current password and your new password",
