@@ -12,6 +12,7 @@ import { useTranslation } from "@/i18n";
 import {
   ArrowRight,
   BadgeCheck,
+  BedDouble,
   Building2,
   CalendarCheck,
   Car,
@@ -32,6 +33,8 @@ import { usePropertyWizardStore } from "@/features/property/stores/propertyWizar
 import { AiListingSheet } from "@/features/property/components/AiListingSheet";
 import type { AiParsedProperty } from "@/features/property/types/aiListing";
 import { AppButton } from "@/components/ui";
+import { MESS_ENABLED } from "@/lib/features";
+import { startSeatListing } from "@/lib/startListing";
 import { colorTokens, colors, webPointer } from "@/theme";
 import { styles } from "./OwnerListPropertySection.styles";
 
@@ -330,6 +333,10 @@ export function OwnerListPropertySection() {
                     icon={TrendingUp}
                     variant="ghost"
                   />
+
+                  {MESS_ENABLED ? (
+                    <AppButton label={t("mess.browse.listSeat")} onPress={startSeatListing} icon={BedDouble} variant="ghost" />
+                  ) : null}
                 </View>
 
                 {/* Clean Micro-Trust Points */}

@@ -26,6 +26,9 @@ const PRIVATE_PREFIXES = [
   "/messages",
   "/property/create",
   "/property/edit",
+  "/mess/create",
+  "/mess/edit",
+  "/mess/my",
   // Staff-only user lists and profiles: a crawler only ever sees the sign-in gate.
   "/users",
 ];

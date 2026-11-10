@@ -5,6 +5,7 @@ import { AdminContextBar, ADMIN_BAR_HEIGHT } from "@/components/AdminContextBar"
 import { hasAnyAdminPermission } from "@/lib/permissions";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
+  BedDouble,
   Bell,
   BookOpen,
   Building2,
@@ -51,6 +52,7 @@ import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 import { styles } from "./AppChrome.styles";
 import { LiveText } from "@/components/LiveText";
 import { startListing } from "@/lib/startListing";
+import { MESS_ENABLED } from "@/lib/features";
 
 export type ActivePage =
   | "home"
@@ -99,6 +101,8 @@ const browseNavLinks: {
     key: "holiday",
   },
   { translationKey: "nav.sold", href: "/sold", icon: Tag, key: "sold" },
+  // Mess & Seat Share appears with its API (src/lib/features.ts).
+  ...(MESS_ENABLED ? [{ translationKey: "mess.nav" as TranslationKey, href: "/mess", icon: BedDouble, key: "mess" as ActivePage }] : []),
 ];
 
 const sidebarNavConfig: {
@@ -724,7 +728,7 @@ export function MobileNav({ active }: { active?: ActivePage }) {
     authGated: boolean;
   }[] = [
     { translationKey: "nav.home", href: "/", icon: Home, selected: active === "home", authGated: false },
-    { translationKey: "nav.search", href: "/buy", icon: Search, selected: active === "buy" || active === "rent" || active === "holiday" || active === "sold" || active === "search" || active === "property" || active === "market", authGated: false },
+    { translationKey: "nav.search", href: "/buy", icon: Search, selected: active === "buy" || active === "rent" || active === "holiday" || active === "sold" || active === "search" || active === "property" || active === "market" || active === "mess", authGated: false },
     { translationKey: "nav.post", href: "/property/create", icon: Plus, selected: active === "post", authGated: true },
     { translationKey: "nav.saved", href: "/saved", icon: Heart, selected: active === "saved", authGated: true },
     { translationKey: "nav.account", href: "/profile", icon: User, selected: active === "profile", authGated: true },

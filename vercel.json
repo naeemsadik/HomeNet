@@ -39,6 +39,7 @@
   ],
   "rewrites": [
     { "source": "/property/:id", "destination": "/property/[id]" },
+    { "source": "/mess/:id", "destination": "/mess/[id]" },
     { "source": "/users/:id", "destination": "/users/[id]" }
   ],
   "headers": [
@@ -48,6 +49,15 @@
         {
           "key": "Link",
           "value": "<https://www.homenetbd.com/property/:id>; rel=\"canonical\""
+        }
+      ]
+    },
+    {
+      "source": "/mess/:id((?!(?:create|edit|my)$)[^/]+)",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "<https://www.homenetbd.com/mess/:id>; rel=\"canonical\""
         }
       ]
     },

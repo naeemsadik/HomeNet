@@ -23,8 +23,12 @@ import {
 import type { Area } from "@/types/api";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
+import { MESS_ENABLED } from "@/lib/features";
 
-type MobileTab = "buy" | "rent" | "holiday" | "sold";
+/** "mess" opens Mess & Seat Share (/mess), its own search. */
+type MobileTab = "buy" | "rent" | "holiday" | "sold" | "mess";
+
+const MOBILE_TABS: MobileTab[] = ["buy", "rent", "holiday", "sold", ...(MESS_ENABLED ? (["mess"] as const) : [])];
 
 export function MobileHeroSearchCard() {
   const { t } = useTranslation();
@@ -53,6 +57,10 @@ export function MobileHeroSearchCard() {
   };
 
   const handleTabChange = (tab: MobileTab) => {
+    if (tab === "mess") {
+      router.push("/mess" as never);
+      return;
+    }
     setActiveTab(tab);
     setFilters((prev) => ({
       ...prev,
@@ -114,7 +122,7 @@ export function MobileHeroSearchCard() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.tabsScrollContent}
           >
-            {(["buy", "rent", "holiday", "sold"] as const).map((tab) => {
+            {MOBILE_TABS.map((tab) => {
               const isSelected = activeTab === tab;
               const tabLabel =
                 tab === "buy"
@@ -123,6 +131,8 @@ export function MobileHeroSearchCard() {
                   ? t("search.tabs.rent")
                   : tab === "holiday"
                   ? t("search.tabs.holidayStay")
+                  : tab === "mess"
+                  ? t("mess.tab")
                   : t("search.tabs.sold");
 
               return (

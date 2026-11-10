@@ -2,8 +2,10 @@ import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { colorTokens, colors, fonts, webPointer } from "@/theme";
 import { useTranslation, type TranslationKey } from "@/i18n";
+import { MESS_ENABLED } from "@/lib/features";
 
-export type SearchTabType = "buy" | "rent" | "short-let" | "sold";
+/** "mess" opens Mess & Seat Share (/mess), its own search; the rest set the search's intent. */
+export type SearchTabType = "buy" | "rent" | "short-let" | "sold" | "mess";
 
 interface SearchTabsProps {
   activeTab: SearchTabType;
@@ -17,6 +19,8 @@ const TABS: { key: SearchTabType; translationKey: TranslationKey }[] = [
   { key: "short-let", translationKey: "hero.tabs.shortLet" },
   // Sold is a research intent, not a buying one, it trails the live tabs.
   { key: "sold", translationKey: "hero.tabs.sold" },
+  // Shown with the mess module (src/lib/features.ts).
+  ...(MESS_ENABLED ? [{ key: "mess" as const, translationKey: "mess.tab" as TranslationKey }] : []),
 ];
 
 export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsProps) {

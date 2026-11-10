@@ -65,6 +65,11 @@ export function HeroSearchWidget({
   // Switching tabs keeps the query, the area and every filter that still
   // applies. "Include sold" only means something while looking at Sold.
   const handleTabChange = (tab: HeroSearchTab) => {
+    // Mess & Seats is its own search, campus first, so the tab opens it.
+    if (tab === "mess") {
+      router.push("/mess" as never);
+      return;
+    }
     setActiveTab(tab);
     setFilters((prev) => ({
       ...prev,
