@@ -1,4 +1,4 @@
-import { ANDROID_PACKAGE, APP_SCHEME, isPrivatePath, languageAlternates, SITE_SHARE_IMAGE, SITE_URL } from "../seo";
+import { ANDROID_PACKAGE, APP_SCHEME, isPrivatePath, isShellPath, SITE_SHARE_IMAGE, SITE_URL } from "../seo";
 
 describe("isPrivatePath", () => {
   it.each([
@@ -12,6 +12,7 @@ describe("isPrivatePath", () => {
     "/profile/edit",
     "/settings",
     "/notifications",
+    "/enquiries",
     "/saved",
     "/verification",
     "/messages",
@@ -34,6 +35,7 @@ describe("isPrivatePath", () => {
     "/guides/namzari-mutation-bangladesh-guide",
     "/property/abc-123",
     "/about",
+    "/careers",
     "/privacy",
     "/terms",
     "/delete-account", // Google Play requires this one to be public
@@ -72,12 +74,15 @@ describe("app identifiers", () => {
   });
 });
 
-describe("languageAlternates", () => {
-  it("offers English, Bangla and a default, all at the canonical URL", () => {
-    expect(languageAlternates("https://www.homenetbd.com/buy")).toEqual([
-      { hrefLang: "en-BD", href: "https://www.homenetbd.com/buy" },
-      { hrefLang: "bn-BD", href: "https://www.homenetbd.com/buy" },
-      { hrefLang: "x-default", href: "https://www.homenetbd.com/buy" },
-    ]);
+describe("isShellPath", () => {
+  it("recognises a dynamic route exported with its pattern still in the path", () => {
+    expect(isShellPath("/property/[id]")).toBe(true);
+    expect(isShellPath("/guides/[slug]")).toBe(true);
+  });
+
+  it("leaves pre-rendered pages alone", () => {
+    expect(isShellPath("/property/94ea3a90-1c2d-4e5f-8a9b-0c1d2e3f4a5b")).toBe(false);
+    expect(isShellPath("/buy/gulshan")).toBe(false);
+    expect(isShellPath("/")).toBe(false);
   });
 });

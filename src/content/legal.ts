@@ -10,7 +10,7 @@
  */
 
 /** Where people write to us: reports, deletion requests, privacy questions. */
-export const SUPPORT_EMAIL = "hello@homenet.com.bd";
+export const SUPPORT_EMAIL = "support@homenetbd.com";
 
 export interface LegalSection {
   heading: string;

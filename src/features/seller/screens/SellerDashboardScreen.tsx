@@ -1,5 +1,6 @@
 import {
   BadgeCheck,
+  BarChart3,
   Bell,
   Building2,
   CheckCircle2,
@@ -7,27 +8,18 @@ import {
   FileText,
   Handshake,
   Heart,
-  LineChart as LineChartIcon,
   MessageSquare,
   ShieldCheck,
   TrendingUp,
   Zap,
 } from "@/components/icons";
-import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
-import Svg, {
-  Circle,
-  Defs,
-  LinearGradient as SvgGradient,
-  Path,
-  Stop,
-  Text as SvgText,
-} from "react-native-svg";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { colors } from "@/theme";
+import { colors, webPointer } from "@/theme";
 import { useMyProperties } from "@/features/property/hooks/useMyProperties";
 import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
 import { SellerBoostWorkspace } from "../components/SellerBoostWorkspace";
@@ -84,9 +76,22 @@ export function SellerDashboardScreen() {
     setBoostModalVisible(true);
   };
 
-  const { data: myPropertiesData } = useMyProperties();
-  const allMyListings =
-    myPropertiesData?.pages.flatMap((page) => page.data?.items ?? (page.data as any)?.data ?? []) ?? [];
+  const {
+    data: myPropertiesData,
+    isLoading: listingsLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useMyProperties();
+  // The counts and the views ranking need every listing, not the first page of 20.
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  // One array per fetch, not per render, so the memos below can hold.
+  const allMyListings = useMemo(
+    () => myPropertiesData?.pages.flatMap((page) => page.data?.items ?? (page.data as any)?.data ?? []) ?? [],
+    [myPropertiesData],
+  );
 
   const sellerName = user?.full_name || user?.email?.split("@")[0] || "Partner";
   const totalCount = allMyListings.length;
@@ -95,6 +100,16 @@ export function SellerDashboardScreen() {
   const soldCount = allMyListings.filter((p) => p.status === "sold").length;
   const verifiedCount = allMyListings.filter((p) => Boolean(p.is_verified)).length;
   const totalViews = allMyListings.reduce((sum, p) => sum + (p.view_count || 0), 0);
+
+  // The five most-viewed listings, from each listing's real view count.
+  const topListings = useMemo(
+    () => [...allMyListings].sort((a, b) => (b.view_count || 0) - (a.view_count || 0)).slice(0, 5),
+    [allMyListings],
+  );
+  const maxListingViews = Math.max(topListings[0]?.view_count || 0, 1);
+  // Drafts and listings waiting for review are not public, so they cannot be viewed yet.
+  const publishedCount = allMyListings.filter((p) => p.status !== "draft" && p.status !== "pending").length;
+  const averageViewsPerListing = publishedCount > 0 ? Math.round(totalViews / publishedCount) : 0;
 
   // Stats grid items
   const sellerStats: StatItem[] = [
@@ -172,7 +187,7 @@ export function SellerDashboardScreen() {
       iconBg: colors.greenLight,
       iconColor: colors.green,
     },
-  ];
+  ].filter((s) => s.id !== "boosted" || isSellerSectionOn("boost"));
 
   const recentActivities: ActivityItem[] = allMyListings.slice(0, 5).map((p) => ({
     id: p.id,
@@ -214,9 +229,10 @@ export function SellerDashboardScreen() {
             {/* Welcome Banner */}
             <SellerWelcomeBanner
               name={sellerName}
-              viewsThisWeek={totalViews}
-              inquiriesThisWeek={0}
-              onBoostListing={() => setBoostModalVisible(true)}
+              activeListingsCount={activeCount}
+              loading={listingsLoading}
+              totalListingsCount={totalCount}
+              onBoostListing={isSellerSectionOn("boost") ? () => setBoostModalVisible(true) : undefined}
             />
 
             {/* Stats Grid: Responsive */}
@@ -257,61 +273,99 @@ export function SellerDashboardScreen() {
 
             {/* Bottom Section (Chart + Recent Activity Grid) */}
             <View style={[styles.bottomGrid, isTablet && styles.bottomGridTablet]}>
-              {/* Left Box: Listing Views Area Chart */}
+              {/* Left Box: Listing Views Breakdown */}
               <View style={styles.chartCard}>
                 <View style={styles.cardHeader}>
                   <View style={styles.cardHeaderTitleRow}>
-                    <LineChartIcon color={colors.ink} size={20} />
+                    <BarChart3 color={colors.ink} size={18} />
                     <View>
-                      <Text style={styles.cardTitle}>{t("seller.dashboard.listingViews")}</Text>
-                      <Text style={styles.cardSubtext}>{t("seller.dashboard.last7Days")}</Text>
+                      <Text style={styles.cardTitle}>{t("seller.dashboard.viewsByListing")}</Text>
+                      <Text style={styles.cardSubtext}>{t("seller.dashboard.viewsByListingSub")}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.chartHeaderStats}>
+                    <View style={styles.chartHeaderStatItem}>
+                      <Text style={styles.chartHeaderStatVal}>
+                        {formatLocalizedNumber(totalViews, language)}
+                      </Text>
+                      <Text style={styles.chartHeaderStatLbl}>{t("dashboard.totalViews")}</Text>
+                    </View>
+                    <View style={styles.chartHeaderStatDivider} />
+                    <View style={styles.chartHeaderStatItem}>
+                      <Text style={styles.chartHeaderStatVal}>
+                        {formatLocalizedNumber(averageViewsPerListing, language)}
+                      </Text>
+                      <Text style={styles.chartHeaderStatLbl}>{t("seller.dashboard.avgViewsPerListing")}</Text>
                     </View>
                   </View>
                 </View>
 
-                {/* Chart SVG */}
-                <View style={styles.chartSvgWrap}>
-                  <Svg height={220} width="100%" viewBox="0 0 500 200">
-                    <Defs>
-                      <SvgGradient id="chartTealGrad" x1="0" y1="0" x2="0" y2="1">
-                        <Stop offset="0%" stopColor={colors.green} stopOpacity="0.3" />
-                        <Stop offset="100%" stopColor={colors.green} stopOpacity="0.0" />
-                      </SvgGradient>
-                    </Defs>
+                {listingsLoading ? (
+                  <View style={styles.chartEmptyNotice}>
+                    <ActivityIndicator color={colors.muted} />
+                  </View>
+                ) : allMyListings.length === 0 ? (
+                  <View style={styles.chartEmptyNotice}>
+                    <Building2 color={colors.muted} size={36} />
+                    <Text style={styles.chartEmptyTitle}>{t("seller.dashboard.noListingsYet")}</Text>
+                    <Text style={styles.chartEmptySub}>{t("seller.dashboard.noListingsSub")}</Text>
+                    <AppLink href="/property/create" style={[styles.createListingBtn, webPointer]}>
+                      <Text style={styles.createListingBtnText}>{t("dashboard.addNewProperty")}</Text>
+                    </AppLink>
+                  </View>
+                ) : totalViews === 0 ? (
+                  <View style={styles.chartEmptyNotice}>
+                    <Eye color={colors.muted} size={36} />
+                    <Text style={styles.chartEmptyTitle}>{t("seller.dashboard.noViewsYet")}</Text>
+                    <Text style={styles.chartEmptySub}>
+                      {/* Drafts and listings in review are not public yet, so "live" would be untrue. */}
+                      {publishedCount > 0 ? t("seller.dashboard.noViewsSub") : t("seller.dashboard.noViewsUnpublishedSub")}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.listingViewsList}>
+                    {topListings.map((item) => {
+                      const count = item.view_count || 0;
+                      // A floor keeps a small count visible; no views means no bar.
+                      const percent = count === 0 ? 0 : Math.max(6, Math.min(100, Math.round((count / maxListingViews) * 100)));
+                      return (
+                        <View key={item.id} style={styles.listingViewRow}>
+                          <View style={styles.listingViewHeaderRow}>
+                            <View style={styles.listingViewMeta}>
+                              <Text numberOfLines={1} style={styles.listingViewTitle}>
+                                {item.title}
+                              </Text>
+                              <Text numberOfLines={1} style={styles.listingViewArea}>
+                                {[item.area?.name, item.status ? t(`seller.filters.${item.status}` as any) : null]
+                                  .filter(Boolean)
+                                  .join(" · ")}
+                              </Text>
+                            </View>
+                            <View style={styles.listingViewCountBadge}>
+                              <Eye color={colors.greenOnLight} size={12} />
+                              <Text style={styles.listingViewCountText}>
+                                {formatLocalizedNumber(count, language)}{" "}
+                                {count === 1 ? t("seller.dashboard.viewOne") : t("seller.dashboard.views")}
+                              </Text>
+                            </View>
+                          </View>
+                          <View style={styles.progressBarTrack}>
+                            <View style={[styles.progressBarFill, { width: `${percent}%` }]} />
+                          </View>
+                        </View>
+                      );
+                    })}
 
-                    {/* Gradient Area Fill */}
-                    <Path
-                      d="M 20 160 Q 90 130 160 140 T 300 90 T 440 50 L 440 180 L 20 180 Z"
-                      fill="url(#chartTealGrad)"
-                    />
-
-                    {/* Trend Line */}
-                    <Path
-                      d="M 20 160 Q 90 130 160 140 T 300 90 T 440 50"
-                      fill="none"
-                      stroke={colors.green}
-                      strokeWidth="3.5"
-                    />
-
-                    {/* Data Points */}
-                    <Circle cx="20" cy="160" r="4.5" fill={colors.green} />
-                    <Circle cx="90" cy="130" r="4.5" fill={colors.green} />
-                    <Circle cx="160" cy="140" r="4.5" fill={colors.green} />
-                    <Circle cx="230" cy="110" r="4.5" fill={colors.green} />
-                    <Circle cx="300" cy="90" r="4.5" fill={colors.green} />
-                    <Circle cx="370" cy="65" r="4.5" fill={colors.green} />
-                    <Circle cx="440" cy="50" r="4.5" fill={colors.green} />
-
-                    {/* Days X Axis */}
-                    <SvgText x="20" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Mon</SvgText>
-                    <SvgText x="90" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Tue</SvgText>
-                    <SvgText x="160" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Wed</SvgText>
-                    <SvgText x="230" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Thu</SvgText>
-                    <SvgText x="300" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Fri</SvgText>
-                    <SvgText x="370" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Sat</SvgText>
-                    <SvgText x="440" y="195" fill={colors.muted} fontSize="12" textAnchor="middle">Sun</SvgText>
-                  </Svg>
-                </View>
+                    {allMyListings.length > 5 && (
+                      <AppLink href="/my-properties" style={[styles.viewAllListingsLink, webPointer]}>
+                        <Text style={styles.viewAllListingsText}>
+                          {t("seller.dashboard.viewAllListings")} →
+                        </Text>
+                      </AppLink>
+                    )}
+                  </View>
+                )}
               </View>
 
               {/* Right Box: Recent Activity Feed */}

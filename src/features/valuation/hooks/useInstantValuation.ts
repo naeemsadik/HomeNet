@@ -1,24 +1,24 @@
-import { useInstantValuationStore } from "../stores/useInstantValuationStore";
+import { useInstantValuationStore, type ValuationFormState } from "../stores/useInstantValuationStore";
+
+/**
+ * Whether each step can go on. The area is the one thing the price cannot do
+ * without; the size is the other. The road, the building name and the rooms are
+ * optional: they appear on the report and do not change the estimate.
+ */
+export function stepValidity(form: Pick<ValuationFormState, "areaName" | "sizeInput">) {
+  const numericSize = parseFloat(form.sizeInput);
+  return {
+    isStep1Valid: form.areaName.trim().length > 0,
+    isStep2Valid: Number.isFinite(numericSize) && numericSize > 0,
+    isStep3Valid: true, // Amenities and site answers are optional
+  };
+}
 
 export function useInstantValuation() {
   const store = useInstantValuationStore();
 
-  const isStep1Valid = Boolean(
-    store.form.areaName.trim().length > 0 &&
-    (store.form.roadOrBlock.trim().length > 0 || store.form.address.trim().length > 0)
-  );
-
-  const numericSize = parseFloat(store.form.sizeInput);
-  const isStep2Valid = Boolean(
-    !isNaN(numericSize) && numericSize > 0 && store.form.bedrooms >= 0 && store.form.bathrooms >= 0
-  );
-
-  const isStep3Valid = true; // Amenities are optional toggles
-
   return {
     ...store,
-    isStep1Valid,
-    isStep2Valid,
-    isStep3Valid,
+    ...stepValidity(store.form),
   };
 }

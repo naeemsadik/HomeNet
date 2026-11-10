@@ -1,6 +1,7 @@
 // Fails the build if the exported HTML contains an inline <script> whose hash
-// isn't allowed by the Content-Security-Policy in vercel.json. JSON-LD blocks
-// (type="application/ld+json") are data, not script, and are skipped.
+// isn't allowed by the Content-Security-Policy in vercel.json. JSON-LD and JSON
+// data blocks (type="application/ld+json" or "application/json") are data, not
+// script, and are skipped.
 //
 // script-src has no 'unsafe-inline', so the only inline script the site runs is
 // Expo Router's hydration flag, allowed by its sha256 hash. If an Expo upgrade
@@ -33,12 +34,14 @@ const connectSrc = csp.split(";").map((d) => d.trim()).find((d) => d.startsWith(
 
 function builtApiBaseUrl() {
   if (process.env.EXPO_PUBLIC_API_BASE_URL) return process.env.EXPO_PUBLIC_API_BASE_URL;
-  try {
-    // Expo reads .env at build time; real environment variables win, as here.
-    const line = readFileSync(".env", "utf8").split(String.fromCharCode(10)).map((l) => l.trim()).find((l) => l.startsWith("EXPO_PUBLIC_API_BASE_URL="));
-    const value = line?.slice(line.indexOf("=") + 1).trim().replace(/^["']|["']$/g, "");
-    if (value) return value;
-  } catch {}
+  // Expo loads .env.local first (higher priority than .env), so check it first.
+  for (const envFile of [".env.local", ".env"]) {
+    try {
+      const line = readFileSync(envFile, "utf8").split(String.fromCharCode(10)).map((l) => l.trim()).find((l) => l.startsWith("EXPO_PUBLIC_API_BASE_URL="));
+      const value = line?.slice(line.indexOf("=") + 1).trim().replace(/^["']|["']$/g, "");
+      if (value) return value;
+    } catch {}
+  }
   const source = readFileSync("src/services/apiClient.ts", "utf8");
   return source.match(/PRODUCTION_API_BASE_URL\s*=\s*"([^"]+)"/)?.[1];
 }
@@ -78,9 +81,9 @@ for (const file of htmlFiles(DIST)) {
   for (const m of html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)) {
     const body = m[2];
     if (!body.trim()) continue;
-    // JSON-LD structured data is a data block the browser never runs, so
-    // script-src does not govern it.
-    if (/\btype=["']?application\/ld\+json/i.test(m[1])) continue;
+    // JSON-LD structured data and the build snapshot (src/lib/buildSnapshot.web.tsx)
+    // are data blocks the browser never runs, so script-src does not govern them.
+    if (/\btype=["']?application\/(ld\+)?json/i.test(m[1])) continue;
     inlineCount++;
     const hash = createHash("sha256").update(body, "utf8").digest("base64");
     if (!allowsInline && !allowed.has(hash)) missing.set(hash, { file, snippet: body.slice(0, 80) });

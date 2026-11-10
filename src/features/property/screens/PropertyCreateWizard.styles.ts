@@ -322,7 +322,11 @@ export const styles = StyleSheet.create({
   },
   scrollBody: {
     width: "100%",
-    maxWidth: 860,
+    // These base styles apply at every size; phones override them below. At 860 the
+    // desktop form shrank to a 746px column on every laptop, the category text was cut
+    // off and the subtype chips wrapped. 1200 fills a laptop and still centres the form
+    // on a very wide monitor.
+    maxWidth: 1200,
     alignSelf: "center",
     padding: 24,
     gap: 20,
@@ -524,6 +528,34 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: "#0B1A17",
   },
+  sameAsPhoneRow: {
+    minHeight: 38,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    alignSelf: "flex-start",
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  sameAsPhoneBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: "rgba(11,26,23,0.35)",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sameAsPhoneBoxOn: {
+    backgroundColor: colorTokens.brand,
+    borderColor: colorTokens.brand,
+  },
+  sameAsPhoneText: {
+    fontFamily: fonts.medium,
+    fontSize: 13.5,
+    color: "#0B1A17",
+  },
   formTextarea: {
     minHeight: 116,
     borderRadius: 16,
@@ -540,7 +572,7 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
   },
   formTextareaFocused: {
-    borderColor: "#00C885",
+    borderColor: colorTokens.brand,
     backgroundColor: "#FFFFFF",
     shadowColor: "#00C885",
     shadowOffset: { width: 0, height: 2 },

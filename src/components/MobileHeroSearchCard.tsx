@@ -7,7 +7,6 @@ import {
   ChevronRight,
   Search,
   SlidersHorizontal,
-  Sparkles,
   X,
 } from "@/components/icons";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
@@ -96,16 +95,6 @@ export function MobileHeroSearchCard() {
       : selectedArea.name
     : null;
 
-  const openAiFinder = () => {
-    const params = new URLSearchParams();
-    if (selectedArea) {
-      if (selectedArea.city) params.set("city", selectedArea.city);
-      params.set("location", selectedArea.name);
-    }
-    const qs = params.toString();
-    router.push((qs ? `/ai-finder?${qs}` : "/ai-finder") as never);
-  };
-
   const searchLabel =
     activeTab === "sold"
       ? t("search.mobileHero.labelSold")
@@ -159,27 +148,6 @@ export function MobileHeroSearchCard() {
         </View>
 
         <View style={styles.panelBody}>
-          {/* 2. Classic search, or the guided AI finder */}
-          <View style={styles.modeToggle}>
-            <View
-              accessibilityRole="button"
-              accessibilityState={{ selected: true }}
-              style={[styles.modeOption, styles.modeOptionActive]}
-            >
-              <Search color={colorTokens.surface} size={16} strokeWidth={2.4} />
-              <Text style={[styles.modeText, styles.modeTextActive]}>{t("search.mobileHero.classic")}</Text>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("search.mobileHero.aiSearch")}
-              onPress={openAiFinder}
-              style={[styles.modeOption, webPointer]}
-            >
-              <Sparkles color={colorTokens.ink} size={16} strokeWidth={2.2} />
-              <Text style={styles.modeText}>{t("search.mobileHero.aiSearch")}</Text>
-            </Pressable>
-          </View>
-
           <Text style={styles.panelLabel}>{searchLabel}</Text>
 
           {/* 3. Where: opens the area picker; filters sit beside it */}
@@ -249,9 +217,14 @@ export function MobileHeroSearchCard() {
             accessibilityRole="button"
             accessibilityLabel={primaryButtonLabel}
             onPress={handleSearch}
-            style={({ pressed }) => [styles.primaryButton, webPointer, pressed && { opacity: 0.9 }]}
+            style={({ hovered, pressed }: any) => [
+              styles.primaryButton,
+              webPointer,
+              hovered && { backgroundColor: colorTokens.brandHover },
+              pressed && { opacity: 0.9, backgroundColor: colorTokens.brandPressed },
+            ]}
           >
-            <Text style={styles.primaryButtonText}>{primaryButtonLabel}</Text>
+            <Text style={styles.primaryButtonText}>{t("hero.search")}</Text>
           </Pressable>
         </View>
       </View>
@@ -410,33 +383,6 @@ const styles = StyleSheet.create({
   panelBody: {
     padding: 16,
     gap: 14,
-  },
-  modeToggle: {
-    flexDirection: "row",
-    alignSelf: "flex-start",
-    backgroundColor: colorTokens.surfaceSunken,
-    borderRadius: radius.pill,
-    padding: 3,
-  },
-  modeOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: radius.pill,
-  },
-  modeOptionActive: {
-    backgroundColor: colorTokens.ink,
-  },
-  modeText: {
-    fontFamily: fonts.semiBold,
-    fontSize: 14,
-    color: colorTokens.ink,
-  },
-  modeTextActive: {
-    color: "#FFFFFF",
-    fontFamily: fonts.bold,
   },
   panelLabel: {
     fontFamily: fonts.bold,

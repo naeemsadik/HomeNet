@@ -5,8 +5,8 @@ export default function AboutRoute() {
   return (
     <>
       <PageMeta
-        title="About HomeNet"
-        description="How HomeNet verifies property listings and connects seekers with owners directly."
+        title="About HomeNet BD | Property Marketplace in Bangladesh"
+        description="HomeNet BD is a property marketplace for Bangladesh where owners list flats, houses and land for free, and buyers and tenants contact them directly."
       />
       <AboutScreen />
     </>

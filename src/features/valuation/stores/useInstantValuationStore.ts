@@ -5,13 +5,16 @@ import { toApiError } from "@/services/apiClient";
 import { getInstantValuation } from "../services/valuationService";
 import type {
   PropertyCondition,
+  LegalPapers,
   PropertyFacing,
+  RoadAccess,
   ValuationAmenities,
   ValuationPropertyType,
   ValuationPurpose,
   ValuationRequestPayload,
   ValuationResponseData,
   ValuationStep,
+  Waterlogging,
 } from "../types/valuationTypes";
 
 export interface ValuationFormState {
@@ -27,52 +30,68 @@ export interface ValuationFormState {
 
   sizeInput: string;
   sizeUnit: "sqft" | "katha";
-  bedrooms: number;
-  bathrooms: number;
+  /** null until the owner chooses: a studio is 0, which is an answer. */
+  bedrooms: number | null;
+  bathrooms: number | null;
   balconies: number;
+  /** "" until the owner chooses; nothing is assumed in the meantime. */
   floorLevel: string;
-  facing: PropertyFacing;
-  propertyAge: PropertyCondition;
+  facing: PropertyFacing | "";
+  propertyAge: PropertyCondition | "";
 
   amenities: ValuationAmenities;
+
+  roadAccess: RoadAccess;
+  legalPapers: LegalPapers;
+  waterlogging: Waterlogging;
 }
 
+/**
+ * The form starts empty. It used to open with a sample flat already filled in
+ * (Gulshan, Road 92, 2,150 sqft, 6th floor, south-facing, brand new, every
+ * amenity ticked), so someone who clicked through got a price for a flat that
+ * was never theirs, with the premiums for all of it added.
+ */
 const defaultFormState: ValuationFormState = {
   purpose: "sale",
   propertyType: "apartment",
-  areaId: "gulshan-2-dhaka",
-  areaName: "Gulshan",
-  roadOrBlock: "Road 92",
+  areaId: "",
+  areaName: "",
+  roadOrBlock: "",
   buildingName: "",
-  address: "Gulshan, Dhaka",
-  locationLat: 23.7925,
-  locationLng: 90.4158,
+  address: "",
+  locationLat: null,
+  locationLng: null,
 
-  sizeInput: "2150",
+  sizeInput: "",
   sizeUnit: "sqft",
-  bedrooms: 3,
-  bathrooms: 3,
-  balconies: 2,
-  floorLevel: "6",
-  facing: "south",
-  propertyAge: "brand_new",
+  bedrooms: null,
+  bathrooms: null,
+  balconies: 0,
+  floorLevel: "",
+  facing: "",
+  propertyAge: "",
 
   amenities: {
-    lift: true,
-    generator: true,
-    parking: true,
-    gas: true,
-    cctv: true,
-    rooftop: true,
+    lift: false,
+    generator: false,
+    parking: false,
+    gas: false,
+    cctv: false,
+    rooftop: false,
     lakeParkView: false,
   },
+
+  // The neutral choices: they change nothing until the owner says otherwise.
+  roadAccess: "wide_road",
+  legalPapers: "complete",
+  waterlogging: "never",
 };
 
 export interface InstantValuationStoreState {
   form: ValuationFormState;
   currentStep: ValuationStep;
   isLoading: boolean;
-  loadingStage: string;
   error: string | null;
   result: ValuationResponseData | null;
 
@@ -89,19 +108,10 @@ export interface InstantValuationStoreState {
   reset: () => void;
 }
 
-const LOADING_STAGES = [
-  "Analyzing comparable verified listings in Dhaka...",
-  "Evaluating per-sqft historical transactions...",
-  "Calculating floor & south-facing orientation premiums...",
-  "Synthesizing Dhaka infrastructure & utility bonuses...",
-  "Finalizing your instant valuation report...",
-];
-
 export const useInstantValuationStore = create<InstantValuationStoreState>((set, get) => ({
   form: defaultFormState,
   currentStep: 1,
   isLoading: false,
-  loadingStage: "",
   error: null,
   result: null,
 
@@ -164,7 +174,11 @@ export const useInstantValuationStore = create<InstantValuationStoreState>((set,
     const { form } = get();
     set({ isLoading: true, error: null, currentStep: 4 });
 
-    const numericSize = parseFloat(form.sizeInput) || 1800;
+    const numericSize = parseFloat(form.sizeInput);
+    if (!Number.isFinite(numericSize) || numericSize <= 0) {
+      set({ isLoading: false, error: "Enter the size of the property first.", currentStep: 2 });
+      return;
+    }
 
     const payload: ValuationRequestPayload = {
       purpose: form.purpose,
@@ -178,29 +192,25 @@ export const useInstantValuationStore = create<InstantValuationStoreState>((set,
       locationLng: form.locationLng,
       sizeSqft: numericSize,
       sizeUnit: form.sizeUnit,
-      bedrooms: form.bedrooms,
-      bathrooms: form.bathrooms,
+      bedrooms: form.bedrooms ?? 0,
+      bathrooms: form.bathrooms ?? 0,
       balconies: form.balconies,
-      floorLevel: form.floorLevel,
-      facing: form.facing,
-      propertyAge: form.propertyAge,
+      floorLevel: form.floorLevel || undefined,
+      facing: form.facing || undefined,
+      propertyAge: form.propertyAge || undefined,
       amenities: form.amenities,
+      roadAccess: form.roadAccess,
+      legalPapers: form.legalPapers,
+      waterlogging: form.waterlogging,
     };
-
-    // Animate through progression stages
-    for (let i = 0; i < LOADING_STAGES.length; i++) {
-      set({ loadingStage: LOADING_STAGES[i] });
-      await new Promise((r) => setTimeout(r, 280));
-    }
 
     try {
       const data = await getInstantValuation(payload);
-      set({ result: data, isLoading: false, loadingStage: "" });
+      set({ result: data, isLoading: false });
     } catch (err: unknown) {
       set({
         error: toApiError(err).message,
         isLoading: false,
-        loadingStage: "",
       });
     }
   },
@@ -212,14 +222,20 @@ export const useInstantValuationStore = create<InstantValuationStoreState>((set,
     wizardStore.reset();
 
     const title = `${form.bedrooms}BR ${form.propertyType === "apartment" ? "Apartment" : "Property"} in ${form.areaName}`;
-    const priceStr = result?.estimatedValue ? String(result.estimatedValue) : "25000000";
+    // A rent is listed at the estimated monthly rent, a sale at the estimated value.
+    const isRent = form.purpose === "rent";
+    const amount = isRent ? result?.estimatedMonthlyRent : result?.estimatedValue;
+    const priceStr = amount ? String(amount) : isRent ? "" : "25000000";
+    const estimateText = isRent
+      ? `Estimated monthly rent: ${result?.estimatedMonthlyRentFormatted || ""}.`
+      : `Estimated market valuation: ${result?.estimatedValueFormatted || ""}.`;
 
     wizardStore.setBasics({
       title,
       type: form.propertyType === "commercial" ? "commercial" : form.propertyType === "land" ? "land" : "residential",
       subtype: form.propertyType === "apartment" ? "apartment" : form.propertyType,
       listingType: form.purpose === "rent" ? "rent" : "sale",
-      description: `Spacious ${form.sizeInput} ${form.sizeUnit} property in ${form.areaName}. Features ${form.bedrooms} bedrooms, ${form.bathrooms} bathrooms, ${form.facing}-facing orientation, lift, generator, and dedicated parking. Estimated market valuation: ${result?.estimatedValueFormatted || ""}.`,
+      description: `Spacious ${form.sizeInput} ${form.sizeUnit} property in ${form.areaName}. Features ${form.bedrooms} bedrooms, ${form.bathrooms} bathrooms, ${form.facing}-facing orientation, lift, generator, and dedicated parking. ${estimateText}`,
       price: priceStr,
       areaSize: form.sizeInput,
       areaUnit: form.sizeUnit,
@@ -265,7 +281,6 @@ export const useInstantValuationStore = create<InstantValuationStoreState>((set,
       form: defaultFormState,
       currentStep: 1,
       isLoading: false,
-      loadingStage: "",
       error: null,
       result: null,
     });

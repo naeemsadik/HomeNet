@@ -14,7 +14,6 @@ jest.mock("expo-router", () => ({
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
 }));
 // The chrome around the page is what these tests are about, not what the modals hold.
-jest.mock("@/components/AiFinderModal", () => ({ AiFinderModal: () => null }));
 jest.mock("@/features/valuation/components/InstantValuationModal", () => ({ InstantValuationModal: () => null }));
 jest.mock("@/features/notification/components/NotificationPreview", () => ({ NotificationPreview: () => null }));
 jest.mock("@/features/notification/hooks/useNotifications", () => ({

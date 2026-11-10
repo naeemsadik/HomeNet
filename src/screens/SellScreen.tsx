@@ -39,7 +39,7 @@ export function SellScreen() {
       <LinearGradient colors={["#075C46", "#086B55", "#365FB7"]} end={{ x: 1, y: 0 }} style={[styles.hero, isTablet && styles.heroTablet, isPhone && styles.heroPhone]}>
         <View style={styles.heroCopyWrap}>
           <View style={styles.heroKicker}><Sparkles color="rgba(255,255,255,0.82)" size={14} /><Eyebrow light>{t("sellScreen.kicker")}</Eyebrow></View>
-          <Text style={[styles.heroTitle, isPhone && styles.heroTitlePhone]}>{t("sellScreen.heroTitle")}</Text>
+          <Text accessibilityRole="header" aria-level={1} style={[styles.heroTitle, isPhone && styles.heroTitlePhone]}>{t("sellScreen.heroTitle")}</Text>
           <Text style={styles.heroCopy}>{t("sellScreen.heroCopy")}</Text>
           <View style={styles.proofRow}>
             <View style={styles.proofItem}><ShieldCheck color="rgba(255,255,255,0.86)" size={16} /><Text style={styles.proofText}>{t("sellScreen.verifiedInquiries")}</Text></View>
