@@ -1,41 +1,20 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Archive, Trash2 } from "@/components/icons";
+import { Pressable, StyleSheet, Text, View, type GestureResponderEvent } from "react-native";
+import { Archive, MessageSquare } from "@/components/icons";
 import { IfPermitted } from "@/components/IfPermitted";
-import { confirmAction } from "@/lib/alert";
 import { useIsModerating } from "@/stores/useAdminContextStore";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useListingModeration } from "../hooks/useListingModeration";
 import type { Property } from "../types/property";
+import { ListingFeedbackModal } from "./ListingFeedbackModal";
 
 /**
- * Whether the irreversible delete is offered.
+ * Lightweight two-action card moderation pill (`Suggest | Archive`) rendered over
+ * a listing's media area beneath the save button.
  *
- * Held off deliberately. On staging, one `DELETE /v1/properties/:id/admin`
- * call naming a single listing was followed by every other listing
- * disappearing as well, across all statuses. That was not proven to be
- * causation from the client, but the endpoint behind this button is the same
- * one, the action has no undo, and the cost of being wrong is a moderator
- * destroying listings they never selected.
- *
- * Archive is unaffected and stays available: it calls `DELETE
- * /v1/properties/:id`, the reversible soft-delete.
- *
- * Set this back to `true` once the backend handler has been checked for a
- * cascade. Nothing else has to change.
- */
-const DELETE_ENABLED = false;
-
-/**
- * Moderation controls over a listing's media area, beside the save heart.
- *
- * Absolutely positioned so the card's layout is identical with and without
- * it: a moderating admin and a buyer see the same card geometry, and nothing
- * reflows when moderation is armed.
- *
- * Self-gating — call sites pass a property and nothing else. Showing these is
- * cosmetic; the API authorises every mutation itself.
+ * Uses crisp 1px Ink borders and restrained tone separation without heavy blur
+ * or drop-shadow bloat.
  */
 export function AdminListingActions({ property }: { property: Property }) {
   const armed = useIsModerating();
@@ -50,84 +29,135 @@ export function AdminListingActions({ property }: { property: Property }) {
 
 function Controls({ property }: { property: Property }) {
   const { t } = useTranslation();
-  const { archive, destroy } = useListingModeration();
+  const { archive } = useListingModeration();
   const [busy, setBusy] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
-  const onArchive = async () => {
+  const stop = (e?: GestureResponderEvent) => {
+    e?.stopPropagation?.();
+  };
+
+  const onSuggest = (e: GestureResponderEvent) => {
+    stop(e);
+    if (busy) return;
+    setFeedbackOpen(true);
+  };
+
+  const onArchive = async (e: GestureResponderEvent) => {
+    stop(e);
     if (busy) return;
     setBusy(true);
     await archive(property);
     setBusy(false);
   };
 
-  // Irreversible, so it asks first. `confirmAction` is a blocking dialog on
-  // both platforms; on web it is the browser's own, which cannot be styled.
-  const onDelete = async () => {
-    if (busy) return;
-    const ok = await confirmAction(
-      t("moderation.deleteTitle"),
-      t("moderation.deleteMessage", { title: property.title }),
-      { confirmLabel: t("moderation.deleteConfirm"), destructive: true },
-    );
-    if (!ok) return;
-    setBusy(true);
-    await destroy(property);
-    setBusy(false);
-  };
-
   return (
-    <View style={styles.strip} pointerEvents="box-none">
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t("moderation.archiveLabel", { title: property.title })}
-        disabled={busy}
-        onPress={onArchive}
-        style={[styles.button, busy && styles.busy, webPointer]}
-      >
-        <Archive color={colorTokens.onInk} size={15} strokeWidth={2.2} />
-        <Text style={styles.label}>{t("moderation.archive")}</Text>
-      </Pressable>
+    <>
+      <View style={styles.pillGroup} pointerEvents="box-none">
+        <Pressable
+          accessibilityLabel={t("moderation.suggestAria", { title: property.title })}
+          accessibilityRole="button"
+          disabled={busy}
+          hitSlop={4}
+          onPress={onSuggest}
+          style={({ pressed }) => [
+            styles.segmentBtn,
+            styles.suggestSegment,
+            pressed && styles.segmentPressed,
+            busy && styles.busy,
+            webPointer,
+          ]}
+        >
+          <MessageSquare color={colorTokens.staffAccentText} size={14} strokeWidth={1.8} />
+          <Text style={styles.suggestLabel}>{t("moderation.suggestAction")}</Text>
+        </Pressable>
 
-      {DELETE_ENABLED ? (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t("moderation.deleteLabel", { title: property.title })}
-        disabled={busy}
-        onPress={onDelete}
-        style={[styles.button, styles.destructive, busy && styles.busy, webPointer]}
-      >
-        <Trash2 color={colorTokens.onDanger} size={15} strokeWidth={2.2} />
-      </Pressable>
-      ) : null}
-    </View>
+        <View style={styles.divider} />
+
+        <Pressable
+          accessibilityLabel={t("moderation.archiveLabel", { title: property.title })}
+          accessibilityRole="button"
+          disabled={busy}
+          hitSlop={4}
+          onPress={onArchive}
+          style={({ pressed }) => [
+            styles.segmentBtn,
+            styles.archiveSegment,
+            pressed && styles.segmentPressed,
+            busy && styles.busy,
+            webPointer,
+          ]}
+        >
+          <Archive color={colorTokens.onInk} size={14} strokeWidth={1.8} />
+          <Text style={styles.label}>{t("moderation.archive")}</Text>
+        </Pressable>
+      </View>
+
+      <ListingFeedbackModal
+        onClose={() => setFeedbackOpen(false)}
+        property={{
+          id: property.id,
+          title: property.title,
+          status: property.status,
+          areaName: property.area?.name ?? null,
+          sellerName: property.user?.full_name ?? null,
+        }}
+        visible={feedbackOpen}
+      />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  strip: {
+  pillGroup: {
     position: "absolute",
-    left: 12,
-    bottom: 12,
-    flexDirection: "row",
-    gap: 8,
+    top: 54,
+    right: 12,
     zIndex: 6,
-  },
-  button: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    height: 32,
-    paddingHorizontal: 12,
+    height: 36,
     borderRadius: radius.pill,
-    // Ink is the one surface the public interface never uses for an action, so
-    // these read as system controls rather than as something for the buyer.
     backgroundColor: colorTokens.ink,
+    borderWidth: 1,
+    borderColor: colorTokens.inkBorderStrong,
+    overflow: "hidden",
   },
-  destructive: { backgroundColor: colorTokens.errorText, paddingHorizontal: 10 },
-  busy: { opacity: 0.6 },
+  segmentBtn: {
+    height: "100%",
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  suggestSegment: {
+    paddingLeft: 13,
+  },
+  archiveSegment: {
+    paddingRight: 13,
+  },
+  segmentPressed: {
+    backgroundColor: colorTokens.inkSurfaceSubtle,
+  },
+  divider: {
+    width: 1,
+    height: 16,
+    backgroundColor: colorTokens.inkBorder,
+  },
+  busy: {
+    opacity: 0.55,
+  },
+  suggestLabel: {
+    color: colorTokens.staffAccentText,
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    lineHeight: 16,
+  },
   label: {
     color: colorTokens.onInk,
     fontFamily: fonts.semiBold,
-    fontSize: 12.5,
+    fontSize: 12,
+    lineHeight: 16,
   },
 });

@@ -149,6 +149,22 @@ export interface UpsertPropertyDto {
 export type CreatePropertyDto = UpsertPropertyDto & { area_id: string };
 export type UpdatePropertyDto = Omit<UpsertPropertyDto, "property_id">;
 
+export type ModerationStatusUpdate = PropertyStatus | "changes_requested";
+
+export interface PropertyFeedbackDto {
+  tags: string[];
+  notes: string;
+  requestChanges?: boolean;
+}
+
+export interface PropertyFeedbackResult {
+  id: string;
+  delivered: "api" | "fallback";
+  status: ModerationStatusUpdate;
+  tags: string[];
+  notes: string;
+}
+
 export interface Permission {
   id: string;
   name: string;

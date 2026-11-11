@@ -1,37 +1,40 @@
 import { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { router, usePathname } from "expo-router";
-import { ArrowLeft, ShieldCheck } from "@/components/icons";
-import { getRoleName, hasAnyAdminPermission } from "@/lib/permissions";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, Clock, ShieldCheck, SlidersHorizontal } from "@/components/icons";
+import { getRoleName, hasAnyAdminPermission, hasPermission } from "@/lib/permissions";
+import { getAdminProperties } from "@/services/propertyApi";
 import { useAuthStore } from "@/stores/authStore";
 import { useAdminContextStore } from "@/stores/useAdminContextStore";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useTranslation } from "@/i18n";
+import { formatLocalizedNumber, useTranslation } from "@/i18n";
 import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 
 /** Height the page's scroll padding must account for. Read by AppChrome. */
-export const ADMIN_BAR_HEIGHT = 36;
+export const ADMIN_BAR_HEIGHT = 40;
 
 /**
- * The staff strip: says who you are, lets you arm moderation, and carries the
- * way back to the admin panel — the indicator and the exit in one element.
+ * Ambient Staff Utility Bar sitting above public pages for signed-in staff.
  *
- * Rendered only after hydration, so it never reaches the static export, which
- * ships to every visitor and to Googlebot.
+ * Lives strictly in the Ink / Slate / Charcoal operator channel using crisp
+ * hairline borders and tone shifts so staff controls never compete with
+ * buyer-facing surfaces.
  *
- * Arming is per-surface and resets on navigation: arriving somewhere new
- * always starts read-only. That inverts the failure moderators reported on
- * Reddit, where a mode left switched on elsewhere is assumed to be on here.
+ * Rendered only after hydration (`hydrated && isStaff`), keeping zero staff
+ * markup in static exports served to visitors and crawlers.
  */
 export function AdminContextBar() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { isPhone } = useResponsive();
   const pathname = usePathname();
   const hydrated = useAuthStore((s) => s.hydrated);
-  const isStaff = useAuthStore(
-    (s) => s.user !== null && hasAnyAdminPermission(s.userRoles),
-  );
-  const roleName = useAuthStore((s) => getRoleName(s.userRoles));
+  const user = useAuthStore((s) => s.user);
+  const userRoles = useAuthStore((s) => s.userRoles);
+  const isStaff = user !== null && hasAnyAdminPermission(userRoles);
+  const canModerate = user !== null && hasPermission(userRoles, "moderate_listing");
+  const roleName = getRoleName(userRoles);
+
   const armed = useAdminContextStore((s) => s.armed);
   const toggle = useAdminContextStore((s) => s.toggle);
   const resetForRoute = useAdminContextStore((s) => s.resetForRoute);
@@ -40,42 +43,130 @@ export function AdminContextBar() {
     resetForRoute();
   }, [pathname, resetForRoute]);
 
-  // Not staff, not hydrated, or already inside /admin: nothing to say. Showing
-  // it there would cost height while telling the reader what they can see.
-  if (!hydrated || !isStaff || pathname.startsWith("/admin")) return null;
+  const inAdminConsole = pathname.startsWith("/admin");
+
+  const { data: pendingCount = 0 } = useQuery({
+    queryKey: ["admin", "properties", "pending-count", user?.id ?? null],
+    queryFn: async () => {
+      const response = await getAdminProperties({ status: "pending", page: 1, limit: 1 });
+      return response.data?.total ?? 0;
+    },
+    enabled: hydrated && canModerate && !inAdminConsole,
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  if (!hydrated || !isStaff || inAdminConsole) return null;
+
+  const roleLabel = (roleName ?? t("moderation.staff")).replace(/_/g, " ");
 
   return (
     <View style={[styles.bar, armed && styles.barArmed]}>
-      <View style={styles.identity}>
-        <ShieldCheck color={colorTokens.onInk} size={14} strokeWidth={2.4} />
-        {!isPhone ? (
-          <Text style={styles.role}>{roleName ?? t("moderation.staff")}</Text>
-        ) : null}
+      <View style={[styles.inner, isPhone && styles.innerPhone]}>
+        {/* Left: Role Badge + Context State */}
+        <View style={styles.leftCluster}>
+          <View style={styles.rolePill}>
+            <ShieldCheck color={colorTokens.onInk} size={14} strokeWidth={1.8} />
+            <Text numberOfLines={1} style={styles.roleText}>
+              {roleLabel}
+            </Text>
+          </View>
+
+          {!isPhone ? (
+            <View style={styles.contextTag}>
+              <View style={[styles.statusDot, armed && styles.statusDotArmed]} />
+              <Text
+                numberOfLines={1}
+                style={[styles.contextText, armed && styles.contextTextArmed]}
+              >
+                {armed ? t("moderation.moderationActive") : t("moderation.publicMode")}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+
+        {/* Right: Pending Count + Tools Switch + Admin Exit */}
+        <View style={styles.rightCluster}>
+          {canModerate && pendingCount > 0 ? (
+            <Pressable
+              accessibilityLabel={t("moderation.pendingReviewsAria", {
+                count: formatLocalizedNumber(pendingCount, language),
+              })}
+              accessibilityRole="link"
+              onPress={() => router.push("/admin" as never)}
+              style={({ pressed }) => [
+                styles.pendingPill,
+                pressed && styles.pressedSubtle,
+                webPointer,
+              ]}
+            >
+              <Clock color={colorTokens.staffAccentText} size={14} strokeWidth={1.8} />
+              <Text numberOfLines={1} style={styles.pendingText}>
+                {isPhone
+                  ? formatLocalizedNumber(pendingCount, language)
+                  : t("moderation.pendingReviews", {
+                      count: formatLocalizedNumber(pendingCount, language),
+                    })}
+              </Text>
+            </Pressable>
+          ) : null}
+
+          {canModerate ? (
+            <Pressable
+              accessibilityLabel={t("moderation.toggleLabel")}
+              accessibilityRole="switch"
+              accessibilityState={{ checked: armed }}
+              onPress={toggle}
+              style={({ pressed }) => [
+                styles.switchPill,
+                armed && styles.switchPillArmed,
+                pressed && styles.pressed,
+                webPointer,
+              ]}
+            >
+              {isPhone ? (
+                <SlidersHorizontal
+                  color={armed ? colorTokens.ink : colorTokens.onInk}
+                  size={14}
+                  strokeWidth={1.8}
+                />
+              ) : (
+                <View style={[styles.switchDot, armed && styles.switchDotArmed]} />
+              )}
+              <Text
+                numberOfLines={1}
+                style={[styles.switchLabel, armed && styles.switchLabelArmed]}
+              >
+                {isPhone
+                  ? armed
+                    ? t("moderation.toolsOn")
+                    : t("moderation.moderate")
+                  : `${t("moderation.moderationTools")}: ${
+                      armed ? t("moderation.toolsOn") : t("moderation.toolsOff")
+                    }`}
+              </Text>
+            </Pressable>
+          ) : null}
+
+          <Pressable
+            accessibilityLabel={t("moderation.backToAdmin")}
+            accessibilityRole="link"
+            onPress={() => router.push("/admin" as never)}
+            style={({ pressed }) => [
+              styles.exitPill,
+              pressed && styles.pressedSubtle,
+              webPointer,
+            ]}
+          >
+            <ArrowLeft color={colorTokens.onInk} size={14} strokeWidth={1.8} />
+            {!isPhone ? (
+              <Text numberOfLines={1} style={styles.exitText}>
+                {t("moderation.exitToConsole")}
+              </Text>
+            ) : null}
+          </Pressable>
+        </View>
       </View>
-
-      <Pressable
-        accessibilityRole="switch"
-        accessibilityState={{ checked: armed }}
-        accessibilityLabel={t("moderation.toggleLabel")}
-        onPress={toggle}
-        style={[styles.toggle, armed && styles.toggleOn, webPointer]}
-      >
-        <Text style={[styles.toggleText, armed && styles.toggleTextOn]}>
-          {armed ? t("moderation.moderating") : t("moderation.moderate")}
-        </Text>
-      </Pressable>
-
-      <Pressable
-        accessibilityRole="link"
-        accessibilityLabel={t("moderation.backToAdmin")}
-        onPress={() => router.push("/admin" as never)}
-        style={[styles.back, webPointer]}
-      >
-        <ArrowLeft color={colorTokens.onInk} size={14} strokeWidth={2.4} />
-        {!isPhone ? (
-          <Text style={styles.backText}>{t("moderation.backToAdmin")}</Text>
-        ) : null}
-      </Pressable>
     </View>
   );
 }
@@ -83,35 +174,160 @@ export function AdminContextBar() {
 const styles = StyleSheet.create({
   bar: {
     height: ADMIN_BAR_HEIGHT,
+    width: "100%",
+    backgroundColor: colorTokens.ink,
+    borderBottomWidth: 1,
+    borderBottomColor: colorTokens.inkBorder,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  barArmed: {
+    borderBottomColor: colorTokens.staffAccent,
+  },
+  inner: {
+    width: "100%",
+    maxWidth: layout.containerMaxWidth,
+    paddingHorizontal: layout.gutter,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: layout.gutter,
-    backgroundColor: colorTokens.ink,
+    gap: 12,
   },
-  // Armed is the only state that gets colour, and it is a hairline rather than
-  // a fill: the strip must not start competing with the page it sits over.
-  barArmed: {
-    borderBottomWidth: 2,
-    borderBottomColor: colorTokens.brand,
+  innerPhone: {
+    paddingHorizontal: layout.gutterPhone,
+    gap: 8,
   },
-  identity: { flexDirection: "row", alignItems: "center", gap: 7 },
-  role: {
+  leftCluster: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flexShrink: 1,
+    minWidth: 0,
+  },
+  rolePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 26,
+    paddingHorizontal: 10,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.inkElevated,
+    borderWidth: 1,
+    borderColor: colorTokens.inkBorder,
+  },
+  roleText: {
     color: colorTokens.onInk,
     fontFamily: fonts.semiBold,
     fontSize: 12,
+    lineHeight: 16,
+    letterSpacing: 0.2,
     textTransform: "capitalize",
   },
-  toggle: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.35)",
+  contextTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    flexShrink: 1,
+    minWidth: 0,
   },
-  toggleOn: { backgroundColor: colorTokens.brand, borderColor: colorTokens.brand },
-  toggleText: { color: colorTokens.onInk, fontFamily: fonts.semiBold, fontSize: 12 },
-  toggleTextOn: { color: colorTokens.onBrand },
-  back: { flexDirection: "row", alignItems: "center", gap: 6 },
-  backText: { color: colorTokens.onInk, fontFamily: fonts.medium, fontSize: 12 },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.onInkMuted,
+  },
+  statusDotArmed: {
+    backgroundColor: colorTokens.staffAccent,
+  },
+  contextText: {
+    color: colorTokens.onInkMuted,
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  contextTextArmed: {
+    color: colorTokens.staffAccentText,
+    fontFamily: fonts.semiBold,
+  },
+  rightCluster: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexShrink: 0,
+  },
+  pendingPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    height: 28,
+    paddingHorizontal: 10,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.inkElevated,
+    borderWidth: 1,
+    borderColor: colorTokens.inkBorder,
+  },
+  pendingText: {
+    color: colorTokens.staffAccentText,
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    lineHeight: 16,
+    fontVariant: ["tabular-nums"],
+  },
+  switchPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 28,
+    paddingHorizontal: 11,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.inkSurfaceSubtle,
+    borderWidth: 1,
+    borderColor: colorTokens.inkBorderStrong,
+    ...(Platform.select({
+      web: { transition: "background-color 150ms ease, border-color 150ms ease" },
+      default: {},
+    }) as object),
+  },
+  switchPillArmed: {
+    backgroundColor: colorTokens.surface,
+    borderColor: colorTokens.surface,
+  },
+  switchDot: {
+    width: 6,
+    height: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.onInkMuted,
+  },
+  switchDotArmed: {
+    backgroundColor: colorTokens.staffAccent,
+  },
+  switchLabel: {
+    color: colorTokens.onInk,
+    fontFamily: fonts.semiBold,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  switchLabelArmed: {
+    color: colorTokens.ink,
+    fontFamily: fonts.bold,
+  },
+  exitPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 28,
+    paddingHorizontal: 10,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.inkSurfaceSubtle,
+    borderWidth: 1,
+    borderColor: colorTokens.inkBorder,
+  },
+  exitText: {
+    color: colorTokens.onInk,
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  pressed: { opacity: 0.85 },
+  pressedSubtle: { backgroundColor: colorTokens.inkBorder },
 });

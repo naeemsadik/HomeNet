@@ -62,6 +62,8 @@ export const colorTokens = {
   /** Text and icons on a `brand` fill. Ink: 8.8:1 on #04cf92 (white was 2.03:1). */
   onBrand: "#0B1A17",
   onInk: "#FFFFFF",
+  /** Secondary labels and hints on an `ink` surface (~10:1 on #0B1A17). */
+  onInkMuted: "rgba(255, 255, 255, 0.72)",
   /** Text and icons on an `errorText` (red) fill. 5.3:1. */
   onDanger: "#FFFFFF",
   /** Text and icons on the `notification` orange (#F4823A, 6.9:1) and WhatsApp
@@ -69,6 +71,16 @@ export const colorTokens = {
   onAccent: "#0B1A17",
   overlay: "rgba(11, 26, 23, 0.45)",
   shadow: "rgba(11, 26, 23, 0.10)",
+
+  // ─── Staff / Operator Channel (never borrows Buyer Brand Green) ─────────
+  /** Elevated slate-charcoal container sitting on or beside `ink`. */
+  inkElevated: "#142824",
+  inkSurfaceSubtle: "rgba(255, 255, 255, 0.10)",
+  inkBorder: "rgba(255, 255, 255, 0.14)",
+  inkBorderStrong: "rgba(255, 255, 255, 0.28)",
+  /** Warm amber dot/indicator for active staff moderation or revision state. */
+  staffAccent: "#F59E0B",
+  staffAccentText: "#FDE68A",
 
   // ─── Legacy aliases ─────────────────────────────────────────────────────
   // Kept so ~420 existing call sites keep compiling while components migrate.
