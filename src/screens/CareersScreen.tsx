@@ -1,21 +1,35 @@
+import { useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, Eyebrow } from "@/components/ui";
 import { Briefcase, Send, ShieldCheck, Users, Zap } from "@/components/icons";
+import { CAREERS_EMAIL } from "@/content/legal";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
+import { notify } from "@/lib/alert";
 import { colorTokens, fonts, radius, shadow } from "@/theme";
 
-const CAREERS_EMAIL = "careers@homenetbd.com";
+export { CAREERS_EMAIL };
 
 export function CareersScreen() {
   const { t } = useTranslation();
   const { isPhone } = useResponsive();
+  const [mailFailed, setMailFailed] = useState(false);
 
   const handleApply = () => {
     const subject = encodeURIComponent(t("careers.emailSubject"));
     const mailtoUrl = `mailto:${CAREERS_EMAIL}?subject=${subject}`;
-    void Linking.openURL(mailtoUrl).catch(() => {});
+    Linking.openURL(mailtoUrl).catch(() => {
+      setMailFailed(true);
+      try {
+        notify(
+          t("careers.metaTitle"),
+          t("careers.mailtoFallback", { email: CAREERS_EMAIL })
+        );
+      } catch {
+        // Fallback already rendered inline via mailFailed state
+      }
+    });
   };
 
   const values = [
@@ -37,7 +51,7 @@ export function CareersScreen() {
   ];
 
   return (
-    <AppChrome active="home">
+    <AppChrome>
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         {/* Hero Section */}
         <View style={[styles.hero, isPhone && styles.heroPhone]}>
@@ -99,7 +113,7 @@ export function CareersScreen() {
               {t("careers.noOpeningsHeading")}
             </Text>
             <Text style={styles.fallbackNotice}>
-              {t("careers.fallbackNotice")}
+              {t("careers.fallbackNotice", { email: CAREERS_EMAIL })}
             </Text>
             <AppButton
               label={t("careers.sendApplication")}
@@ -108,6 +122,17 @@ export function CareersScreen() {
               variant="primary"
               style={[styles.applyButton, isPhone && styles.applyButtonPhone]}
             />
+            {mailFailed ? (
+              <View
+                style={styles.mailErrorAlert}
+                accessibilityRole="alert"
+                accessibilityLiveRegion="polite"
+              >
+                <Text style={styles.mailErrorText}>
+                  {t("careers.mailtoFallback", { email: CAREERS_EMAIL })}
+                </Text>
+              </View>
+            ) : null}
           </View>
         </View>
       </View>
@@ -273,5 +298,23 @@ const styles = StyleSheet.create({
   },
   applyButtonPhone: {
     width: "100%",
+  },
+  mailErrorAlert: {
+    backgroundColor: colorTokens.errorSurface,
+    borderRadius: radius.sm,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: colorTokens.errorText,
+    width: "100%",
+    maxWidth: 480,
+  },
+  mailErrorText: {
+    color: colorTokens.errorText,
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: "center",
   },
 });

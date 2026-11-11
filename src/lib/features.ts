@@ -60,6 +60,7 @@ export const GOOGLE_MAPS_API_KEY: string | null = (() => {
  * its default here once the feature is finished.
  */
 export const SELLER_SECTIONS = {
+  boost: process.env.EXPO_PUBLIC_SELLER_BOOST_ENABLED === "true",
   insights: process.env.EXPO_PUBLIC_SELLER_INSIGHTS_ENABLED === "true",
   analytics: process.env.EXPO_PUBLIC_SELLER_ANALYTICS_ENABLED === "true",
   payments: process.env.EXPO_PUBLIC_SELLER_PAYMENTS_ENABLED === "true",
@@ -69,3 +70,13 @@ export const SELLER_SECTIONS = {
 export function isSellerSectionOn(key: string): boolean {
   return key in SELLER_SECTIONS ? SELLER_SECTIONS[key as keyof typeof SELLER_SECTIONS] : true;
 }
+
+/**
+ * Whether owners can restore a listing they archived. Off since backend PR 93:
+ * `POST /v1/properties/:id/restore` is staff-only and the owner edit route
+ * ignores `status`, so the old Unarchive button reported success while the
+ * listing stayed archived. My Properties offers "Ask to restore" (an email to
+ * support) instead. Turn this on once the API lets owners restore their own
+ * archive; the screen's restore code is still there.
+ */
+export const OWNER_UNARCHIVE_ENABLED = false;

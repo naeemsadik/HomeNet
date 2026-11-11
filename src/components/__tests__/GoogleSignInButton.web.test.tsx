@@ -194,4 +194,18 @@ describe("GoogleSignInButton (web)", () => {
     expect(slot?.style.pointerEvents).toBe("none");
     expect(slot?.style.opacity).toBe("0.5");
   });
+
+  it("keeps a fixed height while Google swaps its plain button for its iframe", async () => {
+    const t = setup();
+    t.answerScript("load");
+
+    const view = await t.mount({ mode: "signin", onCredential: () => undefined });
+    await t.settle();
+    const slot = view.container.querySelector<HTMLElement>('[data-testid="google-sign-in"]');
+
+    // A min-height let the slot grow while both buttons were briefly drawn,
+    // which made the centred sign-in modal jump.
+    expect(slot?.style.height).toBe("44px");
+    expect(slot?.style.minHeight).toBe("");
+  });
 });

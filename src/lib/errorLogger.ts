@@ -27,7 +27,14 @@ export function reportError(
     message: isErr ? error.message : String(error),
     stack: isErr ? error.stack : undefined,
     status: (error as any)?.status ?? null,
-    errorCode: (error as any)?.errorCode ?? (error as any)?.error_code ?? null,
+    // An AxiosError carries none of these at the top level: the API's code
+    // lives at `response.data.error_code`. Reading only the top level logged
+    // `null` for every request failure, whatever the API actually said.
+    errorCode:
+      (error as any)?.errorCode ??
+      (error as any)?.error_code ??
+      (error as any)?.response?.data?.error_code ??
+      null,
     endpoint: (error as any)?.config?.url ?? context?.endpoint as string | undefined,
     context,
   };

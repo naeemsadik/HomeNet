@@ -1,5 +1,5 @@
 import { useResponsive } from "@/hooks/useResponsive";
-import { fonts, webPointer } from "@/theme";
+import { fonts, layout, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
 import { Sparkles } from "@/components/icons";
@@ -62,16 +62,16 @@ export interface FooterProps {
 
 function WebFooter({ style }: FooterProps) {
   const { t } = useTranslation();
-  const { isPhone, isTablet } = useResponsive();
+  const { isPhone, isTablet, containerMaxWidth } = useResponsive();
 
   const resourcesLinks = [
-    { label: "Stamp Duty & Tax Guide", href: "/about" },
-    { label: "Property Price Index", href: "/market" },
-    { label: "Property Valuation Guide", href: "/about" },
-    { label: "Property News & Trends", href: "/about" },
-    { label: "Buyer Guides", href: "/about" },
-    { label: "Seller Guides", href: "/sell" },
-    { label: "Renter Guides", href: "/rent" },
+    { label: "Stamp Duty & Tax Guide", href: "/resources/stamp-duty-tax-guide" },
+    { label: "Property Price Index", href: "/resources/property-price-index" },
+    { label: "Property Valuation Guide", href: "/resources/property-valuation-guide" },
+    { label: "Property News & Trends", href: "/resources/property-news-trends" },
+    { label: "Buyer Guides", href: "/resources/buyer-guides" },
+    { label: "Seller Guides", href: "/resources/seller-guides" },
+    { label: "Renter Guides", href: "/resources/renter-guides" },
     { label: "Landlord Guides", href: "/seller" },
     { label: "Mortgage Calculator", href: "/market" },
   ];
@@ -178,6 +178,7 @@ function WebFooter({ style }: FooterProps) {
         style={[
           styles.footerInner,
           isTablet && styles.footerInnerTablet,
+          { maxWidth: containerMaxWidth },
         ]}
       >
         {/* Main Columns (Desktop / PC) */}
@@ -301,13 +302,13 @@ const styles = StyleSheet.create({
   },
   footerInner: {
     width: "100%",
-    maxWidth: 1400,
-    paddingHorizontal: 40,
+    maxWidth: layout.containerMaxWidth,
+    paddingHorizontal: layout.gutter,
     paddingTop: 48,
     paddingBottom: 36,
   },
   footerInnerTablet: {
-    paddingHorizontal: 24,
+    paddingHorizontal: layout.gutterTablet,
     paddingTop: 36,
     paddingBottom: 28,
   },

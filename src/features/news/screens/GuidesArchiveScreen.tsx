@@ -238,7 +238,7 @@ export function GuidesArchiveScreen() {
           </Pressable>
 
           <Text style={styles.eyebrow}>{t("guides.archive.eyebrow")}</Text>
-          <Text style={[styles.title, isPhone && styles.titlePhone]}>
+          <Text accessibilityRole="header" aria-level={1} style={[styles.title, isPhone && styles.titlePhone]}>
             {t("guides.archive.title")}
           </Text>
           <Text style={[styles.subtitle, isPhone && styles.subtitlePhone]}>

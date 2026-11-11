@@ -55,6 +55,7 @@ import { WizardMediaStep } from "../components/wizard/WizardMediaStep";
 import { WizardReviewStep } from "../components/wizard/WizardReviewStep";
 import { storedListingTypeFor } from "../utils/listingType";
 import { uploadLocalMedia } from "../utils/localMedia";
+import { toWhatsAppFormat } from "../utils/lister";
 
 export function PropertyCreateWizard() {
   const { t } = useTranslation();
@@ -156,6 +157,8 @@ export function PropertyCreateWizard() {
       ),
     },
     virtual_tour_url: store.virtualTourUrl.trim() || undefined,
+    phone: store.phone.trim() ? [store.phone.trim()] : undefined,
+    whatsapp_number: toWhatsAppFormat(store.whatsappNumber) || undefined,
     status: "draft",
   });
 
@@ -229,6 +232,19 @@ export function PropertyCreateWizard() {
       }
       if (!Number.isFinite(areaNum) || areaNum > 1_000_000) {
         return t("wizard.validation.areaMax");
+      }
+      const cleanPhone = store.phone.trim();
+      const cleanWhatsapp = store.whatsappNumber.trim();
+      const phoneDigits = cleanPhone.replace(/\D/g, "");
+      const whatsappDigits = cleanWhatsapp.replace(/\D/g, "");
+      if (!phoneDigits && !whatsappDigits) {
+        return t("wizard.validation.contactRequired");
+      }
+      if (cleanPhone && (phoneDigits.length < 7 || phoneDigits.length > 15)) {
+        return t("wizard.validation.invalidContactNumber");
+      }
+      if (cleanWhatsapp && (whatsappDigits.length < 7 || whatsappDigits.length > 15)) {
+        return t("wizard.validation.invalidContactNumber");
       }
     }
     if (step === 2) {
@@ -574,22 +590,24 @@ export function PropertyCreateWizard() {
               )}
 
               <View style={[styles.wizardRightActions, isPhone && styles.wizardRightActionsMobile, isNarrowPhone && styles.wizardRightActionsNarrow]}>
-                <Pressable
-                  disabled={store.isSubmitting}
-                  onPress={() => void handleSaveDraft()}
-                  style={({ pressed }) => [
-                    styles.saveDraftBtn,
-                    isPhone && styles.saveDraftBtnMobile,
-                    isNarrowPhone && styles.saveDraftBtnNarrow,
-                    webPointer,
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <Save color="#0B1A17" size={14} />
-                  <Text style={[styles.saveDraftText, isPhone && styles.saveDraftTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
-                    {isNarrowPhone ? t("wizard.actions.save") : t("wizard.actions.saveDraft")}
-                  </Text>
-                </Pressable>
+                {store.currentStep >= 3 ? (
+                  <Pressable
+                    disabled={store.isSubmitting}
+                    onPress={() => void handleSaveDraft()}
+                    style={({ pressed }) => [
+                      styles.saveDraftBtn,
+                      isPhone && styles.saveDraftBtnMobile,
+                      isNarrowPhone && styles.saveDraftBtnNarrow,
+                      webPointer,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Save color="#0B1A17" size={14} />
+                    <Text style={[styles.saveDraftText, isPhone && styles.saveDraftTextMobile, isNarrowPhone && styles.btnTextNarrow]}>
+                      {isNarrowPhone ? t("wizard.actions.save") : t("wizard.actions.saveDraft")}
+                    </Text>
+                  </Pressable>
+                ) : null}
 
                 {store.currentStep < 5 ? (
                   <Pressable

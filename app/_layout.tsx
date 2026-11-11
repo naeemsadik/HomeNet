@@ -11,53 +11,23 @@ import { ToastHost } from "@/components/ToastHost";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
-import { colorTokens } from "@/theme";
 import { appFonts } from "@/theme/appFonts";
 import { restoreSavedLanguage } from "@/i18n";
 import { PageMeta } from "@/components/PageMeta";
 import { queryClient } from "@/lib/queryClient";
 import { installDomGuard } from "@/lib/domGuard";
+import { installFieldFocus } from "@/lib/fieldFocus";
 
 // Before React renders: browser translation/extensions might rewrite text nodes.
 installDomGuard();
-
-// Keyboard focus ring. Not colorTokens.primary (#04cf92), which sits at 2.03:1
-// on white and fails the 3:1 WCAG 1.4.11 minimum for a focus indicator.
-const FOCUS_RING_COLOR = colorTokens.primaryOnLight;
-
+// Text fields show focus on the box they draw, not as a square ring inside it.
+installFieldFocus();
 
 export default function RootLayout() {
   // Latin subsets with font-display: swap on web; full files on native.
   const [loaded] = useFonts(appFonts);
 
   useEffect(() => {
-    if (typeof document !== "undefined") {
-      const styleId = "homenet-remove-focus-outline";
-      if (!document.getElementById(styleId)) {
-        const style = document.createElement("style");
-        style.id = styleId;
-        style.textContent = `
-          input, textarea, select, [contenteditable] {
-            outline: none !important;
-            outline-style: none !important;
-            box-shadow: none !important;
-            -webkit-tap-highlight-color: transparent !important;
-          }
-          input:focus, textarea:focus, select:focus, [contenteditable]:focus {
-            outline: none !important;
-            outline-style: none !important;
-            box-shadow: none !important;
-          }
-          input:focus-visible, textarea:focus-visible, select:focus-visible,
-          [contenteditable]:focus-visible {
-            outline: 2px solid ${FOCUS_RING_COLOR} !important;
-            outline-offset: 2px !important;
-          }
-        `;
-        document.head.appendChild(style);
-      }
-    }
-
     // Browser and phone alike: the language the user picked last time.
     void restoreSavedLanguage();
 
@@ -80,7 +50,7 @@ export default function RootLayout() {
             empty <title> that Expo Router emits by default. */}
           <PageMeta
             title="HomeNet BD | Verified Property Listings in Bangladesh"
-            description="Browse verified real estate listings, connect directly with property owners, and search with transparent data on HomeNet."
+            description="HomeNet BD is a property marketplace for Bangladesh. Browse flats, houses and plots for sale or rent and contact the owners directly. Listing is free."
           />
           <StatusBar style="dark" />
           <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />

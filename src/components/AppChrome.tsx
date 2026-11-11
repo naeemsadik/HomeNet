@@ -1,6 +1,8 @@
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, colorTokens, layout, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
+import { AdminContextBar, ADMIN_BAR_HEIGHT } from "@/components/AdminContextBar";
+import { hasAnyAdminPermission } from "@/lib/permissions";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import {
   Bell,
@@ -40,7 +42,6 @@ import { Link, router, usePathname, type Href } from "expo-router";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { Brand } from "./Brand";
 import { UserAvatar } from "./UserAvatar";
-import { AiFinderModal } from "./AiFinderModal";
 import { InstantValuationModal } from "@/features/valuation/components/InstantValuationModal";
 import { LanguageToggle } from "./LanguageToggle";
 import { DrawerLanguageDropdown } from "./DrawerLanguageDropdown";
@@ -118,7 +119,7 @@ function SideBar({
   onNavigate,
   modal = false,
 }: {
-  active: ActivePage;
+  active?: ActivePage;
   onNavigate?: () => void;
   modal?: boolean;
 }) {
@@ -371,6 +372,8 @@ function TopBar({
     authGated?: boolean;
   }[] = [
     ...browseNavLinks,
+    // The valuation page used to be reachable only from the footer and the phone menu.
+    { translationKey: "nav.valuation", href: "/instant-valuation", key: "valuation" },
     { translationKey: "nav.saved", href: "/saved", key: "saved", authGated: true },
   ];
 
@@ -711,7 +714,7 @@ function TopBar({
 }
 
 /** The phone and tablet bottom bar. Seller pages show it too, so it never disappears. */
-export function MobileNav({ active }: { active: ActivePage }) {
+export function MobileNav({ active }: { active?: ActivePage }) {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const links: {
@@ -796,7 +799,7 @@ export function AppChrome({
   floating,
 }: {
   children: ReactNode;
-  active: ActivePage;
+  active?: ActivePage;
   bleed?: ReactNode;
   fluid?: boolean;
   customTopBar?: ReactNode;
@@ -817,6 +820,19 @@ export function AppChrome({
   const insets = useSafeAreaInsets();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Staff get one extra strip under the top bar. Signed-out visitors and the
+  // static export get zero, so the page geometry is unchanged for them.
+  const showAdminBar = useAuthStore(
+    (s) => s.hydrated && s.user !== null && hasAnyAdminPermission(s.userRoles),
+  );
+  const adminBarHeight = showAdminBar ? ADMIN_BAR_HEIGHT : 0;
+  const barOffset =
+    (isMobile
+      ? layout.navHeightPhone
+      : isTablet
+      ? layout.navHeightTablet
+      : layout.navHeight) + insets.top;
 
   const isCrystal = Boolean(bleed) && !isScrolled;
 
@@ -845,12 +861,7 @@ export function AppChrome({
         // (edge-to-edge on Android), so the page must start below both.
         // A custom bar (the phone search screen's) sits in the flow instead.
         !bleed && !customTopBar && {
-          paddingTop:
-            (isMobile
-              ? layout.navHeightPhone
-              : isTablet
-              ? layout.navHeightTablet
-              : layout.navHeight) + insets.top,
+          paddingTop: barOffset + adminBarHeight,
         },
       ]}
       keyboardShouldPersistTaps="handled"
@@ -885,6 +896,11 @@ export function AppChrome({
         {customTopBar ?? (
           <TopBar active={active} onOpenMenu={() => setMenuOpen(true)} isCrystal={isCrystal} />
         )}
+        {showAdminBar ? (
+          <View style={[styles.adminBarSafe, { top: barOffset }]}>
+            <AdminContextBar />
+          </View>
+        ) : null}
         {floating ? (
           <View style={styles.scrollArea}>
             {scrollView}
@@ -916,7 +932,6 @@ export function AppChrome({
           />
         </View>
       </Modal>
-      <AiFinderModal />
       <InstantValuationModal />
     </View>
   );

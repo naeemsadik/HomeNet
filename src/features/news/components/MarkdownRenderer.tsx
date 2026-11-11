@@ -136,10 +136,10 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       continue;
     }
 
-    // 3. Headings
+    // 3. Headings, one level below the page's own <h1> (the guide title)
     if (trimmed.startsWith("### ")) {
       elements.push(
-        <Text key={`h3-${index}`} style={styles.h3}>
+        <Text key={`h3-${index}`} accessibilityRole="header" aria-level={4} style={styles.h3}>
           {trimmed.slice(4)}
         </Text>,
       );
@@ -149,7 +149,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
 
     if (trimmed.startsWith("## ")) {
       elements.push(
-        <Text key={`h2-${index}`} style={styles.h2}>
+        <Text key={`h2-${index}`} accessibilityRole="header" aria-level={3} style={styles.h2}>
           {trimmed.slice(3)}
         </Text>,
       );
@@ -159,7 +159,7 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
 
     if (trimmed.startsWith("# ")) {
       elements.push(
-        <Text key={`h1-${index}`} style={styles.h1}>
+        <Text key={`h1-${index}`} accessibilityRole="header" aria-level={2} style={styles.h1}>
           {trimmed.slice(2)}
         </Text>,
       );

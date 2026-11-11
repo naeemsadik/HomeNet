@@ -20,6 +20,15 @@ export type PropertyCondition =
   | "under_construction"
   | "resale";
 
+/** How wide the road at the property's gate is. In Dhaka a narrow lane can take a tenth off. */
+export type RoadAccess = "main_road" | "wide_road" | "narrow_lane";
+
+/** Whether the papers a buyer's bank and lawyer ask for are in order (RAJUK approval, mutation). */
+export type LegalPapers = "complete" | "unsure";
+
+/** Whether water stands on the road or in the building in the monsoon. */
+export type Waterlogging = "never" | "sometimes";
+
 export interface ValuationAmenities {
   lift: boolean;
   generator: boolean;
@@ -45,10 +54,17 @@ export interface ValuationRequestPayload {
   bedrooms: number;
   bathrooms: number;
   balconies: number;
-  floorLevel: number | string; // e.g. 4 or "Mid Floor (4-8)"
-  facing: PropertyFacing;
-  propertyAge: PropertyCondition;
+  /** Left out when the owner does not say: no floor adjustment is then made. */
+  floorLevel?: number | string; // e.g. 4 or "Mid Floor (4-8)"
+  /** Left out when the owner does not say: no facing adjustment is then made. */
+  facing?: PropertyFacing;
+  /** Left out when the owner does not say: no age adjustment is then made. */
+  propertyAge?: PropertyCondition;
   amenities: ValuationAmenities;
+  /** Optional so an older client or a backend without them still works; treated as the neutral choice. */
+  roadAccess?: RoadAccess;
+  legalPapers?: LegalPapers;
+  waterlogging?: Waterlogging;
 }
 
 export interface ComparableProperty {
@@ -65,15 +81,28 @@ export interface ComparableProperty {
   imageUrl: string;
   listingType: "sale" | "rent";
   isVerified: boolean;
-  similarityScore: number; // e.g. 96 (%)
+}
+
+/**
+ * What the confidence badge rests on, so the sentence under it can be written in
+ * either language. confidenceReason is the same thing in English.
+ */
+export interface ConfidenceBasis {
+  kind: "listings" | "apartmentsOnly" | "builtInRate" | "noData";
+  /** kind "listings": how many asking prices (or rents) the area's figure rests on. */
+  listings?: number;
+  /** kind "listings": the date the listings were collected, YYYY-MM-DD. */
+  asOf?: string;
+  /** One site supplied most of those listings. */
+  mostlyOneSite?: boolean;
+  /** The other figure on the page (the rent for a sale, the sale price for a rent) is an estimate, not from listings. */
+  estimatedYieldInput?: "rent" | "sale";
 }
 
 export interface AreaMarketMetric {
   areaName: string;
   avgPriceSqftSale: number;
   avgPriceSqftRent: number;
-  yearOverYearGrowthPct: number;
-  marketDemand: "Very High" | "High" | "Moderate";
   verifiedListingCount: number;
   popularSubzones: string[];
 }
@@ -84,7 +113,7 @@ export interface ValueDriverImpact {
   deltaBdtPerSqft: number;
   formattedDelta: string;
   description: string;
-  category: "location" | "facing" | "amenity" | "floor" | "condition";
+  category: "location" | "facing" | "amenity" | "floor" | "condition" | "access" | "legal";
 }
 
 export interface PriceBreakdownFactors {
@@ -93,6 +122,8 @@ export interface PriceBreakdownFactors {
   facingAdjustmentPct: number;
   amenitiesAdjustmentPct: number;
   conditionAdjustmentPct: number;
+  /** Road access, papers and monsoon waterlogging together. */
+  siteAdjustmentPct: number;
   calculatedRatePerSqft: number;
 }
 
@@ -118,6 +149,11 @@ export interface ValuationResponseData {
 
   /** Estimated Monthly Rental Yield */
   estimatedMonthlyRent: number;
+  /** The range around the monthly rent, from the rent listings' spread (-6% / +6% without them). */
+  lowMonthlyRent: number;
+  highMonthlyRent: number;
+  lowMonthlyRentFormatted: string;
+  highMonthlyRentFormatted: string;
   estimatedMonthlyRentFormatted: string;
   grossRentalYieldPct: number;
 
@@ -129,9 +165,10 @@ export interface ValuationResponseData {
   pricePerSqftDeltaPct: number; // e.g. +6.5% vs area average
 
   /** Confidence assessment */
-  confidenceScore: "high" | "medium";
+  confidenceScore: "high" | "medium" | "low";
   confidencePct: number;
   confidenceReason: string;
+  confidenceBasis?: ConfidenceBasis;
 
   /** Dhaka Value Drivers Breakdown */
   valueDrivers: ValueDriverImpact[];

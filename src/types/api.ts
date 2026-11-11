@@ -51,10 +51,15 @@ export interface AuthIdentity {
   verified_at: string | null;
 }
 
+export type AccountType = "individual" | "company";
+
 export interface UserProfile {
   id: string;
   full_name: string;
   avatar_url: string | null;
+  account_type?: AccountType;
+  company_name?: string | null;
+  company_logo_url?: string | null;
   created_at: string;
   updated_at: string;
   auth_identities: AuthIdentity[];
@@ -62,6 +67,9 @@ export interface UserProfile {
 
 export interface UpdateUserDto {
   full_name?: string;
+  account_type?: "individual" | "company";
+  /** Required with `account_type: "company"`; an empty string clears it. */
+  company_name?: string;
 }
 
 export interface UploadableFile {
@@ -131,6 +139,8 @@ export interface UpsertPropertyDto {
   location_lat?: number;
   location_lng?: number;
   address?: string;
+  phone?: string[];
+  whatsapp_number?: string;
   amenities?: Record<string, unknown>;
   virtual_tour_url?: string;
   status?: PropertyStatus;

@@ -25,9 +25,11 @@ import { router } from "expo-router";
 import { openExternalUrl } from "@/lib/safeUrl";
 import { shareLink } from "@/lib/share";
 import { AppChrome } from "@/components/AppChrome";
+import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
+import { articleSchema, breadcrumbSchema, guideCrumbs } from "@/lib/schema";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
 import { usePropertyGuide, usePropertyGuides } from "../hooks/usePropertyGuides";
@@ -171,6 +173,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
         description={guideExcerpt || "Property advice, land verification procedures and Dhaka market updates."}
         noindex={!isLoading && (isError || !guide) ? true : undefined}
       />
+      {guide && !isRss ? <JsonLd nodes={[articleSchema(guide), breadcrumbSchema(guideCrumbs(guide))]} /> : null}
       <View
         style={[
           styles.container,
@@ -269,7 +272,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                   </View>
 
                   {/* Title & Metadata */}
-                  <Text style={[styles.articleTitle, isMobile && styles.articleTitlePhone]}>
+                  <Text accessibilityRole="header" aria-level={1} style={[styles.articleTitle, isMobile && styles.articleTitlePhone]}>
                     {guideTitle}
                   </Text>
 
@@ -393,7 +396,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                   </View>
 
                   {/* Article Title */}
-                  <Text style={[styles.articleTitle, isMobile && styles.articleTitlePhone]}>
+                  <Text accessibilityRole="header" aria-level={1} style={[styles.articleTitle, isMobile && styles.articleTitlePhone]}>
                     {guideTitle}
                   </Text>
 

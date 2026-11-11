@@ -64,4 +64,18 @@ export async function deleteAvatar() {
   return data;
 }
 
+export async function uploadCompanyLogo(file: UploadInput, fileName = "company-logo.jpg") {
+  const formData = new FormData();
+  appendUpload(formData, "file", file, fileName);
+  const { data } = await apiClient.post<ApiResponse<UserProfile>>("/v1/users/company-logo", formData, {
+    headers: { "Content-Type": undefined },
+  });
+  return data;
+}
+
+export async function deleteCompanyLogo() {
+  const { data } = await apiClient.delete<ApiResponse<UserProfile>>("/v1/users/company-logo");
+  return data;
+}
+
 export type { UserProfile } from "@/types/api";

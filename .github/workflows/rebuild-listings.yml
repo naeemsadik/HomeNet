@@ -1,0 +1,31 @@
+# Rebuilds the website every 6 hours, so listings approved since the last
+# deploy get their own pre-rendered page and a place in the sitemap. Until
+# then a new listing is served by the noindex /property/[id] shell: it opens
+# for visitors but stays out of search results.
+#
+# Setup (once): in Vercel, Project Settings > Git > Deploy Hooks, create a hook
+# for the main branch, then add its URL to this repository as the secret
+# VERCEL_DEPLOY_HOOK_URL. Each run is a full production build.
+name: Rebuild listings
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger a Vercel production deploy
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$VERCEL_DEPLOY_HOOK_URL" ]; then
+            echo "::error::Add the VERCEL_DEPLOY_HOOK_URL secret (see the comment at the top of this file)."
+            exit 1
+          fi
+          curl --fail --silent --show-error --max-time 30 -X POST "$VERCEL_DEPLOY_HOOK_URL"

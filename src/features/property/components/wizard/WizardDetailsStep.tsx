@@ -1,10 +1,12 @@
 import { Check } from "@/components/icons";
+import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { priceOnRequestLabel, useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
 import { webPointer } from "@/theme";
 import type { PropertyTypeConfig } from "../../constants/propertyCategories";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
+import { toWhatsAppFormat } from "../../utils/lister";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
 
 /** Step 2: price, area and the fields this property type needs. */
@@ -13,6 +15,23 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
   const { isPhone } = useResponsive();
   const store = usePropertyWizardStore();
   const onRequest = store.priceOnRequest;
+  // Ticked on a fresh form, since most owners use one number for both. On a
+  // form that already has numbers, ticked only when WhatsApp really holds the
+  // phone number: a listing with a phone and no WhatsApp opens unticked, so
+  // the box never shows a WhatsApp number that will not be saved.
+  const [sameAsPhone, setSameAsPhone] = useState<boolean>(() =>
+    !store.phone.trim() && !store.whatsappNumber.trim()
+      ? true
+      : store.whatsappNumber !== "" && store.whatsappNumber === toWhatsAppFormat(store.phone),
+  );
+
+  const handleToggleSameAsPhone = () => {
+    const next = !sameAsPhone;
+    setSameAsPhone(next);
+    // Ticking copies the phone over, even an empty one, so a WhatsApp number
+    // typed earlier cannot hide behind the locked box and still be saved.
+    if (next) store.setContact({ whatsappNumber: toWhatsAppFormat(store.phone) });
+  };
 
   const priceSuffix = store.subtype === "short-let"
     ? t("wizard.details.perNightOrMo")
@@ -211,6 +230,57 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
             );
           })}
         </View>
+      </View>
+
+      <View style={styles.formGroup}>
+        <View style={styles.formLabelRow}>
+          <Text style={styles.formLabel}>
+            {t("wizard.details.contactLabel")} <Text style={{ color: "#D4183D" }}>*</Text>
+          </Text>
+          <Text style={styles.formHint}>{t("wizard.details.contactHint")}</Text>
+        </View>
+        <TextInput
+          accessibilityLabel={t("wizard.details.phoneLabel")}
+          keyboardType="phone-pad"
+          onChangeText={(phone) => {
+            store.setContact({
+              phone,
+              ...(sameAsPhone ? { whatsappNumber: toWhatsAppFormat(phone) } : {}),
+            });
+          }}
+          placeholder={t("wizard.details.phonePlaceholder")}
+          placeholderTextColor="#899790"
+          style={styles.formInput}
+          value={store.phone}
+        />
+
+        {/* Clickbox / Checkbox: WhatsApp same as contact phone */}
+        <Pressable
+          accessibilityLabel={t("wizard.details.sameAsPhone")}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: sameAsPhone }}
+          aria-checked={sameAsPhone}
+          onPress={handleToggleSameAsPhone}
+          style={({ pressed }) => [styles.sameAsPhoneRow, webPointer, pressed && styles.pressed]}
+        >
+          <View style={[styles.sameAsPhoneBox, sameAsPhone && styles.sameAsPhoneBoxOn]}>
+            {sameAsPhone ? <Check color="#0B1A17" size={13} strokeWidth={3} /> : null}
+          </View>
+          <Text style={styles.sameAsPhoneText}>{t("wizard.details.sameAsPhone")}</Text>
+        </Pressable>
+
+        <TextInput
+          accessibilityLabel={t("wizard.details.whatsappLabel")}
+          accessibilityState={{ disabled: sameAsPhone }}
+          editable={!sameAsPhone}
+          keyboardType="phone-pad"
+          onChangeText={(whatsappNumber) => store.setContact({ whatsappNumber })}
+          placeholder={t("wizard.details.whatsappPlaceholder")}
+          placeholderTextColor="#899790"
+          style={[styles.formInput, sameAsPhone && styles.formInputLocked]}
+          // Always the stored number: what the box shows is what gets saved.
+          value={store.whatsappNumber}
+        />
       </View>
     </View>
   );
