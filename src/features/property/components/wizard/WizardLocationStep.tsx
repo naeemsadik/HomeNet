@@ -8,6 +8,7 @@ import { resolveMapLink } from "@/services/mapApi";
 import { GOOGLE_MAPS_API_KEY } from "@/lib/features";
 import { reverseGeocode, type GeocodedPlace } from "@/services/geocodeApi";
 import { googleReverseGeocode } from "@/services/googleGeocode";
+import { resolveAreaMatch, type ParsedGooglePlace } from "@/lib/areaMatcher";
 import { areaCenterFor, type MapPoint } from "../../constants/areaCenters";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";
 import { coordinateProblem } from "../../utils/coordinates";
@@ -100,12 +101,61 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
   // ── Filling the address and area from the pin ────────────────────────────────
   // What this step wrote itself, so that only its own values are ever replaced.
   const written = useRef<{ areaId: string | null; address: string | null }>({ areaId: null, address: null });
+  const selectedPlaceRef = useRef<{ lat: number; lng: number; place: ParsedGooglePlace } | null>(null);
   const [auto, setAuto] = useState<{ areaId: string | null; address: string | null }>({ areaId: null, address: null });
   const [lookup, setLookup] = useState<PlaceLookup>({ status: "idle", areaFrom: null });
   const latestLookup = useRef(0);
 
+  const handlePlaceSelected = (parsed: ParsedGooglePlace) => {
+    ownerMovedPin.current = true;
+    const coords = parsed.coordinates;
+    if (coords) {
+      selectedPlaceRef.current = { lat: coords.lat, lng: coords.lng, place: parsed };
+    }
+    const list = areaItems ?? [];
+    const resolution = resolveAreaMatch({
+      query: parsed.subArea,
+      city: parsed.city,
+      coordinates: coords,
+      areas: list,
+    });
+    const matched = resolution.matchedArea;
+    const current = usePropertyWizardStore.getState();
+    const filled = pinFillPatch(
+      current,
+      written.current,
+      matched,
+      parsed.formattedAddress ?? null,
+      true,
+    );
+    written.current = filled.written;
+    const patch = {
+      ...filled.patch,
+      ...(!matched && parsed.city ? { district: parsed.city } : {}),
+    };
+    if (Object.keys(patch).length > 0) usePropertyWizardStore.getState().setLocation(patch);
+    setAuto({ ...written.current });
+    if (matched) {
+      setLookup({
+        status: "done",
+        areaFrom: resolution.matchType === "proximity" ? "nearest" : "place",
+      });
+    }
+  };
+
   useEffect(() => {
     if (!pin) return;
+    // Skip duplicate reverse-geocoding right after a PlaceAutocompleteElement selection
+    const recentPlace = selectedPlaceRef.current;
+    if (
+      recentPlace &&
+      Math.abs(recentPlace.lat - pin.lat) < 0.0002 &&
+      Math.abs(recentPlace.lng - pin.lng) < 0.0002
+    ) {
+      selectedPlaceRef.current = null;
+      return;
+    }
+
     const attempt = ++latestLookup.current;
     // Wait for the pin to settle: dragging it around is one lookup, not dozens.
     const timer = setTimeout(() => {
@@ -155,7 +205,7 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
 
   return (
     <View style={styles.stepFormBody}>
-      <LocationPicker onChange={handlePick} openAt={openAt} value={pin} />
+      <LocationPicker onChange={handlePick} onPlaceSelected={handlePlaceSelected} openAt={openAt} value={pin} />
 
       <View style={styles.formGroup}>
         <Text style={styles.formLabel}>{ON_WEB ? t("wizard.location.mapLinkWeb") : t("wizard.location.mapLinkMobile")}</Text>

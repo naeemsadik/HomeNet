@@ -11,8 +11,9 @@ import {
 } from "@/components/icons";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
-import { AreaPicker } from "./AreaPicker";
+import { AreaPicker, type AreaLocationSelection } from "./AreaPicker";
 import { AdvancedFiltersModal } from "./AdvancedFiltersModal";
+import type { GeoPoint } from "@/lib/areaMatcher";
 import {
   countActiveFilters,
   defaultSearchFilters,
@@ -31,6 +32,9 @@ export function MobileHeroSearchCard() {
   const user = useAuthStore((s) => s.user);
   const [activeTab, setActiveTab] = useState<MobileTab>("buy");
   const [selectedArea, setSelectedArea] = useState<Area | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [customAreaName, setCustomAreaName] = useState<string | null>(null);
+  const [selectedCoords, setSelectedCoords] = useState<GeoPoint | null>(null);
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>(defaultSearchFilters);
@@ -60,6 +64,20 @@ export function MobileHeroSearchCard() {
     }));
   };
 
+  const clearLocationSelection = () => {
+    setSelectedArea(null);
+    setSelectedCity(null);
+    setCustomAreaName(null);
+    setSelectedCoords(null);
+  };
+
+  const applyLocationSelection = (loc: AreaLocationSelection) => {
+    setSelectedArea(loc.area);
+    setSelectedCity(loc.city);
+    setCustomAreaName(loc.area ? null : (loc.areaName ?? null));
+    setSelectedCoords(loc.coordinates ?? null);
+  };
+
   const handleSearch = () => {
     const target = activeTab === "sold" ? "/sold" : activeTab === "buy" ? "/buy" : "/rent";
     const params = new URLSearchParams(
@@ -71,9 +89,13 @@ export function MobileHeroSearchCard() {
       })
     );
 
-    if (selectedArea) {
-      if (selectedArea.city) params.set("city", selectedArea.city);
-      params.set("location", selectedArea.name);
+    const city = selectedCity || selectedArea?.city || null;
+    const areaName = selectedArea?.name || customAreaName || null;
+    if (city) params.set("city", city);
+    if (areaName) params.set("location", areaName);
+    if (selectedCoords) {
+      params.set("lat", String(selectedCoords.lat));
+      params.set("lng", String(selectedCoords.lng));
     }
 
     const qs = params.toString();
@@ -90,10 +112,14 @@ export function MobileHeroSearchCard() {
       : t("search.searchHomesForSale");
 
   const locationDisplayText = selectedArea
-    ? selectedArea.city
-      ? `${selectedArea.name}, ${selectedArea.city}`
+    ? selectedCity
+      ? `${selectedArea.name}, ${selectedCity}`
       : selectedArea.name
-    : null;
+    : customAreaName
+    ? selectedCity
+      ? `${customAreaName}, ${selectedCity}`
+      : customAreaName
+    : selectedCity;
 
   const searchLabel =
     activeTab === "sold"
@@ -155,8 +181,8 @@ export function MobileHeroSearchCard() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={
-                selectedArea
-                  ? t("hero.filterByAreaWithLocation", { location: selectedArea.name })
+                locationDisplayText
+                  ? t("hero.filterByAreaWithLocation", { location: locationDisplayText })
                   : t("hero.filterByArea")
               }
               onPress={() => setAreaPickerOpen(true)}
@@ -171,13 +197,13 @@ export function MobileHeroSearchCard() {
               </Text>
             </Pressable>
 
-            {selectedArea ? (
+            {locationDisplayText ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t("hero.clearLocation")}
                 onPress={(e) => {
                   e.stopPropagation?.();
-                  setSelectedArea(null);
+                  clearLocationSelection();
                 }}
                 style={[styles.clearBtn, webPointer]}
               >
@@ -298,11 +324,21 @@ export function MobileHeroSearchCard() {
 
       {/* Location Picker Modal */}
       <AreaPicker
+        allowCitySelection
+        enableGooglePlaces
+        initialCity={selectedCity ?? undefined}
         visible={areaPickerOpen}
         onClose={() => setAreaPickerOpen(false)}
         selectedArea={selectedArea}
         onSelect={(area) => {
           setSelectedArea(area);
+          setSelectedCity(area?.city ?? null);
+          setCustomAreaName(null);
+          setSelectedCoords(null);
+          setAreaPickerOpen(false);
+        }}
+        onSelectLocation={(loc) => {
+          applyLocationSelection(loc);
           setAreaPickerOpen(false);
         }}
       />

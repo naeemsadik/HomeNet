@@ -83,6 +83,9 @@ export interface Area {
   name: string;
   parent_area_id: string | null;
   city: string | null;
+  city_id?: string | null;
+  /** Alternative spellings or transliterations supported by search/matching. */
+  aliases?: string[];
   /** Where the area is centred. Not every area has one yet; distance search needs it. */
   center_lat?: number | null;
   center_lng?: number | null;

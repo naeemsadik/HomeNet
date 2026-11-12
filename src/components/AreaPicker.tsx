@@ -22,10 +22,21 @@ import {
 import { colorTokens, colors, webPointer } from "@/theme";
 import { OverlayModal } from "@/components/OverlayModal";
 import { useAreaPicker } from "@/hooks/useAreaPicker";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWindowSize } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
+import { inferAreaCity, resolveAreaFromGooglePlace, type GeoPoint } from "@/lib/areaMatcher";
+import { fetchGooglePlaceSuggestions, type PlaceAutocompleteItem } from "@/services/googlePlaces";
 import type { Area } from "@/types/api";
 import { styles } from "./AreaPicker.styles";
+
+export interface AreaLocationSelection {
+  city: string | null;
+  area: Area | null;
+  areaName?: string | null;
+  coordinates?: GeoPoint | null;
+  path: Area[];
+}
 
 export interface AreaPickerProps {
   visible: boolean;
@@ -33,6 +44,12 @@ export interface AreaPickerProps {
   onSelect: (area: Area | null, path: Area[]) => void;
   selectedArea: Area | null;
   initialCity?: string;
+  /** Enables city-wide selection ("Search all in <City>") in browse/search flows. */
+  allowCitySelection?: boolean;
+  /** Enables Google Places Autocomplete suggestions inside the modal on web. */
+  enableGooglePlaces?: boolean;
+  /** Structured callback carrying city, resolved sub-area, and coordinates. */
+  onSelectLocation?: (selection: AreaLocationSelection) => void;
 }
 
 // ─── Skeleton Loading Placeholder ──────────────────────────────────────────
@@ -84,6 +101,9 @@ export function AreaPicker({
   onSelect,
   selectedArea,
   initialCity,
+  allowCitySelection = false,
+  enableGooglePlaces = false,
+  onSelectLocation,
 }: AreaPickerProps) {
   const { t } = useTranslation();
   const { width } = useWindowSize();
@@ -91,6 +111,7 @@ export function AreaPicker({
 
   const {
     areas,
+    allAreas,
     loading,
     error,
     navPath,
@@ -107,8 +128,35 @@ export function AreaPicker({
   } = useAreaPicker({ initialCity, enabled: visible });
 
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [googleSuggestions, setGoogleSuggestions] = useState<PlaceAutocompleteItem[]>([]);
+  const [ambiguousState, setAmbiguousState] = useState<{ contextKey: string; items: Area[] }>({
+    contextKey: "",
+    items: [],
+  });
+  const debouncedPlacesQuery = useDebouncedValue(searchQuery.trim(), 250);
   const flatListRef = React.useRef<FlatList>(null);
   const touchStartY = React.useRef(0);
+  const areasById = React.useMemo(() => new Map(allAreas.map((a) => [a.id, a])), [allAreas]);
+  const pickerContextKey = `${visible}|${selectedCity ?? ""}|${searchQuery}`;
+  const ambiguousCandidates =
+    ambiguousState.contextKey === pickerContextKey ? ambiguousState.items : [];
+
+  useEffect(() => {
+    if (!visible || !enableGooglePlaces || Platform.OS !== "web" || debouncedPlacesQuery.length < 2) {
+      return;
+    }
+    let active = true;
+    void fetchGooglePlaceSuggestions(debouncedPlacesQuery, selectedCity).then((items) => {
+      if (active) setGoogleSuggestions(items);
+    });
+    return () => {
+      active = false;
+    };
+  }, [visible, enableGooglePlaces, debouncedPlacesQuery, selectedCity]);
+  const visibleGoogleSuggestions =
+    visible && enableGooglePlaces && Platform.OS === "web" && debouncedPlacesQuery.length >= 2
+      ? googleSuggestions
+      : [];
 
   // Helper to construct the full path list for a selected area
   const getPathForArea = (area: Area): Area[] => {
@@ -129,13 +177,26 @@ export function AreaPicker({
   // Handle final selection of an area
   const handleSelectArea = (area: Area) => {
     const fullPath = getPathForArea(area);
+    const resolvedCity = inferAreaCity(area, areasById) ?? selectedCity ?? null;
+    const coords =
+      area.center_lat != null && area.center_lng != null
+        ? { lat: area.center_lat, lng: area.center_lng }
+        : null;
     onSelect(area, fullPath);
+    onSelectLocation?.({
+      city: resolvedCity,
+      area,
+      areaName: area.name,
+      coordinates: coords,
+      path: fullPath,
+    });
     onClose();
   };
 
   // Clear current selection completely
   const handleClearSelection = () => {
     onSelect(null, []);
+    onSelectLocation?.({ city: null, area: null, areaName: null, coordinates: null, path: [] });
     onClose();
   };
 
@@ -143,9 +204,52 @@ export function AreaPicker({
   const handleSelectCurrentLevel = () => {
     if (navPath.length > 0) {
       handleSelectArea(navPath[navPath.length - 1]);
+    } else if (allowCitySelection && selectedCity) {
+      onSelect(null, []);
+      onSelectLocation?.({
+        city: selectedCity,
+        area: null,
+        areaName: null,
+        coordinates: null,
+        path: [],
+      });
+      onClose();
     } else {
       handleClearSelection();
     }
+  };
+
+  const handleSelectGooglePlace = async (suggestion: PlaceAutocompleteItem) => {
+    const place = await suggestion.resolvePlace();
+    if (!place) return;
+    const { parsed, resolution } = resolveAreaFromGooglePlace(place, allAreas);
+    if (resolution.matchType === "ambiguous" && resolution.candidates.length > 0) {
+      setAmbiguousState({ contextKey: pickerContextKey, items: resolution.candidates });
+      return;
+    }
+    const city = resolution.city ?? parsed.city ?? selectedCity ?? null;
+    if (resolution.matchedArea) {
+      const matched = resolution.matchedArea;
+      onSelect(matched, [matched]);
+      onSelectLocation?.({
+        city: inferAreaCity(matched, areasById) ?? city,
+        area: matched,
+        areaName: matched.name,
+        coordinates: resolution.coordinates,
+        path: [matched],
+      });
+      onClose();
+      return;
+    }
+    onSelect(null, []);
+    onSelectLocation?.({
+      city,
+      area: null,
+      areaName: parsed.subArea ?? suggestion.primaryText,
+      coordinates: resolution.coordinates,
+      path: [],
+    });
+    onClose();
   };
 
   // Reset focus index when items list changes or modal visibility changes
@@ -424,10 +528,10 @@ export function AreaPicker({
           ) : null}
 
           {/* Current Selection / Action Banner */}
-          {navPath.length > 0 && !searchQuery ? (
+          {(navPath.length > 0 || (allowCitySelection && selectedCity)) && !searchQuery ? (
             <View style={styles.selectionBanner}>
               <Text style={styles.selectionBannerLabel}>
-                {t("areaPicker.currentLevel")}{" "}
+                {navPath.length > 0 ? t("areaPicker.currentLevel") : t("areaPicker.searchCityAll")}{" "}
                 <Text style={styles.selectionBannerValue}>
                   {navPath.length > 0
                     ? navPath[navPath.length - 1].name
@@ -440,7 +544,11 @@ export function AreaPicker({
                 style={[styles.selectionBannerBtn, webPointer]}
               >
                 <Check size={14} color={colorTokens.onBrand} />
-                <Text style={styles.selectionBannerBtnText}>{t("areaPicker.confirmThisLevel")}</Text>
+                <Text style={styles.selectionBannerBtnText}>
+                  {navPath.length > 0
+                    ? t("areaPicker.confirmThisLevel")
+                    : t("areaPicker.selectCityName", { city: selectedCity ?? "" })}
+                </Text>
               </Pressable>
             </View>
           ) : null}
@@ -460,7 +568,7 @@ export function AreaPicker({
                   <Text style={styles.retryButtonText}>{t("areaPicker.goToRoot")}</Text>
                 </Pressable>
               </View>
-            ) : areas.length === 0 ? (
+            ) : areas.length === 0 && visibleGoogleSuggestions.length === 0 && ambiguousCandidates.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Building size={40} color={colors.line} style={styles.emptyIcon} />
                 <Text style={styles.emptyTitle}>
@@ -477,6 +585,53 @@ export function AreaPicker({
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={true}
                 contentContainerStyle={{ paddingBottom: 32 }}
+                ListFooterComponent={
+                  <>
+                    {ambiguousCandidates.length > 0 ? (
+                      <View style={styles.ambiguousBox}>
+                        <Text style={styles.ambiguousTitle}>{t("areaPicker.disambiguateTitle")}</Text>
+                        {ambiguousCandidates.map((cand) => (
+                          <Pressable
+                            key={`ambig-${cand.id}`}
+                            accessibilityRole="button"
+                            onPress={() => handleSelectArea(cand)}
+                            style={[styles.areaRow, webPointer]}
+                          >
+                            <View style={styles.areaTextContainer}>
+                              <Text style={styles.areaName}>{cand.name}</Text>
+                              <Text style={styles.areaCity}>
+                                {inferAreaCity(cand, areasById) || t("areaPicker.areaFallback")}
+                              </Text>
+                            </View>
+                            <ChevronRight size={16} color="#7E8F89" />
+                          </Pressable>
+                        ))}
+                      </View>
+                    ) : null}
+                    {visibleGoogleSuggestions.length > 0 ? (
+                      <View style={styles.googleSection}>
+                        <Text style={styles.googleSectionLabel}>{t("areaPicker.googleSuggestions")}</Text>
+                        {visibleGoogleSuggestions.map((item) => (
+                          <Pressable
+                            key={item.id}
+                            accessibilityRole="button"
+                            onPress={() => void handleSelectGooglePlace(item)}
+                            style={({ pressed }) => [styles.areaRow, webPointer, pressed && { opacity: 0.8 }]}
+                          >
+                            <View style={styles.pinCircle}>
+                              <MapPin size={15} color="#04cf92" strokeWidth={2} />
+                            </View>
+                            <View style={styles.areaTextContainer}>
+                              <Text style={styles.areaName}>{item.primaryText}</Text>
+                              <Text style={styles.areaCity}>{item.secondaryText}</Text>
+                            </View>
+                            <ChevronRight size={16} color="#7E8F89" />
+                          </Pressable>
+                        ))}
+                      </View>
+                    ) : null}
+                  </>
+                }
                 onScrollToIndexFailed={(info) => {
                   flatListRef.current?.scrollToOffset({
                     offset: info.highestMeasuredFrameIndex * info.averageItemLength,
@@ -531,9 +686,7 @@ export function AreaPicker({
                             {item.name}
                           </Text>
                           <Text style={styles.areaCity}>
-                            {item.city
-                              ? item.city.charAt(0).toUpperCase() + item.city.slice(1).toLowerCase()
-                              : t("areaPicker.areaFallback")}
+                            {inferAreaCity(item, areasById) || t("areaPicker.areaFallback")}
                           </Text>
                         </View>
                       </Pressable>
