@@ -442,10 +442,10 @@ export function HomeNetExplainerSection() {
                 <button
                   onClick={handleContinueFull}
                   style={{
-                    backgroundColor: "#0F6D55",
-                    color: "#FFFFFF",
+                    backgroundColor: colorTokens.brand,
+                    color: colorTokens.onBrand,
                     border: "none",
-                    borderRadius: 10,
+                    borderRadius: radius.lg,
                     padding: isPhone ? "10px 18px" : "12px 24px",
                     fontSize: isPhone ? 14 : 15,
                     fontWeight: 700,
@@ -453,13 +453,13 @@ export function HomeNetExplainerSection() {
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
-                    boxShadow: "0 4px 14px rgba(15, 109, 85, 0.4)",
+                    boxShadow: "0 4px 14px rgba(4, 207, 146, 0.3)",
                     transition: "transform 0.15s ease",
                   }}
                   onMouseEnter={(e: any) => (e.currentTarget.style.transform = "scale(1.03)")}
                   onMouseLeave={(e: any) => (e.currentTarget.style.transform = "scale(1)")}
                 >
-                  <Play color="#FFFFFF" size={16} strokeWidth={2.5} />
+                  <Play color={colorTokens.onBrand} size={16} strokeWidth={2.5} />
                   <span>{t("home.explainerContinueBtn")}</span>
                 </button>
 
@@ -541,7 +541,7 @@ export function HomeNetExplainerSection() {
                 style={{
                   width: `${progressPercent}%`,
                   height: "100%",
-                  backgroundColor: "#0F6D55",
+                  backgroundColor: colorTokens.brand,
                   borderRadius: 4,
                   position: "relative",
                 }}

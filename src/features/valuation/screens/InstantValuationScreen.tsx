@@ -337,7 +337,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   nextBtnPhone: { alignSelf: "stretch" },
-  nextBtnHovered: { backgroundColor: colorTokens.brandHover },
+  nextBtnHovered: {
+    backgroundColor: colorTokens.brand,
+    opacity: 0.95,
+  },
   pressed: { opacity: 0.9 },
   nextText: { fontFamily: fonts.bold, fontSize: 16, color: colorTokens.onBrand },
   helper: { fontFamily: fonts.regular, fontSize: 13, color: colorTokens.muted },

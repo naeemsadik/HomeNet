@@ -823,7 +823,11 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   searchBtnHovered: {
-    backgroundColor: colorTokens.brandHover,
+    backgroundColor: colorTokens.brand,
+    shadowColor: "rgba(11, 26, 23, 0.18)",
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   // `flex: 0` resolves to a 0% basis, which collapses the button to no height
   // in the card's column layout and throws away the 44 above.

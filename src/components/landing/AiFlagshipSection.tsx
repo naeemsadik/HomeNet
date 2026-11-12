@@ -22,7 +22,7 @@ import {
   Sliders,
   Play,
 } from '@/components/icons';
-import { colors, fonts } from '../../theme';
+import { colors, colorTokens, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useAuthStore } from '../../stores/authStore';
 import { useAuthModalStore } from '../../stores/useAuthModalStore';
@@ -282,7 +282,7 @@ export function AiFlagshipSection() {
                 <View style={styles.chromeDotsRow}>
                   <View style={[styles.chromeDot, { backgroundColor: '#FF5F56' }]} />
                   <View style={[styles.chromeDot, { backgroundColor: '#FFBD2E' }]} />
-                  <View style={[styles.chromeDot, { backgroundColor: '#27C93F' }]} />
+                  <View style={[styles.chromeDot, { backgroundColor: colorTokens.brand }]} />
                 </View>
                 <Text style={styles.deviceChromeTitle}>{t("landing.aiFlagship.chromeTitle")}</Text>
                 {demoState === 'preview' && (
@@ -351,18 +351,20 @@ export function AiFlagshipSection() {
                     {/* Action Button */}
                     {demoState === 'analyzing' ? (
                       <View style={styles.analyzingStateRow}>
-                        <ActivityIndicator size="small" color="#04CF92" />
+                        <ActivityIndicator size="small" color={colorTokens.brand} />
                         <Text style={styles.analyzingText}>{t("landing.aiFlagship.analyzingState")}</Text>
                       </View>
                     ) : (
                       <Pressable
-                        style={({ hovered }: any) => [
+                        accessibilityRole="button"
+                        style={({ hovered, pressed }: any) => [
                           styles.analyzeBtn,
                           hovered && styles.analyzeBtnHovered,
+                          pressed && styles.brandBtnPressed,
                         ]}
                         onPress={demoState === 'idle' ? runSequence : handleManualAnalyze}
                       >
-                        <Sparkles size={15} color="#0B1A17" style={{ marginRight: 8 }} />
+                        <Sparkles size={15} color={colorTokens.onBrand} style={{ marginRight: 8 }} />
                         <Text style={styles.analyzeBtnText}>{t("landing.aiFlagship.analyzeBtn")}</Text>
                       </Pressable>
                     )}
@@ -533,14 +535,16 @@ export function AiFlagshipSection() {
                       </Pressable>
 
                       <Pressable
-                        style={({ hovered }: any) => [
+                        accessibilityRole="button"
+                        style={({ hovered, pressed }: any) => [
                           styles.applyBtn,
                           hovered && styles.applyBtnHovered,
+                          pressed && styles.brandBtnPressed,
                         ]}
                         onPress={handleApply}
                       >
                         <Text style={styles.applyBtnText}>{t("landing.aiFlagship.applyBtn")}</Text>
-                        <ArrowRight size={15} color="#0B1A17" style={{ marginLeft: 6 }} />
+                        <ArrowRight size={15} color={colorTokens.onBrand} style={{ marginLeft: 6 }} />
                       </Pressable>
                     </View>
 

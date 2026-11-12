@@ -440,8 +440,11 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.brand,
   },
   searchButtonPhone: { height: 50, paddingHorizontal: 20 },
-  searchButtonHovered: { backgroundColor: colorTokens.brandHover },
-  searchButtonPressed: { opacity: 0.9, backgroundColor: colorTokens.brandPressed },
+  searchButtonHovered: {
+    backgroundColor: colorTokens.brand,
+    ...(Platform.OS === "web" ? { boxShadow: "0 4px 12px rgba(11, 26, 23, 0.12)" } : {}),
+  },
+  searchButtonPressed: { opacity: 0.9, backgroundColor: colorTokens.brand },
   searchLabel: {
     color: colorTokens.onBrand,
     fontFamily: fonts.bold,

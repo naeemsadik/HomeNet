@@ -220,8 +220,8 @@ export function MobileHeroSearchCard() {
             style={({ hovered, pressed }: any) => [
               styles.primaryButton,
               webPointer,
-              hovered && { backgroundColor: colorTokens.brandHover },
-              pressed && { opacity: 0.9, backgroundColor: colorTokens.brandPressed },
+              hovered && { opacity: 0.95 },
+              pressed && { opacity: 0.88 },
             ]}
           >
             <Text style={styles.primaryButtonText}>{t("hero.search")}</Text>

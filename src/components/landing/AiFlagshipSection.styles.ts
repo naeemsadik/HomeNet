@@ -196,11 +196,11 @@ export const styles = StyleSheet.create({
     width: '100%',
   },
   deviceFrame: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    backgroundColor: colorTokens.surface,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: 'rgba(11, 26, 23, 0.1)',
-    shadowColor: '#000',
+    borderColor: colorTokens.border,
+    shadowColor: colorTokens.ink,
     shadowOpacity: 0.07,
     shadowOffset: { width: 0, height: 8 },
     shadowRadius: 24,
@@ -321,25 +321,28 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#04CF92',
+    backgroundColor: colorTokens.brand,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: radius.pill,
+    borderRadius: radius.lg,
     ...(Platform.OS === 'web'
       ? {
           cursor: 'pointer',
-          transition: 'all 0.15s ease',
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
         }
       : {}),
   },
   analyzeBtnHovered: {
-    backgroundColor: colorTokens.brandHover,
+    backgroundColor: colorTokens.brand,
     transform: [{ translateY: -1 }],
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 4px 12px rgba(11, 26, 23, 0.12)' }
+      : {}),
   },
   analyzeBtnText: {
     fontFamily: fonts.bold,
     fontSize: 14,
-    color: '#0B1A17',
+    color: colorTokens.onBrand,
   },
   analyzingStateRow: {
     flexDirection: 'row',
@@ -560,20 +563,28 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#04CF92',
+    backgroundColor: colorTokens.brand,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: radius.pill,
-    ...(Platform.OS === 'web' ? { cursor: 'pointer', transition: 'all 0.15s ease' } : {}),
+    borderRadius: radius.lg,
+    ...(Platform.OS === 'web'
+      ? { cursor: 'pointer', transition: 'transform 0.15s ease, box-shadow 0.15s ease' }
+      : {}),
   },
   applyBtnHovered: {
-    backgroundColor: colorTokens.brandHover,
+    backgroundColor: colorTokens.brand,
     transform: [{ translateY: -1 }],
+    ...(Platform.OS === 'web'
+      ? { boxShadow: '0 4px 12px rgba(11, 26, 23, 0.12)' }
+      : {}),
+  },
+  brandBtnPressed: {
+    opacity: 0.88,
   },
   applyBtnText: {
     fontFamily: fonts.bold,
     fontSize: 13,
-    color: '#0B1A17',
+    color: colorTokens.onBrand,
   },
   sheetDisclaimer: {
     fontFamily: fonts.regular,

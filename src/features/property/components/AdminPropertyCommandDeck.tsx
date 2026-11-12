@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  primaryPressed: { backgroundColor: colorTokens.brandPressed },
+  primaryPressed: { backgroundColor: colorTokens.brand, opacity: 0.88 },
   primaryText: { color: colorTokens.onBrand, fontFamily: fonts.semiBold, fontSize: 14, lineHeight: 20 },
   pressed: { opacity: 0.7 },
   busy: { opacity: 0.55 },
