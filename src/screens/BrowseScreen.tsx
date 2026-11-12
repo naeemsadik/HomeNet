@@ -97,7 +97,7 @@ export function BrowseScreen({
   // A partial area list (see useAreas) is worse than none: it would offer two
   // places and treat every other one as unknown.
   const { areas: fetchedAreas, ready: areasReady, complete: areasComplete } = useAreas();
-  const areas = areasComplete ? fetchedAreas : [];
+  const areas = React.useMemo(() => (areasComplete ? fetchedAreas : []), [areasComplete, fetchedAreas]);
   const cityChoices = React.useMemo(() => {
     if (fixedLocation) return undefined;
     return buildCityOptions(areas, t("search.rightmove.allCities"));
@@ -121,9 +121,9 @@ export function BrowseScreen({
     FILTER_PARAM_KEYS.map((key) => (params as Record<string, unknown>)[key] ?? "")
   );
   const filters = React.useMemo(
-    () => filtersFromParams(params, { mode, fixedLocation }),
+    () => filtersFromParams(params, { mode, fixedLocation, areas }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paramKey, mode, fixedLocation]
+    [paramKey, mode, fixedLocation, areas]
   );
   const areaOptions = React.useMemo(() => {
     if (fixedLocation) return undefined;

@@ -11,6 +11,7 @@ import {
   hasClientFilters,
   isFiltersModalRequested,
   parsePriceToNumber,
+  placeFromQuery,
   resetSearchFilters,
   toApiFilters,
   toPropertyTypeFilter,
@@ -486,5 +487,51 @@ describe("resetSearchFilters", () => {
   it("clears the area when the page does not pin one", () => {
     const reset = resetSearchFilters({ ...defaultSearchFilters, area: "Dhaka" });
     expect(reset.area).toBe("");
+  });
+});
+
+describe("a place typed into the search box", () => {
+  const area = (name: string, city: string | null = "Dhaka") => ({
+    id: name,
+    name,
+    city,
+    parent_area_id: null,
+  });
+
+  it("is read as the city when it is exactly a city name", () => {
+    const filters = filtersFromParams({ query: "Dhaka" }, { mode: "buy" });
+    expect(filters.city).toBe("Dhaka");
+    expect(filters.query).toBe("");
+    expect(filters.area).toBe("");
+  });
+
+  it("is read as the area, and its city, when it is exactly one area's name", () => {
+    const filters = filtersFromParams({ query: "gulshan" }, { mode: "buy", areas: [area("Gulshan"), area("Banani")] });
+    expect(filters.area).toBe("Gulshan");
+    expect(filters.city).toBe("Dhaka");
+    expect(filters.query).toBe("");
+  });
+
+  it("stays words to search for when it is not a whole place name", () => {
+    expect(filtersFromParams({ query: "3 bed near Dhaka" }, { mode: "buy" }).query).toBe("3 bed near Dhaka");
+    expect(filtersFromParams({ query: "Gulsh" }, { mode: "buy", areas: [area("Gulshan")] }).area).toBe("");
+  });
+
+  it("leaves an ambiguous area name alone", () => {
+    expect(placeFromQuery("Sadar", [area("Sadar", "Dhaka"), area("Sadar", "Sylhet")])).toBeNull();
+  });
+
+  it("does not override a city or area the link already names", () => {
+    const filters = filtersFromParams({ query: "Dhaka", city: "Sylhet" }, { mode: "buy" });
+    expect(filters.city).toBe("Sylhet");
+    expect(filters.query).toBe("Dhaka");
+  });
+
+  it("is written back as a city, with the query cleared, by the next filter change", () => {
+    const params = { query: "Dhaka", searched: "1" };
+    const filters = filtersFromParams(params, { mode: "buy" });
+    const patch = filtersToParamPatch({ ...filters, city: "Gazipur", area: "" }, { current: params });
+    expect(patch.city).toBe("Gazipur");
+    expect(patch.query).toBe("");
   });
 });
