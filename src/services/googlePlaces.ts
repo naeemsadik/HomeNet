@@ -45,7 +45,7 @@ export async function fetchGooglePlaceSuggestions(
       .map((prediction) => ({
         id: prediction.placeId,
         primaryText: prediction.mainText?.text || prediction.text?.text || trimmed,
-        secondaryText: prediction.secondaryText?.text || city || "Bangladesh",
+        secondaryText: prediction.secondaryText?.text || city || "",
         resolvePlace: async () => {
           const place = prediction.toPlace();
           await place.fetchFields({

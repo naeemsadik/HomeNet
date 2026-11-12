@@ -9,7 +9,7 @@ import {
   SlidersHorizontal,
   X,
 } from "@/components/icons";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, radius, webPointer, brandButtonState } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { AreaPicker, type AreaLocationSelection } from "./AreaPicker";
 import { AdvancedFiltersModal } from "./AdvancedFiltersModal";
@@ -246,8 +246,8 @@ export function MobileHeroSearchCard() {
             style={({ hovered, pressed }: any) => [
               styles.primaryButton,
               webPointer,
-              hovered && { opacity: 0.95 },
-              pressed && { opacity: 0.88 },
+              hovered && brandButtonState.hovered,
+              pressed && brandButtonState.pressed,
             ]}
           >
             <Text style={styles.primaryButtonText}>{t("hero.search")}</Text>
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     ...(Platform.select({
       web: { boxShadow: "0 18px 40px -18px rgba(11, 26, 23, 0.35)" },
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: colorTokens.ink,
         shadowOffset: { width: 0, height: 12 },
         shadowOpacity: 0.18,
         shadowRadius: 24,

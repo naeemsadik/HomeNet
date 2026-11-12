@@ -1,4 +1,5 @@
 import { MapPin } from "@/components/icons";
+import { colorTokens } from "@/theme";
 import { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, Text, TextInput, View } from "react-native";
 import { useTranslation } from "@/i18n";
@@ -220,7 +221,7 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
             void readLink(text, false);
           }}
           placeholder={t("wizard.location.mapLinkPlaceholder")}
-          placeholderTextColor="#899790"
+          placeholderTextColor={colorTokens.subtle}
           style={styles.formInput}
           value={linkText}
         />
@@ -244,7 +245,7 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
         <TextInput
           onChangeText={(v) => store.setLocation({ address: v })}
           placeholder={t("wizard.location.addressPlaceholder")}
-          placeholderTextColor="#899790"
+          placeholderTextColor={colorTokens.subtle}
           style={styles.formInput}
           value={store.address}
         />
@@ -268,7 +269,7 @@ export function WizardLocationStep({ onOpenAreaPicker }: { onOpenAreaPicker: () 
             onPress={onOpenAreaPicker}
             style={({ pressed }) => [styles.formInput, styles.areaPickerButton, pressed && styles.pressed]}
           >
-            <MapPin color="#04cf92" size={17} />
+            <MapPin color={colorTokens.brandText} size={17} />
             <Text style={[styles.areaPickerText, !store.areaId && styles.areaPickerPlaceholder]}>
               {store.areaId
                 ? [store.areaName, store.district].filter(Boolean).join(", ")

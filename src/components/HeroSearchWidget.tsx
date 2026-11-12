@@ -8,7 +8,7 @@ import {
   SlidersHorizontal,
   X,
 } from "@/components/icons";
-import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, webPointer, brandButtonState } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     ...(Platform.select({
       web: { boxShadow: "0 24px 60px -20px rgba(11, 26, 23, 0.28)" },
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: colorTokens.ink,
         shadowOffset: { width: 0, height: 20 },
         shadowOpacity: 0.22,
         shadowRadius: 44,
@@ -485,11 +485,8 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.brand,
   },
   searchButtonPhone: { height: 50, paddingHorizontal: 20 },
-  searchButtonHovered: {
-    backgroundColor: colorTokens.brand,
-    ...(Platform.OS === "web" ? { boxShadow: "0 4px 12px rgba(11, 26, 23, 0.12)" } : {}),
-  },
-  searchButtonPressed: { opacity: 0.9, backgroundColor: colorTokens.brand },
+  searchButtonHovered: brandButtonState.hovered,
+  searchButtonPressed: brandButtonState.pressed,
   searchLabel: {
     color: colorTokens.onBrand,
     fontFamily: fonts.bold,

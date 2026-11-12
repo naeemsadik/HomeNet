@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   buttonHovered: {
     backgroundColor: "rgba(4, 207, 146, 0.05)",
-    borderColor: colorTokens.brand,
+    borderColor: colorTokens.brandText,
   },
   buttonPressed: {
     opacity: 0.8,

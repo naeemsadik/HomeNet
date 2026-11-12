@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { LocateFixed, X } from "@/components/icons";
 import { parseGooglePlace } from "@/lib/areaMatcher";
 import { loadGoogleMaps, onGoogleMapsKeyRefused } from "@/lib/googleMapsLoader";
-import { webPointer } from "@/theme";
+import { webPointer, colorTokens } from "@/theme";
 import type { MapPoint } from "../../constants/areaCenters";
 import { MAP_PIN_ZOOM } from "../../constants/map";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
@@ -122,7 +122,7 @@ export function GoogleLocationPicker({
           search.style.width = "100%";
           // Google's box turns black when the browser is in dark mode; the form is always light.
           search.style.colorScheme = "light";
-          search.style.backgroundColor = "#FFFFFF";
+          search.style.backgroundColor = colorTokens.surface;
           search.style.border = "1.2px solid rgba(11,26,23,0.12)";
           search.style.borderRadius = "12px";
           search.addEventListener("gmp-select", (async (event: { placePrediction: { toPlace: () => google.maps.places.Place } }) => {
@@ -229,7 +229,7 @@ export function GoogleLocationPicker({
             onPress={useMyLocation}
             style={[styles.subtypePill, webPointer]}
           >
-            <LocateFixed color="#5C6B66" size={14} />
+            <LocateFixed color={colorTokens.muted} size={14} />
             <Text style={styles.subtypePillText}>{locating ? "Locating…" : "Use my location"}</Text>
           </Pressable>
           {value ? (
@@ -239,7 +239,7 @@ export function GoogleLocationPicker({
               onPress={clearPin}
               style={[styles.subtypePill, webPointer]}
             >
-              <X color="#5C6B66" size={14} />
+              <X color={colorTokens.muted} size={14} />
               <Text style={styles.subtypePillText}>Clear</Text>
             </Pressable>
           ) : null}
@@ -253,7 +253,7 @@ export function GoogleLocationPicker({
           aria-label="Map. Click or tap to place the pin."
           ref={hostRef}
           role="application"
-          style={{ width: "100%", height: "100%", background: "#F4F6F5" }}
+          style={{ width: "100%", height: "100%", background: colorTokens.surfaceSunken }}
         />
         {status === "loading" ? <Text style={styles.mapStatus}>Loading map…</Text> : null}
       </View>

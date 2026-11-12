@@ -352,7 +352,7 @@ export function AreaPicker({
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
               <View style={styles.headerIconCircle}>
-                <MapPin size={16} color="#04cf92" strokeWidth={2.2} />
+                <MapPin size={16} color={colorTokens.brandText} strokeWidth={2.2} />
               </View>
               <Text style={styles.headerTitle}>{t("areaPicker.title")}</Text>
             </View>
@@ -372,7 +372,7 @@ export function AreaPicker({
                 style={[styles.closeButton, webPointer]}
                 accessibilityLabel={t("areaPicker.close")}
               >
-                <X size={17} color="#5C6B66" strokeWidth={2} />
+                <X size={17} color={colorTokens.muted} strokeWidth={2} />
               </Pressable>
             </View>
           </View>
@@ -438,7 +438,7 @@ export function AreaPicker({
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 placeholder={t("areaPicker.searchPlaceholder")}
-                placeholderTextColor="#8B9892"
+                placeholderTextColor={colorTokens.subtle}
                 style={styles.searchInput}
                 autoCorrect={false}
                 clearButtonMode="while-editing"
@@ -603,7 +603,7 @@ export function AreaPicker({
                                 {inferAreaCity(cand, areasById) || t("areaPicker.areaFallback")}
                               </Text>
                             </View>
-                            <ChevronRight size={16} color="#7E8F89" />
+                            <ChevronRight size={16} color={colorTokens.muted} />
                           </Pressable>
                         ))}
                       </View>
@@ -619,13 +619,13 @@ export function AreaPicker({
                             style={({ pressed }) => [styles.areaRow, webPointer, pressed && { opacity: 0.8 }]}
                           >
                             <View style={styles.pinCircle}>
-                              <MapPin size={15} color="#04cf92" strokeWidth={2} />
+                              <MapPin size={15} color={colorTokens.brandText} strokeWidth={2} />
                             </View>
                             <View style={styles.areaTextContainer}>
                               <Text style={styles.areaName}>{item.primaryText}</Text>
                               <Text style={styles.areaCity}>{item.secondaryText}</Text>
                             </View>
-                            <ChevronRight size={16} color="#7E8F89" />
+                            <ChevronRight size={16} color={colorTokens.muted} />
                           </Pressable>
                         ))}
                       </View>
@@ -672,7 +672,7 @@ export function AreaPicker({
                         <View style={[styles.pinCircle, isSelected && styles.pinCircleSelected]}>
                           <MapPin
                             size={15}
-                            color={isSelected ? "#04cf92" : "#60716B"}
+                            color={isSelected ? colorTokens.brandText : colorTokens.muted}
                             strokeWidth={isSelected ? 2.2 : 1.8}
                           />
                         </View>
@@ -714,7 +714,7 @@ export function AreaPicker({
                           </Pressable>
                         ) : isSelected ? (
                           <View style={styles.selectedCheckBadge}>
-                            <Check size={13} color="#04cf92" strokeWidth={2.5} />
+                            <Check size={13} color={colorTokens.brandText} strokeWidth={2.5} />
                           </View>
                         ) : null}
 
@@ -730,7 +730,7 @@ export function AreaPicker({
                             ]}
                             accessibilityLabel={`View child locations in ${item.name}`}
                           >
-                            <ChevronRight size={16} color="#7E8F89" />
+                            <ChevronRight size={16} color={colorTokens.muted} />
                           </Pressable>
                         ) : null}
                       </View>

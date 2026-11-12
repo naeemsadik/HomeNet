@@ -862,7 +862,7 @@ const styles = StyleSheet.create({
   },
   searchBtnHovered: {
     backgroundColor: colorTokens.brand,
-    shadowColor: "rgba(11, 26, 23, 0.18)",
+    shadowColor: colorTokens.shadow,
     shadowOpacity: 0.35,
     shadowRadius: 8,
     elevation: 4,
