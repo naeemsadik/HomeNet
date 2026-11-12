@@ -2,7 +2,6 @@ import React from "react";
 import renderer, { act, type ReactTestInstance } from "react-test-renderer";
 import {
   PropertyNewsTrendsScreen,
-  ARTICLES_DATA,
 } from "@/screens/resources/PropertyNewsTrendsScreen";
 import { en } from "@/i18n";
 

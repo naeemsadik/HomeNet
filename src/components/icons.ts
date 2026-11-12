@@ -7,8 +7,14 @@
  * (file names are in node_modules/lucide-react-native/dist/esm/icons). ESLint
  * blocks importing the full library.
  */
-// eslint-disable-next-line no-restricted-imports -- type-only, erased at build
-export type { LucideIcon } from "lucide-react-native";
+ 
+import * as React from "react";
+import Svg, { Path } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+import type CircleAlertIcon from "lucide-react-native/icons/circle-alert";
+
+/** Same type as lucide-react-native's LucideIcon, taken from one icon file so the full library is never imported. */
+export type LucideIcon = typeof CircleAlertIcon;
 
 export { default as AlertCircle } from "lucide-react-native/icons/circle-alert";
 export { default as AlertTriangle } from "lucide-react-native/icons/triangle-alert";
@@ -127,9 +133,6 @@ export { default as WalletCards } from "lucide-react-native/icons/wallet-cards";
 export { default as X } from "lucide-react-native/icons/x";
 export { default as XCircle } from "lucide-react-native/icons/circle-x";
 export { default as Zap } from "lucide-react-native/icons/zap";
-import * as React from "react";
-import Svg, { Path } from "react-native-svg";
-import type { SvgProps } from "react-native-svg";
 
 export interface IconProps extends SvgProps {
   size?: number;

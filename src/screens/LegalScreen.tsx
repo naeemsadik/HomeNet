@@ -5,13 +5,13 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { DELETE_ACCOUNT, PRIVACY_POLICY, TERMS_OF_USE, type LegalDocument } from "@/content/legal";
 import { colors, fonts } from "@/theme";
 
+import { useTranslation } from "@/i18n";
+
 const RELATED = [
   { label: "Privacy Policy", href: "/privacy", doc: PRIVACY_POLICY },
   { label: "Terms of Use", href: "/terms", doc: TERMS_OF_USE },
   { label: "Delete account", href: "/delete-account", doc: DELETE_ACCOUNT },
 ] as const;
-
-import { useTranslation } from "@/i18n";
 
 /**
  * A long-form legal page: the privacy policy, the terms, the account-deletion

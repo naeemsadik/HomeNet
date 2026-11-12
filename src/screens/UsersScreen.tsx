@@ -40,6 +40,8 @@ import { useUserRoles } from "@/features/admin/hooks/useUserRoles";
 import type { UserRole } from "@/features/admin/types/admin";
 import { toApiError } from "@/services/apiClient";
 
+import { useTranslation } from "@/i18n";
+
 /** The list endpoint may embed each user's roles; rows fall back to a per-user query only when it does not. */
 type DirectoryUser = UserProfile & { user_roles?: UserRole[] };
 
@@ -62,8 +64,6 @@ function UserRolesLoader({ user }: { user: DirectoryUser }) {
   if (!roles || roles.length === 0) return null;
   return <UserRoleBadges roles={roles} />;
 }
-
-import { useTranslation } from "@/i18n";
 
 export function UsersScreen() {
   const { t } = useTranslation();

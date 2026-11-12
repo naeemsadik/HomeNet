@@ -21,6 +21,7 @@
  * Runs on any current Node with no flag: the pipeline is TypeScript, and this script
  * compiles it itself with the `typescript` package that is already a dev dependency.
  */
+import { Buffer } from "node:buffer";
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

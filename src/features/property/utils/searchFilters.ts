@@ -11,11 +11,11 @@
  * the API can do, and `applyClientFilters` for what it cannot.
  */
 import { filterAddedSince } from "./addedToSite";
+import type { Property, PropertyFilters } from "../types/property";
+import type { PropertyType } from "@/types/api";
 
 // Re-exported so the filter model stays the one import point for callers.
 export { filterAddedSince } from "./addedToSite";
-import type { Property, PropertyFilters } from "../types/property";
-import type { PropertyType } from "@/types/api";
 
 export type SearchPurpose = "all" | "sale" | "rent" | "short-let" | "sold";
 

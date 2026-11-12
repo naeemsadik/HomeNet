@@ -7,6 +7,8 @@ import { hasPermission, isAdmin } from "@/lib/permissions";
 
 import { LiveText } from "@/components/LiveText";
 
+import { useTranslation } from "@/i18n";
+
 type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
 
 interface AdminTabNavProps {
@@ -32,8 +34,6 @@ const TABS: {
   { key: "areas", label: "Areas", icon: MapPinned, permissions: ["manage_areas"] },
   { key: "settings", label: "Settings", icon: Settings },
 ];
-
-import { useTranslation } from "@/i18n";
 
 export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNavProps) {
   const { t } = useTranslation();
