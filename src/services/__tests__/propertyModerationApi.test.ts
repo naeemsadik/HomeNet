@@ -58,24 +58,18 @@ describe("submitPropertyFeedback service seam", () => {
     expect(res.data?.delivered).toBe("api");
   });
 
-  it("falls back cleanly to adminUpdateProperty(draft) when feedback endpoint returns 404", async () => {
-    (apiClient.post as jest.Mock).mockRejectedValueOnce(axiosStatusError(404));
-    (apiClient.patch as jest.Mock).mockResolvedValueOnce({
-      data: { success: true, data: { id: "prop-1", status: "draft" } },
-    });
+  it.each([404, 405, 501])("throws when the endpoint is missing (%s) and changes nothing", async (status) => {
+    (apiClient.post as jest.Mock).mockRejectedValueOnce(axiosStatusError(status));
 
-    const res = await submitPropertyFeedback("prop-1", {
-      tags: ["unrealistic_pricing", "incomplete_details"],
-      notes: "Asking price is 20% above Gulshan average",
-      requestChanges: true,
-    });
-
-    expect(apiClient.patch).toHaveBeenCalledWith("/v1/properties/prop-1/admin", {
-      status: "draft",
-    });
-    expect(res.success).toBe(true);
-    expect(res.data?.delivered).toBe("fallback");
-    expect(res.data?.status).toBe("changes_requested");
+    await expect(
+      submitPropertyFeedback("prop-1", {
+        tags: ["unrealistic_pricing"],
+        notes: "Asking price is well above the area",
+        requestChanges: true,
+      }),
+    ).rejects.toBeTruthy();
+    // The listing must not be unlisted while the seller's feedback is dropped.
+    expect(apiClient.patch).not.toHaveBeenCalled();
   });
 
   it("rethrows real authorization failures (403) instead of swallowing them", async () => {

@@ -261,7 +261,10 @@ export function useListingModeration() {
       } catch (error) {
         revertDetail?.();
         restoreFeed?.();
-        showToast(toApiError(error).message);
+        const apiError = toApiError(error);
+        // The endpoint is not deployed everywhere yet. Say so plainly: nothing was sent.
+        const notDeployed = apiError.status === 404 || apiError.status === 405 || apiError.status === 501;
+        showToast(notDeployed ? t("moderation.feedbackUnavailable") : apiError.message, { durationMs: 6000 });
         return false;
       }
     },
@@ -271,7 +274,10 @@ export function useListingModeration() {
   /**
    * Irreversible: nothing leaves the list until the server has agreed.
    *
-   * Guarded behind an explicit confirmation dialog on every trigger site.
+   * Not reachable from the interface, on purpose. On staging, one call to this
+   * endpoint naming a single listing was followed by every other listing
+   * disappearing. Do not add a button for it until the backend handler has
+   * been checked for a cascade; then ask for confirmation at the trigger site.
    */
   const destroy = useCallback(
     async (property: Pick<Property, "id" | "title">) => {

@@ -21,6 +21,7 @@ export function PropertyEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isPhone } = useResponsive();
   const user = useAuthStore((s) => s.user);
+  const hydrated = useAuthStore((s) => s.hydrated);
   const updateProperty = useUpdateProperty();
   const uploadMedia = useUploadMedia();
 
@@ -53,7 +54,7 @@ export function PropertyEditScreen() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !hydrated) {
     return (
       <AppChrome active="sell">
         <View style={styles.center}>

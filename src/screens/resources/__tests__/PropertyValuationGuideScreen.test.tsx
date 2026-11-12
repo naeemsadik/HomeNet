@@ -2,7 +2,6 @@ import React from "react";
 import renderer, { act, type ReactTestInstance } from "react-test-renderer";
 import {
   PropertyValuationGuideScreen,
-  VALUATION_BENCHMARKS,
 } from "@/screens/resources/PropertyValuationGuideScreen";
 import { en } from "@/i18n";
 

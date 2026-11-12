@@ -1,29 +1,11 @@
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { router } from "expo-router";
-import {
-  Archive,
-  ArchiveRestore,
-  Check,
-  ChevronDown,
-  MessageSquare,
-  ShieldCheck,
-  SlidersHorizontal,
-  Trash2,
-  X,
-} from "@/components/icons";
+import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Archive, ArchiveRestore, Check, ChevronDown, MessageSquare, X } from "@/components/icons";
 import { IfPermitted } from "@/components/IfPermitted";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useTranslation } from "@/i18n";
-import { confirmAction } from "@/lib/alert";
-import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
+import { useTranslation, type TranslationKey } from "@/i18n";
+import { useIsModerating } from "@/stores/useAdminContextStore";
+import { colorTokens, fonts, layout, radius, shadow, webPointer } from "@/theme";
 import type { PropertyStatus } from "@/types/api";
 import { useListingModeration } from "../hooks/useListingModeration";
 import { ListingFeedbackModal } from "./ListingFeedbackModal";
@@ -38,52 +20,31 @@ export interface AdminPropertyCommandDeckProps {
   };
 }
 
-const STATUS_OPTIONS = [
-  { status: "active", labelKey: "moderation.statusActive", dotColor: colorTokens.onInk },
-  { status: "pending", labelKey: "moderation.statusPending", dotColor: colorTokens.staffAccent },
-  { status: "draft", labelKey: "moderation.statusChangesRequested", dotColor: colorTokens.staffAccentText },
-  { status: "archived", labelKey: "moderation.statusArchived", dotColor: colorTokens.onInkMuted },
-] as const;
+/** What a status is called, and the dot beside it. A draft is a draft: nobody may have reviewed it. */
+const STATUS_META: Record<PropertyStatus, { labelKey: TranslationKey; dot: string }> = {
+  active: { labelKey: "moderation.statusActive", dot: colorTokens.brand },
+  pending: { labelKey: "moderation.statusPending", dot: colorTokens.warningText },
+  draft: { labelKey: "moderation.statusDraft", dot: colorTokens.muted },
+  archived: { labelKey: "moderation.statusArchived", dot: colorTokens.subtle },
+  sold: { labelKey: "moderation.statusSold", dot: colorTokens.muted },
+};
 
-function statusLabelKey(status: PropertyStatus) {
-  switch (status) {
-    case "active":
-      return "moderation.statusActive" as const;
-    case "pending":
-      return "moderation.statusPending" as const;
-    case "draft":
-      return "moderation.statusChangesRequested" as const;
-    case "archived":
-      return "moderation.statusArchived" as const;
-    case "sold":
-      return "moderation.statusSold" as const;
-  }
-}
-
-function statusDotColor(status: PropertyStatus): string {
-  switch (status) {
-    case "active":
-      return colorTokens.onInk;
-    case "pending":
-      return colorTokens.staffAccent;
-    case "draft":
-      return colorTokens.staffAccentText;
-    case "sold":
-      return colorTokens.infoSurface;
-    case "archived":
-    default:
-      return colorTokens.onInkMuted;
-  }
-}
+/** The statuses a moderator may set by hand. Sold is the owner's to say. */
+const SETTABLE: PropertyStatus[] = ["active", "pending", "draft", "archived"];
 
 /**
- * In-page Staff Command Deck for PropertyDetailScreen.
+ * Moderation bar on a listing page: its status, one primary action (ask the
+ * seller for changes) and one secondary (archive or restore).
  *
- * Enforces Least Privilege (no direct editing of seller copy) and lives in
- * the Ink / Slate control channel using crisp 1px borders and subtle surface
- * tone shifts rather than heavy blur shadows.
+ * Shown only while the staff strip's "Tools" switch is on, the same rule the
+ * listing cards follow, and only to holders of `moderate_listing`. There is no
+ * edit and no delete here: a moderator never rewrites a seller's copy, and the
+ * permanent delete stays off until the backend handler has been checked (see
+ * `useListingModeration.destroy`).
  */
 export function AdminPropertyCommandDeck({ property }: AdminPropertyCommandDeckProps) {
+  const armed = useIsModerating();
+  if (!armed) return null;
   return (
     <IfPermitted permission="moderate_listing">
       <CommandDeckInner property={property} />
@@ -94,266 +55,158 @@ export function AdminPropertyCommandDeck({ property }: AdminPropertyCommandDeckP
 function CommandDeckInner({ property }: AdminPropertyCommandDeckProps) {
   const { t } = useTranslation();
   const { isPhone } = useResponsive();
-  const { archive, restore, updateStatus, destroy } = useListingModeration();
+  const { archive, restore, updateStatus } = useListingModeration();
 
-  const [collapsed, setCollapsed] = useState(false);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [busyAction, setBusyAction] = useState<string | null>(null);
+  const [busyAction, setBusyAction] = useState<"status" | "archive" | null>(null);
 
   const isArchived = property.status === "archived";
   const isBusy = busyAction !== null;
-  const currentStatusLabel = t(statusLabelKey(property.status));
+  const current = STATUS_META[property.status] ?? STATUS_META.draft;
+  const currentLabel = t(current.labelKey);
 
-  const handleStatusSelect = async (nextStatus: PropertyStatus) => {
+  const handleStatusSelect = async (next: PropertyStatus) => {
     setStatusMenuOpen(false);
-    if (nextStatus === property.status || isBusy) return;
+    if (next === property.status || isBusy) return;
     setBusyAction("status");
-    await updateStatus(property, nextStatus);
+    await updateStatus(property, next);
     setBusyAction(null);
   };
 
   const handleArchiveOrRestore = async () => {
     if (isBusy) return;
     setBusyAction("archive");
-    if (isArchived) {
-      await restore(property);
-    } else {
-      await archive(property);
-    }
+    await (isArchived ? restore(property) : archive(property));
     setBusyAction(null);
   };
 
-  const handleDelete = async () => {
-    if (isBusy) return;
-    const confirmed = await confirmAction(
-      t("moderation.deleteTitle"),
-      t("moderation.deleteMessage", { title: property.title }),
-      { confirmLabel: t("moderation.deleteConfirm"), destructive: true },
-    );
-    if (!confirmed) return;
-    setBusyAction("delete");
-    const deleted = await destroy(property);
-    setBusyAction(null);
-    if (deleted) {
-      router.back();
-    }
-  };
-
-  if (collapsed) {
-    return (
-      <View style={styles.collapsedWrap} pointerEvents="box-none">
-        <Pressable
-          accessibilityLabel={t("moderation.expandDeck")}
-          accessibilityRole="button"
-          onPress={() => setCollapsed(false)}
-          style={({ pressed }) => [
-            styles.collapsedPill,
-            pressed && styles.pressed,
-            webPointer,
-          ]}
-        >
-          <View style={[styles.dot, { backgroundColor: statusDotColor(property.status) }]} />
-          <SlidersHorizontal color={colorTokens.onInk} size={14} strokeWidth={1.8} />
-          <Text style={styles.collapsedText}>{t("moderation.expandDeck")}</Text>
-        </Pressable>
-      </View>
-    );
-  }
+  const ArchiveIcon = isArchived ? ArchiveRestore : Archive;
 
   return (
     <>
       <View style={[styles.wrapper, isPhone && styles.wrapperPhone]} pointerEvents="box-none">
         <View style={[styles.deck, isPhone && styles.deckPhone]}>
-          {/* Left: Context + Status Switcher */}
-          <View style={[styles.leftSection, isPhone && styles.leftSectionPhone]}>
-            <View style={styles.brandCluster}>
-              <ShieldCheck color={colorTokens.onInkMuted} size={14} strokeWidth={1.8} />
-              {!isPhone ? (
-                <Text style={styles.deckLabel}>{t("moderation.commandDeckTitle")}</Text>
-              ) : null}
-            </View>
-
+          <View style={styles.statusSide}>
+            {!isPhone ? <Text style={styles.deckLabel}>{t("moderation.commandDeckTitle")}</Text> : null}
             <Pressable
-              accessibilityLabel={t("moderation.switchStatusAria", { status: currentStatusLabel })}
+              accessibilityLabel={t("moderation.switchStatusAria", { status: currentLabel })}
               accessibilityRole="button"
               disabled={isBusy}
               onPress={() => setStatusMenuOpen(true)}
               style={({ pressed }) => [
                 styles.statusBtn,
-                pressed && styles.btnPressed,
+                isPhone && styles.grow,
+                pressed && styles.pressed,
                 isBusy && styles.busy,
                 webPointer,
               ]}
             >
               {busyAction === "status" ? (
-                <ActivityIndicator color={colorTokens.onInk} size="small" />
+                <ActivityIndicator color={colorTokens.ink} size="small" />
               ) : (
-                <View style={[styles.dot, { backgroundColor: statusDotColor(property.status) }]} />
+                <View style={[styles.dot, { backgroundColor: current.dot }]} />
               )}
               <Text numberOfLines={1} style={styles.statusBtnText}>
-                {currentStatusLabel}
+                {currentLabel}
               </Text>
-              <ChevronDown color={colorTokens.onInkMuted} size={14} strokeWidth={1.8} />
+              <ChevronDown color={colorTokens.muted} size={16} strokeWidth={2} />
             </Pressable>
-
-            {isPhone ? (
-              <Pressable
-                accessibilityLabel={t("moderation.collapseDeck")}
-                accessibilityRole="button"
-                hitSlop={4}
-                onPress={() => setCollapsed(true)}
-                style={({ pressed }) => [
-                  styles.collapseIconBtn,
-                  pressed && styles.btnPressed,
-                  webPointer,
-                ]}
-              >
-                <ChevronDown color={colorTokens.onInkMuted} size={16} strokeWidth={1.8} />
-              </Pressable>
-            ) : null}
           </View>
 
-          {/* Right: Request Changes · Archive/Restore · Guarded Delete */}
-          <View style={[styles.actionsSection, isPhone && styles.actionsSectionPhone]}>
+          <View style={[styles.actions, isPhone && styles.actionsPhone]}>
+            <Pressable
+              accessibilityLabel={
+                isArchived ? t("moderation.restore") : t("moderation.archiveLabel", { title: property.title })
+              }
+              accessibilityRole="button"
+              disabled={isBusy}
+              onPress={handleArchiveOrRestore}
+              style={({ pressed }) => [
+                styles.secondaryBtn,
+                isPhone && styles.grow,
+                pressed && styles.pressed,
+                isBusy && styles.busy,
+                webPointer,
+              ]}
+            >
+              {busyAction === "archive" ? (
+                <ActivityIndicator color={colorTokens.ink} size="small" />
+              ) : (
+                <ArchiveIcon color={colorTokens.ink} size={16} strokeWidth={2} />
+              )}
+              <Text style={styles.secondaryText}>
+                {isArchived ? t("moderation.restore") : t("moderation.archive")}
+              </Text>
+            </Pressable>
+
             <Pressable
               accessibilityLabel={t("moderation.suggestAria", { title: property.title })}
               accessibilityRole="button"
               disabled={isBusy}
               onPress={() => setFeedbackOpen(true)}
               style={({ pressed }) => [
-                styles.suggestBtn,
-                isPhone && styles.suggestBtnPhone,
-                pressed && styles.btnPressed,
+                styles.primaryBtn,
+                isPhone && styles.grow,
+                pressed && styles.primaryPressed,
                 isBusy && styles.busy,
                 webPointer,
               ]}
             >
-              <MessageSquare color={colorTokens.staffAccentText} size={16} strokeWidth={1.8} />
-              <Text numberOfLines={1} style={styles.suggestBtnText}>
+              <MessageSquare color={colorTokens.onBrand} size={16} strokeWidth={2} />
+              <Text numberOfLines={1} style={styles.primaryText}>
                 {t("moderation.suggestActionFull")}
               </Text>
             </Pressable>
-
-            <Pressable
-              accessibilityLabel={
-                isArchived
-                  ? t("moderation.restore")
-                  : t("moderation.archiveLabel", { title: property.title })
-              }
-              accessibilityRole="button"
-              disabled={isBusy}
-              onPress={handleArchiveOrRestore}
-              style={({ pressed }) => [
-                styles.actionBtn,
-                isPhone && styles.actionBtnPhone,
-                pressed && styles.btnPressed,
-                isBusy && styles.busy,
-                webPointer,
-              ]}
-            >
-              {busyAction === "archive" ? (
-                <ActivityIndicator color={colorTokens.onInk} size="small" />
-              ) : isArchived ? (
-                <ArchiveRestore color={colorTokens.onInk} size={16} strokeWidth={1.8} />
-              ) : (
-                <Archive color={colorTokens.onInk} size={16} strokeWidth={1.8} />
-              )}
-              <Text style={styles.actionText}>
-                {isArchived ? t("moderation.restore") : t("moderation.archive")}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              accessibilityLabel={t("moderation.deleteLabel", { title: property.title })}
-              accessibilityRole="button"
-              disabled={isBusy}
-              onPress={handleDelete}
-              style={({ pressed }) => [
-                styles.deleteBtn,
-                pressed && styles.pressed,
-                isBusy && styles.busy,
-                webPointer,
-              ]}
-            >
-              {busyAction === "delete" ? (
-                <ActivityIndicator color={colorTokens.onDanger} size="small" />
-              ) : (
-                <Trash2 color={colorTokens.onDanger} size={16} strokeWidth={1.8} />
-              )}
-            </Pressable>
-
-            {!isPhone ? (
-              <Pressable
-                accessibilityLabel={t("moderation.collapseDeck")}
-                accessibilityRole="button"
-                hitSlop={4}
-                onPress={() => setCollapsed(true)}
-                style={({ pressed }) => [
-                  styles.collapseIconBtn,
-                  pressed && styles.btnPressed,
-                  webPointer,
-                ]}
-              >
-                <ChevronDown color={colorTokens.onInkMuted} size={16} strokeWidth={1.8} />
-              </Pressable>
-            ) : null}
           </View>
         </View>
       </View>
 
-      {/* Status Switcher Modal */}
       <Modal
         animationType="fade"
         onRequestClose={() => setStatusMenuOpen(false)}
         transparent
         visible={statusMenuOpen}
       >
-        <View style={styles.statusModalOverlay}>
+        <View style={styles.overlay}>
           <Pressable
             accessibilityLabel={t("common.close")}
             accessibilityRole="button"
             onPress={() => setStatusMenuOpen(false)}
             style={StyleSheet.absoluteFill}
           />
-          <View accessibilityViewIsModal style={styles.statusMenuCard}>
-            <View style={styles.statusMenuHeader}>
-              <Text style={styles.statusMenuTitle}>{t("moderation.statusLabel")}</Text>
+          <View accessibilityRole="radiogroup" accessibilityViewIsModal style={styles.menu}>
+            <View style={styles.menuHeader}>
+              <Text style={styles.menuTitle}>{t("moderation.statusLabel")}</Text>
               <Pressable
                 accessibilityLabel={t("common.close")}
                 accessibilityRole="button"
                 onPress={() => setStatusMenuOpen(false)}
-                style={[styles.statusMenuClose, webPointer]}
+                style={({ pressed }) => [styles.menuClose, pressed && styles.pressed, webPointer]}
               >
-                <X color={colorTokens.onInk} size={18} strokeWidth={1.8} />
+                <X color={colorTokens.ink} size={18} strokeWidth={2} />
               </Pressable>
             </View>
-            {STATUS_OPTIONS.map((option) => {
-              const selected = property.status === option.status;
-              const label = t(option.labelKey);
+            {SETTABLE.map((status) => {
+              const selected = property.status === status;
+              const label = t(STATUS_META[status].labelKey);
               return (
                 <Pressable
-                  key={option.status}
+                  key={status}
                   accessibilityLabel={label}
                   accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  onPress={() => void handleStatusSelect(option.status)}
+                  accessibilityState={{ checked: selected }}
+                  onPress={() => void handleStatusSelect(status)}
                   style={({ pressed }) => [
-                    styles.statusOption,
-                    selected && styles.statusOptionSelected,
-                    pressed && styles.btnPressed,
+                    styles.option,
+                    selected && styles.optionSelected,
+                    pressed && styles.pressed,
                     webPointer,
                   ]}
                 >
-                  <View style={styles.statusOptionLeft}>
-                    <View style={[styles.dot, { backgroundColor: option.dotColor }]} />
-                    <Text style={[styles.statusOptionText, selected && styles.statusOptionTextSelected]}>
-                      {label}
-                    </Text>
-                  </View>
-                  {selected ? (
-                    <Check color={colorTokens.onInk} size={16} strokeWidth={2} />
-                  ) : null}
+                  <View style={[styles.dot, { backgroundColor: STATUS_META[status].dot }]} />
+                  <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{label}</Text>
+                  {selected ? <Check color={colorTokens.brandText} size={18} strokeWidth={2.4} /> : null}
                 </Pressable>
               );
             })}
@@ -371,241 +224,102 @@ function CommandDeckInner({ property }: AdminPropertyCommandDeckProps) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    width: "100%",
-    maxWidth: 820,
-    paddingHorizontal: layout.gutter,
-    alignItems: "center",
-  },
-  wrapperPhone: {
-    paddingHorizontal: 12,
-  },
+  wrapper: { width: "100%", maxWidth: 760, paddingHorizontal: layout.gutter, alignItems: "center" },
+  wrapperPhone: { paddingHorizontal: 12 },
   deck: {
     width: "100%",
-    backgroundColor: colorTokens.ink,
+    backgroundColor: colorTokens.surface,
     borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorderStrong,
-    paddingHorizontal: 16,
-    paddingVertical: 11,
+    padding: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 16,
+    ...shadow,
   },
-  deckPhone: {
-    flexDirection: "column",
-    alignItems: "stretch",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 10,
-  },
-  leftSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  leftSectionPhone: {
-    justifyContent: "space-between",
-  },
-  brandCluster: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  deckLabel: {
-    color: colorTokens.onInkMuted,
-    fontFamily: fonts.semiBold,
-    fontSize: 13,
-    lineHeight: 18,
-  },
+  deckPhone: { flexDirection: "column", alignItems: "stretch", gap: 8 },
+  statusSide: { flexDirection: "row", alignItems: "center", gap: 12 },
+  deckLabel: { color: colorTokens.muted, fontFamily: fonts.semiBold, fontSize: 13, lineHeight: 18 },
   statusBtn: {
-    height: 36,
-    paddingHorizontal: 12,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.inkElevated,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorderStrong,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-  },
-  statusBtnText: {
-    color: colorTokens.onInk,
-    fontFamily: fonts.semiBold,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  dot: {
-    width: 7,
-    height: 7,
-    borderRadius: radius.pill,
-  },
-  actionsSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  actionsSectionPhone: {
-    justifyContent: "space-between",
-    gap: 8,
-  },
-  suggestBtn: {
-    height: 38,
+    minHeight: layout.touchTarget,
     paddingHorizontal: 14,
-    borderRadius: radius.md,
-    backgroundColor: colorTokens.inkElevated,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorderStrong,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-  },
-  suggestBtnPhone: {
-    flex: 1.4,
-    paddingHorizontal: 10,
-  },
-  suggestBtnText: {
-    color: colorTokens.staffAccentText,
-    fontFamily: fonts.semiBold,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  actionBtn: {
-    height: 38,
-    paddingHorizontal: 13,
-    borderRadius: radius.md,
-    backgroundColor: colorTokens.inkSurfaceSubtle,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorder,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  actionBtnPhone: {
-    flex: 1,
-    paddingHorizontal: 10,
-  },
-  actionText: {
-    color: colorTokens.onInk,
-    fontFamily: fonts.semiBold,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  deleteBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: radius.md,
-    backgroundColor: colorTokens.errorText,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  collapseIconBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.inkSurfaceSubtle,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  collapsedWrap: {
-    paddingHorizontal: layout.gutter,
-    alignItems: "center",
-  },
-  collapsedPill: {
-    height: 40,
-    paddingHorizontal: 15,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.ink,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorderStrong,
+    borderRadius: radius.lg,
+    backgroundColor: colorTokens.surfaceSunken,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
-  collapsedText: {
-    color: colorTokens.onInk,
-    fontFamily: fonts.semiBold,
-    fontSize: 13,
-    lineHeight: 18,
+  statusBtnText: { flexShrink: 1, color: colorTokens.ink, fontFamily: fonts.semiBold, fontSize: 14, lineHeight: 20 },
+  dot: { width: 8, height: 8, borderRadius: radius.pill },
+  actions: { flexDirection: "row", alignItems: "center", gap: 8 },
+  actionsPhone: { alignItems: "stretch" },
+  grow: { flex: 1, justifyContent: "center" },
+  secondaryBtn: {
+    minHeight: layout.touchTarget,
+    paddingHorizontal: 16,
+    borderRadius: radius.lg,
+    backgroundColor: colorTokens.surface,
+    borderWidth: 1.5,
+    borderColor: colorTokens.muted,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
-  btnPressed: {
-    backgroundColor: colorTokens.inkBorderStrong,
+  secondaryText: { color: colorTokens.ink, fontFamily: fonts.semiBold, fontSize: 14, lineHeight: 20 },
+  primaryBtn: {
+    minHeight: layout.touchTarget,
+    paddingHorizontal: 16,
+    borderRadius: radius.lg,
+    backgroundColor: colorTokens.brand,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
-  pressed: {
-    opacity: 0.85,
-  },
-  busy: {
-    opacity: 0.55,
-  },
-  statusModalOverlay: {
+  primaryPressed: { backgroundColor: colorTokens.brandPressed },
+  primaryText: { color: colorTokens.onBrand, fontFamily: fonts.semiBold, fontSize: 14, lineHeight: 20 },
+  pressed: { opacity: 0.7 },
+  busy: { opacity: 0.55 },
+  overlay: {
     flex: 1,
     backgroundColor: colorTokens.overlay,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
-  statusMenuCard: {
+  menu: {
     width: "100%",
-    maxWidth: 320,
-    backgroundColor: colorTokens.ink,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorderStrong,
+    maxWidth: 340,
+    backgroundColor: colorTokens.surface,
+    borderRadius: radius.xl,
     padding: 12,
-    gap: 6,
+    gap: 4,
   },
-  statusMenuHeader: {
+  menuHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 6,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colorTokens.inkBorder,
+    paddingLeft: 8,
+    paddingBottom: 4,
   },
-  statusMenuTitle: {
-    color: colorTokens.onInk,
-    fontFamily: fonts.bold,
-    fontSize: 15,
-    lineHeight: 20,
-  },
-  statusMenuClose: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.pill,
+  menuTitle: { color: colorTokens.ink, fontFamily: fonts.bold, fontSize: 16, lineHeight: 22 },
+  menuClose: {
+    width: layout.touchTarget,
+    height: layout.touchTarget,
+    borderRadius: radius.lg,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colorTokens.inkSurfaceSubtle,
   },
-  statusOption: {
-    height: 44,
+  option: {
+    minHeight: layout.touchTarget,
     paddingHorizontal: 12,
-    borderRadius: radius.md,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  statusOptionSelected: {
-    backgroundColor: colorTokens.inkElevated,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorderStrong,
-  },
-  statusOptionLeft: {
+    borderRadius: radius.lg,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-  statusOptionText: {
-    color: colorTokens.onInkMuted,
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  statusOptionTextSelected: {
-    color: colorTokens.onInk,
-    fontFamily: fonts.semiBold,
-  },
+  optionSelected: { backgroundColor: colorTokens.brandSurface },
+  optionText: { flex: 1, color: colorTokens.body, fontFamily: fonts.medium, fontSize: 15, lineHeight: 21 },
+  optionTextSelected: { color: colorTokens.ink, fontFamily: fonts.semiBold },
 });

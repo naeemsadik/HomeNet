@@ -39,11 +39,8 @@ const QA_PRESET_TAGS = [
 ] as const;
 
 /**
- * Seller Revision modal for moderators holding `moderate_listing`.
- *
- * Designed under Impeccable Operate principles: crisp hairline structure,
- * restrained Ink / Slate tones, explicit line heights for English and Bengali,
- * and plain direct microcopy without decorative eyebrows or icon tiles.
+ * Where a moderator tells a seller what to fix: preset reasons, a note, and a
+ * plain statement of what sending it does to the listing.
  */
 export function ListingFeedbackModal({
   visible,
@@ -144,7 +141,7 @@ export function ListingFeedbackModal({
                 webPointer,
               ]}
             >
-              <X color={colorTokens.onInk} size={18} strokeWidth={1.8} />
+              <X color={colorTokens.ink} size={18} strokeWidth={2} />
             </Pressable>
           </View>
 
@@ -190,7 +187,7 @@ export function ListingFeedbackModal({
                       ]}
                     >
                       {selected ? (
-                        <Check color={colorTokens.onInk} size={14} strokeWidth={2} />
+                        <Check color={colorTokens.brandText} size={14} strokeWidth={2.4} />
                       ) : null}
                       <Text style={[styles.tagText, selected && styles.tagTextSelected]}>
                         {label}
@@ -278,9 +275,9 @@ export function ListingFeedbackModal({
               ]}
             >
               {submitting ? (
-                <ActivityIndicator color={colorTokens.onInk} size="small" />
+                <ActivityIndicator color={colorTokens.onBrand} size="small" />
               ) : (
-                <Send color={colorTokens.onInk} size={16} strokeWidth={1.8} />
+                <Send color={colorTokens.onBrand} size={16} strokeWidth={2} />
               )}
               <Text style={styles.submitBtnText}>
                 {submitting ? t("moderation.feedbackSending") : t("moderation.feedbackSubmit")}
@@ -321,35 +318,32 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 0,
   },
   header: {
-    backgroundColor: colorTokens.ink,
+    backgroundColor: colorTokens.surface,
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colorTokens.inkBorder,
+    borderBottomColor: colorTokens.divider,
   },
   title: {
     flex: 1,
-    color: colorTokens.onInk,
+    color: colorTokens.ink,
     fontFamily: fonts.bold,
     fontSize: 18,
     lineHeight: 24,
   },
   closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.inkSurfaceSubtle,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorder,
+    width: layout.touchTarget,
+    height: layout.touchTarget,
+    borderRadius: radius.lg,
     alignItems: "center",
     justifyContent: "center",
   },
   closeBtnPressed: {
-    backgroundColor: colorTokens.inkBorderStrong,
+    backgroundColor: colorTokens.surfaceSunken,
   },
   body: {
     padding: 20,
@@ -412,8 +406,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    minHeight: 36,
-    paddingHorizontal: 13,
+    minHeight: layout.touchTarget,
+    paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: radius.pill,
     backgroundColor: colorTokens.surfaceSunken,
@@ -421,8 +415,8 @@ const styles = StyleSheet.create({
     borderColor: colorTokens.divider,
   },
   tagChipSelected: {
-    backgroundColor: colorTokens.ink,
-    borderColor: colorTokens.ink,
+    backgroundColor: colorTokens.brandSurface,
+    borderColor: colorTokens.brandText,
   },
   tagText: {
     color: colorTokens.body,
@@ -431,7 +425,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   tagTextSelected: {
-    color: colorTokens.onInk,
+    color: colorTokens.brandText,
     fontFamily: fonts.semiBold,
   },
   textarea: {
@@ -501,9 +495,9 @@ const styles = StyleSheet.create({
   cancelBtn: {
     minHeight: layout.touchTarget,
     paddingHorizontal: 16,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colorTokens.divider,
+    borderRadius: radius.lg,
+    borderWidth: 1.5,
+    borderColor: colorTokens.muted,
     backgroundColor: colorTokens.surface,
     alignItems: "center",
     justifyContent: "center",
@@ -517,8 +511,8 @@ const styles = StyleSheet.create({
   submitBtn: {
     minHeight: layout.touchTarget,
     paddingHorizontal: 18,
-    borderRadius: radius.md,
-    backgroundColor: colorTokens.ink,
+    borderRadius: radius.lg,
+    backgroundColor: colorTokens.brand,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -528,7 +522,7 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   submitBtnText: {
-    color: colorTokens.onInk,
+    color: colorTokens.onBrand,
     fontFamily: fonts.semiBold,
     fontSize: 14,
     lineHeight: 20,

@@ -4,30 +4,34 @@ import { Archive, MessageSquare } from "@/components/icons";
 import { IfPermitted } from "@/components/IfPermitted";
 import { useIsModerating } from "@/stores/useAdminContextStore";
 import { useTranslation } from "@/i18n";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, radius, shadow, webPointer } from "@/theme";
 import { useListingModeration } from "../hooks/useListingModeration";
 import type { Property } from "../types/property";
 import { ListingFeedbackModal } from "./ListingFeedbackModal";
 
 /**
- * Lightweight two-action card moderation pill (`Suggest | Archive`) rendered over
- * a listing's media area beneath the save button.
+ * The two moderation actions on a listing card: ask the seller for changes, or
+ * archive. Rendered over the photo, only while staff have the Tools switch on
+ * and hold `moderate_listing`, so a buyer's card and a moderator's card have
+ * the same geometry.
  *
- * Uses crisp 1px Ink borders and restrained tone separation without heavy blur
- * or drop-shadow bloat.
+ * There is no delete here. One `DELETE /v1/properties/:id/admin` call on
+ * staging was followed by every other listing disappearing; until the backend
+ * handler has been checked, the permanent delete is not offered anywhere.
+ * Archive is the reversible soft-delete and stays.
  */
-export function AdminListingActions({ property }: { property: Property }) {
+export function AdminListingActions({ property, top = 54 }: { property: Property; top?: number }) {
   const armed = useIsModerating();
   if (!armed) return null;
 
   return (
     <IfPermitted permission="moderate_listing">
-      <Controls property={property} />
+      <Controls property={property} top={top} />
     </IfPermitted>
   );
 }
 
-function Controls({ property }: { property: Property }) {
+function Controls({ property, top }: { property: Property; top: number }) {
   const { t } = useTranslation();
   const { archive } = useListingModeration();
   const [busy, setBusy] = useState(false);
@@ -53,7 +57,7 @@ function Controls({ property }: { property: Property }) {
 
   return (
     <>
-      <View style={styles.pillGroup} pointerEvents="box-none">
+      <View style={[styles.pillGroup, { top }]} pointerEvents="box-none">
         <Pressable
           accessibilityLabel={t("moderation.suggestAria", { title: property.title })}
           accessibilityRole="button"
@@ -68,7 +72,7 @@ function Controls({ property }: { property: Property }) {
             webPointer,
           ]}
         >
-          <MessageSquare color={colorTokens.staffAccentText} size={14} strokeWidth={1.8} />
+          <MessageSquare color={colorTokens.brandText} size={15} strokeWidth={2} />
           <Text style={styles.suggestLabel}>{t("moderation.suggestAction")}</Text>
         </Pressable>
 
@@ -88,7 +92,7 @@ function Controls({ property }: { property: Property }) {
             webPointer,
           ]}
         >
-          <Archive color={colorTokens.onInk} size={14} strokeWidth={1.8} />
+          <Archive color={colorTokens.ink} size={15} strokeWidth={2} />
           <Text style={styles.label}>{t("moderation.archive")}</Text>
         </Pressable>
       </View>
@@ -111,17 +115,15 @@ function Controls({ property }: { property: Property }) {
 const styles = StyleSheet.create({
   pillGroup: {
     position: "absolute",
-    top: 54,
     right: 12,
     zIndex: 6,
     flexDirection: "row",
     alignItems: "center",
     height: 36,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.ink,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorderStrong,
+    borderRadius: radius.lg,
+    backgroundColor: colorTokens.surface,
     overflow: "hidden",
+    ...shadow,
   },
   segmentBtn: {
     height: "100%",
@@ -131,33 +133,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
   },
-  suggestSegment: {
-    paddingLeft: 13,
-  },
-  archiveSegment: {
-    paddingRight: 13,
-  },
-  segmentPressed: {
-    backgroundColor: colorTokens.inkSurfaceSubtle,
-  },
-  divider: {
-    width: 1,
-    height: 16,
-    backgroundColor: colorTokens.inkBorder,
-  },
-  busy: {
-    opacity: 0.55,
-  },
-  suggestLabel: {
-    color: colorTokens.staffAccentText,
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  label: {
-    color: colorTokens.onInk,
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    lineHeight: 16,
-  },
+  suggestSegment: {},
+  archiveSegment: {},
+  segmentPressed: { backgroundColor: colorTokens.surfaceSunken },
+  divider: { width: 1, height: 18, backgroundColor: colorTokens.divider },
+  busy: { opacity: 0.55 },
+  suggestLabel: { color: colorTokens.brandText, fontFamily: fonts.semiBold, fontSize: 13, lineHeight: 18 },
+  label: { color: colorTokens.ink, fontFamily: fonts.semiBold, fontSize: 13, lineHeight: 18 },
 });

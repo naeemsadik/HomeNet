@@ -159,7 +159,7 @@ export interface PropertyFeedbackDto {
 
 export interface PropertyFeedbackResult {
   id: string;
-  delivered: "api" | "fallback";
+  delivered?: "api";
   status: ModerationStatusUpdate;
   tags: string[];
   notes: string;

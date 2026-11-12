@@ -11,17 +11,13 @@ import { Eyebrow } from "@/components/ui";
 import {
   ArrowRight,
   BookOpen,
-  Building2,
   Calendar,
   CheckCircle2,
   Clock,
-  Compass,
-  FileText,
   LineChart,
   Mail,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
 } from "@/components/icons";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation, type TranslationKey } from "@/i18n";

@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router, usePathname } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Clock, ShieldCheck, SlidersHorizontal } from "@/components/icons";
+import { ArrowLeft, Clock, ShieldCheck } from "@/components/icons";
 import { getRoleName, hasAnyAdminPermission, hasPermission } from "@/lib/permissions";
 import { getAdminProperties } from "@/services/propertyApi";
 import { useAuthStore } from "@/stores/authStore";
@@ -14,12 +14,17 @@ import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 /** Height the page's scroll padding must account for. Read by AppChrome. */
 export const ADMIN_BAR_HEIGHT = 40;
 
+/** Controls are 28 high inside a 40 strip; this brings the touch area to 44. */
+const HIT_SLOP = { top: 8, bottom: 8, left: 4, right: 4 } as const;
+
 /**
- * Ambient Staff Utility Bar sitting above public pages for signed-in staff.
+ * A quiet strip under the navbar for signed-in staff: who they are, whether
+ * moderation tools are on for this page, how many listings wait for review,
+ * and the way back to the admin console.
  *
- * Lives strictly in the Ink / Slate / Charcoal operator channel using crisp
- * hairline borders and tone shifts so staff controls never compete with
- * buyer-facing surfaces.
+ * It uses the same light surfaces and the one brand green as the rest of the
+ * site, so it reads as part of HomeNet and not as a second product. When tools
+ * are on, the strip takes the brand tint: that is the only state change.
  *
  * Rendered only after hydration (`hydrated && isStaff`), keeping zero staff
  * markup in static exports served to visitors and crawlers.
@@ -59,54 +64,35 @@ export function AdminContextBar() {
   if (!hydrated || !isStaff || inAdminConsole) return null;
 
   const roleLabel = (roleName ?? t("moderation.staff")).replace(/_/g, " ");
+  const count = formatLocalizedNumber(pendingCount, language);
 
   return (
     <View style={[styles.bar, armed && styles.barArmed]}>
       <View style={[styles.inner, isPhone && styles.innerPhone]}>
-        {/* Left: Role Badge + Context State */}
         <View style={styles.leftCluster}>
-          <View style={styles.rolePill}>
-            <ShieldCheck color={colorTokens.onInk} size={14} strokeWidth={1.8} />
-            <Text numberOfLines={1} style={styles.roleText}>
-              {roleLabel}
-            </Text>
-          </View>
-
+          <ShieldCheck color={colorTokens.brandText} size={16} strokeWidth={2} />
+          <Text numberOfLines={1} style={styles.roleText}>
+            {roleLabel}
+          </Text>
           {!isPhone ? (
-            <View style={styles.contextTag}>
-              <View style={[styles.statusDot, armed && styles.statusDotArmed]} />
-              <Text
-                numberOfLines={1}
-                style={[styles.contextText, armed && styles.contextTextArmed]}
-              >
-                {armed ? t("moderation.moderationActive") : t("moderation.publicMode")}
-              </Text>
-            </View>
+            <Text numberOfLines={1} style={[styles.contextText, armed && styles.contextTextArmed]}>
+              {armed ? t("moderation.moderationActive") : t("moderation.publicMode")}
+            </Text>
           ) : null}
         </View>
 
-        {/* Right: Pending Count + Tools Switch + Admin Exit */}
         <View style={styles.rightCluster}>
           {canModerate && pendingCount > 0 ? (
             <Pressable
-              accessibilityLabel={t("moderation.pendingReviewsAria", {
-                count: formatLocalizedNumber(pendingCount, language),
-              })}
+              accessibilityLabel={t("moderation.pendingReviewsAria", { count })}
               accessibilityRole="link"
+              hitSlop={HIT_SLOP}
               onPress={() => router.push("/admin" as never)}
-              style={({ pressed }) => [
-                styles.pendingPill,
-                pressed && styles.pressedSubtle,
-                webPointer,
-              ]}
+              style={({ pressed }) => [styles.link, pressed && styles.pressed, webPointer]}
             >
-              <Clock color={colorTokens.staffAccentText} size={14} strokeWidth={1.8} />
-              <Text numberOfLines={1} style={styles.pendingText}>
-                {isPhone
-                  ? formatLocalizedNumber(pendingCount, language)
-                  : t("moderation.pendingReviews", {
-                      count: formatLocalizedNumber(pendingCount, language),
-                    })}
+              <Clock color={colorTokens.brandText} size={14} strokeWidth={2} />
+              <Text numberOfLines={1} style={styles.linkTextBrand}>
+                {isPhone ? count : t("moderation.pendingReviews", { count })}
               </Text>
             </Pressable>
           ) : null}
@@ -116,34 +102,22 @@ export function AdminContextBar() {
               accessibilityLabel={t("moderation.toggleLabel")}
               accessibilityRole="switch"
               accessibilityState={{ checked: armed }}
+              hitSlop={HIT_SLOP}
               onPress={toggle}
               style={({ pressed }) => [
-                styles.switchPill,
-                armed && styles.switchPillArmed,
+                styles.toggle,
+                armed && styles.toggleArmed,
                 pressed && styles.pressed,
                 webPointer,
               ]}
             >
-              {isPhone ? (
-                <SlidersHorizontal
-                  color={armed ? colorTokens.ink : colorTokens.onInk}
-                  size={14}
-                  strokeWidth={1.8}
-                />
-              ) : (
-                <View style={[styles.switchDot, armed && styles.switchDotArmed]} />
-              )}
-              <Text
-                numberOfLines={1}
-                style={[styles.switchLabel, armed && styles.switchLabelArmed]}
-              >
-                {isPhone
-                  ? armed
-                    ? t("moderation.toolsOn")
-                    : t("moderation.moderate")
-                  : `${t("moderation.moderationTools")}: ${
-                      armed ? t("moderation.toolsOn") : t("moderation.toolsOff")
-                    }`}
+              <View style={[styles.track, armed && styles.trackArmed]}>
+                <View style={[styles.knob, armed && styles.knobArmed]} />
+              </View>
+              <Text numberOfLines={1} style={styles.toggleLabel}>
+                {`${t(isPhone ? "moderation.moderate" : "moderation.moderationTools")}: ${
+                  armed ? t("moderation.toolsOn") : t("moderation.toolsOff")
+                }`}
               </Text>
             </Pressable>
           ) : null}
@@ -151,16 +125,13 @@ export function AdminContextBar() {
           <Pressable
             accessibilityLabel={t("moderation.backToAdmin")}
             accessibilityRole="link"
+            hitSlop={HIT_SLOP}
             onPress={() => router.push("/admin" as never)}
-            style={({ pressed }) => [
-              styles.exitPill,
-              pressed && styles.pressedSubtle,
-              webPointer,
-            ]}
+            style={({ pressed }) => [styles.link, pressed && styles.pressed, webPointer]}
           >
-            <ArrowLeft color={colorTokens.onInk} size={14} strokeWidth={1.8} />
+            <ArrowLeft color={colorTokens.ink} size={14} strokeWidth={2} />
             {!isPhone ? (
-              <Text numberOfLines={1} style={styles.exitText}>
+              <Text numberOfLines={1} style={styles.linkText}>
                 {t("moderation.exitToConsole")}
               </Text>
             ) : null}
@@ -175,14 +146,15 @@ const styles = StyleSheet.create({
   bar: {
     height: ADMIN_BAR_HEIGHT,
     width: "100%",
-    backgroundColor: colorTokens.ink,
+    backgroundColor: colorTokens.surfaceSunken,
     borderBottomWidth: 1,
-    borderBottomColor: colorTokens.inkBorder,
+    borderBottomColor: colorTokens.divider,
     justifyContent: "center",
     alignItems: "center",
   },
   barArmed: {
-    borderBottomColor: colorTokens.staffAccent,
+    backgroundColor: colorTokens.brandSurface,
+    borderBottomColor: colorTokens.brandBorder,
   },
   inner: {
     width: "100%",
@@ -193,141 +165,51 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 12,
   },
-  innerPhone: {
-    paddingHorizontal: layout.gutterPhone,
-    gap: 8,
-  },
-  leftCluster: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    flexShrink: 1,
-    minWidth: 0,
-  },
-  rolePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    height: 26,
-    paddingHorizontal: 10,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.inkElevated,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorder,
-  },
+  innerPhone: { paddingHorizontal: layout.gutterPhone, gap: 8 },
+  leftCluster: { flexDirection: "row", alignItems: "center", gap: 8, flexShrink: 1, minWidth: 0 },
   roleText: {
-    color: colorTokens.onInk,
+    color: colorTokens.ink,
     fontFamily: fonts.semiBold,
-    fontSize: 12,
-    lineHeight: 16,
-    letterSpacing: 0.2,
+    fontSize: 13,
+    lineHeight: 18,
     textTransform: "capitalize",
-  },
-  contextTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
     flexShrink: 1,
-    minWidth: 0,
   },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.onInkMuted,
-  },
-  statusDotArmed: {
-    backgroundColor: colorTokens.staffAccent,
-  },
-  contextText: {
-    color: colorTokens.onInkMuted,
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  contextTextArmed: {
-    color: colorTokens.staffAccentText,
+  contextText: { color: colorTokens.muted, fontFamily: fonts.regular, fontSize: 13, lineHeight: 18, flexShrink: 1 },
+  contextTextArmed: { color: colorTokens.brandText, fontFamily: fonts.semiBold },
+  rightCluster: { flexDirection: "row", alignItems: "center", gap: 12, flexShrink: 0 },
+  link: { flexDirection: "row", alignItems: "center", gap: 6, height: 28, paddingHorizontal: 4, borderRadius: radius.sm },
+  linkText: { color: colorTokens.ink, fontFamily: fonts.medium, fontSize: 13, lineHeight: 18 },
+  linkTextBrand: {
+    color: colorTokens.brandText,
     fontFamily: fonts.semiBold,
-  },
-  rightCluster: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flexShrink: 0,
-  },
-  pendingPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    height: 28,
-    paddingHorizontal: 10,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.inkElevated,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorder,
-  },
-  pendingText: {
-    color: colorTokens.staffAccentText,
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 18,
     fontVariant: ["tabular-nums"],
   },
-  switchPill: {
+  toggle: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    height: 28,
-    paddingHorizontal: 11,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.inkSurfaceSubtle,
-    borderWidth: 1,
-    borderColor: colorTokens.inkBorderStrong,
-    ...(Platform.select({
-      web: { transition: "background-color 150ms ease, border-color 150ms ease" },
-      default: {},
-    }) as object),
-  },
-  switchPillArmed: {
-    backgroundColor: colorTokens.surface,
-    borderColor: colorTokens.surface,
-  },
-  switchDot: {
-    width: 6,
-    height: 6,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.onInkMuted,
-  },
-  switchDotArmed: {
-    backgroundColor: colorTokens.staffAccent,
-  },
-  switchLabel: {
-    color: colorTokens.onInk,
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  switchLabelArmed: {
-    color: colorTokens.ink,
-    fontFamily: fonts.bold,
-  },
-  exitPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+    gap: 8,
     height: 28,
     paddingHorizontal: 10,
-    borderRadius: radius.pill,
-    backgroundColor: colorTokens.inkSurfaceSubtle,
+    borderRadius: radius.md,
+    backgroundColor: colorTokens.surface,
     borderWidth: 1,
-    borderColor: colorTokens.inkBorder,
+    borderColor: colorTokens.muted,
   },
-  exitText: {
-    color: colorTokens.onInk,
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    lineHeight: 16,
+  toggleArmed: { borderColor: colorTokens.brandText },
+  track: {
+    width: 26,
+    height: 14,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.subtle,
+    justifyContent: "center",
+    paddingHorizontal: 2,
   },
-  pressed: { opacity: 0.85 },
-  pressedSubtle: { backgroundColor: colorTokens.inkBorder },
+  trackArmed: { backgroundColor: colorTokens.brandText, alignItems: "flex-end" },
+  knob: { width: 10, height: 10, borderRadius: radius.pill, backgroundColor: colorTokens.surface },
+  knobArmed: {},
+  toggleLabel: { color: colorTokens.ink, fontFamily: fonts.semiBold, fontSize: 13, lineHeight: 18 },
+  pressed: { opacity: 0.7 },
 });

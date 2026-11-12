@@ -3,15 +3,14 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Dimensions } from "react-native";
-import { router } from "expo-router";
 import { AdminContextBar } from "@/components/AdminContextBar";
 import { AdminListingActions } from "@/features/property/components/AdminListingActions";
 import { AdminPropertyCommandDeck } from "@/features/property/components/AdminPropertyCommandDeck";
 import { ListingFeedbackModal } from "@/features/property/components/ListingFeedbackModal";
 import { useAuthStore } from "@/stores/authStore";
 import { useAdminContextStore } from "@/stores/useAdminContextStore";
-import { confirmAction } from "@/lib/alert";
 import { useToastStore } from "@/lib/toast";
+import { ApiError } from "@/services/apiClient";
 import {
   adminDeleteProperty,
   adminUpdateProperty,
@@ -227,7 +226,7 @@ describe("AdminContextBar", () => {
       switchBtn.click();
     });
     expect(useAdminContextStore.getState().armed).toBe(true);
-    expect(container.textContent).toContain("Moderation active");
+    expect(container.textContent).toContain("Moderation tools on");
     expect(container.textContent).toContain("On");
   });
 
@@ -309,12 +308,39 @@ describe("AdminPropertyCommandDeck", () => {
     expect(container.innerHTML).toBe("");
   });
 
-  it("supports Status switching, Request Changes, and guarded Delete with zero Edit touchpoints", async () => {
+  it("stays hidden until the Tools switch is on, like the listing cards", async () => {
     setStaffAuth(true, MODERATOR_ROLES);
-    (confirmAction as jest.Mock).mockResolvedValue(true);
+    await renderDom(<AdminPropertyCommandDeck property={deckProps} />);
+    expect(container.innerHTML).toBe("");
+  });
+
+  it("offers no delete and no edit", async () => {
+    setStaffAuth(true, MODERATOR_ROLES);
+    act(() => useAdminContextStore.getState().arm());
+    await renderDom(<AdminPropertyCommandDeck property={deckProps} />);
+
+    const labels = Array.from(document.body.querySelectorAll("[aria-label]")).map((el) =>
+      (el.getAttribute("aria-label") ?? "").toLowerCase(),
+    );
+    expect(labels.some((l) => l.includes("delete"))).toBe(false);
+    expect(labels.some((l) => l.includes("edit property"))).toBe(false);
+    expect(adminDeleteProperty).not.toHaveBeenCalled();
+  });
+
+  it("calls a draft a draft, not 'changes requested'", async () => {
+    setStaffAuth(true, MODERATOR_ROLES);
+    act(() => useAdminContextStore.getState().arm());
+    await renderDom(<AdminPropertyCommandDeck property={{ ...deckProps, status: "draft" }} />);
+    expect(container.textContent).toContain("Draft");
+    expect(container.textContent).not.toContain("Changes Requested");
+  });
+
+  it("supports status switching and Request Changes", async () => {
+    setStaffAuth(true, MODERATOR_ROLES);
+    act(() => useAdminContextStore.getState().arm());
 
     await renderDom(<AdminPropertyCommandDeck property={deckProps} />);
-    expect(container.textContent).toContain("Staff Deck");
+    expect(container.textContent).toContain("Moderation");
 
     // Least privilege: no Edit Property action in Command Deck.
     const editBtn = Array.from(document.body.querySelectorAll("[aria-label]")).find((el) =>
@@ -337,19 +363,10 @@ describe("AdminPropertyCommandDeck", () => {
     });
 
     await act(async () => {
-      findByAriaLabel("Under Review").click();
+      findByAriaLabel("Under review").click();
     });
     await flushAsync();
     expect(adminUpdateProperty).toHaveBeenCalledWith("prop-1", { status: "pending" });
-
-    // Guarded delete
-    await act(async () => {
-      findByAriaLabel("Delete").click();
-    });
-    await flushAsync();
-    expect(confirmAction).toHaveBeenCalled();
-    expect(adminDeleteProperty).toHaveBeenCalledWith("prop-1");
-    expect(router.back).toHaveBeenCalled();
   });
 });
 
@@ -405,5 +422,29 @@ describe("ListingFeedbackModal", () => {
     expect(useToastStore.getState().toast?.message).toContain("Notes sent to seller");
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("says plainly that nothing was sent when the server has no feedback endpoint", async () => {
+    const onClose = jest.fn();
+    (submitPropertyFeedback as jest.Mock).mockRejectedValueOnce(new ApiError("Not found", 404));
+
+    await renderDom(
+      <ListingFeedbackModal
+        onClose={onClose}
+        property={{ id: "prop-1", title: "3 Bed Residence in Gulshan 2", status: "active" }}
+        visible
+      />,
+    );
+    await act(async () => {
+      findByAriaLabel("Image quality").click();
+    });
+    await act(async () => {
+      findByAriaLabel("Send to seller").click();
+    });
+    await flushAsync();
+
+    expect(useToastStore.getState().toast?.message).toContain("Nothing was sent");
+    // The form stays open with the moderator's notes in it.
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

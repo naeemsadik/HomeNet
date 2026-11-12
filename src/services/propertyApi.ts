@@ -1,4 +1,4 @@
-import apiClient, { toApiError } from "./apiClient";
+import apiClient from "./apiClient";
 import { appendUpload, type UploadInput } from "./upload";
 import { upsertPropertyDtoSchema } from "@/lib/schemas/property";
 import type {
@@ -207,66 +207,25 @@ export async function adminDeleteProperty(id: string) {
 }
 
 /**
- * Staff revision / seller coaching seam (needs `moderate_listing`).
+ * Sends a moderator's notes to the seller (needs `moderate_listing`).
  *
- * Posts editorial suggestions to `/v1/properties/:id/feedback` when deployed.
- * If the backend endpoint is not yet available (404 / 405 / 501), moves the
- * listing back to `draft` via `adminUpdateProperty` when `requestChanges` is
- * requested, logs the structured coaching payload in dev, and returns a clean
- * fallback confirmation so staff QA never stalls.
+ * There is deliberately no fallback. If the endpoint is missing this throws,
+ * and the caller tells the moderator nothing was sent: unlisting a seller's
+ * property while their feedback is quietly dropped is worse than an error.
  */
 export async function submitPropertyFeedback(
   id: string,
   payload: PropertyFeedbackDto,
 ): Promise<ApiResponse<PropertyFeedbackResult>> {
-  const encodedId = encodeURIComponent(id);
-  const cleanNotes = payload.notes.trim();
-  const requestChanges = payload.requestChanges !== false;
-
-  try {
-    const { data } = await apiClient.post<ApiResponse<PropertyFeedbackResult>>(
-      `/v1/properties/${encodedId}/feedback`,
-      {
-        tags: payload.tags,
-        notes: cleanNotes,
-        status: requestChanges ? "changes_requested" : undefined,
-      },
-    );
-    return data;
-  } catch (error) {
-    const apiErr = toApiError(error);
-    const isUnimplemented =
-      apiErr.status === 404 || apiErr.status === 405 || apiErr.status === 501;
-
-    if (!isUnimplemented) {
-      throw error;
-    }
-
-    if (requestChanges) {
-      await adminUpdateProperty(id, { status: "draft" });
-    }
-
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.info("[Moderation Feedback Fallback]", {
-        propertyId: id,
-        tags: payload.tags,
-        notes: cleanNotes,
-        requestChanges,
-      });
-    }
-
-    return {
-      success: true,
-      message: "Revision request queued for seller",
-      data: {
-        id,
-        delivered: "fallback",
-        status: requestChanges ? "changes_requested" : "pending",
-        tags: payload.tags,
-        notes: cleanNotes,
-      },
-    };
-  }
+  const { data } = await apiClient.post<ApiResponse<PropertyFeedbackResult>>(
+    `/v1/properties/${encodeURIComponent(id)}/feedback`,
+    {
+      tags: payload.tags,
+      notes: payload.notes.trim(),
+      status: payload.requestChanges !== false ? "changes_requested" : undefined,
+    },
+  );
+  return data;
 }
 
 // Not documented by the supplied API; retained for existing unsupported screens.
