@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DEFAULT_HOST = "www.homenetbd.com";
-const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
+const INDEXNOW_ENDPOINT = process.env.INDEXNOW_ENDPOINT || "https://api.indexnow.org/indexnow";
 const TIMEOUT_MS = 10_000;
 const BATCH_SIZE = 10_000;
 
@@ -34,7 +34,7 @@ export function findIndexNowKey(publicDir = resolve(ROOT, "public")) {
 
 /**
  * Locates the sitemap file:
- * Checks process.env.INDEXNOW_SITEMAP, or custom argument, or public/sitemap.xml, or dist/sitemap.xml.
+ * Checks the custom argument, process.env.INDEXNOW_SITEMAP, then dist/sitemap.xml, then public/sitemap.xml.
  */
 export function getSitemapPath(customPath) {
   const candidate = customPath || process.env.INDEXNOW_SITEMAP;
@@ -42,10 +42,11 @@ export function getSitemapPath(customPath) {
     const resolved = resolve(ROOT, candidate);
     return statSync(resolved).isDirectory() ? resolve(resolved, "sitemap.xml") : resolved;
   }
-  const publicPath = resolve(ROOT, "public/sitemap.xml");
-  if (existsSync(publicPath)) return publicPath;
+  // dist/ is the sitemap this build just made; public/ may hold an older copy.
   const distPath = resolve(ROOT, "dist/sitemap.xml");
   if (existsSync(distPath)) return distPath;
+  const publicPath = resolve(ROOT, "public/sitemap.xml");
+  if (existsSync(publicPath)) return publicPath;
   return null;
 }
 
@@ -137,15 +138,41 @@ export async function submitToIndexNow({
   return { submitted: false, reason: "all_requests_failed" };
 }
 
+/**
+ * Whether this run should tell search engines anything. A search engine fetches the live site, so
+ * only a production deploy has something new to report. Preview builds, pull-request builds and
+ * local builds would re-send every URL for nothing (and IndexNow may start ignoring a site that
+ * does that). `npm run indexnow` passes --force to submit by hand.
+ */
+export function shouldSubmit({ env = process.env, force = false } = {}) {
+  if (force) return { submit: true };
+  if (env.INDEXNOW_DISABLED === "1") return { submit: false, reason: "INDEXNOW_DISABLED is set" };
+  if (env.VERCEL_ENV === "production") return { submit: true };
+  return {
+    submit: false,
+    reason: env.VERCEL_ENV
+      ? `this is a ${env.VERCEL_ENV} build, not production`
+      : "this is not a Vercel production build (use `npm run indexnow` to submit by hand)",
+  };
+}
+
 export async function main() {
   try {
+    const args = process.argv.slice(2);
+    const force = args.includes("--force");
+    const decision = shouldSubmit({ force });
+    if (!decision.submit) {
+      console.log(`IndexNow: skipped, ${decision.reason}.`);
+      return;
+    }
+
     const key = findIndexNowKey();
     if (!key) {
       console.warn("IndexNow: no API key found in public/ or INDEXNOW_KEY. Skipping submission.");
       return;
     }
 
-    const sitemapPath = getSitemapPath(process.argv[2]);
+    const sitemapPath = getSitemapPath(args.find((arg) => !arg.startsWith("--")));
     if (!sitemapPath || !existsSync(sitemapPath)) {
       console.warn("IndexNow: sitemap not found. Skipping submission.");
       return;

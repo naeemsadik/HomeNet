@@ -146,7 +146,7 @@ describe("what Google is asked to index", () => {
     const pkg = JSON.parse(read("package.json"));
     expect(pkg.scripts.build).toContain("scripts/submit-indexnow.mjs");
     expect(pkg.scripts.sitemap).toContain("scripts/submit-indexnow.mjs");
-    expect(pkg.scripts.indexnow).toBe("node scripts/submit-indexnow.mjs");
+    expect(pkg.scripts.indexnow).toBe("node scripts/submit-indexnow.mjs --force");
   });
 
   it("does not use Expo's route loaders, which re-bundle the whole app for every page and failed the deploy", () => {

@@ -12,7 +12,7 @@
     "build": "expo export --platform web && node -e \"const fs=require('fs');fs.copyFileSync('dist/+not-found.html', 'dist/404.html');fs.rmSync('dist/_sitemap.html',{force:true})\" && node scripts/generate-sitemap.mjs && node scripts/check-csp.mjs && node scripts/check-seo.mjs && node scripts/submit-indexnow.mjs",
     "export:web": "expo export --platform web",
     "sitemap": "node scripts/generate-sitemap.mjs && node scripts/submit-indexnow.mjs",
-    "indexnow": "node scripts/submit-indexnow.mjs",
+    "indexnow": "node scripts/submit-indexnow.mjs --force",
     "map:native": "node scripts/build-native-map.mjs",
     "smoke:api": "node scripts/api-smoke.mjs",
     "typecheck": "tsc --noEmit",

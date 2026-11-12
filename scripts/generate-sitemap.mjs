@@ -218,13 +218,6 @@ function main() {
   xml += `</urlset>\n`;
 
   writeFileSync(resolve(DIST, "sitemap.xml"), xml, "utf8");
-  if (DIST === resolve(ROOT, "dist")) {
-    try {
-      writeFileSync(resolve(ROOT, "public/sitemap.xml"), xml, "utf8");
-    } catch {
-      // Ignore if public/ is read-only
-    }
-  }
   console.log(
     `sitemap: ${STATIC_PAGES.length} pages, ${areaPages} area pages (${empty.length} with no listings left out` +
       `${unknown ? `, ${unknown} kept without build-time data` : ""}), ${guideList.length} guides, ${listings.length} listings`,
