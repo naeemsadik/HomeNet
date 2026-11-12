@@ -35,7 +35,7 @@ export function isPrivatePath(pathname: string): boolean {
 }
 
 /** Must match `expo.android.package` in app.json (a test checks). */
-export const ANDROID_PACKAGE = "com.homenet.app";
+export const ANDROID_PACKAGE = "com.homenetbd.app";
 /** Must match `expo.scheme` in app.json. Deep links read homenet://property/<id>. */
 export const APP_SCHEME = "homenet";
 

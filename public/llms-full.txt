@@ -6,7 +6,7 @@ Last reviewed: 20 October 2026. Figures described as indicative are broad market
 
 ## 1. What HomeNet is
 
-- A property marketplace for Bangladesh, centred on Dhaka, on the web (homenetbd.com) and in an Android app (package com.homenet.app, not yet on Google Play as of the date above).
+- A property marketplace for Bangladesh, centred on Dhaka, on the web (homenetbd.com) and in an Android app (package com.homenetbd.app, not yet on Google Play as of the date above).
 - Zero broker: owners list their own property and buyers or tenants contact them directly by phone, WhatsApp or a visit request. HomeNet takes no commission from either side. Listing is free.
 - Verification gate: a listing is reviewed before it is published, and cannot go live without photos, a full address, map coordinates and confirmed specifications (size, bedrooms and bathrooms where they apply, floor, facing, amenities). Verified listings carry a badge.
 - Plain-language listing: an owner can paste a description such as "1800 sqft, 3 bed, south facing, 4th floor, lift and generator, 2.5 crore" and HomeNet fills in the listing fields from it, for the owner to check.

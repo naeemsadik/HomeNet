@@ -3,7 +3,7 @@
 The code is prepared. These are the steps that remain, in order. Anything marked
 **you** needs an account, a decision or a phone that only you have.
 
-Package name: `com.homenet.app`. **It can never be changed after the first upload.**
+Package name: `com.homenetbd.app`. **It can never be changed after the first upload.**
 Confirm it is the one you want before step 3.
 
 ## 0. Before every release
@@ -175,7 +175,7 @@ Hidden or removed so a reviewer does not read it as broken:
   enough data (an honest page, but a main menu item with no content). The admin
   *Settings* card says "coming soon". Reviewers sometimes treat these as an
   incomplete app. Hide them for the first release, or accept the risk.
-- **Package name** `com.homenet.app` (see the top).
+- **Package name** `com.homenetbd.app` (see the top).
 - **Legal text** was drafted from what the app does. Have someone qualified read the
   Privacy Policy and Terms of Use before launch, particularly the Terms' limits of
   liability. There is no "governing law" clause because that is a legal choice.

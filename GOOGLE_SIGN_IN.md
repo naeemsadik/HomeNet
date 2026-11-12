@@ -55,6 +55,6 @@ project. Only the public client id is needed.
 ## Android
 
 Not included: the button never renders there (`GOOGLE_SIGN_IN_AVAILABLE` is false off
-the web). Android needs an Android-type OAuth client (package `com.homenet.app` plus
+the web). Android needs an Android-type OAuth client (package `com.homenetbd.app` plus
 the SHA-1 of the Play signing key, which exists after the first Play upload), added to
 the backend's `GOOGLE_CLIENT_IDS`, and a native sign-in on the app side.
