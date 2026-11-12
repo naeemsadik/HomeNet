@@ -11,6 +11,7 @@
  * the API can do, and `applyClientFilters` for what it cannot.
  */
 import { filterAddedSince } from "./addedToSite";
+import { inferAreaCity, isKnownBangladeshCity, isNationwideValue, normalizeCityName } from "@/lib/areaMatcher";
 
 // Re-exported so the filter model stays the one import point for callers.
 export { filterAddedSince } from "./addedToSite";
@@ -22,13 +23,16 @@ export type SearchPurpose = "all" | "sale" | "rent" | "short-let" | "sold";
 export interface SearchFilters {
   purpose: SearchPurpose;
   query: string;
+  /** Step 1 nationwide filter: city/district (e.g. "Dhaka", "Bogura"); "" means all of Bangladesh. */
+  city: string;
   /**
-   * The place, by name: a city ("Dhaka") or a neighbourhood ("Gulshan"); ""
-   * is everywhere. `resolveScope` (areaScope.ts) turns it into the area ids or
-   * the centre-and-radius the API actually filters on, never a `city` param,
-   * which the deployed API rejects outright with a 400.
+   * Step 2 sub-area/neighbourhood within `city` (e.g. "Gulshan", "Adabar");
+   * "" means all areas in the selected city (or all of Bangladesh when city is "").
    */
   area: string;
+  /** Optional Google Place coordinates used as proximity fallback when no exact DB area matches. */
+  lat: string;
+  lng: string;
   radius: string;
   /** "all" or an API PropertyType: residential, commercial, land, parking. */
   propertyType: string;
@@ -52,7 +56,10 @@ export interface SearchFilters {
 export const defaultSearchFilters: SearchFilters = {
   purpose: "all",
   query: "",
+  city: "",
   area: "",
+  lat: "",
+  lng: "",
   radius: "",
   propertyType: "all",
   addedToSite: "",
@@ -164,12 +171,38 @@ export function filtersFromParams(
     .map((key) => key.trim())
     .filter(Boolean);
 
+  const rawCity = one(params.city) || "";
+  const rawLocation = one(params.location) || "";
+  const parsedCity = rawCity && !isNationwideValue(rawCity) ? normalizeCityName(rawCity) || rawCity.trim() : "";
+
+  let city = parsedCity;
+  let area = fixedLocation || "";
+
+  if (!fixedLocation) {
+    if (rawLocation && !isNationwideValue(rawLocation)) {
+      if (!city && isKnownBangladeshCity(rawLocation)) {
+        // Legacy city links (e.g. ?location=Dhaka) promote cleanly into Step 1 city
+        city = normalizeCityName(rawLocation) || rawLocation.trim();
+        area = "";
+      } else {
+        area = rawLocation.trim();
+        if (!city) {
+          const inferred = inferAreaCity({ id: "", name: area, city: null, parent_area_id: null });
+          if (inferred) city = inferred;
+        }
+      }
+    }
+  }
+
   // `status=sold` already becomes the sold purpose above, so "include sold"
   // only ever comes from its own round-trip param.
   return {
     purpose,
     query: one(params.query) || one(params.search) || "",
-    area: fixedLocation || one(params.location) || one(params.city) || "",
+    city,
+    area,
+    lat: one(params.lat) || "",
+    lng: one(params.lng) || "",
     radius: one(params.radius) || "",
     propertyType: toPropertyTypeFilter(one(params.type)),
     addedToSite: one(params.added) || "",
@@ -215,7 +248,12 @@ export function filtersToParams(
     params.listing_type = filters.purpose;
   }
 
+  if (!fixedLocation && filters.city.trim()) params.city = filters.city.trim();
   if (!fixedLocation && filters.area.trim()) params.location = filters.area.trim();
+  if (filters.lat.trim() && filters.lng.trim()) {
+    params.lat = filters.lat.trim();
+    params.lng = filters.lng.trim();
+  }
   if (filters.propertyType && filters.propertyType !== "all") params.type = filters.propertyType;
   if (filters.radius) params.radius = filters.radius;
   if (filters.addedToSite) params.added = filters.addedToSite;
@@ -247,6 +285,8 @@ export const FILTER_PARAM_KEYS = [
   "subtype",
   "city",
   "location",
+  "lat",
+  "lng",
   "type",
   "radius",
   "added",
@@ -447,6 +487,7 @@ export function resetSearchFilters(
   return {
     ...defaultSearchFilters,
     purpose: filters.purpose,
+    city: "",
     area: fixedLocation || "",
   };
 }

@@ -1,11 +1,11 @@
 import React from "react";
 import {
-  Image,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import {
   Mail,
@@ -13,14 +13,69 @@ import {
   Search,
   ShieldCheck,
 } from "@/components/icons";
-import { colorTokens, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { formatPrice } from "@/lib/format";
 import { BrowserFrame } from "./BrowserFrame";
 import { PhoneFrame } from "./PhoneFrame";
 import { previewProperties } from "@/data/landingPreview";
 import { PropertyCard } from "@/components/PropertyCard";
+
+interface PhoneDetailPreviewProps {
+  imageUrl?: string;
+  title: string;
+  location: string;
+  verifiedLabel: string;
+  contactLabel: string;
+  price: string;
+}
+
+/** Shared phone mockup preview rendered in both the desktop overlap and mobile view. */
+function PhoneDetailPreview({
+  imageUrl,
+  title,
+  location,
+  verifiedLabel,
+  contactLabel,
+  price,
+}: PhoneDetailPreviewProps) {
+  return (
+    <View style={styles.mobileDetailPreview}>
+      <View style={styles.mobileDetailImageWrap}>
+        <Image
+          accessibilityLabel={title}
+          cachePolicy="memory-disk"
+          contentFit="cover"
+          source={{ uri: cdnImage(imageUrl, 640, 280) }}
+          style={styles.mobileDetailImage}
+        />
+        <View style={styles.mobileDetailBadge}>
+          <ShieldCheck color={colorTokens.info} size={12} strokeWidth={2.5} />
+          <Text style={styles.mobileDetailBadgeText}>{verifiedLabel}</Text>
+        </View>
+      </View>
+
+      <View style={styles.mobileDetailBody}>
+        <Text numberOfLines={1} style={styles.mobileDetailLocation}>
+          {location}
+        </Text>
+        <Text numberOfLines={1} style={styles.mobileDetailTitle}>
+          {title}
+        </Text>
+        <Text style={styles.mobileDetailPrice}>{price}</Text>
+
+        <View style={styles.mobileContactBtn} testID="hero-contact-cta">
+          <Mail color={colorTokens.onBrand} size={13} strokeWidth={2} />
+          <Text style={styles.mobileContactBtnText} testID="hero-contact-cta-text">
+            {contactLabel}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export function HeroProductVisual() {
   const { t } = useTranslation();
@@ -38,9 +93,10 @@ export function HeroProductVisual() {
       onPress={handleOpenApp}
       accessibilityRole="link"
       accessibilityLabel={t("landing.heroVisual.openAppAria")}
-      style={[
+      style={({ pressed }) => [
         styles.container,
         (isLargeScreen || isTall) && styles.containerLarge,
+        pressed && styles.containerPressed,
         webPointer,
       ]}
     >
@@ -60,17 +116,19 @@ export function HeroProductVisual() {
             {/* Decorative Search Bar Replica */}
             <View style={styles.searchReplicaBar}>
               <View style={styles.searchReplicaInput}>
-                <Search color="#5C6B66" size={16} strokeWidth={2} />
+                <Search color={colorTokens.muted} size={16} strokeWidth={2} />
                 <Text numberOfLines={1} style={styles.searchReplicaPlaceholder}>
                   {t("landing.heroVisual.searchPlaceholder")}
                 </Text>
               </View>
               <View style={styles.searchReplicaAreaBtn}>
-                <MapPin color="#0F6D55" size={14} strokeWidth={2} />
+                <MapPin color={colorTokens.brandText} size={14} strokeWidth={2} />
                 <Text style={styles.searchReplicaAreaText}>{t("landing.heroVisual.city")}</Text>
               </View>
-              <View style={styles.searchReplicaBtn}>
-                <Text style={styles.searchReplicaBtnText}>{t("landing.heroVisual.searchBtn")}</Text>
+              <View style={styles.searchReplicaBtn} testID="hero-search-cta">
+                <Text style={styles.searchReplicaBtnText} testID="hero-search-cta-text">
+                  {t("landing.heroVisual.searchBtn")}
+                </Text>
               </View>
             </View>
 
@@ -78,11 +136,11 @@ export function HeroProductVisual() {
             <View style={styles.cardsRow}>
               <View style={styles.cardCol}>
                 <PropertyCard
-          decorative property={p1} onPress={handleOpenApp} />
+                  decorative property={p1} onPress={handleOpenApp} />
               </View>
               <View style={styles.cardCol}>
                 <PropertyCard
-          decorative property={p2} onPress={handleOpenApp} />
+                  decorative property={p2} onPress={handleOpenApp} />
               </View>
             </View>
           </BrowserFrame>
@@ -90,34 +148,14 @@ export function HeroProductVisual() {
           {/* Overlapping Phone Frame (Detail View) */}
           <View style={styles.phoneOverlapWrap}>
             <PhoneFrame style={styles.phoneFrame}>
-              <View style={styles.mobileDetailPreview}>
-                <View style={styles.mobileDetailImageWrap}>
-                  <Image
-                    source={{ uri: cdnImage(p1.media?.[0]?.url, 640, 280) }}
-                    style={styles.mobileDetailImage}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.mobileDetailBadge}>
-                    <ShieldCheck color="#2251D6" size={12} strokeWidth={2.5} />
-                    <Text style={styles.mobileDetailBadgeText}>{t("landing.heroVisual.verifiedBadge")}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.mobileDetailBody}>
-                  <Text numberOfLines={1} style={styles.mobileDetailLocation}>
-                    Road 92, Gulshan-2
-                  </Text>
-                  <Text numberOfLines={1} style={styles.mobileDetailTitle}>
-                    {p1.title}
-                  </Text>
-                  <Text style={styles.mobileDetailPrice}>৳4.85 Crore</Text>
-
-                  <View style={styles.mobileContactBtn}>
-                    <Mail color="#FFFFFF" size={13} strokeWidth={2} />
-                    <Text style={styles.mobileContactBtnText}>{t("landing.heroVisual.contactDirect")}</Text>
-                  </View>
-                </View>
-              </View>
+              <PhoneDetailPreview
+                contactLabel={t("landing.heroVisual.contactDirect")}
+                price={formatPrice(p1.price, p1.price_currency)}
+                imageUrl={p1.media?.[0]?.url}
+                location="Road 92, Gulshan-2"
+                title={p1.title}
+                verifiedLabel={t("landing.heroVisual.verifiedBadge")}
+              />
             </PhoneFrame>
           </View>
         </View>
@@ -125,34 +163,14 @@ export function HeroProductVisual() {
         /* Mobile Only: Focused Single Phone Frame Preview */
         <View style={styles.mobileVisualWrap}>
           <PhoneFrame style={styles.mobileStandalonePhone}>
-            <View style={styles.mobileDetailPreview}>
-              <View style={styles.mobileDetailImageWrap}>
-                <Image
-                  source={{ uri: cdnImage(p1.media?.[0]?.url, 640, 280) }}
-                  style={styles.mobileDetailImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.mobileDetailBadge}>
-                  <ShieldCheck color="#2251D6" size={12} strokeWidth={2.5} />
-                  <Text style={styles.mobileDetailBadgeText}>{t("landing.heroVisual.verifiedBadge")}</Text>
-                </View>
-              </View>
-
-              <View style={styles.mobileDetailBody}>
-                <Text numberOfLines={1} style={styles.mobileDetailLocation}>
-                  Road 92, Gulshan-2, Dhaka
-                </Text>
-                <Text numberOfLines={1} style={styles.mobileDetailTitle}>
-                  {p1.title}
-                </Text>
-                <Text style={styles.mobileDetailPrice}>৳4.85 Crore</Text>
-
-                <View style={styles.mobileContactBtn}>
-                  <Mail color="#FFFFFF" size={13} strokeWidth={2} />
-                  <Text style={styles.mobileContactBtnText}>{t("landing.heroVisual.contactDirect")}</Text>
-                </View>
-              </View>
-            </View>
+            <PhoneDetailPreview
+              contactLabel={t("landing.heroVisual.contactDirect")}
+              price={formatPrice(p1.price, p1.price_currency)}
+              imageUrl={p1.media?.[0]?.url}
+              location="Road 92, Gulshan-2, Dhaka"
+              title={p1.title}
+              verifiedLabel={t("landing.heroVisual.verifiedBadge")}
+            />
           </PhoneFrame>
         </View>
       )}
@@ -169,6 +187,9 @@ const styles = StyleSheet.create({
   },
   containerLarge: {
     marginTop: 44,
+  },
+  containerPressed: {
+    opacity: 0.96,
   },
   compositionWrap: {
     position: "relative",
@@ -191,17 +212,17 @@ const styles = StyleSheet.create({
   },
   browserBody: {
     padding: 18,
-    backgroundColor: "#F8FAF9",
+    backgroundColor: colorTokens.canvas,
   },
   searchReplicaBar: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     padding: 6,
-    borderRadius: 12,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
+    borderColor: colorTokens.border,
     marginBottom: 16,
   },
   searchReplicaInput: {
@@ -212,7 +233,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   searchReplicaPlaceholder: {
-    color: "#5C6B66",
+    color: colorTokens.muted,
     fontFamily: fonts.regular,
     fontSize: 13,
   },
@@ -220,13 +241,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E6FAF4",
+    backgroundColor: colorTokens.brandSurface,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: radius.md,
   },
   searchReplicaAreaText: {
-    color: "#0F6D55",
+    color: colorTokens.brandText,
     fontFamily: fonts.semiBold,
     fontSize: 12,
   },
@@ -234,7 +255,7 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.brand,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: radius.lg,
   },
   searchReplicaBtnText: {
     color: colorTokens.onBrand,
@@ -269,7 +290,7 @@ const styles = StyleSheet.create({
     maxWidth: 320,
   },
   mobileDetailPreview: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     paddingBottom: 14,
   },
   mobileDetailImageWrap: {
@@ -288,13 +309,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#E8EEFC",
+    backgroundColor: colorTokens.infoSurface,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 999,
+    borderRadius: radius.pill,
   },
   mobileDetailBadgeText: {
-    color: "#2251D6",
+    color: colorTokens.info,
     fontFamily: fonts.semiBold,
     fontSize: 11,
     fontWeight: "600",
@@ -305,18 +326,18 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   mobileDetailLocation: {
-    color: "#5C6B66",
+    color: colorTokens.muted,
     fontFamily: fonts.medium,
     fontSize: 11,
   },
   mobileDetailTitle: {
-    color: "#0B1A17",
+    color: colorTokens.ink,
     fontFamily: fonts.headingBold,
     fontSize: 13.5,
     fontWeight: "700",
   },
   mobileDetailPrice: {
-    color: "#0F6D55",
+    color: colorTokens.brandText,
     fontFamily: fonts.headingExtraBold,
     fontSize: 15,
     fontWeight: "800",
@@ -327,13 +348,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    backgroundColor: "#0F6D55",
+    backgroundColor: colorTokens.brand,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: radius.lg,
     marginTop: 8,
   },
   mobileContactBtnText: {
-    color: "#FFFFFF",
+    color: colorTokens.onBrand,
     fontFamily: fonts.bold,
     fontSize: 11.5,
     fontWeight: "700",

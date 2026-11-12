@@ -2,7 +2,7 @@ import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Globe } from "@/components/icons";
 import { useTranslation } from "@/i18n";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 
 interface LanguageToggleProps {
   compact?: boolean;
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   buttonHovered: {
     backgroundColor: "rgba(4, 207, 146, 0.05)",
-    borderColor: "#03b57f",
+    borderColor: colorTokens.brandText,
   },
   buttonPressed: {
     opacity: 0.8,

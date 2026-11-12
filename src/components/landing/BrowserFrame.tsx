@@ -1,7 +1,7 @@
 import React, { type ReactNode } from "react";
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { Platform, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { Lock } from "@/components/icons";
-import { fonts } from "@/theme";
+import { colorTokens, fonts, radius } from "@/theme";
 import { useTranslation } from "@/i18n";
 
 interface BrowserFrameProps {
@@ -31,7 +31,7 @@ export function BrowserFrame({
         </View>
 
         <View style={styles.addressBar}>
-          <Lock color="#5C6B66" size={11} strokeWidth={2.5} />
+          <Lock color={colorTokens.muted} size={11} strokeWidth={2.5} />
           <Text numberOfLines={1} style={styles.addressText}>
             {displayUrl}
           </Text>
@@ -48,22 +48,27 @@ export function BrowserFrame({
 
 const styles = StyleSheet.create({
   browser: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
+    backgroundColor: colorTokens.surface,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.1)",
+    borderColor: colorTokens.border,
     overflow: "hidden",
-    shadowColor: "rgba(11, 26, 23, 0.12)",
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 1,
-    shadowRadius: 28,
-    elevation: 8,
+    ...Platform.select({
+      web: { boxShadow: "0px 14px 28px rgba(11, 26, 23, 0.12)" },
+      default: {
+        shadowColor: colorTokens.shadow,
+        shadowOffset: { width: 0, height: 14 },
+        shadowOpacity: 1,
+        shadowRadius: 28,
+        elevation: 8,
+      },
+    }),
   },
   chromeBar: {
     height: 38,
-    backgroundColor: "#F4F6F5",
+    backgroundColor: colorTokens.surfaceSunken,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(11, 26, 23, 0.08)",
+    borderBottomColor: colorTokens.divider,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -87,24 +92,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#FBBF24",
   },
   dotMaximize: {
-    backgroundColor: "#34D399",
+    backgroundColor: colorTokens.brand,
   },
   addressBar: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: radius.card,
     borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.06)",
+    borderColor: colorTokens.divider,
     maxWidth: 260,
     width: "100%",
     justifyContent: "center",
   },
   addressText: {
-    color: "#5C6B66",
+    color: colorTokens.muted,
     fontFamily: fonts.medium,
     fontSize: 11,
     fontWeight: "500",
@@ -113,7 +118,7 @@ const styles = StyleSheet.create({
     width: 60,
   },
   body: {
-    backgroundColor: "#F8FAF9",
+    backgroundColor: colorTokens.canvas,
     overflow: "hidden",
   },
 });

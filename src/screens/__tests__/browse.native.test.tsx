@@ -162,7 +162,7 @@ describe("the browse screen's navbar highlight", () => {
 describe("the Area list when the API returns only part of it", () => {
   const press = (node: ReactTestInstance) => act(() => node.props.onPress());
 
-  it("offers the site's own places instead of a list of two", async () => {
+  it("offers the site's own places scoped to the selected city instead of a list of two", async () => {
     // What the API did when its cache held a short page: 2 of 41 areas.
     getAreas.mockResolvedValue({
       data: {
@@ -177,16 +177,34 @@ describe("the Area list when the API returns only part of it", () => {
     });
     withDesktopWindow();
     const tree = await mount();
+    expect(textOf(tree.root)).toContain("All of Bangladesh");
 
-    const box = pressableWithText(tree, "All areas");
+    // Step 1: pick City / District first — writes city to URL params
+    const cityBox = pressableWithText(tree, "All Cities (Bangladesh)");
+    expect(cityBox).toBeDefined();
+    press(cityBox!);
+    const dhakaOption = tree.root
+      .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
+      .find((r) => textOf(r).trim() === "Dhaka");
+    expect(dhakaOption).toBeDefined();
+    press(dhakaOption!);
+    expect(router.setParams).toHaveBeenCalledWith(
+      expect.objectContaining({ city: "Dhaka" }),
+    );
+
+    // Step 2: once city is active in URL params, Area dropdown unlocks scoped strictly to Dhaka
+    mockParams = { searched: "1", city: "Dhaka" };
+    const scopedTree = await mount();
+    const box = pressableWithText(scopedTree, "All areas");
     expect(box).toBeDefined();
     press(box!);
 
-    const rows = tree.root
+    const rows = scopedTree.root
       .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
       .map((r) => textOf(r).trim());
     expect(rows.length).toBeGreaterThan(20);
-    expect(rows).toEqual(expect.arrayContaining(["All areas", "Dhaka", "Gulshan", "Uttara"]));
+    expect(rows).toEqual(expect.arrayContaining(["All areas", "Gulshan", "Uttara"]));
+    expect(rows).not.toContain("Agrabad");
   });
 });
 
@@ -337,6 +355,16 @@ describe("the filter sheet's result count", () => {
       await new Promise((resolve) => setTimeout(resolve, 450));
     });
     expect(pressableWithText(tree, "Show 18 results")).toBeDefined();
+
+    // Step 1: choose City first so Step 2 Sub-Areas unlock
+    const cityBox = pressableWithText(tree, "All Cities (Bangladesh)");
+    expect(cityBox).toBeDefined();
+    await act(async () => cityBox!.props.onPress());
+    const dhakaRow = tree.root
+      .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
+      .find((r) => textOf(r).trim() === "Dhaka");
+    expect(dhakaRow).toBeDefined();
+    await act(async () => dhakaRow!.props.onPress());
 
     const box = pressableWithText(tree, "All areas");
     expect(box).toBeDefined();

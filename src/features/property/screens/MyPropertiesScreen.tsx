@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
     color: "#5C6B66",
   },
   pillCountTextActive: {
-    color: "rgba(255,255,255,0.75)",
+    color: colorTokens.onBrand,
   },
   addPropertyBtn: {
     height: 40,
