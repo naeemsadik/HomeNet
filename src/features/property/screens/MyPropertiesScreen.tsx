@@ -1,20 +1,5 @@
 import { router } from "expo-router";
-import {
-  Archive,
-  ArchiveRestore,
-  Building2,
-  CheckCircle2,
-  Edit,
-  Eye,
-  Heart,
-  MessageSquare,
-  MoreVertical,
-  Plus,
-  RotateCcw,
-  Sparkles,
-  Trash2,
-  Zap,
-} from "@/components/icons";
+import { Archive, ArchiveRestore, Building2, CheckCircle2, Edit, Eye, Heart, MessageSquare, MoreVertical, Plus, RotateCcw, Trash2, Zap } from "@/components/icons";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -61,7 +46,6 @@ interface ListingItemData {
   boostText?: string;
   isVerified?: boolean;
   isBoosted?: boolean;
-  aiValue: string;
   views: string;
   likes: string;
   inquiries: string;
@@ -105,7 +89,6 @@ export function MyPropertiesScreen() {
       isVerified: p.is_verified,
       isBoosted: false,
       boostText: undefined,
-      aiValue: typeof p.price === "number" ? `৳ ${((p.price * 1.05) / 10000000).toFixed(2)}Cr` : "—",
       views: (p.view_count || 0).toLocaleString(),
       likes: "0",
       inquiries: "0",
@@ -330,9 +313,6 @@ export function MyPropertiesScreen() {
                   <View style={[styles.colStatus, styles.colBorder]}>
                     <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.status")}</Text>
                   </View>
-                  <View style={[styles.colAiValue, styles.colBorder]}>
-                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.aiValue")}</Text>
-                  </View>
                   <View style={[styles.colPerformance, styles.colBorder]}>
                     <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.performance")}</Text>
                   </View>
@@ -400,12 +380,6 @@ export function MyPropertiesScreen() {
                       </View>
 
                       {/* AI Value Column */}
-                      <View style={[styles.colAiValue, styles.colBorder, { flexDirection: "row", alignItems: "center", gap: 4 }]}>
-                        <Sparkles color="#04cf92" size={14} />
-                        <Text style={styles.aiValueText} numberOfLines={1}>{item.aiValue}</Text>
-                      </View>
-
-                      {/* Performance Column (Views, Likes, Inquiries) */}
                       <View style={[styles.colPerformance, styles.colBorder, { flexDirection: "row", alignItems: "center", gap: 10 }]}>
                         <View style={styles.metricItem}>
                           <Eye color="#5C6B66" size={14} />
@@ -475,10 +449,6 @@ export function MyPropertiesScreen() {
                     <View style={styles.mobileCardBody}>
                       <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
                         <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
-                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                          <Sparkles color="#04cf92" size={14} />
-                          <Text style={styles.aiValueText}>{item.aiValue}</Text>
-                        </View>
                       </View>
 
                       <View style={styles.mobileMetricsRow}>
@@ -772,13 +742,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     justifyContent: "center",
   },
-  colAiValue: {
-    flex: 1.0,
-    minWidth: 96,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    justifyContent: "center",
-  },
   colPerformance: {
     flex: 1.4,
     minWidth: 120,
@@ -850,11 +813,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.regular,
     color: "#F4823A",
-  },
-  aiValueText: {
-    fontSize: 14,
-    fontFamily: fonts.regular,
-    color: "#04cf92",
   },
   metricItem: {
     flexDirection: "row",

@@ -82,8 +82,17 @@ export interface Area {
   id: string;
   name: string;
   parent_area_id: string | null;
+  /**
+   * The area's district name, filled in by `normalizeArea` (areaApi.ts). The API
+   * has no `city` field: an area belongs to a district, a district to a division.
+   * Dhaka, Gazipur, Bogura and the rest are districts.
+   */
   city: string | null;
   city_id?: string | null;
+  /** The district the area is in. Sent by the API; filters on /v1/areas and /v1/properties take it. */
+  district_id?: string | null;
+  /** The division of that district, for the `division_id` filter. */
+  division_id?: string | null;
   /** Alternative spellings or transliterations supported by search/matching. */
   aliases?: string[];
   /** Where the area is centred. Not every area has one yet; distance search needs it. */

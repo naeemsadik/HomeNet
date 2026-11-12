@@ -2,7 +2,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, layout, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
-import { Sparkles } from "@/components/icons";
+
 import { useTranslation } from "@/i18n";
 import {
   Platform,
@@ -241,7 +241,6 @@ function WebFooter({ style }: FooterProps) {
             <Text style={styles.footerColHeading}>{t("footer.professional")}</Text>
             <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
               <Text style={styles.proBadgeText}>{t("footer.homenetPro")}</Text>
-              <Sparkles color="#A7F3D0" size={13} />
             </AppLink>
             {proBenefits.map((item) => (
               <AppLink href="/seller" key={item} style={styles.footerLinkWrap}>

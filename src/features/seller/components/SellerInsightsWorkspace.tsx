@@ -1,4 +1,4 @@
-import { BarChart2, CheckCircle2, Sparkles, TrendingUp } from "@/components/icons";
+import { BarChart2, CheckCircle2, TrendingUp, LineChart } from "@/components/icons";
 import { Text, View } from "react-native";
 import { AiFinderWorkflow } from "@/components/AiFinderWorkflow";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -16,7 +16,7 @@ export function SellerInsightsWorkspace() {
       <View style={[styles.tabHeroBanner, isPhone && styles.tabHeroBannerPhone]}>
         <View style={[styles.tabHeroHeader, isPhone && styles.tabHeroHeaderPhone]}>
           <View style={[styles.tabHeroIconWrap, { backgroundColor: colors.blueLight }]}>
-            <Sparkles color={colors.blue} size={24} />
+            <LineChart color={colors.blue} size={24} />
           </View>
           <View style={styles.tabHeroTextWrap}>
             <Text style={[styles.tabHeroTitle, isPhone && styles.tabHeroTitlePhone]}>
