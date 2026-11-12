@@ -1,26 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import {
-  ArrowLeft,
-  Bath,
-  BedDouble,
-  Building2,
-  Calendar,
-  Camera,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Flag,
-  Heart,
-  MapPin,
-  Maximize2,
-  Phone,
-  RotateCcw,
-  Share2,
-  ShieldCheck,
-  Sparkles,
-  TrendingUp,
-  UserRound,
-} from "@/components/icons";
+import { ArrowLeft, Bath, BedDouble, Building2, Calendar, Camera, Check, ChevronLeft, ChevronRight, Flag, Heart, MapPin, Maximize2, Phone, RotateCcw, Share2, ShieldCheck, TrendingUp, UserRound } from "@/components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { openExternalUrl } from "@/lib/safeUrl";
 import {
@@ -810,7 +789,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
             {property.aiValuation ? (
             <View style={styles.aiValuationCard}>
               <View style={styles.aiValuationHeader}>
-                <Sparkles color="#04cf92" size={20} />
                 <Text style={styles.aiValuationTitle}>{t("propertyDetail.aiValuationTitle")}</Text>
               </View>
 
@@ -889,7 +867,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                             <Text style={styles.similarPrice}>{sim.price}</Text>
                             {sim.score ? (
                               <View style={styles.similarScoreBadge}>
-                                <Sparkles color="#04cf92" size={12} />
                                 <Text style={styles.similarScoreText}>{sim.score}</Text>
                               </View>
                             ) : null}
@@ -936,7 +913,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                   <Text style={styles.priceCalloutLabel}>{t("propertyDetail.askingPrice")}</Text>
                   {property.score ? (
                     <View style={styles.scoreBadge}>
-                      <Sparkles color="#04cf92" size={14} />
                       <Text style={styles.scoreBadgeText}>{property.score}</Text>
                     </View>
                   ) : null}
@@ -1008,7 +984,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
             {property.aiRecommendation ? (
             <View style={styles.aiRecCard}>
               <View style={styles.aiRecHeader}>
-                <Sparkles color="#04cf92" size={18} />
                 <Text style={styles.aiRecTitle}>{t("propertyDetail.aiRecTitle")}</Text>
               </View>
 

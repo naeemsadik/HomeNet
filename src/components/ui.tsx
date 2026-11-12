@@ -370,7 +370,10 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   buttonPrimary: { backgroundColor: colorTokens.brand },
-  buttonPrimaryHovered: { backgroundColor: colorTokens.brandHover },
+  buttonPrimaryHovered: {
+    backgroundColor: colorTokens.brand,
+    ...(Platform.OS === "web" ? { boxShadow: "0 4px 12px rgba(11, 26, 23, 0.12)" } : {}),
+  },
   buttonSecondary: {
     backgroundColor: colorTokens.surface,
     borderColor: colorTokens.divider,

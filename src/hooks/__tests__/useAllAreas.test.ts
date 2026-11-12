@@ -30,6 +30,25 @@ describe("filterAreas", () => {
       "banani",
     ]);
   });
+
+  it("infers city when area.city is null and matches transliteration variants", () => {
+    const legacyNullCity = [
+      area("adabar", "Adabar", null),
+      area("aftabnagar", "Aftabnagar", null),
+      area("agrabad", "Agrabad", null),
+      area("shajahanpur", "Shajahanpur", "Dhaka"),
+    ];
+    expect(filterAreas(legacyNullCity, { city: "Dhaka" }).map((a) => a.id)).toEqual([
+      "adabar",
+      "aftabnagar",
+      "shajahanpur",
+    ]);
+    expect(filterAreas(legacyNullCity, { city: "Chattogram" }).map((a) => a.id)).toEqual(["agrabad"]);
+    expect(filterAreas(legacyNullCity, { city: "Dhaka", search: "Adabor" }).map((a) => a.id)).toEqual(["adabar"]);
+    expect(filterAreas(legacyNullCity, { city: "Dhaka", search: "Shahjahanpur" }).map((a) => a.id)).toEqual([
+      "shajahanpur",
+    ]);
+  });
 });
 
 describe("pageAreas", () => {

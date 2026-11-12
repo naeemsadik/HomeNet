@@ -1,16 +1,4 @@
-import {
-  ArrowLeft,
-  ArrowRight,
-  Building2,
-  Check,
-  Home,
-  KeyRound,
-  MapPin,
-  RotateCcw,
-  Sparkles,
-  WalletCards,
-  type LucideIcon,
-} from "@/components/icons";
+import { ArrowLeft, ArrowRight, Building2, Check, Home, KeyRound, MapPin, RotateCcw, WalletCards, type LucideIcon, Search } from "@/components/icons";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -184,7 +172,6 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
     <View style={[styles.headerRow, isModal && styles.headerRowModal]}>
       <View style={styles.headerLeft}>
         <View style={styles.aiPillBadge}>
-          <Sparkles color="#04cf92" size={14} />
           <Text style={styles.aiPillText}>
             {AI_SEARCH_ENABLED ? t("search.aiFinder.aiFinderBadge") : t("search.aiFinder.finderBadge")}
           </Text>
@@ -228,7 +215,7 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
 
       {AI_SEARCH_ENABLED ? (
         <AppButton
-          icon={Sparkles}
+          icon={Search}
           label={t("search.aiFinder.switchDescribe")}
           onPress={() => setMode("describe")}
           style={styles.switchMode}

@@ -5,15 +5,7 @@ import {
   Text,
   View,
 } from "react-native";
-import {
-  Maximize2,
-  Pause,
-  Play,
-  RotateCcw,
-  Sparkles,
-  Volume2,
-  VolumeX,
-} from "@/components/icons";
+import { Maximize2, Pause, Play, RotateCcw, Volume2, VolumeX, Home } from "@/components/icons";
 import { colorTokens, fonts, radius } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -413,7 +405,7 @@ function HomeNetExplainerWeb() {
                   marginBottom: 16,
                 }}
               >
-                <Sparkles color="#34D399" size={26} strokeWidth={2.5} />
+                <Home color="#34D399" size={26} strokeWidth={2.5} />
               </div>
 
               <h3
@@ -452,10 +444,10 @@ function HomeNetExplainerWeb() {
                 <button
                   onClick={handleContinueFull}
                   style={{
-                    backgroundColor: "#0F6D55",
-                    color: "#FFFFFF",
+                    backgroundColor: colorTokens.brand,
+                    color: colorTokens.onBrand,
                     border: "none",
-                    borderRadius: 10,
+                    borderRadius: radius.lg,
                     padding: isPhone ? "10px 18px" : "12px 24px",
                     fontSize: isPhone ? 14 : 15,
                     fontWeight: 700,
@@ -463,13 +455,12 @@ function HomeNetExplainerWeb() {
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
-                    boxShadow: "0 4px 14px rgba(15, 109, 85, 0.4)",
                     transition: "transform 0.15s ease",
                   }}
                   onMouseEnter={(e: any) => (e.currentTarget.style.transform = "scale(1.03)")}
                   onMouseLeave={(e: any) => (e.currentTarget.style.transform = "scale(1)")}
                 >
-                  <Play color="#FFFFFF" size={16} strokeWidth={2.5} />
+                  <Play color={colorTokens.onBrand} size={16} strokeWidth={2.5} />
                   <span>{t("home.explainerContinueBtn")}</span>
                 </button>
 
@@ -551,7 +542,7 @@ function HomeNetExplainerWeb() {
                 style={{
                   width: `${progressPercent}%`,
                   height: "100%",
-                  backgroundColor: "#0F6D55",
+                  backgroundColor: colorTokens.brand,
                   borderRadius: 4,
                   position: "relative",
                 }}

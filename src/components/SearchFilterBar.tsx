@@ -30,6 +30,8 @@ interface SearchFilterBarProps {
   onFilterChange: (next: SearchFilters) => void;
   /** Opens the full filters sheet (bathrooms, size, amenities, added to site…). */
   onOpenMoreFilters: () => void;
+  /** Step 1 city/district options. */
+  cityOptions?: { label: string; value: string }[];
   /** Places to choose from. Without them the bar shows `locationName` as text. */
   areaOptions?: { label: string; value: string }[];
   /** False when the place has no known centre, so "+ N km" cannot apply. */
@@ -46,6 +48,7 @@ export function SearchFilterBar({
   filters,
   onFilterChange,
   onOpenMoreFilters,
+  cityOptions,
   areaOptions,
   radiusAvailable = true,
   locationName,
@@ -102,21 +105,37 @@ export function SearchFilterBar({
     [t],
   );
 
-  const showArea = Boolean(areaOptions?.length);
+  const showCity = Boolean(cityOptions?.length);
+  const areaDisabled = showCity && !filters.city && !filters.area;
+  const showArea = showCity || Boolean(areaOptions?.length);
+  const resolvedAreaOptions = areaDisabled
+    ? [{ label: t("search.rightmove.selectCityFirst"), value: "" }]
+    : withCurrentArea(areaOptions ?? [], filters.area);
 
   return (
     <View style={styles.bar}>
       {/* Where */}
       <View style={styles.whereGroup}>
+        {showCity ? (
+          <SelectField
+            accessibilityLabel={t("search.rightmove.city")}
+            value={filters.city}
+            options={cityOptions ?? []}
+            onChange={(val) => update({ city: val, area: "", lat: "", lng: "", radius: "" })}
+            tone="dark"
+            style={styles.citySelect}
+          />
+        ) : null}
         <View style={styles.locationBox}>
           <MapPin color={colorTokens.brandText} size={16} strokeWidth={2.2} />
           {showArea ? (
             <SelectField
               accessibilityLabel={t("search.rightmove.area")}
-              value={filters.area}
-              options={withCurrentArea(areaOptions ?? [], filters.area)}
+              value={areaDisabled ? "" : filters.area}
+              options={resolvedAreaOptions}
+              disabled={areaDisabled}
               // A new place starts with "this area only".
-              onChange={(val) => update({ area: val, radius: "" })}
+              onChange={(val) => update({ area: val, lat: "", lng: "", radius: "" })}
               tone="plain"
               style={styles.locationSelect}
             />
@@ -266,6 +285,9 @@ const styles = StyleSheet.create({
   },
   radiusSelect: {
     width: 150,
+  },
+  citySelect: {
+    width: 156,
   },
   divider: {
     width: 1,

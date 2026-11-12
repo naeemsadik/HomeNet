@@ -166,3 +166,65 @@ describe("fallbackAreaOptions", () => {
     }
   });
 });
+
+describe("nationwide hierarchy & transliteration resolution", () => {
+  const { areaOptionsForCity, cityOptions } = require("../areaScope") as typeof import("../areaScope");
+
+  it("scopes sub-areas strictly to the chosen city and resolves transliteration spellings", () => {
+    const richAreas: Area[] = [
+      ...areas,
+      area("adabar", "Adabar", { city: "Dhaka", center_lat: 23.7712, center_lng: 90.3586 }),
+      area("dhk-shaj", "Shajahanpur", { city: "Dhaka" }),
+      area("bgr-shaj", "Shajahanpur", { city: "Bogura" }),
+    ];
+
+    expect(cityOptions(richAreas, "All Cities (Bangladesh)")[0]).toEqual({
+      label: "All Cities (Bangladesh)",
+      value: "",
+    });
+    expect(areaOptionsForCity(richAreas, "", "All areas")).toEqual([{ label: "All areas", value: "" }]);
+    expect(areaOptionsForCity(richAreas, "Chattogram", "All areas").map((o) => o.value)).toEqual([
+      "",
+      "Agrabad",
+    ]);
+
+    expect(resolveScope({ name: "Adabor", city: "Dhaka", radiusKm: 0, areas: richAreas }).scope).toEqual({
+      kind: "areas",
+      ids: ["adabar"],
+    });
+    expect(resolveScope({ name: "Shahjahanpur", city: "Bogura", radiusKm: 0, areas: richAreas }).scope).toEqual({
+      kind: "areas",
+      ids: ["bgr-shaj"],
+    });
+    // Coordinate fallback when unmapped area name is supplied with lat/lng
+    expect(
+      resolveScope({
+        name: "Unmapped Road",
+        city: "Dhaka",
+        lat: 23.7715,
+        lng: 90.359,
+        radiusKm: 0,
+        areas: richAreas,
+      }).scope,
+    ).toEqual({
+      kind: "areas",
+      ids: ["adabar"],
+    });
+    // Beyond 3km from mapped DB areas: gracefully falls back to radius search around lat/lng
+    expect(
+      resolveScope({
+        name: "Far Outskirts",
+        city: "Dhaka",
+        lat: 23.92,
+        lng: 90.26,
+        radiusKm: 0,
+        areas: richAreas,
+      }).scope,
+    ).toEqual({
+      kind: "radius",
+      lat: 23.92,
+      lng: 90.26,
+      radius: 3,
+    });
+  });
+});

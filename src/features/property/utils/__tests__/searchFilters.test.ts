@@ -104,7 +104,8 @@ describe("filtersFromParams", () => {
     expect(filters.minBedrooms).toBe("4");
     expect(filters.minBathrooms).toBe("2");
     expect(filters.verifiedOnly).toBe(true);
-    expect(filters.area).toBe("Dhaka");
+    expect(filters.city).toBe("Dhaka");
+    expect(filters.area).toBe("");
   });
 
   it("prefers ?search= when ?query= is absent", () => {
@@ -185,7 +186,10 @@ describe("filtersToParams", () => {
       ...defaultSearchFilters,
       purpose: "rent",
       query: "Banani",
-      area: "Dhaka",
+      city: "Dhaka",
+      area: "Gulshan",
+      lat: "23.7925",
+      lng: "90.4078",
       radius: "5",
       propertyType: "residential",
       addedToSite: "3d",
@@ -287,9 +291,10 @@ describe("toApiFilters", () => {
     // The deployed API answers any `city` with 400 "property city should not
     // exist". The place is applied by resolveScope/useBrowseFeed instead.
     const fromLegacyLink = filtersFromParams({ city: "Dhaka" });
-    expect(fromLegacyLink.area).toBe("Dhaka");
+    expect(fromLegacyLink.city).toBe("Dhaka");
+    expect(fromLegacyLink.area).toBe("");
     expect(toApiFilters(fromLegacyLink)).not.toHaveProperty("city");
-    expect(toApiFilters({ ...defaultSearchFilters, area: "Gulshan" })).not.toHaveProperty("city");
+    expect(toApiFilters({ ...defaultSearchFilters, city: "Dhaka", area: "Gulshan" })).not.toHaveProperty("city");
   });
 
   it("leaves type unset for an any-type search", () => {

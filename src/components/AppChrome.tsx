@@ -4,26 +4,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { AdminContextBar, ADMIN_BAR_HEIGHT } from "@/components/AdminContextBar";
 import { hasAnyAdminPermission } from "@/lib/permissions";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
-import {
-  Bell,
-  BookOpen,
-  Building2,
-  Calculator,
-  CalendarCheck,
-  Heart,
-  Home,
-  KeyRound,
-  LogOut,
-  Menu,
-  Plus,
-  Search,
-  Sparkles,
-  Tag,
-  TrendingUp,
-  User,
-  X,
-  type LucideIcon,
-} from "@/components/icons";
+import { Bell, BookOpen, Building2, Calculator, CalendarCheck, Heart, Home, KeyRound, LogOut, Menu, Plus, Search, Tag, TrendingUp, User, X, type LucideIcon } from "@/components/icons";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   Modal,
@@ -205,7 +186,7 @@ function SideBar({
       {isTablet ? null : (
       <View style={styles.sidebarCard}>
         <View style={styles.sidebarCardIconWrap}>
-          <Sparkles color={colorTokens.onBrand} size={20} />
+          <Home color={colorTokens.onBrand} size={20} />
         </View>
         <Text style={styles.sidebarCardTitle}>{t("nav.listProperty")}</Text>
         <Text style={styles.sidebarCardSubtitle}>

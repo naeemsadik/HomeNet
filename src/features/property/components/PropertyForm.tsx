@@ -385,8 +385,8 @@ const styles = StyleSheet.create({
     borderColor: colorTokens.primary,
   },
   stepDotDone: {
-    backgroundColor: colorTokens.primaryDark,
-    borderColor: colorTokens.primaryDark,
+    backgroundColor: colorTokens.brand,
+    borderColor: colorTokens.brand,
   },
   stepDotText: {
     fontSize: 11,

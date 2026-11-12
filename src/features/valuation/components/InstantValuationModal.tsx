@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(11, 26, 23, 0.75)",
   },
   floatingCloseButtonHovered: {
-    backgroundColor: colorTokens.brandText,
+    backgroundColor: colorTokens.body,
   },
   floatingCloseButtonPressed: {
     opacity: 0.85,
