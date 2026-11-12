@@ -29,7 +29,8 @@ jest.mock("@/components/icons", () => {
   const icon = (name: string) => (props: { color?: string }) =>
     mockReact.createElement("span", { "data-icon": name, "data-color": props.color });
   return {
-    Sparkles: icon("Sparkles"),
+    Search: icon("Search"),
+    FileText: icon("FileText"),
     ArrowRight: icon("ArrowRight"),
     Check: icon("Check"),
     AlertTriangle: icon("AlertTriangle"),

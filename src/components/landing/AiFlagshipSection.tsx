@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
-  Sparkles,
+  FileText,
+  Search,
   ArrowRight,
   Check,
   AlertTriangle,
@@ -303,7 +304,7 @@ export function AiFlagshipSection() {
               {/* Sheet Header */}
               <View style={styles.sheetHeader}>
                 <View style={styles.sheetHeaderIconWrap}>
-                  <Sparkles size={18} color="#0F6D55" />
+                  <FileText size={18} color={colorTokens.brandText} />
                 </View>
                 <View style={styles.sheetHeaderTextWrap}>
                   <Text style={styles.sheetHeaderTitle}>{t("landing.aiFlagship.sheetTitle")}</Text>
@@ -364,7 +365,7 @@ export function AiFlagshipSection() {
                         ]}
                         onPress={demoState === 'idle' ? runSequence : handleManualAnalyze}
                       >
-                        <Sparkles size={15} color={colorTokens.onBrand} style={{ marginRight: 8 }} />
+                        <Search size={15} color={colorTokens.onBrand} style={{ marginRight: 8 }} />
                         <Text style={styles.analyzeBtnText}>{t("landing.aiFlagship.analyzeBtn")}</Text>
                       </Pressable>
                     )}

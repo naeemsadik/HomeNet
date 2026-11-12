@@ -1,16 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  ArrowRight,
-  BadgeCheck,
-  BarChart3,
-  Building2,
-  CheckCircle2,
-  Clock3,
-  MapPin,
-  ShieldCheck,
-  Sparkles,
-  type LucideIcon,
-} from "@/components/icons";
+import { ArrowRight, BadgeCheck, BarChart3, Building2, CheckCircle2, Clock3, MapPin, ShieldCheck, type LucideIcon } from "@/components/icons";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
@@ -38,7 +27,7 @@ export function SellScreen() {
     <AppChrome active="sell">
       <LinearGradient colors={["#075C46", "#086B55", "#365FB7"]} end={{ x: 1, y: 0 }} style={[styles.hero, isTablet && styles.heroTablet, isPhone && styles.heroPhone]}>
         <View style={styles.heroCopyWrap}>
-          <View style={styles.heroKicker}><Sparkles color="rgba(255,255,255,0.82)" size={14} /><Eyebrow light>{t("sellScreen.kicker")}</Eyebrow></View>
+          <View style={styles.heroKicker}><Eyebrow light>{t("sellScreen.kicker")}</Eyebrow></View>
           <Text accessibilityRole="header" aria-level={1} style={[styles.heroTitle, isPhone && styles.heroTitlePhone]}>{t("sellScreen.heroTitle")}</Text>
           <Text style={styles.heroCopy}>{t("sellScreen.heroCopy")}</Text>
           <View style={styles.proofRow}>
