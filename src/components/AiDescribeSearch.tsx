@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, Search, Sparkles } from "@/components/icons";
+import { AlertTriangle, ArrowRight, Search } from "@/components/icons";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -148,7 +148,6 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
       {hasResult ? (
         <View style={styles.results}>
           <View style={styles.understoodHeader}>
-            <Sparkles color={colors.greenOnLight} size={16} />
             <Text style={styles.understoodTitle}>{t("search.aiDescribe.understood")}</Text>
             <Pressable
               accessibilityLabel={t("search.aiDescribe.startNewSearchAria")}
@@ -208,7 +207,6 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
                       />
                       {listing.ai_badges.length > 0 ? (
                         <View accessibilityLabel={`AI notes: ${listing.ai_badges.join(", ")}`} style={styles.badges}>
-                          <Sparkles color={colors.greenOnLight} size={12} />
                           {listing.ai_badges.map((badge) => (
                             <View key={badge} style={styles.badge}>
                               <Text style={styles.badgeText}>{badge}</Text>

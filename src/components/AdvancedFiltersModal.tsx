@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { Check, MapPin, Sparkles, X } from "@/components/icons";
+import { Check, MapPin, X } from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
 import { OverlayHost } from "@/components/OverlayModal";
@@ -476,7 +476,6 @@ export function AdvancedFiltersModal({
               style={[styles.verifiedRowCard, webPointer]}
             >
               <View style={styles.verifiedRowLeft}>
-                <Sparkles color={colorTokens.brandText} size={16} />
                 <Text style={styles.verifiedRowLabel}>{t("filters.verifiedOnly")}</Text>
               </View>
               <View
