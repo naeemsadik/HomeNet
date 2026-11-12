@@ -1,4 +1,4 @@
-import { CheckCircle2, MessageSquare, Rocket, Sparkles, TrendingUp } from "@/components/icons";
+import { CheckCircle2, MessageSquare, Rocket, TrendingUp } from "@/components/icons";
 import { Pressable, Text, View } from "react-native";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -122,7 +122,6 @@ export function SellerBoostWorkspace({ onOpenBoost }: { onOpenBoost: (packageId?
             >
               {pkg.popular ? (
                 <View style={styles.popularTag}>
-                  <Sparkles color={colors.ink} size={12} />
                   <Text style={styles.popularTagText}>{pkg.badge}</Text>
                 </View>
               ) : (

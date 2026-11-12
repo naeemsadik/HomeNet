@@ -1,16 +1,4 @@
-import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  Calendar,
-  Clock,
-  ExternalLink,
-  Layers,
-  Share2,
-  ShieldCheck,
-  Sparkles,
-  User,
-} from "@/components/icons";
+import { ArrowLeft, ArrowRight, BookOpen, Calendar, Clock, ExternalLink, Layers, Share2, ShieldCheck, User } from "@/components/icons";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -556,7 +544,7 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
               {/* Quick Action Finder Card */}
               <View style={styles.sidebarActionCard}>
                 <View style={styles.actionIconBox}>
-                  <Sparkles color="#FFFFFF" size={20} />
+                  <BookOpen color="#FFFFFF" size={20} />
                 </View>
                 <Text style={styles.actionCardTitle}>{t("guides.detail.guidanceTitle")}</Text>
                 <Text style={styles.actionCardCopy}>
