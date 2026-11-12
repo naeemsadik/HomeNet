@@ -1,10 +1,10 @@
 import { StyleSheet } from "react-native";
-import { colorTokens, colors, fonts, shadow } from "@/theme";
+import { colorTokens, colors, fonts, shadow, radius } from "@/theme";
 
 export const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(19, 40, 32, 0.45)",
+    backgroundColor: colorTokens.overlay,
     justifyContent: "flex-end",
     alignItems: "center",
   },
@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     bottom: 0,
   },
   sheetContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     width: "100%",
@@ -33,9 +33,9 @@ export const styles = StyleSheet.create({
   sheetTablet: {
     height: 560,
     width: 480,
-    borderRadius: 20,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: "rgba(11, 26, 23, 0.08)",
+    borderColor: colorTokens.divider,
     overflow: "hidden",
   },
   dragHandleContainer: {
@@ -46,7 +46,7 @@ export const styles = StyleSheet.create({
   dragHandle: {
     width: 38,
     height: 5,
-    borderRadius: 3,
+    borderRadius: radius.xs,
     backgroundColor: colors.line,
   },
   
@@ -59,7 +59,7 @@ export const styles = StyleSheet.create({
     paddingTop: 18,
     paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(11, 26, 23, 0.06)",
+    borderBottomColor: colorTokens.divider,
   },
   headerTitleRow: {
     flexDirection: "row",
@@ -69,15 +69,15 @@ export const styles = StyleSheet.create({
   headerIconCircle: {
     width: 28,
     height: 28,
-    borderRadius: 14,
-    backgroundColor: "#E6FAF4",
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.brandSurface,
     alignItems: "center",
     justifyContent: "center",
   },
   headerTitle: {
     fontSize: 17,
     fontFamily: fonts.bold,
-    color: "#0B1A17",
+    color: colorTokens.ink,
     letterSpacing: -0.3,
   },
   headerActions: {
@@ -97,8 +97,8 @@ export const styles = StyleSheet.create({
   closeButton: {
     width: 32,
     height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F3F5F4",
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -107,8 +107,8 @@ export const styles = StyleSheet.create({
   chipsSection: {
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(11, 26, 23, 0.06)",
-    backgroundColor: "#FFFFFF",
+    borderBottomColor: colorTokens.divider,
+    backgroundColor: colorTokens.surface,
   },
   chipsScroll: {
     paddingHorizontal: 20,
@@ -117,19 +117,19 @@ export const styles = StyleSheet.create({
   chip: {
     paddingHorizontal: 15,
     paddingVertical: 7,
-    borderRadius: 999,
-    backgroundColor: "#F3F5F4",
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.surfaceSunken,
     borderWidth: 1,
     borderColor: "transparent",
   },
   chipActive: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
+    backgroundColor: colorTokens.brand,
+    borderColor: colorTokens.brand,
   },
   chipText: {
     fontSize: 13,
     fontFamily: fonts.medium,
-    color: "#4A5B55",
+    color: colorTokens.body,
   },
   chipTextActive: {
     color: colorTokens.onBrand,
@@ -145,10 +145,10 @@ export const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: colorTokens.canvas,
     borderWidth: 1.2,
-    borderColor: "rgba(11, 26, 23, 0.1)",
-    borderRadius: 12,
+    borderColor: colorTokens.divider,
+    borderRadius: radius.xl,
     paddingHorizontal: 14,
     height: 44,
   },
@@ -160,7 +160,7 @@ export const styles = StyleSheet.create({
     height: "100%",
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: "#0B1A17",
+    color: colorTokens.ink,
     outlineStyle: "none",
   } as any,
   clearSearchBtn: {
@@ -247,7 +247,7 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.green,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: radius.md,
   },
   selectionBannerBtnText: {
     color: colorTokens.onBrand,
@@ -264,33 +264,34 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    minHeight: 44,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    borderRadius: 12,
+    borderRadius: radius.xl,
     marginVertical: 2,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     borderWidth: 1,
     borderColor: "transparent",
   },
   areaRowSelected: {
-    backgroundColor: "#F0F7F4",
-    borderColor: "rgba(15, 109, 85, 0.2)",
+    backgroundColor: colorTokens.brandSurface,
+    borderColor: colorTokens.brandBorder,
   },
   areaRowFocused: {
-    backgroundColor: "#F4F7F5",
-    borderColor: "rgba(11, 26, 23, 0.08)",
+    backgroundColor: colorTokens.surfaceSunken,
+    borderColor: colorTokens.divider,
   },
   pinCircle: {
     width: 32,
     height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F0F4F2",
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.surfaceSunken,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   pinCircleSelected: {
-    backgroundColor: "#DCEEE8",
+    backgroundColor: colorTokens.brandBorder,
   },
   areaInfoPressable: {
     flexDirection: "row",
@@ -308,17 +309,17 @@ export const styles = StyleSheet.create({
   areaName: {
     fontSize: 14.5,
     fontFamily: fonts.semiBold,
-    color: "#0B1A17",
+    color: colorTokens.ink,
     letterSpacing: -0.2,
   },
   areaNameSelected: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
     fontWeight: "700",
   },
   areaCity: {
     fontSize: 12,
     fontFamily: fonts.regular,
-    color: "#6D7E78",
+    color: colorTokens.muted,
     marginTop: 1.5,
   },
   actionCol: {
@@ -329,34 +330,34 @@ export const styles = StyleSheet.create({
   directSelectBtn: {
     paddingHorizontal: 11,
     paddingVertical: 5.5,
-    borderRadius: 7,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: "rgba(4, 207, 146, 0.25)",
-    backgroundColor: "#FFFFFF",
+    borderColor: colorTokens.brandBorder,
+    backgroundColor: colorTokens.surface,
     minWidth: 54,
     alignItems: "center",
     justifyContent: "center",
   },
   directSelectBtnActive: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
+    backgroundColor: colorTokens.brand,
+    borderColor: colorTokens.brand,
   },
   directSelectText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   selectedCheckBadge: {
     width: 26,
     height: 26,
-    borderRadius: 13,
-    backgroundColor: "#E6FAF4",
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.brandSurface,
     alignItems: "center",
     justifyContent: "center",
   },
   drillBtn: {
     padding: 6,
-    borderRadius: 6,
+    borderRadius: radius.sm,
   },
 
   // Skeletons
@@ -373,7 +374,7 @@ export const styles = StyleSheet.create({
   skeletonIcon: {
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: radius.md,
     backgroundColor: colors.soft,
     marginRight: 12,
   },
@@ -384,19 +385,19 @@ export const styles = StyleSheet.create({
   skeletonLineLong: {
     width: "60%",
     height: 12,
-    borderRadius: 4,
+    borderRadius: radius.xs,
     backgroundColor: colors.soft,
   },
   skeletonLineShort: {
     width: "30%",
     height: 8,
-    borderRadius: 3,
+    borderRadius: radius.xs,
     backgroundColor: colors.soft,
   },
   skeletonArrow: {
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: radius.md,
     backgroundColor: colors.soft,
   },
 
@@ -417,7 +418,7 @@ export const styles = StyleSheet.create({
   retryButton: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: radius.md,
     backgroundColor: colors.soft,
     borderWidth: 1,
     borderColor: colors.line,
@@ -448,5 +449,35 @@ export const styles = StyleSheet.create({
     color: colors.muted,
     textAlign: "center",
     paddingHorizontal: 20,
+  },
+  googleSection: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: colorTokens.divider,
+  },
+  googleSectionLabel: {
+    fontSize: 11,
+    fontFamily: fonts.bold,
+    color: colorTokens.muted,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  ambiguousBox: {
+    marginTop: 8,
+    marginHorizontal: 4,
+    padding: 12,
+    borderRadius: radius.lg,
+    backgroundColor: colorTokens.canvas,
+    borderWidth: 1,
+    borderColor: colorTokens.brandBorder,
+  },
+  ambiguousTitle: {
+    fontSize: 13,
+    fontFamily: fonts.bold,
+    color: colorTokens.ink,
+    marginBottom: 4,
   },
 });

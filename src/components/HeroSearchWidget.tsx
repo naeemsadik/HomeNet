@@ -8,12 +8,13 @@ import {
   SlidersHorizontal,
   X,
 } from "@/components/icons";
-import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, webPointer, brandButtonState } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
-import { AreaPicker } from "./AreaPicker";
+import { AreaPicker, type AreaLocationSelection } from "./AreaPicker";
 import { AdvancedFiltersModal } from "./AdvancedFiltersModal";
+import type { GeoPoint } from "@/lib/areaMatcher";
 import {
   countActiveFilters,
   defaultSearchFilters,
@@ -43,6 +44,9 @@ export function HeroSearchWidget({
   const [query, setQuery] = useState("");
   const [areaPickerOpen, setAreaPickerOpen] = useState(false);
   const [selectedArea, setSelectedArea] = useState<Area | null>(null);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [customAreaName, setCustomAreaName] = useState<string | null>(null);
+  const [selectedCoords, setSelectedCoords] = useState<GeoPoint | null>(null);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>(defaultSearchFilters);
 
@@ -72,10 +76,41 @@ export function HeroSearchWidget({
     }));
   };
 
+  const clearLocationSelection = () => {
+    setSelectedArea(null);
+    setSelectedCity(null);
+    setCustomAreaName(null);
+    setSelectedCoords(null);
+  };
+
+  const applyLocationSelection = (loc: AreaLocationSelection) => {
+    setSelectedArea(loc.area);
+    setSelectedCity(loc.city);
+    setCustomAreaName(loc.area ? null : (loc.areaName ?? null));
+    setSelectedCoords(loc.coordinates ?? null);
+  };
+
+  const activeLocationLabel = selectedArea
+    ? selectedCity
+      ? `${selectedArea.name}, ${selectedCity}`
+      : selectedArea.name
+    : customAreaName
+    ? selectedCity
+      ? `${customAreaName}, ${selectedCity}`
+      : customAreaName
+    : selectedCity;
+
+  const hasLocationSelection = Boolean(activeLocationLabel);
+
   const locationParams = (params: URLSearchParams) => {
-    if (!selectedArea) return;
-    if (selectedArea.city) params.set("city", selectedArea.city);
-    params.set("location", selectedArea.name);
+    const city = selectedCity || selectedArea?.city || null;
+    const areaName = selectedArea?.name || customAreaName || null;
+    if (city) params.set("city", city);
+    if (areaName) params.set("location", areaName);
+    if (selectedCoords) {
+      params.set("lat", String(selectedCoords.lat));
+      params.set("lng", String(selectedCoords.lng));
+    }
   };
 
   const handleSearch = () => {
@@ -173,31 +208,31 @@ export function HeroSearchWidget({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
-              selectedArea
-                ? t("hero.filterByAreaWithLocation", { location: selectedArea.name })
+              activeLocationLabel
+                ? t("hero.filterByAreaWithLocation", { location: activeLocationLabel })
                 : t("hero.filterByArea")
             }
             onPress={() => setAreaPickerOpen(true)}
             style={({ hovered }: any) => [
               styles.areaButton,
               isPhone && styles.areaButtonPhone,
-              selectedArea && styles.areaButtonActive,
+              hasLocationSelection && styles.areaButtonActive,
               hovered && styles.areaButtonHovered,
               webPointer,
             ]}
           >
             <MapPin
-              color={selectedArea ? colors.greenOnLight : colors.muted}
+              color={hasLocationSelection ? colors.greenOnLight : colors.muted}
               size={16}
               strokeWidth={2}
             />
             <Text
               numberOfLines={1}
-              style={[styles.areaLabel, selectedArea && styles.areaLabelActive]}
+              style={[styles.areaLabel, hasLocationSelection && styles.areaLabelActive]}
             >
-              {selectedArea ? selectedArea.name : t("hero.allLocations")}
+              {activeLocationLabel || t("hero.allLocations")}
             </Text>
-            {selectedArea ? (
+            {hasLocationSelection ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t("hero.clearLocation")}
@@ -205,7 +240,7 @@ export function HeroSearchWidget({
                 hitSlop={10}
                 onPress={(e) => {
                   e.stopPropagation();
-                  setSelectedArea(null);
+                  clearLocationSelection();
                 }}
                 style={[styles.areaClear, webPointer]}
               >
@@ -254,11 +289,21 @@ export function HeroSearchWidget({
       ) : null}
 
       <AreaPicker
+        allowCitySelection
+        enableGooglePlaces
+        initialCity={selectedCity ?? undefined}
         visible={areaPickerOpen}
         onClose={() => setAreaPickerOpen(false)}
         selectedArea={selectedArea}
         onSelect={(area) => {
           setSelectedArea(area);
+          setSelectedCity(area?.city ?? null);
+          setCustomAreaName(null);
+          setSelectedCoords(null);
+          setAreaPickerOpen(false);
+        }}
+        onSelectLocation={(loc) => {
+          applyLocationSelection(loc);
           setAreaPickerOpen(false);
         }}
       />
@@ -285,7 +330,7 @@ const styles = StyleSheet.create({
     ...(Platform.select({
       web: { boxShadow: "0 24px 60px -20px rgba(11, 26, 23, 0.28)" },
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: colorTokens.ink,
         shadowOffset: { width: 0, height: 20 },
         shadowOpacity: 0.22,
         shadowRadius: 44,
@@ -440,8 +485,8 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.brand,
   },
   searchButtonPhone: { height: 50, paddingHorizontal: 20 },
-  searchButtonHovered: { backgroundColor: colorTokens.brandHover },
-  searchButtonPressed: { opacity: 0.9, backgroundColor: colorTokens.brandPressed },
+  searchButtonHovered: brandButtonState.hovered,
+  searchButtonPressed: brandButtonState.pressed,
   searchLabel: {
     color: colorTokens.onBrand,
     fontFamily: fonts.bold,

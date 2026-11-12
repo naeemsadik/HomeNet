@@ -7,7 +7,7 @@ import { AreaPicker } from "@/components/AreaPicker";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema, faqPageSchema, valuationToolSchema, VALUATION_FAQ } from "@/lib/schema";
 import { SITE_URL } from "@/lib/seo";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, radius, webPointer, brandButtonState } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { useInstantValuation } from "../hooks/useInstantValuation";
@@ -337,8 +337,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   nextBtnPhone: { alignSelf: "stretch" },
-  nextBtnHovered: { backgroundColor: colorTokens.brandHover },
-  pressed: { opacity: 0.9 },
+  nextBtnHovered: brandButtonState.hovered,
+  pressed: brandButtonState.pressed,
   nextText: { fontFamily: fonts.bold, fontSize: 16, color: colorTokens.onBrand },
   helper: { fontFamily: fonts.regular, fontSize: 13, color: colorTokens.muted },
   errorText: { fontFamily: fonts.medium, fontSize: 13, color: colorTokens.errorText },

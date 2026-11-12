@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { LocateFixed, X } from "@/components/icons";
+import { parseGooglePlace } from "@/lib/areaMatcher";
 import { loadGoogleMaps, onGoogleMapsKeyRefused } from "@/lib/googleMapsLoader";
-import { webPointer } from "@/theme";
+import { webPointer, colorTokens } from "@/theme";
 import type { MapPoint } from "../../constants/areaCenters";
 import { MAP_PIN_ZOOM } from "../../constants/map";
 import { styles } from "../../screens/PropertyCreateWizard.styles";
@@ -14,6 +15,7 @@ export function GoogleLocationPicker({
   value,
   openAt,
   onChange,
+  onPlaceSelected,
   onUnavailable,
 }: LocationPickerProps & { /** Google could not be used; the caller shows the OpenStreetMap map instead. */ onUnavailable: () => void }) {
   const { lat: openLat, lng: openLng } = openAt;
@@ -23,9 +25,11 @@ export function GoogleLocationPicker({
   const markerRef = useRef<google.maps.Marker | null>(null);
   // Map event handlers outlive a render; they call whichever callbacks are current.
   const onChangeRef = useRef(onChange);
+  const onPlaceSelectedRef = useRef(onPlaceSelected);
   const onUnavailableRef = useRef(onUnavailable);
   useEffect(() => {
     onChangeRef.current = onChange;
+    onPlaceSelectedRef.current = onPlaceSelected;
     onUnavailableRef.current = onUnavailable;
   });
 
@@ -118,13 +122,23 @@ export function GoogleLocationPicker({
           search.style.width = "100%";
           // Google's box turns black when the browser is in dark mode; the form is always light.
           search.style.colorScheme = "light";
-          search.style.backgroundColor = "#FFFFFF";
+          search.style.backgroundColor = colorTokens.surface;
           search.style.border = "1.2px solid rgba(11,26,23,0.12)";
-          search.style.borderRadius = "16px";
+          search.style.borderRadius = "12px";
           search.addEventListener("gmp-select", (async (event: { placePrediction: { toPlace: () => google.maps.places.Place } }) => {
             const place = event.placePrediction.toPlace();
-            await place.fetchFields({ fields: ["location"] });
-            if (place.location) pickPoint({ lat: place.location.lat(), lng: place.location.lng() }, true);
+            await place.fetchFields({
+              fields: ["location", "addressComponents", "formattedAddress", "displayName"],
+            });
+            const parsed = parseGooglePlace(
+              place as unknown as Parameters<typeof parseGooglePlace>[0],
+            );
+            onPlaceSelectedRef.current?.(parsed);
+            if (parsed.coordinates) {
+              pickPoint(parsed.coordinates, true);
+            } else if (place.location) {
+              pickPoint({ lat: place.location.lat(), lng: place.location.lng() }, true);
+            }
           }) as unknown as EventListener);
           searchRef.current.appendChild(search);
         } catch (error) {
@@ -215,7 +229,7 @@ export function GoogleLocationPicker({
             onPress={useMyLocation}
             style={[styles.subtypePill, webPointer]}
           >
-            <LocateFixed color="#5C6B66" size={14} />
+            <LocateFixed color={colorTokens.muted} size={14} />
             <Text style={styles.subtypePillText}>{locating ? "Locating…" : "Use my location"}</Text>
           </Pressable>
           {value ? (
@@ -225,7 +239,7 @@ export function GoogleLocationPicker({
               onPress={clearPin}
               style={[styles.subtypePill, webPointer]}
             >
-              <X color="#5C6B66" size={14} />
+              <X color={colorTokens.muted} size={14} />
               <Text style={styles.subtypePillText}>Clear</Text>
             </Pressable>
           ) : null}
@@ -239,7 +253,7 @@ export function GoogleLocationPicker({
           aria-label="Map. Click or tap to place the pin."
           ref={hostRef}
           role="application"
-          style={{ width: "100%", height: "100%", background: "#F4F6F5" }}
+          style={{ width: "100%", height: "100%", background: colorTokens.surfaceSunken }}
         />
         {status === "loading" ? <Text style={styles.mapStatus}>Loading map…</Text> : null}
       </View>

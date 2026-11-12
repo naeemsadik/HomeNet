@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
-  Sparkles,
+  FileText,
+  Search,
   ArrowRight,
   Check,
   AlertTriangle,
@@ -22,7 +23,7 @@ import {
   Sliders,
   Play,
 } from '@/components/icons';
-import { colors, fonts } from '../../theme';
+import { colors, colorTokens, fonts } from '../../theme';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useAuthStore } from '../../stores/authStore';
 import { useAuthModalStore } from '../../stores/useAuthModalStore';
@@ -207,7 +208,7 @@ export function AiFlagshipSection() {
         {/* Section Header */}
         <View style={styles.headerBlock}>
           <View style={styles.eyebrowBadge}>
-            <Languages size={14} color="#0F6D55" style={{ marginRight: 6 }} />
+            <Languages size={14} color={colorTokens.brandText} style={{ marginRight: 6 }} />
             <Text style={styles.eyebrowText}>{t("landing.aiFlagship.eyebrow")}</Text>
           </View>
 
@@ -229,9 +230,9 @@ export function AiFlagshipSection() {
             {headlines.map((headline, idx) => {
               const isActive = activeHeadline === idx;
               const icons = [
-                <Languages key="1" size={20} color="#0F6D55" />,
-                <ShieldAlert key="2" size={20} color="#0F6D55" />,
-                <Sliders key="3" size={20} color="#0F6D55" />,
+                <Languages key="1" size={20} color={colorTokens.brandText} />,
+                <ShieldAlert key="2" size={20} color={colorTokens.brandText} />,
+                <Sliders key="3" size={20} color={colorTokens.brandText} />,
               ];
 
               return (
@@ -261,7 +262,7 @@ export function AiFlagshipSection() {
                   <View style={styles.examplesList}>
                     {headline.examples.map((item, itemIdx) => (
                       <View key={itemIdx} style={styles.exampleRow}>
-                        <CheckCircle2 size={13} color="#0F6D55" style={{ marginTop: 2, marginRight: 8 }} />
+                        <CheckCircle2 size={13} color={colorTokens.brandText} style={{ marginTop: 2, marginRight: 8 }} />
                         <Text style={styles.exampleText}>{item}</Text>
                       </View>
                     ))}
@@ -282,7 +283,7 @@ export function AiFlagshipSection() {
                 <View style={styles.chromeDotsRow}>
                   <View style={[styles.chromeDot, { backgroundColor: '#FF5F56' }]} />
                   <View style={[styles.chromeDot, { backgroundColor: '#FFBD2E' }]} />
-                  <View style={[styles.chromeDot, { backgroundColor: '#27C93F' }]} />
+                  <View style={[styles.chromeDot, { backgroundColor: colorTokens.brand }]} />
                 </View>
                 <Text style={styles.deviceChromeTitle}>{t("landing.aiFlagship.chromeTitle")}</Text>
                 {demoState === 'preview' && (
@@ -294,7 +295,7 @@ export function AiFlagshipSection() {
                     onPress={runSequence}
                     accessibilityLabel={t("landing.aiFlagship.replayDemo")}
                   >
-                    <Play size={11} color="#0F6D55" style={{ marginRight: 4 }} />
+                    <Play size={11} color={colorTokens.brandText} style={{ marginRight: 4 }} />
                     <Text style={styles.replayBtnText}>{t("landing.aiFlagship.replayDemo")}</Text>
                   </Pressable>
                 )}
@@ -303,7 +304,7 @@ export function AiFlagshipSection() {
               {/* Sheet Header */}
               <View style={styles.sheetHeader}>
                 <View style={styles.sheetHeaderIconWrap}>
-                  <Sparkles size={18} color="#0F6D55" />
+                  <FileText size={18} color={colorTokens.brandText} />
                 </View>
                 <View style={styles.sheetHeaderTextWrap}>
                   <Text style={styles.sheetHeaderTitle}>{t("landing.aiFlagship.sheetTitle")}</Text>
@@ -330,7 +331,7 @@ export function AiFlagshipSection() {
                         value={demoState === 'idle' ? typedText : typedText || targetText}
                         onChangeText={setTypedText}
                         placeholder={t("landing.aiFlagship.demoInputPlaceholder")}
-                        placeholderTextColor="#899790"
+                        placeholderTextColor={colorTokens.subtle}
                         editable={demoState === 'idle'}
                         textAlignVertical="top"
                       />
@@ -351,18 +352,20 @@ export function AiFlagshipSection() {
                     {/* Action Button */}
                     {demoState === 'analyzing' ? (
                       <View style={styles.analyzingStateRow}>
-                        <ActivityIndicator size="small" color="#04CF92" />
+                        <ActivityIndicator size="small" color={colorTokens.brand} />
                         <Text style={styles.analyzingText}>{t("landing.aiFlagship.analyzingState")}</Text>
                       </View>
                     ) : (
                       <Pressable
-                        style={({ hovered }: any) => [
+                        accessibilityRole="button"
+                        style={({ hovered, pressed }: any) => [
                           styles.analyzeBtn,
                           hovered && styles.analyzeBtnHovered,
+                          pressed && styles.brandBtnPressed,
                         ]}
                         onPress={demoState === 'idle' ? runSequence : handleManualAnalyze}
                       >
-                        <Sparkles size={15} color="#0B1A17" style={{ marginRight: 8 }} />
+                        <Search size={15} color={colorTokens.onBrand} style={{ marginRight: 8 }} />
                         <Text style={styles.analyzeBtnText}>{t("landing.aiFlagship.analyzeBtn")}</Text>
                       </Pressable>
                     )}
@@ -420,14 +423,14 @@ export function AiFlagshipSection() {
                         <View style={styles.labelWithBadgeRow}>
                           <Text style={styles.fieldLabel}>{t("landing.aiFlagship.priceBdt")}</Text>
                           <View style={styles.resolvedBadge}>
-                            <Check size={11} color="#0F6D55" style={{ marginRight: 3 }} />
+                            <Check size={11} color={colorTokens.brandText} style={{ marginRight: 3 }} />
                             <Text style={styles.resolvedBadgeText}>
                               {t("landing.aiFlagship.resolvedFrom", { raw: parsedData.priceRaw })}
                             </Text>
                           </View>
                         </View>
                         <View style={styles.fieldValueBox}>
-                          <Text style={[styles.fieldValueText, { fontFamily: fonts.semiBold, color: '#0F6D55' }]}>
+                          <Text style={[styles.fieldValueText, { fontFamily: fonts.semiBold, color: colorTokens.brandText }]}>
                             {parsedData.priceDisplay}
                           </Text>
                         </View>
@@ -460,7 +463,7 @@ export function AiFlagshipSection() {
                         <View style={styles.labelWithBadgeRow}>
                           <Text style={styles.fieldLabel}>{t("landing.aiFlagship.facing")}</Text>
                           <View style={styles.lowConfBadge}>
-                            <AlertTriangle size={11} color="#D4870A" style={{ marginRight: 4 }} />
+                            <AlertTriangle size={11} color={colorTokens.warningText} style={{ marginRight: 4 }} />
                             <Text style={styles.lowConfText}>{t("landing.aiFlagship.lowConfidenceNotice")}</Text>
                           </View>
                         </View>
@@ -478,7 +481,7 @@ export function AiFlagshipSection() {
                               style={styles.fieldEditDone}
                               onPress={() => setEditingField(null)}
                             >
-                              <Check size={14} color="#0F6D55" />
+                              <Check size={14} color={colorTokens.brandText} />
                             </Pressable>
                           </View>
                         ) : (
@@ -489,7 +492,7 @@ export function AiFlagshipSection() {
                             <Text style={[styles.fieldValueText, styles.fieldValueTextLow]}>
                               {parsedData.facing}
                             </Text>
-                            <Edit3 size={13} color="#899790" />
+                            <Edit3 size={13} color={colorTokens.subtle} />
                           </Pressable>
                         )}
                       </View>
@@ -512,7 +515,7 @@ export function AiFlagshipSection() {
                       <View style={styles.amenityChipsGrid}>
                         {amenityEntries.map(([key]) => (
                           <View key={key} style={styles.amenityChip}>
-                            <Check size={12} color="#0F6D55" style={{ marginRight: 4 }} />
+                            <Check size={12} color={colorTokens.brandText} style={{ marginRight: 4 }} />
                             <Text style={styles.amenityChipText}>{key.replace(/_/g, ' ')}</Text>
                           </View>
                         ))}
@@ -533,14 +536,16 @@ export function AiFlagshipSection() {
                       </Pressable>
 
                       <Pressable
-                        style={({ hovered }: any) => [
+                        accessibilityRole="button"
+                        style={({ hovered, pressed }: any) => [
                           styles.applyBtn,
                           hovered && styles.applyBtnHovered,
+                          pressed && styles.brandBtnPressed,
                         ]}
                         onPress={handleApply}
                       >
                         <Text style={styles.applyBtnText}>{t("landing.aiFlagship.applyBtn")}</Text>
-                        <ArrowRight size={15} color="#0B1A17" style={{ marginLeft: 6 }} />
+                        <ArrowRight size={15} color={colorTokens.onBrand} style={{ marginLeft: 6 }} />
                       </Pressable>
                     </View>
 

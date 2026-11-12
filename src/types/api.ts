@@ -83,6 +83,9 @@ export interface Area {
   name: string;
   parent_area_id: string | null;
   city: string | null;
+  city_id?: string | null;
+  /** Alternative spellings or transliterations supported by search/matching. */
+  aliases?: string[];
   /** Where the area is centred. Not every area has one yet; distance search needs it. */
   center_lat?: number | null;
   center_lng?: number | null;
@@ -148,6 +151,22 @@ export interface UpsertPropertyDto {
 
 export type CreatePropertyDto = UpsertPropertyDto & { area_id: string };
 export type UpdatePropertyDto = Omit<UpsertPropertyDto, "property_id">;
+
+export type ModerationStatusUpdate = PropertyStatus | "changes_requested";
+
+export interface PropertyFeedbackDto {
+  tags: string[];
+  notes: string;
+  requestChanges?: boolean;
+}
+
+export interface PropertyFeedbackResult {
+  id: string;
+  delivered?: "api";
+  status: ModerationStatusUpdate;
+  tags: string[];
+  notes: string;
+}
 
 export interface Permission {
   id: string;

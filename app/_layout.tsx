@@ -51,6 +51,7 @@ export default function RootLayout() {
           <PageMeta
             title="HomeNet BD | Verified Property Listings in Bangladesh"
             description="HomeNet BD is a property marketplace for Bangladesh. Browse flats, houses and plots for sale or rent and contact the owners directly. Listing is free."
+            noCanonical
           />
           <StatusBar style="dark" />
           <Stack screenOptions={{ contentStyle: { backgroundColor: "#f8faf9" }, headerShown: false }} />
