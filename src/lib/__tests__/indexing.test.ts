@@ -23,14 +23,9 @@ describe("what Google is asked to index", () => {
     expect(redirects["/home"]).toBe("/");
   });
 
-  it("gives every listing URL a canonical in the response, before any script runs", () => {
+  it("does not inject a blanket canonical Link header on /property/:id responses, so deleted/unknown IDs on the 200 shell never carry a self-referencing canonical", () => {
     const rule = vercel.headers.find((h: { source: string }) => h.source.startsWith("/property/:id"));
-    expect(rule.headers).toContainEqual({
-      key: "Link",
-      value: '<https://www.homenetbd.com/property/:id>; rel="canonical"',
-    });
-    // ...but not the listing form's own pages, which are not listings.
-    expect(rule.source).toBe("/property/:id((?!(?:create|edit)$)[^/]+)");
+    expect(rule).toBeUndefined();
   });
 
   it("answers an unknown guide with a real 404: every guide is exported, so there is no shell rewrite", () => {
@@ -95,10 +90,56 @@ describe("what Google is asked to index", () => {
     });
   });
 
+  describe("property pages in the sitemap", () => {
+    const sitemap = (() => {
+      const dist = mkdtempSync(join(tmpdir(), "sitemap-props-"));
+      mkdirSync(join(dist, "property"), { recursive: true });
+      const prop = (name: string, html: string) => writeFileSync(join(dist, "property", `${name}.html`), html);
+      prop(
+        "active-1",
+        `<html><script type="application/json" id="build-snapshot">${JSON.stringify({ id: "active-1", status: "active", updated_at: "2026-11-05T00:00:00Z" })}</script></html>`,
+      );
+      prop(
+        "archived-1",
+        `<html><script type="application/json" id="build-snapshot">${JSON.stringify({ id: "archived-1", status: "archived", updated_at: "2026-11-05T00:00:00Z" })}</script></html>`,
+      );
+      prop(
+        "noindex-1",
+        `<html><head><meta name="robots" content="noindex, follow" /></head><script type="application/json" id="build-snapshot">${JSON.stringify({ id: "noindex-1", status: "active" })}</script></html>`,
+      );
+      prop("no-id-1", `<html><script type="application/json" id="build-snapshot">${JSON.stringify({})}</script></html>`);
+      prop("missing-snapshot", `<html><body>Loading...</body></html>`);
+      prop("[id]", `<html><body>Shell</body></html>`);
+      prop("create", `<html><body>Create</body></html>`);
+      prop("edit", `<html><body>Edit</body></html>`);
+      execFileSync(process.execPath, [join(ROOT, "scripts/generate-sitemap.mjs"), dist], { cwd: ROOT, stdio: "pipe" });
+      const xml = readFileSync(join(dist, "sitemap.xml"), "utf8");
+      rmSync(dist, { recursive: true, force: true });
+      return xml;
+    })();
+
+    it("includes only active, existing properties with their lastmod date", () => {
+      expect(sitemap).toMatch(
+        /<loc>https:\/\/www\.homenetbd\.com\/property\/active-1<\/loc>\n    <lastmod>2026-11-05<\/lastmod>/,
+      );
+    });
+
+    it("excludes archived, noindex, shell, form, and missing-snapshot property pages", () => {
+      for (const excluded of ["archived-1", "noindex-1", "no-id-1", "missing-snapshot", "%5Bid%5D", "[id]", "create", "edit"]) {
+        expect(sitemap).not.toContain(`/property/${excluded}`);
+      }
+    });
+  });
+
   it("keeps a listing the build could not fetch out of the index, so one failed fetch cannot fail the deploy", () => {
     // Exported as the loading state, with no <h1>. Were it indexable, check-seo would stop the build.
     const screen = read("src/features/property/screens/PropertyDetailScreen.tsx");
     expect(screen).toMatch(/isLoading && !property[\s\S]{0,400}<PageMeta [^>]*\bnoindex\b/);
+  });
+
+  it("marks missing/deleted property pages noindex, follow and suppresses self-referencing canonicals", () => {
+    const screen = read("src/features/property/screens/PropertyDetailScreen.tsx");
+    expect(screen).toMatch(/if \(!property\)[\s\S]{0,400}robots="noindex, follow"[\s\S]{0,120}noCanonical/);
   });
 
   it("does not use Expo's route loaders, which re-bundle the whole app for every page and failed the deploy", () => {

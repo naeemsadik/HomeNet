@@ -39,6 +39,7 @@ export function PageMeta({
   noindex,
   robots,
   canonicalPath,
+  noCanonical,
   image,
 }: {
   title: string;
@@ -52,6 +53,8 @@ export function PageMeta({
   robots?: string;
   /** The page this one duplicates, when it should not be indexed under its own address. */
   canonicalPath?: string;
+  /** Omit canonical, og:url, and App Links tags (e.g. root fallback or not-found states). */
+  noCanonical?: boolean;
   /** The share preview image (absolute URL, about 1200 wide). Defaults to the site's. */
   image?: string;
 }) {
@@ -62,8 +65,13 @@ export function PageMeta({
   // A dynamic route is exported once as a shell whose path still reads
   // "/property/[id]". A canonical built from that would be wrong for every
   // listing, so none is emitted until the browser knows the real path.
+  // Also omit self-referencing canonicals when hidden (noindex) or explicitly suppressed.
   const canonicalPart = canonicalPath ?? pathname;
-  const canonical = isShellPath(canonicalPart) ? null : `${SITE_URL}${canonicalPart === "/" ? "" : canonicalPart}`;
+  const suppressCanonical = Boolean(noCanonical) || (isHidden && !canonicalPath);
+  const canonical =
+    suppressCanonical || isShellPath(canonicalPart)
+      ? null
+      : `${SITE_URL}${canonicalPart === "/" ? "" : canonicalPart}`;
   const shareImage = image || SITE_SHARE_IMAGE;
 
   return (

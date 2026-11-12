@@ -56,122 +56,32 @@ describe("StampDutyTaxGuideScreen", () => {
     );
     expect(h2Headers.length).toBe(4);
     const h2Texts = h2Headers.map((h) => textOf(h));
-    expect(h2Texts[0]).toContain(en.stampDutyGuide.calculatorTitle);
+    expect(h2Texts[0]).toContain(en.stampDutyGuide.feesTitle);
     expect(h2Texts[1]).toContain(en.stampDutyGuide.workflowTitle);
     expect(h2Texts[2]).toContain(en.stampDutyGuide.documentsTitle);
     expect(h2Texts[3]).toContain(en.stampDutyGuide.faqTitle);
   });
 
-  it("calculates default 1 Crore in Dhaka City Corp accurately (8.5% total)", () => {
+  it("names the fees that apply but states no percentage rate", () => {
     let tree: renderer.ReactTestRenderer;
     act(() => {
       tree = renderer.create(<StampDutyTaxGuideScreen />);
     });
-
     const fullText = textOf(tree!.root);
-    // 1 Crore defaults
-    // Stamp Duty 1.5% = 1,50,000
-    expect(fullText).toContain("৳ 1,50,000");
-    // Registration Fee 1.0% = 1,00,000
-    expect(fullText).toContain("৳ 1,00,000");
-    // Local Govt Tax 2.0% = 2,00,000
-    expect(fullText).toContain("৳ 2,00,000");
-    // AIT 4.0% = 4,00,000
-    expect(fullText).toContain("৳ 4,00,000");
-    // Total Statutory = 8,50,000 (8.50%)
-    expect(fullText).toContain("৳ 8,50,000");
-    expect(fullText).toContain("8.50%");
+    expect(fullText).toContain(en.stampDutyGuide.fee1Title);
+    expect(fullText).toContain(en.stampDutyGuide.fee5Title);
+    // Rates change with each Finance Act and are not verified here, so none is shown.
+    expect(fullText).not.toMatch(/\d+(\.\d+)?\s?%/);
+    expect(fullText).toContain(en.stampDutyGuide.feesNote);
   });
 
-  it("updates calculation when selecting a preset chip (e.g. 50 Lakh)", () => {
+  it("has no calculator and no compliance badge", () => {
     let tree: renderer.ReactTestRenderer;
     act(() => {
       tree = renderer.create(<StampDutyTaxGuideScreen />);
     });
-
-    const presetChips = tree!.root.findAll(
-      (node) =>
-        node.props.onPress &&
-        textOf(node).includes(en.stampDutyGuide.preset50L),
-    );
-    expect(presetChips.length).toBeGreaterThan(0);
-
-    act(() => {
-      presetChips[0].props.onPress();
-    });
-
-    const fullText = textOf(tree!.root);
-    // 50 Lakh (5,000,000) * 8.5% = 4,25,000
-    expect(fullText).toContain("৳ 4,25,000");
-  });
-
-  it("updates calculation when selecting Rural location (LGT 1%, AIT 1%)", () => {
-    let tree: renderer.ReactTestRenderer;
-    act(() => {
-      tree = renderer.create(<StampDutyTaxGuideScreen />);
-    });
-
-    const ruralOptions = tree!.root.findAll(
-      (node) =>
-        node.props.onPress &&
-        textOf(node).includes(en.stampDutyGuide.locRural),
-    );
-    expect(ruralOptions.length).toBeGreaterThan(0);
-
-    act(() => {
-      ruralOptions[0].props.onPress();
-    });
-
-    const fullText = textOf(tree!.root);
-    // 1 Crore with:
-    // Stamp Duty: 1.5% = 1,50,000
-    // Reg Fee: 1.0% = 1,00,000
-    // LGT: 1.0% = 1,00,000
-    // AIT: 1.0% = 1,00,000
-    // Total: 4.5% = 4,50,000
-    expect(fullText).toContain("৳ 4,50,000");
-    expect(fullText).toContain("4.50%");
-  });
-
-  it("calculates developer VAT (2% for <= 1600 sq ft, 4.5% for > 1600 sq ft)", () => {
-    let tree: renderer.ReactTestRenderer;
-    act(() => {
-      tree = renderer.create(<StampDutyTaxGuideScreen />);
-    });
-
-    const devButtons = tree!.root.findAll(
-      (node) =>
-        node.props.onPress &&
-        textOf(node).includes(en.stampDutyGuide.typeDeveloper),
-    );
-    expect(devButtons.length).toBeGreaterThan(0);
-
-    act(() => {
-      devButtons[0].props.onPress();
-    });
-
-    let fullText = textOf(tree!.root);
-    // Dhaka City Corp + Developer (under 1600 sq ft):
-    // 8.5% + 2% VAT = 10.5% = 10,50,000 BDT
-    expect(fullText).toContain("৳ 10,50,000");
-    expect(fullText).toContain("10.50%");
-
-    // Now switch to over 1600 sq ft (4.5% VAT)
-    const over1600Buttons = tree!.root.findAll(
-      (node) =>
-        node.props.onPress &&
-        textOf(node).includes(en.stampDutyGuide.sizeOver1600),
-    );
-    expect(over1600Buttons.length).toBeGreaterThan(0);
-
-    act(() => {
-      over1600Buttons[0].props.onPress();
-    });
-
-    fullText = textOf(tree!.root);
-    // 8.5% + 4.5% VAT = 13.0% = 13,00,000 BDT
-    expect(fullText).toContain("৳ 13,00,000");
-    expect(fullText).toContain("13.00%");
+    expect(tree!.root.findAll((n) => n.props.keyboardType === "numeric" || n.props.keyboardType === "number-pad")).toHaveLength(0);
+    expect(textOf(tree!.root)).not.toMatch(/Compliant|Aligned/);
   });
 
   it("renders 6-step registration workflow and legal document checklist", () => {

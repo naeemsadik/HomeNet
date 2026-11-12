@@ -116,6 +116,8 @@ const LISTING_STATUS_MAP_BN: Record<string, string> = {
   rejected: "প্রত্যাখ্যাত",
   verified: "যাচাইকৃত",
   inactive: "নিষ্ক্রিয়",
+  archived: "আর্কাইভকৃত",
+  changes_requested: "সংশোধন প্রয়োজন",
   under_review: "পর্যালোচনাধীন",
 };
 

@@ -13,11 +13,15 @@ import { useQuery } from "@tanstack/react-query";
 import { getPropertyById } from "@/services/propertyApi";
 import { toApiError } from "@/services/apiClient";
 import { isListingPhoto } from "@/features/property/utils/listingMedia";
+import { NotFoundScreen } from "@/screens/NotFoundScreen";
+import { useAuthStore } from "@/stores/authStore";
 
 export function PropertyEditScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { isPhone } = useResponsive();
+  const user = useAuthStore((s) => s.user);
+  const hydrated = useAuthStore((s) => s.hydrated);
   const updateProperty = useUpdateProperty();
   const uploadMedia = useUploadMedia();
 
@@ -30,8 +34,10 @@ export function PropertyEditScreen() {
     enabled: !!id,
   });
 
+  const isOwner = Boolean(user && propertyData && user.id === propertyData.user_id);
+
   const handleSubmit = async (dto: UpsertPropertyDto, images: { uri: string; file?: Blob | File }[]) => {
-    if (!id) return;
+    if (!id || !isOwner) return;
     try {
       const result = await updateProperty.mutateAsync({ id, dto });
       const propertyId = result.data?.id ?? id;
@@ -48,7 +54,7 @@ export function PropertyEditScreen() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !hydrated) {
     return (
       <AppChrome active="sell">
         <View style={styles.center}>
@@ -68,6 +74,11 @@ export function PropertyEditScreen() {
         </View>
       </AppChrome>
     );
+  }
+
+  // Least-privilege enforcement: only the authentic owner can edit a listing.
+  if (!isOwner) {
+    return <NotFoundScreen />;
   }
 
   const initialData: Partial<UpsertPropertyDto> = {

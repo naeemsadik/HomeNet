@@ -56,6 +56,9 @@ export async function listingSnapshot(id: string): Promise<PropertyDetail | null
     );
     const detail = body?.data;
     if (!detail?.id) throw new Error("API response has no listing");
+    if (detail.status && detail.status !== "active") {
+      throw new Error(`Listing ${id} has non-active status (${detail.status})`);
+    }
     const { phone, whatsapp_number, ...publicDetail } = detail;
     return { ...publicDetail, user: detail.user ? { ...detail.user, auth_identities: [] } : null };
   } catch (error) {

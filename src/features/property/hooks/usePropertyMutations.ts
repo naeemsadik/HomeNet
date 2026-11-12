@@ -17,6 +17,7 @@ function useInvalidateProperties() {
   return (id?: string) => {
     queryClient.invalidateQueries({ queryKey: ["properties"] });
     queryClient.invalidateQueries({ queryKey: ["my-properties"] });
+    queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
     if (id) queryClient.invalidateQueries({ queryKey: ["property", id] });
   };
 }

@@ -73,7 +73,7 @@ function WebFooter({ style }: FooterProps) {
     { label: "Seller Guides", href: "/resources/seller-guides" },
     { label: "Renter Guides", href: "/resources/renter-guides" },
     { label: "Landlord Guides", href: "/seller" },
-    { label: "Mortgage Calculator", href: "/market" },
+    { label: "Mortgage Calculator", href: "/mortgage-calculator" },
   ];
 
   const searchLinks = [

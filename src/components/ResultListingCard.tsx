@@ -1,3 +1,4 @@
+import { AdminListingActions } from "@/features/property/components/AdminListingActions";
 import React, { memo, useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
@@ -193,6 +194,7 @@ function ResultListingCardComponent({
           style={[styles.mediaCol, compact && styles.mediaColCompact, webPointer]}
         >
           {media}
+          <AdminListingActions property={property} top={12} />
           <View style={[styles.priceBand, featured && styles.priceBandFeatured]}>
             <Text style={[styles.priceText, featured && styles.priceTextFeatured]}>
               {price}
