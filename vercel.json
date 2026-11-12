@@ -43,15 +43,6 @@
   ],
   "headers": [
     {
-      "source": "/property/:id((?!(?:create|edit)$)[^/]+)",
-      "headers": [
-        {
-          "key": "Link",
-          "value": "<https://www.homenetbd.com/property/:id>; rel=\"canonical\""
-        }
-      ]
-    },
-    {
       "source": "/_expo/static/(.*)",
       "headers": [
         {
