@@ -117,29 +117,39 @@ function guides() {
   });
 }
 
+const NON_LISTING_FILES = new Set(["[id].html", "create.html", "edit.html"]);
+
+function snapshotFromHtml(html) {
+  const block = html.match(/<script[^>]*\bid="build-snapshot"[^>]*>([\s\S]*?)<\/script>/);
+  return block ? JSON.parse(block[1]) : null;
+}
+
 /** The build snapshot in an exported page's HTML, parsed; null when the page has none. */
 function pageSnapshot(...segments) {
   const file = resolve(DIST, ...segments);
   if (!existsSync(file)) return null;
-  const block = readFileSync(file, "utf8").match(/<script[^>]*\bid="build-snapshot"[^>]*>([\s\S]*?)<\/script>/);
-  return block ? JSON.parse(block[1]) : null;
+  return snapshotFromHtml(readFileSync(file, "utf8"));
 }
 
 /**
- * The listing pages the export wrote, with the day each listing last changed.
- * A page with no snapshot is left out: the "[id]" shell, /property/create, and
- * a listing the build could not fetch, which exports noindex until the next
- * build.
+ * The active listing pages the export wrote, with the day each listing last changed.
+ * A page with no valid active snapshot is left out: the "[id]" shell, /property/create,
+ * /property/edit, non-active listings, and any listing the build could not fetch
+ * (which exports noindex until the next build).
  */
 function exportedListings() {
   const dir = resolve(DIST, "property");
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
-    .filter((name) => name.endsWith(".html"))
+    .filter((name) => name.endsWith(".html") && !NON_LISTING_FILES.has(name) && !name.startsWith("["))
     .sort()
     .flatMap((name) => {
-      const detail = pageSnapshot("property", name);
-      return detail ? [{ id: name.slice(0, -".html".length), lastmod: isoDay(detail.updated_at || detail.created_at) }] : [];
+      const html = readFileSync(resolve(dir, name), "utf8");
+      if (/<meta[^>]*name="robots"[^>]*content="[^"]*noindex/i.test(html)) return [];
+      const detail = snapshotFromHtml(html);
+      if (!detail?.id) return [];
+      if (detail.status !== undefined && detail.status !== "active") return [];
+      return [{ id: name.slice(0, -".html".length), lastmod: isoDay(detail.updated_at || detail.created_at) }];
     });
 }
 
