@@ -142,6 +142,13 @@ describe("what Google is asked to index", () => {
     expect(screen).toMatch(/if \(!property\)[\s\S]{0,400}robots="noindex, follow"[\s\S]{0,120}noCanonical/);
   });
 
+  it("includes automated IndexNow submission in the post-build / sitemap pipeline", () => {
+    const pkg = JSON.parse(read("package.json"));
+    expect(pkg.scripts.build).toContain("scripts/submit-indexnow.mjs");
+    expect(pkg.scripts.sitemap).toContain("scripts/submit-indexnow.mjs");
+    expect(pkg.scripts.indexnow).toBe("node scripts/submit-indexnow.mjs");
+  });
+
   it("does not use Expo's route loaders, which re-bundle the whole app for every page and failed the deploy", () => {
     expect(read("app.json")).not.toContain("unstable_useServerDataLoaders");
   });
