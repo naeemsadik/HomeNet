@@ -238,7 +238,9 @@ export function BrowseScreen({
   const [searchStarted, setSearchStarted] = useState(false);
   if (hasSearchedNow && !searchStarted) setSearchStarted(true);
   const hasSearched = hasSearchedNow || searchStarted;
-  const feedReady = hasSearched && (!filters.area || isCityName(filters.area) || areasReady);
+  // A whole city is filtered by its district, which only the area list can name, so wait for it
+  // instead of asking for the city by name first and again once the list arrives.
+  const feedReady = hasSearched && (filters.area ? isCityName(filters.area) || areasReady : !filters.city || areasReady);
 
   const {
     properties: apiProperties,
