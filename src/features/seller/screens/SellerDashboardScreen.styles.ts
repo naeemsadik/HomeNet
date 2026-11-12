@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colorTokens, colors, fonts, radius } from "@/theme";
+import { colorTokens, colors, fonts, radius, radiusTokens } from "@/theme";
 
 export const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
@@ -178,7 +178,7 @@ export const styles = StyleSheet.create({
     gap: 16,
   },
   heroBanner: {
-    borderRadius: 24,
+    borderRadius: radiusTokens.xl,
     padding: 32,
     flexDirection: "row",
     alignItems: "center",
@@ -495,7 +495,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     padding: 10,
-    borderRadius: 14,
+    borderRadius: radiusTokens.xl,
     backgroundColor: "#FAFBFB",
   },
   activityIconWrap: {
@@ -553,7 +553,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 520,
     backgroundColor: colors.white,
-    borderRadius: 24,
+    borderRadius: radiusTokens.xl,
     padding: 24,
     gap: 20,
     shadowColor: "#000",
@@ -603,7 +603,7 @@ export const styles = StyleSheet.create({
     alignItems: "flex-start",
     gap: 12,
     padding: 14,
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.08)",
     backgroundColor: colors.white,
@@ -702,7 +702,7 @@ export const styles = StyleSheet.create({
   },
   tabHeroBanner: {
     padding: 22,
-    borderRadius: 20,
+    borderRadius: radiusTokens.xl,
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
@@ -721,7 +721,7 @@ export const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "stretch",
     padding: 16,
-    borderRadius: 18,
+    borderRadius: radiusTokens.xl,
     gap: 14,
   },
   tabHeroHeader: {
@@ -742,7 +742,7 @@ export const styles = StyleSheet.create({
   tabHeroIconWrap: {
     width: 48,
     height: 48,
-    borderRadius: 14,
+    borderRadius: radiusTokens.xl,
     backgroundColor: colors.greenLight,
     alignItems: "center",
     justifyContent: "center",
@@ -799,7 +799,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     minWidth: 150,
     backgroundColor: colors.white,
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
@@ -844,14 +844,14 @@ export const styles = StyleSheet.create({
   },
   tabCard: {
     backgroundColor: colors.white,
-    borderRadius: 20,
+    borderRadius: radiusTokens.xl,
     padding: 22,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
   },
   tabCardPhone: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
   },
   tabCardHeader: {
     marginBottom: 16,
@@ -876,7 +876,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     minWidth: 250,
     backgroundColor: "#F9FAF9",
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     padding: 20,
     borderWidth: 1.2,
     borderColor: "rgba(11, 26, 23, 0.08)",
@@ -1017,7 +1017,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     minWidth: 250,
     backgroundColor: colors.white,
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     padding: 18,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
@@ -1116,7 +1116,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     minWidth: 250,
     backgroundColor: colors.white,
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     padding: 18,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",
@@ -1175,7 +1175,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     minWidth: 230,
     backgroundColor: colors.white,
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     padding: 18,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.08)",

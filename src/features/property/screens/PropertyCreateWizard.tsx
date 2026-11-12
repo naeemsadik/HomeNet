@@ -18,17 +18,11 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { AreaPicker } from "@/components/AreaPicker";
-import {
-  useMarkAllRead,
-  useNotifications,
-  useUnreadCount,
-} from "@/features/notification/hooks/useNotifications";
 import { SellerShell } from "@/features/seller/components/SellerShell";
 import { Footer } from "@/components/Footer";
 import { useResponsive } from "@/hooks/useResponsive";
-import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
-import { confirmAction, notify } from "@/lib/alert";
+import { notify } from "@/lib/alert";
 import type { UploadInput } from "@/services/upload";
 import { colorTokens, webPointer } from "@/theme";
 import type { Area, PropertyType, UpsertPropertyDto } from "@/types/api";
@@ -59,9 +53,10 @@ import { toWhatsAppFormat } from "../utils/lister";
 
 export function PropertyCreateWizard() {
   const { t } = useTranslation();
-  const { isPhone, isTablet, width } = useResponsive();
+  const { isPhone, width } = useResponsive();
   const isNarrowPhone = isPhone && width <= 360;
   const store = usePropertyWizardStore();
+  const setBasics = usePropertyWizardStore((s) => s.setBasics);
   const params = useLocalSearchParams<{
     listing_type?: string;
     type?: string;
@@ -77,23 +72,13 @@ export function PropertyCreateWizard() {
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-
-  // Live Notifications functionalities
-  const { data: unreadCountData } = useUnreadCount();
-  const unreadCount = unreadCountData?.data?.count ?? 0;
-  const { data: notificationsData, isLoading: notificationsLoading } = useNotifications();
-  const markAllReadMutation = useMarkAllRead();
-  const notificationsList =
-    notificationsData?.pages.flatMap((page) => page.data?.items ?? []) ?? [];
 
   // Sync initial query params from URL if present (e.g. from homepage OwnerListPropertySection)
   useEffect(() => {
     if (params.type && (params.type in PROPERTY_TYPE_CONFIGS)) {
       const typeKey = params.type as PropertyType;
       const cfg = PROPERTY_TYPE_CONFIGS[typeKey];
-      store.setBasics({
+      setBasics({
         type: typeKey,
         ...(params.listing_type === "sale" || params.listing_type === "rent"
           ? { listingType: params.listing_type }
@@ -104,7 +89,7 @@ export function PropertyCreateWizard() {
         areaUnit: cfg.defaultUnit,
       });
     }
-  }, [params.type, params.listing_type, params.subtype]);
+  }, [params.type, params.listing_type, params.subtype, setBasics]);
 
   // The error banner sits at the top of the step card, so a user who has
   // scrolled down a long step would never see it otherwise.
@@ -418,17 +403,6 @@ export function PropertyCreateWizard() {
     } finally {
       store.setIsSubmitting(false);
     }
-  };
-
-  const logout = useAuthStore((s) => s.logout);
-  const handleLogout = async () => {
-    const confirmed = await confirmAction(t("wizard.logoutConfirm.title"), t("wizard.logoutConfirm.message"), {
-      confirmLabel: t("wizard.logoutConfirm.confirm"),
-      destructive: true,
-    });
-    if (!confirmed) return;
-    logout();
-    router.replace("/");
   };
 
   // Sidebar items - aligned with HomeNet standards (all seller tabs present)

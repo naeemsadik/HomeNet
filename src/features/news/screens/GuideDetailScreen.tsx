@@ -11,7 +11,7 @@ import {
   Sparkles,
   User,
 } from "@/components/icons";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Platform,
@@ -63,13 +63,11 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
 
   const resolvedUrl = useMemo(
     () => guide.imageUrl || resolveGuideImage(guide),
-    [guide.imageUrl, guide.id, guide.slug, guide.category, guide.title, guide.sourceType],
+    [guide],
   );
-  const [imgUri, setImgUri] = useState(resolvedUrl);
-
-  useEffect(() => {
-    setImgUri(resolvedUrl);
-  }, [resolvedUrl]);
+  // The address that failed to load, so a new guide starts from its own image again.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const imgUri = failedUrl === resolvedUrl ? GUIDE_FALLBACK_IMAGE : resolvedUrl;
 
   const handlePress = useCallback(() => {
     if (isRss && (guide.sourceUrl || guide.href)) {
@@ -99,7 +97,7 @@ const RelatedGuideMiniItem = memo(function RelatedGuideMiniItem({
           contentFit="cover"
           cachePolicy="memory-disk"
           transition={200}
-          onError={() => setImgUri(GUIDE_FALLBACK_IMAGE)}
+          onError={() => setFailedUrl(resolvedUrl)}
         />
       </View>
       <View style={styles.relatedContent}>
@@ -137,17 +135,12 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
     () => guide?.imageUrl || resolveGuideImage(guide),
     [guide],
   );
-  const [coverUri, setCoverUri] = useState(resolvedCoverUrl);
-
-  useEffect(() => {
-    setCoverUri(resolvedCoverUrl);
-  }, [resolvedCoverUrl]);
+  const [failedCoverUrl, setFailedCoverUrl] = useState<string | null>(null);
+  const coverUri = failedCoverUrl === resolvedCoverUrl ? GUIDE_FALLBACK_IMAGE : resolvedCoverUrl;
 
   const handleCoverError = useCallback(() => {
-    if (coverUri !== GUIDE_FALLBACK_IMAGE) {
-      setCoverUri(GUIDE_FALLBACK_IMAGE);
-    }
-  }, [coverUri]);
+    setFailedCoverUrl(resolvedCoverUrl);
+  }, [resolvedCoverUrl]);
 
   // Filter out the active article from related items
   const relatedGuides = useMemo(() => {

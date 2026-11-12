@@ -1,4 +1,5 @@
-import { Image, Text, View, type ImageStyle, type StyleProp } from "react-native";
+import { Text, View, type StyleProp } from "react-native";
+import { Image, type ImageStyle } from "expo-image";
 import { colorTokens, fonts } from "@/theme";
 
 /** Up to two letters from a name: "Rahim Uddin" → "RU", "Rahim" → "R". */
@@ -31,7 +32,7 @@ export function UserAvatar({
 }) {
   const box = { width: size, height: size, borderRadius: size / 2 };
   if (uri) {
-    return <Image accessibilityIgnoresInvertColors source={{ uri }} style={[box, style]} />;
+    return <Image source={{ uri }} style={[box, style]} />;
   }
   return (
     <View

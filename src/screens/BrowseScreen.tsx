@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  FlatList,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -23,6 +25,7 @@ import {
   X,
 } from "@/components/icons";
 import { AppChrome } from "@/components/AppChrome";
+import { Footer } from "@/components/Footer";
 import { PropertyCard } from "@/components/PropertyCard";
 import { RightmoveFilterCard } from "@/components/RightmoveFilterCard";
 import { ResultListingCard } from "@/components/ResultListingCard";
@@ -34,6 +37,7 @@ import { PropertyResultsMap } from "@/features/property/components/PropertyResul
 import { PropertySkeletonFeed } from "@/features/property/components/PropertySkeleton";
 import { useAreas } from "@/features/property/hooks/useAreas";
 import { fetchBrowseTotal, useBrowseFeed } from "@/features/property/hooks/useBrowseFeed";
+import type { Area } from "@/types/api";
 import type { PropertyFilters } from "@/features/property/types/property";
 import type { BrowseSnapshot } from "@/lib/browseSnapshot";
 import {
@@ -71,6 +75,11 @@ const SAVED_SEARCHES_ENABLED = false;
 
 type SortKey = "newest" | "priceAsc" | "priceDesc" | "nearest" | "popular";
 
+/** One stable empty list, so memos that depend on the areas do not rerun each render. */
+const NO_AREAS: Area[] = [];
+
+const ResultSeparator = () => <View style={styles.resultSeparator} />;
+
 export function BrowseScreen({
   mode,
   location: fixedLocation,
@@ -96,7 +105,7 @@ export function BrowseScreen({
   // A partial area list (see useAreas) is worse than none: it would offer two
   // places and treat every other one as unknown.
   const { areas: fetchedAreas, ready: areasReady, complete: areasComplete } = useAreas();
-  const areas = areasComplete ? fetchedAreas : [];
+  const areas = areasComplete ? fetchedAreas : NO_AREAS;
   const areaOptions = React.useMemo(() => {
     if (fixedLocation) return undefined;
     return areasComplete
@@ -129,6 +138,9 @@ export function BrowseScreen({
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   const [isSearchSaved, setIsSearchSaved] = useState(false);
   const [isAlertOn, setIsAlertOn] = useState(false);
+  // Set when Search is pressed, or when the results' own filters are changed, so
+  // a search that has been made stays one (see hasSearched below).
+  const [searchStarted, setSearchStarted] = useState(false);
 
   const toggleSaved = useSavedStore((state) => state.toggleSaved);
   // Subscribing to the ids is what re-renders the hearts when one is toggled.
@@ -138,9 +150,12 @@ export function BrowseScreen({
 
   const applyFilters = useCallback(
     (next: SearchFilters) => {
+      // Only reachable from the results, so a search has been made: remember
+      // it, or clearing the last filter would bounce back to the search card.
+      setSearchStarted(true);
       router.setParams(filtersToParamPatch(next, { fixedLocation, current: params }));
     },
-    [fixedLocation, params]
+    [fixedLocation, params, setSearchStarted]
   );
 
   // Depends on the one fact it reads, so the memo survives unrelated param changes.
@@ -184,7 +199,7 @@ export function BrowseScreen({
         searched: "1",
       });
     },
-    [fixedLocation, params]
+    [fixedLocation, params, setSearchStarted]
   );
 
   const apiFilters = toApiFilters(filters);
@@ -209,8 +224,6 @@ export function BrowseScreen({
     Boolean(filters.area) ||
     Boolean(filters.query) ||
     activeFilterCount > 0;
-  const [searchStarted, setSearchStarted] = useState(false);
-  if (hasSearchedNow && !searchStarted) setSearchStarted(true);
   const hasSearched = hasSearchedNow || searchStarted;
   const feedReady = hasSearched && (!filters.area || isCityName(filters.area) || areasReady);
 
@@ -235,12 +248,14 @@ export function BrowseScreen({
   });
   const snapshot = loading && !hasUrlFilters ? initialResults : undefined;
   const feedLoading = loading && !snapshot;
-  const feed = snapshot ? snapshot.items : apiProperties ?? [];
   const isSoldView = filters.purpose === "sold";
 
   // Memoised so the sort below, and every card under it, only recompute when
   // the feed or the filters actually change rather than on each render.
-  const results = React.useMemo(() => applyClientFilters(feed, filters), [feed, filters]);
+  const results = React.useMemo(
+    () => applyClientFilters(snapshot ? snapshot.items : apiProperties ?? [], filters),
+    [snapshot, apiProperties, filters]
+  );
 
   const sortedResults = React.useMemo(() => {
     const list = [...results];
@@ -503,7 +518,8 @@ export function BrowseScreen({
     </View>
   ) : null;
 
-  const resultsBody = feedLoading ? (
+  // Everything the results area shows when it is not the list of cards.
+  const resultsPlaceholder = feedLoading ? (
     <PropertySkeletonFeed />
   ) : isError && results.length === 0 ? (
     <View style={styles.centerContainer}>
@@ -511,7 +527,24 @@ export function BrowseScreen({
       <Text style={styles.emptySubtitle}>{t("browse.loadErrorSubtitle")}</Text>
       <AppButton icon={RotateCcw} label={t("browse.retry")} onPress={() => void refresh()} />
     </View>
-  ) : results.length > 0 ? (
+  ) : results.length > 0 ? null : isSoldView ? (
+    <View style={styles.emptyContainer}>
+      <Search color={colorTokens.brand} size={32} />
+      <Text style={styles.emptyTitle}>{t("browse.noSoldTitle")}</Text>
+      <Text style={styles.emptySubtitle}>{t("browse.noSoldSubtitle")}</Text>
+    </View>
+  ) : (
+    <View style={styles.emptyContainer}>
+      <Search color={colorTokens.brand} size={32} />
+      <Text style={styles.emptyTitle}>{t("browse.noMatchingTitle")}</Text>
+      <Text style={styles.emptySubtitle}>{t("browse.noMatchingSubtitle")}</Text>
+      <Pressable onPress={handleResetFilters} style={[styles.clearAllBtn, webPointer]}>
+        <Text style={styles.clearAllBtnText}>{t("browse.resetAllFilters")}</Text>
+      </Pressable>
+    </View>
+  );
+
+  const resultsBody = resultsPlaceholder ?? (
     <View style={styles.resultsList}>
       {sortedResults.map((prop) =>
         isMobile ? (
@@ -533,21 +566,20 @@ export function BrowseScreen({
       )}
       {loadMoreButton}
     </View>
-  ) : isSoldView ? (
-    <View style={styles.emptyContainer}>
-      <Search color={colorTokens.brand} size={32} />
-      <Text style={styles.emptyTitle}>{t("browse.noSoldTitle")}</Text>
-      <Text style={styles.emptySubtitle}>{t("browse.noSoldSubtitle")}</Text>
-    </View>
-  ) : (
-    <View style={styles.emptyContainer}>
-      <Search color={colorTokens.brand} size={32} />
-      <Text style={styles.emptyTitle}>{t("browse.noMatchingTitle")}</Text>
-      <Text style={styles.emptySubtitle}>{t("browse.noMatchingSubtitle")}</Text>
-      <Pressable onPress={handleResetFilters} style={[styles.clearAllBtn, webPointer]}>
-        <Text style={styles.clearAllBtnText}>{t("browse.resetAllFilters")}</Text>
-      </Pressable>
-    </View>
+  );
+
+  // In the app a phone's results are a FlatList, so only the cards near the
+  // screen are mounted however many pages have been loaded. The website keeps
+  // the plain list: its page scrolls with the window and is exported as HTML.
+  const virtualGutter = { paddingHorizontal: isPhone ? layout.gutterPhone : layout.gutter };
+  const renderResultCard = useCallback(
+    ({ item }: { item: (typeof sortedResults)[number] }) => (
+      <View style={virtualGutter}>
+        <PropertyCard onSave={handleToggleSaved} property={item} saved={isSaved(item.id)} />
+      </View>
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [handleToggleSaved, isSaved, isPhone]
   );
 
   // Only listings with real coordinates get a pin, so that is what the pill counts.
@@ -727,7 +759,7 @@ export function BrowseScreen({
   );
 
   // ── Phone ────────────────────────────────────────────────────────────────
-  const mobileContent = (
+  const mobileHeader = (
     <>
       {/* The page's heading on its own line (Rightmove's "Properties For Sale
           in M6"), so the row under it has room for the count, sort and Map. */}
@@ -757,45 +789,87 @@ export function BrowseScreen({
           {viewToggle}
         </View>
       </View>
-
-      {view === "map" ? (
-        <PropertyResultsMap
-          activeLocation={activeLocationTitle}
-          peek="carousel"
-          properties={sortedResults}
-          // The map fills the screen between the results row and the bottom tabs.
-          style={[styles.mobileMap, { height: Math.max(420, height - 190) }]}
-        >
-          <View pointerEvents="box-none" style={styles.mobileMapTop}>
-            {showingPill}
-          </View>
-        </PropertyResultsMap>
-      ) : (
-        resultsBody
-      )}
     </>
   );
 
-  return (
-    <AppChrome
-      active={mode === "rent" && filters.purpose === "short-let" ? "holiday" : mode || "buy"}
-      customTopBar={mobileTopBar}
+  const mobileMap = (
+    <PropertyResultsMap
+      activeLocation={activeLocationTitle}
+      peek="carousel"
+      properties={sortedResults}
+      // The map fills the screen between the results row and the bottom tabs.
+      style={[styles.mobileMap, { height: Math.max(420, height - 190) }]}
     >
-      <View style={[styles.container, isMobile && styles.containerMobile]}>
-        {!hasSearched ? landingContent : isMobile ? mobileContent : desktopContent}
-
-        <AdvancedFiltersModal
-          areaOptions={areaOptions}
-          filters={hasSearched ? filters : draftFilters}
-          fixedLocation={fixedLocation}
-          onApply={hasSearched ? applyFilters : startSearch}
-          onClose={closeFilterModal}
-          onPreviewCount={setPreviewFilters}
-          resultCount={previewCount}
-          showLocation
-          visible={isFilterModalOpen}
-        />
+      <View pointerEvents="box-none" style={styles.mobileMapTop}>
+        {showingPill}
       </View>
+    </PropertyResultsMap>
+  );
+
+  const mobileContent = (
+    <>
+      {mobileHeader}
+      {view === "map" ? mobileMap : resultsBody}
+    </>
+  );
+
+  const filtersModal = (
+    <AdvancedFiltersModal
+      areaOptions={areaOptions}
+      filters={hasSearched ? filters : draftFilters}
+      fixedLocation={fixedLocation}
+      onApply={hasSearched ? applyFilters : startSearch}
+      onClose={closeFilterModal}
+      onPreviewCount={setPreviewFilters}
+      resultCount={previewCount}
+      showLocation
+      visible={isFilterModalOpen}
+    />
+  );
+
+  const activePage = mode === "rent" && filters.purpose === "short-let" ? "holiday" : mode || "buy";
+  const useVirtualList = Platform.OS !== "web" && isMobile;
+  const showCards = hasSearched && view === "list" && !resultsPlaceholder;
+
+  return (
+    <AppChrome active={activePage} customTopBar={mobileTopBar} scroll={!useVirtualList}>
+      {useVirtualList ? (
+        <>
+          <FlatList
+            contentContainerStyle={styles.virtualContent}
+            data={showCards ? sortedResults : []}
+            initialNumToRender={4}
+            ItemSeparatorComponent={ResultSeparator}
+            keyboardShouldPersistTaps="handled"
+            keyExtractor={(item) => String(item.id)}
+            ListEmptyComponent={
+              hasSearched ? <View style={virtualGutter}>{view === "map" ? mobileMap : resultsPlaceholder}</View> : null
+            }
+            ListFooterComponent={
+              <>
+                <View style={[virtualGutter, styles.virtualTail]}>{showCards ? loadMoreButton : null}</View>
+                <Footer />
+              </>
+            }
+            ListHeaderComponent={
+              <View style={[styles.virtualHeader, virtualGutter]}>
+                {!hasSearched ? landingContent : mobileHeader}
+              </View>
+            }
+            maxToRenderPerBatch={4}
+            renderItem={renderResultCard}
+            showsVerticalScrollIndicator={false}
+            style={styles.virtualList}
+            windowSize={7}
+          />
+          {filtersModal}
+        </>
+      ) : (
+        <View style={[styles.container, isMobile && styles.containerMobile]}>
+          {!hasSearched ? landingContent : isMobile ? mobileContent : desktopContent}
+          {filtersModal}
+        </View>
+      )}
 
       {/* ── Mobile: Sort Dropdown Sheet Modal ────────────────────────────── */}
       <Modal
@@ -1198,6 +1272,28 @@ const styles = StyleSheet.create({
   /* ── Results list ──────────────────────────────────────────────────────── */
   resultsList: {
     gap: 18,
+  },
+  resultSeparator: {
+    height: 18,
+  },
+
+  /* In-app phone results (FlatList) */
+  virtualList: {
+    flex: 1,
+    width: "100%",
+  },
+  virtualContent: {
+    flexGrow: 1,
+    backgroundColor: "#F8FAF9",
+  },
+  virtualHeader: {
+    paddingTop: 10,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  virtualTail: {
+    paddingTop: 18,
+    paddingBottom: 24,
   },
   loadMoreWrap: {
     alignItems: "center",

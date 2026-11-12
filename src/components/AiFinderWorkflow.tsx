@@ -35,7 +35,7 @@ import { AI_SEARCH_ENABLED } from "@/lib/features";
 import { useSavedStore } from "@/stores/savedStore";
 import type { Property } from "@/features/property/types/property";
 import { areaIdsFor, resolveArea } from "@/features/property/utils/aiSearchFilters";
-import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, shadow, webPointer, radiusTokens } from "@/theme";
 
 const budgetRanges: Record<string, { min_price?: number; max_price?: number }> = {
   "Under BDT 70k": { max_price: 70000 },
@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
   /* ─── Main Shell ─── */
   finderShell: {
     width: "100%",
-    borderRadius: 20,
+    borderRadius: radiusTokens.xl,
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: colors.line,
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   finderShellModal: {
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     borderWidth: 0.8,
   },
   progress: {
@@ -674,7 +674,7 @@ const styles = StyleSheet.create({
     position: "relative",
     minHeight: 115,
     padding: 14,
-    borderRadius: 14,
+    borderRadius: radiusTokens.xl,
     backgroundColor: colors.white,
     borderWidth: 1.2,
     borderColor: colors.line,
@@ -759,7 +759,7 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 20,
     padding: 14,
-    borderRadius: 14,
+    borderRadius: radiusTokens.xl,
     backgroundColor: "#F2F8F5",
   },
   resultSummaryPhone: {
@@ -806,7 +806,7 @@ const styles = StyleSheet.create({
     padding: 28,
     alignItems: "center",
     backgroundColor: "#F8FAF9",
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
   },
   emptyTitle: {
     fontSize: 15,

@@ -1,7 +1,9 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { LoaderCircle, Mail, ShieldCheck, UserRound, XCircle } from "@/components/icons";
 import { useEffect, useState } from "react";
-import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { openExternalUrl } from "@/lib/safeUrl";
+import { Image } from "expo-image";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -93,7 +95,7 @@ export function UserDetailScreen({ userId }: { userId: string }) {
             <View style={styles.detailIcon}><Mail color={colors.green} size={16} /></View>
             <View style={styles.detailInfo}>
               <Text style={styles.detailLabel}>{t("userDirectory.detail.email")}</Text>
-              <Pressable onPress={() => identity?.email && Linking.openURL(`mailto:${identity.email}`)}>
+              <Pressable onPress={() => identity?.email && openExternalUrl(`mailto:${identity.email}`)}>
                 <Text style={styles.detailValue}>{identity?.email ?? t("userDirectory.detail.na")}</Text>
               </Pressable>
             </View>

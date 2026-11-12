@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from "react-native";
-import { colorTokens, colors, fonts, layout } from "@/theme";
+import { colorTokens, colors, fonts, layout, radiusTokens } from "@/theme";
 
 export const styles = StyleSheet.create({
   sectionSpacing: {
@@ -98,7 +98,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 940,
     marginTop: -88,
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     overflow: "hidden",
     ...(Platform.select({
       web: { boxShadow: "0 28px 64px -24px rgba(11, 26, 23, 0.34)" },
@@ -113,7 +113,7 @@ export const styles = StyleSheet.create({
   },
   searchDockLarge: {
     maxWidth: 1060,
-    borderRadius: 20,
+    borderRadius: radiusTokens.xl,
   },
   searchDockPhone: {
     marginTop: -56,
@@ -179,7 +179,7 @@ export const styles = StyleSheet.create({
   featuredCard: {
     width: 520,
     height: 325,
-    borderRadius: 24,
+    borderRadius: radiusTokens.xl,
     overflow: "hidden",
     backgroundColor: "#EEF3F1",
     ...(Platform.OS === "web" ? {
@@ -189,7 +189,7 @@ export const styles = StyleSheet.create({
   featuredCardInner: {
     width: "100%",
     height: "100%",
-    borderRadius: 24,
+    borderRadius: radiusTokens.xl,
     overflow: "hidden",
   },
   featuredCardHovered: {
@@ -303,7 +303,7 @@ export const styles = StyleSheet.create({
   marketInsightCard: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
+    borderRadius: radiusTokens.xl,
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
     padding: 24.8,
@@ -316,7 +316,7 @@ export const styles = StyleSheet.create({
   trustedPartnersCard: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
+    borderRadius: radiusTokens.xl,
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
     padding: 24.8,
@@ -330,7 +330,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "#F8FAF9",
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     padding: 12,
   },
   partnerInfoWrap: {
@@ -405,7 +405,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
+    borderRadius: radiusTokens.xl,
     borderWidth: 0.8,
     borderColor: "rgba(11, 26, 23, 0.08)",
     overflow: "hidden",
@@ -425,7 +425,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     minWidth: "100%",
     maxWidth: "100%",
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
   },
   newsImageWrap: {
     height: 157,

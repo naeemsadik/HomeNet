@@ -22,16 +22,16 @@ import {
   UserRound,
 } from "@/components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { openExternalUrl } from "@/lib/safeUrl";
 import {
   ActivityIndicator,
-  Image,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
   Text,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { AppChrome } from "@/components/AppChrome";
 import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
@@ -221,7 +221,9 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;
     }
-    void Linking.openURL(`tel:${property.seller.phone}`);
+    if (!openExternalUrl(`tel:${property.seller.phone}`)) {
+      notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
+    }
   };
 
   const openWhatsApp = (message: string) => {
@@ -237,7 +239,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;
     }
-    void Linking.openURL(url).catch(() => {
+    openExternalUrl(url, () => {
       notify(
         t("propertyDetail.whatsappUnavailableTitle"),
         t("propertyDetail.whatsappUnavailableBody", { phone: rawPhone }),
@@ -343,8 +345,14 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
     setThumbScrollX(newX);
   };
 
+  // Effects below call the latest handlers without re-running when they are re-created.
+  const photoActionsRef = useRef({ scrollThumbTo, handleNextPhoto, handlePrevPhoto });
   useEffect(() => {
-    scrollThumbTo(activeImageIndex);
+    photoActionsRef.current = { scrollThumbTo, handleNextPhoto, handlePrevPhoto };
+  });
+
+  useEffect(() => {
+    photoActionsRef.current.scrollThumbTo(activeImageIndex);
     if (lightboxVisible && lightboxThumbScrollRef.current) {
       const targetX = Math.max(0, activeImageIndex * 86 - 160);
       lightboxThumbScrollRef.current.scrollTo({ x: targetX, animated: true });
@@ -363,22 +371,22 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
         if (e.key === "Escape") {
           setLightboxVisible(false);
         } else if (e.key === "ArrowLeft") {
-          handlePrevPhoto();
+          photoActionsRef.current.handlePrevPhoto();
         } else if (e.key === "ArrowRight") {
-          handleNextPhoto();
+          photoActionsRef.current.handleNextPhoto();
         }
       } else {
         if (e.key === "ArrowLeft") {
-          handlePrevPhoto();
+          photoActionsRef.current.handlePrevPhoto();
         } else if (e.key === "ArrowRight") {
-          handleNextPhoto();
+          photoActionsRef.current.handleNextPhoto();
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [lightboxVisible, property?.mediaImages.length]);
+  }, [lightboxVisible]);
 
   const mapLocationQuery = property
     ? property.latitude && property.longitude

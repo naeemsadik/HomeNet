@@ -1,5 +1,7 @@
 import { ExternalLink, MapPin, type LucideIcon } from "@/components/icons";
-import { Image, Linking, Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
+import { openExternalUrl } from "@/lib/safeUrl";
+import { Image } from "expo-image";
 import { colorTokens, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { styles } from "../screens/PropertyDetailScreen.styles";
@@ -35,7 +37,7 @@ export function PropertyLocationSection({
         <Text style={styles.sectionHeading}>{t("propertyDetail.location")}</Text>
         <Pressable
           accessibilityLabel={t("propertyDetail.openGoogleMaps")}
-          onPress={() => void Linking.openURL(mapExternalUrl)}
+          onPress={() => openExternalUrl(mapExternalUrl)}
           style={({ pressed }) => [styles.openMapsBtn, webPointer, pressed && styles.pressed]}
         >
           <ExternalLink color="#04cf92" size={14} />
@@ -60,7 +62,7 @@ export function PropertyLocationSection({
           />
         ) : (
           <Pressable
-            onPress={() => void Linking.openURL(mapExternalUrl)}
+            onPress={() => openExternalUrl(mapExternalUrl)}
             style={styles.nativeMapContainer}
           >
             <Image

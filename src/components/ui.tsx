@@ -3,7 +3,6 @@ import { ArrowRight, Check, ChevronDown, type LucideIcon } from "@/components/ic
 import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
-  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -19,6 +18,7 @@ import {
 import { colors, colorTokens, fonts, radius, webPointer } from "@/theme";
 import { OverlayModal } from "@/components/OverlayModal";
 import { useResponsive } from "@/hooks/useResponsive";
+import { openExternalUrl } from "@/lib/safeUrl";
 
 export function AppLink({
   href,
@@ -36,7 +36,7 @@ export function AppLink({
   const open = () => {
     onPress?.();
     if (href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("http")) {
-      void Linking.openURL(href);
+      openExternalUrl(href);
       return;
     }
     router.push(href as Href);

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Linking, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { openExternalUrl } from "@/lib/safeUrl";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, Eyebrow } from "@/components/ui";
 import { Briefcase, Send, ShieldCheck, Users, Zap } from "@/components/icons";
@@ -19,7 +20,7 @@ export function CareersScreen() {
   const handleApply = () => {
     const subject = encodeURIComponent(t("careers.emailSubject"));
     const mailtoUrl = `mailto:${CAREERS_EMAIL}?subject=${subject}`;
-    Linking.openURL(mailtoUrl).catch(() => {
+    openExternalUrl(mailtoUrl, () => {
       setMailFailed(true);
       try {
         notify(

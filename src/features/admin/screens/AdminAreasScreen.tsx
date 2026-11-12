@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -68,8 +68,15 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
   const [pickerOpen, setPickerOpen] = useState(false);
   const [parent, setParent] = useState<Area | null>(null);
 
-  useEffect(() => {
-    if (!visible) return;
+  // Reset the fields when the form opens or is pointed at another area
+  // (adjusted while rendering rather than in an effect).
+  const [syncedWith, setSyncedWith] = useState<{ initial: AreaDetail | null | undefined; visible: boolean }>({
+    initial: undefined,
+    visible: false,
+  });
+  if (syncedWith.initial !== initial || syncedWith.visible !== visible) {
+    setSyncedWith({ initial, visible });
+    if (visible) {
     setName(initial?.name ?? "");
     setCity(initial?.city ?? "Dhaka");
     setBoundary(initial?.boundary ?? "");
@@ -86,7 +93,8 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
           }
         : null,
     );
-  }, [initial, visible]);
+    }
+  }
 
   const centerLat = parseCoordinate(lat, 90);
   const centerLng = parseCoordinate(lng, 180);

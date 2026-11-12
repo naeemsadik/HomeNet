@@ -54,22 +54,20 @@ export function SellerDashboardScreen() {
   const { isPhone, isTablet } = useResponsive();
   const { user } = useAuthStore();
   const { tab } = useLocalSearchParams<{ tab?: string }>();
-  const [activeNav, setActiveNav] = useState<SellerNavKey>("dashboard");
+  // The section named in the URL; a section that is switched off opens the
+  // dashboard, even from an old link.
+  const tabNav: SellerNavKey =
+    tab && ["dashboard", "boost", "insights", "analytics", "payments", "help"].includes(tab) && isSellerSectionOn(tab)
+      ? (tab as SellerNavKey)
+      : "dashboard";
+  const [activeNav, setActiveNav] = useState<SellerNavKey>(tabNav);
+  const [seenTab, setSeenTab] = useState(tab);
+  if (seenTab !== tab) {
+    setSeenTab(tab);
+    setActiveNav(tabNav);
+  }
   const [boostModalVisible, setBoostModalVisible] = useState(false);
   const [selectedBoostPkg, setSelectedBoostPkg] = useState<string>("featured");
-
-  useEffect(() => {
-    if (
-      tab &&
-      ["dashboard", "boost", "insights", "analytics", "payments", "help"].includes(tab) &&
-      // A section that is switched off opens the dashboard, even from an old link.
-      isSellerSectionOn(tab)
-    ) {
-      setActiveNav(tab as SellerNavKey);
-    } else if (!tab || !isSellerSectionOn(tab)) {
-      setActiveNav("dashboard");
-    }
-  }, [tab]);
 
   const handleOpenBoost = (packageId?: string) => {
     if (packageId) setSelectedBoostPkg(packageId);
@@ -117,7 +115,6 @@ export function SellerDashboardScreen() {
       id: "total",
       label: t("dashboard.totalListings"),
       value: formatLocalizedNumber(totalCount, language),
-      trend: totalCount > 0 ? "+1" : undefined,
       icon: Building2,
       iconBg: colors.greenLight,
       iconColor: colors.green,
@@ -126,7 +123,6 @@ export function SellerDashboardScreen() {
       id: "active",
       label: t("dashboard.activeListings"),
       value: formatLocalizedNumber(activeCount, language),
-      trend: activeCount > 0 ? "+1" : undefined,
       icon: CheckCircle2,
       iconBg: colors.greenLight,
       iconColor: colors.green,

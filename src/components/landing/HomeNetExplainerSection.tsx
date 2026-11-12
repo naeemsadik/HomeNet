@@ -28,7 +28,17 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
+/**
+ * The explainer is a website feature: it is built from DOM elements (div, video,
+ * button, h3, p, span) that React Native cannot render, and the video file is not
+ * shipped in the app. On a phone it renders nothing, so those tags can never run.
+ */
 export function HomeNetExplainerSection() {
+  if (Platform.OS !== "web") return null;
+  return <HomeNetExplainerWeb />;
+}
+
+function HomeNetExplainerWeb() {
   const { t } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
 

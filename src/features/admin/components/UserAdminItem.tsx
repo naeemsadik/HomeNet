@@ -1,4 +1,5 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { Settings, Trash2, UserRound } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { RoleBadge } from "./StatusBadge";

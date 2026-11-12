@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import { Check, MapPin, Sparkles, X } from "@/components/icons";
-import { colorTokens, fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer, radiusTokens } from "@/theme";
 import { LiveText } from "@/components/LiveText";
 import { OverlayHost } from "@/components/OverlayModal";
 import { SelectField } from "@/components/SelectField";
@@ -522,7 +522,7 @@ const styles = StyleSheet.create({
     maxWidth: 448,
     maxHeight: "92%",
     backgroundColor: colorTokens.surface,
-    borderRadius: 24,
+    borderRadius: radiusTokens.xl,
     padding: 24,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
     minHeight: 38.4,
     borderWidth: 1.2,
     borderColor: colorTokens.divider,
-    borderRadius: 20,
+    borderRadius: radiusTokens.xl,
     backgroundColor: colorTokens.surface,
     alignItems: "center",
     justifyContent: "center",
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: colorTokens.canvas,
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     padding: 16,
   },
   verifiedRowLeft: {

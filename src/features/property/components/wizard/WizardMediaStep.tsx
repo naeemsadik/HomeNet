@@ -1,5 +1,6 @@
 import { Camera, Trash2, Video } from "@/components/icons";
-import { ActivityIndicator, Image, Pressable, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
+import { Image } from "expo-image";
 import { useTranslation } from "@/i18n";
 import { webPointer } from "@/theme";
 import { usePropertyWizardStore } from "../../stores/propertyWizardStore";

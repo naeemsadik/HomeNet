@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Linking, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { openExternalUrl } from "@/lib/safeUrl";
 import { Check, CheckCircle2, Flag, X } from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
@@ -60,9 +61,8 @@ export function ReportListingModal({
   const handleSubmit = () => {
     // Open prepared email report
     const mailtoUrl = reportListingMailto({ id: propertyId, title: propertyTitle });
-    Linking.openURL(mailtoUrl).catch(() => {
-      // Fallback is gracefully handled inside the submission state
-    });
+    // No email client is handled by the submission state below.
+    openExternalUrl(mailtoUrl);
     setIsSubmitted(true);
   };
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { ShieldCheck } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { useRoles } from "../hooks/useRoles";
@@ -29,9 +29,12 @@ export function AdminRolesScreen() {
           {toApiError(error).message} {t("admin.roles.retry")}
         </Text>
       ) : (
-        <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-          {roles.map((role) => (
-            <View key={role.id} style={styles.roleCard}>
+        <FlatList
+          contentContainerStyle={styles.list}
+          data={roles}
+          keyExtractor={(role) => String(role.id)}
+          renderItem={({ item: role }) => (
+            <View style={styles.roleCard}>
               <View style={styles.roleTop}>
                 <View style={styles.roleIcon}>
                   <ShieldCheck color={colorTokens.primary} size={20} />
@@ -74,8 +77,9 @@ export function AdminRolesScreen() {
                 <Text style={styles.manageBtnText}>{t("admin.roles.managePermissions")}</Text>
               </Pressable>
             </View>
-          ))}
-        </ScrollView>
+          )}
+          showsVerticalScrollIndicator={false}
+        />
       )}
 
       <PermissionEditorModal

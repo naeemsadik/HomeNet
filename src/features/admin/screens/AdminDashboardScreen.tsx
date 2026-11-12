@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { FlatList, Platform, StyleSheet, Text, View } from "react-native";
+import { Footer } from "@/components/Footer";
 import { Eyebrow } from "@/components/ui";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -14,6 +15,8 @@ import { hasAnyAdminPermission, isAdmin } from "@/lib/permissions";
 import { NotificationList } from "@/features/notification/components/NotificationList";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 import { useTranslation } from "@/i18n";
+
+const NO_ROWS: string[] = [];
 
 type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
 
@@ -56,12 +59,8 @@ export function AdminDashboardScreen() {
     );
   }
 
-  return (
-    <AppChrome active="home">
-      <ScrollView
-        contentContainerStyle={[styles.container, { paddingHorizontal: contentPadding }, isPhone && styles.containerPhone]}
-        showsVerticalScrollIndicator={false}
-      >
+  const content = (
+    <>
         <View style={styles.headerSection}>
           <Eyebrow>{t("admin.eyebrow")}</Eyebrow>
           <Text style={styles.title}>{t("admin.dashboardTitle")}</Text>
@@ -87,12 +86,35 @@ export function AdminDashboardScreen() {
             </View>
           )}
         </View>
-      </ScrollView>
+    </>
+  );
+  const containerStyle = [styles.container, { paddingHorizontal: contentPadding }, isPhone && styles.containerPhone];
+
+  // In the app the page is one FlatList, so the lists inside the tabs (listings,
+  // users, areas) share its window instead of sitting in a ScrollView. The
+  // website keeps the chrome's own scrolling.
+  const native = Platform.OS !== "web";
+  return (
+    <AppChrome active="home" scroll={!native}>
+      {native ? (
+        <FlatList
+          data={NO_ROWS}
+          keyExtractor={(row) => row}
+          ListFooterComponent={<Footer />}
+          ListHeaderComponent={<View style={containerStyle}>{content}</View>}
+          renderItem={null}
+          showsVerticalScrollIndicator={false}
+          style={styles.nativeList}
+        />
+      ) : (
+        <View style={containerStyle}>{content}</View>
+      )}
     </AppChrome>
   );
 }
 
 const styles = StyleSheet.create({
+  nativeList: { flex: 1, width: "100%" },
   container: { gap: 18, paddingBottom: 30 },
   containerPhone: { gap: 14 },
   headerSection: { gap: 6 },

@@ -149,9 +149,12 @@ export function AreaPicker({
   };
 
   // Reset focus index when items list changes or modal visibility changes
-  useEffect(() => {
+  // (adjusted while rendering, which avoids an effect and a second render pass).
+  const [focusKey, setFocusKey] = useState({ areas, visible });
+  if (focusKey.areas !== areas || focusKey.visible !== visible) {
+    setFocusKey({ areas, visible });
     setFocusedIndex(-1);
-  }, [areas, visible]);
+  }
 
   // Scroll to focused item on keyboard navigation
   useEffect(() => {
@@ -167,6 +170,13 @@ export function AreaPicker({
       }
     }
   }, [focusedIndex]);
+
+  // The key handler below must always call the latest selection logic without
+  // re-binding the window listener on every render.
+  const handleSelectAreaRef = React.useRef(handleSelectArea);
+  useEffect(() => {
+    handleSelectAreaRef.current = handleSelectArea;
+  });
 
   // Web keyboard event listener
   useEffect(() => {
@@ -188,7 +198,7 @@ export function AreaPicker({
           const selectedItem = areas[focusedIndex];
           const isLeaf = (selectedItem._count?.children ?? 0) === 0;
           if (isLeaf) {
-            handleSelectArea(selectedItem);
+            handleSelectAreaRef.current(selectedItem);
           } else {
             drillDown(selectedItem);
           }

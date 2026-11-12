@@ -797,8 +797,15 @@ export function AppChrome({
   customTopBar,
   compactFooter,
   floating,
+  scroll = true,
 }: {
   children: ReactNode;
+  /**
+   * False when the page brings its own virtualized list (a FlatList), which
+   * must not sit inside this ScrollView. Such a page supplies its own footer
+   * and starts below a custom top bar.
+   */
+  scroll?: boolean;
   active?: ActivePage;
   bleed?: ReactNode;
   fluid?: boolean;
@@ -851,7 +858,18 @@ export function AppChrome({
     setIsScrolled(top > 40);
   };
 
-  const scrollView = (
+  const scrollView = !scroll ? (
+    <View
+      style={{
+        flex: 1,
+        width: "100%",
+        // The pinned bar covers the top of the page, as it does over the ScrollView.
+        paddingTop: !bleed && !customTopBar ? barOffset + adminBarHeight : 0,
+      }}
+    >
+      {children}
+    </View>
+  ) : (
     <ScrollView
       onScroll={handleScroll}
       scrollEventThrottle={16}

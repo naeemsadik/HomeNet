@@ -16,14 +16,44 @@ export function isSafeLinkUrl(url: string | null | undefined): url is string {
   }
 }
 
-/** Opens `url` in a new tab (web) or the OS handler (native). Does nothing and returns false for unsafe URLs. */
-export function openExternalUrl(url: string | null | undefined): boolean {
-  if (!isSafeLinkUrl(url)) return false;
+/**
+ * The URL as it will be opened, or null when it cannot be made safe.
+ * `tel:` keeps only digits, a leading + and the dialling characters ,;# *;
+ * `mailto:` must name one plausible address (the ?subject=&body= part is kept).
+ */
+export function sanitizeExternalUrl(url: string | null | undefined): string | null {
+  if (!isSafeLinkUrl(url)) return null;
+  const trimmed = url.trim();
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith("tel:")) {
+    const number = trimmed.slice(4).replace(/[^\d+*#,;]/g, "");
+    const clean = number.replace(/(?!^)\+/g, "");
+    return /\d/.test(clean) ? `tel:${clean}` : null;
+  }
+  if (lower.startsWith("mailto:")) {
+    const rest = trimmed.slice(7);
+    const q = rest.indexOf("?");
+    const address = decodeURIComponent(q === -1 ? rest : rest.slice(0, q)).trim();
+    if (!/^[^\s@<>,;"]+@[^\s@<>,;"]+\.[^\s@<>,;"]+$/.test(address)) return null;
+    return `mailto:${encodeURIComponent(address).replace(/%40/g, "@")}${q === -1 ? "" : rest.slice(q)}`;
+  }
+  return trimmed;
+}
 
-  if (Platform.OS === "web" && typeof window !== "undefined") {
-    window.open(url, "_blank", "noopener,noreferrer");
+/**
+ * Opens `url` in a new tab (web) or the OS handler (native). Does nothing and
+ * returns false for unsafe URLs. `onError` runs when the OS has no app for it
+ * (for example no email client).
+ */
+export function openExternalUrl(url: string | null | undefined, onError?: () => void): boolean {
+  const safe = sanitizeExternalUrl(url);
+  if (!safe) return false;
+
+  // Web pages open in a new tab; mailto: and tel: go to the OS handler, on web too.
+  if (Platform.OS === "web" && typeof window !== "undefined" && /^https?:/i.test(safe)) {
+    window.open(safe, "_blank", "noopener,noreferrer");
   } else {
-    void Linking.openURL(url).catch(() => {});
+    Linking.openURL(safe).catch(() => onError?.());
   }
   return true;
 }

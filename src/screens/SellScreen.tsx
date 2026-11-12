@@ -16,7 +16,7 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppButton, AppLink, Eyebrow, FeatureCard, SectionHeader, SelectField } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
-import { colorTokens, colors, fonts, shadow } from "@/theme";
+import { colorTokens, colors, fonts, radiusTokens, shadow } from "@/theme";
 
 import { useTranslation } from "@/i18n";
 
@@ -114,9 +114,9 @@ export function SellScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: { minHeight: 480, flexDirection: "row", alignItems: "center", gap: 70, overflow: "hidden", padding: 72, borderRadius: 24 },
+  hero: { minHeight: 480, flexDirection: "row", alignItems: "center", gap: 70, overflow: "hidden", padding: 72, borderRadius: radiusTokens.xl },
   heroTablet: { flexDirection: "column", alignItems: "stretch", gap: 30 },
-  heroPhone: { minHeight: 0, paddingHorizontal: 20, paddingVertical: 30, borderRadius: 19 },
+  heroPhone: { minHeight: 0, paddingHorizontal: 20, paddingVertical: 30, borderRadius: radiusTokens.xl },
   heroCopyWrap: { flex: 1.1 },
   heroKicker: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 13 },
   heroTitle: { maxWidth: 560, color: colors.white, fontFamily: fonts.bold, fontSize: 50, lineHeight: 54, letterSpacing: -0.5 },
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   proofRow: { flexDirection: "row", flexWrap: "wrap", gap: 20 },
   proofItem: { flexDirection: "row", alignItems: "center", gap: 8 },
   proofText: { color: "rgba(255,255,255,0.92)", fontFamily: fonts.semiBold, fontSize: 14 },
-  valuationCard: { flex: 0.9, gap: 14, padding: 24, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.98)", borderWidth: 1, borderColor: "rgba(255,255,255,0.72)", ...shadow },
+  valuationCard: { flex: 0.9, gap: 14, padding: 24, borderRadius: radiusTokens.xl, backgroundColor: "rgba(255,255,255,0.98)", borderWidth: 1, borderColor: "rgba(255,255,255,0.72)", ...shadow },
   valuationCardPhone: { padding: 18 },
   valuationHead: { flexDirection: "row", alignItems: "center", gap: 11, marginBottom: 3 },
   valuationIcon: { width: 41, height: 41, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: colors.green },
@@ -143,12 +143,12 @@ const styles = StyleSheet.create({
   processSection: { marginTop: 54 },
   stepGrid: { flexDirection: "row", flexWrap: "wrap", gap: 15 },
   stepGridPhone: { flexDirection: "column" },
-  stepCard: { position: "relative", minWidth: 200, flex: 1, overflow: "hidden", padding: 23, borderRadius: 15, backgroundColor: "#FBFDFC", borderWidth: 1, borderColor: colors.line },
+  stepCard: { position: "relative", minWidth: 200, flex: 1, overflow: "hidden", padding: 23, borderRadius: radiusTokens.xl, backgroundColor: "#FBFDFC", borderWidth: 1, borderColor: colors.line },
   stepNumber: { position: "absolute", top: 13, right: 16, color: "#D8E4DE", fontFamily: fonts.extraBold, fontSize: 20 },
   stepIcon: { width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: colors.greenLight },
   stepTitle: { marginTop: 17, marginBottom: 7, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 16 },
   stepCopy: { color: colors.muted, fontFamily: fonts.regular, fontSize: 13, lineHeight: 18 },
-  insightCard: { flexDirection: "row", alignItems: "center", gap: 50, marginTop: 50, padding: 48, borderRadius: 20, borderWidth: 1, borderColor: "#E0E9E5" },
+  insightCard: { flexDirection: "row", alignItems: "center", gap: 50, marginTop: 50, padding: 48, borderRadius: radiusTokens.xl, borderWidth: 1, borderColor: "#E0E9E5" },
   insightCardCompact: { flexDirection: "column", alignItems: "stretch" },
   insightCardPhone: { gap: 28, paddingHorizontal: 19, paddingVertical: 25 },
   insightCopyWrap: { flex: 1 },
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   insightLinkText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 14 },
   stats: { flex: 1, flexDirection: "row", flexWrap: "wrap", gap: 12 },
   statsPhone: { flexDirection: "column" },
-  statCard: { minHeight: 130, minWidth: 140, flex: 1, justifyContent: "center", padding: 18, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.85)", borderWidth: 1, borderColor: "rgba(255,255,255,0.9)" },
+  statCard: { minHeight: 130, minWidth: 140, flex: 1, justifyContent: "center", padding: 18, borderRadius: radiusTokens.xl, backgroundColor: "rgba(255,255,255,0.85)", borderWidth: 1, borderColor: "rgba(255,255,255,0.9)" },
   statCardPhone: { minHeight: 95 },
   statLabel: { color: colors.ink, fontFamily: fonts.semiBold, fontSize: 13 },
   statValue: { marginTop: 8, marginBottom: 6, color: colors.greenDark, fontFamily: fonts.extraBold, fontSize: 24, letterSpacing: -0.4 },

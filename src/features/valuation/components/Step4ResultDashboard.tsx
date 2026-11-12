@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Building2, ArrowUpRight, RotateCcw } from "@/components/icons";
 import { AppButton } from "@/components/ui";

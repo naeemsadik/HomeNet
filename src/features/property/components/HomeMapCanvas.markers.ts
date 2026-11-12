@@ -1,3 +1,4 @@
+import { colorTokens } from "@/theme";
 import type { HomeMapMarker } from "./HomeMapCanvas.types";
 
 /** The price pins and cluster bubbles, shared by the website's map and the app's (which runs the same Leaflet in a WebView). */
@@ -13,7 +14,7 @@ export const MARKER_CSS = `
   user-select: none; -webkit-tap-highlight-color: transparent;
 }
 .hn-price.sale { background: #0F172A; color: #FFFFFF; border: 1.5px solid #1E293B; }
-.hn-price.rent { background: #059669; color: #FFFFFF; border: 1.5px solid #047857; }
+.hn-price.rent { background: ${colorTokens.brandText}; color: #FFFFFF; border: 1.5px solid ${colorTokens.brandText}; }
 .hn-price.neutral { background: #334155; color: #F8FAFC; border: 1.5px solid #475569; }
 .hn-price .hn-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .hn-price.sale .hn-dot { background: #38BDF8; }
@@ -22,7 +23,7 @@ export const MARKER_CSS = `
 .hn-price:hover { transform: translate(-50%, -50%) translateY(-2px) scale(1.06); }
 .hn-price.active {
   transform: translate(-50%, -50%) scale(1.14);
-  box-shadow: 0 0 0 3px #10B981, 0 8px 22px rgba(15, 23, 42, 0.38);
+  box-shadow: 0 0 0 3px ${colorTokens.brand}, 0 8px 22px rgba(15, 23, 42, 0.38);
 }
 .hn-cluster { background: rgba(15, 23, 42, 0.14); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .hn-cluster > div {

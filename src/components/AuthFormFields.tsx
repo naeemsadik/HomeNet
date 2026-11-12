@@ -1,5 +1,5 @@
 import { Eye, EyeOff, AlertCircle, type LucideIcon } from "@/components/icons";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Animated,
   Pressable,
@@ -48,7 +48,7 @@ export function FloatingInput({
   const { t } = useTranslation();
   const [focused, setFocused] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const labelAnim = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const [labelAnim] = useState(() => new Animated.Value(value ? 1 : 0));
 
   const isActive = focused || !!value;
 
@@ -58,7 +58,7 @@ export function FloatingInput({
       duration: 180,
       useNativeDriver: false,
     }).start();
-  }, [isActive]);
+  }, [isActive, labelAnim]);
 
   const labelTop = labelAnim.interpolate({
     inputRange: [0, 1],

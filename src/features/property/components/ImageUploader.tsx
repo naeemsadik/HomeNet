@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Pressable, ScrollView, Image, StyleSheet } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { useTranslation } from "@/i18n";
 import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";

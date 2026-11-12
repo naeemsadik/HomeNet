@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { View, Text, Image, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import { Image } from "expo-image";
 import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, Trash2, UserRound } from "@/components/icons";

@@ -81,6 +81,7 @@ export function GoogleLocationPicker({
   // Create the map once, and the place search above it.
   useEffect(() => {
     let cancelled = false;
+    const searchBox = searchRef.current;
     // A key Google refuses only after loading leaves a broken map and a place search
     // that errors on every keystroke: switch to the OpenStreetMap map instead.
     const stopListening = onGoogleMapsKeyRefused(() => {
@@ -143,7 +144,7 @@ export function GoogleLocationPicker({
       markerRef.current?.setMap(null);
       markerRef.current = null;
       mapRef.current = null;
-      if (searchRef.current) searchRef.current.replaceChildren();
+      searchBox?.replaceChildren();
     };
     // The map is created once; later changes arrive through the effects below.
     // eslint-disable-next-line react-hooks/exhaustive-deps

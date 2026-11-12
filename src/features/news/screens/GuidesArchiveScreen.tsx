@@ -6,7 +6,7 @@ import {
   Search,
   X,
 } from "@/components/icons";
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -54,19 +54,15 @@ const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: Prop
 
   const resolvedUrl = useMemo(
     () => guide.imageUrl || resolveGuideImage(guide),
-    [guide.imageUrl, guide.id, guide.slug, guide.category, guide.title, guide.sourceType],
+    [guide],
   );
-  const [imgUri, setImgUri] = useState(resolvedUrl);
-
-  useEffect(() => {
-    setImgUri(resolvedUrl);
-  }, [resolvedUrl]);
+  // The address that failed to load, so a new guide starts from its own image again.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const imgUri = failedUrl === resolvedUrl ? GUIDE_FALLBACK_IMAGE : resolvedUrl;
 
   const handleImageError = useCallback(() => {
-    if (imgUri !== GUIDE_FALLBACK_IMAGE) {
-      setImgUri(GUIDE_FALLBACK_IMAGE);
-    }
-  }, [imgUri]);
+    setFailedUrl(resolvedUrl);
+  }, [resolvedUrl]);
 
   const handlePress = useCallback(() => {
     if (isRss) {
@@ -154,7 +150,7 @@ export function GuidesArchiveScreen() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading, isError, refetch } = usePropertyGuides({ limit: 50 });
-  const allGuides = data?.items ?? [];
+  const allGuides = useMemo(() => data?.items ?? [], [data]);
 
   const filteredGuides = useMemo(() => {
     let result = allGuides;

@@ -1,5 +1,5 @@
 import { AdminListingActions } from "@/features/property/components/AdminListingActions";
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -79,12 +79,14 @@ function ResultListingCardComponent({
 
   const address = listingAddress(property) ?? t("propertyCard.locationUnavailable");
 
+  // Read once on mount (a lazy initial state), so rendering stays pure.
+  const [now] = useState(() => Date.now());
   const recency = useMemo(() => {
     const raw = property.published_at || property.created_at;
     if (!raw) return null;
     const date = new Date(raw);
     if (Number.isNaN(date.getTime())) return null;
-    const days = Math.floor((Date.now() - date.getTime()) / 86_400_000);
+    const days = Math.floor((now - date.getTime()) / 86_400_000);
     if (days <= 0) return t("propertyCard.addedToday");
     return t("propertyCard.addedDate", {
       date: date.toLocaleDateString(language === "bn" ? "bn-BD" : "en-GB", {
@@ -93,7 +95,7 @@ function ResultListingCardComponent({
         year: "numeric",
       }),
     });
-  }, [property.published_at, property.created_at, t, language]);
+  }, [property.published_at, property.created_at, t, language, now]);
 
   const lister = listerDisplay(property.user, t("search.results.owner"));
   const ownerName = lister.name;

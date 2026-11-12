@@ -48,3 +48,26 @@ describe("openExternalUrl (web)", () => {
     expect(open).not.toHaveBeenCalled();
   });
 });
+
+describe("sanitizeExternalUrl", () => {
+  const { sanitizeExternalUrl } = require("@/lib/safeUrl");
+
+  it("strips unexpected characters from tel: numbers", () => {
+    expect(sanitizeExternalUrl("tel:+880 1700-000000")).toBe("tel:+8801700000000");
+    expect(sanitizeExternalUrl("tel:017<script>")).toBe("tel:017");
+    expect(sanitizeExternalUrl("tel:abc")).toBeNull();
+  });
+
+  it("accepts one plain address for mailto: and keeps the subject", () => {
+    expect(sanitizeExternalUrl("mailto:jobs@homenetbd.com?subject=Hi%20there")).toBe(
+      "mailto:jobs@homenetbd.com?subject=Hi%20there",
+    );
+    expect(sanitizeExternalUrl("mailto:not-an-address")).toBeNull();
+    expect(sanitizeExternalUrl("mailto:a@b.com,c@d.com")).toBeNull();
+  });
+
+  it("leaves https URLs alone and rejects unsafe ones", () => {
+    expect(sanitizeExternalUrl("https://maps.google.com/?q=1,2")).toBe("https://maps.google.com/?q=1,2");
+    expect(sanitizeExternalUrl("javascript:alert(1)")).toBeNull();
+  });
+});

@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.homenetbd.app",
-      "sha256_cert_fingerprints": ["REPLACE_WITH_PLAY_APP_SIGNING_SHA256_FINGERPRINT"]
+      "sha256_cert_fingerprints": ["15:D1:F2:29:34:EA:F3:69:3D:8C:5E:40:0F:A1:41:24:7B:32:0B:56:B6:0B:0C:B8:C1:09:E1:D8:51:BC:0D:45"]
     }
   }
 ]

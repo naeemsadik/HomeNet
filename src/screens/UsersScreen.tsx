@@ -16,13 +16,13 @@ import { useCallback, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   FlatList,
-  Image,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { notify } from "@/lib/alert";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";

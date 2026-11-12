@@ -1,11 +1,11 @@
 import React from "react";
 import {
-  Image,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import {
   Mail,
@@ -95,7 +95,7 @@ export function HeroProductVisual() {
                   <Image
                     source={{ uri: cdnImage(p1.media?.[0]?.url, 640, 280) }}
                     style={styles.mobileDetailImage}
-                    resizeMode="cover"
+                    contentFit="cover"
                   />
                   <View style={styles.mobileDetailBadge}>
                     <ShieldCheck color="#2251D6" size={12} strokeWidth={2.5} />
@@ -130,7 +130,7 @@ export function HeroProductVisual() {
                 <Image
                   source={{ uri: cdnImage(p1.media?.[0]?.url, 640, 280) }}
                   style={styles.mobileDetailImage}
-                  resizeMode="cover"
+                  contentFit="cover"
                 />
                 <View style={styles.mobileDetailBadge}>
                   <ShieldCheck color="#2251D6" size={12} strokeWidth={2.5} />

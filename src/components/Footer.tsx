@@ -1,5 +1,5 @@
 import { useResponsive } from "@/hooks/useResponsive";
-import { fonts, layout, webPointer } from "@/theme";
+import { fonts, layout, webPointer, radiusTokens } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
 import { Sparkles } from "@/components/icons";
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   },
   mobileDownloadCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    borderRadius: radiusTokens.xl,
     paddingHorizontal: 20,
     paddingVertical: 18,
     borderWidth: 1,
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
   },
   mobileProCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    borderRadius: radiusTokens.xl,
     padding: 16,
     borderWidth: 1,
     borderColor: "rgba(11, 26, 23, 0.06)",

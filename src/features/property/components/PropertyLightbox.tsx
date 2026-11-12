@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, X } from "@/components/icons";
 import { useRef, type RefObject } from "react";
-import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { webPointer } from "@/theme";
 import { useTranslation, formatLocalizedNumber } from "@/i18n";
 import { styles } from "../screens/PropertyDetailScreen.styles";
@@ -99,7 +100,7 @@ export function PropertyLightbox({
             source={{ uri: images[activeIndex] || images[0] }}
             accessibilityLabel={`Photo ${activeIndex + 1} of ${images.length}`}
             style={styles.lightboxImage}
-            resizeMode="contain"
+            contentFit="contain"
           />
 
           {activeIndex < images.length - 1 ? (
