@@ -8,7 +8,7 @@ import {
   logoutUser,
   registerUser,
 } from "@/services/authApi";
-import { getUserRoles } from "@/services/roleApi";
+import { getRoles, getUserRoles } from "@/services/roleApi";
 import { notifyUnauthorized, toApiError } from "@/services/apiClient";
 import { useSavedStore } from "@/stores/savedStore";
 import { withAvatarVersion } from "@/lib/avatarCache";
@@ -159,8 +159,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   fetchUserRoles: async (userId) => {
     try {
       const response = await getUserRoles(userId);
-      // Each role arrives with its permissions (GET /v1/roles/user/:id, backend PR 93).
-      set({ userRoles: response.data ?? [] });
+      const roles = response.data ?? [];
+      const needsPermissions = roles.some(
+        (ur) => !ur.role.role_permissions || ur.role.role_permissions.length === 0,
+      );
+      if (needsPermissions && roles.length > 0) {
+        try {
+          const allRolesResponse = await getRoles();
+          const roleMap = new Map(
+            (allRolesResponse.data ?? []).map((role) => [role.id, role.role_permissions]),
+          );
+          set({
+            userRoles: roles.map((ur) => ({
+              ...ur,
+              role: {
+                ...ur.role,
+                role_permissions:
+                  ur.role.role_permissions && ur.role.role_permissions.length > 0
+                    ? ur.role.role_permissions
+                    : (roleMap.get(ur.role_id) ?? roleMap.get(ur.role.id) ?? []),
+              },
+            })),
+          });
+          return;
+        } catch {
+          // Fall back to raw userRoles if /v1/roles is forbidden or unavailable.
+        }
+      }
+      set({ userRoles: roles });
     } catch {
       set({ userRoles: [] });
     }
