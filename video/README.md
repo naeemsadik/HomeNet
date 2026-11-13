@@ -21,6 +21,7 @@ If Remotion cannot download Chrome (offline CI), pass an existing binary:
 
 Other useful commands:
 
+- `npm run thumbnail` renders the 1280×720 YouTube thumbnail to `out/homenet-thumbnail.png`.
 - `npm run sfx` regenerates the synthesized sound effects in `public/sfx/`.
 - `REMOTION_BROWSER=/path/to/chrome node scripts/stills.mjs 12.5 38.8` renders half-size
   check frames at those seconds into `out/`.
