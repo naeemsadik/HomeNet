@@ -9,13 +9,13 @@ import { body, display, Logo } from "../components/UI";
 const c = theme.colors;
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
-/** URL typed in three bursts that follow the voiceover: "homenet" · ".com" · ".bd". */
+/** URL typed in bursts on the spoken words: "homenetbd" on হোমনেট, ".com" on ডট কম; ডট বিডি lands the confirm pulse. */
 const useUrl = () => {
   const frame = useCurrentFrame();
   const cue = useCue();
   const seg = (text: string, from: number, to: number) =>
     text.slice(0, Math.round(interpolate(frame, [cue(from), cue(to)], [0, text.length], { ...clamp, easing: theme.ease.out })));
-  return seg("homenet", CUE.urlHomenet - 0.25, CUE.urlHomenet + 0.3) + seg(".com", CUE.urlCom - 0.1, CUE.urlCom + 0.2) + seg(".bd", CUE.urlBd - 0.1, CUE.urlBd + 0.15);
+  return seg("homenetbd", CUE.urlHomenet - 0.25, CUE.urlHomenet + 0.4) + seg(".com", CUE.urlCom - 0.1, CUE.urlCom + 0.25);
 };
 
 export const Web: React.FC = () => {

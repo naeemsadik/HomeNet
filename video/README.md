@@ -52,7 +52,7 @@ word. To retime anything, edit the number in `timeline.ts`, nothing else.
 | Sell & value | 48.8–62.4 | কয়েকটি সিম্পল স্টেপে… ভ্যালুয়েশন ইন্টেলিজেন্স | 4-step listing flow, AI valuation panel with price range |
 | Moderation | 62.4–72.9 | মডারেশন টিম… ১০০% জেনুইন | Review queue ticking to verified, seller–shield–buyer, 100% counter |
 | Vision | 72.9–82.9 | ডিজিটাল, স্বচ্ছ, ঝামেলাহীন… হাতের মুঠোয় | Three pillars over a property photo, then the app on a phone |
-| Web CTA | 82.9–89.1 | ভিজিট করুন হোমনেট ডট কম ডট বিডি | Address bar typing homenet.com.bd in time with the words |
+| Web CTA | 82.9–89.1 | ভিজিট করুন হোমনেট ডট কম ডট বিডি | Address bar typing homenetbd.com in time with the words (the screen shows the real domain) |
 | App | 89.1–95.8 | প্লে-স্টোর থেকে… হোমনেট অ্যাপ | Phone with update notifications, store button → download → installed |
 | Outro | 95.8–99.1 | হোমনেট। স্মার্ট প্রপার্টি, স্মার্ট সলিউশন। | Logo lockup, tagline in two beats, URL |
 

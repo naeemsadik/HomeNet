@@ -35,7 +35,7 @@ export const Outro: React.FC = () => {
       </div>
       <div style={{ position: "absolute", top: 760 }}>
         <Enter at={CUE.smartSolution + 0.4} dy={20}>
-          <span style={{ ...body(34, c.onInkDim, theme.weight.semiBold), letterSpacing: "0.02em" }}>homenet.com.bd</span>
+          <span style={{ ...body(34, c.onInkDim, theme.weight.semiBold), letterSpacing: "0.02em" }}>homenetbd.com</span>
         </Enter>
       </div>
     </AbsoluteFill>

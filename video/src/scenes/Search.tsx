@@ -137,8 +137,8 @@ const Results: React.FC = () => {
 /** Left column: the spoken idea, in three short beats. */
 const Narrative: React.FC = () => {
   const words = [
-    { text: "স্বপ্নের বাড়ি", at: CUE.bari, exit: CUE.flat },
-    { text: "ফ্ল্যাট", at: CUE.flat, exit: CUE.office },
+    { text: "স্বপ্নের বাড়ি", at: CUE.bari, exit: CUE.flat - 0.12 },
+    { text: "ফ্ল্যাট", at: CUE.flat, exit: CUE.office - 0.1 },
     { text: "অফিস স্পেস", at: CUE.office, exit: CUE.smartSearch - 0.75 },
   ];
   return (
@@ -195,7 +195,7 @@ export const Search: React.FC = () => {
       <Narrative />
       <div style={{ position: "absolute", left: 770, top: 150, opacity: Math.min(1, enter),
         transform: `translateX(${(1 - enter) * 120}px) rotateY(${(1 - enter) * -8}deg)`, transformOrigin: "left center" }}>
-        <BrowserFrame url="homenet.com.bd/buy" width={1040} height={790}>
+        <BrowserFrame url="homenetbd.com/buy" width={1040} height={790}>
           <div style={{ position: "absolute", inset: 0, padding: "18px 32px", display: "flex", flexDirection: "column", gap: 18 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <Logo variant="light" width={180} />

@@ -3,7 +3,7 @@ import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { theme } from "../theme";
 import { CUE } from "../timeline";
 import { Enter, useBreathe, useCue, useCueSpring, useProgress } from "../components/Motion";
-import { Icon, PlayGlyph } from "../components/Icons";
+import { Icon, PlayStoreIcon } from "../components/Icons";
 import { body, display, PhoneFrame } from "../components/UI";
 import { AppScreen } from "../components/AppScreen";
 
@@ -57,18 +57,23 @@ export const AppPromo: React.FC = () => {
         {/* Store button turns into a download, then an installed state */}
         <div style={{ marginTop: 48 }}>
           <Enter at={CUE.playStore} dy={40} preset="bouncy">
-            <div style={{ position: "relative", width: 560, height: 120, borderRadius: 20, background: c.ink, overflow: "hidden",
-              display: "flex", alignItems: "center", gap: 22, padding: "0 34px", boxShadow: theme.shadow.dark }}>
+            <div style={{ position: "relative", width: 680, height: 150, borderRadius: 20, background: c.ink, overflow: "hidden",
+              display: "flex", alignItems: "center", gap: 22, padding: "0 26px", boxShadow: theme.shadow.dark }}>
               <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${dl * 100}%`, background: "rgba(4,207,146,0.22)" }} />
-              <div style={{ zIndex: 1, width: 64, height: 64, borderRadius: 16, background: installed ? c.brand : "rgba(255,255,255,0.1)",
-                display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${installed ? Math.min(done, 1.15) : 1})` }}>
-                {installed ? <Icon name="check" size={36} color={c.onBrand} stroke={3} /> : dl > 0 ? <Icon name="download" size={32} color={c.onInk} /> : <PlayGlyph size={32} color={c.onInk} />}
+              <div style={{ zIndex: 1, width: 100, height: 100, borderRadius: 22, background: c.surface, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <PlayStoreIcon size={68} />
               </div>
-              <div style={{ zIndex: 1, display: "flex", flexDirection: "column" }}>
+              <div style={{ zIndex: 1, flex: 1, display: "flex", flexDirection: "column" }}>
                 <span style={{ ...body(20, c.onInkDim, theme.weight.medium), lineHeight: 1.4 }}>
                   {installed ? "ইনস্টল সম্পন্ন" : dl > 0 ? "ডাউনলোড হচ্ছে…" : "প্লে-স্টোর থেকে ডাউনলোড করুন"}
                 </span>
                 <span style={{ ...display(40, c.onInk, theme.weight.bold), paddingBlock: 0, lineHeight: 1.35 }}>হোমনেট অ্যাপ</span>
+              </div>
+              <div style={{ zIndex: 1, width: 60, height: 60, borderRadius: 30, flexShrink: 0,
+                background: installed ? c.brand : "rgba(255,255,255,0.1)",
+                display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${installed ? Math.min(done, 1.15) : 1})` }}>
+                {installed ? <Icon name="check" size={32} color={c.onBrand} stroke={3} /> : <Icon name="download" size={28} color={c.onInk} />}
               </div>
             </div>
           </Enter>

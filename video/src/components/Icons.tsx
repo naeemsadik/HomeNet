@@ -48,3 +48,13 @@ export const Icon: React.FC<{ name: string; size?: number; color: string; stroke
 export const PlayGlyph: React.FC<{ size: number; color: string }> = ({ size, color }) => (
   <svg width={size} height={size} viewBox="0 0 24 24"><path d="M6 3.5v17a1 1 0 0 0 1.5.9l14-8.5a1 1 0 0 0 0-1.8l-14-8.5A1 1 0 0 0 6 3.5z" fill={color} /></svg>
 );
+
+/** Four-colour Play Store mark for the "download from Play Store" moment. */
+export const PlayStoreIcon: React.FC<{ size: number }> = ({ size }) => (
+  <svg width={size} height={size} viewBox="0 0 512 512">
+    <path d="M70 34 L290 256 L70 478 C58 472 52 460 52 446 V66 C52 52 58 40 70 34 Z" fill="#4285F4" />
+    <path d="M70 34 C80 28 94 28 106 35 L370 187 L290 256 Z" fill="#34A853" />
+    <path d="M370 187 L442 228 C464 241 464 271 442 284 L370 325 L290 256 Z" fill="#FBBC04" />
+    <path d="M70 478 L290 256 L370 325 L106 477 C94 484 80 484 70 478 Z" fill="#EA4335" />
+  </svg>
+);
