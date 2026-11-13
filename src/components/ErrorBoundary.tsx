@@ -14,9 +14,24 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   hasError: boolean;
+  error?: Error;
 }
 
-function DefaultErrorFallback({ onReset, onGoHome }: { onReset: () => void; onGoHome: () => void }) {
+/** The error as one short line: enough to report from a phone, never a stack trace. */
+function errorSummary(error: unknown): string {
+  const text = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+  return text.length > 220 ? `${text.slice(0, 217)}...` : text;
+}
+
+function DefaultErrorFallback({
+  error,
+  onReset,
+  onGoHome,
+}: {
+  error?: Error;
+  onReset: () => void;
+  onGoHome: () => void;
+}) {
   const { t } = useTranslation();
   return (
     <View style={styles.container}>
@@ -26,6 +41,12 @@ function DefaultErrorFallback({ onReset, onGoHome }: { onReset: () => void; onGo
         </View>
         <Text style={styles.title}>{t("errorBoundary.title")}</Text>
         <Text style={styles.message}>{t("errorBoundary.message")}</Text>
+        {/* In the phone app nothing else records a crash, so the cause is shown for a bug report. */}
+        {error && Platform.OS !== "web" ? (
+          <Text selectable style={styles.detail}>
+            {errorSummary(error)}
+          </Text>
+        ) : null}
         <View style={styles.buttonRow}>
           <Pressable
             accessibilityLabel={t("errorBoundary.tryAgain")}
@@ -55,8 +76,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(): ErrorBoundaryState {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
@@ -67,11 +88,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   handleReset = () => {
-    this.setState({ hasError: false });
+    this.setState({ hasError: false, error: undefined });
   };
 
   handleGoHome = () => {
-    this.setState({ hasError: false });
+    this.setState({ hasError: false, error: undefined });
     try {
       router.replace("/");
     } catch {
@@ -89,7 +110,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback;
       }
 
-      return <DefaultErrorFallback onReset={this.handleReset} onGoHome={this.handleGoHome} />;
+      return <DefaultErrorFallback error={this.state.error} onReset={this.handleReset} onGoHome={this.handleGoHome} />;
     }
 
     return this.props.children;
@@ -143,6 +164,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
     marginBottom: 24,
+  },
+  detail: {
+    fontSize: 11,
+    lineHeight: 15,
+    color: colorTokens.muted,
+    textAlign: "center",
+    marginTop: -12,
+    marginBottom: 20,
   },
   buttonRow: {
     flexDirection: "row",
