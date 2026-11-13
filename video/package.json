@@ -1,0 +1,24 @@
+{
+  "name": "homenet-promo-video",
+  "private": true,
+  "version": "1.0.0",
+  "description": "HomeNet Bangla promo video (Remotion). Isolated from the app.",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts HomeNetPromo out/homenet-promo.mp4 --codec h264 --crf 18",
+    "still": "remotion still src/index.ts HomeNetPromo out/still.png",
+    "sfx": "node scripts/make-sfx.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.543",
+    "@remotion/fonts": "^4.0.543",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.543"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
