@@ -2708,6 +2708,8 @@ export const en = {
       missingCount: "{{count}} required items missing",
       done: "Done",
       missing: "Missing",
+      showPassed: "Show passed checks ({{count}})",
+      hidePassed: "Hide passed checks",
       checks: {
         pin: "Map pin",
         gender_policy: "Who the mess is for",

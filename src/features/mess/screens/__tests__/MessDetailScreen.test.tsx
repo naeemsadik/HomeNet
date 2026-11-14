@@ -219,7 +219,13 @@ describe("MessDetailScreen for staff", () => {
     // DETAIL has only a room photo: the washroom and building photos are missing.
     expect(text).toContain("2 required items missing");
     expect(container.querySelector('[aria-label="Washroom photo: Missing"]')).not.toBeNull();
+    // What passes is one tap away, so the checklist does not push the listing off the screen.
+    expect(container.querySelector('[aria-label="Room photo: Done"]')).toBeNull();
+    const toggle = [...container.querySelectorAll('[role="button"]')].find((el) => el.textContent === "Show passed checks (11)") as HTMLElement;
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    await act(async () => toggle.click());
     expect(container.querySelector('[aria-label="Room photo: Done"]')).not.toBeNull();
+    expect(toggle.getAttribute("aria-expanded")).toBe("true");
     // The same moderation bar as a property page, with its main action.
     expect(text).toContain("Request changes");
   });

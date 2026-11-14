@@ -2710,6 +2710,8 @@ export const bn: TranslationSchema = {
       missingCount: "{{count}}টি দরকারি তথ্য নেই",
       done: "আছে",
       missing: "নেই",
+      showPassed: "পাস করা যাচাইগুলো দেখুন ({{count}})",
+      hidePassed: "পাস করা যাচাইগুলো লুকান",
       checks: {
         pin: "ম্যাপে পিন",
         gender_policy: "মেসটি কাদের জন্য",
