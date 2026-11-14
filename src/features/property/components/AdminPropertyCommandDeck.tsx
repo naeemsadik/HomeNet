@@ -122,9 +122,10 @@ function CommandDeckInner({ property }: AdminPropertyCommandDeckProps) {
               accessibilityRole="button"
               disabled={isBusy}
               onPress={handleArchiveOrRestore}
+              // On a phone Archive keeps its own width and the main action takes the rest,
+              // so "Request changes" fits instead of being cut off beside an equal-width Archive.
               style={({ pressed }) => [
                 styles.secondaryBtn,
-                isPhone && styles.grow,
                 pressed && styles.pressed,
                 isBusy && styles.busy,
                 webPointer,
