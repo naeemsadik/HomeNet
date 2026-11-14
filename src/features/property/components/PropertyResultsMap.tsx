@@ -17,6 +17,7 @@ import { BedDouble, MapPin, X } from "@/components/icons";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { formatLocalizedPrice, isPriceOnRequest, useTranslation } from "@/i18n";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { listingPath } from "@/lib/listingPath";
 import type { Property } from "../types/property";
 import { HomeMapCanvas } from "./HomeMapCanvas";
 import type { HomeMapMarker } from "./HomeMapCanvas.types";
@@ -136,7 +137,7 @@ export function PropertyResultsMap({
     if (onSelectProperty) {
       onSelectProperty(selectedProperty);
     } else {
-      router.push(`/property/${selectedProperty.id}` as never);
+      router.push(listingPath(selectedProperty) as never);
     }
   };
 
@@ -193,7 +194,7 @@ export function PropertyResultsMap({
                   width={slideWidth}
                   active={p.id === activeProperty?.id}
                   onPress={() =>
-                    onSelectProperty ? onSelectProperty(p) : router.push(`/property/${p.id}` as never)
+                    onSelectProperty ? onSelectProperty(p) : router.push(listingPath(p) as never)
                   }
                 />
               ))}

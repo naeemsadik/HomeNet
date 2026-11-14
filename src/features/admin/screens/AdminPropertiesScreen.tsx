@@ -8,6 +8,7 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { toApiError } from "@/services/apiClient";
 import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTranslation } from "@/i18n";
+import { listingPath } from "@/lib/listingPath";
 
 export function AdminPropertiesScreen() {
   const { t } = useTranslation();
@@ -33,7 +34,8 @@ export function AdminPropertiesScreen() {
   }
 
   function handleView(id: string) {
-    router.push(`/property/${id}` as never);
+    const listing = properties.find((item) => item.id === id);
+    router.push(listingPath({ id, subtype: listing?.subtype }) as never);
   }
 
   return (

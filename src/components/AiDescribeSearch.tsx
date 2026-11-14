@@ -20,6 +20,7 @@ import type { Property } from "@/features/property/types/property";
 import { describeFilters, toCardProperty } from "@/features/property/utils/aiSearchFilters";
 import { useSavedStore } from "@/stores/savedStore";
 import { sanitizeErrorMessage } from "@/lib/errorSanitizer";
+import { listingPath } from "@/lib/listingPath";
 import { colorTokens, colors, fonts, webPointer } from "@/theme";
 
 /** The API's limit on a query (3–300 characters). */
@@ -67,7 +68,7 @@ export function AiDescribeSearch({ initialPrompt = "", onClose, onUseGuided }: A
   const openProperty = useCallback(
     (property: Property) => {
       onClose?.();
-      router.push(`/property/${property.id}` as Href);
+      router.push(listingPath(property) as Href);
     },
     [onClose],
   );

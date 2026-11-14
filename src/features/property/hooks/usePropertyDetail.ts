@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getProperties, getPropertyById } from "@/services/propertyApi";
+import { isMessSubtype } from "@/lib/listingPath";
 
 export interface PropertyDetailArea {
   id: string;
@@ -104,8 +105,9 @@ export function useSimilarProperties(
         limit: 5,
         status: "active",
       });
+      // A mess seat is priced per seat, so it is never "similar" to a flat or a house.
       return (response.data?.items ?? [])
-        .filter((property) => property.id !== excludeId)
+        .filter((property) => property.id !== excludeId && !isMessSubtype(property.subtype))
         .slice(0, 4);
     },
     enabled: !!type,

@@ -26,6 +26,7 @@ import { useMyProperties } from "../hooks/useMyProperties";
 import { useArchiveProperty, useDeleteProperty, useUnarchiveProperty } from "../hooks/usePropertyMutations";
 import { toApiError } from "@/services/apiClient";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { listingEditPath, listingPath } from "@/lib/listingPath";
 
 import { LiveText } from "@/components/LiveText";
 import { NoTranslateText } from "@/components/NoTranslateText";
@@ -36,6 +37,9 @@ export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "a
 
 interface ListingItemData {
   id: string;
+  /** The listing page and the edit form: /mess for a mess listing, /property for the rest. */
+  href: string;
+  editHref: string;
   title: string;
   location: string;
   imageUrl?: string;
@@ -61,6 +65,7 @@ export function MyPropertiesScreen() {
   const unarchiveMutation = useUnarchiveProperty();
   const [activeMenu, setActiveMenu] = useState<{
     id: string;
+    editHref: string;
     title: string;
     status: ListingItemData["status"];
     right: number;
@@ -73,6 +78,8 @@ export function MyPropertiesScreen() {
   const allListings = useMemo(() => {
     return apiProperties.map((p): ListingItemData => ({
       id: p.id,
+      href: listingPath(p),
+      editHref: listingEditPath(p),
       title: p.title || "Untitled Property",
       location: [p.area?.name, (p.area as any)?.city].filter(Boolean).join(", ") || p.address || "Location unavailable",
       imageUrl: cdnImage(
@@ -205,6 +212,7 @@ export function MyPropertiesScreen() {
         top = Math.max(16, Math.min(top, windowHeight - menuHeight - 16));
         setActiveMenu({
           id: item.id,
+          editHref: item.editHref,
           title: item.title,
           status: item.status,
           right,
@@ -217,6 +225,7 @@ export function MyPropertiesScreen() {
     const pageY = event?.nativeEvent?.pageY || 100;
     setActiveMenu({
       id: item.id,
+      editHref: item.editHref,
       title: item.title,
       status: item.status,
       right: 60,
@@ -333,7 +342,7 @@ export function MyPropertiesScreen() {
                     <View key={item.id} style={styles.tableDataRow}>
                       {/* Property Info (Thumbnail, Title, Verified, Boost, Location) */}
                       <View style={[styles.colProperty, styles.colBorder, { flexDirection: "row", gap: 12, alignItems: "center" }]}>
-                        <AppLink href={`/property/${item.id}`} style={styles.propThumb}>
+                        <AppLink href={item.href} style={styles.propThumb}>
                           {item.imageUrl ? (
                             <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.propThumb} />
                           ) : (
@@ -344,7 +353,7 @@ export function MyPropertiesScreen() {
                         </AppLink>
                         <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                            <AppLink href={`/property/${item.id}`} style={{ flexShrink: 1 }}>
+                            <AppLink href={item.href} style={{ flexShrink: 1 }}>
                               <Text style={styles.propTitle} numberOfLines={1}>{item.title}</Text>
                             </AppLink>
                             {item.isVerified ? <CheckCircle2 color="#04cf92" size={16} /> : null}
@@ -467,11 +476,11 @@ export function MyPropertiesScreen() {
                       </View>
 
                       <View style={styles.mobileActionsRow}>
-                        <AppLink href={`/property/${item.id}`} style={styles.mobileActionBtn}>
+                        <AppLink href={item.href} style={styles.mobileActionBtn}>
                           <Eye color="#5C6B66" size={14} />
                           <Text style={styles.mobileActionText}>{t("seller.actions.view")}</Text>
                         </AppLink>
-                        <AppLink href={`/property/edit?id=${item.id}`} style={styles.mobileActionBtn}>
+                        <AppLink href={item.editHref} style={styles.mobileActionBtn}>
                           <Edit color="#04cf92" size={14} />
                           <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
                         </AppLink>
@@ -536,9 +545,9 @@ export function MyPropertiesScreen() {
               <Pressable
                 style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
                 onPress={() => {
-                  const id = activeMenu.id;
+                  const editHref = activeMenu.editHref;
                   setActiveMenu(null);
-                  router.push(`/property/edit?id=${id}` as any);
+                  router.push(editHref as never);
                 }}
               >
                 <Edit color="#04cf92" size={15} />

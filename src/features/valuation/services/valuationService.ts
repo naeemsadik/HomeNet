@@ -1,6 +1,7 @@
 import apiClient from "@/services/apiClient";
 import { getProperties } from "@/services/propertyApi";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { isMessSubtype } from "@/lib/listingPath";
 import areaBenchmarkData from "../data/areaBenchmarks.json";
 import { translate } from "@/i18n";
 import { confidenceReasonText } from "../utils/confidenceText";
@@ -610,7 +611,8 @@ export async function findComparables(payload: ValuationRequestPayload): Promise
 
   const targetSqft = payload.sizeUnit === "katha" ? payload.sizeSqft * SQFT_PER_KATHA : payload.sizeSqft;
   return items
-    .filter((p) => p.listing_type === payload.purpose && p.price > 0)
+    // A mess seat's rent is per seat, not for the home: it would drag a rent valuation down.
+    .filter((p) => p.listing_type === payload.purpose && p.price > 0 && !isMessSubtype(p.subtype))
     .map((p) => ({ p, sqft: listingSqft(p) }))
     // Closest in size first; a listing without a size goes last.
     .sort((x, y) => (x.sqft === null ? Infinity : Math.abs(x.sqft - targetSqft)) - (y.sqft === null ? Infinity : Math.abs(y.sqft - targetSqft)))

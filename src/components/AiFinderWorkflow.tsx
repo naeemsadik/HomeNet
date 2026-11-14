@@ -20,6 +20,7 @@ import { getPropertiesInAreas } from "@/services/propertyApi";
 import { useAllAreas } from "@/hooks/useAllAreas";
 import { useResponsive } from "@/hooks/useResponsive";
 import { AI_SEARCH_ENABLED } from "@/lib/features";
+import { listingPath } from "@/lib/listingPath";
 import { useSavedStore } from "@/stores/savedStore";
 import type { Property } from "@/features/property/types/property";
 import { areaIdsFor, resolveArea } from "@/features/property/utils/aiSearchFilters";
@@ -99,7 +100,7 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
   const handleOpenMatch = useCallback(
     (property: Property) => {
       if (isModal && onClose) onClose();
-      router.push(`/property/${property.id}` as Href);
+      router.push(listingPath(property) as Href);
     },
     [isModal, onClose],
   );

@@ -27,6 +27,7 @@ import {
 import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { listingPath } from "@/lib/listingPath";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { whatsappUrl } from "@/features/property/utils/lister";
 import { useTranslation, formatLocalizedPrice, isPriceOnRequest, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
@@ -116,7 +117,7 @@ function PropertyCardComponent({
 
   const open = () => {
     if (onPress) onPress(property);
-    else if (property.id) router.push(`/property/${property.id}` as never);
+    else if (property.id) router.push(listingPath(property) as never);
   };
 
   const mediaHeight = imageHeight ?? (isFeature ? (isPhone ? 300 : 360) : isPhone ? 190 : 210);
