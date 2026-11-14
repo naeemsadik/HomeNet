@@ -67,7 +67,30 @@ export interface University {
   name: string;
   short_name: string;
   city: string;
+  /** Hidden from students when false. Only the admin list (include_inactive) returns those. */
+  is_active?: boolean;
   campuses: Campus[];
+}
+
+/** POST /v1/universities, PATCH /v1/universities/:id (manage_areas). */
+export interface UniversityInput {
+  name: string;
+  /** Unique, e.g. "UIU". The API answers 409 for a duplicate. */
+  short_name: string;
+  city: string;
+  is_active: boolean;
+}
+
+/**
+ * POST /v1/campuses, PATCH /v1/campuses/:id (manage_areas). Creating or moving
+ * a campus makes the API recompute walking times for listings within 6 km.
+ */
+export interface CampusInput {
+  university_id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  is_primary: boolean;
 }
 
 // ─── Listing parts ───────────────────────────────────────────────────────────

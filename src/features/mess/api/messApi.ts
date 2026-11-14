@@ -13,6 +13,8 @@ import type { ApiResponse } from "@/types/api";
 import type { PaginatedResponse } from "@/features/property/types/property";
 import { toApiParams } from "../utils/filterParams";
 import type {
+  Campus,
+  CampusInput,
   ContactChannel,
   ContactResult,
   MediaLabel,
@@ -26,11 +28,20 @@ import type {
   SeatStatus,
   SeekerPreference,
   University,
+  UniversityInput,
   UpsertMessDto,
 } from "../types/mess";
 
 export interface MessBackend {
   getUniversities(): Promise<University[]>;
+  /** The admin catalogue (manage_areas): hidden universities too. */
+  getAdminUniversities(): Promise<University[]>;
+  createUniversity(input: UniversityInput): Promise<University>;
+  updateUniversity(id: string, input: UniversityInput): Promise<University>;
+  deleteUniversity(id: string): Promise<void>;
+  createCampus(input: CampusInput): Promise<Campus>;
+  updateCampus(id: string, input: Omit<CampusInput, "university_id">): Promise<Campus>;
+  deleteCampus(id: string): Promise<void>;
   searchMess(filters: MessFilters, page: number, limit: number): Promise<PaginatedResponse<MessCard>>;
   getMessDetail(id: string): Promise<MessDetail>;
   getMyMessListings(): Promise<PaginatedResponse<MyMessListing>>;
@@ -60,6 +71,39 @@ export const httpBackend: MessBackend = {
   async getUniversities() {
     const { data } = await apiClient.get<ApiResponse<University[]>>("/v1/universities");
     return unwrap(data);
+  },
+
+  async getAdminUniversities() {
+    const { data } = await apiClient.get<ApiResponse<University[]>>("/v1/universities", { params: { include_inactive: true } });
+    return unwrap(data);
+  },
+
+  async createUniversity(input) {
+    const { data } = await apiClient.post<ApiResponse<University>>("/v1/universities", input);
+    return unwrap(data);
+  },
+
+  async updateUniversity(id, input) {
+    const { data } = await apiClient.patch<ApiResponse<University>>(`/v1/universities/${enc(id)}`, input);
+    return unwrap(data);
+  },
+
+  async deleteUniversity(id) {
+    await apiClient.delete(`/v1/universities/${enc(id)}`);
+  },
+
+  async createCampus(input) {
+    const { data } = await apiClient.post<ApiResponse<Campus>>("/v1/campuses", input);
+    return unwrap(data);
+  },
+
+  async updateCampus(id, input) {
+    const { data } = await apiClient.patch<ApiResponse<Campus>>(`/v1/campuses/${enc(id)}`, input);
+    return unwrap(data);
+  },
+
+  async deleteCampus(id) {
+    await apiClient.delete(`/v1/campuses/${enc(id)}`);
   },
 
   async searchMess(filters, page, limit) {
@@ -145,6 +189,13 @@ const fixtureBackend: MessBackend | null =
 const backend = (): MessBackend => fixtureBackend ?? httpBackend;
 
 export const getUniversities = () => backend().getUniversities();
+export const getAdminUniversities = () => backend().getAdminUniversities();
+export const createUniversity = (input: UniversityInput) => backend().createUniversity(input);
+export const updateUniversity = (id: string, input: UniversityInput) => backend().updateUniversity(id, input);
+export const deleteUniversity = (id: string) => backend().deleteUniversity(id);
+export const createCampus = (input: CampusInput) => backend().createCampus(input);
+export const updateCampus = (id: string, input: Omit<CampusInput, "university_id">) => backend().updateCampus(id, input);
+export const deleteCampus = (id: string) => backend().deleteCampus(id);
 export const searchMess = (filters: MessFilters, page: number, limit: number) => backend().searchMess(filters, page, limit);
 export const getMessDetail = (id: string) => backend().getMessDetail(id);
 export const getMyMessListings = () => backend().getMyMessListings();

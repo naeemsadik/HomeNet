@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Bell, Building2, MapPinned, Settings, ShieldCheck, Users } from "@/components/icons";
+import { Bell, Building2, GraduationCap, MapPinned, Settings, ShieldCheck, Users } from "@/components/icons";
+import { MESS_ENABLED } from "@/lib/features";
 import { colorTokens, fontTokens } from "@/theme";
 import type { UserRole } from "../types/admin";
 
@@ -7,7 +8,7 @@ import { hasPermission, isAdmin } from "@/lib/permissions";
 
 import { LiveText } from "@/components/LiveText";
 
-type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
+export type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "universities" | "settings";
 
 interface AdminTabNavProps {
   active: AdminTab;
@@ -30,6 +31,8 @@ const TABS: {
   { key: "users", label: "Users", icon: Users, permissions: ["manage_users"] },
   { key: "roles", label: "Roles", icon: ShieldCheck, permissions: ["view_roles", "manage_roles"] },
   { key: "areas", label: "Areas", icon: MapPinned, permissions: ["manage_areas"] },
+  // The campus catalogue behind Mess & Seat Share, shown with the module.
+  ...(MESS_ENABLED ? [{ key: "universities" as const, label: "Universities", icon: GraduationCap, permissions: ["manage_areas"] }] : []),
   { key: "settings", label: "Settings", icon: Settings },
 ];
 

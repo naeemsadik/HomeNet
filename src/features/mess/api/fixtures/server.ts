@@ -10,6 +10,7 @@
 import { Platform } from "react-native";
 import { ApiError } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
+import { hasPermission, isAdmin } from "@/lib/permissions";
 import { queryClient } from "@/lib/queryClient";
 import { allAreasQuery, type AllAreas } from "@/hooks/useAllAreas";
 import type { PaginatedResponse } from "@/features/property/types/property";
@@ -29,6 +30,7 @@ import type {
   MyMessListing,
   Seat,
   SeekerPreference,
+  University,
   UtilityCharge,
 } from "../../types/mess";
 import type { MessBackend } from "../messApi";
@@ -47,12 +49,22 @@ const REVEALS_PER_HOUR = 5;
 const listings = new Map<string, StoredListing>(seedListings().map((seed) => [seed.detail.id, seed]));
 const reveals: { listing_id: string; user_id: string; at: number }[] = [];
 const preferences = new Map<string, SeekerPreference>();
+/** The catalogue, editable from the admin Universities tab while the demo runs. */
+const universities: University[] = FIXTURE_UNIVERSITIES.map((university) => ({
+  ...university,
+  is_active: true,
+  campuses: university.campuses.map((campus) => ({ ...campus })),
+}));
 let nextId = 1;
 
 const delay = <T>(value: T): Promise<T> => new Promise((resolve) => setTimeout(() => resolve(value), LATENCY_MS));
 const fail = (message: string, status: number, errors: string[] = []) =>
   new Promise<never>((_, reject) => setTimeout(() => reject(new ApiError(message, status, null, errors, message)), LATENCY_MS));
 const currentUser = () => useAuthStore.getState().user;
+const userCan = (permission: string) => {
+  const { user, userRoles } = useAuthStore.getState();
+  return Boolean(user) && (isAdmin(userRoles) || hasPermission(userRoles, permission));
+};
 
 // ─── Derivations (PRD 2.4 and 2.5) ──────────────────────────────────────────
 
@@ -64,7 +76,8 @@ function distancesFor(listing: StoredListing): CampusDistance[] {
   const { location_lat: lat, location_lng: lng, id } = listing.detail;
   if (lat == null || lng == null) return [];
   const rows: CampusDistance[] = [];
-  for (const university of FIXTURE_UNIVERSITIES) {
+  for (const university of universities) {
+    if (university.is_active === false) continue;
     for (const campus of university.campuses) {
       const straight = straightMetres(lat, lng, campus.lat, campus.lng);
       if (straight > SEARCH_RADIUS_M) continue;
@@ -283,7 +296,69 @@ function ownListing(id: string): StoredListing | ApiError {
 const isError = (value: unknown): value is ApiError => value instanceof ApiError;
 
 export const fixtureBackend: MessBackend = {
-  getUniversities: () => delay(FIXTURE_UNIVERSITIES),
+  getUniversities: () => delay(universities.filter((university) => university.is_active !== false)),
+
+  getAdminUniversities() {
+    if (!userCan("manage_areas")) return fail("Forbidden", 403);
+    return delay(universities);
+  },
+
+  createUniversity(input) {
+    if (!userCan("manage_areas")) return fail("Forbidden", 403);
+    if (universities.some((u) => u.short_name.toLowerCase() === input.short_name.trim().toLowerCase())) {
+      return fail("A university with this short name already exists", 409);
+    }
+    const university: University = { id: `fx-uni-new-${nextId++}`, ...input, short_name: input.short_name.trim(), campuses: [] };
+    universities.push(university);
+    return delay(university);
+  },
+
+  updateUniversity(id, input) {
+    if (!userCan("manage_areas")) return fail("Forbidden", 403);
+    const university = universities.find((u) => u.id === id);
+    if (!university) return fail("University not found", 404);
+    if (universities.some((u) => u.id !== id && u.short_name.toLowerCase() === input.short_name.trim().toLowerCase())) {
+      return fail("A university with this short name already exists", 409);
+    }
+    Object.assign(university, input, { short_name: input.short_name.trim() });
+    return delay(university);
+  },
+
+  deleteUniversity(id) {
+    if (!userCan("manage_areas")) return fail("Forbidden", 403);
+    const index = universities.findIndex((u) => u.id === id);
+    if (index < 0) return fail("University not found", 404);
+    universities.splice(index, 1);
+    return delay(undefined);
+  },
+
+  createCampus(input) {
+    if (!userCan("manage_areas")) return fail("Forbidden", 403);
+    const university = universities.find((u) => u.id === input.university_id);
+    if (!university) return fail("University not found", 404);
+    const campus = { id: `fx-campus-new-${nextId++}`, area_id: null, ...input };
+    if (campus.is_primary) university.campuses.forEach((row) => (row.is_primary = false));
+    university.campuses.push(campus);
+    return delay(campus);
+  },
+
+  updateCampus(id, input) {
+    if (!userCan("manage_areas")) return fail("Forbidden", 403);
+    const university = universities.find((u) => u.campuses.some((row) => row.id === id));
+    const campus = university?.campuses.find((row) => row.id === id);
+    if (!university || !campus) return fail("Campus not found", 404);
+    if (input.is_primary) university.campuses.forEach((row) => (row.is_primary = false));
+    Object.assign(campus, input);
+    return delay(campus);
+  },
+
+  deleteCampus(id) {
+    if (!userCan("manage_areas")) return fail("Forbidden", 403);
+    const university = universities.find((u) => u.campuses.some((row) => row.id === id));
+    if (!university) return fail("Campus not found", 404);
+    university.campuses = university.campuses.filter((row) => row.id !== id);
+    return delay(undefined);
+  },
 
   searchMess(filters, page, limit) {
     const cards = sortCards(
@@ -297,7 +372,8 @@ export const fixtureBackend: MessBackend = {
   getMessDetail(id) {
     const listing = listings.get(id);
     const isOwner = listing && currentUser()?.id === listing.owner_id;
-    if (!listing || (listing.detail.status !== "active" && !isOwner)) return fail("Listing not found", 404);
+    // A listing that is not live is visible to its owner and to moderators only.
+    if (!listing || (listing.detail.status !== "active" && !isOwner && !userCan("moderate_listing"))) return fail("Listing not found", 404);
     return delay(toDetail(listing));
   },
 

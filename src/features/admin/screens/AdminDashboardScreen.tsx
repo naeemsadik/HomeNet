@@ -5,17 +5,17 @@ import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens, fontTokens } from "@/theme";
-import { AdminTabNav } from "../components/AdminTabNav";
+import { AdminTabNav, type AdminTab } from "../components/AdminTabNav";
 import { AdminPropertiesScreen } from "./AdminPropertiesScreen";
 import { AdminUsersScreen } from "./AdminUsersScreen";
 import { AdminRolesScreen } from "./AdminRolesScreen";
 import { AdminAreasScreen } from "./AdminAreasScreen";
+import { AdminUniversitiesScreen } from "./AdminUniversitiesScreen";
+import { MESS_ENABLED } from "@/lib/features";
 import { hasAnyAdminPermission, isAdmin } from "@/lib/permissions";
 import { NotificationList } from "@/features/notification/components/NotificationList";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 import { useTranslation } from "@/i18n";
-
-type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
 
 export function AdminDashboardScreen() {
   const { t } = useTranslation();
@@ -32,13 +32,14 @@ export function AdminDashboardScreen() {
     ),
   );
   const allowedTabs: AdminTab[] = isFullAdmin
-    ? ["properties", "notifications", "users", "roles", "areas", "settings"]
+    ? ["properties", "notifications", "users", "roles", "areas", ...(MESS_ENABLED ? (["universities"] as const) : []), "settings"]
     : [
         ...(["manage_properties", "moderate_listing", "review_verification"].some((name) => permissionNames.has(name)) ? ["properties" as const] : []),
         ...(permissionNames.has("moderate_listing") ? ["notifications" as const] : []),
         ...(permissionNames.has("manage_users") ? ["users" as const] : []),
         ...(["view_roles", "manage_roles"].some((name) => permissionNames.has(name)) ? ["roles" as const] : []),
         ...(permissionNames.has("manage_areas") ? ["areas" as const] : []),
+        ...(MESS_ENABLED && permissionNames.has("manage_areas") ? ["universities" as const] : []),
         "settings" as const,
       ];
   const visibleTab = allowedTabs.includes(activeTab) ? activeTab : allowedTabs[0];
@@ -81,6 +82,7 @@ export function AdminDashboardScreen() {
           {visibleTab === "users" && <AdminUsersScreen />}
           {visibleTab === "roles" && <AdminRolesScreen />}
           {visibleTab === "areas" && <AdminAreasScreen />}
+          {visibleTab === "universities" && <AdminUniversitiesScreen />}
           {visibleTab === "settings" && (
             <View style={styles.settingsPlaceholder}>
               <Text style={styles.settingsText}>{t("admin.settingsComingSoon")}</Text>

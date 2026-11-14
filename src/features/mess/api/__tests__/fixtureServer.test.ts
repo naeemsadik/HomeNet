@@ -107,3 +107,47 @@ describe("fixture backend listing flow", () => {
     await expect(settle(fixtureBackend.setSeatStatus("fx-mess-1", "fx-s1-1", "filled"))).rejects.toMatchObject({ status: 403 });
   });
 });
+
+describe("fixture backend university catalogue (manage_areas)", () => {
+  const signInWith = (permission: string) =>
+    useAuthStore.setState({
+      user: { id: "staff", full_name: "Staff", email: "staff@example.com", avatar_url: null },
+      userRoles: [
+        {
+          id: "ur",
+          user_id: "staff",
+          role_id: "r",
+          role: { id: "r", name: "ops", role_permissions: [{ permission: { id: "p", name: permission, description: null } }] },
+        },
+      ],
+    });
+
+  afterEach(() => useAuthStore.setState({ user: null, userRoles: [] }));
+
+  it("refuses anyone without manage_areas", async () => {
+    signInWith("moderate_listing");
+    await expect(settle(fixtureBackend.getAdminUniversities())).rejects.toMatchObject({ status: 403 });
+    await expect(
+      settle(fixtureBackend.createUniversity({ name: "X", short_name: "X", city: "Dhaka", is_active: true })),
+    ).rejects.toMatchObject({ status: 403 });
+  });
+
+  it("adds a university and a campus that students then see, and refuses a duplicate short name", async () => {
+    signInWith("manage_areas");
+    const university = await settle(fixtureBackend.createUniversity({ name: "Test University", short_name: "TSTU", city: "Dhaka", is_active: true }));
+    await settle(fixtureBackend.createCampus({ university_id: university.id, name: "Gate 1", lat: 23.8, lng: 90.4, is_primary: true }));
+    const visible = await settle(fixtureBackend.getUniversities());
+    expect(visible.find((row) => row.short_name === "TSTU")?.campuses.map((campus) => campus.name)).toEqual(["Gate 1"]);
+
+    await expect(
+      settle(fixtureBackend.createUniversity({ name: "Other", short_name: "tstu", city: "Dhaka", is_active: true })),
+    ).rejects.toMatchObject({ status: 409 });
+  });
+
+  it("hides a university students should not see, but keeps it in the admin list", async () => {
+    signInWith("manage_areas");
+    const university = await settle(fixtureBackend.createUniversity({ name: "Hidden U", short_name: "HIDU", city: "Dhaka", is_active: false }));
+    expect((await settle(fixtureBackend.getUniversities())).some((row) => row.id === university.id)).toBe(false);
+    expect((await settle(fixtureBackend.getAdminUniversities())).some((row) => row.id === university.id)).toBe(true);
+  });
+});
