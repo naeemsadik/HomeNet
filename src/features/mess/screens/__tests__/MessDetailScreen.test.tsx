@@ -240,3 +240,18 @@ describe("MessDetailScreen for staff", () => {
     expect(text).not.toContain("Review checklist");
   });
 });
+
+describe("MessDetailScreen photo tabs", () => {
+  it("marks the shown photo group with aria-selected", async () => {
+    (getMessDetail as jest.Mock).mockResolvedValue(DETAIL);
+    await render();
+    const tabs = () => [...container.querySelectorAll('[role="tab"]')] as HTMLElement[];
+    const tab = (name: string) => tabs().find((el) => el.textContent === name)!;
+    expect(tab("All").getAttribute("aria-selected")).toBe("true");
+    expect(tab("Room").getAttribute("aria-selected")).toBe("false");
+
+    await act(async () => tab("Room").click());
+    expect(tab("Room").getAttribute("aria-selected")).toBe("true");
+    expect(tab("All").getAttribute("aria-selected")).toBe("false");
+  });
+});

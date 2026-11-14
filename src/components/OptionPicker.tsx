@@ -39,7 +39,7 @@ export function OptionPicker({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel ? `${accessibilityLabel}: ${current?.label ?? ""}` : current?.label}
-        accessibilityState={{ disabled: !!disabled, expanded: open }}
+        aria-disabled={!!disabled} aria-expanded={open}
         disabled={disabled}
         onPress={() => setOpen(true)}
         style={[styles.box, disabled && styles.boxDisabled, style]}
@@ -60,8 +60,8 @@ export function OptionPicker({
                 return (
                   <Pressable
                     key={option.value || "__none__"}
-                    accessibilityRole="menuitem"
-                    accessibilityState={{ selected }}
+                    role="option"
+                    aria-selected={selected}
                     onPress={() => {
                       setOpen(false);
                       if (option.value !== value) onChange(option.value);

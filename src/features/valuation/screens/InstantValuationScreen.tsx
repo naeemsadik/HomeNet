@@ -271,7 +271,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
     <View style={styles.faqItem}>
       <Pressable
         accessibilityRole="button"
-        accessibilityState={{ expanded: open }}
+        aria-expanded={open}
         onPress={() => setOpen((value) => !value)}
         style={[styles.faqHeader, webPointer]}
       >

@@ -434,7 +434,7 @@ export function RightmoveFilterCard({
               onPress={() => handleUpdate({ includeSold: !filters.includeSold })}
               style={[styles.checkboxRow, webPointer]}
               accessibilityRole="checkbox"
-              accessibilityState={{ checked: filters.includeSold }}
+              aria-checked={filters.includeSold}
               accessibilityHint={t("search.rightmove.includeSoldHelp")}
               // The (?) was decoration until it carried the explanation.
               {...(Platform.OS === "web"

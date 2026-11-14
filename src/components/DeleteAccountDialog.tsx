@@ -161,7 +161,7 @@ export function DeleteAccountDialog({
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityState={{ disabled: !matches || isDeleting }}
+              aria-disabled={!matches || isDeleting}
               disabled={!matches || isDeleting}
               onPress={handleDelete}
               style={({ pressed }) => [

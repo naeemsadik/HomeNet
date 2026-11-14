@@ -63,7 +63,7 @@ export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNav
                 : t("admin.tabs.tabAria", { name: label })
             }
             accessibilityRole="tab"
-            accessibilityState={{ selected: isActive }}
+            aria-selected={isActive}
           >
             <Icon color={isActive ? colorTokens.onBrand : colorTokens.textSecondary} size={16} />
             <Text style={[styles.tabText, isActive && styles.tabTextActive]}>

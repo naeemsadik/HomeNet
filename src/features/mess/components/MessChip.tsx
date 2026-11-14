@@ -30,7 +30,8 @@ export function MessChip({
     <Pressable
       accessibilityRole={role}
       accessibilityLabel={accessibilityLabel ?? label}
-      accessibilityState={role === "button" ? { disabled } : { checked: selected, disabled }}
+      aria-checked={role === "button" ? undefined : selected}
+      aria-disabled={disabled}
       disabled={disabled}
       hitSlop={4}
       onPress={onPress}

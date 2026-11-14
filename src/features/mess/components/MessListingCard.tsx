@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import { memo, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { Image } from "expo-image";
@@ -149,7 +150,7 @@ function MessListingCardComponent({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={saved ? t("mess.card.unsave") : t("mess.card.save")}
-          accessibilityState={{ selected: saved }}
+          {...pressedState(saved)}
           hitSlop={8}
           onPress={() => onToggleSave(item.id)}
           style={({ pressed }) => [styles.save, webPointer, pressed && styles.savePressed]}

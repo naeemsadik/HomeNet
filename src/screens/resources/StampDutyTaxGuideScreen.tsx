@@ -221,7 +221,7 @@ export function StampDutyTaxGuideScreen() {
                 <View key={index} style={styles.faqCard}>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityState={{ expanded: isExpanded }}
+                    aria-expanded={isExpanded}
                     onPress={() => toggleFaq(index)}
                     style={[styles.faqQuestionRow, webPointer]}
                   >

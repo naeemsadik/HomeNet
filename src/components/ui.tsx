@@ -123,7 +123,7 @@ export function AppButton({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: isInert, busy: loading }}
+      aria-disabled={isInert} aria-busy={loading}
       disabled={isInert}
       onPress={onPress}
       style={({ pressed, hovered }: any) => [

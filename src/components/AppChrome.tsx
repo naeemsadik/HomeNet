@@ -1,3 +1,4 @@
+import { currentState } from "@/lib/a11yState";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, colorTokens, layout, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
@@ -254,7 +255,7 @@ function TopNavAnchor({
     >
       <Pressable
         accessibilityRole="link"
-        accessibilityState={{ selected }}
+        {...currentState(selected)}
         onHoverIn={() => setHovered(true)}
         onHoverOut={() => setHovered(false)}
       >
@@ -466,7 +467,7 @@ function TopBar({
                     pressed && { opacity: 0.8 },
                   ]}
                   accessibilityRole="link"
-                  accessibilityState={{ selected: isSelected }}
+                  {...currentState(isSelected)}
                 >
                   {content}
                 </Pressable>
@@ -762,7 +763,7 @@ export function MobileNav({ active }: { active?: ActivePage }) {
               ]}
               accessibilityRole="link"
               accessibilityLabel={label}
-              accessibilityState={{ selected }}
+              {...currentState(selected)}
             >
               {/* The current tab sits on a tinted pill (Material 3's active indicator). */}
               <View style={[styles.mobileNavIndicator, selected && styles.mobileNavIndicatorActive]}>

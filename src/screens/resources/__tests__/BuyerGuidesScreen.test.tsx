@@ -113,9 +113,9 @@ describe("BuyerGuidesScreen", () => {
     expect(checkboxes.length).toBe(6);
 
     // Item 0 and 1 initially checked (true), 2 is unchecked (false)
-    expect(checkboxes[0].props.accessibilityState.checked).toBe(true);
-    expect(checkboxes[1].props.accessibilityState.checked).toBe(true);
-    expect(checkboxes[2].props.accessibilityState.checked).toBe(false);
+    expect(checkboxes[0].props["aria-checked"]).toBe(true);
+    expect(checkboxes[1].props["aria-checked"]).toBe(true);
+    expect(checkboxes[2].props["aria-checked"]).toBe(false);
 
     // Toggle item 2 to checked -> 3 of 6 -> 50%
     act(() => {
@@ -208,12 +208,11 @@ describe("BuyerGuidesScreen", () => {
       (node) =>
         node.type === Pressable &&
         node.props.accessibilityRole === "button" &&
-        node.props.accessibilityState &&
-        "expanded" in node.props.accessibilityState,
+        node.props["aria-expanded"] !== undefined,
     );
     expect(faqButtons.length).toBe(4);
-    expect(faqButtons[0].props.accessibilityState.expanded).toBe(true);
-    expect(faqButtons[1].props.accessibilityState.expanded).toBe(false);
+    expect(faqButtons[0].props["aria-expanded"]).toBe(true);
+    expect(faqButtons[1].props["aria-expanded"]).toBe(false);
 
     // Expand FAQ 2
     act(() => {

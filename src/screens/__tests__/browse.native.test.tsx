@@ -184,7 +184,7 @@ describe("the Area list when the API returns only part of it", () => {
     expect(cityBox).toBeDefined();
     press(cityBox!);
     const dhakaOption = tree.root
-      .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
+      .findAll((n) => n.props.role === "option" && typeof n.props.onPress === "function")
       .find((r) => textOf(r).trim() === "Dhaka");
     expect(dhakaOption).toBeDefined();
     press(dhakaOption!);
@@ -200,7 +200,7 @@ describe("the Area list when the API returns only part of it", () => {
     press(box!);
 
     const rows = scopedTree.root
-      .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
+      .findAll((n) => n.props.role === "option" && typeof n.props.onPress === "function")
       .map((r) => textOf(r).trim());
     expect(rows.length).toBeGreaterThan(20);
     expect(rows).toEqual(expect.arrayContaining(["All areas", "Gulshan", "Uttara"]));
@@ -225,7 +225,7 @@ describe("a city typed into the hero search", () => {
     expect(areaBox).toBeDefined();
     press(areaBox!);
     const rows = tree.root
-      .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
+      .findAll((n) => n.props.role === "option" && typeof n.props.onPress === "function")
       .map((r) => textOf(r).trim());
     expect(rows).toEqual(expect.arrayContaining(["All areas", "Gulshan", "Uttara"]));
     expect(rows).not.toContain("Agrabad");
@@ -252,7 +252,7 @@ describe("a city typed into the hero search", () => {
     const tree = await mount("buy");
     press(pressableWithText(tree, "Dhaka")!);
     const sylhet = tree.root
-      .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
+      .findAll((n) => n.props.role === "option" && typeof n.props.onPress === "function")
       .find((r) => textOf(r).trim() === "Sylhet");
     expect(sylhet).toBeDefined();
     press(sylhet!);
@@ -413,7 +413,7 @@ describe("the filter sheet's result count", () => {
     expect(cityBox).toBeDefined();
     await act(async () => cityBox!.props.onPress());
     const dhakaRow = tree.root
-      .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
+      .findAll((n) => n.props.role === "option" && typeof n.props.onPress === "function")
       .find((r) => textOf(r).trim() === "Dhaka");
     expect(dhakaRow).toBeDefined();
     await act(async () => dhakaRow!.props.onPress());
@@ -422,7 +422,7 @@ describe("the filter sheet's result count", () => {
     expect(box).toBeDefined();
     await act(async () => box!.props.onPress());
     const row = tree.root
-      .findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function")
+      .findAll((n) => n.props.role === "option" && typeof n.props.onPress === "function")
       .find((r) => textOf(r).trim() === "Mohammadpur");
     expect(row).toBeDefined();
     await act(async () => row!.props.onPress());

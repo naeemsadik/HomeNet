@@ -101,7 +101,7 @@ export function AdminContextBar() {
             <Pressable
               accessibilityLabel={t("moderation.toggleLabel")}
               accessibilityRole="switch"
-              accessibilityState={{ checked: armed }}
+              aria-checked={armed}
               hitSlop={HIT_SLOP}
               onPress={toggle}
               style={({ pressed }) => [

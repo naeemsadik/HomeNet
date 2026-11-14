@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import React, { useMemo, useState } from "react";
 import {
   Modal,
@@ -530,7 +531,7 @@ export function OwnerListPropertySection() {
                       key={intent.id}
                       accessibilityLabel={`${intent.label}, ${intent.description}`}
                       accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
+                      {...pressedState(isSelected)}
                       onPress={() => setSelectedIntentId(intent.id)}
                       // @ts-ignore web hover
                       onMouseEnter={() => setHoveredIntentId(intent.id)}

@@ -170,7 +170,7 @@ export function MortgageCalculatorScreen() {
                 key={tab.mode}
                 accessibilityLabel={t(tab.labelKey)}
                 accessibilityRole="tab"
-                accessibilityState={{ selected }}
+                aria-selected={selected}
                 onPress={() => setMode(tab.mode)}
                 style={({ pressed }) => [
                   styles.tab,

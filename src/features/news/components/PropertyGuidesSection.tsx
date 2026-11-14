@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import { ArrowRight, BookOpen, ExternalLink } from "@/components/icons";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -241,7 +242,7 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
               ]}
               accessibilityRole="button"
               accessibilityLabel={t("guides.filterByTab", { tab: tabLabel })}
-              accessibilityState={{ selected: isActive }}
+              {...pressedState(isActive)}
             >
               <Text
                 style={[

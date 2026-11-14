@@ -165,7 +165,7 @@ export function MobileHeroSearchCard() {
                 <Pressable
                   key={tab}
                   accessibilityRole="tab"
-                  accessibilityState={{ selected: isSelected }}
+                  aria-selected={isSelected}
                   accessibilityLabel={tabLabel}
                   onPress={() => handleTabChange(tab)}
                   style={[styles.tab, webPointer]}

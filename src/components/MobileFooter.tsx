@@ -122,7 +122,7 @@ const Section = memo(function Section({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={title}
-        accessibilityState={{ expanded: open }}
+        aria-expanded={open}
         onPress={() => onToggle(section.key)}
         style={[styles.sectionHeader, webPointer]}
       >

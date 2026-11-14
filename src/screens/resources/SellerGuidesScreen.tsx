@@ -342,7 +342,7 @@ export function SellerGuidesScreen() {
                   <Pressable
                     key={item.id}
                     accessibilityRole="checkbox"
-                    accessibilityState={{ checked: isChecked }}
+                    aria-checked={isChecked}
                     onPress={() => toggleCheck(idx)}
                     style={[
                       styles.checkRow,
@@ -509,7 +509,7 @@ export function SellerGuidesScreen() {
                 <View key={index} style={styles.faqCard}>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityState={{ expanded: isExpanded }}
+                    aria-expanded={isExpanded}
                     onPress={() => toggleFaq(index)}
                     style={[styles.faqQuestionRow, webPointer]}
                   >

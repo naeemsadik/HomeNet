@@ -130,3 +130,13 @@ describe("MessListingCard", () => {
     expect(text).toContain("ছেলেদের");
   });
 });
+
+describe("MessListingCard save button state", () => {
+  it("says whether the listing is saved with aria-pressed", async () => {
+    await render(<MessListingCard item={CARD} onPress={jest.fn()} saved onToggleSave={jest.fn()} />);
+    expect(container.querySelector('[role="button"][aria-pressed]')?.getAttribute("aria-pressed")).toBe("true");
+
+    await render(<MessListingCard item={CARD} onPress={jest.fn()} saved={false} onToggleSave={jest.fn()} />);
+    expect(container.querySelector('[role="button"][aria-pressed]')?.getAttribute("aria-pressed")).toBe("false");
+  });
+});

@@ -203,7 +203,7 @@ function SeatButton({ label, onPress, disabled }: { label: string; onPress: () =
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled }}
+      aria-disabled={disabled}
       disabled={disabled}
       onPress={onPress}
       style={({ hovered }: { hovered?: boolean }) => [styles.seatButton, hovered && styles.seatButtonHovered, disabled && styles.seatButtonOff, webPointer]}

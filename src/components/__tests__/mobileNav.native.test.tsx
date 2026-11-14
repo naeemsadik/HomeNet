@@ -52,8 +52,8 @@ afterEach(() => {
 describe("MobileNav", () => {
   it("marks Post as the current tab on the listing form", () => {
     const tree = mount("post");
-    expect(tab(tree, "Post").props.accessibilityState).toEqual({ selected: true });
-    expect(tab(tree, "Home").props.accessibilityState).toEqual({ selected: false });
+    expect(tab(tree, "Post").props["aria-selected"]).toBe(true);
+    expect(tab(tree, "Home").props["aria-selected"]).toBe(false);
   });
 
   it("shows the signed-in person's photo on the Account tab", () => {

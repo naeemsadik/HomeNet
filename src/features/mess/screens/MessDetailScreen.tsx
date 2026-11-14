@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import { Image } from "expo-image";
@@ -192,7 +193,7 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={isSaved ? t("mess.card.unsave") : t("mess.card.save")}
-              accessibilityState={{ selected: isSaved }}
+              {...pressedState(isSaved)}
               onPress={() => void toggleSaved(detail.id)}
               style={[styles.iconButton, webPointer]}
             >
@@ -365,7 +366,7 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
                         <Pressable
                           key={tab}
                           accessibilityRole="tab"
-                          accessibilityState={{ selected }}
+                          aria-selected={selected}
                           onPress={() => setPhotoTab(tab)}
                           style={[styles.tab, selected && styles.tabSelected, webPointer]}
                         >

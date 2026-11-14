@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Modal,
@@ -499,7 +500,7 @@ export function BrowseScreen({
     <View style={styles.searchActions}>
       <Pressable
         accessibilityRole="button"
-        accessibilityState={{ selected: isSearchSaved }}
+        {...pressedState(isSearchSaved)}
         onPress={handleToggleSaveSearch}
         style={[styles.linkBtn, onMap && styles.mapChip, webPointer]}
       >
@@ -515,7 +516,7 @@ export function BrowseScreen({
       </Pressable>
       <Pressable
         accessibilityRole="button"
-        accessibilityState={{ selected: isAlertOn }}
+        {...pressedState(isAlertOn)}
         onPress={handleToggleAlert}
         style={[styles.linkBtn, onMap && styles.mapChip, webPointer]}
       >

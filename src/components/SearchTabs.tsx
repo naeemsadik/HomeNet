@@ -44,7 +44,7 @@ export function SearchTabs({ activeTab, onChange, compact = false }: SearchTabsP
             <Pressable
               key={tab.key}
               accessibilityRole="tab"
-              accessibilityState={{ selected: isActive }}
+              aria-selected={isActive}
               accessibilityLabel={t("hero.tabLabel", { label })}
               onPress={() => onChange(tab.key)}
               style={({ hovered }: any) => [

@@ -91,3 +91,18 @@ describe("MessFilterSheet", () => {
     expect(byLabel("15 min")).toBeNull();
   });
 });
+
+describe("MessFilterSheet state for screen readers", () => {
+  it("marks the chosen option in each group with aria-checked", async () => {
+    await open({ campus_id: "c-uiu", gender: "female" });
+    const female = byLabel("Female")!;
+    const male = byLabel("Male")!;
+    expect(female.getAttribute("role")).toBe("radio");
+    expect(female.getAttribute("aria-checked")).toBe("true");
+    expect(male.getAttribute("aria-checked")).toBe("false");
+
+    await press("Male");
+    expect(byLabel("Male")!.getAttribute("aria-checked")).toBe("true");
+    expect(byLabel("Female")!.getAttribute("aria-checked")).toBe("false");
+  });
+});

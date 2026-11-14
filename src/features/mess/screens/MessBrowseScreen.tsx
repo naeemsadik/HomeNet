@@ -205,7 +205,7 @@ export function MessBrowseScreen() {
               <Pressable
                 key={option.value}
                 accessibilityRole="radio"
-                accessibilityState={{ checked: selected, disabled }}
+                aria-checked={selected} aria-disabled={disabled}
                 disabled={disabled}
                 onPress={() => {
                   commit({ ...filters, sort_by: option.value });

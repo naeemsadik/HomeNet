@@ -59,7 +59,7 @@ function UniversityPickerPanel({ visible, onClose, selectedCampusId, onSelect }:
               <Pressable
                 key={campus.id}
                 accessibilityRole="radio"
-                accessibilityState={{ checked: isSelected }}
+                aria-checked={isSelected}
                 onPress={() => choose(campus.id)}
                 style={({ hovered }: { hovered?: boolean }) => [styles.row, hovered && styles.rowHovered, isSelected && styles.rowSelected, webPointer]}
               >
@@ -101,7 +101,7 @@ function UniversityPickerPanel({ visible, onClose, selectedCampusId, onSelect }:
                 <Pressable
                   key={university.id}
                   accessibilityRole={many ? "button" : "radio"}
-                  accessibilityState={many ? undefined : { checked: isSelected }}
+                  aria-checked={many ? undefined : isSelected}
                   accessibilityLabel={`${university.short_name}, ${university.name}`}
                   onPress={() => pickUniversity(university)}
                   style={({ hovered }: { hovered?: boolean }) => [styles.row, hovered && styles.rowHovered, isSelected && styles.rowSelected, webPointer]}

@@ -20,7 +20,7 @@ const press = (node: ReactTestInstance) => act(() => node.props.onPress());
 const buttons = (tree: ReactTestRenderer) =>
   tree.root.findAll((n) => n.props.accessibilityRole === "button" && typeof n.props.onPress === "function");
 const rows = (tree: ReactTestRenderer) =>
-  tree.root.findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function");
+  tree.root.findAll((n) => n.props.role === "option" && typeof n.props.onPress === "function");
 const modals = (tree: ReactTestRenderer) => tree.root.findAllByType(Modal);
 
 const OPTIONS = [
@@ -88,8 +88,8 @@ describe("a drop-down inside another Modal on Android", () => {
     press(rows(tree)[1]);
     expect(textOf(tree.root)).toContain("2 beds");
     press(buttons(tree)[0]);
-    expect(rows(tree).find((r) => r.props.accessibilityState?.selected)).toBeDefined();
-    expect(textOf(rows(tree).find((r) => r.props.accessibilityState?.selected)!)).toBe("2 beds");
+    expect(rows(tree).find((r) => r.props["aria-selected"])).toBeDefined();
+    expect(textOf(rows(tree).find((r) => r.props["aria-selected"])!)).toBe("2 beds");
   });
 
   it("is an ordinary Modal when there is no host above it", () => {

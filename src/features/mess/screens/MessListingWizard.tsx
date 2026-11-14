@@ -285,7 +285,7 @@ function WizardForm({ start, isEdit, onStartOver }: { start: WizardStart; isEdit
                   <Pressable
                     key={target}
                     accessibilityRole="tab"
-                    accessibilityState={{ selected: current, disabled: !reachable }}
+                    aria-selected={current} aria-disabled={!reachable}
                     disabled={!reachable || busy}
                     onPress={() => goTo(target)}
                     style={[styles.stepPill, current && styles.stepPillCurrent, !reachable && styles.stepPillLocked, webPointer]}

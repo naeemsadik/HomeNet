@@ -66,7 +66,7 @@ export function ContactChannelBar({
             <Pressable
               key={channel}
               accessibilityRole="button"
-              accessibilityState={{ busy, disabled: pending !== null }}
+              aria-busy={busy} aria-disabled={pending !== null}
               accessibilityLabel={t(`mess.channel.${channel}`)}
               disabled={pending !== null}
               onPress={() => contact(channel)}

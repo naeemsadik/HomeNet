@@ -131,7 +131,7 @@ export function ReportListingModal({
                     <Pressable
                       key={item.key}
                       accessibilityRole="radio"
-                      accessibilityState={{ selected: isSelected }}
+                      aria-checked={isSelected}
                       onPress={() => setSelectedReason(item.key)}
                       style={[
                         modalStyles.reasonCard,
@@ -170,7 +170,7 @@ export function ReportListingModal({
 
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityState={{ busy: sending, disabled: sending }}
+                  aria-busy={sending} aria-disabled={sending}
                   disabled={sending}
                   onPress={handleSubmit}
                   style={[modalStyles.primaryBtn, sending && modalStyles.primaryBtnBusy, webPointer]}

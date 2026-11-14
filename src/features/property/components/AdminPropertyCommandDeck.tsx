@@ -195,7 +195,7 @@ function CommandDeckInner({ property }: AdminPropertyCommandDeckProps) {
                   key={status}
                   accessibilityLabel={label}
                   accessibilityRole="radio"
-                  accessibilityState={{ checked: selected }}
+                  aria-checked={selected}
                   onPress={() => void handleStatusSelect(status)}
                   style={({ pressed }) => [
                     styles.option,
