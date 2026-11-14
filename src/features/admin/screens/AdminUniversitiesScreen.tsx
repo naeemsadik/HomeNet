@@ -237,7 +237,6 @@ function CampusForm({
         style={styles.input}
       />
       <Toggle label={t("admin.universities.primaryLabel")} value={primary} onChange={setPrimary} />
-      <Text style={styles.label}>{t("admin.universities.pinLabel")}</Text>
       <Text style={styles.help}>{t("admin.universities.pinHelp")}</Text>
       <View style={styles.mapBox}>
         <LocationPicker value={pin} openAt={pin ?? DHAKA_CENTER} onChange={movePin} />
@@ -393,7 +392,7 @@ export function AdminUniversitiesScreen() {
           {universities.map((university) => (
             <View key={university.id} style={styles.card}>
               <View style={styles.cardHead}>
-                <GraduationCap color={colorTokens.primary} size={18} />
+                <GraduationCap color={colorTokens.brandText} size={18} />
                 <View style={styles.cardCopy}>
                   <Text style={styles.cardTitle}>
                     {university.short_name}
@@ -409,7 +408,7 @@ export function AdminUniversitiesScreen() {
                   style={[styles.iconButton, webPointer]}
                   accessibilityLabel={t("admin.universities.editAria", { name: university.short_name })}
                 >
-                  <Pencil color={colorTokens.primary} size={15} />
+                  <Pencil color={colorTokens.brandText} size={15} />
                 </Pressable>
                 <Pressable
                   onPress={() => setDeleteTarget({ kind: "university", item: university })}
@@ -438,7 +437,7 @@ export function AdminUniversitiesScreen() {
                     style={[styles.iconButton, webPointer]}
                     accessibilityLabel={t("admin.universities.editAria", { name: campus.name })}
                   >
-                    <Pencil color={colorTokens.primary} size={15} />
+                    <Pencil color={colorTokens.brandText} size={15} />
                   </Pressable>
                   <Pressable
                     onPress={() => setDeleteTarget({ kind: "campus", item: campus })}
@@ -450,7 +449,7 @@ export function AdminUniversitiesScreen() {
                 </View>
               ))}
               <Pressable onPress={() => openCampus(university, null)} style={[styles.addCampus, webPointer]}>
-                <Plus color={colorTokens.primary} size={14} />
+                <Plus color={colorTokens.brandText} size={14} />
                 <Text style={styles.addCampusText}>{t("admin.universities.addCampus")}</Text>
               </Pressable>
             </View>
@@ -518,16 +517,16 @@ const styles = StyleSheet.create({
   campusName: { color: colorTokens.textPrimary, fontFamily: fontTokens.semiBold, fontSize: 13 },
   primaryTag: { color: colorTokens.brandText, fontFamily: fontTokens.semiBold, fontSize: 11 },
   addCampus: { flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start", marginLeft: 26, minHeight: 36 },
-  addCampusText: { color: colorTokens.primary, fontFamily: fontTokens.semiBold, fontSize: 12 },
+  addCampusText: { color: colorTokens.brandText, fontFamily: fontTokens.semiBold, fontSize: 12 },
   iconButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center", borderRadius: 9, backgroundColor: colorTokens.backgroundAlt },
   center: { alignItems: "center", justifyContent: "center", gap: 12, paddingVertical: 40 },
   emptyText: { color: colorTokens.textMuted, fontFamily: fontTokens.semiBold },
   errorText: { color: colorTokens.error, fontFamily: fontTokens.regular, fontSize: 12 },
   overlay: { flex: 1, alignItems: "center", justifyContent: "center", padding: 16, backgroundColor: colorTokens.overlay },
-  formDialog: { width: "100%", maxWidth: 560, maxHeight: "92%", borderRadius: 18, backgroundColor: colorTokens.background, padding: 20, gap: 8 },
-  formHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
+  formDialog: { width: "100%", maxWidth: 560, maxHeight: "92%", borderRadius: 18, backgroundColor: colorTokens.background, paddingVertical: 20, gap: 8 },
+  formHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8, paddingHorizontal: 20 },
   formTitle: { flex: 1, fontSize: 18, fontFamily: fontTokens.bold, color: colorTokens.textPrimary },
-  formBody: { gap: 8, paddingBottom: 4 },
+  formBody: { gap: 8, paddingBottom: 4, paddingHorizontal: 20 },
   label: { fontSize: 12, fontFamily: fontTokens.semiBold, color: colorTokens.textSecondary, marginTop: 4 },
   help: { fontSize: 12, lineHeight: 17, fontFamily: fontTokens.regular, color: colorTokens.textMuted },
   input: { minHeight: 44, borderRadius: 10, borderWidth: 1, borderColor: colorTokens.divider, paddingHorizontal: 12, color: colorTokens.textPrimary, fontFamily: fontTokens.regular },
@@ -540,7 +539,7 @@ const styles = StyleSheet.create({
   toggleThumb: { width: 20, height: 20, borderRadius: 10, backgroundColor: colorTokens.background },
   toggleThumbOn: { transform: [{ translateX: 16 }] },
   toggleText: { color: colorTokens.textPrimary, fontFamily: fontTokens.regular, fontSize: 14 },
-  formActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginTop: 6 },
+  formActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginTop: 6, paddingHorizontal: 20 },
   primaryButton: { minWidth: 90, minHeight: 44, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: colorTokens.primary, paddingHorizontal: 14 },
   primaryButtonText: { color: colorTokens.onBrand, fontFamily: fontTokens.bold, fontSize: 13 },
   secondaryButton: { minHeight: 44, alignItems: "center", justifyContent: "center", borderRadius: 10, borderWidth: 1, borderColor: colorTokens.divider, paddingHorizontal: 14 },

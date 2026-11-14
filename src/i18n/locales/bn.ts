@@ -652,7 +652,6 @@ export const bn: TranslationSchema = {
       campusNameLabel: "ক্যাম্পাস বা গেট",
       campusNamePlaceholder: "মূল ক্যাম্পাস, ইউনাইটেড সিটি",
       primaryLabel: "মূল ক্যাম্পাস",
-      pinLabel: "গেটের অবস্থান",
       pinHelp: "গেটের উপর পিন দিন, অথবা অক্ষাংশ-দ্রাঘিমাংশ লিখুন। পিন সরালে ৬ কিলোমিটারের মধ্যের বিজ্ঞাপনগুলোর হাঁটার সময় আবার হিসাব হয়।",
       latLabel: "অক্ষাংশ",
       lngLabel: "দ্রাঘিমাংশ",

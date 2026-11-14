@@ -650,7 +650,6 @@ export const en = {
       campusNameLabel: "Campus or gate",
       campusNamePlaceholder: "Main campus, United City",
       primaryLabel: "Main campus",
-      pinLabel: "Gate location",
       pinHelp: "Drop the pin on the gate, or type the coordinates. Moving it recomputes walking times for listings within 6 km.",
       latLabel: "Latitude",
       lngLabel: "Longitude",
