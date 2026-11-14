@@ -3,6 +3,8 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { router } from "expo-router";
 import { useLanguageStore } from "@/i18n";
+// jest.mock calls below are hoisted above this import.
+import { PropertyDetailScreen } from "../PropertyDetailScreen";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -56,9 +58,6 @@ jest.mock("../../hooks/usePropertyDetail", () => ({
   usePropertyDetail: () => ({ data: mockCurrent, error: null, isLoading: false, refetch: jest.fn() }),
   useSimilarProperties: () => ({ data: [], error: null, isLoading: false, refetch: jest.fn() }),
 }));
-
-// Imported after the mocks above.
-import { PropertyDetailScreen } from "../PropertyDetailScreen";
 
 let container: HTMLDivElement;
 let root: { render: (node: React.ReactNode) => void; unmount: () => void };

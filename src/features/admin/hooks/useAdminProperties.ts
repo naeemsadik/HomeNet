@@ -21,6 +21,7 @@ export function useAdminProperties(filters: Omit<PropertyAdminFilters, "page">) 
       const params: Record<string, string | number> = {};
       if (filters.status) params.status = filters.status;
       if (filters.search) params.search = filters.search;
+      if (filters.subtype) params.subtype = filters.subtype;
       params.page = pageParam;
       params.limit = limit;
 

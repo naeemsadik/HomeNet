@@ -8,18 +8,22 @@ import { ConfirmDialog } from "../components/ConfirmDialog";
 import { toApiError } from "@/services/apiClient";
 import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTranslation } from "@/i18n";
+import { MESS_ENABLED } from "@/lib/features";
 import { listingPath } from "@/lib/listingPath";
 
 export function AdminPropertiesScreen() {
   const { t } = useTranslation();
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
+  // Mess listings only (PRD 2.5, moderation): shown with the mess module.
+  const [messOnly, setMessOnly] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
 
   const { data, error, isLoading, refetch, hasNextPage, fetchNextPage } = useAdminProperties({
     status: status === "all" ? undefined : status,
     search: debouncedSearch || undefined,
+    subtype: MESS_ENABLED && messOnly ? "mess,seat_share" : undefined,
   });
 
   const { approveProperty, rejectProperty, deleteProperty } = useAdminPropertyMutations();
@@ -54,6 +58,8 @@ export function AdminPropertiesScreen() {
         searchQuery={search}
         onStatusChange={setStatus}
         onSearchChange={setSearch}
+        messOnly={MESS_ENABLED ? messOnly : undefined}
+        onMessOnlyChange={MESS_ENABLED ? setMessOnly : undefined}
         onApprove={(id) => approveProperty.mutate(id)}
         onReject={(id) => rejectProperty.mutate(id)}
         onDelete={setDeleteTarget}

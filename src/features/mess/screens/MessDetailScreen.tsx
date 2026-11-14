@@ -20,20 +20,24 @@ import {
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { PageMeta } from "@/components/PageMeta";
 import { AppButton } from "@/components/ui";
+import { AdminPropertyCommandDeck } from "@/features/property/components/AdminPropertyCommandDeck";
 import { PropertyLightbox } from "@/features/property/components/PropertyLightbox";
 import { ReportListingModal, type ReportReasonKey } from "@/features/property/components/ReportListingModal";
 import { useResponsive } from "@/hooks/useResponsive";
 import { formatLocalizedNumber, useTranslation, type TranslationKey } from "@/i18n";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { hasPermission } from "@/lib/permissions";
 import { SITE_URL } from "@/lib/seo";
 import { shareLink } from "@/lib/share";
 import { useAuthStore } from "@/stores/authStore";
+import { useIsModerating } from "@/stores/useAdminContextStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { AllInCostTag } from "../components/AllInCostTag";
 import { ContactChannelBar } from "../components/ContactChannelBar";
 import { HouseRulesBadges } from "../components/HouseRulesBadges";
+import { ReviewChecklist } from "../components/ReviewChecklist";
 import { CampusDistanceChip, CostsDeclaredBadge, FreshnessStamp, GenderBadge, VerifiedBadge } from "../components/ListingFacts";
 import { SeatAvailabilityList } from "../components/SeatAvailabilityList";
 import { UtilityBreakdownTable } from "../components/UtilityBreakdown";
@@ -88,6 +92,9 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
   const { t, language } = useTranslation();
   const { isPhone, isTablet } = useResponsive();
   const user = useAuthStore((s) => s.user);
+  // Staff with the Tools switch on moderate here, as on a property page.
+  const canModerate = useAuthStore((s) => s.hydrated && s.user !== null && hasPermission(s.userRoles, "moderate_listing"));
+  const moderating = useIsModerating() && canModerate;
   const campusId = useMessFilterStore((s) => s.campusId);
   const universities = useUniversities();
   const isSaved = useSavedStore((s) => s.savedIds.includes(detail.id));
@@ -141,8 +148,20 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
       />
     ) : null;
 
+  const commandDeck = moderating ? (
+    <AdminPropertyCommandDeck
+      property={{
+        id: detail.id,
+        title: detail.title,
+        status: detail.status,
+        areaName: detail.area?.name ?? null,
+        sellerName: detail.lister?.full_name ?? null,
+      }}
+    />
+  ) : null;
+
   return (
-    <AppChrome active="mess" floating={!wide && contact ? contact : undefined}>
+    <AppChrome active="mess" floating={commandDeck ?? (!wide && contact ? contact : undefined)}>
       <PageMeta
         title={t("mess.meta.detailTitle", { title: detail.title })}
         description={priceText ? t("mess.meta.detailDescription", { title: detail.title, price: priceText }) : undefined}
@@ -151,7 +170,7 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
         noindex={detail.status !== "active" ? true : undefined}
       />
 
-      <View style={[styles.page, !wide && contact ? styles.pageWithFloating : null]}>
+      <View style={[styles.page, commandDeck || (!wide && contact) ? styles.pageWithFloating : null]}>
         <View style={styles.topBar}>
           <Pressable
             accessibilityRole="button"
@@ -185,6 +204,7 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
         {isOwner && detail.status === "draft" ? <Banner text={t("mess.detail.draftBanner")} /> : null}
         {isOwner && detail.status === "pending" ? <Banner text={t("mess.detail.pendingBanner")} /> : null}
         {mess.available_seats === 0 ? <Banner text={t("mess.detail.filledBanner")} tone="warning" /> : null}
+        {moderating ? <ReviewChecklist detail={detail} /> : null}
         {isOwner ? (
           <AppButton
             label={t("mess.detail.edit")}

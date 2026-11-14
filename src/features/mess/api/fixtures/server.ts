@@ -13,9 +13,10 @@ import { useAuthStore } from "@/stores/authStore";
 import { queryClient } from "@/lib/queryClient";
 import { allAreasQuery, type AllAreas } from "@/hooks/useAllAreas";
 import type { PaginatedResponse } from "@/features/property/types/property";
-import { FRESHNESS_HIDE_DAYS, REQUIRED_MEDIA_LABELS } from "../../constants/vocabulary";
+import { FRESHNESS_HIDE_DAYS } from "../../constants/vocabulary";
 import { cheapestAllIn, costsComplete } from "../../utils/allInCost";
 import { estimatedWalk, straightMetres } from "../../utils/geo";
+import { missingForSubmit, type CompletenessKey } from "../../utils/completeness";
 import { deriveRuleKeys } from "../../utils/rules";
 import { minutesOfDay } from "../../utils/time";
 import type {
@@ -229,23 +230,27 @@ function sortCards(cards: MessCard[], filters: MessFilters): MessCard[] {
 
 // ─── Submit checks (PRD 2.3.4) ──────────────────────────────────────────────
 
+/** The English messages the API sends in data.errors, one per failed check. */
+const SUBMIT_MESSAGES: Record<CompletenessKey, string> = {
+  pin: "Place the pin on the map.",
+  gender_policy: "Fill in gender policy.",
+  current_residents: "Fill in current residents.",
+  residents_fit: "Current residents cannot be more than total seats.",
+  available_seat: "Add at least one available seat.",
+  costs: "Answer every bill category: included, fixed, varies or not applicable.",
+  smoking_policy: "Fill in smoking policy.",
+  meal_system: "Fill in meal system.",
+  guest_policy: "Fill in guest policy.",
+  photo_room: "Add a room photo.",
+  photo_washroom: "Add a washroom photo.",
+  photo_building: "Add a building photo.",
+  contact_channels: "Choose at least one way to be contacted.",
+};
+
+/** Read from what the lister stored, not the detail: the detail fills unanswered fields with defaults. */
 function submitProblems(listing: StoredListing): string[] {
-  const detail = toDetail(listing);
-  const stored = listing.detail.mess;
-  const problems: string[] = [];
-  if (!detail.mess.costs_complete) problems.push("Answer every bill category: included, fixed, varies or not applicable.");
-  if (!detail.seats.some((seat) => seat.status === "available")) problems.push("Add at least one available seat.");
-  if (detail.location_lat == null || detail.location_lng == null) problems.push("Place the pin on the map.");
-  for (const label of REQUIRED_MEDIA_LABELS) {
-    if (!detail.media.some((media) => media.label === label)) problems.push(`Add a ${label} photo.`);
-  }
-  const required: (keyof MessDetailsInput)[] = ["gender_policy", "smoking_policy", "meal_system", "guest_policy", "current_residents"];
-  for (const field of required) {
-    if (stored[field] === undefined || stored[field] === null) problems.push(`Fill in ${field.replace(/_/g, " ")}.`);
-  }
-  if (!stored.contact_channels?.length) problems.push("Choose at least one way to be contacted.");
-  if ((stored.current_residents ?? 0) > (stored.total_seats ?? 0)) problems.push("Current residents cannot be more than total seats.");
-  return problems;
+  const { detail } = listing;
+  return missingForSubmit({ ...detail, mess: detail.mess }).map((key) => SUBMIT_MESSAGES[key]);
 }
 
 /** The real API joins the area; here the name comes from the area list the wizard's picker loaded. */

@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useLanguageStore } from "@/i18n";
 import { ApiError } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
+import { useAdminContextStore } from "@/stores/useAdminContextStore";
+import type { UserRole } from "@/types/api";
 import { getMessDetail, getUniversities } from "../../api/messApi";
 import type { MessDetail } from "../../types/mess";
 import { MessDetailScreen } from "../MessDetailScreen";
@@ -121,7 +123,8 @@ async function render() {
 beforeEach(() => {
   jest.clearAllMocks();
   useLanguageStore.getState().setLanguage("en");
-  useAuthStore.setState({ user: null });
+  useAuthStore.setState({ user: null, userRoles: [] });
+  useAdminContextStore.setState({ armed: false });
   (getUniversities as jest.Mock).mockResolvedValue([]);
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -187,5 +190,53 @@ describe("MessDetailScreen", () => {
     const text = await render();
     expect(text).toContain("Could not load this listing.");
     expect(text).toContain("Try again");
+  });
+});
+
+const MODERATOR: UserRole[] = [
+  {
+    id: "ur-1",
+    user_id: "staff-1",
+    role_id: "role-mod",
+    role: { id: "role-mod", name: "moderator", role_permissions: [{ permission: { id: "p-mod", name: "moderate_listing", description: null } }] },
+  },
+];
+
+describe("MessDetailScreen for staff", () => {
+  const signInStaff = () =>
+    useAuthStore.setState({
+      hydrated: true,
+      user: { id: "staff-1", full_name: "Ops", email: "ops@homenetbd.com", avatar_url: null },
+      userRoles: MODERATOR,
+    });
+
+  it("shows the review checklist and the moderation bar once Tools is on", async () => {
+    (getMessDetail as jest.Mock).mockResolvedValue({ ...DETAIL, status: "pending" });
+    signInStaff();
+    useAdminContextStore.setState({ armed: true });
+    const text = await render();
+    expect(text).toContain("Review checklist");
+    // DETAIL has only a room photo: the washroom and building photos are missing.
+    expect(text).toContain("2 required items missing");
+    expect(container.querySelector('[aria-label="Washroom photo: Missing"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="Room photo: Done"]')).not.toBeNull();
+    // The same moderation bar as a property page, with its main action.
+    expect(text).toContain("Request changes");
+  });
+
+  it("shows neither while Tools is off, so staff see the page a student sees", async () => {
+    (getMessDetail as jest.Mock).mockResolvedValue({ ...DETAIL, status: "pending" });
+    signInStaff();
+    const text = await render();
+    expect(text).not.toContain("Review checklist");
+    expect(text).not.toContain("Request changes");
+  });
+
+  it("never shows the checklist to someone without moderate_listing", async () => {
+    (getMessDetail as jest.Mock).mockResolvedValue(DETAIL);
+    useAuthStore.setState({ hydrated: true, user: { id: "u2", full_name: "Student", email: "s@example.com", avatar_url: null }, userRoles: [] });
+    useAdminContextStore.setState({ armed: true });
+    const text = await render();
+    expect(text).not.toContain("Review checklist");
   });
 });

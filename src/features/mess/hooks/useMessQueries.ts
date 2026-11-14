@@ -3,16 +3,12 @@ import { toApiError } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { getMessDetail, getMyMessListings, searchMess } from "../api/messApi";
 import type { MessFilters } from "../types/mess";
+import { messKeys } from "./messKeys";
+
+export { messKeys };
 
 /** The API caps a page at 30. */
 export const MESS_PAGE_SIZE = 20;
-
-export const messKeys = {
-  all: ["mess"] as const,
-  feed: (filters: MessFilters) => ["mess", "feed", filters] as const,
-  detail: (id: string) => ["mess", "detail", id] as const,
-  my: (userId: string | undefined) => ["mess", "my", userId] as const,
-};
 
 /** Search results, paged for infinite scroll. Same return shape as usePropertyFeed. */
 export function useMessFeed(filters: MessFilters, { enabled = true }: { enabled?: boolean } = {}) {
