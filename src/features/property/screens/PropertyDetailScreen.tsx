@@ -1,26 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import {
-  ArrowLeft,
-  Bath,
-  BedDouble,
-  Building2,
-  Calendar,
-  Camera,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Flag,
-  Heart,
-  MapPin,
-  Maximize2,
-  Phone,
-  RotateCcw,
-  Share2,
-  ShieldCheck,
-  Sparkles,
-  TrendingUp,
-  UserRound,
-} from "@/components/icons";
+import { ArrowLeft, Bath, BedDouble, Building2, Calendar, Camera, Check, ChevronLeft, ChevronRight, Flag, Heart, MapPin, Maximize2, Phone, RotateCcw, Share2, ShieldCheck, TrendingUp, UserRound } from "@/components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -47,8 +26,11 @@ import { cdnImage } from "@/lib/cloudinaryImage";
 import { colorTokens, webPointer } from "@/theme";
 import { type PropertyDetail, usePropertyDetail, useSimilarProperties } from "../hooks/usePropertyDetail";
 import { useSavedStore } from "@/stores/savedStore";
+import { useAuthStore } from "@/stores/authStore";
+import { hasPermission } from "@/lib/permissions";
 import { toApiError } from "@/services/apiClient";
 import { styles } from "./PropertyDetailScreen.styles";
+import { AdminPropertyCommandDeck } from "../components/AdminPropertyCommandDeck";
 import { BookVisitModal } from "../components/BookVisitModal";
 import { ReportListingModal } from "../components/ReportListingModal";
 import { PropertyLightbox } from "../components/PropertyLightbox";
@@ -94,6 +76,9 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   );
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const canModerate = useAuthStore(
+    (s) => s.hydrated && s.user !== null && hasPermission(s.userRoles, "moderate_listing"),
+  );
   const isPropertySaved = useSavedStore((s) => s.isSaved(propertyId));
   const toggleSaved = useSavedStore((s) => s.toggleSaved);
   const [bookModalVisible, setBookModalVisible] = useState(false);
@@ -388,7 +373,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       <AppChrome active="property">
         {/* A listing the build could not fetch exports as this state. A spinner
             has nothing to index, so it stays out until the next build. */}
-        <PageMeta title="Property for sale or rent in Bangladesh | HomeNet BD" noindex />
+        <PageMeta title="Property for sale or rent in Bangladesh | HomeNet BD" noindex noCanonical />
         <View style={styles.requestState}>
           <ActivityIndicator color="#04cf92" size="large" />
           <Text style={styles.requestError}>{t("propertyDetail.loading")}</Text>
@@ -401,8 +386,9 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
     return (
       <AppChrome active="property">
         {/* A removed or mistyped listing answers 200 with this message: keep it
-            out of the index rather than leave a soft 404 there. */}
-        <PageMeta title="Listing not found | HomeNet BD" noindex />
+            out of the index with noindex, follow and omit the self-referencing
+            canonical so Google does not flag deleted URLs as duplicates. */}
+        <PageMeta title="Listing not found | HomeNet BD" robots="noindex, follow" noCanonical />
         <View style={styles.requestState}>
           <Text style={styles.requestError}>{error ? toApiError(error).message : t("propertyDetail.notFound")}</Text>
           <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>
@@ -435,8 +421,21 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
     </View>
   );
 
+  const commandDeck =
+    canModerate && apiDetail ? (
+      <AdminPropertyCommandDeck
+        property={{
+          id: apiDetail.id,
+          title: apiDetail.title,
+          status: apiDetail.status,
+          areaName: property.location,
+          sellerName: property.seller.name,
+        }}
+      />
+    ) : undefined;
+
   return (
-    <AppChrome active="property">
+    <AppChrome active="property" floating={commandDeck}>
       {/* What a search result or a shared link for this URL reads: the kind of
           property, the area and the price, with the first photo as the preview.
           The owner's own title is the page's <h1>. */}
@@ -454,6 +453,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
         contentContainerStyle={[
           styles.scrollBody,
           isPhone && styles.scrollBodyPhone,
+          commandDeck ? { paddingBottom: isPhone ? 120 : 96 } : null,
         ]}
         showsVerticalScrollIndicator={false}
       >
@@ -781,7 +781,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
             {property.aiValuation ? (
             <View style={styles.aiValuationCard}>
               <View style={styles.aiValuationHeader}>
-                <Sparkles color="#04cf92" size={20} />
                 <Text style={styles.aiValuationTitle}>{t("propertyDetail.aiValuationTitle")}</Text>
               </View>
 
@@ -860,7 +859,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                             <Text style={styles.similarPrice}>{sim.price}</Text>
                             {sim.score ? (
                               <View style={styles.similarScoreBadge}>
-                                <Sparkles color="#04cf92" size={12} />
                                 <Text style={styles.similarScoreText}>{sim.score}</Text>
                               </View>
                             ) : null}
@@ -907,7 +905,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                   <Text style={styles.priceCalloutLabel}>{t("propertyDetail.askingPrice")}</Text>
                   {property.score ? (
                     <View style={styles.scoreBadge}>
-                      <Sparkles color="#04cf92" size={14} />
                       <Text style={styles.scoreBadgeText}>{property.score}</Text>
                     </View>
                   ) : null}
@@ -979,7 +976,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
             {property.aiRecommendation ? (
             <View style={styles.aiRecCard}>
               <View style={styles.aiRecHeader}>
-                <Sparkles color="#04cf92" size={18} />
                 <Text style={styles.aiRecTitle}>{t("propertyDetail.aiRecTitle")}</Text>
               </View>
 

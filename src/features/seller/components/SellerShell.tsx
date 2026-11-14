@@ -5,10 +5,10 @@ import {
   CircleHelp,
   CreditCard,
   LayoutDashboard,
+  LineChart,
   LogOut,
   PlusCircle,
   Rocket,
-  Sparkles,
   User,
 } from "@/components/icons";
 import React, { useState } from "react";
@@ -90,7 +90,7 @@ export function SellerShell({
     { key: "seats", label: t("mess.my.title"), icon: BedDouble, href: "/mess/my" },
     { key: "create", label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
     { key: "boost", label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
-    { key: "insights", label: t("dashboard.tabs.aiInsights"), icon: Sparkles, href: "/seller?tab=insights" },
+    { key: "insights", label: t("dashboard.tabs.aiInsights"), icon: LineChart, href: "/seller?tab=insights" },
     { key: "analytics", label: t("dashboard.tabs.analytics"), icon: BarChart2, href: "/seller?tab=analytics" },
     { key: "payments", label: t("dashboard.tabs.payments"), icon: CreditCard, href: "/seller?tab=payments" },
     { key: "profile", label: t("dashboard.tabs.profile"), icon: User, href: "/seller/profile" },

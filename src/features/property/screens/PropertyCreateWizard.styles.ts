@@ -699,12 +699,6 @@ export const styles = StyleSheet.create({
   categoryCardSelected: {
     borderColor: "#04cf92",
     backgroundColor: "#E6FAF4",
-    ...(Platform.select({
-      web: {
-        boxShadow: "0 2px 10px rgba(4, 207, 146, 0.18)",
-      },
-      default: {},
-    }) as any),
   },
   categoryIconWrap: {
     width: 36,

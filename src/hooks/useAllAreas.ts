@@ -1,5 +1,10 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { fetchAreas } from "@/services/areaApi";
+import {
+  normalizeBasicAreaName,
+  normalizeBdTransliteration,
+  scopeAreasToCity,
+} from "@/lib/areaMatcher";
 import type { Area } from "@/types/api";
 
 /**
@@ -50,18 +55,31 @@ export function useAllAreas({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({ ...allAreasQuery, enabled });
 }
 
-/** The same matching the API's filters apply: city exact, name case-insensitive. */
+/**
+ * Filters the shared all-areas catalog by city (supporting legacy null-city rows
+ * and old city spellings), hierarchy level, and transliteration-normalized search.
+ */
 export function filterAreas(
   areas: Area[],
   { search, city, topLevelOnly = false }: { search?: string; city?: string | null; topLevelOnly?: boolean },
 ): Area[] {
-  const needle = search?.trim().toLowerCase() ?? "";
-  return areas.filter(
-    (area) =>
-      (!city || area.city === city) &&
-      (!topLevelOnly || !area.parent_area_id) &&
-      (!needle || area.name.toLowerCase().includes(needle)),
-  );
+  const scoped = city ? scopeAreasToCity(areas, city) : areas;
+  const rawNeedle = search?.trim().toLowerCase() ?? "";
+  const basicNeedle = normalizeBasicAreaName(search ?? "");
+  const transNeedle = normalizeBdTransliteration(search ?? "");
+
+  return scoped.filter((area) => {
+    if (topLevelOnly && area.parent_area_id) return false;
+    if (!rawNeedle) return true;
+
+    const labels = area.aliases?.length ? [area.name, ...area.aliases] : [area.name];
+    return labels.some((label) => {
+      const lower = label.toLowerCase();
+      if (lower.includes(rawNeedle)) return true;
+      if (basicNeedle && normalizeBasicAreaName(label).includes(basicNeedle)) return true;
+      return Boolean(transNeedle && normalizeBdTransliteration(label).includes(transNeedle));
+    });
+  });
 }
 
 export function pageAreas(areas: Area[], page: number, pageSize: number) {

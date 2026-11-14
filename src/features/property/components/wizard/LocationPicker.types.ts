@@ -1,3 +1,4 @@
+import type { ParsedGooglePlace } from "@/lib/areaMatcher";
 import type { MapPoint } from "../../constants/areaCenters";
 
 export interface LocationPickerProps {
@@ -7,4 +8,6 @@ export interface LocationPickerProps {
   openAt: MapPoint;
   /** The owner placed, moved or cleared the pin. */
   onChange: (next: MapPoint | null) => void;
+  /** Optional callback when an autocomplete place (with addressComponents) is picked. */
+  onPlaceSelected?: (place: ParsedGooglePlace) => void;
 }

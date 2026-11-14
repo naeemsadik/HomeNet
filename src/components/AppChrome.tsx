@@ -18,7 +18,6 @@ import {
   Menu,
   Plus,
   Search,
-  Sparkles,
   Tag,
   TrendingUp,
   User,
@@ -210,7 +209,7 @@ function SideBar({
       {isTablet ? null : (
       <View style={styles.sidebarCard}>
         <View style={styles.sidebarCardIconWrap}>
-          <Sparkles color={colorTokens.onBrand} size={20} />
+          <Home color={colorTokens.onBrand} size={20} />
         </View>
         <Text style={styles.sidebarCardTitle}>{t("nav.listProperty")}</Text>
         <Text style={styles.sidebarCardSubtitle}>
@@ -377,6 +376,8 @@ function TopBar({
     authGated?: boolean;
   }[] = [
     ...browseNavLinks,
+    // The valuation page used to be reachable only from the footer and the phone menu.
+    { translationKey: "nav.valuation", href: "/instant-valuation", key: "valuation" },
     { translationKey: "nav.saved", href: "/saved", key: "saved", authGated: true },
   ];
 

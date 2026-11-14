@@ -1,12 +1,4 @@
-import {
-  AlertTriangle,
-  ArrowRight,
-  Check,
-  Edit3,
-  RotateCcw,
-  Sparkles,
-  X,
-} from "@/components/icons";
+import { AlertTriangle, ArrowRight, Check, Edit3, RotateCcw, X, FileText } from "@/components/icons";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -199,7 +191,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
               {/* Header */}
               <View style={s.header}>
                 <View style={s.headerIconWrap}>
-                  <Sparkles color={colors.green} size={20} />
+                  <FileText color={colors.green} size={20} />
                 </View>
                 <View style={s.headerText}>
                   <Text style={s.headerTitle}>{t("wizard.aiSheet.title")}</Text>
@@ -315,7 +307,6 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
                           pressed && !isAnalyzeDisabled && s.pressed,
                         ]}
                       >
-                        <Sparkles color={colorTokens.onBrand} size={16} />
                         <Text style={s.analyzeBtnText}>{t("wizard.aiSheet.analyzeBtn")}</Text>
                       </Pressable>
                     )}

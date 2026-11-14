@@ -1,4 +1,5 @@
 import type { GeocodedPlace } from "@/services/geocodeApi";
+import { inferAreaCity, resolveAreaMatch } from "@/lib/areaMatcher";
 import type { Area } from "@/types/api";
 import { knownAreaCenter, type MapPoint } from "../constants/areaCenters";
 import { resolveArea } from "./aiSearchFilters";
@@ -12,9 +13,19 @@ const NOISE = /\b(thana|upazila|upazilla|ward|union|division|district|metropolit
  * A numbered sub-area ("Sector 6") counts only when its parent ("Uttara") is
  * also named, because "Sector 6" alone appears in more than one part of Dhaka.
  */
-export function areaFromPlace(place: GeocodedPlace, areas: Area[]): Area | null {
+export function areaFromPlace(place: GeocodedPlace, areas: Area[], cityHint?: string | null): Area | null {
   const matches = place.areaNames
-    .map((name) => resolveArea(name.replace(NOISE, " ").replace(/\s+/g, " ").trim(), areas))
+    .map((name) => {
+      const cleaned = name.replace(NOISE, " ").replace(/\s+/g, " ").trim();
+      const direct = resolveArea(cleaned, areas);
+      if (direct) return direct;
+      const matched = resolveAreaMatch({
+        query: cleaned,
+        city: cityHint ?? null,
+        areas,
+      }).matchedArea;
+      return matched;
+    })
     .filter((area): area is Area => area !== null);
 
   for (const area of matches) {
@@ -94,7 +105,7 @@ export function pinFillPatch(
   if (area && areaIsOurs) {
     patch.areaId = area.id;
     patch.areaName = area.name;
-    patch.district = area.city ?? "";
+    patch.district = inferAreaCity(area) ?? area.city ?? "";
     next.areaId = area.id;
   } else if (!area && current.areaId !== "" && areaIsOurs) {
     patch.areaId = "";

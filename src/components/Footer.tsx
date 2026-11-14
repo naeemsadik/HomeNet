@@ -2,7 +2,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, layout, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
-import { Sparkles } from "@/components/icons";
+
 import { useTranslation } from "@/i18n";
 import {
   Platform,
@@ -65,15 +65,15 @@ function WebFooter({ style }: FooterProps) {
   const { isPhone, isTablet, containerMaxWidth } = useResponsive();
 
   const resourcesLinks = [
-    { label: "Stamp Duty & Tax Guide", href: "/about" },
-    { label: "Property Price Index", href: "/market" },
-    { label: "Property Valuation Guide", href: "/about" },
-    { label: "Property News & Trends", href: "/about" },
-    { label: "Buyer Guides", href: "/about" },
-    { label: "Seller Guides", href: "/sell" },
-    { label: "Renter Guides", href: "/rent" },
+    { label: "Stamp Duty & Tax Guide", href: "/resources/stamp-duty-tax-guide" },
+    { label: "Property Price Index", href: "/resources/property-price-index" },
+    { label: "Property Valuation Guide", href: "/resources/property-valuation-guide" },
+    { label: "Property News & Trends", href: "/resources/property-news-trends" },
+    { label: "Buyer Guides", href: "/resources/buyer-guides" },
+    { label: "Seller Guides", href: "/resources/seller-guides" },
+    { label: "Renter Guides", href: "/resources/renter-guides" },
     { label: "Landlord Guides", href: "/seller" },
-    { label: "Mortgage Calculator", href: "/market" },
+    { label: "Mortgage Calculator", href: "/mortgage-calculator" },
   ];
 
   const searchLinks = [
@@ -241,7 +241,6 @@ function WebFooter({ style }: FooterProps) {
             <Text style={styles.footerColHeading}>{t("footer.professional")}</Text>
             <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
               <Text style={styles.proBadgeText}>{t("footer.homenetPro")}</Text>
-              <Sparkles color="#A7F3D0" size={13} />
             </AppLink>
             {proBenefits.map((item) => (
               <AppLink href="/seller" key={item} style={styles.footerLinkWrap}>

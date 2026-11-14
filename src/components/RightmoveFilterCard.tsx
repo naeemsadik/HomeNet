@@ -47,8 +47,12 @@ interface RightmoveFilterCardProps {
   onSearch: (filters: SearchFilters) => void;
   /** Opens the filters modal, the superset of this bar. */
   onOpenMoreFilters?: () => void;
-  /** Places to choose from. Without them the Area dropdown is not shown. */
+  /** Step 1 city/district options. When provided, Step 2 sub-areas scope to the chosen city. */
+  cityOptions?: { label: string; value: string }[];
+  /** Step 2 sub-area options for the currently selected city. */
   areaOptions?: { label: string; value: string }[];
+  /** Resolves sub-area choices dynamically as draft `filters.city` changes. */
+  getAreaOptionsForCity?: (city: string) => { label: string; value: string }[];
   /** False when the place has no known centre, so "+ N km" cannot apply. */
   radiusAvailable?: boolean;
   /** Why distance is off, shown under the radius dropdown. */
@@ -78,10 +82,12 @@ export function RightmoveFilterCard({
   onFilterChange,
   onSearch,
   onOpenMoreFilters,
+  cityOptions,
   areaOptions,
+  getAreaOptionsForCity,
   radiusAvailable = true,
   radiusHint,
-  locationName = "Dhaka",
+  locationName = "Bangladesh",
   totalResults,
 }: RightmoveFilterCardProps) {
   const { t, language } = useTranslation();
@@ -182,21 +188,34 @@ export function RightmoveFilterCard({
     "count",
   );
 
-  // Area leads the bar: it is the first thing a search narrows, and digging it
-  // out of the filters modal made the commonest choice the hardest one.
-  const showArea = Boolean(areaOptions?.length);
-  // The card is used without an area chooser too (a pinned /buy/<area> page).
-  const resolvedAreaOptions = withCurrentArea(areaOptions ?? [], filters.area);
+  const showCity = Boolean(cityOptions?.length);
+  const scopedAreaOptions = getAreaOptionsForCity
+    ? getAreaOptionsForCity(filters.city)
+    : (areaOptions ?? []);
+  const areaDisabled = showCity && !filters.city && !filters.area;
+  const showArea = showCity || Boolean(scopedAreaOptions.length);
+
+  const citySelect = showCity ? (
+    <SelectField
+      accessibilityLabel={t("search.rightmove.city")}
+      value={filters.city}
+      options={cityOptions ?? []}
+      onChange={(val) =>
+        handleUpdate({ city: val, area: "", lat: "", lng: "", radius: "" })
+      }
+    />
+  ) : null;
+
+  const effectiveAreaChoices = areaDisabled
+    ? [{ label: t("search.rightmove.selectCityFirst"), value: "" }]
+    : withCurrentArea(scopedAreaOptions, filters.area);
   const areaSelect = showArea ? (
     <SelectField
       accessibilityLabel={t("search.rightmove.area")}
-      // The value is the area's id, which is what the API filters on; the name
-      // rides along for the heading above.
-      value={filters.area}
-      options={resolvedAreaOptions}
-      // A new place starts with "this area only": a distance chosen for the
-      // last place says nothing about this one.
-      onChange={(val) => handleUpdate({ area: val, radius: "" })}
+      value={areaDisabled ? "" : filters.area}
+      options={effectiveAreaChoices}
+      disabled={areaDisabled}
+      onChange={(val) => handleUpdate({ area: val, lat: "", lng: "", radius: "" })}
     />
   ) : null;
 
@@ -294,6 +313,12 @@ export function RightmoveFilterCard({
     return (
       <View style={[styles.card, styles.cardPhone]}>
         {titleBlock}
+        {showCity ? (
+          <View style={styles.phoneAreaField}>
+            <Text style={styles.fieldLabel}>{t("search.rightmove.city")}</Text>
+            {citySelect}
+          </View>
+        ) : null}
         {showArea ? (
           <View style={styles.phoneAreaField}>
             <Text style={styles.fieldLabel}>{t("search.rightmove.area")}</Text>
@@ -345,8 +370,21 @@ export function RightmoveFilterCard({
 
       {/* ─── Grid Controls (3 columns x 2 rows on desktop) ─────────────── */}
       <View style={[styles.grid, isDesktop && styles.gridDesktop, !isDesktop && styles.gridResponsive]}>
-        {/* Area leads, on a row of its own */}
-        {showArea ? (
+        {/* Nationwide hierarchy: City / District -> scoped Sub-Area */}
+        {showCity ? (
+          <View style={[styles.col, colStyle, isDesktop && !isCompact && styles.colFull]}>
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.fieldLabel}>{t("search.rightmove.city")}</Text>
+                {citySelect}
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.fieldLabel}>{t("search.rightmove.area")}</Text>
+                {areaSelect}
+              </View>
+            </View>
+          </View>
+        ) : showArea ? (
           <View style={[styles.col, colStyle, isDesktop && !isCompact && styles.colFull]}>
             <Text style={styles.fieldLabel}>{t("search.rightmove.area")}</Text>
             {areaSelect}
@@ -823,7 +861,11 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   searchBtnHovered: {
-    backgroundColor: colorTokens.brandHover,
+    backgroundColor: colorTokens.brand,
+    shadowColor: colorTokens.shadow,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
   },
   // `flex: 0` resolves to a 0% basis, which collapses the button to no height
   // in the card's column layout and throws away the 44 above.

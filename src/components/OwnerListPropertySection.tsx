@@ -19,11 +19,11 @@ import {
   Check,
   Compass,
   FileCheck2,
+  FileText,
   Home,
   KeyRound,
   LayoutDashboard,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
   X,
 } from "@/components/icons";
@@ -355,7 +355,6 @@ export function OwnerListPropertySection() {
                     </View>
                     <View style={styles.trustPillCenterPhone}>
                       <View style={styles.trustPillItem}>
-                        <Sparkles color="#F4823A" size={14} />
                         <Text style={styles.trustPillText}>{t("search.ownerSection.trustFree")}</Text>
                       </View>
                     </View>
@@ -373,7 +372,6 @@ export function OwnerListPropertySection() {
                     </View>
                     <View style={styles.trustDot} />
                     <View style={styles.trustPillItem}>
-                      <Sparkles color="#F4823A" size={14} />
                       <Text style={styles.trustPillText}>{t("search.ownerSection.trustFree")}</Text>
                     </View>
                   </View>
@@ -450,7 +448,6 @@ export function OwnerListPropertySection() {
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
                 <View style={styles.modalEyebrowRow}>
-                  <Sparkles color="#04cf92" size={14} />
                   <Text style={styles.modalEyebrow}>{t("search.ownerSection.modalEyebrow")}</Text>
                 </View>
                 <Text style={styles.modalTitle}>{t("search.ownerSection.modalTitle")}</Text>
@@ -488,7 +485,7 @@ export function OwnerListPropertySection() {
             >
               <View style={[styles.aiCardLeft, isPhone && styles.aiCardLeftPhone]}>
                 <View style={styles.aiIconGlowingWrap}>
-                  <Sparkles color="#04cf92" size={20} strokeWidth={2.2} />
+                  <FileText color={colorTokens.brandText} size={20} strokeWidth={2.2} />
                 </View>
                 <View style={styles.aiTextContainer}>
                   <View style={styles.aiHeadlineRow}>
@@ -511,7 +508,6 @@ export function OwnerListPropertySection() {
                   isPhone && styles.aiCtaButtonPhone,
                 ]}
               >
-                <Sparkles color={colorTokens.onBrand} size={15} strokeWidth={2.2} />
                 <Text style={styles.aiCtaButtonText}>{t("search.ownerSection.listWithAi")}</Text>
                 <ArrowRight color={colorTokens.onBrand} size={15} strokeWidth={2.2} />
               </View>

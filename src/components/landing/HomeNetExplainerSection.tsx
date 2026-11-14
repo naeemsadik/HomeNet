@@ -5,15 +5,7 @@ import {
   Text,
   View,
 } from "react-native";
-import {
-  Maximize2,
-  Pause,
-  Play,
-  RotateCcw,
-  Sparkles,
-  Volume2,
-  VolumeX,
-} from "@/components/icons";
+import { Maximize2, Pause, Play, RotateCcw, Volume2, VolumeX, Home } from "@/components/icons";
 import { colorTokens, fonts, radius } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -304,7 +296,7 @@ export function HomeNetExplainerSection() {
             />
           ) : (
             <View style={styles.nativeFallback}>
-              <Play color="#FFFFFF" size={48} strokeWidth={2} />
+              <Play color={colorTokens.surface} size={48} strokeWidth={2} />
               <Text style={styles.fallbackText}>{t("home.explainerTitle")}</Text>
             </View>
           )}
@@ -339,7 +331,7 @@ export function HomeNetExplainerSection() {
                 e.currentTarget.style.backgroundColor = "rgba(15, 109, 85, 0.9)";
               }}
             >
-              <Play color="#FFFFFF" size={32} strokeWidth={2.5} />
+              <Play color={colorTokens.surface} size={32} strokeWidth={2.5} />
             </div>
           )}
 
@@ -360,7 +352,7 @@ export function HomeNetExplainerSection() {
                 alignItems: "center",
                 gap: 8,
                 cursor: "pointer",
-                color: "#FFFFFF",
+                color: colorTokens.surface,
                 fontSize: 13,
                 fontWeight: 600,
                 boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
@@ -395,7 +387,7 @@ export function HomeNetExplainerSection() {
                   width: 56,
                   height: 56,
                   borderRadius: "50%",
-                  backgroundColor: "rgba(15, 109, 85, 0.2)",
+                  backgroundColor: colorTokens.brandBorder,
                   border: "2px solid #0F6D55",
                   display: "flex",
                   alignItems: "center",
@@ -403,12 +395,12 @@ export function HomeNetExplainerSection() {
                   marginBottom: 16,
                 }}
               >
-                <Sparkles color="#34D399" size={26} strokeWidth={2.5} />
+                <Home color="#34D399" size={26} strokeWidth={2.5} />
               </div>
 
               <h3
                 style={{
-                  color: "#FFFFFF",
+                  color: colorTokens.surface,
                   fontSize: isPhone ? 18 : 22,
                   fontWeight: 700,
                   margin: "0 0 8px 0",
@@ -442,10 +434,10 @@ export function HomeNetExplainerSection() {
                 <button
                   onClick={handleContinueFull}
                   style={{
-                    backgroundColor: "#0F6D55",
-                    color: "#FFFFFF",
+                    backgroundColor: colorTokens.brand,
+                    color: colorTokens.onBrand,
                     border: "none",
-                    borderRadius: 10,
+                    borderRadius: radius.lg,
                     padding: isPhone ? "10px 18px" : "12px 24px",
                     fontSize: isPhone ? 14 : 15,
                     fontWeight: 700,
@@ -453,13 +445,12 @@ export function HomeNetExplainerSection() {
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
-                    boxShadow: "0 4px 14px rgba(15, 109, 85, 0.4)",
                     transition: "transform 0.15s ease",
                   }}
                   onMouseEnter={(e: any) => (e.currentTarget.style.transform = "scale(1.03)")}
                   onMouseLeave={(e: any) => (e.currentTarget.style.transform = "scale(1)")}
                 >
-                  <Play color="#FFFFFF" size={16} strokeWidth={2.5} />
+                  <Play color={colorTokens.onBrand} size={16} strokeWidth={2.5} />
                   <span>{t("home.explainerContinueBtn")}</span>
                 </button>
 
@@ -541,7 +532,7 @@ export function HomeNetExplainerSection() {
                 style={{
                   width: `${progressPercent}%`,
                   height: "100%",
-                  backgroundColor: "#0F6D55",
+                  backgroundColor: colorTokens.brand,
                   borderRadius: 4,
                   position: "relative",
                 }}
@@ -554,7 +545,7 @@ export function HomeNetExplainerSection() {
                     width: 12,
                     height: 12,
                     borderRadius: "50%",
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: colorTokens.surface,
                     boxShadow: "0 0 6px rgba(0,0,0,0.4)",
                   }}
                 />
@@ -567,7 +558,7 @@ export function HomeNetExplainerSection() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                color: "#FFFFFF",
+                color: colorTokens.surface,
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -576,7 +567,7 @@ export function HomeNetExplainerSection() {
                   style={{
                     background: "none",
                     border: "none",
-                    color: "#FFFFFF",
+                    color: colorTokens.surface,
                     cursor: "pointer",
                     padding: 4,
                     display: "flex",
@@ -585,9 +576,9 @@ export function HomeNetExplainerSection() {
                   aria-label={isPlaying ? "Pause" : "Play"}
                 >
                   {isPlaying ? (
-                    <Pause color="#FFFFFF" size={18} strokeWidth={2.5} />
+                    <Pause color={colorTokens.surface} size={18} strokeWidth={2.5} />
                   ) : (
-                    <Play color="#FFFFFF" size={18} strokeWidth={2.5} />
+                    <Play color={colorTokens.surface} size={18} strokeWidth={2.5} />
                   )}
                 </button>
 
@@ -596,7 +587,7 @@ export function HomeNetExplainerSection() {
                   style={{
                     background: "none",
                     border: "none",
-                    color: "#FFFFFF",
+                    color: colorTokens.surface,
                     cursor: "pointer",
                     padding: 4,
                     display: "flex",
@@ -607,7 +598,7 @@ export function HomeNetExplainerSection() {
                   {isMuted ? (
                     <VolumeX color="#FBBF24" size={18} strokeWidth={2.5} />
                   ) : (
-                    <Volume2 color="#FFFFFF" size={18} strokeWidth={2.5} />
+                    <Volume2 color={colorTokens.surface} size={18} strokeWidth={2.5} />
                   )}
                 </button>
 
@@ -643,7 +634,7 @@ export function HomeNetExplainerSection() {
                   style={{
                     background: "none",
                     border: "none",
-                    color: "#FFFFFF",
+                    color: colorTokens.surface,
                     cursor: "pointer",
                     padding: 4,
                     display: "flex",
@@ -651,7 +642,7 @@ export function HomeNetExplainerSection() {
                   }}
                   aria-label="Fullscreen"
                 >
-                  <Maximize2 color="#FFFFFF" size={18} strokeWidth={2.5} />
+                  <Maximize2 color={colorTokens.surface} size={18} strokeWidth={2.5} />
                 </button>
               </div>
             </div>
@@ -739,7 +730,7 @@ const styles = StyleSheet.create({
   fallbackText: {
     fontFamily: fonts.bold,
     fontSize: 16,
-    color: "#FFFFFF",
+    color: colorTokens.surface,
     marginTop: 12,
   },
 });

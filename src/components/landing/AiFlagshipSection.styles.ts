@@ -1,17 +1,17 @@
 import { Platform, StyleSheet } from 'react-native';
-import { colors, colorTokens, radius, fonts } from '../../theme';
+import { brandButtonState, colors, colorTokens, radius, fonts } from '../../theme';
 
 export const styles = StyleSheet.create({
   sectionRoot: {
     width: '100%',
-    backgroundColor: '#F8FAF9',
+    backgroundColor: colorTokens.canvas,
     paddingVertical: 84,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+    borderBottomColor: colorTokens.divider,
   },
   marketPositionStrip: {
     width: '100%',
-    backgroundColor: '#0B1A17',
+    backgroundColor: colorTokens.ink,
     paddingVertical: 10,
     alignItems: 'center',
     marginBottom: 40,
@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
   marketPositionText: {
     fontFamily: fonts.semiBold,
     fontSize: 13,
-    color: '#04CF92',
+    color: colorTokens.brandText,
     letterSpacing: 0.5,
   },
   innerContainer: {
@@ -44,15 +44,15 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: colorTokens.brandSurface,
     borderWidth: 1,
-    borderColor: 'rgba(15, 109, 85, 0.2)',
+    borderColor: colorTokens.brandBorder,
     marginBottom: 16,
   },
   eyebrowText: {
     fontFamily: fonts.semiBold,
     fontSize: 12,
-    color: '#0F6D55',
+    color: colorTokens.brandText,
     textTransform: 'uppercase',
     letterSpacing: 0.8,
   },
@@ -103,11 +103,11 @@ export const styles = StyleSheet.create({
     width: '100%',
   },
   headlineCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colorTokens.surface,
     borderRadius: radius.lg,
     padding: 24,
     borderWidth: 1.5,
-    borderColor: 'rgba(11, 26, 23, 0.08)',
+    borderColor: colorTokens.divider,
     ...(Platform.OS === 'web'
       ? {
           cursor: 'pointer',
@@ -116,16 +116,16 @@ export const styles = StyleSheet.create({
       : {}),
   },
   headlineCardActive: {
-    borderColor: '#0F6D55',
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#0F6D55',
+    borderColor: colorTokens.brandText,
+    backgroundColor: colorTokens.surface,
+    shadowColor: colorTokens.brandText,
     shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 14,
   },
   headlineCardHovered: {
     transform: [{ translateY: -2 }],
-    borderColor: 'rgba(15, 109, 85, 0.4)',
+    borderColor: colorTokens.brandBorder,
   },
   cardTopRow: {
     flexDirection: 'row',
@@ -137,12 +137,12 @@ export const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: colorTokens.brandSurface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headlineTagPill: {
-    backgroundColor: 'rgba(15, 109, 85, 0.06)',
+    backgroundColor: colorTokens.brandSurface,
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: radius.pill,
@@ -150,7 +150,7 @@ export const styles = StyleSheet.create({
   headlineTagText: {
     fontFamily: fonts.medium,
     fontSize: 11,
-    color: '#0F6D55',
+    color: colorTokens.brandText,
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
@@ -172,7 +172,7 @@ export const styles = StyleSheet.create({
     gap: 6,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.04)',
+    borderTopColor: colorTokens.divider,
   },
   exampleRow: {
     flexDirection: 'row',
@@ -196,11 +196,11 @@ export const styles = StyleSheet.create({
     width: '100%',
   },
   deviceFrame: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    backgroundColor: colorTokens.surface,
+    borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: 'rgba(11, 26, 23, 0.1)',
-    shadowColor: '#000',
+    borderColor: colorTokens.border,
+    shadowColor: colorTokens.ink,
     shadowOpacity: 0.07,
     shadowOffset: { width: 0, height: 8 },
     shadowRadius: 24,
@@ -210,11 +210,11 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F3F5F4',
+    backgroundColor: colorTokens.surfaceSunken,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
+    borderBottomColor: colorTokens.divider,
   },
   chromeDotsRow: {
     flexDirection: 'row',
@@ -234,7 +234,7 @@ export const styles = StyleSheet.create({
   replayBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: colorTokens.brandSurface,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: radius.pill,
@@ -243,7 +243,7 @@ export const styles = StyleSheet.create({
   replayBtnText: {
     fontFamily: fonts.semiBold,
     fontSize: 11,
-    color: '#0F6D55',
+    color: colorTokens.brandText,
   },
   sheetHeader: {
     flexDirection: 'row',
@@ -256,7 +256,7 @@ export const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: 'rgba(15, 109, 85, 0.09)',
+    backgroundColor: colorTokens.brandSurface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -276,7 +276,7 @@ export const styles = StyleSheet.create({
   },
   sheetDivider: {
     height: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.06)',
+    backgroundColor: colorTokens.divider,
   },
   sheetBody: {
     padding: 20,
@@ -287,9 +287,9 @@ export const styles = StyleSheet.create({
   textareaWrap: {
     position: 'relative',
     borderWidth: 1.5,
-    borderColor: 'rgba(11, 26, 23, 0.15)',
+    borderColor: colorTokens.divider,
     borderRadius: radius.md,
-    backgroundColor: '#FAFBFB',
+    backgroundColor: colorTokens.canvas,
     padding: 12,
   },
   sheetTextarea: {
@@ -306,7 +306,7 @@ export const styles = StyleSheet.create({
     right: 14,
     width: 2,
     height: 16,
-    backgroundColor: '#0F6D55',
+    backgroundColor: colorTokens.brandText,
   },
   charCountRow: {
     flexDirection: 'row',
@@ -321,48 +321,45 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#04CF92',
+    backgroundColor: colorTokens.brand,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: radius.pill,
+    borderRadius: radius.lg,
     ...(Platform.OS === 'web'
       ? {
           cursor: 'pointer',
-          transition: 'all 0.15s ease',
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
         }
       : {}),
   },
-  analyzeBtnHovered: {
-    backgroundColor: colorTokens.brandHover,
-    transform: [{ translateY: -1 }],
-  },
+  analyzeBtnHovered: brandButtonState.hovered,
   analyzeBtnText: {
     fontFamily: fonts.bold,
     fontSize: 14,
-    color: '#0B1A17',
+    color: colorTokens.onBrand,
   },
   analyzingStateRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    backgroundColor: 'rgba(15, 109, 85, 0.06)',
+    backgroundColor: colorTokens.brandSurface,
     borderRadius: radius.pill,
     gap: 10,
   },
   analyzingText: {
     fontFamily: fonts.medium,
     fontSize: 13,
-    color: '#0F6D55',
+    color: colorTokens.brandText,
   },
   previewStage: {
     gap: 16,
   },
   conversionBanner: {
-    backgroundColor: 'rgba(15, 109, 85, 0.07)',
+    backgroundColor: colorTokens.brandSurface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(15, 109, 85, 0.2)',
+    borderColor: colorTokens.brandBorder,
     padding: 10,
   },
   conversionTag: {
@@ -382,7 +379,7 @@ export const styles = StyleSheet.create({
   conversionTagValue: {
     fontFamily: fonts.bold,
     fontSize: 13,
-    color: '#0F6D55',
+    color: colorTokens.brandText,
   },
   fieldSection: {
     gap: 8,
@@ -427,7 +424,7 @@ export const styles = StyleSheet.create({
   resolvedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: colorTokens.brandSurface,
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 6,
@@ -435,14 +432,14 @@ export const styles = StyleSheet.create({
   resolvedBadgeText: {
     fontFamily: fonts.medium,
     fontSize: 11,
-    color: '#0F6D55',
+    color: colorTokens.brandText,
   },
   lowConfBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF6E9',
+    backgroundColor: colorTokens.warningSurface,
     borderWidth: 1,
-    borderColor: 'rgba(212, 135, 10, 0.3)',
+    borderColor: colorTokens.divider,
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 6,
@@ -450,26 +447,26 @@ export const styles = StyleSheet.create({
   lowConfText: {
     fontFamily: fonts.medium,
     fontSize: 11,
-    color: '#D4870A',
+    color: colorTokens.warningText,
   },
   fieldValueBox: {
-    backgroundColor: '#F8FAF9',
+    backgroundColor: colorTokens.canvas,
     borderRadius: radius.sm,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderColor: colorTokens.divider,
   },
   fieldValueBoxEditable: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FEFDFB',
+    backgroundColor: colorTokens.warningSurface,
     borderRadius: radius.sm,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: 'rgba(212, 135, 10, 0.35)',
+    borderColor: colorTokens.divider,
     ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
   },
   fieldValueText: {
@@ -479,7 +476,7 @@ export const styles = StyleSheet.create({
   },
   fieldValueTextLow: {
     fontFamily: fonts.medium,
-    color: '#8A5300',
+    color: colorTokens.warningText,
   },
   fieldEditRow: {
     flexDirection: 'row',
@@ -488,9 +485,9 @@ export const styles = StyleSheet.create({
   },
   fieldEditInput: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colorTokens.surface,
     borderWidth: 1.5,
-    borderColor: '#0F6D55',
+    borderColor: colorTokens.brandText,
     borderRadius: radius.sm,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -503,7 +500,7 @@ export const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: radius.sm,
-    backgroundColor: 'rgba(15, 109, 85, 0.1)',
+    backgroundColor: colorTokens.brandSurface,
     alignItems: 'center',
     justifyContent: 'center',
     ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
@@ -516,9 +513,9 @@ export const styles = StyleSheet.create({
   amenityChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 109, 85, 0.08)',
+    backgroundColor: colorTokens.brandSurface,
     borderWidth: 1,
-    borderColor: 'rgba(15, 109, 85, 0.2)',
+    borderColor: colorTokens.brandBorder,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: radius.pill,
@@ -526,7 +523,7 @@ export const styles = StyleSheet.create({
   amenityChipText: {
     fontFamily: fonts.medium,
     fontSize: 12,
-    color: '#0F6D55',
+    color: colorTokens.brandText,
     textTransform: 'capitalize',
   },
   sheetActionsRow: {
@@ -543,8 +540,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.15)',
-    backgroundColor: '#FFFFFF',
+    borderColor: colorTokens.divider,
+    backgroundColor: colorTokens.surface,
     ...(Platform.OS === 'web' ? { cursor: 'pointer', transition: 'all 0.15s ease' } : {}),
   },
   tryAgainBtnHovered: {
@@ -560,20 +557,20 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#04CF92',
+    backgroundColor: colorTokens.brand,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: radius.pill,
-    ...(Platform.OS === 'web' ? { cursor: 'pointer', transition: 'all 0.15s ease' } : {}),
+    borderRadius: radius.lg,
+    ...(Platform.OS === 'web'
+      ? { cursor: 'pointer', transition: 'transform 0.15s ease, box-shadow 0.15s ease' }
+      : {}),
   },
-  applyBtnHovered: {
-    backgroundColor: colorTokens.brandHover,
-    transform: [{ translateY: -1 }],
-  },
+  applyBtnHovered: brandButtonState.hovered,
+  brandBtnPressed: brandButtonState.pressed,
   applyBtnText: {
     fontFamily: fonts.bold,
     fontSize: 13,
-    color: '#0B1A17',
+    color: colorTokens.onBrand,
   },
   sheetDisclaimer: {
     fontFamily: fonts.regular,

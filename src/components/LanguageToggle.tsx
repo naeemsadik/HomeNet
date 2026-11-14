@@ -2,7 +2,7 @@ import React from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Globe } from "@/components/icons";
 import { useTranslation } from "@/i18n";
-import { fonts, webPointer } from "@/theme";
+import { colorTokens, fonts, webPointer } from "@/theme";
 
 interface LanguageToggleProps {
   compact?: boolean;
@@ -81,11 +81,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13,
     borderRadius: 999,
     flexShrink: 0,
-    shadowColor: "#04cf92",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 1,
     ...(Platform.select({
       web: {
         backdropFilter: "blur(8px)",
@@ -108,7 +103,7 @@ const styles = StyleSheet.create({
   },
   buttonHovered: {
     backgroundColor: "rgba(4, 207, 146, 0.05)",
-    borderColor: "#03b57f",
+    borderColor: colorTokens.brandText,
   },
   buttonPressed: {
     opacity: 0.8,

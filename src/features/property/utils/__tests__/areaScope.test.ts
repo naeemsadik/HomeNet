@@ -3,10 +3,12 @@ import {
   areaCentre,
   areaIdsWithChildren,
   areaOptions,
+  districtIdForCity,
   findArea,
   isCityName,
   resolveScope,
 } from "../areaScope";
+import { withScope } from "../../hooks/useBrowseFeed";
 
 const area = (id: string, name: string, extra: Partial<Area> = {}): Area => ({
   id,
@@ -164,5 +166,107 @@ describe("fallbackAreaOptions", () => {
       const { scope } = resolveScope({ name: option.value, radiusKm: 5, areas: [] });
       expect(["city", "text"]).toContain(scope.kind);
     }
+  });
+});
+
+describe("nationwide hierarchy & transliteration resolution", () => {
+  const { areaOptionsForCity, cityOptions } = require("../areaScope") as typeof import("../areaScope");
+
+  it("scopes sub-areas strictly to the chosen city and resolves transliteration spellings", () => {
+    const richAreas: Area[] = [
+      ...areas,
+      area("adabar", "Adabar", { city: "Dhaka", center_lat: 23.7712, center_lng: 90.3586 }),
+      area("dhk-shaj", "Shajahanpur", { city: "Dhaka" }),
+      area("bgr-shaj", "Shajahanpur", { city: "Bogura" }),
+    ];
+
+    expect(cityOptions(richAreas, "All Cities (Bangladesh)")[0]).toEqual({
+      label: "All Cities (Bangladesh)",
+      value: "",
+    });
+    expect(areaOptionsForCity(richAreas, "", "All areas")).toEqual([{ label: "All areas", value: "" }]);
+    expect(areaOptionsForCity(richAreas, "Chattogram", "All areas").map((o) => o.value)).toEqual([
+      "",
+      "Agrabad",
+    ]);
+
+    expect(resolveScope({ name: "Adabor", city: "Dhaka", radiusKm: 0, areas: richAreas }).scope).toEqual({
+      kind: "areas",
+      ids: ["adabar"],
+    });
+    expect(resolveScope({ name: "Shahjahanpur", city: "Bogura", radiusKm: 0, areas: richAreas }).scope).toEqual({
+      kind: "areas",
+      ids: ["bgr-shaj"],
+    });
+    // Coordinate fallback when unmapped area name is supplied with lat/lng
+    expect(
+      resolveScope({
+        name: "Unmapped Road",
+        city: "Dhaka",
+        lat: 23.7715,
+        lng: 90.359,
+        radiusKm: 0,
+        areas: richAreas,
+      }).scope,
+    ).toEqual({
+      kind: "areas",
+      ids: ["adabar"],
+    });
+    // Beyond 3km from mapped DB areas: gracefully falls back to radius search around lat/lng
+    expect(
+      resolveScope({
+        name: "Far Outskirts",
+        city: "Dhaka",
+        lat: 23.92,
+        lng: 90.26,
+        radiusKm: 0,
+        areas: richAreas,
+      }).scope,
+    ).toEqual({
+      kind: "radius",
+      lat: 23.92,
+      lng: 90.26,
+      radius: 3,
+    });
+  });
+});
+
+describe("a whole city is filtered by its district", () => {
+  const withDistricts: Area[] = [
+    area("g", "Gulshan", { district_id: "d-dhaka" }),
+    area("m", "Mirpur", { district_id: "d-dhaka" }),
+    area("c", "Agrabad", { city: "Chattogram", district_id: "d-ctg" }),
+  ];
+
+  it("names the district when the area list says which one the city is", () => {
+    const { scope } = resolveScope({ name: "", city: "Dhaka", radiusKm: 0, areas: withDistricts });
+    expect(scope).toEqual({ kind: "city", city: "Dhaka", districtId: "d-dhaka" });
+  });
+
+  it("matches the API's district name, which carries the word District", () => {
+    const real: Area[] = [area("g", "Adabar", { city: "Dhaka District", district_id: "d-dhaka" })];
+    expect(districtIdForCity(real, "Dhaka")).toBe("d-dhaka");
+  });
+
+  it("has no district when the list has not loaded, so the caller searches the name", () => {
+    const { scope } = resolveScope({ name: "", city: "Dhaka", radiusKm: 0, areas: [] });
+    expect(scope).toEqual({ kind: "city", city: "Dhaka", districtId: undefined });
+  });
+
+  it("has no district when two districts share the city's name", () => {
+    const twin: Area[] = [...withDistricts, area("x", "Elsewhere", { district_id: "d-other" })];
+    expect(districtIdForCity(twin, "Dhaka")).toBeUndefined();
+  });
+
+  it("sends district_id to the API and not a text search", () => {
+    const filters = withScope({}, { kind: "city", city: "Dhaka", districtId: "d-dhaka" });
+    expect(filters.district_id).toBe("d-dhaka");
+    expect(filters.search).toBeUndefined();
+  });
+
+  it("searches the city's name when there is no district to name", () => {
+    const filters = withScope({}, { kind: "city", city: "Dhaka" });
+    expect(filters.district_id).toBeUndefined();
+    expect(filters.search).toBe("Dhaka");
   });
 });

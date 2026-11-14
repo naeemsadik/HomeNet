@@ -1,4 +1,13 @@
 import { SEO_AREAS } from "@/content/areas";
+import {
+  collectAvailableCities,
+  inferAreaCity,
+  isKnownBangladeshCity,
+  isNationwideValue,
+  normalizeCityName,
+  resolveAreaMatch,
+  scopeAreasToCity,
+} from "@/lib/areaMatcher";
 import type { Area } from "@/types/api";
 
 /**
@@ -10,29 +19,47 @@ import type { Area } from "@/types/api";
  * Distance search needs the area's coordinates, which only some areas have yet.
  */
 
-const CITIES = ["dhaka", "chattogram", "sylhet", "coxsbazar"];
-
 /** Lower-case letters and digits only, so "Gulshan 1", "Gulshan-1" and "gulshan1" agree. */
 export const squash = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 
 export function isCityName(name: string): boolean {
-  return CITIES.includes(squash(name));
+  if (!name.trim() || isNationwideValue(name)) return false;
+  return isKnownBangladeshCity(name);
 }
 
 /**
- * The area a name means: an exact match, else the longest area name the text
- * starts with ("Bashundhara R/A" is the area "Bashundhara"). Names shorter than
- * four characters are only matched exactly.
+ * Resolves a sub-area name inside `areas` (optionally scoped to `city`):
+ * Uses the multi-layer matcher (exact/alias -> transliteration fuzzy -> proximity),
+ * then falls back to longest prefix match ("Bashundhara R/A" -> "Bashundhara").
  */
-export function findArea(name: string, areas: Area[]): Area | null {
-  const needle = squash(name);
+export function findArea(
+  name: string,
+  areas: Area[],
+  city?: string | null,
+  coordinates?: { lat: number; lng: number } | null,
+): Area | null {
+  const trimmed = name.trim();
+  if (!trimmed) return null;
+
+  const scoped = city && !isNationwideValue(city) ? scopeAreasToCity(areas, city) : areas;
+  const resolution = resolveAreaMatch({
+    query: trimmed,
+    city,
+    areas: scoped,
+    coordinates: coordinates ?? null,
+  });
+
+  if (resolution.matchedArea) return resolution.matchedArea;
+  if (resolution.matchType === "ambiguous") return null;
+
+  const needle = squash(trimmed);
   if (!needle) return null;
 
-  const exact = areas.find((area) => squash(area.name) === needle);
+  const exact = scoped.find((area) => squash(area.name) === needle);
   if (exact) return exact;
 
   let best: Area | null = null;
-  for (const area of areas) {
+  for (const area of scoped) {
     const candidate = squash(area.name);
     if (candidate.length >= 4 && needle.startsWith(candidate) && (!best || candidate.length > squash(best.name).length)) {
       best = area;
@@ -51,29 +78,32 @@ export interface Centre {
   lng: number;
 }
 
-const validCoordinate = (lat: unknown, lng: unknown): boolean =>
-  typeof lat === "number" && typeof lng === "number" && Number.isFinite(lat) && Number.isFinite(lng);
+const isValidCoord = (val: unknown): val is number =>
+  typeof val === "number" && Number.isFinite(val);
+
+function toCentre(lat: unknown, lng: unknown): Centre | null {
+  return isValidCoord(lat) && isValidCoord(lng) ? { lat, lng } : null;
+}
 
 /** The area's own centre, else its parent's, else null (distance search is not possible). */
 export function areaCentre(area: Area, areas: Area[]): Centre | null {
-  if (validCoordinate(area.center_lat, area.center_lng)) {
-    return { lat: area.center_lat as number, lng: area.center_lng as number };
-  }
+  const own = toCentre(area.center_lat, area.center_lng);
+  if (own) return own;
   const parent = area.parent_area_id ? areas.find((other) => other.id === area.parent_area_id) : undefined;
-  if (parent && validCoordinate(parent.center_lat, parent.center_lng)) {
-    return { lat: parent.center_lat as number, lng: parent.center_lng as number };
-  }
-  return null;
+  return parent ? toCentre(parent.center_lat, parent.center_lng) : null;
 }
 
 export type AreaScope =
-  /** No place chosen: all listings. */
+  /** No place chosen: all listings across Bangladesh. */
   | { kind: "none" }
-  /** A whole city: the API's `city` filter. */
-  | { kind: "city"; city: string }
-  /** A neighbourhood: its listings, by area id. */
+  /**
+   * A whole city. With `districtId` (the area list says which district it is) the
+   * API filters on it; without one, a text search for the name.
+   */
+  | { kind: "city"; city: string; districtId?: string }
+  /** A neighbourhood (or disambiguated set): its listings, by area id. */
   | { kind: "areas"; ids: string[] }
-  /** A neighbourhood plus a distance around its centre. */
+  /** A neighbourhood or pin plus a distance around its centre. */
   | { kind: "radius"; lat: number; lng: number; radius: number }
   /** A place the area list does not know: fall back to a text search for the name. */
   | { kind: "text"; text: string };
@@ -87,21 +117,102 @@ export interface ResolvedScope {
 /** The API accepts 1 to 50 km. */
 export const MAX_RADIUS_KM = 50;
 
-export function resolveScope(input: { name: string; radiusKm: number; areas: Area[] }): ResolvedScope {
-  const name = input.name.trim();
-  if (!name) return { scope: { kind: "none" }, radiusAvailable: false };
-
-  if (isCityName(name)) return { scope: { kind: "city", city: name }, radiusAvailable: false };
-
-  const area = findArea(name, input.areas);
-  if (!area) return { scope: { kind: "text", text: name }, radiusAvailable: false };
-
-  const centre = areaCentre(area, input.areas);
-  const radius = Math.min(Math.round(input.radiusKm), MAX_RADIUS_KM);
-  if (centre && radius >= 1) {
-    return { scope: { kind: "radius", ...centre, radius }, radiusAvailable: true };
+/**
+ * The one district a city is, read from the areas the API sent. Undefined when the
+ * list does not name exactly one (not loaded yet, or two districts share the name),
+ * so the caller falls back to searching the name rather than guessing.
+ */
+export function districtIdForCity(areas: Area[], city: string): string | undefined {
+  // The API names a district "Dhaka District"; the site says Dhaka. Compare them the same way.
+  const target = normalizeCityName(city)?.toLowerCase();
+  if (!target) return undefined;
+  const ids = new Set<string>();
+  for (const area of areas) {
+    if (area.district_id && normalizeCityName(area.city)?.toLowerCase() === target) ids.add(area.district_id);
   }
-  return { scope: { kind: "areas", ids: areaIdsWithChildren(area, input.areas) }, radiusAvailable: centre !== null };
+  return ids.size === 1 ? [...ids][0] : undefined;
+}
+
+export function resolveScope(input: {
+  name: string;
+  city?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  radiusKm: number;
+  areas: Area[];
+}): ResolvedScope {
+  const name = input.name.trim();
+  const city = input.city && !isNationwideValue(input.city) ? normalizeCityName(input.city) ?? input.city.trim() : "";
+  const coords = toCentre(input.lat, input.lng);
+  const radius = Math.min(Math.round(input.radiusKm), MAX_RADIUS_KM);
+
+  if (!name && !city) {
+    if (coords) {
+      return {
+        scope: { kind: "radius", ...coords, radius: radius >= 1 ? radius : 3 },
+        radiusAvailable: true,
+      };
+    }
+    return { scope: { kind: "none" }, radiusAvailable: false };
+  }
+
+  // City-level selection (no specific sub-area selected, or sub-area is the city name itself)
+  if ((!name && city) || (name && isCityName(name))) {
+    const resolvedCity = city || normalizeCityName(name) || name;
+    if (coords && radius >= 1) {
+      return { scope: { kind: "radius", ...coords, radius }, radiusAvailable: true };
+    }
+    return { scope: { kind: "city", city: resolvedCity, districtId: districtIdForCity(input.areas, resolvedCity) }, radiusAvailable: false };
+  }
+
+  const scopedAreas = city ? scopeAreasToCity(input.areas, city) : input.areas;
+  const resolution = resolveAreaMatch({
+    query: name,
+    city: city || null,
+    areas: scopedAreas,
+    coordinates: coords,
+  });
+
+  if (resolution.matchedArea) {
+    const centre = areaCentre(resolution.matchedArea, input.areas) ?? coords;
+    if (centre && radius >= 1) {
+      return { scope: { kind: "radius", ...centre, radius }, radiusAvailable: true };
+    }
+    return {
+      scope: { kind: "areas", ids: areaIdsWithChildren(resolution.matchedArea, input.areas) },
+      radiusAvailable: centre !== null,
+    };
+  }
+
+  if (resolution.matchType === "ambiguous" && resolution.candidates.length > 0) {
+    const ids = Array.from(
+      new Set(resolution.candidates.flatMap((candidate) => areaIdsWithChildren(candidate, input.areas))),
+    );
+    return { scope: { kind: "areas", ids }, radiusAvailable: coords !== null };
+  }
+
+  // Fallback for prefix-matched area names (e.g. "Bashundhara R/A" -> "Bashundhara")
+  const prefixMatch = findArea(name, scopedAreas, city, coords);
+  if (prefixMatch) {
+    const centre = areaCentre(prefixMatch, input.areas) ?? coords;
+    if (centre && radius >= 1) {
+      return { scope: { kind: "radius", ...centre, radius }, radiusAvailable: true };
+    }
+    return {
+      scope: { kind: "areas", ids: areaIdsWithChildren(prefixMatch, input.areas) },
+      radiusAvailable: centre !== null,
+    };
+  }
+
+  // Coordinate fallback when Google Place location is outside mapped DB areas
+  if (coords) {
+    return {
+      scope: { kind: "radius", ...coords, radius: radius >= 1 ? radius : 3 },
+      radiusAvailable: true,
+    };
+  }
+
+  return { scope: { kind: "text", text: name }, radiusAvailable: false };
 }
 
 export interface AreaOption {
@@ -109,11 +220,77 @@ export interface AreaOption {
   value: string;
 }
 
+/** Step 1 filter options: All Cities (Bangladesh) followed by active BD cities. */
+export function cityOptions(areas: Area[], allCitiesLabel: string): AreaOption[] {
+  const options: AreaOption[] = [{ label: allCitiesLabel, value: "" }];
+  for (const city of collectAvailableCities(areas)) {
+    options.push({ label: city, value: city });
+  }
+  return options;
+}
+
+/** Step 2 filter options: sub-areas strictly scoped to `city`, with children indented. */
+export function areaOptionsForCity(
+  areas: Area[],
+  city: string | null | undefined,
+  allAreasLabel: string,
+): AreaOption[] {
+  const options: AreaOption[] = [{ label: allAreasLabel, value: "" }];
+  const normalizedCity = city ? normalizeCityName(city) : null;
+  if (!normalizedCity || isNationwideValue(normalizedCity)) {
+    return options;
+  }
+
+  const byId = new Map(areas.map((a) => [a.id, a]));
+  const scoped = scopeAreasToCity(areas, normalizedCity).filter(
+    (area) => (normalizeCityName(area.name)?.toLowerCase() ?? "") !== normalizedCity.toLowerCase(),
+  );
+
+  const byName = (a: Area, b: Area) => a.name.localeCompare(b.name);
+  const topLevel = scoped.filter((area) => !area.parent_area_id || !byId.has(area.parent_area_id)).sort(byName);
+  const seen = new Set<string>();
+
+  for (const area of topLevel) {
+    if (!seen.has(area.name)) {
+      options.push({ label: area.name, value: area.name });
+      seen.add(area.name);
+    }
+    for (const child of scoped.filter((other) => other.parent_area_id === area.id).sort(byName)) {
+      if (!seen.has(child.name)) {
+        options.push({ label: `  ${child.name}`, value: child.name });
+        seen.add(child.name);
+      }
+    }
+  }
+  return options;
+}
+
+/** Fallback sub-area options when live `/v1/areas` is incomplete, scoped strictly to `city`. */
+export function fallbackAreaOptionsForCity(
+  city: string | null | undefined,
+  allAreasLabel: string,
+): AreaOption[] {
+  const options: AreaOption[] = [{ label: allAreasLabel, value: "" }];
+  const normalizedCity = city ? normalizeCityName(city) : null;
+  if (!normalizedCity || isNationwideValue(normalizedCity)) return options;
+
+  for (const place of SEO_AREAS.filter((area) => area.parent && area.city.toLowerCase() === normalizedCity.toLowerCase())) {
+    options.push({ label: place.name, value: place.name });
+  }
+  return options;
+}
+
 /** Cities first, then each neighbourhood with its sub-areas indented under it. */
 export function areaOptions(areas: Area[], allAreasLabel: string): AreaOption[] {
   const options: AreaOption[] = [{ label: allAreasLabel, value: "" }];
 
-  const cities = [...new Set(areas.map((area) => area.city).filter((city): city is string => !!city))].sort();
+  const cities = [
+    ...new Set(
+      areas
+        .map((area) => inferAreaCity(area))
+        .filter((city): city is string => !!city),
+    ),
+  ].sort();
   for (const city of cities) options.push({ label: city, value: city });
 
   const byName = (a: Area, b: Area) => a.name.localeCompare(b.name);

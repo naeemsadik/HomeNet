@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { Check, MapPin, Sparkles, X } from "@/components/icons";
+import { Check, MapPin, X } from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
 import { OverlayHost } from "@/components/OverlayModal";
@@ -76,7 +76,9 @@ export function AdvancedFiltersModal({
   onReset,
   resultCount,
   showLocation = false,
+  cityOptions,
   areaOptions,
+  getAreaOptionsForCity,
   fixedLocation,
   onPreviewCount,
 }: {
@@ -95,7 +97,9 @@ export function AdvancedFiltersModal({
   resultCount?: number;
   /** The hero has its own area button, so it hides this. Browse shows it. */
   showLocation?: boolean;
+  cityOptions?: { label: string; value: string }[];
   areaOptions?: { label: string; value: string }[];
+  getAreaOptionsForCity?: (city: string) => { label: string; value: string }[];
   fixedLocation?: string;
   /** Asks the host for the count the pending filters would return. */
   onPreviewCount?: (filters: SearchFilters) => void;
@@ -184,7 +188,14 @@ export function AdvancedFiltersModal({
           : countOptionLabel(option, language, t, side),
     }));
 
-  const areaChoices = withCurrentArea(areaOptions ?? [], localFilters.area);
+  const showCity = Boolean(cityOptions?.length);
+  const scopedAreas = getAreaOptionsForCity
+    ? getAreaOptionsForCity(localFilters.city)
+    : (areaOptions ?? []);
+  const modalAreaDisabled = showCity && !localFilters.city && !localFilters.area;
+  const areaChoices = modalAreaDisabled
+    ? [{ label: t("filters.selectCityFirst"), value: "" }]
+    : withCurrentArea(scopedAreas, localFilters.area);
 
   // A count that ignores the pending client-side filters would be wrong, and a
   // wrong number is worse than no number.
@@ -265,20 +276,33 @@ export function AdvancedFiltersModal({
             style={styles.scrollArea}
           >
             {/* Location: Browse only; the hero has its own area button. */}
-            {showLocation && !fixedLocation && areaOptions?.length ? (
+            {showLocation && !fixedLocation && (showCity || areaOptions?.length) ? (
               <View style={styles.section}>
                 <View style={styles.sectionTitleRow}>
                   <MapPin color={colorTokens.ink} size={16} />
                   <Text style={styles.sectionLabel}>{t("filters.location")}</Text>
                 </View>
+                {showCity ? (
+                  <View style={{ marginBottom: 10 }}>
+                    <SelectField
+                      accessibilityLabel={t("filters.city")}
+                      value={localFilters.city}
+                      options={cityOptions ?? []}
+                      onChange={(value) =>
+                        patch({ city: value, area: "", lat: "", lng: "", radius: "" })
+                      }
+                    />
+                  </View>
+                ) : null}
                 {/* Seeded from the same `area` the bar wrote, so an area
                     already chosen out there is already chosen in here. */}
                 <SelectField
                   accessibilityLabel={t("filters.location")}
-                  value={localFilters.area}
+                  value={modalAreaDisabled ? "" : localFilters.area}
                   options={areaChoices}
+                  disabled={modalAreaDisabled}
                   // A new place starts with "this area only".
-                  onChange={(value) => patch({ area: value, radius: "" })}
+                  onChange={(value) => patch({ area: value, lat: "", lng: "", radius: "" })}
                 />
               </View>
             ) : null}
@@ -452,7 +476,6 @@ export function AdvancedFiltersModal({
               style={[styles.verifiedRowCard, webPointer]}
             >
               <View style={styles.verifiedRowLeft}>
-                <Sparkles color={colorTokens.brandText} size={16} />
                 <Text style={styles.verifiedRowLabel}>{t("filters.verifiedOnly")}</Text>
               </View>
               <View

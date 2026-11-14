@@ -1,7 +1,13 @@
 import apiClient from "./apiClient";
 import { appendUpload, type UploadInput } from "./upload";
 import { upsertPropertyDtoSchema } from "@/lib/schemas/property";
-import type { ApiResponse, PropertyStatus, UpsertPropertyDto } from "@/types/api";
+import type {
+  ApiResponse,
+  PropertyFeedbackDto,
+  PropertyFeedbackResult,
+  PropertyStatus,
+  UpsertPropertyDto,
+} from "@/types/api";
 
 import type {
   PaginatedResponse,
@@ -190,14 +196,38 @@ export async function deletePropertyMedia(mediaId: string) {
 
 export async function adminUpdateProperty(id: string, dto: UpsertPropertyDto) {
   const { data } = await apiClient.patch<ApiResponse<PropertyMutationResult>>(
-    `/v1/properties/${id}/admin`,
+    `/v1/properties/${encodeURIComponent(id)}/admin`,
     dto,
   );
   return data;
 }
 
 export async function adminDeleteProperty(id: string) {
-  const { data } = await apiClient.delete<ApiResponse<null>>(`/v1/properties/${id}/admin`);
+  const { data } = await apiClient.delete<ApiResponse<null>>(
+    `/v1/properties/${encodeURIComponent(id)}/admin`,
+  );
+  return data;
+}
+
+/**
+ * Sends a moderator's notes to the seller (needs `moderate_listing`).
+ *
+ * There is deliberately no fallback. If the endpoint is missing this throws,
+ * and the caller tells the moderator nothing was sent: unlisting a seller's
+ * property while their feedback is quietly dropped is worse than an error.
+ */
+export async function submitPropertyFeedback(
+  id: string,
+  payload: PropertyFeedbackDto,
+): Promise<ApiResponse<PropertyFeedbackResult>> {
+  const { data } = await apiClient.post<ApiResponse<PropertyFeedbackResult>>(
+    `/v1/properties/${encodeURIComponent(id)}/feedback`,
+    {
+      tags: payload.tags,
+      notes: payload.notes.trim(),
+      status: payload.requestChanges !== false ? "changes_requested" : undefined,
+    },
+  );
   return data;
 }
 

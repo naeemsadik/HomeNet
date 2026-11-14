@@ -37,8 +37,9 @@ import { fetchBrowseTotal, useBrowseFeed } from "@/features/property/hooks/useBr
 import type { PropertyFilters } from "@/features/property/types/property";
 import type { BrowseSnapshot } from "@/lib/browseSnapshot";
 import {
-  areaOptions as buildAreaOptions,
-  fallbackAreaOptions,
+  areaOptionsForCity,
+  cityOptions as buildCityOptions,
+  fallbackAreaOptionsForCity,
   isCityName,
   resolveScope,
 } from "@/features/property/utils/areaScope";
@@ -96,13 +97,21 @@ export function BrowseScreen({
   // A partial area list (see useAreas) is worse than none: it would offer two
   // places and treat every other one as unknown.
   const { areas: fetchedAreas, ready: areasReady, complete: areasComplete } = useAreas();
-  const areas = areasComplete ? fetchedAreas : [];
-  const areaOptions = React.useMemo(() => {
+  const areas = React.useMemo(() => (areasComplete ? fetchedAreas : []), [areasComplete, fetchedAreas]);
+  const cityChoices = React.useMemo(() => {
     if (fixedLocation) return undefined;
-    return areasComplete
-      ? buildAreaOptions(areas, t("filters.allAreas"))
-      : fallbackAreaOptions(t("filters.allAreas"));
-  }, [areas, areasComplete, fixedLocation, t]);
+    return buildCityOptions(areas, t("search.rightmove.allCities"));
+  }, [areas, fixedLocation, t]);
+
+  const getAreaOptionsForCity = React.useCallback(
+    (city: string) => {
+      if (fixedLocation) return [];
+      return areasComplete
+        ? areaOptionsForCity(areas, city, t("filters.allAreas"))
+        : fallbackAreaOptionsForCity(city, t("filters.allAreas"));
+    },
+    [areas, areasComplete, fixedLocation, t]
+  );
 
   /**
    * The URL is the only filter state. Refresh, Back and a shared link all land
@@ -112,12 +121,22 @@ export function BrowseScreen({
     FILTER_PARAM_KEYS.map((key) => (params as Record<string, unknown>)[key] ?? "")
   );
   const filters = React.useMemo(
-    () => filtersFromParams(params, { mode, fixedLocation }),
+    () => filtersFromParams(params, { mode, fixedLocation, areas }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paramKey, mode, fixedLocation]
+    [paramKey, mode, fixedLocation, areas]
   );
+  const areaOptions = React.useMemo(() => {
+    if (fixedLocation) return undefined;
+    return getAreaOptionsForCity(filters.city);
+  }, [fixedLocation, getAreaOptionsForCity, filters.city]);
+
   const locationParam = filters.area || undefined;
-  const activeLocationTitle = locationParam || filters.query || t("search.allDhaka");
+  const activeLocationTitle =
+    (locationParam && filters.city
+      ? `${locationParam}, ${filters.city}`
+      : locationParam || filters.city) ||
+    filters.query ||
+    t("search.allBangladesh");
   const activeFilterCount = countActiveFilters(filters);
 
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(() =>
@@ -189,14 +208,19 @@ export function BrowseScreen({
 
   const apiFilters = toApiFilters(filters);
 
+  const parsedLat = filters.lat ? Number(filters.lat) : null;
+  const parsedLng = filters.lng ? Number(filters.lng) : null;
   const { scope, radiusAvailable } = React.useMemo(
     () =>
       resolveScope({
         name: filters.area,
+        city: filters.city,
+        lat: parsedLat,
+        lng: parsedLng,
         radiusKm: filters.radius ? parseInt(filters.radius, 10) : 0,
         areas,
       }),
-    [filters.area, filters.radius, areas]
+    [filters.area, filters.city, parsedLat, parsedLng, filters.radius, areas]
   );
   // The page opens on the search card, as Rightmove's does, and only turns
   // into results once a search has been made. A shared link, an area page or
@@ -206,13 +230,17 @@ export function BrowseScreen({
   const hasSearchedNow =
     searchedParam ||
     Boolean(fixedLocation) ||
+    Boolean(filters.city) ||
     Boolean(filters.area) ||
+    Boolean(filters.lat && filters.lng) ||
     Boolean(filters.query) ||
     activeFilterCount > 0;
   const [searchStarted, setSearchStarted] = useState(false);
   if (hasSearchedNow && !searchStarted) setSearchStarted(true);
   const hasSearched = hasSearchedNow || searchStarted;
-  const feedReady = hasSearched && (!filters.area || isCityName(filters.area) || areasReady);
+  // A whole city is filtered by its district, which only the area list can name, so wait for it
+  // instead of asking for the city by name first and again once the list arrives.
+  const feedReady = hasSearched && (filters.area ? isCityName(filters.area) || areasReady : !filters.city || areasReady);
 
   const {
     properties: apiProperties,
@@ -288,7 +316,10 @@ export function BrowseScreen({
       ? "browse.purposeSold"
       : "browse.purposeAll"
   );
-  const headingPlace = locationParam || t("browse.everywhere");
+  const headingPlace =
+    (locationParam && filters.city
+      ? `${locationParam}, ${filters.city}`
+      : locationParam || filters.city) || t("browse.everywhere");
   const resultsHeading = feedLoading
     ? t("browse.heading", { purpose: headingPurpose, place: headingPlace })
     : t(totalCount === 1 ? "browse.headingOne" : "browse.headingCount", {
@@ -303,15 +334,21 @@ export function BrowseScreen({
   // "Show all 18 results", and the right number only flashed up as the sheet
   // closed and the feed behind it reloaded.
   const previewArea = previewFilters?.area ?? "";
+  const previewCity = previewFilters?.city ?? "";
+  const previewLat = previewFilters?.lat ? Number(previewFilters.lat) : null;
+  const previewLng = previewFilters?.lng ? Number(previewFilters.lng) : null;
   const previewRadius = previewFilters?.radius ?? "";
   const previewScope = React.useMemo(
     () =>
       resolveScope({
         name: previewArea,
+        city: previewCity,
+        lat: previewLat,
+        lng: previewLng,
         radiusKm: previewRadius ? parseInt(previewRadius, 10) : 0,
         areas,
       }).scope,
-    [previewArea, previewRadius, areas]
+    [previewArea, previewCity, previewLat, previewLng, previewRadius, areas]
   );
   const previewReady = !previewArea || isCityName(previewArea) || areasReady;
   const previewApiFilters = previewFilters ? toApiFilters(previewFilters) : null;
@@ -372,7 +409,10 @@ export function BrowseScreen({
               : t("search.results.crossLinkBuy", { location: activeLocationTitle }),
           href: {
             pathname: mode === "buy" ? "/rent" : "/buy",
-            params: locationParam ? { location: locationParam } : {},
+            params: {
+              ...(filters.city ? { city: filters.city } : {}),
+              ...(locationParam ? { location: locationParam } : {}),
+            },
           },
         }
       : null;
@@ -575,7 +615,9 @@ export function BrowseScreen({
     <View style={[styles.landing, isMobile && styles.landingMobile]}>
       <RightmoveFilterCard
         areaOptions={areaOptions}
+        cityOptions={cityChoices}
         filters={draftFilters}
+        getAreaOptionsForCity={getAreaOptionsForCity}
         locationName={activeLocationTitle}
         onFilterChange={setDraftFilters}
         onOpenMoreFilters={() => setIsFilterModalOpen(true)}
@@ -590,6 +632,7 @@ export function BrowseScreen({
     <>
       <SearchFilterBar
         areaOptions={areaOptions}
+        cityOptions={cityChoices}
         filters={filters}
         locationName={activeLocationTitle}
         onFilterChange={applyFilters}
@@ -786,8 +829,10 @@ export function BrowseScreen({
 
         <AdvancedFiltersModal
           areaOptions={areaOptions}
+          cityOptions={cityChoices}
           filters={hasSearched ? filters : draftFilters}
           fixedLocation={fixedLocation}
+          getAreaOptionsForCity={getAreaOptionsForCity}
           onApply={hasSearched ? applyFilters : startSearch}
           onClose={closeFilterModal}
           onPreviewCount={setPreviewFilters}
