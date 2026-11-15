@@ -96,8 +96,11 @@ export function areaCentre(area: Area, areas: Area[]): Centre | null {
 export type AreaScope =
   /** No place chosen: all listings across Bangladesh. */
   | { kind: "none" }
-  /** A whole city: city-wide text search. */
-  | { kind: "city"; city: string }
+  /**
+   * A whole city. With `districtId` (the area list says which district it is) the
+   * API filters on it; without one, a text search for the name.
+   */
+  | { kind: "city"; city: string; districtId?: string }
   /** A neighbourhood (or disambiguated set): its listings, by area id. */
   | { kind: "areas"; ids: string[] }
   /** A neighbourhood or pin plus a distance around its centre. */
@@ -113,6 +116,22 @@ export interface ResolvedScope {
 
 /** The API accepts 1 to 50 km. */
 export const MAX_RADIUS_KM = 50;
+
+/**
+ * The one district a city is, read from the areas the API sent. Undefined when the
+ * list does not name exactly one (not loaded yet, or two districts share the name),
+ * so the caller falls back to searching the name rather than guessing.
+ */
+export function districtIdForCity(areas: Area[], city: string): string | undefined {
+  // The API names a district "Dhaka District"; the site says Dhaka. Compare them the same way.
+  const target = normalizeCityName(city)?.toLowerCase();
+  if (!target) return undefined;
+  const ids = new Set<string>();
+  for (const area of areas) {
+    if (area.district_id && normalizeCityName(area.city)?.toLowerCase() === target) ids.add(area.district_id);
+  }
+  return ids.size === 1 ? [...ids][0] : undefined;
+}
 
 export function resolveScope(input: {
   name: string;
@@ -143,7 +162,7 @@ export function resolveScope(input: {
     if (coords && radius >= 1) {
       return { scope: { kind: "radius", ...coords, radius }, radiusAvailable: true };
     }
-    return { scope: { kind: "city", city: resolvedCity }, radiusAvailable: false };
+    return { scope: { kind: "city", city: resolvedCity, districtId: districtIdForCity(input.areas, resolvedCity) }, radiusAvailable: false };
   }
 
   const scopedAreas = city ? scopeAreasToCity(input.areas, city) : input.areas;

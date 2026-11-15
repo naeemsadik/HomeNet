@@ -364,12 +364,6 @@ export const styles = StyleSheet.create({
   intentCardSelected: {
     borderColor: "#04cf92",
     backgroundColor: "#E6FAF4",
-    ...(Platform.select({
-      web: {
-        boxShadow: "0 2px 10px rgba(4, 207, 146, 0.15)",
-      },
-      default: {},
-    }) as any),
   },
   intentCardTop: {
     flexDirection: "row",
@@ -474,12 +468,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 11,
     paddingHorizontal: 20,
     borderRadius: 12,
-    ...(Platform.select({
-      web: {
-        boxShadow: "0 3px 10px rgba(4, 207, 146, 0.3)",
-      },
-      default: {},
-    }) as any),
   },
   continueButtonText: {
     color: colorTokens.onBrand,
@@ -502,15 +490,8 @@ export const styles = StyleSheet.create({
     ...(Platform.select({
       web: {
         transition: "all 0.16s ease",
-        boxShadow: "0 4px 18px rgba(4, 207, 146, 0.10)",
       },
-      default: {
-        shadowColor: "#04cf92",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 2,
-      },
+      default: {},
     }) as any),
   },
   aiEntryCardPhone: {
@@ -579,12 +560,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 14,
-    ...(Platform.select({
-      web: {
-        boxShadow: "0 3px 12px rgba(4, 207, 146, 0.35)",
-      },
-      default: {},
-    }) as any),
   },
   aiCtaButtonPhone: {
     width: "100%",

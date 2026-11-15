@@ -16,7 +16,7 @@ import { inferAreaCity, isKnownBangladeshCity, isNationwideValue, normalizeCityN
 // Re-exported so the filter model stays the one import point for callers.
 export { filterAddedSince } from "./addedToSite";
 import type { Property, PropertyFilters } from "../types/property";
-import type { PropertyType } from "@/types/api";
+import type { Area, PropertyType } from "@/types/api";
 
 export type SearchPurpose = "all" | "sale" | "rent" | "short-let" | "sold";
 
@@ -139,6 +139,30 @@ export interface ParamContext {
   mode?: "buy" | "rent" | "sold";
   /** Pins the area, for the /buy/<area> and /rent/<area> landing pages. */
   fixedLocation?: string;
+  /**
+   * The known areas. With them, words typed into the search box that are exactly
+   * an area's name are read as that area, so the filter bar shows it.
+   */
+  areas?: Area[];
+}
+
+/**
+ * A search typed as a place ("Dhaka", "Gulshan") is a place, not words to look for
+ * in listing text. Left as text it found nothing and the filter bar still read
+ * "All cities", so the page and the bar disagreed about where we were searching.
+ * Only an exact city name, or an exact and unambiguous area name, is promoted.
+ */
+export function placeFromQuery(
+  query: string,
+  areas: Area[] = [],
+): { city: string; area: string } | null {
+  const text = query.trim();
+  if (!text) return null;
+  if (isKnownBangladeshCity(text)) return { city: normalizeCityName(text) || text, area: "" };
+  const matches = areas.filter((a) => a.name.trim().toLowerCase() === text.toLowerCase());
+  if (matches.length !== 1) return null;
+  const [match] = matches;
+  return { city: inferAreaCity(match) ?? match.city ?? "", area: match.name };
 }
 
 /** True when the URL asks for the filters modal to be open. */
@@ -149,7 +173,7 @@ export function isFiltersModalRequested(params: SearchParams): boolean {
 
 export function filtersFromParams(
   params: SearchParams,
-  { mode, fixedLocation }: ParamContext = {},
+  { mode, fixedLocation, areas }: ParamContext = {},
 ): SearchFilters {
   const status = one(params.status);
   const listingType = one(params.listing_type);
@@ -194,11 +218,21 @@ export function filtersFromParams(
     }
   }
 
+  let query = one(params.query) || one(params.search) || "";
+  if (!fixedLocation && !city && !area) {
+    const place = placeFromQuery(query, areas);
+    if (place) {
+      city = place.city;
+      area = place.area;
+      query = "";
+    }
+  }
+
   // `status=sold` already becomes the sold purpose above, so "include sold"
   // only ever comes from its own round-trip param.
   return {
     purpose,
-    query: one(params.query) || one(params.search) || "",
+    query,
     city,
     area,
     lat: one(params.lat) || "",

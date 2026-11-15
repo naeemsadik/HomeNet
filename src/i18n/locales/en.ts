@@ -476,7 +476,6 @@ export const en = {
     consentSuffix: ".",
     forgotPasswordTitle: "Forgot Password",
     forgotPasswordMessage: "Password reset isn't available in the app yet. Email support@homenetbd.com from the address on your account and we'll help you reset it.",
-    promoText: "Listing a property? Paste a plain description and HomeNet fills the details for you.",
     close: "Close",
     showPassword: "Show password",
     hidePassword: "Hide password",

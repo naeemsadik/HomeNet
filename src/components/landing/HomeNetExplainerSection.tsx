@@ -5,15 +5,7 @@ import {
   Text,
   View,
 } from "react-native";
-import {
-  Maximize2,
-  Pause,
-  Play,
-  RotateCcw,
-  Sparkles,
-  Volume2,
-  VolumeX,
-} from "@/components/icons";
+import { Maximize2, Pause, Play, RotateCcw, Volume2, VolumeX, Home } from "@/components/icons";
 import { colorTokens, fonts, radius } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -403,7 +395,7 @@ export function HomeNetExplainerSection() {
                   marginBottom: 16,
                 }}
               >
-                <Sparkles color="#34D399" size={26} strokeWidth={2.5} />
+                <Home color="#34D399" size={26} strokeWidth={2.5} />
               </div>
 
               <h3

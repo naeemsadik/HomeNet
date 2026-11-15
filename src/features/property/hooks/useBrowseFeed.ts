@@ -17,8 +17,10 @@ export function withScope(filters: PropertyFilters, scope: AreaScope): PropertyF
   return {
     ...filters,
     // `city` is not a filter the API accepts, it answers any value with
-    // 400 "property city should not exist", so a city searches by name.
-    ...(scope.kind === "city" || scope.kind === "text"
+    // 400 "property city should not exist". A city is a district, which it does
+    // filter on; when the area list has not said which district, search the name.
+    ...(scope.kind === "city" && scope.districtId ? { district_id: scope.districtId } : {}),
+    ...((scope.kind === "city" && !scope.districtId) || scope.kind === "text"
       ? {
           search: (() => {
             const place = scope.kind === "city" ? scope.city : scope.text;

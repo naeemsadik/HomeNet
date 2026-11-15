@@ -478,7 +478,6 @@ export const bn: TranslationSchema = {
     consentSuffix: " মেনে নিচ্ছেন।",
     forgotPasswordTitle: "পাসওয়ার্ড ভুলে গেছেন",
     forgotPasswordMessage: "অ্যাপে এখনও পাসওয়ার্ড রিসেট উপলব্ধ নেই। আপনার অ্যাকাউন্টের ইমেইল থেকে support@homenetbd.com এ লিখুন এবং আমরা আপনাকে সাহায্য করব।",
-    promoText: "প্রপার্টি তালিকাভুক্ত করছেন? একটি সহজ বিবরণ লিখুন এবং HomeNet আপনার জন্য তথ্য পূরণ করবে।",
     close: "বন্ধ করুন",
     showPassword: "পাসওয়ার্ড দেখুন",
     hidePassword: "পাসওয়ার্ড লুকান",

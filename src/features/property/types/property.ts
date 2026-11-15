@@ -75,6 +75,8 @@ export interface PaginatedResponse<T> {
 
 export interface PropertyFilters {
   city?: string;
+  /** Every listing in one district (what the site calls a city). */
+  district_id?: string;
   area_id?: string;
   type?: PropertyType;
   listing_type?: ListingType;

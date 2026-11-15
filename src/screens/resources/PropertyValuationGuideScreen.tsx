@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow } from "@/components/ui";
-import { AlertCircle, ArrowRight, Building2, Check, ChevronDown, CircleHelp, Clock, Compass, FileCheck, Sparkles } from "@/components/icons";
+import { AlertCircle, ArrowRight, Building2, Check, ChevronDown, CircleHelp, Clock, Compass, FileCheck, Layers } from "@/components/icons";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts, layout, radius, shadow, webPointer } from "@/theme";
@@ -47,7 +47,7 @@ export function PropertyValuationGuideScreen() {
     {
       title: t("propertyValuationGuide.factor5Title"),
       desc: t("propertyValuationGuide.factor5Desc"),
-      icon: Sparkles,
+      icon: Layers,
     },
   ];
 

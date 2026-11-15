@@ -455,3 +455,81 @@ Asked for: let the submit check accept 0, and decide how an unset price is told 
 from a deliberate 0 (for example make the submit check require that `price` was sent,
 or store `null` for "not set"). Also check anything that sorts or filters by price:
 listings priced 0 sort first on "price low to high" and match "under ৳X" filters.
+
+
+
+## 12. Location and the gaps between the app and the API
+
+Read from the code on `main` (843f5a7, 9 Nov) and `staging` (a697ef9, 12 Nov) on
+2026-11-12, plus one request to the staging `GET /v1/areas`. Nothing here was run
+against the production database.
+
+### 12a. What the API already has, and the app now uses
+
+Both branches use **Division → District → Area**. An area has `district_id` and,
+on the list and detail routes, a nested `district: { id, name, division_id }` and
+`center_lat` / `center_lng`. There is no `city` anywhere in the API. In the staging
+response the district is named `"Dhaka District"`, which the app reads as the city
+"Dhaka".
+
+| The API has | The app now |
+|---|---|
+| `district` on every area | Reads the city from it (`normalizeArea`, `src/services/areaApi.ts`) instead of guessing from the area's name |
+| `district_id` and `division_id` on `GET /v1/areas` | Sends them (no longer sends `?city=`, which the API does not have) |
+| `district_id` and `division_id` on `GET /v1/properties` | A whole-city search sends `district_id`. It falls back to a text search for the name only when the area list has not said which district the city is. |
+| `GET /v1/divisions`, `/divisions/:id/districts`, `/districts/:id/areas` | Not used yet; the city list is built from the areas |
+
+### 12b. Missing on both branches: the app calls these and gets a 404
+
+| Call | Used for | What the app does meanwhile |
+|---|---|---|
+| `POST /v1/properties/:id/feedback` | A moderator's "Request changes" notes to a seller | Tells the moderator nothing was sent and leaves the listing alone |
+| `POST /v1/properties/smart-search` | AI search | The feature is off or fails |
+| `POST /v1/ai/parse-property` | AI quick listing | Same |
+| `GET /v1/guides`, `GET /v1/guides/:id` | Guides pages | Falls back to the guides bundled in the app |
+| `POST /v1/properties/:id/unarchive` | Owner unarchive | Falls back to `POST /restore`, then two PATCH variants |
+
+`smart-listing` / `smart-search` exist only on the old `28-featai-add-ai-assistant-service`
+and `grok_api_key` branches (last commit 9 Oct) and never reached `staging`.
+
+### 12c. Missing: fields and filters
+
+1. **`aliases: string[]` on areas**, for known alternate spellings (`Adabar` / `Adabor`,
+   `Shajahanpur` / `Shahjahanpur`). The app matches by fuzzy similarity instead, which can
+   choose the wrong neighbour.
+2. **A parent `area_id` should match its sub-areas** (see 1c). The app still sends one request
+   per sub-area and merges the pages.
+3. **`center_lat` / `center_lng` on every area.** Distance search and the nearest-area match skip
+   areas without one. A sub-area is placed by its parent when it has none.
+4. **A plain city name.** The district is `"Dhaka District"`; the app strips the word District. If
+   other names carry other suffixes, a `short_name` on districts would remove the guessing.
+5. **Whether property responses include the area's district**, so a listing card can show the city
+   without a second lookup. Not confirmed from the code.
+
+### 12d. Data
+
+On staging today `GET /v1/areas?limit=100` returns **1 area** (Adabar). The geography seed
+(`apps/api/prisma/seeds/geography.seed.ts`, `areas.seed.ts`) needs to be run there before the
+city picker, area picker and area search can be tested properly. Also the six "Postman Area"
+rows noted in 1c.
+
+### 12e. Release gap: `staging` is 6 commits ahead of `main`
+
+Staging has, and `main` does not:
+
+- `GET /v1/properties/my/:id` and `GET /v1/properties/admin/:id` (owner and staff detail). The
+  edit-listing screen needs the first.
+- The revision flow: `GET /v1/properties/:id/revision` and `/admin/revision`, and
+  `POST /v1/properties/:id/admin/revision/approve`, `/admin/revision/reject` and `/admin/reject`.
+- `POST /v1/properties/make-archive/:id`.
+
+**A breaking change when staging is released:** `DELETE /v1/property-delete/:id` exists only on
+`main`. The app's owner "permanent delete" still calls it, so it will 404 after the release unless
+the route is kept or the app is changed to match.
+
+### 12f. Security
+
+If the API ever calls Google Geocoding or Places itself, it needs its **own key restricted by
+server IP address**. The website key is restricted by HTTP referrer, must not be reused on the
+server, and would fail there anyway (a server request has no `Referer`). See
+`docs/GOOGLE_MAPS_AND_LOCATION_GUIDE.md`.
