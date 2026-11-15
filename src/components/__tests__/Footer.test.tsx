@@ -1,22 +1,34 @@
 import React from "react";
 import renderer, { act, type ReactTestInstance } from "react-test-renderer";
-import { Footer } from "@/components/Footer";
+import { StyleSheet } from "react-native";
+import { AppLink } from "@/components/ui";
+import { Footer, RESOURCE_LINKS } from "@/components/Footer";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 jest.mock("@/components/icons", () => new Proxy({}, { get: () => () => null }));
 
-jest.mock("expo-router", () => ({
-  useRouter: () => ({ push: jest.fn() }),
-  Link: (props: { children: React.ReactNode; href: string }) => props.children,
-}));
+const mockPush = jest.fn();
+jest.mock("expo-router", () => {
+  const React = require("react");
+  return {
+    useRouter: () => ({ push: (...args: any[]) => mockPush(...args) }),
+    router: { push: (...args: any[]) => mockPush(...args) },
+    Link: ({ children, href, style }: any) => {
+      return React.cloneElement(React.Children.only(children), { href, style });
+    },
+  };
+});
+
+let mockResponsive = {
+  isPhone: false,
+  isTablet: false,
+  width: 1280,
+  containerMaxWidth: 1200,
+};
 
 jest.mock("@/hooks/useResponsive", () => ({
-  useResponsive: () => ({
-    isPhone: false,
-    isTablet: false,
-    containerMaxWidth: 1200,
-  }),
+  useResponsive: () => mockResponsive,
 }));
 
 const textOf = (node: ReactTestInstance | string | number | null | undefined): string => {
@@ -28,7 +40,17 @@ const textOf = (node: ReactTestInstance | string | number | null | undefined): s
 };
 
 describe("Footer", () => {
-  it("renders the resources links and does not render Landlord Guides or Mortgage Calculator", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockResponsive = {
+      isPhone: false,
+      isTablet: false,
+      width: 1280,
+      containerMaxWidth: 1200,
+    };
+  });
+
+  it("renders desktop resources links and does not render Landlord Guides or Mortgage Calculator", () => {
     let tree: renderer.ReactTestRenderer;
     act(() => {
       tree = renderer.create(<Footer />);
@@ -45,9 +67,70 @@ describe("Footer", () => {
     expect(fullText).toContain("Seller Guides");
     expect(fullText).toContain("Renter Guides");
 
-    // Removed links must NOT be present
+    // Removed or stale links must NOT be present
     expect(fullText).not.toContain("Landlord Guides");
     expect(fullText).not.toContain("Mortgage Calculator");
+    expect(fullText).not.toContain("Insights");
+  });
+
+  it("renders mobile footer accordion with all 7 resource links and 44px min touch target", () => {
+    mockResponsive = {
+      isPhone: true,
+      isTablet: false,
+      width: 375,
+      containerMaxWidth: 375,
+    };
+
+    let tree: renderer.ReactTestRenderer;
+    act(() => {
+      tree = renderer.create(<Footer />);
+    });
+
+    // Find the "Resources" accordion header
+    const resourcesHeader = tree!.root.find(
+      (node) =>
+        node.props.accessibilityRole === "button" &&
+        node.props.accessibilityLabel === "Resources"
+    );
+    expect(resourcesHeader).toBeTruthy();
+    expect(resourcesHeader.props.accessibilityState?.expanded).toBe(false);
+
+    // Open the accordion
+    act(() => {
+      resourcesHeader.props.onPress();
+    });
+
+    // Find all resource AppLink components in the mobile footer
+    const resourceLinks = tree!.root.findAllByType(AppLink).filter(
+      (node) =>
+        typeof node.props.href === "string" &&
+        node.props.href.startsWith("/resources/")
+    );
+
+    expect(resourceLinks).toHaveLength(7);
+
+    const renderedHrefs = resourceLinks.map((node) => node.props.href);
+    for (const link of RESOURCE_LINKS) {
+      expect(renderedHrefs).toContain(link.href);
+    }
+
+    // Verify touch target: each link row must satisfy minHeight >= 44
+    for (const linkNode of resourceLinks) {
+      const flattenedStyle = StyleSheet.flatten(linkNode.props.style) as { minHeight?: number };
+      expect(flattenedStyle?.minHeight).toBeGreaterThanOrEqual(44);
+    }
+
+    // Pressing a link closes the accordion (onToggle)
+    act(() => {
+      resourceLinks[0].props.onPress();
+    });
+
+    const closedHeader = tree!.root.find(
+      (node) =>
+        node.props.accessibilityRole === "button" &&
+        node.props.accessibilityLabel === "Resources"
+    );
+    expect(closedHeader.props.accessibilityState?.expanded).toBe(false);
   });
 });
 

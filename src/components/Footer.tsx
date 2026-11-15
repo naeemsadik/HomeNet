@@ -2,6 +2,9 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, layout, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
+import { RESOURCE_LINKS, type ResourceLinkItem } from "@/constants/navigation";
+
+export { RESOURCE_LINKS, type ResourceLinkItem };
 
 import { useTranslation } from "@/i18n";
 import {
@@ -63,16 +66,6 @@ export interface FooterProps {
 function WebFooter({ style }: FooterProps) {
   const { t } = useTranslation();
   const { isPhone, isTablet, containerMaxWidth } = useResponsive();
-
-  const resourcesLinks = [
-    { label: "Stamp Duty & Tax Guide", href: "/resources/stamp-duty-tax-guide" },
-    { label: "Property Price Index", href: "/resources/property-price-index" },
-    { label: "Property Valuation Guide", href: "/resources/property-valuation-guide" },
-    { label: "Property News & Trends", href: "/resources/property-news-trends" },
-    { label: "Buyer Guides", href: "/resources/buyer-guides" },
-    { label: "Seller Guides", href: "/resources/seller-guides" },
-    { label: "Renter Guides", href: "/resources/renter-guides" },
-  ];
 
   const searchLinks = [
     { label: "Search homes for sale", href: "/buy" },
@@ -197,9 +190,9 @@ function WebFooter({ style }: FooterProps) {
           {/* Column 2: Resources */}
           <View style={styles.footerCol}>
             <Text style={styles.footerColHeading}>{t("footer.resources")}</Text>
-            {resourcesLinks.map((item) => (
-              <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
-                <Text style={styles.footerLinkText}>{item.label}</Text>
+            {RESOURCE_LINKS.map((item) => (
+              <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
+                <Text style={styles.footerLinkText}>{t(item.labelKey)}</Text>
               </AppLink>
             ))}
           </View>
