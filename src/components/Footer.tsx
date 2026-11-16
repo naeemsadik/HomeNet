@@ -74,7 +74,7 @@ function WebFooter({ style }: FooterProps) {
     { label: "Commercial to rent", href: "/rent" },
     { label: "Holiday stays & Serviced", href: "/rent?subtype=short-let" },
     { label: "Verified listings only", href: "/buy?is_verified=true" },
-    ...(STUDENT_ACCOMMODATION_HREF ? [{ label: t("footer.studentAccommodation"), href: STUDENT_ACCOMMODATION_HREF }] : []),
+    ...(STUDENT_ACCOMMODATION_HREF ? [{ label: t("mess.nav"), href: STUDENT_ACCOMMODATION_HREF }] : []),
     { label: "New developments", href: "/buy" },
   ];
 

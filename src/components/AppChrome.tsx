@@ -590,7 +590,7 @@ function TopBar({
                           uri={user.avatar_url}
                         />
                         <View style={styles.dropdownProfileInfo}>
-                          <Text numberOfLines={1} style={styles.userDropdownName}>
+                          <Text numberOfLines={2} style={styles.userDropdownName}>
                             {user.full_name || t("nav.account")}
                           </Text>
                           {user.email ? (

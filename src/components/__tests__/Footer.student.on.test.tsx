@@ -38,7 +38,7 @@ describe("Student accommodation in the footer (Mess & Seat Share on)", () => {
     mockResponsive = { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 };
     const link = render()
       .root.findAllByType(AppLink)
-      .find((n) => textOf(n).includes("Student accommodation"));
+      .find((n) => textOf(n).includes("Mess & Seats"));
     expect(link?.props.href).toBe("/mess");
   });
 

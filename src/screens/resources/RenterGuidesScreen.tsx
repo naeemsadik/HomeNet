@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { STUDENT_ACCOMMODATION_HREF } from "@/constants/navigation";
 import {
   Pressable,
   StyleSheet,
@@ -141,7 +142,7 @@ export const RENTER_DEEP_DIVE_GUIDES: RenterDeepDiveGuide[] = [
     categoryKey: "renterGuides.guide3Category",
     titleKey: "renterGuides.guide3Title",
     descKey: "renterGuides.guide3Desc",
-    href: "/rent?subtype=student",
+    href: STUDENT_ACCOMMODATION_HREF ?? "/rent",
   },
   {
     id: "guide-4",

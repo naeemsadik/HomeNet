@@ -112,7 +112,7 @@ export function ListingFeedbackModal({
       visible={visible}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "web" ? undefined : "padding"}
         style={[styles.overlay, isPhone && styles.overlayPhone]}
       >
         <Pressable

@@ -147,7 +147,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
       visible={visible}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "web" ? undefined : "padding"}
         style={s.keyboardView}
       >
         <View style={s.overlay}>

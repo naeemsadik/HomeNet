@@ -115,7 +115,6 @@ export const bn: TranslationSchema = {
     aboutHomenet: "হোমনেট সম্পর্কে",
     commercial: "বাণিজ্যিক প্রপার্টি",
     verifiedListings: "যাচাইকৃত লিস্টিং",
-    studentAccommodation: "ছাত্র আবাসন",
     sellerDashboard: "বিক্রেতা ড্যাশবোর্ড",
     copyright: "কপিরাইট © ২০২৬ HomeNet Group Limited। সর্বস্বত্ব সংরক্ষিত।",
   },
