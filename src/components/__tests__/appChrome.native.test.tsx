@@ -68,18 +68,19 @@ describe("the page chrome on a phone", () => {
     expect(flat(scroll.props.contentContainerStyle).paddingTop).toBe(layout.navHeightPhone + STATUS_BAR);
   });
 
-  it("lists the web navbar's links, Holiday Stay included, in the hamburger menu", () => {
+  it("lists the web navbar's links in the hamburger menu", () => {
     const tree = mount();
     const menuButton = tree.root.find((n) => n.props.accessibilityLabel === "Open navigation menu" && typeof n.props.onPress === "function");
     act(() => menuButton.props.onPress());
 
     const links = tree.root.findAll((n) => n.props.accessibilityRole === "link" && typeof n.props.onPress === "function");
     const labels = links.map(textOf).map((label) => label.trim());
-    for (const label of ["Buy", "Rent", "Holiday Stay", "Sold", "Insights", "Valuation", "Guides"]) {
+    for (const label of ["Buy", "Rent", "Sold", "Insights", "Valuation", "Guides"]) {
       expect(labels).toContain(label);
     }
+    expect(labels).not.toContain("Holiday Stay");
 
-    act(() => links[labels.indexOf("Holiday Stay")].props.onPress());
-    expect(router.push).toHaveBeenCalledWith("/rent?subtype=short-let");
+    act(() => links[labels.indexOf("Buy")].props.onPress());
+    expect(router.push).toHaveBeenCalledWith("/buy");
   });
 });

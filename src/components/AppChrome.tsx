@@ -11,7 +11,6 @@ import {
   BookOpen,
   Building2,
   Calculator,
-  CalendarCheck,
   Heart,
   Home,
   KeyRound,
@@ -94,12 +93,6 @@ const browseNavLinks: {
 }[] = [
   { translationKey: "nav.buy", href: "/buy", icon: Building2, key: "buy" },
   { translationKey: "nav.rent", href: "/rent", icon: KeyRound, key: "rent" },
-  {
-    translationKey: "nav.holidayStay",
-    href: "/rent?subtype=short-let",
-    icon: CalendarCheck,
-    key: "holiday",
-  },
   { translationKey: "nav.sold", href: "/sold", icon: Tag, key: "sold" },
   // Mess & Seat Share appears with its API (src/lib/features.ts).
   ...(MESS_ENABLED ? [{ translationKey: "mess.nav" as TranslationKey, href: "/mess", icon: BedDouble, key: "mess" as ActivePage }] : []),

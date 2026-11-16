@@ -2,7 +2,15 @@ import React from "react";
 import renderer, { act, type ReactTestInstance } from "react-test-renderer";
 import { StyleSheet } from "react-native";
 import { AppLink } from "@/components/ui";
-import { Footer, RESOURCE_LINKS } from "@/components/Footer";
+import {
+  Footer,
+  RESOURCE_LINKS,
+  SEARCH_LINKS,
+  LOCATION_LINKS,
+  HOMENET_LINKS,
+  PROFESSIONAL_LINKS,
+  LEGAL_LINKS,
+} from "@/components/Footer";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -73,6 +81,52 @@ describe("Footer", () => {
     expect(fullText).not.toContain("Insights");
   });
 
+  it("verifies zero links point to /about except About HomeNet, and no duplicate hrefs exist per section", () => {
+    let tree: renderer.ReactTestRenderer;
+    act(() => {
+      tree = renderer.create(<Footer />);
+    });
+
+    const allLinks = tree!.root.findAllByType(AppLink);
+    const aboutLinks = allLinks.filter((node) => node.props.href === "/about");
+
+    // Only exactly ONE link in the whole footer points to /about ("About HomeNet")
+    expect(aboutLinks).toHaveLength(1);
+    expect(textOf(aboutLinks[0])).toContain("About HomeNet");
+
+    // Dedicated routes are used instead of /about redirects
+    const hrefs = allLinks.map((node) => node.props.href);
+    expect(hrefs).toContain("/contact");
+    expect(hrefs).toContain("/help");
+    expect(hrefs).toContain("/safety");
+    expect(hrefs).toContain("/accessibility");
+    expect(hrefs).toContain("/sitemap");
+    expect(hrefs).toContain("/press");
+    expect(hrefs).toContain("/investors");
+    expect(hrefs).toContain("/tech-blog");
+
+    // Corporate destinations have dedicated links
+    const fullText = textOf(tree!.root);
+    expect(fullText).toContain("Press centre");
+    expect(fullText).toContain("Investor relations");
+    expect(fullText).toContain("Tech blog & AI models");
+
+    // "Holiday Stay" is not rendered as a top-level category in Search links
+    const searchHrefs = SEARCH_LINKS.map((l) => l.href);
+    expect(searchHrefs).not.toContain("/rent?subtype=short-let");
+
+    // Verify no duplicate hrefs exist within each individual section
+    const checkNoDuplicates = (section: readonly { href: string }[]) => {
+      const set = new Set(section.map((item) => item.href));
+      expect(set.size).toBe(section.length);
+    };
+
+    checkNoDuplicates(SEARCH_LINKS);
+    checkNoDuplicates(HOMENET_LINKS);
+    checkNoDuplicates(PROFESSIONAL_LINKS);
+    checkNoDuplicates(LEGAL_LINKS);
+  });
+
   it("renders mobile footer accordion with all 7 resource links and 44px min touch target", () => {
     mockResponsive = {
       isPhone: true,
@@ -93,7 +147,6 @@ describe("Footer", () => {
         node.props.accessibilityLabel === "Resources"
     );
     expect(resourcesHeader).toBeTruthy();
-    // The web only reads aria-*, so the footer states expanded that way.
     expect(resourcesHeader.props["aria-expanded"]).toBe(false);
 
     // Open the accordion

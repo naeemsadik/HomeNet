@@ -29,7 +29,7 @@ import { MESS_ENABLED } from "@/lib/features";
 /** "mess" opens Mess & Seat Share (/mess), its own search. */
 type MobileTab = "buy" | "rent" | "holiday" | "sold" | "mess";
 
-const MOBILE_TABS: MobileTab[] = ["buy", "rent", "holiday", "sold", ...(MESS_ENABLED ? (["mess"] as const) : [])];
+const MOBILE_TABS: MobileTab[] = ["buy", "rent", "sold", ...(MESS_ENABLED ? (["mess"] as const) : [])];
 
 export function MobileHeroSearchCard() {
   const { t } = useTranslation();
