@@ -61,7 +61,7 @@ const SECTIONS: FooterSection[] = [
       { label: "nav.sold", href: "/sold" },
       { label: "footer.commercial", href: "/buy?type=commercial" },
       { label: "footer.verifiedListings", href: "/buy?is_verified=true" },
-      { label: "footer.studentAccommodation", href: STUDENT_ACCOMMODATION_HREF },
+      ...(STUDENT_ACCOMMODATION_HREF ? [{ label: "footer.studentAccommodation" as const, href: STUDENT_ACCOMMODATION_HREF }] : []),
     ],
   },
   {

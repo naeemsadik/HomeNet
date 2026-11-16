@@ -46,8 +46,10 @@ export const RESOURCE_LINKS: readonly ResourceLinkItem[] = [
 ] as const;
 
 /**
- * Where "Student accommodation" goes. Mess & Seat Share has its own search at /mess
- * once the mess API is deployed and the feature is switched on; until then a
- * student's search is the rentals filtered to student housing.
+ * Where "Student accommodation" goes: Mess & Seat Share's own search at /mess, once the
+ * mess API is deployed and the feature is switched on. Until then there is no page for
+ * it, and no link: Browse has no student filter (it reads `subtype` only for holiday
+ * stays), so a link to /rent?subtype=student would show every rental under a label
+ * that promises students' housing.
  */
-export const STUDENT_ACCOMMODATION_HREF = MESS_ENABLED ? "/mess" : "/rent?subtype=student";
+export const STUDENT_ACCOMMODATION_HREF: string | null = MESS_ENABLED ? "/mess" : null;
