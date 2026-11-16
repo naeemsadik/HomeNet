@@ -106,7 +106,7 @@ export function PropertyForm({
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+    <KeyboardAvoidingView behavior={Platform.OS === "web" ? undefined : "padding"} style={styles.flex}>
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {/* Step Indicator */}
         <View style={styles.stepIndicator}>
