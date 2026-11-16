@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { contactLister } from "../api/messApi";
 import type { ContactChannel } from "../types/mess";
+import { MESS_DEMO } from "@/lib/features";
 
 const WHATSAPP_HOSTS = ["wa.me", "api.whatsapp.com"];
 
@@ -48,6 +49,11 @@ export function useContactLister(listing: { id: string; title: string }, campusN
   const [error, setError] = useState<string | null>(null);
 
   const reveal = async (channel: ContactChannel) => {
+    if (MESS_DEMO) {
+      // A sample listing has no real person behind it: never open the dialler or WhatsApp.
+      setError(t("mess.demo.contact"));
+      return;
+    }
     setPending(channel);
     setError(null);
     try {

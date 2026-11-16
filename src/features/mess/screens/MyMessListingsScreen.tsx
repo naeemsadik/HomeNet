@@ -18,6 +18,7 @@ import { useConfirmAvailable, useSetSeatStatus } from "../hooks/useMessMutations
 import { useMyMessListings } from "../hooks/useMessQueries";
 import type { MyMessListing, Seat, SeatStatus } from "../types/mess";
 import { daysSince, formatTaka, formatTakaRange } from "../utils/format";
+import { DemoNotice } from "../components/DemoNotice";
 
 /** Confirmations older than this get the reminder styling, ahead of the 30-day cut-off. */
 const CONFIRM_REMINDER_DAYS = 14;
@@ -35,6 +36,7 @@ export function MyMessListingsScreen() {
   return (
     <SellerShell activeNav="seats" title={t("mess.my.title")} showSearch={false}>
       <PageMeta title={t("mess.meta.myTitle")} noindex />
+      <DemoNotice />
       <View style={[styles.page, isPhone && styles.pagePhone]}>
         <View style={styles.header}>
           <View style={styles.headerText}>

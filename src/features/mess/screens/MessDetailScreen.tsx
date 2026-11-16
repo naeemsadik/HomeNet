@@ -51,6 +51,8 @@ import type { MediaLabel, MessDetail, ReportReason } from "../types/mess";
 import { cheapestAllIn } from "../utils/allInCost";
 import { formatDate, formatDistance, formatTakaRange } from "../utils/format";
 import { formatClock } from "../utils/time";
+import { DemoNotice } from "../components/DemoNotice";
+import { MESS_DEMO } from "@/lib/features";
 
 const REPORT_REASONS: Record<ReportReasonKey, ReportReason> = {
   fakeListing: "fake_listing",
@@ -71,6 +73,7 @@ export function MessDetailScreen({ id }: { id: string | undefined }) {
   return (
     <AppChrome active="mess">
       <PageMeta title={t("mess.meta.browseTitle")} noindex />
+      <DemoNotice />
       <View style={styles.state}>
         {query.isError ? (
           <>
@@ -168,8 +171,9 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
         description={priceText ? t("mess.meta.detailDescription", { title: detail.title, price: priceText }) : undefined}
         image={cover ? cdnImage(cover.url, 1200) : undefined}
         canonicalPath={`/mess/${detail.id}`}
-        noindex={detail.status !== "active" ? true : undefined}
+        noindex={MESS_DEMO || detail.status !== "active" ? true : undefined}
       />
+      <DemoNotice />
 
       <View style={[styles.page, commandDeck || (!wide && contact) ? styles.pageWithFloating : null]}>
         <View style={styles.topBar}>
