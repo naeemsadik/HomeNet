@@ -53,11 +53,11 @@ describe("MobileHeroSearchCard", () => {
       root.render(<MobileHeroSearchCard />);
     });
 
-    // Segmented tabs (clean top-level categories without Holiday Stay)
+    // Segmented tabs
     expect(container.textContent).toContain("Buy");
     expect(container.textContent).toContain("Rent");
+    expect(container.textContent).toContain("Holiday stay");
     expect(container.textContent).toContain("Sold");
-    expect(container.querySelector('[aria-label="Holiday stay"]')).toBeNull();
 
     // Natural-language search placeholder
     expect(container.textContent).toContain("Search by area, project, or keyword");
@@ -83,11 +83,11 @@ describe("MobileHeroSearchCard", () => {
       root.render(<MobileHeroSearchCard />);
     });
 
-    // Segmented tabs in Bengali (without Holiday stay)
+    // Segmented tabs in Bengali
     expect(container.textContent).toContain("কিনুন");
     expect(container.textContent).toContain("ভাড়া");
+    expect(container.textContent).toContain("হলিডে স্টে");
     expect(container.textContent).toContain("বিক্রি হয়েছে");
-    expect(container.querySelector('[aria-label="হলিডে স্টে"]')).toBeNull();
 
     // Mobile search button in Bengali displays "অনুসন্ধান"
     expect(container.textContent).toContain("অনুসন্ধান");
@@ -102,28 +102,28 @@ describe("MobileHeroSearchCard", () => {
     });
   });
 
-  it("routes to rent search when Rent tab is active", async () => {
+  it("routes to holiday stay search when Holiday Stay tab is active", async () => {
     const root = createRoot(container);
 
     await act(async () => {
       root.render(<MobileHeroSearchCard />);
     });
 
-    const rentTab = container.querySelector('[aria-label="Rent"]');
-    expect(rentTab).toBeTruthy();
+    const holidayTab = container.querySelector('[aria-label="Holiday stay"]');
+    expect(holidayTab).toBeTruthy();
 
     await act(async () => {
-      rentTab?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      holidayTab?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    const primaryBtn = container.querySelector('[aria-label="Search properties for rent"]');
+    const primaryBtn = container.querySelector('[aria-label="Search holiday stays"]');
     expect(primaryBtn).toBeTruthy();
 
     await act(async () => {
       primaryBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(router.push).toHaveBeenCalledWith("/rent?listing_type=rent");
+    expect(router.push).toHaveBeenCalledWith("/rent?subtype=short-let&listing_type=short_let");
 
     await act(async () => {
       root.unmount();

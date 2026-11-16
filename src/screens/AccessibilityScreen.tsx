@@ -3,7 +3,6 @@ import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { Eyebrow, FeatureCard } from "@/components/ui";
 import {
-  CheckCircle2,
   Compass,
   Eye,
   Languages,

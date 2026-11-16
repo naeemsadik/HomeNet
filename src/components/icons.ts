@@ -119,7 +119,6 @@ export type IconName =
   | "ShieldCheck"
   | "Sliders"
   | "SlidersHorizontal"
-  | "Sparkles"
   | "Star"
   | "Store"
   | "Tag"

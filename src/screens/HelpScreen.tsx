@@ -137,7 +137,7 @@ export function HelpScreen() {
                         <Pressable
                           accessibilityRole="button"
                           accessibilityLabel={question}
-                          accessibilityState={{ expanded: isOpen }}
+                          aria-expanded={isOpen}
                           onPress={() => toggleFaq(itemKey)}
                           style={[styles.faqTrigger, webPointer]}
                         >

@@ -16,6 +16,7 @@ interface SearchTabsProps {
 const TABS: { key: SearchTabType; translationKey: TranslationKey }[] = [
   { key: "buy", translationKey: "hero.tabs.buy" },
   { key: "rent", translationKey: "hero.tabs.rent" },
+  { key: "short-let", translationKey: "hero.tabs.shortLet" },
   // Sold is a research intent, not a buying one, it trails the live tabs.
   { key: "sold", translationKey: "hero.tabs.sold" },
   // Shown with the mess module (src/lib/features.ts).

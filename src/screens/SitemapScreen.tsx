@@ -2,15 +2,8 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { AppLink, Eyebrow } from "@/components/ui";
-import {
-  BookOpen,
-  Building2,
-  Compass,
-  FileCheck2,
-  KeyRound,
-  ShieldCheck,
-  TrendingUp,
-} from "@/components/icons";
+
+
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts, layout, radius, shadow, webPointer } from "@/theme";

@@ -10,7 +10,6 @@ import {
   Globe,
   Mail,
   ShieldCheck,
-  TrendingUp,
 } from "@/components/icons";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";

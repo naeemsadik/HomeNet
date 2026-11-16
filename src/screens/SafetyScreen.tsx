@@ -8,8 +8,6 @@ import {
   CheckCircle2,
   Eye,
   FileCheck2,
-  Lock,
-  Mail,
   ShieldAlert,
   ShieldCheck,
   type LucideIcon,

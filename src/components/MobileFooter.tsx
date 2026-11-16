@@ -7,7 +7,6 @@ import { useTranslation, type TranslationKey } from "@/i18n";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import {
   RESOURCE_LINKS,
-  SEARCH_LINKS,
   getSearchLinks,
   LOCATION_LINKS,
   HOMENET_LINKS,

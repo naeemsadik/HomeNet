@@ -56,7 +56,7 @@ describe("HelpScreen", () => {
     expect(fullText).toContain(en.helpCenter.cat3Title);
 
     const faqButtons = tree!.root.findAll(
-      (node) => node.props.accessibilityRole === "button" && node.props.accessibilityState
+      (node) => node.props.accessibilityRole === "button" && typeof node.props["aria-expanded"] === "boolean"
     );
     expect(faqButtons.length).toBeGreaterThan(0);
   });
