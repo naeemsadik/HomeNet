@@ -4,7 +4,7 @@ import { useTranslation } from "@/i18n";
 
 const FEATURES_CONFIG = [
   { icon: "Rocket" as const, titleKey: "professionals.boosting.feature1Title", descKey: "professionals.boosting.feature1Desc" },
-  { icon: "Sparkles" as const, titleKey: "professionals.boosting.feature2Title", descKey: "professionals.boosting.feature2Desc" },
+  { icon: "Zap" as const, titleKey: "professionals.boosting.feature2Title", descKey: "professionals.boosting.feature2Desc" },
   { icon: "BadgeCheck" as const, titleKey: "professionals.boosting.feature3Title", descKey: "professionals.boosting.feature3Desc" },
 ] as const;
 

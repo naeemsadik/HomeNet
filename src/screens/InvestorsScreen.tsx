@@ -9,8 +9,8 @@ import {
   FileCheck2,
   Mail,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
+  Zap,
 } from "@/components/icons";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
@@ -31,7 +31,7 @@ export function InvestorsScreen() {
       desc: t("investors.pillar1Desc"),
     },
     {
-      icon: Sparkles,
+      icon: Zap,
       title: t("investors.pillar2Title"),
       desc: t("investors.pillar2Desc"),
     },
