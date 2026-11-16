@@ -29,7 +29,9 @@ const WORDMARK_RATIO = 2706 / 383;
 export function BrandWordmark({ height, tone = "dark" }: { height: number; tone?: Tone }) {
   const fill = tone === "light" ? "#FFFFFF" : colorTokens.brand;
   return (
-    <Svg width={height * WORDMARK_RATIO} height={height} viewBox="858 310 2706 383">
+    // overflow visible: Android clips an Svg to its box, and a rounding error of a pixel or two in
+    // that box cut the tops off the letters in the phone header.
+    <Svg width={height * WORDMARK_RATIO} height={height} style={{ overflow: "visible" }} viewBox="858 310 2706 383">
       <Path d={HOMENET} fill={fill} fillRule="evenodd" />
       <Path d={BD} fill={fill} fillRule="evenodd" />
     </Svg>

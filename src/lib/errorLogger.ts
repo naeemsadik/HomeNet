@@ -39,15 +39,16 @@ export function reportError(
     context,
   };
 
-  // 1. In development or local runs, log full detailed diagnostic info
+  // Always logged. This used to log only in development and on a server, so a crash in the
+  // installed Android app left no trace anywhere. A release build's console.error reaches
+  // `adb logcat` (tag ReactNativeJS) and a browser's console.
   if (__DEV__) {
     console.error("[HomeNet Error Report]", errorReport);
-  } else if (typeof window === "undefined") {
-    // 2. Server-side / Node / SSR environment: log structured JSON for server logs
+  } else {
     try {
       console.error(JSON.stringify({ level: "error", ...errorReport }));
     } catch {
-      console.error("[HomeNet Server Error]", errorReport.message);
+      console.error("[HomeNet Error]", errorReport.message);
     }
   }
 
