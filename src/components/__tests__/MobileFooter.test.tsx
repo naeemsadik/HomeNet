@@ -84,4 +84,32 @@ describe("MobileFooter", () => {
 
     await act(async () => root.unmount());
   });
+
+  it("renders all 7 resource links when opening the Resources section", async () => {
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<MobileFooter />);
+    });
+    await open("Resources");
+
+    const hrefs = Array.from(container.querySelectorAll("a")).map((a) => a.getAttribute("href"));
+    expect(hrefs).toContain("/resources/stamp-duty-tax-guide");
+    expect(hrefs).toContain("/resources/property-price-index");
+    expect(hrefs).toContain("/resources/property-valuation-guide");
+    expect(hrefs).toContain("/resources/property-news-trends");
+    expect(hrefs).toContain("/resources/buyer-guides");
+    expect(hrefs).toContain("/resources/seller-guides");
+    expect(hrefs).toContain("/resources/renter-guides");
+
+    // Old stale links must not be present
+    expect(hrefs).not.toContain("/guides");
+    expect(hrefs).not.toContain("/market");
+    expect(hrefs).not.toContain("/instant-valuation");
+
+    // Excluded links must not be present
+    expect(container.textContent).not.toContain("Landlord Guides");
+    expect(container.textContent).not.toContain("Mortgage Calculator");
+
+    await act(async () => root.unmount());
+  });
 });

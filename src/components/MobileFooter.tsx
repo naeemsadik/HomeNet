@@ -6,6 +6,7 @@ import { SUPPORT_EMAIL } from "@/content/legal";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { colorTokens, fonts, webPointer } from "@/theme";
+import { RESOURCE_LINKS } from "@/constants/navigation";
 
 interface FooterLink {
   /** A translation key, or a plain name (areas are place names, the same in both languages). */
@@ -45,11 +46,10 @@ const SECTIONS: FooterSection[] = [
   {
     key: "resources",
     title: "footer.resources",
-    links: [
-      { label: "nav.guides", href: "/guides" },
-      { label: "nav.insights", href: "/market" },
-      { label: "nav.valuation", href: "/instant-valuation" },
-    ],
+    links: RESOURCE_LINKS.map((link) => ({
+      label: link.labelKey,
+      href: link.href,
+    })),
   },
   {
     key: "search",
@@ -134,7 +134,12 @@ const Section = memo(function Section({
       {open ? (
         <View style={styles.links}>
           {section.links.map((link) => (
-            <AppLink href={link.href} key={`${section.key}-${link.href}-${link.label}`} style={styles.linkRow}>
+            <AppLink
+              href={link.href}
+              key={`${section.key}-${link.href}-${link.label}`}
+              style={styles.linkRow}
+              onPress={() => onToggle(section.key)}
+            >
               <Text style={styles.linkText}>{isKey(link.label) ? t(link.label) : link.label}</Text>
             </AppLink>
           ))}
