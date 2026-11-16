@@ -93,3 +93,10 @@ export const OWNER_UNARCHIVE_ENABLED = false;
  * from builds without it.
  */
 export const MESS_ENABLED = process.env.EXPO_PUBLIC_MESS_ENABLED === "true";
+
+/**
+ * Mess & Seat Share is showing sample listings (EXPO_PUBLIC_MESS_FIXTURES=true) rather
+ * than real ones. Every /mess page then says so, and the contact buttons do not dial or
+ * message anyone: the people and numbers in the samples are made up.
+ */
+export const MESS_DEMO = MESS_ENABLED && process.env.EXPO_PUBLIC_MESS_FIXTURES === "true";

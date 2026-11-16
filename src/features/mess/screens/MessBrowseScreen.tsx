@@ -25,6 +25,8 @@ import { campusLabel, findCampus, useUniversities } from "../hooks/useUniversiti
 import type { MessCard, MessSort, RuleKey } from "../types/mess";
 import { clearedFilters, countActiveFilters } from "../utils/filterParams";
 import { ruleMatchesFilters } from "../utils/rules";
+import { DemoNotice } from "../components/DemoNotice";
+import { MESS_DEMO } from "@/lib/features";
 
 const SORTS: { value: MessSort; labelKey: TranslationKey; needsCampus?: boolean }[] = [
   { value: "walk_asc", labelKey: "mess.filters.sortWalk", needsCampus: true },
@@ -72,7 +74,8 @@ export function MessBrowseScreen() {
 
   return (
     <AppChrome active="mess">
-      <PageMeta title={t("mess.meta.browseTitle")} description={t("mess.meta.browseDescription")} />
+      <PageMeta title={t("mess.meta.browseTitle")} description={t("mess.meta.browseDescription")} noindex={MESS_DEMO ? true : undefined} />
+      <DemoNotice />
 
       <View style={styles.page}>
         <View style={[styles.header, isPhone && styles.headerPhone]}>

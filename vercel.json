@@ -5,6 +5,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": null,
+  "build": {
+    "env": {
+      "EXPO_PUBLIC_MESS_ENABLED": "true",
+      "EXPO_PUBLIC_MESS_FIXTURES": "true"
+    }
+  },
   "redirects": [
     {
       "source": "/valuation",

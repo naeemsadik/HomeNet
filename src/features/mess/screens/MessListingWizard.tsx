@@ -24,6 +24,7 @@ import { missingPhotos, STEP_FIELDS, validateStep, type StepIssue } from "../sch
 import { useMessWizardStore } from "../stores/messWizardStore";
 import type { MediaLabel, MessMedia } from "../types/mess";
 import { emptyForm, formFromDetail, WIZARD_STEPS, dtoForStep, type MessListingForm, type WizardStep } from "../utils/wizardForm";
+import { DemoNotice } from "../components/DemoNotice";
 
 const STEP_LABELS: Record<WizardStep, TranslationKey> = {
   place: "mess.wizard.steps.place",
@@ -93,6 +94,7 @@ export function MessListingWizard({ editId }: { editId?: string }) {
   return (
     <AppChrome active="post">
       <PageMeta title={editId ? t("mess.meta.editTitle") : t("mess.meta.createTitle")} noindex />
+      <DemoNotice />
       {start ? (
         <WizardForm
           key={`${editId ?? "new"}-${attempt}`}

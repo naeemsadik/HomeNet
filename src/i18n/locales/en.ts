@@ -2179,6 +2179,11 @@ export const en = {
   mess: {
     nav: "Mess & Seats",
     tab: "Mess & Seats",
+    demo: {
+      title: "Sample listings",
+      notice: "This is a preview of Mess & Seat Share. The listings, photos and phone numbers are samples, not real, and nothing you post here is saved or shown to anyone. Real listings are coming soon.",
+      contact: "This is a sample listing, so there is no real number to call.",
+    },
     meta: {
       browseTitle: "Mess & seat share near your campus | HomeNet",
       browseDescription: "Find a mess seat or shared room near your university in Dhaka. See the all-in monthly cost, walking time to campus and house rules before you call.",
