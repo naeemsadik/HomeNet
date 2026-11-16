@@ -28,6 +28,7 @@ import { type PropertyDetail, usePropertyDetail, useSimilarProperties } from "..
 import { useSavedStore } from "@/stores/savedStore";
 import { useAuthStore } from "@/stores/authStore";
 import { hasPermission } from "@/lib/permissions";
+import { listingPath, opensOnMessPage } from "@/lib/listingPath";
 import { toApiError } from "@/services/apiClient";
 import { styles } from "./PropertyDetailScreen.styles";
 import { AdminPropertyCommandDeck } from "../components/AdminPropertyCommandDeck";
@@ -64,6 +65,12 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   const id = propertyId;
   const { isPhone, isTablet } = useResponsive();
   const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId, initialDetail);
+  // A mess listing has its own page, with seats, bills and walking time, where the
+  // lister's number is revealed only to a signed-in seeker (PRD D6). Send it there.
+  const messPage = apiDetail && opensOnMessPage(apiDetail) ? listingPath(apiDetail) : null;
+  useEffect(() => {
+    if (messPage) router.replace(messPage as never);
+  }, [messPage]);
   const {
     data: similarProperties = [],
     error: similarError,
@@ -368,7 +375,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   const googleMapsEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapLocationQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   const googleMapsExternalUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapLocationQuery)}`;
 
-  if (isLoading && !property) {
+  if ((isLoading && !property) || messPage) {
     return (
       <AppChrome active="property">
         {/* A listing the build could not fetch exports as this state. A spinner

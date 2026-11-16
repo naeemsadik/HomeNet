@@ -1,3 +1,4 @@
+import { currentState } from "@/lib/a11yState";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   ArrowLeft,
@@ -483,7 +484,8 @@ export function PropertyCreateWizard() {
                     <Pressable
                       accessibilityLabel={st.title}
                       accessibilityRole="button"
-                      accessibilityState={{ disabled: !isDone, selected: isCurrent }}
+                      aria-disabled={!isDone}
+                      {...currentState(isCurrent, "step")}
                       disabled={!isDone}
                       onPress={() => store.setCurrentStep(st.num as 1 | 2 | 3 | 4 | 5)}
                       style={[

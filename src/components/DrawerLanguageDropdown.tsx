@@ -23,7 +23,7 @@ export function DrawerLanguageDropdown() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t("common.languageSelector", { code: activeCode })}
-        accessibilityState={{ expanded: open }}
+        aria-expanded={open}
         onPress={() => setOpen((prev) => !prev)}
         style={[styles.trigger, webPointer]}
       >

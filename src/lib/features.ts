@@ -80,3 +80,16 @@ export function isSellerSectionOn(key: string): boolean {
  * archive; the screen's restore code is still there.
  */
 export const OWNER_UNARCHIVE_ENABLED = false;
+
+/**
+ * Mess & Seat Share (/mess). Needs the mess API (PRD v1.0, section 2.3), which
+ * is not deployed yet. Off: no navigation entry, and every /mess page is the
+ * not-found page. To switch it on, set EXPO_PUBLIC_MESS_ENABLED=true and
+ * redeploy: the web build is static, so the value is fixed at build time.
+ *
+ * EXPO_PUBLIC_MESS_FIXTURES=true answers the mess API from made-up demo data
+ * instead, for development before the API exists. It is read in
+ * src/features/mess/api/messApi.ts, where the bundler can drop the demo data
+ * from builds without it.
+ */
+export const MESS_ENABLED = process.env.EXPO_PUBLIC_MESS_ENABLED === "true";

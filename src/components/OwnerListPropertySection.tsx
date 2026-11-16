@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import React, { useMemo, useState } from "react";
 import {
   Modal,
@@ -9,13 +10,32 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useTranslation } from "@/i18n";
-import { ArrowRight, BadgeCheck, Building2, CalendarCheck, Car, Check, Compass, FileCheck2, Home, KeyRound, LayoutDashboard, ShieldCheck, TrendingUp, X, FileText } from "@/components/icons";
+import {
+  ArrowRight,
+  BadgeCheck,
+  BedDouble,
+  Building2,
+  CalendarCheck,
+  Car,
+  Check,
+  Compass,
+  FileCheck2,
+  FileText,
+  Home,
+  KeyRound,
+  LayoutDashboard,
+  ShieldCheck,
+  TrendingUp,
+  X,
+} from "@/components/icons";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { usePropertyWizardStore } from "@/features/property/stores/propertyWizardStore";
 import { AiListingSheet } from "@/features/property/components/AiListingSheet";
 import type { AiParsedProperty } from "@/features/property/types/aiListing";
 import { AppButton } from "@/components/ui";
+import { MESS_ENABLED } from "@/lib/features";
+import { startSeatListing } from "@/lib/startListing";
 import { colorTokens, colors, webPointer } from "@/theme";
 import { styles } from "./OwnerListPropertySection.styles";
 
@@ -314,6 +334,10 @@ export function OwnerListPropertySection() {
                     icon={TrendingUp}
                     variant="ghost"
                   />
+
+                  {MESS_ENABLED ? (
+                    <AppButton label={t("mess.browse.listSeat")} onPress={startSeatListing} icon={BedDouble} variant="ghost" />
+                  ) : null}
                 </View>
 
                 {/* Clean Micro-Trust Points */}
@@ -507,7 +531,7 @@ export function OwnerListPropertySection() {
                       key={intent.id}
                       accessibilityLabel={`${intent.label}, ${intent.description}`}
                       accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
+                      {...pressedState(isSelected)}
                       onPress={() => setSelectedIntentId(intent.id)}
                       // @ts-ignore web hover
                       onMouseEnter={() => setHoveredIntentId(intent.id)}

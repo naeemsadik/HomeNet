@@ -54,6 +54,9 @@ const STATIC_PAGES = [
   { path: "/resources/renter-guides", file: "app/resources/renter-guides.tsx", changefreq: "monthly", priority: "0.8" },
   { path: "/privacy", file: "app/privacy.tsx", changefreq: "yearly", priority: "0.2", lastmod: LEGAL_UPDATED },
   { path: "/terms", file: "app/terms.tsx", changefreq: "yearly", priority: "0.2", lastmod: LEGAL_UPDATED },
+  // Mess & Seat Share: listed only when the build exported it as a real page.
+  // With MESS_ENABLED off it is the not-found page (noindex) and is left out.
+  { path: "/mess", file: "app/mess/index.tsx", changefreq: "daily", priority: "0.8", onlyIfIndexable: "mess/index.html" },
 ];
 // /buy/<area> and /rent/<area>, one pair per area in src/content/areas.ts.
 const AREA_INTENTS = ["buy", "rent"];
@@ -116,6 +119,13 @@ function guides() {
     const date = body.match(/updatedAt:\s*"([^"]+)"/)?.[1] ?? body.match(/publishedAt:\s*"([^"]+)"/)?.[1];
     return { slug: match[1], lastmod: isoDay(date) };
   });
+}
+
+/** Whether an exported page exists and does not ask search engines to skip it. */
+function indexable(...segments) {
+  const file = resolve(DIST, ...segments);
+  if (!existsSync(file)) return false;
+  return !/<meta[^>]*name="robots"[^>]*content="[^"]*noindex/i.test(readFileSync(file, "utf8"));
 }
 
 const NON_LISTING_FILES = new Set(["[id].html", "create.html", "edit.html"]);
@@ -186,7 +196,8 @@ function main() {
   if (listings.length === 0) console.warn("WARNING: no listing pages were exported, so the sitemap lists none.");
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-  for (const page of STATIC_PAGES) xml += urlEntry(page.path, { ...page, lastmod: page.lastmod ?? gitDay(page.file) });
+  const staticPages = STATIC_PAGES.filter((page) => !page.onlyIfIndexable || indexable(page.onlyIfIndexable));
+  for (const page of staticPages) xml += urlEntry(page.path, { ...page, lastmod: page.lastmod ?? gitDay(page.file) });
 
   let areaPages = 0;
   let unknown = 0;
@@ -219,7 +230,7 @@ function main() {
 
   writeFileSync(resolve(DIST, "sitemap.xml"), xml, "utf8");
   console.log(
-    `sitemap: ${STATIC_PAGES.length} pages, ${areaPages} area pages (${empty.length} with no listings left out` +
+    `sitemap: ${staticPages.length} pages, ${areaPages} area pages (${empty.length} with no listings left out` +
       `${unknown ? `, ${unknown} kept without build-time data` : ""}), ${guideList.length} guides, ${listings.length} listings`,
   );
 }
