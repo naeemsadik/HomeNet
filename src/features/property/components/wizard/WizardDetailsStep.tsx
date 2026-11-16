@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import { Check } from "@/components/icons";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
@@ -53,7 +54,7 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
               price is kept underneath and comes back when the tick is removed. */}
           <TextInput
             accessibilityLabel={t("wizard.details.priceLabel", { suffix: priceSuffix })}
-            accessibilityState={{ disabled: onRequest }}
+            aria-disabled={onRequest}
             editable={!onRequest}
             keyboardType="numeric"
             onChangeText={(v) => store.setDetails({ price: v })}
@@ -72,7 +73,6 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
             accessibilityLabel={priceOnRequestLabel(language)}
             accessibilityHint={t("wizard.details.contactForPriceHint")}
             accessibilityRole="checkbox"
-            accessibilityState={{ checked: onRequest }}
             aria-checked={onRequest}
             onPress={() => store.setDetails({ priceOnRequest: !onRequest })}
             style={({ pressed }) => [styles.priceOnRequestRow, webPointer, pressed && styles.pressed]}
@@ -209,7 +209,7 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
                 key={item.key}
                 accessibilityLabel={item.label}
                 accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
+                {...pressedState(isSelected)}
                 onPress={() => store.toggleAmenity(item.key)}
                 style={[
                   styles.amenityPill,
@@ -258,7 +258,6 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
         <Pressable
           accessibilityLabel={t("wizard.details.sameAsPhone")}
           accessibilityRole="checkbox"
-          accessibilityState={{ checked: sameAsPhone }}
           aria-checked={sameAsPhone}
           onPress={handleToggleSameAsPhone}
           style={({ pressed }) => [styles.sameAsPhoneRow, webPointer, pressed && styles.pressed]}
@@ -271,7 +270,7 @@ export function WizardDetailsStep({ activeTypeConfig }: { activeTypeConfig: Prop
 
         <TextInput
           accessibilityLabel={t("wizard.details.whatsappLabel")}
-          accessibilityState={{ disabled: sameAsPhone }}
+          aria-disabled={sameAsPhone}
           editable={!sameAsPhone}
           keyboardType="phone-pad"
           onChangeText={(whatsappNumber) => store.setContact({ whatsappNumber })}

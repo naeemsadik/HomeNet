@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import { Check, Plus } from "@/components/icons";
 import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
@@ -71,7 +72,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                 key={typeKey}
                 accessibilityLabel={cfg.label}
                 accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
+                {...pressedState(isSelected)}
                 onPress={() => {
                   setOtherPicked(false);
                   store.setBasics({
@@ -163,7 +164,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
               accessibilityHint={t("wizard.basics.otherSubtypeHint")}
               accessibilityLabel={t("wizard.basics.otherSubtypeAria")}
               accessibilityRole="button"
-              accessibilityState={{ selected: showOther }}
+              {...pressedState(showOther)}
               onPress={() => {
                 setOtherPicked(true);
                 // Keep what is already typed; leave the field empty after a listed option.

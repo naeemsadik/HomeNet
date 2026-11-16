@@ -145,7 +145,7 @@ export function ListerTypeSection() {
               key={key}
               accessibilityLabel={`${label}. ${hint}`}
               accessibilityRole="radio"
-              accessibilityState={{ selected: active, disabled: profile.isLoading }}
+              aria-checked={active} aria-disabled={profile.isLoading}
               // react-native-web ignores accessibilityState.checked.
               {...({ "aria-checked": active } as object)}
               // Until the saved choice arrives, a pick would be overwritten by it.

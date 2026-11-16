@@ -5,6 +5,7 @@ import { PropertyStatusBadge } from "./StatusBadge";
 import type { PropertyAdminItem } from "../types/admin";
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { isPriceOnRequest, priceOnRequestLabel, useTranslation } from "@/i18n";
+import { isMessSubtype } from "@/lib/listingPath";
 
 interface PropertyAdminItemProps {
   item: PropertyAdminItem;
@@ -40,6 +41,9 @@ export function PropertyAdminItemRow({
         </View>
         <View style={styles.info}>
           <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
+          {isMessSubtype(item.subtype) ? (
+            <Text style={styles.kindTag}>{t(item.subtype?.trim().toLowerCase() === "seat_share" ? "mess.subtype.seat_share" : "mess.subtype.mess")}</Text>
+          ) : null}
           <NoTranslateText style={styles.price}>
             {isPriceOnRequest(item.price) ? priceOnRequestLabel(language) : `${item.price_currency} ${item.price.toLocaleString()}`}
           </NoTranslateText>
@@ -137,6 +141,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fontTokens.bold,
     color: colorTokens.textPrimary,
+  },
+  kindTag: {
+    alignSelf: "flex-start",
+    fontSize: 11,
+    fontFamily: fontTokens.semiBold,
+    color: colorTokens.brandText,
+    backgroundColor: colorTokens.brandSurface,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
   price: {
     fontSize: 13,

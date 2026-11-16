@@ -76,6 +76,8 @@ export interface AdminStatsResponse {
 export interface PropertyAdminFilters {
   status?: string;
   search?: string;
+  /** Comma-separated subtypes, e.g. "mess,seat_share" for mess listings only. */
+  subtype?: string;
   page?: number;
   limit?: number;
 }

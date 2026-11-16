@@ -1,10 +1,30 @@
+import { currentState } from "@/lib/a11yState";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, colorTokens, layout, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { AdminContextBar, ADMIN_BAR_HEIGHT } from "@/components/AdminContextBar";
 import { hasAnyAdminPermission } from "@/lib/permissions";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
-import { Bell, BookOpen, Building2, Calculator, CalendarCheck, Heart, Home, KeyRound, LogOut, Menu, Plus, Search, Tag, TrendingUp, User, X, type LucideIcon } from "@/components/icons";
+import {
+  BedDouble,
+  Bell,
+  BookOpen,
+  Building2,
+  Calculator,
+  CalendarCheck,
+  Heart,
+  Home,
+  KeyRound,
+  LogOut,
+  Menu,
+  Plus,
+  Search,
+  Tag,
+  TrendingUp,
+  User,
+  X,
+  type LucideIcon,
+} from "@/components/icons";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   Modal,
@@ -32,6 +52,7 @@ import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 import { styles } from "./AppChrome.styles";
 import { LiveText } from "@/components/LiveText";
 import { startListing } from "@/lib/startListing";
+import { MESS_ENABLED } from "@/lib/features";
 
 export type ActivePage =
   | "home"
@@ -52,7 +73,8 @@ export type ActivePage =
   | "messages"
   | "enquiries"
   | "valuation"
-  | "guides";
+  | "guides"
+  | "mess";
 
 /** Below this width the phone bar is used (matches the phone home and search screens). */
 export const isMobileWidth = (width: number) => width < 768;
@@ -79,6 +101,8 @@ const browseNavLinks: {
     key: "holiday",
   },
   { translationKey: "nav.sold", href: "/sold", icon: Tag, key: "sold" },
+  // Mess & Seat Share appears with its API (src/lib/features.ts).
+  ...(MESS_ENABLED ? [{ translationKey: "mess.nav" as TranslationKey, href: "/mess", icon: BedDouble, key: "mess" as ActivePage }] : []),
 ];
 
 const sidebarNavConfig: {
@@ -231,7 +255,7 @@ function TopNavAnchor({
     >
       <Pressable
         accessibilityRole="link"
-        accessibilityState={{ selected }}
+        {...currentState(selected)}
         onHoverIn={() => setHovered(true)}
         onHoverOut={() => setHovered(false)}
       >
@@ -443,7 +467,7 @@ function TopBar({
                     pressed && { opacity: 0.8 },
                   ]}
                   accessibilityRole="link"
-                  accessibilityState={{ selected: isSelected }}
+                  {...currentState(isSelected)}
                 >
                   {content}
                 </Pressable>
@@ -706,7 +730,7 @@ export function MobileNav({ active }: { active?: ActivePage }) {
     authGated: boolean;
   }[] = [
     { translationKey: "nav.home", href: "/", icon: Home, selected: active === "home", authGated: false },
-    { translationKey: "nav.search", href: "/buy", icon: Search, selected: active === "buy" || active === "rent" || active === "holiday" || active === "sold" || active === "search" || active === "property" || active === "market", authGated: false },
+    { translationKey: "nav.search", href: "/buy", icon: Search, selected: active === "buy" || active === "rent" || active === "holiday" || active === "sold" || active === "search" || active === "property" || active === "market" || active === "mess", authGated: false },
     { translationKey: "nav.post", href: "/property/create", icon: Plus, selected: active === "post", authGated: true },
     { translationKey: "nav.saved", href: "/saved", icon: Heart, selected: active === "saved", authGated: true },
     { translationKey: "nav.account", href: "/profile", icon: User, selected: active === "profile", authGated: true },
@@ -739,7 +763,7 @@ export function MobileNav({ active }: { active?: ActivePage }) {
               ]}
               accessibilityRole="link"
               accessibilityLabel={label}
-              accessibilityState={{ selected }}
+              {...currentState(selected)}
             >
               {/* The current tab sits on a tinted pill (Material 3's active indicator). */}
               <View style={[styles.mobileNavIndicator, selected && styles.mobileNavIndicatorActive]}>

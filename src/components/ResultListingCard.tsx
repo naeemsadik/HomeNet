@@ -17,6 +17,7 @@ import {
 } from "@/components/icons";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { isMessSubtype, listingPath } from "@/lib/listingPath";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import {
   formatLocalizedNumber,
@@ -97,11 +98,13 @@ function ResultListingCardComponent({
 
   const lister = listerDisplay(property.user, t("search.results.owner"));
   const ownerName = lister.name;
-  const ownerPhone = contactPhone(property);
-  const whatsappLink = whatsappUrl(
-    property.whatsapp_number,
-    t("search.results.whatsappMessage", { title: property.title }),
-  );
+  // A mess lister's number is shown only after a signed-in, rate-limited reveal on
+  // the listing's own page (PRD D6), never on a search card.
+  const isMess = isMessSubtype(property.subtype);
+  const ownerPhone = isMess ? null : contactPhone(property);
+  const whatsappLink = isMess
+    ? null
+    : whatsappUrl(property.whatsapp_number, t("search.results.whatsappMessage", { title: property.title }));
   const initials = lister.name
     .split(/\s+/)
     .map((w) => w[0])
@@ -111,7 +114,7 @@ function ResultListingCardComponent({
     .toUpperCase();
 
   const open = () => {
-    if (property.id) router.push(`/property/${property.id}` as never);
+    if (property.id) router.push(listingPath(property) as never);
   };
 
   const chat = () => {

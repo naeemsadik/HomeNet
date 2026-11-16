@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import {
   ArrowLeft,
   BookOpen,
@@ -292,7 +293,7 @@ export function GuidesArchiveScreen() {
                   ]}
                   accessibilityRole="button"
                   accessibilityLabel={t("guides.archive.filterByTabAria", { tab: tabLabel })}
-                  accessibilityState={{ selected: isActive }}
+                  {...pressedState(isActive)}
                 >
                   <Text
                     style={[

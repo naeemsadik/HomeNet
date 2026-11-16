@@ -341,7 +341,7 @@ export function RenterGuidesScreen() {
                   <Pressable
                     key={item.id}
                     accessibilityRole="checkbox"
-                    accessibilityState={{ checked: isChecked }}
+                    aria-checked={isChecked}
                     onPress={() => toggleCheck(idx)}
                     style={[
                       styles.checkRow,
@@ -508,7 +508,7 @@ export function RenterGuidesScreen() {
                 <View key={index} style={styles.faqCard}>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityState={{ expanded: isExpanded }}
+                    aria-expanded={isExpanded}
                     onPress={() => toggleFaq(index)}
                     style={[styles.faqQuestionRow, webPointer]}
                   >

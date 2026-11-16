@@ -39,6 +39,7 @@
   ],
   "rewrites": [
     { "source": "/property/:id", "destination": "/property/[id]" },
+    { "source": "/mess/:id", "destination": "/mess/[id]" },
     { "source": "/users/:id", "destination": "/users/[id]" }
   ],
   "headers": [

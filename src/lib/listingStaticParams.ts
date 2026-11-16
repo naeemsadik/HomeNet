@@ -1,5 +1,6 @@
 import type { PropertyDetail } from "@/features/property/hooks/usePropertyDetail";
 import { buildTimeGet } from "@/lib/buildTimeApi";
+import { isMessSubtype } from "@/lib/listingPath";
 
 /**
  * The live listing ids, for `generateStaticParams` in app/property/[id].tsx.
@@ -17,7 +18,7 @@ import { buildTimeGet } from "@/lib/buildTimeApi";
 const PAGE_SIZE = 100; // the API's maximum
 const MAX_PAGES = 50; // a runaway-loop guard: 5,000 listings
 
-type ListingsPage = { data?: { items?: { id?: string; status?: string }[]; total?: number } };
+type ListingsPage = { data?: { items?: { id?: string; status?: string; subtype?: string | null }[]; total?: number } };
 
 export async function listingStaticParams(): Promise<{ id: string }[]> {
   const ids: string[] = [];
@@ -27,6 +28,8 @@ export async function listingStaticParams(): Promise<{ id: string }[]> {
       const items = body?.data?.items;
       if (!Array.isArray(items)) throw new Error("API response has no data.items list");
       for (const item of items) {
+        // A mess listing is not a /property page (it lives at /mess/:id), so it is not exported here.
+        if (isMessSubtype(item?.subtype)) continue;
         if (item?.id && (item.status === undefined || item.status === "active")) ids.push(String(item.id));
       }
       if (items.length < PAGE_SIZE || ids.length >= (body.data?.total ?? 0)) break;
