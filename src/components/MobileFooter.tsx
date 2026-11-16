@@ -6,7 +6,7 @@ import { SUPPORT_EMAIL } from "@/content/legal";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import { RESOURCE_LINKS } from "@/constants/navigation";
+import { RESOURCE_LINKS, STUDENT_ACCOMMODATION_HREF } from "@/constants/navigation";
 
 interface FooterLink {
   /** A translation key, or a plain name (areas are place names, the same in both languages). */
@@ -61,6 +61,7 @@ const SECTIONS: FooterSection[] = [
       { label: "nav.sold", href: "/sold" },
       { label: "footer.commercial", href: "/buy?type=commercial" },
       { label: "footer.verifiedListings", href: "/buy?is_verified=true" },
+      { label: "footer.studentAccommodation", href: STUDENT_ACCOMMODATION_HREF },
     ],
   },
   {

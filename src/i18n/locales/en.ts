@@ -113,6 +113,7 @@ export const en = {
     aboutHomenet: "About HomeNet",
     commercial: "Commercial property",
     verifiedListings: "Verified listings",
+    studentAccommodation: "Student accommodation",
     sellerDashboard: "Seller dashboard",
     copyright: "Copyright © 2026 HomeNet Group Limited. All rights reserved.",
   },
