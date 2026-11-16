@@ -135,4 +135,19 @@ describe("HeroProductVisual", () => {
       root.unmount();
     });
   });
+
+  it("renders canonical homenetbd.com domain and natural language placeholder with no homenet.com.bd", () => {
+    const root = createRoot(container);
+    act(() => {
+      root.render(<HeroProductVisual />);
+    });
+
+    expect(container.textContent).not.toContain("homenet.com.bd");
+    expect(container.textContent).toContain("homenetbd.com/buy?city=Dhaka");
+    expect(container.textContent).toContain("Search by area, project, or keyword");
+
+    act(() => {
+      root.unmount();
+    });
+  });
 });

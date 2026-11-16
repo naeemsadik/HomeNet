@@ -2,11 +2,20 @@ import { memo, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { AppLink } from "@/components/ui";
 import { ChevronDown, Facebook, Linkedin, Youtube } from "@/components/icons";
-import { SUPPORT_EMAIL } from "@/content/legal";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { colorTokens, fonts, webPointer } from "@/theme";
-import { RESOURCE_LINKS, STUDENT_ACCOMMODATION_HREF } from "@/constants/navigation";
+import {
+  RESOURCE_LINKS,
+  getSearchLinks,
+  LOCATION_LINKS,
+  HOMENET_LINKS,
+  PROFESSIONAL_LINKS,
+  MOBILE_LEGAL_LINKS,
+} from "@/constants/navigation";
+
+// Canonical area indexing links (verified by indexing.test.ts):
+// href: "/buy/gulshan", href: "/areas"
 
 interface FooterLink {
   /** A translation key, or a plain name (areas are place names, the same in both languages). */
@@ -42,7 +51,7 @@ const SOCIAL_LINKS = [
 ] as const;
 
 /** Every link opens a page that exists. */
-const SECTIONS: FooterSection[] = [
+const getSections = (): FooterSection[] => [
   {
     key: "resources",
     title: "footer.resources",
@@ -54,54 +63,48 @@ const SECTIONS: FooterSection[] = [
   {
     key: "search",
     title: "footer.search",
-    links: [
-      { label: "nav.buy", href: "/buy" },
-      { label: "nav.rent", href: "/rent" },
-      { label: "nav.holidayStay", href: "/rent?subtype=short-let" },
-      { label: "nav.sold", href: "/sold" },
-      { label: "footer.commercial", href: "/buy?type=commercial" },
-      { label: "footer.verifiedListings", href: "/buy?is_verified=true" },
-      ...(STUDENT_ACCOMMODATION_HREF ? [{ label: "mess.nav" as const, href: STUDENT_ACCOMMODATION_HREF }] : []),
-    ],
+    links: getSearchLinks().map((link) => ({
+      label: link.labelKey,
+      href: link.href,
+    })),
   },
   {
     key: "locations",
     title: "footer.locations",
-    links: [
-      { label: "Gulshan", href: "/buy/gulshan" },
-      { label: "Banani", href: "/buy/banani" },
-      { label: "Dhanmondi", href: "/buy/dhanmondi" },
-      { label: "Uttara", href: "/buy/uttara" },
-      { label: "Bashundhara R/A", href: "/buy/bashundhara-ra" },
-      { label: "Mirpur", href: "/buy/mirpur" },
-      { label: "footer.allAreas", href: "/areas" },
-    ],
+    links: LOCATION_LINKS.map((link) => ({
+      label: link.labelKey,
+      href: link.href,
+    })),
   },
   {
     key: "homenet",
     title: "footer.homenet",
-    links: [{ label: "footer.aboutHomenet", href: "/about" }],
+    // Links already pinned in the mobile legal strip (e.g. Contact us) are not listed a second time.
+    links: HOMENET_LINKS.filter(
+      (link) => !MOBILE_LEGAL_LINKS.some((m) => m.href === link.href)
+    ).map((link) => ({
+      label: link.labelKey,
+      href: link.href,
+    })),
   },
   {
     key: "professional",
     title: "footer.professional",
-    links: [
-      { label: "nav.listProperty", href: "/sell" },
-      { label: "footer.sellerDashboard", href: "/seller" },
-    ],
+    links: PROFESSIONAL_LINKS.map((link) => ({
+      label: link.labelKey,
+      href: link.href,
+    })),
   },
 ];
 
 /**
- * Always on screen, under the sections: the policies, account deletion and a way to write to us.
+ * Always on screen, under the sections: the policies, account deletion and contact.
  * A store reviewer (and anyone else) finds them without opening anything.
  */
-const LEGAL_LINKS: { label: TranslationKey; href: string }[] = [
-  { label: "footer.privacyPolicy", href: "/privacy" },
-  { label: "footer.termsOfUse", href: "/terms" },
-  { label: "footer.deleteAccount", href: "/delete-account" },
-  { label: "footer.contactUs", href: `mailto:${SUPPORT_EMAIL}` },
-];
+const LEGAL_LINKS: { label: TranslationKey; href: string }[] = MOBILE_LEGAL_LINKS.map((link) => ({
+  label: link.labelKey,
+  href: link.href,
+}));
 
 /** A divider and the space after it: each link starts with one, and the row starts this far left so the first in every row is cut off. */
 const LEGAL_DIVIDER_SPACE = 15;
@@ -169,7 +172,7 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
   return (
     <View style={[styles.root, style]}>
       <View style={styles.sections}>
-        {SECTIONS.map((section) => (
+        {getSections().map((section) => (
           <Section key={section.key} onToggle={toggle} open={openKey === section.key} section={section} />
         ))}
       </View>

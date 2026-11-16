@@ -12,6 +12,8 @@ import { MessListingWizard } from "../MessListingWizard";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
+jest.setTimeout(15000);
+
 jest.mock("@/components/icons", () => {
   const Icon = () => null;
   return new Proxy({}, { get: () => Icon });

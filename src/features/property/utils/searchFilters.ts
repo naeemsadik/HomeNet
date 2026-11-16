@@ -219,6 +219,12 @@ export function filtersFromParams(
   }
 
   let query = one(params.query) || one(params.search) || "";
+  if (!query && one(params.condition) === "new") {
+    query = "new";
+  }
+  if (!query && one(params.subtype) === "student") {
+    query = "student";
+  }
   if (!fixedLocation && !city && !area) {
     const place = placeFromQuery(query, areas);
     if (place) {
@@ -238,7 +244,7 @@ export function filtersFromParams(
     lat: one(params.lat) || "",
     lng: one(params.lng) || "",
     radius: one(params.radius) || "",
-    propertyType: toPropertyTypeFilter(one(params.type)),
+    propertyType: toPropertyTypeFilter(one(params.type) || one(params.category)),
     addedToSite: one(params.added) || "",
     includeSold: one(params.include_sold) === "true",
     verifiedOnly: one(params.is_verified) === "true",
@@ -322,6 +328,8 @@ export const FILTER_PARAM_KEYS = [
   "lat",
   "lng",
   "type",
+  "category",
+  "condition",
   "radius",
   "added",
   "include_sold",
