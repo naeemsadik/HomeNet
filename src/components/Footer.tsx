@@ -2,7 +2,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, layout, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
-import { RESOURCE_LINKS, type ResourceLinkItem } from "@/constants/navigation";
+import { RESOURCE_LINKS, STUDENT_ACCOMMODATION_HREF, type ResourceLinkItem } from "@/constants/navigation";
 
 export { RESOURCE_LINKS, type ResourceLinkItem };
 
@@ -74,7 +74,7 @@ function WebFooter({ style }: FooterProps) {
     { label: "Commercial to rent", href: "/rent" },
     { label: "Holiday stays & Serviced", href: "/rent?subtype=short-let" },
     { label: "Verified listings only", href: "/buy?is_verified=true" },
-    { label: "Student accommodation", href: "/rent" },
+    { label: "Student accommodation", href: STUDENT_ACCOMMODATION_HREF },
     { label: "New developments", href: "/buy" },
   ];
 

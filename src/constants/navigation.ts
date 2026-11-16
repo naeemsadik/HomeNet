@@ -1,3 +1,4 @@
+import { MESS_ENABLED } from "@/lib/features";
 import type { TranslationKey } from "@/i18n";
 
 export interface ResourceLinkItem {
@@ -44,3 +45,9 @@ export const RESOURCE_LINKS: readonly ResourceLinkItem[] = [
   },
 ] as const;
 
+/**
+ * Where "Student accommodation" goes. Mess & Seat Share has its own search at /mess
+ * once the mess API is deployed and the feature is switched on; until then a
+ * student's search is the rentals filtered to student housing.
+ */
+export const STUDENT_ACCOMMODATION_HREF = MESS_ENABLED ? "/mess" : "/rent?subtype=student";
