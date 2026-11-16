@@ -34,7 +34,7 @@ const render = () => {
 };
 
 describe("Student accommodation in the footer (Mess & Seat Share on)", () => {
-  it("links the desktop footer to /mess", () => {
+  it("links the desktop footer to /mess, labelled in the reader's language", () => {
     mockResponsive = { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 };
     const link = render()
       .root.findAllByType(AppLink)

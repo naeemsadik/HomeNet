@@ -34,19 +34,19 @@ const render = () => {
 };
 
 describe("Student accommodation in the footer (Mess & Seat Share off)", () => {
-  it("links the desktop footer to /rent?subtype=student", () => {
+  it("is not in the desktop footer: there is no page for it yet", () => {
     mockResponsive = { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 };
-    const link = render()
-      .root.findAllByType(AppLink)
-      .find((n) => textOf(n).includes("Student accommodation"));
-    expect(link?.props.href).toBe("/rent?subtype=student");
+    const links = render().root.findAllByType(AppLink);
+    expect(links.some((n) => textOf(n).includes("Student accommodation"))).toBe(false);
+    expect(links.some((n) => String(n.props.href).includes("subtype=student"))).toBe(false);
   });
 
-  it("has it in the phone footer's Search section, linking to /rent?subtype=student", () => {
+  it("is not in the phone footer's Search section either", () => {
     mockResponsive = { isPhone: true, isTablet: false, width: 375, containerMaxWidth: 375 };
     const tree = render();
     const header = tree.root.find((n) => n.props.accessibilityRole === "button" && n.props.accessibilityLabel === "Search");
     act(() => header.props.onPress());
-    expect(tree.root.findAllByType(AppLink).some((n) => n.props.href === "/rent?subtype=student")).toBe(true);
+    const links = tree.root.findAllByType(AppLink);
+    expect(links.some((n) => textOf(n).includes("Student accommodation"))).toBe(false);
   });
 });
