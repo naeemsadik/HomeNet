@@ -93,7 +93,8 @@ describe("Footer", () => {
         node.props.accessibilityLabel === "Resources"
     );
     expect(resourcesHeader).toBeTruthy();
-    expect(resourcesHeader.props.accessibilityState?.expanded).toBe(false);
+    // The web only reads aria-*, so the footer states expanded that way.
+    expect(resourcesHeader.props["aria-expanded"]).toBe(false);
 
     // Open the accordion
     act(() => {
@@ -130,7 +131,7 @@ describe("Footer", () => {
         node.props.accessibilityRole === "button" &&
         node.props.accessibilityLabel === "Resources"
     );
-    expect(closedHeader.props.accessibilityState?.expanded).toBe(false);
+    expect(closedHeader.props["aria-expanded"]).toBe(false);
   });
 });
 
