@@ -344,7 +344,7 @@ export function MyPropertiesScreen() {
                       <View style={[styles.colProperty, styles.colBorder, { flexDirection: "row", gap: 12, alignItems: "center" }]}>
                         <AppLink href={item.href} style={styles.propThumb}>
                           {item.imageUrl ? (
-                            <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.propThumb} />
+                            <Image source={{ uri: cdnImage(item.imageUrl, 240) }} accessibilityLabel={item.title} style={styles.propThumb} />
                           ) : (
                             <View style={[styles.propThumb, styles.imagePlaceholder]}>
                               <Building2 color="#6B7D78" size={20} />
@@ -433,7 +433,7 @@ export function MyPropertiesScreen() {
                   <View key={item.id} style={styles.mobileCard}>
                     <View style={styles.mobileCardHead}>
                       {item.imageUrl ? (
-                        <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.mobileThumb} />
+                        <Image source={{ uri: cdnImage(item.imageUrl, 240) }} accessibilityLabel={item.title} style={styles.mobileThumb} />
                       ) : (
                         <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
                           <Building2 color="#6B7D78" size={20} />

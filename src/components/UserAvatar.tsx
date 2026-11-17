@@ -1,3 +1,4 @@
+import { cdnImage } from "@/lib/cloudinaryImage";
 import { Image, Text, View, type ImageStyle, type StyleProp } from "react-native";
 import { colorTokens, fonts } from "@/theme";
 
@@ -31,7 +32,7 @@ export function UserAvatar({
 }) {
   const box = { width: size, height: size, borderRadius: size / 2 };
   if (uri) {
-    return <Image accessibilityIgnoresInvertColors source={{ uri }} style={[box, style]} />;
+    return <Image accessibilityIgnoresInvertColors source={{ uri: cdnImage(uri, 256) }} style={[box, style]} />;
   }
   return (
     <View

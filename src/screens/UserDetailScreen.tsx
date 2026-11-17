@@ -1,3 +1,4 @@
+import { cdnImage } from "@/lib/cloudinaryImage";
 import { LinearGradient } from "expo-linear-gradient";
 import { LoaderCircle, Mail, ShieldCheck, UserRound, XCircle } from "@/components/icons";
 import { useEffect, useState } from "react";
@@ -67,7 +68,7 @@ export function UserDetailScreen({ userId }: { userId: string }) {
           <LinearGradient colors={[colors.green, colors.blue]} end={{ x: 1, y: 0 }} style={styles.heroGradient} />
           <View style={styles.avatarWrap}>
             {user.avatar_url ? (
-              <Image source={{ uri: user.avatar_url }} style={styles.avatarImage} />
+              <Image source={{ uri: cdnImage(user.avatar_url, 256) }} style={styles.avatarImage} />
             ) : (
               <View style={styles.avatarPlaceholder}>
                 <UserRound color={colors.white} size={34} />

@@ -1,3 +1,4 @@
+import { stockImage } from "@/lib/cloudinaryImage";
 import type { GuideCategory, PropertyGuide } from "../types/news";
 
 /**
@@ -13,8 +14,8 @@ import type { GuideCategory, PropertyGuide } from "../types/news";
  */
 
 /** Universal fallback editorial real-estate photograph (contemporary residence). */
-export const GUIDE_FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85";
+export const GUIDE_FALLBACK_IMAGE = stockImage(
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85");
 
 /** Curated topic & category editorial photography */
 export const CATEGORY_EDITORIAL_IMAGES: Record<GuideCategory, string> = {
@@ -106,7 +107,7 @@ const SPECIFIC_GUIDE_EDITORIAL_IMAGES: Record<string, string> = {
  * 4. Match based on topic tags/title keywords (e.g. land, mutation, stamp duty, loan, inspection).
  * 5. Fallback to category photo, and finally to universal fallback.
  */
-export function resolveGuideImage(guide?: Partial<PropertyGuide> | null): string {
+function pickGuideImage(guide?: Partial<PropertyGuide> | null): string {
   if (!guide) return GUIDE_FALLBACK_IMAGE;
 
   const isRss = guide.sourceType === "rss";
@@ -203,4 +204,9 @@ export function resolveGuideImage(guide?: Partial<PropertyGuide> | null): string
   }
 
   return GUIDE_FALLBACK_IMAGE;
+}
+
+/** The guide's photo, as WebP in the Android app (see stockImage). */
+export function resolveGuideImage(guide?: Partial<PropertyGuide> | null): string {
+  return stockImage(pickGuideImage(guide));
 }

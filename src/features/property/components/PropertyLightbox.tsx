@@ -1,3 +1,4 @@
+import { cdnImage } from "@/lib/cloudinaryImage";
 import { ChevronLeft, ChevronRight, X } from "@/components/icons";
 import { useRef, type RefObject } from "react";
 import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
@@ -96,7 +97,7 @@ export function PropertyLightbox({
           ) : null}
 
           <Image
-            source={{ uri: images[activeIndex] || images[0] }}
+            source={{ uri: cdnImage(images[activeIndex] || images[0], 1800) }}
             accessibilityLabel={`Photo ${activeIndex + 1} of ${images.length}`}
             style={styles.lightboxImage}
             resizeMode="contain"
@@ -131,7 +132,7 @@ export function PropertyLightbox({
                   webPointer,
                 ]}
               >
-                <Image source={{ uri: img }} accessibilityLabel={`Photo ${idx + 1}`} style={styles.thumbnailImg} />
+                <Image source={{ uri: cdnImage(img, 240) }} accessibilityLabel={`Photo ${idx + 1}`} style={styles.thumbnailImg} />
               </Pressable>
             ))}
           </ScrollView>

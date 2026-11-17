@@ -519,7 +519,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                     accessibilityLabel={t("propertyDetail.viewAllPhotos", { count: formatLocalizedNumber(totalPhotos, language) })}
                   >
                     <Image
-                      source={{ uri: property.mediaImages[0] }}
+                      source={{ uri: cdnImage(property.mediaImages[0], 1400) }}
                       accessibilityLabel={`${property.title}, photo 1`}
                       style={styles.mainImage}
                     />
@@ -538,7 +538,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                       accessibilityLabel={`${property.title}, photo 2`}
                     >
                       <Image
-                        source={{ uri: property.mediaImages[1] }}
+                        source={{ uri: cdnImage(property.mediaImages[1], 700) }}
                         accessibilityLabel={`${property.title}, photo 2`}
                         style={styles.mosaicSideImage}
                       />
@@ -554,7 +554,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                       accessibilityLabel={`${property.title}, photo 3`}
                     >
                       <Image
-                        source={{ uri: property.mediaImages[2] }}
+                        source={{ uri: cdnImage(property.mediaImages[2], 700) }}
                         accessibilityLabel={`${property.title}, photo 3`}
                         style={styles.mosaicSideImage}
                       />
@@ -591,7 +591,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                 >
                   {property.mediaImages.length ? (
                     <Image
-                      source={{ uri: property.mediaImages[activeImageIndex] || property.mediaImages[0] }}
+                      source={{ uri: cdnImage(property.mediaImages[activeImageIndex] || property.mediaImages[0], 1400) }}
                       accessibilityLabel={`${property.title}, photo ${activeImageIndex + 1}`}
                       style={styles.mainImage}
                     />
@@ -675,7 +675,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                             webPointer,
                           ]}
                         >
-                          <Image source={{ uri: img }} accessibilityLabel={`${property.title}, photo ${idx + 1}`} style={styles.thumbnailImg} />
+                          <Image source={{ uri: cdnImage(img, 240) }} accessibilityLabel={`${property.title}, photo ${idx + 1}`} style={styles.thumbnailImg} />
                           {showPlusBadge ? (
                             <View style={styles.moreImagesOverlay}>
                               <Text style={styles.moreImagesText}>
@@ -855,7 +855,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                     {property.similarProperties.map((sim) => (
                       <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
                         {sim.imageUrl ? (
-                          <Image source={{ uri: sim.imageUrl }} accessibilityLabel={sim.title} style={styles.similarThumb} />
+                          <Image source={{ uri: cdnImage(sim.imageUrl, 480) }} accessibilityLabel={sim.title} style={styles.similarThumb} />
                         ) : (
                           <View style={[styles.similarThumb, styles.similarThumbPlaceholder]}>
                             <Building2 color="#6B7D78" size={24} />

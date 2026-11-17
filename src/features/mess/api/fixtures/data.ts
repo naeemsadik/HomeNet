@@ -5,6 +5,7 @@
  * campus coordinates are rough positions for demos and are NOT the production
  * seed, which needs each campus gate checked on a map (PRD 2.2.5).
  */
+import { stockImage } from "@/lib/cloudinaryImage";
 import type { MessDetail, MessDetailsInput, Seat, University, UtilityCharge } from "../../types/mess";
 
 export const FIXTURE_UNIVERSITIES: University[] = [
@@ -55,7 +56,7 @@ export const FIXTURE_UNIVERSITIES: University[] = [
   },
 ];
 
-const photo = (id: string) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=70`;
+const photo = (id: string) => stockImage(`https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=70`);
 const ROOM = photo("1522708323590-d24dbb6b0267");
 const ROOM_2 = photo("1502672260266-1c1ef2d93688");
 const WASHROOM = photo("1600607687939-ce8a6c25118c");
