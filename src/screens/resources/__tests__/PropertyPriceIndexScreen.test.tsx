@@ -98,7 +98,7 @@ describe("PropertyPriceIndexScreen", () => {
     const { published } = getAreaPriceIndex();
     expect(published.length).toBeGreaterThan(0);
     for (const row of published) {
-      expect(text).toContain(`Based on ${row.listings} listings`);
+      expect(text).toContain(`Based on ${row.listings} actual listings`);
     }
   });
 
