@@ -33,12 +33,12 @@ const render = () => {
   return tree;
 };
 
-describe("Student accommodation in the footer (Mess & Seat Share on)", () => {
+describe("Student accommodation in the footer (Shared living on)", () => {
   it("links the desktop footer to /mess, labelled in the reader's language", () => {
     mockResponsive = { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 };
     const link = render()
       .root.findAllByType(AppLink)
-      .find((n) => textOf(n).includes("Mess & Seats"));
+      .find((n) => textOf(n).includes("Shared living"));
     expect(link?.props.href).toBe("/mess");
   });
 

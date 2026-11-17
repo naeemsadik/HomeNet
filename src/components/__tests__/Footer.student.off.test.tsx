@@ -33,11 +33,11 @@ const render = () => {
   return tree;
 };
 
-describe("Student accommodation in the footer (Mess & Seat Share off)", () => {
+describe("Student accommodation in the footer (Shared living off)", () => {
   it("is not in the desktop footer: there is no page for it yet", () => {
     mockResponsive = { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 };
     const links = render().root.findAllByType(AppLink);
-    expect(links.some((n) => textOf(n).includes("Mess & Seats"))).toBe(false);
+    expect(links.some((n) => textOf(n).includes("Shared living"))).toBe(false);
     expect(links.some((n) => String(n.props.href).includes("subtype=student"))).toBe(false);
   });
 
@@ -47,6 +47,6 @@ describe("Student accommodation in the footer (Mess & Seat Share off)", () => {
     const header = tree.root.find((n) => n.props.accessibilityRole === "button" && n.props.accessibilityLabel === "Search");
     act(() => header.props.onPress());
     const links = tree.root.findAllByType(AppLink);
-    expect(links.some((n) => textOf(n).includes("Mess & Seats"))).toBe(false);
+    expect(links.some((n) => textOf(n).includes("Shared living"))).toBe(false);
   });
 });

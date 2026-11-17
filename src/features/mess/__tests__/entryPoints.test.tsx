@@ -35,16 +35,16 @@ afterEach(async () => {
   container.remove();
 });
 
-describe("Mess & Seats entry points (MESS_ENABLED on)", () => {
+describe("Shared living entry points (MESS_ENABLED on)", () => {
   it("adds the tab after the property searches", async () => {
     await act(async () => root.render(<SearchTabs activeTab="buy" onChange={jest.fn()} />));
     const tabs = [...container.querySelectorAll('[role="tab"]')].map((tab) => tab.textContent);
-    expect(tabs[tabs.length - 1]).toBe("Mess & Seats");
+    expect(tabs[tabs.length - 1]).toBe("Shared living");
   });
 
   it("opens /mess from the hero tab instead of changing the search's intent", async () => {
     await act(async () => root.render(<HeroSearchWidget />));
-    const tab = [...container.querySelectorAll('[role="tab"]')].find((el) => el.textContent === "Mess & Seats") as HTMLElement;
+    const tab = [...container.querySelectorAll('[role="tab"]')].find((el) => el.textContent === "Shared living") as HTMLElement;
     await act(async () => tab.click());
     expect(router.push).toHaveBeenCalledWith("/mess");
   });
