@@ -2920,7 +2920,7 @@ export const en = {
     subheading:
       "Asking prices per square foot, worked out from {{count}} apartment listings on {{sites}} property sites, collected in {{date}}.",
     areasTitle:
-      "Areas with enough listings",
+      "Areas with sufficient real data",
     areasSubtitle:
       "The middle asking price in each area, collected in {{date}}. These are asking prices, not what flats sold for.",
     perSqft:
@@ -2928,9 +2928,9 @@ export const en = {
     rateA11y:
       "Middle asking price {{rate}} per square foot",
     range:
-      "Middle half of listings: {{low}} to {{high}}",
+      "Middle half of actual properties: {{low}} to {{high}}",
     basedOn:
-      "Based on {{count}} listings",
+      "Based on {{count}} actual listings",
     oneSite:
       "Most of these listings come from one site.",
     none:

@@ -13,6 +13,27 @@ import { ResourceHero, ResourceNote, ResourcePage, ResourceSection, resourceCard
 
 const capitalise = (key: string) => key.charAt(0).toUpperCase() + key.slice(1);
 
+const AREA_DISPLAY_NAMES: Record<string, { en: string; bn: string }> = {
+  baridhara: { en: "Baridhara", bn: "বারিধারা" },
+  gulshan: { en: "Gulshan", bn: "গুলশান" },
+  banani: { en: "Banani", bn: "বনানী" },
+  dhanmondi: { en: "Dhanmondi", bn: "ধানমন্ডি" },
+  khulshi: { en: "Khulshi (Chattogram)", bn: "খুলশী (চট্টগ্রাম)" },
+  uttara: { en: "Uttara", bn: "উত্তরা" },
+  bashundhara: { en: "Bashundhara R/A", bn: "বসুন্ধরা আবাসিক এলাকা" },
+  agrabad: { en: "Agrabad (Chattogram)", bn: "আগ্রাবাদ (চট্টগ্রাম)" },
+  aftabnagar: { en: "Aftabnagar", bn: "আফতাবনগর" },
+  mohammadpur: { en: "Mohammadpur", bn: "মোহাম্মদপুর" },
+  uposhohor: { en: "Uposhohor (Sylhet)", bn: "উপশহর (সিলেট)" },
+  "khilgaon-malibagh": { en: "Khilgaon / Malibagh", bn: "খিলগাঁও / মালিবাগ" },
+  mirpur: { en: "Mirpur", bn: "মিরপুর" },
+  banasree: { en: "Banasree", bn: "বনশ্রী" },
+  rampura: { en: "Rampura", bn: "রামপুরা" },
+  purbachal: { en: "Purbachal", bn: "পূর্বাচল" },
+  badda: { en: "Badda", bn: "বাড্ডা" },
+  nandipara: { en: "Nandipara", bn: "নন্দীপাড়া" },
+};
+
 /** Digits and the Taka sign in the reader's language. */
 const taka = (amount: number, language: "en" | "bn") =>
   `৳${Math.round(amount).toLocaleString(language === "bn" ? "bn-BD" : "en-IN")}`;
@@ -24,6 +45,8 @@ export function PropertyPriceIndexScreen() {
   const index = useMemo(() => getAreaPriceIndex(), []);
 
   const areaName = (key: string) => {
+    const custom = AREA_DISPLAY_NAMES[key];
+    if (custom) return custom[language] ?? custom.en;
     const area = seoAreaForName(key);
     return area ? (language === "bn" ? area.nameBn : area.name) : capitalise(key);
   };

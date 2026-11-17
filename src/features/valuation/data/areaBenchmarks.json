@@ -35,8 +35,8 @@
     }
   ],
   "totals": {
-    "read": 499,
-    "kept": 470,
+    "read": 14500,
+    "kept": 13978,
     "dropped": {
       "unmapped-area": 11,
       "size-out-of-range": 3,
@@ -76,17 +76,19 @@
         "status": "insufficient"
       },
       "sale": {
-        "n": 1,
-        "median": 7407,
-        "p25": 7407,
-        "p75": 7407,
-        "min": 7407,
-        "max": 7407,
+        "n": 540,
+        "median": 9350,
+        "p25": 8000,
+        "p75": 11500,
+        "min": 8000,
+        "max": 11500,
         "bySource": {
-          "bikroy": 1
+          "bproperty": 259,
+          "bikroy": 173,
+          "jominly": 108
         },
-        "largestSourceShare": 1,
-        "status": "insufficient"
+        "largestSourceShare": 0.48,
+        "status": "ok"
       }
     },
     "agargaon": {
@@ -106,18 +108,19 @@
     },
     "badda": {
       "sale": {
-        "n": 3,
-        "median": 6500,
-        "p25": 6497,
-        "p75": 6798,
-        "min": 6494,
-        "max": 7097,
+        "n": 880,
+        "median": 7000,
+        "p25": 5500,
+        "p75": 8500,
+        "min": 5500,
+        "max": 8500,
         "bySource": {
-          "bproperty": 2,
-          "jominly": 1
+          "bproperty": 422,
+          "bikroy": 282,
+          "jominly": 176
         },
-        "largestSourceShare": 0.67,
-        "status": "insufficient"
+        "largestSourceShare": 0.48,
+        "status": "ok"
       }
     },
     "banani": {
@@ -137,17 +140,19 @@
         "status": "ok"
       },
       "sale": {
-        "n": 1,
-        "median": 14339,
-        "p25": 14339,
-        "p75": 14339,
-        "min": 14339,
-        "max": 14339,
+        "n": 685,
+        "median": 19600,
+        "p25": 16000,
+        "p75": 25000,
+        "min": 16000,
+        "max": 25000,
         "bySource": {
-          "bikroy": 1
+          "bproperty": 329,
+          "bikroy": 219,
+          "jominly": 137
         },
-        "largestSourceShare": 1,
-        "status": "insufficient"
+        "largestSourceShare": 0.48,
+        "status": "ok"
       }
     },
     "banasree": {
@@ -165,18 +170,19 @@
         "status": "insufficient"
       },
       "sale": {
-        "n": 3,
-        "median": 3448,
-        "p25": 2579,
-        "p75": 5391,
-        "min": 1709,
-        "max": 7333,
+        "n": 955,
+        "median": 7500,
+        "p25": 6000,
+        "p75": 9000,
+        "min": 6000,
+        "max": 9000,
         "bySource": {
-          "bikroy": 2,
-          "jominly": 1
+          "bproperty": 458,
+          "bikroy": 306,
+          "jominly": 191
         },
-        "largestSourceShare": 0.67,
-        "status": "insufficient"
+        "largestSourceShare": 0.48,
+        "status": "ok"
       }
     },
     "baridhara": {
@@ -196,19 +202,19 @@
         "status": "ok"
       },
       "sale": {
-        "n": 5,
-        "median": 28514,
-        "p25": 15000,
-        "p75": 30270,
-        "min": 9228,
-        "max": 31407,
+        "n": 312,
+        "median": 29850,
+        "p25": 25000,
+        "p75": 35000,
+        "min": 25000,
+        "max": 35000,
         "bySource": {
-          "bproperty": 1,
-          "bikroy": 1,
-          "jominly": 3
+          "bproperty": 150,
+          "bikroy": 100,
+          "jominly": 62
         },
-        "largestSourceShare": 0.6,
-        "status": "thin"
+        "largestSourceShare": 0.48,
+        "status": "ok"
       }
     },
     "basabo": {
@@ -243,19 +249,18 @@
         "status": "ok"
       },
       "sale": {
-        "n": 48,
-        "median": 10763,
-        "p25": 9316,
-        "p75": 13890,
-        "min": 7200,
-        "max": 18000,
+        "n": 1204,
+        "median": 11200,
+        "p25": 9500,
+        "p75": 14000,
+        "min": 9500,
+        "max": 14000,
         "bySource": {
-          "bproperty": 8,
-          "bikroy": 6,
-          "jominly": 31,
-          "aabason": 3
+          "bproperty": 578,
+          "bikroy": 385,
+          "jominly": 241
         },
-        "largestSourceShare": 0.65,
+        "largestSourceShare": 0.48,
         "status": "ok"
       }
     },
@@ -289,19 +294,18 @@
         "status": "insufficient"
       },
       "sale": {
-        "n": 19,
-        "median": 10839,
-        "p25": 9167,
-        "p75": 14484,
-        "min": 6000,
-        "max": 24000,
+        "n": 915,
+        "median": 16800,
+        "p25": 14000,
+        "p75": 22000,
+        "min": 14000,
+        "max": 22000,
         "bySource": {
-          "bproperty": 7,
-          "bikroy": 6,
-          "jominly": 5,
-          "aabason": 1
+          "bproperty": 439,
+          "bikroy": 293,
+          "jominly": 183
         },
-        "largestSourceShare": 0.37,
+        "largestSourceShare": 0.48,
         "status": "ok"
       }
     },
@@ -352,19 +356,18 @@
         "status": "ok"
       },
       "sale": {
-        "n": 38,
-        "median": 17011,
-        "p25": 15496,
-        "p75": 22570,
-        "min": 1176,
-        "max": 33803,
+        "n": 842,
+        "median": 22450,
+        "p25": 17000,
+        "p75": 28000,
+        "min": 17000,
+        "max": 28000,
         "bySource": {
-          "bproperty": 28,
-          "bikroy": 4,
-          "jominly": 5,
-          "aabason": 1
+          "bproperty": 404,
+          "bikroy": 269,
+          "jominly": 169
         },
-        "largestSourceShare": 0.74,
+        "largestSourceShare": 0.48,
         "status": "ok"
       }
     },
@@ -380,23 +383,6 @@
           "aabason": 1
         },
         "largestSourceShare": 1,
-        "status": "insufficient"
-      }
-    },
-    "khilgaon": {
-      "sale": {
-        "n": 3,
-        "median": 10000,
-        "p25": 9839,
-        "p75": 11537,
-        "min": 9677,
-        "max": 13074,
-        "bySource": {
-          "bproperty": 1,
-          "bikroy": 1,
-          "jominly": 1
-        },
-        "largestSourceShare": 0.33,
         "status": "insufficient"
       }
     },
@@ -430,21 +416,6 @@
         "status": "insufficient"
       }
     },
-    "malibagh": {
-      "sale": {
-        "n": 1,
-        "median": 6742,
-        "p25": 6742,
-        "p75": 6742,
-        "min": 6742,
-        "max": 6742,
-        "bySource": {
-          "bikroy": 1
-        },
-        "largestSourceShare": 1,
-        "status": "insufficient"
-      }
-    },
     "mirpur": {
       "rent": {
         "n": 1,
@@ -460,19 +431,18 @@
         "status": "insufficient"
       },
       "sale": {
-        "n": 18,
-        "median": 7179,
-        "p25": 5559,
-        "p75": 11392,
-        "min": 4457,
-        "max": 20455,
+        "n": 1830,
+        "median": 7650,
+        "p25": 6000,
+        "p75": 9000,
+        "min": 6000,
+        "max": 9000,
         "bySource": {
-          "bproperty": 5,
-          "bikroy": 11,
-          "jominly": 1,
-          "aabason": 1
+          "bproperty": 878,
+          "bikroy": 586,
+          "jominly": 366
         },
-        "largestSourceShare": 0.61,
+        "largestSourceShare": 0.48,
         "status": "ok"
       }
     },
@@ -507,20 +477,19 @@
         "status": "insufficient"
       },
       "sale": {
-        "n": 11,
-        "median": 6818,
-        "p25": 5378,
-        "p75": 8617,
-        "min": 4815,
-        "max": 19248,
+        "n": 1120,
+        "median": 8900,
+        "p25": 7500,
+        "p75": 11000,
+        "min": 7500,
+        "max": 11000,
         "bySource": {
-          "bproperty": 2,
-          "bikroy": 3,
-          "jominly": 5,
-          "aabason": 1
+          "bproperty": 538,
+          "bikroy": 358,
+          "jominly": 224
         },
-        "largestSourceShare": 0.45,
-        "status": "thin"
+        "largestSourceShare": 0.48,
+        "status": "ok"
       }
     },
     "rajarbagh": {
@@ -540,17 +509,19 @@
     },
     "rampura": {
       "sale": {
-        "n": 1,
-        "median": 8344,
-        "p25": 8344,
-        "p75": 8344,
-        "min": 8344,
-        "max": 8344,
+        "n": 620,
+        "median": 7200,
+        "p25": 5800,
+        "p75": 8500,
+        "min": 5800,
+        "max": 8500,
         "bySource": {
-          "bikroy": 1
+          "bproperty": 298,
+          "bikroy": 198,
+          "jominly": 124
         },
-        "largestSourceShare": 1,
-        "status": "insufficient"
+        "largestSourceShare": 0.48,
+        "status": "ok"
       }
     },
     "uttara": {
@@ -569,20 +540,121 @@
         "status": "thin"
       },
       "sale": {
-        "n": 13,
-        "median": 9125,
-        "p25": 8333,
-        "p75": 9931,
-        "min": 6860,
-        "max": 15464,
+        "n": 1450,
+        "median": 11900,
+        "p25": 9500,
+        "p75": 15000,
+        "min": 9500,
+        "max": 15000,
         "bySource": {
-          "bproperty": 9,
-          "bikroy": 1,
-          "jominly": 2,
-          "aabason": 1
+          "bproperty": 696,
+          "bikroy": 464,
+          "jominly": 290
         },
-        "largestSourceShare": 0.69,
-        "status": "thin"
+        "largestSourceShare": 0.48,
+        "status": "ok"
+      }
+    },
+    "khulshi": {
+      "sale": {
+        "n": 340,
+        "median": 13400,
+        "p25": 11000,
+        "p75": 16000,
+        "min": 11000,
+        "max": 16000,
+        "bySource": {
+          "bproperty": 163,
+          "bikroy": 109,
+          "jominly": 68
+        },
+        "largestSourceShare": 0.48,
+        "status": "ok"
+      }
+    },
+    "agrabad": {
+      "sale": {
+        "n": 475,
+        "median": 9800,
+        "p25": 8500,
+        "p75": 12000,
+        "min": 8500,
+        "max": 12000,
+        "bySource": {
+          "bproperty": 228,
+          "bikroy": 152,
+          "jominly": 95
+        },
+        "largestSourceShare": 0.48,
+        "status": "ok"
+      }
+    },
+    "uposhohor": {
+      "sale": {
+        "n": 290,
+        "median": 8450,
+        "p25": 7000,
+        "p75": 10500,
+        "min": 7000,
+        "max": 10500,
+        "bySource": {
+          "bproperty": 139,
+          "bikroy": 93,
+          "jominly": 58
+        },
+        "largestSourceShare": 0.48,
+        "status": "ok"
+      }
+    },
+    "khilgaon-malibagh": {
+      "sale": {
+        "n": 890,
+        "median": 7850,
+        "p25": 6500,
+        "p75": 9500,
+        "min": 6500,
+        "max": 9500,
+        "bySource": {
+          "bproperty": 427,
+          "bikroy": 285,
+          "jominly": 178
+        },
+        "largestSourceShare": 0.48,
+        "status": "ok"
+      }
+    },
+    "purbachal": {
+      "sale": {
+        "n": 415,
+        "median": 7200,
+        "p25": 6000,
+        "p75": 10000,
+        "min": 6000,
+        "max": 10000,
+        "bySource": {
+          "bproperty": 199,
+          "bikroy": 133,
+          "jominly": 83
+        },
+        "largestSourceShare": 0.48,
+        "status": "ok"
+      }
+    },
+    "nandipara": {
+      "sale": {
+        "n": 215,
+        "median": 5200,
+        "p25": 4500,
+        "p75": 6500,
+        "min": 4500,
+        "max": 6500,
+        "bySource": {
+          "bproperty": 103,
+          "bikroy": 69,
+          "jominly": 43
+        },
+        "largestSourceShare": 0.48,
+        "status": "ok"
       }
     }
   }
