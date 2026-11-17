@@ -2,6 +2,7 @@ import React from "react";
 import renderer, { act, type ReactTestInstance } from "react-test-renderer";
 import { SitemapScreen } from "@/screens/SitemapScreen";
 import { AppLink } from "@/components/ui";
+import { CURATED_PROPERTY_GUIDES } from "@/content/curatedGuides";
 import { en } from "@/i18n";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -68,5 +69,22 @@ describe("SitemapScreen", () => {
     expect(hrefs).toContain("/guides");
     expect(hrefs).toContain("/contact");
     expect(hrefs).toContain("/about");
+  });
+
+  it("links only to guide pages that exist", () => {
+    let tree: renderer.ReactTestRenderer;
+    act(() => {
+      tree = renderer.create(<SitemapScreen />);
+    });
+
+    const slugs = new Set(CURATED_PROPERTY_GUIDES.map((guide) => guide.slug));
+    const guideHrefs = tree!.root
+      .findAllByType(AppLink)
+      .map((node) => node.props.href as string)
+      .filter((href) => href.startsWith("/guides/"));
+
+    expect(guideHrefs.length).toBeGreaterThan(0);
+    const missing = guideHrefs.filter((href) => !slugs.has(href.replace("/guides/", "")));
+    expect(missing).toEqual([]);
   });
 });
