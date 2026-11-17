@@ -3765,6 +3765,8 @@ export const bn: TranslationSchema = {
     subtitle: "প্রপার্টি অনুসন্ধান, এরিয়া হাব, আইনি গাইড ও কোম্পানি পেজে সহজে যান।",
     buySection: "বিক্রির জন্য প্রপার্টি",
     rentSection: "ভাড়ার জন্য প্রপার্টি",
+    areasSaleSection: "জনপ্রিয় এলাকায় কিনুন",
+    areasRentSection: "জনপ্রিয় এলাকায় ভাড়া নিন",
     resourcesSection: "মার্কেট তথ্য ও রিসোর্স",
     legalSection: "আইনি নামজারি ও পরামর্শ",
     companySection: "প্রতিষ্ঠান ও সহায়তা",
