@@ -1,3 +1,4 @@
+import { cdnImage } from "@/lib/cloudinaryImage";
 import React, { useEffect } from "react";
 import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
@@ -195,7 +196,7 @@ export function Step4ResultDashboard() {
                 style={({ hovered }: { hovered?: boolean }) => [styles.comp, hovered && styles.compHovered, webPointer]}
               >
                 {comp.imageUrl ? (
-                  <Image accessibilityLabel={comp.title} source={{ uri: comp.imageUrl }} style={styles.compImage} />
+                  <Image accessibilityLabel={comp.title} source={{ uri: cdnImage(comp.imageUrl, 480) }} style={styles.compImage} />
                 ) : (
                   <View style={[styles.compImage, styles.compImageEmpty]}>
                     <Building2 color={colorTokens.muted} size={24} strokeWidth={1.8} />

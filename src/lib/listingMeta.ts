@@ -115,10 +115,10 @@ export function listingMetaDescription(detail: PropertyDetail): string {
 }
 
 /**
- * The first photo at the 1200×630 share size. JPEG rather than f_auto: link
+ * The first photo at the 1200×630 share size. JPEG rather than f_auto or f_webp: link
  * preview crawlers do not all accept WebP or AVIF.
  */
 export function listingShareImage(detail: PropertyDetail): string | undefined {
   const first = detail.media?.find((m) => m.media_type === "image")?.url;
-  return cdnImage(first, 1200, 630)?.replace("/f_auto,", "/f_jpg,");
+  return cdnImage(first, 1200, 630)?.replace(/\/f_(?:auto|webp),/, "/f_jpg,");
 }

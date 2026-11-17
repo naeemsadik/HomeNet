@@ -46,6 +46,19 @@ export default function Root({ children }: PropsWithChildren) {
           * {
             box-sizing: border-box;
           }
+          /* Pages are pre-rendered at a phone's size (src/hooks/useResponsive.ts). On a wider screen
+             that layout would flash and then jump to the real one, so the page stays invisible
+             until app/_layout.tsx adds app-ready (a script that loads fast there). It stays in the
+             document, so crawlers read it. If the script never runs it appears after 4 s anyway. */
+          @media (min-width: 601px) {
+            html:not(.app-ready) #root {
+              opacity: 0;
+              animation: app-ready-fallback 0s 4s forwards;
+            }
+          }
+          @keyframes app-ready-fallback {
+            to { opacity: 1; }
+          }
         ` }} />
         {/* The field focus rules, under the id installFieldFocus checks so they are not added twice. */}
         <style id={FIELD_FOCUS_STYLE_ID} dangerouslySetInnerHTML={{ __html: FIELD_FOCUS_CSS }} />

@@ -1,9 +1,10 @@
 // First, so production is silent before anything else can log.
 import "@/lib/productionConsole";
 import { useEffect } from "react";
+import { Platform } from "react-native";
 import { useFonts } from "expo-font";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthModal } from "@/components/AuthModal";
@@ -15,6 +16,7 @@ import { appFonts } from "@/theme/appFonts";
 import { restoreSavedLanguage } from "@/i18n";
 import { PageMeta } from "@/components/PageMeta";
 import { queryClient } from "@/lib/queryClient";
+import { fallbackTitleForPath } from "@/lib/seo";
 import { installDomGuard } from "@/lib/domGuard";
 import { installFieldFocus } from "@/lib/fieldFocus";
 
@@ -26,6 +28,22 @@ installFieldFocus();
 export default function RootLayout() {
   // Latin subsets with font-display: swap on web; full files on native.
   const [loaded] = useFonts(appFonts);
+  const pathname = usePathname();
+
+  // Tells app/+html.tsx's CSS the page is hydrated and laid out for this screen, so it can show
+  // the pre-rendered page it hid on wider screens (see the comment there). Two frames: the first
+  // paints the hydrated tree, the second is when its layout for the real window size has settled.
+  useEffect(() => {
+    if (!loaded || Platform.OS !== "web" || typeof document === "undefined") return;
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => document.documentElement.classList.add("app-ready"));
+    });
+    return () => {
+      cancelAnimationFrame(first);
+      cancelAnimationFrame(second);
+    };
+  }, [loaded]);
 
   useEffect(() => {
     // Browser and phone alike: the language the user picked last time.
@@ -49,7 +67,7 @@ export default function RootLayout() {
             override this; without it, any route lacking one would ship the
             empty <title> that Expo Router emits by default. */}
           <PageMeta
-            title="HomeNet BD | Verified Property Listings in Bangladesh"
+            title={fallbackTitleForPath(pathname)}
             description="HomeNet BD is a property marketplace for Bangladesh. Browse flats, houses and plots for sale or rent and contact the owners directly. Listing is free."
             noCanonical
           />

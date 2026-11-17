@@ -2,7 +2,11 @@ import { useSyncExternalStore } from "react";
 import { Dimensions } from "react-native";
 
 /**
- * The size every page is pre-rendered at (expo export has no window). While
+ * The size every page is pre-rendered at (expo export has no window). A phone's size: Google
+ * crawls with a phone, and a phone is the visitor who waits longest for the script. At the old
+ * desktop size (1200) a phone first saw the desktop layout squeezed into its screen, then the
+ * real one when the script loaded, a layout shift of 0.48 (Google's limit is 0.1). Wider screens
+ * would now see the phone layout first, so app/+html.tsx hides the page there until it is ready. While
  * React hydrates that HTML, the first render must use the same size, or phones
  * produce different markup and React throws "Minified React error #418" and
  * discards the whole pre-rendered page.
@@ -11,8 +15,8 @@ import { Dimensions } from "react-native";
  * snapshot while hydrating, then re-renders with the real window size.
  * Components that mount later, and native apps, get the real size at once.
  */
-const STATIC_RENDER_WIDTH = 1200;
-const STATIC_RENDER_HEIGHT = 800;
+const STATIC_RENDER_WIDTH = 390;
+const STATIC_RENDER_HEIGHT = 844;
 
 function subscribe(onChange: () => void) {
   const subscription = Dimensions.addEventListener("change", onChange);
