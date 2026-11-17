@@ -3766,6 +3766,8 @@ export const en = {
     subtitle: "Easily navigate all property searches, area hubs, legal guides, and company resources.",
     buySection: "Properties for Sale",
     rentSection: "Properties for Rent",
+    areasSaleSection: "Buy in popular areas",
+    areasRentSection: "Rent in popular areas",
     resourcesSection: "Market Insights & Guides",
     legalSection: "Legal Mutation & Advice",
     companySection: "Company & Trust",
