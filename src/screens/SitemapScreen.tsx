@@ -79,11 +79,11 @@ export function SitemapScreen() {
       titleKey: "sitemap.legalSection",
       links: [
         { label: "Property Guides & Legal Advice Hub", href: "/guides" },
-        { label: "Namzari & Mutation Guide", href: "/guides/namzari-mutation-guide" },
-        { label: "Bangladesh Land Measurement Units", href: "/guides/bangladesh-land-measurement-units" },
-        { label: "Property Registration Checklist", href: "/guides/property-registration-checklist" },
-        { label: "Rajuk Plan Approval Guide", href: "/guides/rajuk-plan-approval-guide" },
-        { label: "Title Deed Verification Guide", href: "/guides/title-deed-verification-guide" },
+        { label: "Namzari & Mutation Guide", href: "/guides/namzari-mutation-bangladesh-guide" },
+        { label: "Katha, Bigha, Decimal & Sqft", href: "/guides/understanding-katha-bigha-decimal-sqft" },
+        { label: "Dhaka Flat Registration Costs", href: "/guides/dhaka-flat-registration-costs-breakdown" },
+        { label: "How to Verify a RAJUK-Approved Flat", href: "/guides/rajuk-approved-flat-how-to-verify" },
+        { label: "How to Verify Khatian", href: "/guides/how-to-verify-khatian-cs-sa-rs-bs" },
       ],
     },
     {
