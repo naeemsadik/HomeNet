@@ -2,7 +2,7 @@ import Head from "expo-router/head";
 import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
-import { HERO_IMAGE_URL } from "@/lib/heroImage";
+import { HERO_IMAGE_MOBILE_URL, HERO_IMAGE_URL } from "@/lib/heroImage";
 import { HomeScreen } from "@/screens/HomeScreen";
 
 export default function IndexRoute() {
@@ -21,7 +21,8 @@ export default function IndexRoute() {
           and answer engines look for the brand's entity data. */}
       <JsonLd nodes={[organizationSchema(), websiteSchema()]} />
       <Head>
-        <link rel="preload" as="image" fetchPriority="high" href={HERO_IMAGE_URL} />
+        <link rel="preload" as="image" fetchPriority="high" href={HERO_IMAGE_MOBILE_URL} media="(max-width: 600px)" />
+        <link rel="preload" as="image" fetchPriority="high" href={HERO_IMAGE_URL} media="(min-width: 601px)" />
       </Head>
       <HomeScreen />
     </>

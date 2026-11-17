@@ -16,3 +16,11 @@ import { stockImage } from "@/lib/cloudinaryImage";
 export const HERO_IMAGE_URL = stockImage(
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80",
 );
+
+/**
+ * The same photograph at the size a phone needs. The phone's hero is 412 px wide (about 830 px on
+ * a sharp screen), so the 1600 px file above was twice the bytes it could ever show there.
+ */
+export const HERO_IMAGE_MOBILE_URL = stockImage(
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=75",
+);
