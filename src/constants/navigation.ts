@@ -89,7 +89,7 @@ export const getSearchLinks = (): readonly NavigationLinkItem[] => {
       ? [
           {
             labelKey: "mess.nav" as const,
-            label: "Mess & Seats",
+            label: "Shared living",
             href: "/mess",
           },
         ]

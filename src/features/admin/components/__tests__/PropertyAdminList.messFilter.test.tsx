@@ -69,11 +69,11 @@ function list(props: Partial<React.ComponentProps<typeof PropertyAdminList>>) {
   );
 }
 
-describe("Admin listings: the Mess & seats filter", () => {
+describe("Admin listings: the Shared living filter", () => {
   it("offers the filter when the screen passes a handler, and toggles it", async () => {
     const onMessOnlyChange = jest.fn();
     await act(async () => root.render(list({ messOnly: false, onMessOnlyChange })));
-    const chip = container.querySelector('[role="switch"][aria-label="Mess & Seats"]') as HTMLElement;
+    const chip = container.querySelector('[role="switch"][aria-label="Shared living"]') as HTMLElement;
     expect(chip).not.toBeNull();
     expect(chip.getAttribute("aria-checked")).toBe("false");
     await act(async () => chip.click());

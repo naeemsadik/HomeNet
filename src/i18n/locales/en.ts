@@ -2207,16 +2207,16 @@ export const en = {
       "Could not open mail client. Please send your resume directly to {{email}}",
   },
   mess: {
-    nav: "Mess & Seats",
-    tab: "Mess & Seats",
+    nav: "Shared living",
+    tab: "Shared living",
     demo: {
       title: "Sample listings",
-      notice: "This is a preview of Mess & Seat Share. The listings, photos and phone numbers are samples, not real, and nothing you post here is saved or shown to anyone. Real listings are coming soon.",
+      notice: "This is a preview of Shared living. The listings, photos and phone numbers are samples, not real, and nothing you post here is saved or shown to anyone. Real listings are coming soon.",
       contact: "This is a sample listing, so there is no real number to call.",
     },
     meta: {
-      browseTitle: "Mess & seat share near your campus | HomeNet",
-      browseDescription: "Find a mess seat or shared room near your university in Dhaka. See the all-in monthly cost, walking time to campus and house rules before you call.",
+      browseTitle: "Shared living near your campus | HomeNet",
+      browseDescription: "Find a seat in a mess or a shared room near your university in Dhaka. See the all-in monthly cost, walking time to campus and house rules before you call.",
       detailTitle: "{{title}} | HomeNet",
       detailDescription: "{{title}}: all-in cost from {{price}} a month, with walking time to campus, roommates and house rules.",
       createTitle: "List a vacant seat | HomeNet",
@@ -2444,8 +2444,8 @@ export const en = {
       remove: "Remove filter: {{label}}",
     },
     browse: {
-      heading: "Mess seats and shared rooms in Dhaka",
-      headingCampus: "Mess seats near {{campus}}",
+      heading: "Shared living in Dhaka",
+      headingCampus: "Shared living near {{campus}}",
       intro: "Every listing shows the all-in monthly cost, the walk to your campus and the house rules.",
       resultsOne: "1 listing",
       results: "{{count}} listings",
