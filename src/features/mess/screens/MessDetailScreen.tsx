@@ -20,6 +20,7 @@ import {
 } from "@/components/icons";
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { PageMeta } from "@/components/PageMeta";
+import { PropertyResultsMap } from "@/components/PropertyResultsMap";
 import { AppButton } from "@/components/ui";
 import { AdminPropertyCommandDeck } from "@/features/property/components/AdminPropertyCommandDeck";
 import { PropertyLightbox } from "@/features/property/components/PropertyLightbox";
@@ -35,6 +36,7 @@ import { useIsModerating } from "@/stores/useAdminContextStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { useSavedStore } from "@/stores/savedStore";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { detailForMap } from "../utils/mapListings";
 import { AllInCostTag } from "../components/AllInCostTag";
 import { ContactChannelBar } from "../components/ContactChannelBar";
 import { HouseRulesBadges } from "../components/HouseRulesBadges";
@@ -119,6 +121,7 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
   const cheapest = cheapestAllIn(detail.seats, detail.charges);
   const lowestRent = cheapest?.rent ?? (detail.seats.length ? Math.min(...detail.seats.map((seat) => seat.rent)) : 0);
 
+  const mapPins = useMemo(() => detailForMap(detail), [detail]);
   const media = useMemo(() => [...detail.media].sort((a, b) => a.display_order - b.display_order), [detail.media]);
   const cover = media.find((item) => item.label === "room") ?? media[0];
   const labelsPresent = MEDIA_LABELS.filter((label) => media.some((item) => item.label === label));
@@ -269,6 +272,14 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
             <Section title={t("mess.detail.locationTitle")}>
               {detail.address ? (
                 <Fact icon={<MapPin size={16} color={colorTokens.muted} />} text={detail.address} />
+              ) : null}
+              {mapPins.length ? (
+                <PropertyResultsMap
+                  activeLocation={detail.area?.name ?? t("mess.browse.mapPlace")}
+                  peek="none"
+                  properties={mapPins}
+                  style={styles.locationMap}
+                />
               ) : null}
               <Text style={styles.subTitle}>{t("mess.detail.walkTimes")}</Text>
               {detail.distances.length ? (
@@ -550,6 +561,7 @@ const styles = StyleSheet.create({
   muted: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 20, color: colorTokens.muted },
   small: { fontFamily: fonts.regular, fontSize: 12, color: colorTokens.muted },
   walkList: { gap: 6 },
+  locationMap: { height: 260, borderRadius: radius.card, overflow: "hidden" },
   walkRow: {
     flexDirection: "row",
     alignItems: "center",

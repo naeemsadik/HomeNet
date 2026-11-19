@@ -2465,6 +2465,7 @@ export const bn: TranslationSchema = {
     browse: {
       heading: "ঢাকায় শেয়ার্ড লিভিং",
       headingCampus: "{{campus}}-এর কাছে শেয়ার্ড লিভিং",
+      mapPlace: "ঢাকা",
       intro: "প্রতিটি বিজ্ঞাপনে আছে মাসে সব মিলিয়ে খরচ, আপনার ক্যাম্পাস পর্যন্ত হাঁটা পথ আর বাসার নিয়ম।",
       resultsOne: "১টি বিজ্ঞাপন",
       results: "{{count}}টি বিজ্ঞাপন",
