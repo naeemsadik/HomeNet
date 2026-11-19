@@ -108,7 +108,9 @@ describe("Token Refresh Coordination (Single-Flight & Cross-Tab)", () => {
     expect(req3.headers.Authorization).toBe("Bearer new-access-token-2");
   });
 
-  it("cross-tab Web Locks: prevents duplicate refresh when two tabs trigger refresh simultaneously", async () => {
+  // Both calls below run in one module, so the in-tab single-flight already makes them
+  // share a refresh. The real two-tab case is in "two tabs" further down.
+  it("with the Web Locks API present, parallel 401s in one tab still make one refresh call", async () => {
     let storedAccessToken = "expired-token";
     let storedRefreshToken = "refresh-1";
 
@@ -199,5 +201,157 @@ describe("Token Refresh Coordination (Single-Flight & Cross-Tab)", () => {
     expect(clearSpy).toHaveBeenCalled();
     expect(mockUnauthorized).toHaveBeenCalled();
     expect((mockRequest as any)._retry).toBe(true);
+  });
+});
+
+describe("Two tabs and cross-tab logout", () => {
+  const originalNavigator = globalThis.navigator;
+
+  type Shared = { access: string | null; refresh: string | null };
+
+  /** A lock that runs one holder at a time, as the browser's Web Locks API does across tabs. */
+  function makeLocks() {
+    let tail: Promise<unknown> = Promise.resolve();
+    return {
+      request: jest.fn(async (_name: string, callback: () => Promise<unknown>) => {
+        const previous = tail;
+        let release!: () => void;
+        tail = new Promise<void>((resolve) => {
+          release = resolve;
+        });
+        await previous;
+        try {
+          return await callback();
+        } finally {
+          release();
+        }
+      }),
+    };
+  }
+
+  const setNavigator = (value: unknown) =>
+    Object.defineProperty(globalThis, "navigator", { value, configurable: true, writable: true });
+
+  /**
+   * One browser tab: its own copy of apiClient (so its own in-tab state), reading and writing
+   * the same token storage as every other tab, and sharing one refresh endpoint call counter.
+   */
+  function openTab(shared: Shared, refreshEndpoint: jest.Mock) {
+    let client!: typeof import("@/services/apiClient");
+    let axiosCopy!: { post: unknown };
+    jest.isolateModules(() => {
+      jest.doMock("@/services/tokenStorage", () => ({
+        ACCESS_TOKEN_KEY: "homenet.access_token",
+        REFRESH_TOKEN_KEY: "homenet.refresh_token",
+        getAccessToken: async () => shared.access,
+        getRefreshToken: async () => shared.refresh,
+        saveTokens: async (access: string, refresh: string) => {
+          shared.access = access;
+          shared.refresh = refresh;
+        },
+        clearTokens: async () => {
+          shared.access = null;
+          shared.refresh = null;
+        },
+      }));
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const axiosModule = require("axios");
+      axiosCopy = axiosModule.default ?? axiosModule;
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      client = require("@/services/apiClient");
+    });
+    jest.spyOn(axiosCopy as { post: () => Promise<unknown> }, "post").mockImplementation(refreshEndpoint as never);
+    client.default.defaults.adapter = jest.fn(async (config) => ({
+      data: { success: true, message: "OK", data: null },
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config,
+    }));
+    const on401 = (request: object) =>
+      (client.default.interceptors.response as any).handlers[0].rejected({
+        response: { status: 401 },
+        config: request,
+      });
+    return { client, on401 };
+  }
+
+  const slowRefresh = () =>
+    jest.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      return {
+        data: {
+          success: true,
+          data: { access_token: "rotated-access-2", refresh_token: "rotated-refresh-2" },
+        },
+      };
+    });
+
+  const staleRequest = (url: string) => ({ url, headers: { Authorization: "Bearer expired-token" } });
+
+  afterEach(() => {
+    setNavigator(originalNavigator);
+    jest.dontMock("@/services/tokenStorage");
+    jest.restoreAllMocks();
+  });
+
+  it("two tabs with the lock: one refresh, and the second tab reuses the rotated token", async () => {
+    const shared: Shared = { access: "expired-token", refresh: "refresh-1" };
+    const locks = makeLocks();
+    setNavigator({ locks });
+    const refreshEndpoint = slowRefresh();
+    const tab1 = openTab(shared, refreshEndpoint);
+    const tab2 = openTab(shared, refreshEndpoint);
+    const req1 = staleRequest("/v1/properties");
+    const req2 = staleRequest("/v1/profile");
+
+    await Promise.all([tab1.on401(req1), tab2.on401(req2)]);
+
+    expect(locks.request).toHaveBeenCalledTimes(2);
+    expect(refreshEndpoint).toHaveBeenCalledTimes(1);
+    expect(req1.headers.Authorization).toBe("Bearer rotated-access-2");
+    expect(req2.headers.Authorization).toBe("Bearer rotated-access-2");
+    expect(shared.refresh).toBe("rotated-refresh-2");
+  });
+
+  it("control: without the lock, two tabs both refresh with the same token (the bug the lock prevents)", async () => {
+    const shared: Shared = { access: "expired-token", refresh: "refresh-1" };
+    setNavigator({});
+    const refreshEndpoint = slowRefresh();
+    const tab1 = openTab(shared, refreshEndpoint);
+    const tab2 = openTab(shared, refreshEndpoint);
+
+    await Promise.all([tab1.on401(staleRequest("/v1/a")), tab2.on401(staleRequest("/v1/b"))]);
+
+    expect(refreshEndpoint).toHaveBeenCalledTimes(2);
+    expect(refreshEndpoint.mock.calls.map((call) => (call as unknown[])[1])).toEqual([
+      { refresh_token: "refresh-1" },
+      { refresh_token: "refresh-1" },
+    ]);
+  });
+
+  it("a tab signs out when another tab clears the tokens", async () => {
+    const tab = openTab({ access: "a", refresh: "r" }, jest.fn());
+    const onUnauthorized = jest.fn();
+    tab.client.setUnauthorizedHandler(onUnauthorized);
+
+    window.dispatchEvent(
+      new StorageEvent("storage", { key: "homenet.refresh_token", newValue: null }),
+    );
+
+    expect(onUnauthorized).toHaveBeenCalled();
+  });
+
+  it("a tab stays signed in when another tab stores new tokens, or an unrelated key changes", async () => {
+    const tab = openTab({ access: "a", refresh: "r" }, jest.fn());
+    const onUnauthorized = jest.fn();
+    tab.client.setUnauthorizedHandler(onUnauthorized);
+
+    window.dispatchEvent(
+      new StorageEvent("storage", { key: "homenet.access_token", newValue: "rotated" }),
+    );
+    window.dispatchEvent(new StorageEvent("storage", { key: "homenet.language", newValue: null }));
+
+    expect(onUnauthorized).not.toHaveBeenCalled();
   });
 });
