@@ -106,6 +106,12 @@ export async function legacyPatchProperty(id: string, dto: UpsertPropertyDto) {
   return data;
 }
 
+/** Owner puts a listing live that an admin approved and held for them. */
+export async function publishProperty(id: string) {
+  const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>(`/v1/properties/${id}/publish`);
+  return data;
+}
+
 /** Owner unarchive: restores an archived listing back to active via multiple fallback strategies. */
 export async function unarchiveProperty(id: string) {
   try {

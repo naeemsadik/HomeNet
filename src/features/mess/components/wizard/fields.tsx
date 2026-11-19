@@ -4,7 +4,7 @@
  * reads its error from the form and clears it as soon as it is changed.
  */
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useController, useFormContext, type FieldPath, type FieldPathValue } from "react-hook-form";
 import { Minus, Plus } from "@/components/icons";
 import { formatLocalizedNumber, useTranslation, type TranslationKey } from "@/i18n";
@@ -12,6 +12,8 @@ import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import type { MessListingForm } from "../../utils/wizardForm";
 import { toClockTime } from "../../utils/time";
 import { MessChip } from "../MessChip";
+
+export { ToggleRow } from "@/components/ToggleRow";
 
 type Path = FieldPath<MessListingForm>;
 
@@ -194,24 +196,6 @@ export function TextField({
   );
 }
 
-export function ToggleRow({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (next: boolean) => void }) {
-  return (
-    <View style={styles.toggleRow}>
-      <View style={styles.toggleText}>
-        <Text style={styles.toggleLabel}>{label}</Text>
-        {hint ? <Text style={styles.hint}>{hint}</Text> : null}
-      </View>
-      <Switch
-        accessibilityLabel={label}
-        onValueChange={onChange}
-        thumbColor={colorTokens.surface}
-        trackColor={{ false: colorTokens.divider, true: colorTokens.brand }}
-        value={value}
-      />
-    </View>
-  );
-}
-
 export function StepCard({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <View style={styles.card}>
@@ -268,9 +252,6 @@ const styles = StyleSheet.create({
   prefix: { fontFamily: fonts.medium, fontSize: 15, color: colorTokens.muted },
   input: { flex: 1, minWidth: 0, minHeight: 44, fontFamily: fonts.regular, fontSize: 15, color: colorTokens.ink },
   multiline: { minHeight: 110 },
-  toggleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, minHeight: 48 },
-  toggleText: { flex: 1, gap: 2 },
-  toggleLabel: { fontFamily: fonts.medium, fontSize: 15, color: colorTokens.ink },
   card: {
     gap: 16,
     padding: 20,
