@@ -10,7 +10,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts } from "@/theme";
 import { useQuery } from "@tanstack/react-query";
-import { getPropertyById } from "@/services/propertyApi";
+import { fetchPropertyForViewer } from "../hooks/usePropertyDetail";
 import { toApiError } from "@/services/apiClient";
 import { isListingPhoto } from "@/features/property/utils/listingMedia";
 import { NotFoundScreen } from "@/screens/NotFoundScreen";
@@ -27,10 +27,8 @@ export function PropertyEditScreen() {
 
   const { data: propertyData, error: propertyError, isLoading } = useQuery({
     queryKey: ["property", id],
-    queryFn: async () => {
-      const response = await getPropertyById(id!);
-      return response.data;
-    },
+    // The public route hides a pending listing, which is the one an owner edits most.
+    queryFn: () => fetchPropertyForViewer(id!),
     enabled: !!id,
   });
 
@@ -58,8 +56,10 @@ export function PropertyEditScreen() {
         }
       }
 
-      // The API decides whether the save changed anything, so ask it what happened.
-      const saved = reviewNotice ? (await getPropertyById(propertyId)).data : null;
+      // The API decides whether the save changed anything, so ask it what happened. A listing
+      // sent for review is no longer public, and the save already worked, so a failed read is
+      // not an error.
+      const saved = reviewNotice ? await fetchPropertyForViewer(propertyId).catch(() => null) : null;
       const inReview = saved?.status === "pending";
       notify(t("common.success"), t(inReview ? "property.editInReview" : "property.updateSuccess"), { onConfirm: () => router.back() });
     } catch (err: any) {
