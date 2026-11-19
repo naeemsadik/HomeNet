@@ -2049,15 +2049,13 @@ export const en = {
     },
     heroVisual: {
       openAppAria: "Open live properties in HomeNet",
-      searchPlaceholder: "Search by area, project, or keyword (e.g., Gulshan, Dhanmondi, Uttara)",
       city: "Dhaka",
-      searchBtn: "Search",
       verifiedBadge: "Verified",
       contactDirect: "Contact Owner Directly",
     },
     browserFrame: {
       url: "homenetbd.com/buy",
-      dhakaUrl: "homenetbd.com/buy?city=Dhaka",
+      dhakaUrl: "homenetbd.com/buy?listing_type=sale&city=Dhaka&searched=1",
     },
     journey: {
       seekersTitle: "For Property Seekers",
