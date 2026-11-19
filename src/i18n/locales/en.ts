@@ -1636,6 +1636,7 @@ export const en = {
       addImagesAria: "Add images",
       addBtn: "Add",
       imagesCountHint: "Upload up to {{max}} images ({{current}}/{{max}})",
+      keepOneHint: "A live listing needs at least one photo. Add another before removing this one.",
     },
     review: {
       readyTitle: "Ready for verification",

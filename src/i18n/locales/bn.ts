@@ -1638,6 +1638,7 @@ export const bn: TranslationSchema = {
       addImagesAria: "ছবি যোগ করুন",
       addBtn: "যোগ",
       imagesCountHint: "সর্বোচ্চ {{max}}টি ছবি আপলোড করুন ({{current}}/{{max}})",
+      keepOneHint: "লাইভ লিস্টিংয়ে কমপক্ষে একটি ছবি থাকতে হবে। এটি সরানোর আগে আরেকটি যোগ করুন।",
     },
     review: {
       readyTitle: "ভেরিফিকেশনের জন্য প্রস্তুত",
