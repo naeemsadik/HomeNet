@@ -49,7 +49,7 @@ function toMapProperty(source: MapSource): Property {
     published_at: null,
     created_at: source.at,
     updated_at: source.at,
-    area: source.area ? ({ id: source.area.id, name: source.area.name } as Property["area"]) : null,
+    area: source.area ? { id: source.area.id, name: source.area.name, parent_area_id: null, city: null } : null,
     media: source.cover
       ? [{ id: `${source.id}-cover`, property_id: source.id, media_type: "image", url: source.cover, public_id: "", thumbnail_url: null, display_order: 0 }]
       : [],

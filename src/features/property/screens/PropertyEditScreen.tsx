@@ -4,14 +4,15 @@ import { confirmAction, notify } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyForm } from "../components/PropertyForm";
-import { useDeleteMedia, useUpdateProperty, useUploadMedia } from "../hooks/usePropertyMutations";
+import { useUpdateProperty } from "../hooks/usePropertyMutations";
 import type { UpsertPropertyDto } from "@/types/api";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts } from "@/theme";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchPropertyForViewer } from "../hooks/usePropertyDetail";
 import { toApiError } from "@/services/apiClient";
+import { deletePropertyMedia, uploadPropertyMedia } from "@/services/propertyApi";
 import { isListingPhoto } from "@/features/property/utils/listingMedia";
 import { applyPhotoEdits } from "@/features/property/utils/removedPhotos";
 import { NotFoundScreen } from "@/screens/NotFoundScreen";
@@ -24,8 +25,7 @@ export function PropertyEditScreen() {
   const user = useAuthStore((s) => s.user);
   const hydrated = useAuthStore((s) => s.hydrated);
   const updateProperty = useUpdateProperty();
-  const uploadMedia = useUploadMedia();
-  const deleteMedia = useDeleteMedia();
+  const queryClient = useQueryClient();
   // One save is several requests; the form stays locked from the first to the last.
   const [saving, setSaving] = useState(false);
 
@@ -61,9 +61,13 @@ export function PropertyEditScreen() {
       await applyPhotoEdits({
         saved: photos,
         inForm: images,
-        upload: (file) => uploadMedia.mutateAsync({ propertyId, file }),
-        remove: (photo) => deleteMedia.mutateAsync({ mediaId: photo.id, propertyId }),
+        upload: (file) => uploadPropertyMedia(propertyId, file, "image"),
+        remove: (photo) => deletePropertyMedia(photo.id),
       });
+      // The photo requests skip the per-request refresh the hooks do; refresh once, now they are done.
+      for (const queryKey of [["properties"], ["my-properties"], ["admin", "properties"], ["property", propertyId]]) {
+        void queryClient.invalidateQueries({ queryKey });
+      }
 
       // The API decides whether the save changed anything, so ask it what happened. A listing
       // sent for review is no longer public, and the save already worked, so a failed read is

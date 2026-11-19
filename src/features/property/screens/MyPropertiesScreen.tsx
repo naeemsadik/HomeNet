@@ -277,7 +277,7 @@ export function MyPropertiesScreen() {
                   ["all", t("seller.filters.all"), counts.all],
                   ["active", t("seller.filters.active"), counts.active],
                   ["draft", t("seller.filters.draft"), counts.draft],
-                  ["pending", t("seller.filters.pending"), counts.pending],
+                  ["pending", t("seller.inReview"), counts.pending],
                   ["rejected", t("seller.filters.rejected"), counts.rejected],
                   ["sold", t("seller.filters.sold"), counts.sold],
                   ["archived", t("seller.filters.archived"), counts.archived],

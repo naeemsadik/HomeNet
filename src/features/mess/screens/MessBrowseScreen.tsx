@@ -74,6 +74,12 @@ export function MessBrowseScreen() {
 
   const canMap = feed.items.some(hasPin);
   const showMap = view === "map" && canMap;
+  const pinned = cardsForMap(feed.items);
+
+  // With no pinned result the page shows the list, and it should stay there if pins return later.
+  useEffect(() => {
+    if (!canMap) setView("list");
+  }, [canMap]);
   const heading = campusName ? t("mess.browse.headingCampus", { campus: campusName }) : t("mess.browse.heading");
   const count = feed.total ?? 0;
 
@@ -127,7 +133,6 @@ export function MessBrowseScreen() {
           <View style={styles.prompt}>
             <GraduationCap size={22} color={colorTokens.brandText} />
             <Text style={styles.promptText}>{t("mess.campus.prompt")}</Text>
-            <AppButton label={t("mess.campus.choose")} onPress={() => setPanel("campus")} />
           </View>
         ) : null}
 
@@ -152,13 +157,17 @@ export function MessBrowseScreen() {
         ) : (
           <>
             <LiveText style={styles.count} accessibilityLiveRegion="polite">
-              {count === 1 ? t("mess.browse.resultsOne") : t("mess.browse.results", { count: formatLocalizedNumber(count, language) })}
+              {showMap
+                ? t("mess.browse.mapShowing", { pinned: formatLocalizedNumber(pinned.length, language), count: formatLocalizedNumber(count, language) })
+                : count === 1
+                  ? t("mess.browse.resultsOne")
+                  : t("mess.browse.results", { count: formatLocalizedNumber(count, language) })}
             </LiveText>
             {showMap ? (
               <PropertyResultsMap
                 activeLocation={campusName ?? t("mess.browse.mapPlace")}
                 peek={isPhone ? "carousel" : "bottom"}
-                properties={cardsForMap(feed.items)}
+                properties={pinned}
                 style={styles.map}
               />
             ) : (
