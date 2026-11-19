@@ -2444,6 +2444,7 @@ export const en = {
     browse: {
       heading: "Shared living in Dhaka",
       headingCampus: "Shared living near {{campus}}",
+      mapPlace: "Dhaka",
       intro: "Every listing shows the all-in monthly cost, the walk to your campus and the house rules.",
       resultsOne: "1 listing",
       results: "{{count}} listings",

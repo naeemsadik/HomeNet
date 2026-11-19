@@ -26,6 +26,12 @@ jest.mock("@/components/AppChrome", () => ({
   ),
 }));
 jest.mock("@/components/PageMeta", () => ({ PageMeta: () => null }));
+// Leaflet is not loadable in Jest; the stub records how many pins the page asked for.
+jest.mock("@/components/PropertyResultsMap", () => ({
+  PropertyResultsMap: ({ properties }: { properties: unknown[] }) => (
+    <div data-testid="results-map" data-pins={properties.length} />
+  ),
+}));
 jest.mock("@/features/property/components/PropertyLightbox", () => ({ PropertyLightbox: () => null }));
 jest.mock("@/features/property/components/WhatsAppIcon", () => ({ WhatsAppIcon: () => null }));
 jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false } }));
@@ -146,6 +152,18 @@ describe("MessDetailScreen", () => {
     expect(order.every((index) => index >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
+  });
+
+  it("shows the listing on a map under Location, and no map when the lister placed no pin", async () => {
+    (getMessDetail as jest.Mock).mockResolvedValue(DETAIL);
+    await render();
+    expect(container.querySelector('[data-testid="results-map"]')?.getAttribute("data-pins")).toBe("1");
+    await act(async () => root.unmount());
+
+    root = createRoot(container);
+    (getMessDetail as jest.Mock).mockResolvedValue({ ...DETAIL, location_lat: null, location_lng: null });
+    await render();
+    expect(container.querySelector('[data-testid="results-map"]')).toBeNull();
   });
 
   it("shows the cost breakdown inline, for the cheapest open seat", async () => {

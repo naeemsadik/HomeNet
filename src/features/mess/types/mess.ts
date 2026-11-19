@@ -192,6 +192,9 @@ export interface MessCard {
   title: string;
   subtype: MessSubtype;
   area: { id: string; name: string } | null;
+  /** The map pin. Absent when the lister has not placed one, so the card has no spot on the map. */
+  location_lat?: number | null;
+  location_lng?: number | null;
   cover: { url: string; label: MediaLabel | null } | null;
   cost: { all_in_min: number; all_in_max: number; rent_from: number; costs_complete: boolean };
   /** Present only when the search named a campus. */

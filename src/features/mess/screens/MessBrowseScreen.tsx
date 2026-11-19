@@ -3,9 +3,10 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppChrome } from "@/components/AppChrome";
-import { ArrowUpDown, Check, ChevronDown, GraduationCap, Plus, SearchX, SlidersHorizontal } from "@/components/icons";
+import { ArrowUpDown, Check, ChevronDown, GraduationCap, List, MapIcon, Plus, SearchX, SlidersHorizontal } from "@/components/icons";
 import { LiveText } from "@/components/LiveText";
 import { PageMeta } from "@/components/PageMeta";
+import { PropertyResultsMap } from "@/components/PropertyResultsMap";
 import { AppButton } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { formatLocalizedNumber, useTranslation, type TranslationKey } from "@/i18n";
@@ -24,6 +25,7 @@ import { useSyncSeatPreferences } from "../hooks/useSeatPreferences";
 import { campusLabel, findCampus, useUniversities } from "../hooks/useUniversities";
 import type { MessCard, MessSort, RuleKey } from "../types/mess";
 import { clearedFilters, countActiveFilters } from "../utils/filterParams";
+import { cardsForMap, hasPin } from "../utils/mapListings";
 import { ruleMatchesFilters } from "../utils/rules";
 import { DemoNotice } from "../components/DemoNotice";
 import { MESS_DEMO } from "@/lib/features";
@@ -50,6 +52,7 @@ export function MessBrowseScreen() {
   const toggleSaved = useSavedStore((s) => s.toggleSaved);
   const [panel, setPanel] = useState<Panel>(null);
   const [breakdownId, setBreakdownId] = useState<string | null>(null);
+  const [view, setView] = useState<"list" | "map">("list");
 
   const choice = findCampus(universities.data, filters.campus_id);
   const campusName = choice ? campusLabel(choice) : null;
@@ -69,6 +72,8 @@ export function MessBrowseScreen() {
   const rows: MessCard[][] = [];
   for (let i = 0; i < feed.items.length; i += columns) rows.push(feed.items.slice(i, i + columns));
 
+  const canMap = feed.items.some(hasPin);
+  const showMap = view === "map" && canMap;
   const heading = campusName ? t("mess.browse.headingCampus", { campus: campusName }) : t("mess.browse.heading");
   const count = feed.total ?? 0;
 
@@ -106,6 +111,14 @@ export function MessBrowseScreen() {
             accessibilityLabel={`${t("mess.filters.sort")}: ${t(SORTS.find((option) => option.value === sort)!.labelKey)}`}
             onPress={() => setPanel("sort")}
           />
+          {canMap ? (
+            <ToolbarButton
+              icon={showMap ? List : MapIcon}
+              label={t(showMap ? "search.listView" : "search.mapView")}
+              onPress={() => setView(showMap ? "list" : "map")}
+              trailing={false}
+            />
+          ) : null}
         </View>
 
         <ActiveFilterChips filters={filters} onChange={commit} />
@@ -141,6 +154,14 @@ export function MessBrowseScreen() {
             <LiveText style={styles.count} accessibilityLiveRegion="polite">
               {count === 1 ? t("mess.browse.resultsOne") : t("mess.browse.results", { count: formatLocalizedNumber(count, language) })}
             </LiveText>
+            {showMap ? (
+              <PropertyResultsMap
+                activeLocation={campusName ?? t("mess.browse.mapPlace")}
+                peek={isPhone ? "carousel" : "bottom"}
+                properties={cardsForMap(feed.items)}
+                style={styles.map}
+              />
+            ) : (
             <View style={styles.grid} role="list">
               {rows.map((row, r) => (
                 <View key={r} style={styles.row}>
@@ -163,6 +184,7 @@ export function MessBrowseScreen() {
                 </View>
               ))}
             </View>
+            )}
             {feed.hasMore ? (
               <AppButton
                 label={t("mess.browse.loadMore")}
@@ -234,12 +256,15 @@ function ToolbarButton({
   onPress,
   emphasis = false,
   accessibilityLabel,
+  trailing = true,
 }: {
   icon: typeof GraduationCap;
   label: string;
   onPress: () => void;
   emphasis?: boolean;
   accessibilityLabel?: string;
+  /** The chevron marks a button that opens a list; the view switch has none. */
+  trailing?: boolean;
 }) {
   return (
     <Pressable
@@ -252,7 +277,7 @@ function ToolbarButton({
       <Text style={[styles.toolText, emphasis && styles.toolTextEmphasis]} numberOfLines={1}>
         {label}
       </Text>
-      <ChevronDown size={14} color={colorTokens.muted} />
+      {trailing ? <ChevronDown size={14} color={colorTokens.muted} /> : null}
     </Pressable>
   );
 }
@@ -294,6 +319,7 @@ const styles = StyleSheet.create({
   promptText: { flex: 1, minWidth: 200, fontFamily: fonts.medium, fontSize: 14, lineHeight: 20, color: colorTokens.ink },
   count: { fontFamily: fonts.semiBold, fontSize: 14, color: colorTokens.body },
   grid: { gap: 16 },
+  map: { height: 560, borderRadius: radius.card, overflow: "hidden" },
   row: { flexDirection: "row", gap: 16 },
   cell: { flex: 1, minWidth: 0 },
   skeleton: { height: 360, borderRadius: radius.card, backgroundColor: colorTokens.surfaceSunken },
