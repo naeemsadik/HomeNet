@@ -30,6 +30,8 @@ interface PropertyFormProps {
   error?: string | null;
   /** Edit only: saving takes this listing offline for review (it is live, or approved and held). */
   reviewNotice?: "offline" | "held" | null;
+  /** Edit only: keep the last photo (false when a video means the listing keeps media without it). */
+  keepLastPhoto?: boolean;
 }
 
 const STEPS = ["Details", "Location", "Features", "Images"] as const;
@@ -44,6 +46,7 @@ export function PropertyForm({
   loading = false,
   error = null,
   reviewNotice = null,
+  keepLastPhoto = true,
 }: PropertyFormProps) {
   const { t, language } = useTranslation();
   // "Contact for price" is stored as price 1; the box is then locked.
@@ -269,7 +272,7 @@ export function PropertyForm({
               onAdd={(newImgs) => setImages((prev) => [...prev, ...newImgs])}
               onRemove={(idx) => setImages((prev) => prev.filter((_, i) => i !== idx))}
               maxImages={20}
-              keepLast={mode === "edit" && reviewNotice !== null}
+              keepLast={mode === "edit" && reviewNotice !== null && keepLastPhoto}
             />
             {mode === "edit" ? (
               <View style={styles.reviewBox}>

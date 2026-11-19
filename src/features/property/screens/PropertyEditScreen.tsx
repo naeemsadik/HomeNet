@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchPropertyForViewer } from "../hooks/usePropertyDetail";
 import { toApiError } from "@/services/apiClient";
 import { isListingPhoto } from "@/features/property/utils/listingMedia";
-import { removedPhotos } from "@/features/property/utils/removedPhotos";
+import { applyPhotoEdits } from "@/features/property/utils/removedPhotos";
 import { NotFoundScreen } from "@/screens/NotFoundScreen";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -36,6 +36,9 @@ export function PropertyEditScreen() {
     enabled: !!id,
   });
 
+  const photos = (propertyData?.media ?? []).filter(isListingPhoto);
+  // The API counts videos as media too, so a listing with a video may lose its only photo.
+  const hasOtherMedia = (propertyData?.media ?? []).length > photos.length;
   const isOwner = Boolean(user && propertyData && user.id === propertyData.user_id);
   // A save sends a live listing, or one approved and held for its owner, back to review.
   const reviewNotice = propertyData?.status === "active" ? "offline" : propertyData?.ready_to_publish ? "held" : null;
@@ -55,18 +58,12 @@ export function PropertyEditScreen() {
       const result = await updateProperty.mutateAsync({ id, dto });
       const propertyId = result.data?.id ?? id;
 
-      for (const img of images) {
-        if (img.file && !img.uri.startsWith("http")) {
-          await uploadMedia.mutateAsync({ propertyId, file: img.file });
-        }
-      }
-
-      // New photos go up before removed ones come down, so a listing that must keep a photo
-      // never passes through having none (the API refuses to remove the last one).
-      const photos = (propertyData?.media ?? []).filter(isListingPhoto);
-      for (const photo of removedPhotos(photos, images)) {
-        await deleteMedia.mutateAsync({ mediaId: photo.id, propertyId });
-      }
+      await applyPhotoEdits({
+        saved: photos,
+        inForm: images,
+        upload: (file) => uploadMedia.mutateAsync({ propertyId, file }),
+        remove: (photo) => deleteMedia.mutateAsync({ mediaId: photo.id, propertyId }),
+      });
 
       // The API decides whether the save changed anything, so ask it what happened. A listing
       // sent for review is no longer public, and the save already worked, so a failed read is
@@ -143,6 +140,7 @@ export function PropertyEditScreen() {
           onSubmit={handleSubmit}
           onCancel={() => router.back()}
           reviewNotice={reviewNotice}
+          keepLastPhoto={!hasOtherMedia}
           loading={saving}
           error={updateProperty.error ? toApiError(updateProperty.error).message : null}
         />

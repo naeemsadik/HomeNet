@@ -102,6 +102,32 @@ describe("fetchPropertyForViewer", () => {
     await expect(fetchPropertyForViewer("p1")).rejects.toBe(outage);
   });
 
+  describe("for a listing already seen as pending", () => {
+    it("asks for the owner's copy first and does not call the public route", async () => {
+      signIn();
+      myRead.mockResolvedValue(listing("mine"));
+
+      await expect(fetchPropertyForViewer("p1", { knownNonPublic: true })).resolves.toMatchObject({ title: "mine" });
+      expect(publicRead).not.toHaveBeenCalled();
+    });
+
+    it("falls back to the public route when the listing has gone live", async () => {
+      signIn();
+      myRead.mockRejectedValue(notFound());
+      publicRead.mockResolvedValue(listing("public"));
+
+      await expect(fetchPropertyForViewer("p1", { knownNonPublic: true })).resolves.toMatchObject({ title: "public" });
+    });
+
+    it("asks the public route when nobody is signed in, and keeps its error", async () => {
+      const original = notFound();
+      publicRead.mockRejectedValue(original);
+
+      await expect(fetchPropertyForViewer("p1", { knownNonPublic: true })).rejects.toBe(original);
+      expect(myRead).not.toHaveBeenCalled();
+    });
+  });
+
   it("waits for the stored session before deciding nobody is signed in", async () => {
     useAuthStore.setState({ hydrated: false, user: null, userRoles: [] });
     publicRead.mockRejectedValue(notFound());
