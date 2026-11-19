@@ -1,5 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProperties, getPropertyById } from "@/services/propertyApi";
+import { ApiError } from "@/services/apiClient";
+import { getAdminPropertyById, getMyPropertyById, getProperties, getPropertyById } from "@/services/propertyApi";
+import type { ApiResponse } from "@/types/api";
+import type { Property } from "../types/property";
+import { hasPermission } from "@/lib/permissions";
+import { useAuthStore } from "@/stores/authStore";
 import { isMessSubtype } from "@/lib/listingPath";
 
 export interface PropertyDetailArea {
@@ -58,6 +63,64 @@ export interface PropertyDetail {
   _count: { media: number };
 }
 
+const HYDRATION_WAIT_MS = 5_000;
+
+/** The session is read from storage once at start-up; a listing opened by link can ask before that is done. */
+function waitForSession(): Promise<void> {
+  if (useAuthStore.getState().hydrated) return Promise.resolve();
+  return new Promise((resolve) => {
+    const timer = setTimeout(done, HYDRATION_WAIT_MS);
+    const unsubscribe = useAuthStore.subscribe((state) => {
+      if (state.hydrated) done();
+    });
+    function done() {
+      clearTimeout(timer);
+      unsubscribe();
+      resolve();
+    }
+  });
+}
+
+const isStatus = (error: unknown, ...statuses: number[]) =>
+  error instanceof ApiError && error.status !== null && statuses.includes(error.status);
+
+const unwrap = (response: ApiResponse<Property>): Property => {
+  if (!response.data) throw new Error(response.message || "Property not found");
+  return response.data;
+};
+
+/**
+ * The listing as its viewer may see it. The public route answers "not found"
+ * for a listing that is pending, a draft or archived, so its owner and staff
+ * would see the same dead end as everyone else. When the public route says
+ * not found and someone is signed in, ask for their own copy, then (for staff
+ * with manage_properties) any copy. If none opens it, the public error stands.
+ * Any other failure (a 500, no connection) is not a missing listing and is
+ * passed on as it is.
+ */
+export async function fetchPropertyForViewer(id: string): Promise<Property> {
+  try {
+    return unwrap(await getPropertyById(id));
+  } catch (publicError) {
+    if (!isStatus(publicError, 404)) throw publicError;
+    await waitForSession();
+    const { user, userRoles } = useAuthStore.getState();
+    if (!user) throw publicError;
+
+    const reads = [getMyPropertyById];
+    if (hasPermission(userRoles, "manage_properties")) reads.push(getAdminPropertyById);
+    for (const read of reads) {
+      try {
+        return unwrap(await read(id));
+      } catch (error) {
+        // Not theirs (404) or not allowed (403): try the next, then keep the first error.
+        if (!isStatus(error, 403, 404)) throw error;
+      }
+    }
+    throw publicError;
+  }
+}
+
 // A pending listing is polled for its review result: quickly at first, then
 // slower, then not at all. Window focus refetches still pick up a late change.
 const INITIAL_POLL_INTERVAL_MS = 10_000;
@@ -76,9 +139,7 @@ export function usePropertyDetail(id: string, initial?: PropertyDetail) {
   return useQuery({
     queryKey: ["property", cleanId],
     queryFn: async () => {
-      const response = await getPropertyById(cleanId);
-      if (!response.data) throw new Error(response.message || "Property not found");
-      return response.data as PropertyDetail;
+      return (await fetchPropertyForViewer(cleanId)) as unknown as PropertyDetail;
     },
     initialData: initial,
     initialDataUpdatedAt: 0,
