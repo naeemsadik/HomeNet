@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/services/apiClient";
 import { getAdminPropertyById, getMyPropertyById, getProperties, getPropertyById } from "@/services/propertyApi";
 import type { ApiResponse } from "@/types/api";
@@ -84,9 +84,10 @@ function waitForSession(): Promise<void> {
 const isStatus = (error: unknown, ...statuses: number[]) =>
   error instanceof ApiError && error.status !== null && statuses.includes(error.status);
 
-const unwrap = (response: ApiResponse<Property>): Property => {
+/** The API's listing payload, typed as the screen that reads it expects. */
+const unwrap = <T,>(response: ApiResponse<Property>): T => {
   if (!response.data) throw new Error(response.message || "Property not found");
-  return response.data;
+  return response.data as unknown as T;
 };
 
 /**
@@ -97,26 +98,41 @@ const unwrap = (response: ApiResponse<Property>): Property => {
  * with manage_properties) any copy. If none opens it, the public error stands.
  * Any other failure (a 500, no connection) is not a missing listing and is
  * passed on as it is.
+ *
+ * `knownNonPublic` is for a listing already seen as pending or a draft (a
+ * refresh of a listing in review): its own copy is asked for first, and the
+ * public route only if that fails, as the listing may have gone live.
  */
-export async function fetchPropertyForViewer(id: string): Promise<Property> {
-  try {
-    return unwrap(await getPropertyById(id));
-  } catch (publicError) {
-    if (!isStatus(publicError, 404)) throw publicError;
+export async function fetchPropertyForViewer<T = Property>(
+  id: string,
+  { knownNonPublic = false }: { knownNonPublic?: boolean } = {},
+): Promise<T> {
+  const readPublic = async () => unwrap<T>(await getPropertyById(id));
+
+  const readOwn = async (): Promise<T | undefined> => {
     await waitForSession();
     const { user, userRoles } = useAuthStore.getState();
-    if (!user) throw publicError;
-
+    if (!user) return undefined;
     const reads = [getMyPropertyById];
     if (hasPermission(userRoles, "manage_properties")) reads.push(getAdminPropertyById);
     for (const read of reads) {
       try {
-        return unwrap(await read(id));
+        return unwrap<T>(await read(id));
       } catch (error) {
-        // Not theirs (404) or not allowed (403): try the next, then keep the first error.
+        // Not theirs (404) or not allowed (403): try the next.
         if (!isStatus(error, 403, 404)) throw error;
       }
     }
+    return undefined;
+  };
+
+  if (knownNonPublic) return (await readOwn()) ?? readPublic();
+  try {
+    return await readPublic();
+  } catch (publicError) {
+    if (!isStatus(publicError, 404)) throw publicError;
+    const own = await readOwn();
+    if (own !== undefined) return own;
     throw publicError;
   }
 }
@@ -136,10 +152,14 @@ const MAX_POLL_ATTEMPTS = 10;
  */
 export function usePropertyDetail(id: string, initial?: PropertyDetail) {
   const cleanId = (typeof id === "string" ? id : String(id || "")).trim();
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["property", cleanId],
-    queryFn: async () => {
-      return (await fetchPropertyForViewer(cleanId)) as unknown as PropertyDetail;
+    queryFn: () => {
+      // A listing already seen as not public (in review) is asked for as its owner or staff first.
+      const seen = queryClient.getQueryData<PropertyDetail>(["property", cleanId]);
+      const knownNonPublic = seen !== undefined && seen.status !== "active" && seen.status !== "sold";
+      return fetchPropertyForViewer<PropertyDetail>(cleanId, { knownNonPublic });
     },
     initialData: initial,
     initialDataUpdatedAt: 0,
