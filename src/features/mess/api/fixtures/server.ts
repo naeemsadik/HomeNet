@@ -163,6 +163,8 @@ function toCard(listing: StoredListing, campusId?: string): MessCard {
     title: detail.title,
     subtype: detail.subtype,
     area: detail.area,
+    location_lat: detail.location_lat,
+    location_lng: detail.location_lng,
     cover: cover(detail),
     cost: {
       all_in_min: detail.mess.all_in_min,

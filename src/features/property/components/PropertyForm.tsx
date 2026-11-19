@@ -30,6 +30,8 @@ interface PropertyFormProps {
   error?: string | null;
   /** Edit only: saving takes this listing offline for review (it is live, or approved and held). */
   reviewNotice?: "offline" | "held" | null;
+  /** Edit only: keep the last photo (false when a video means the listing keeps media without it). */
+  keepLastPhoto?: boolean;
 }
 
 const STEPS = ["Details", "Location", "Features", "Images"] as const;
@@ -44,6 +46,7 @@ export function PropertyForm({
   loading = false,
   error = null,
   reviewNotice = null,
+  keepLastPhoto = true,
 }: PropertyFormProps) {
   const { t, language } = useTranslation();
   // "Contact for price" is stored as price 1; the box is then locked.
@@ -111,6 +114,17 @@ export function PropertyForm({
     onSubmit(dto, images);
   };
 
+  // Said on the first step, so it is read before the work is done, and again before saving.
+  const offlineNotice =
+    mode === "edit" && reviewNotice ? (
+      <View accessibilityRole="alert" style={styles.reviewNotice}>
+        <Text style={styles.reviewNoticeTitle}>{t("property.editOfflineTitle")}</Text>
+        <Text style={styles.reviewNoticeBody}>
+          {t(reviewNotice === "held" ? "property.editHeldBody" : "property.editOfflineBody")}
+        </Text>
+      </View>
+    ) : null;
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "web" ? undefined : "padding"} style={styles.flex}>
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -147,6 +161,7 @@ export function PropertyForm({
         {/* Step Content */}
         {step === 0 && (
           <View style={styles.stepContent}>
+            {offlineNotice}
             <Text style={styles.sectionTitle}>{t("wizard.form.detailsTitle")}</Text>
             <FormFloatingInput
               control={control}
@@ -269,17 +284,12 @@ export function PropertyForm({
               onAdd={(newImgs) => setImages((prev) => [...prev, ...newImgs])}
               onRemove={(idx) => setImages((prev) => prev.filter((_, i) => i !== idx))}
               maxImages={20}
+              keepLast={mode === "edit" && reviewNotice !== null && keepLastPhoto}
             />
             {mode === "edit" ? (
               <View style={styles.reviewBox}>
-                {reviewNotice ? (
-                  <View accessibilityRole="alert" style={styles.reviewNotice}>
-                    <Text style={styles.reviewNoticeTitle}>{t("property.editOfflineTitle")}</Text>
-                    <Text style={styles.reviewNoticeBody}>
-                      {t(reviewNotice === "held" ? "property.editHeldBody" : "property.editOfflineBody")}
-                    </Text>
-                  </View>
-                ) : null}
+                {offlineNotice}
+                <Text style={styles.sectionTitle}>{t("property.approvalTitle")}</Text>
                 <ToggleRow
                   label={t("property.goLiveLabel")}
                   hint={t(goLiveOnApproval ? "property.goLiveOnHint" : "property.goLiveOffHint")}

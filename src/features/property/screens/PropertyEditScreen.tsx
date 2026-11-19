@@ -1,18 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyForm } from "../components/PropertyForm";
-import { useUpdateProperty, useUploadMedia } from "../hooks/usePropertyMutations";
+import { useUpdateProperty } from "../hooks/usePropertyMutations";
 import type { UpsertPropertyDto } from "@/types/api";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts } from "@/theme";
-import { useQuery } from "@tanstack/react-query";
-import { getPropertyById } from "@/services/propertyApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { fetchPropertyForViewer } from "../hooks/usePropertyDetail";
 import { toApiError } from "@/services/apiClient";
+import { deletePropertyMedia, uploadPropertyMedia } from "@/services/propertyApi";
 import { isListingPhoto } from "@/features/property/utils/listingMedia";
+import { applyPhotoEdits } from "@/features/property/utils/removedPhotos";
 import { NotFoundScreen } from "@/screens/NotFoundScreen";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -23,23 +25,26 @@ export function PropertyEditScreen() {
   const user = useAuthStore((s) => s.user);
   const hydrated = useAuthStore((s) => s.hydrated);
   const updateProperty = useUpdateProperty();
-  const uploadMedia = useUploadMedia();
+  const queryClient = useQueryClient();
+  // One save is several requests; the form stays locked from the first to the last.
+  const [saving, setSaving] = useState(false);
 
   const { data: propertyData, error: propertyError, isLoading } = useQuery({
     queryKey: ["property", id],
-    queryFn: async () => {
-      const response = await getPropertyById(id!);
-      return response.data;
-    },
+    // The public route hides a pending listing, which is the one an owner edits most.
+    queryFn: () => fetchPropertyForViewer(id!),
     enabled: !!id,
   });
 
+  const photos = (propertyData?.media ?? []).filter(isListingPhoto);
+  // The API counts videos as media too, so a listing with a video may lose its only photo.
+  const hasOtherMedia = (propertyData?.media ?? []).length > photos.length;
   const isOwner = Boolean(user && propertyData && user.id === propertyData.user_id);
   // A save sends a live listing, or one approved and held for its owner, back to review.
   const reviewNotice = propertyData?.status === "active" ? "offline" : propertyData?.ready_to_publish ? "held" : null;
 
   const handleSubmit = async (dto: UpsertPropertyDto, images: { uri: string; file?: Blob | File }[]) => {
-    if (!id || !isOwner) return;
+    if (!id || !isOwner || saving) return;
     if (reviewNotice) {
       const confirmed = await confirmAction(
         t("property.editConfirmTitle"),
@@ -48,22 +53,32 @@ export function PropertyEditScreen() {
       );
       if (!confirmed) return;
     }
+    setSaving(true);
     try {
       const result = await updateProperty.mutateAsync({ id, dto });
       const propertyId = result.data?.id ?? id;
 
-      for (const img of images) {
-        if (img.file && !img.uri.startsWith("http")) {
-          await uploadMedia.mutateAsync({ propertyId, file: img.file });
-        }
+      await applyPhotoEdits({
+        saved: photos,
+        inForm: images,
+        upload: (file) => uploadPropertyMedia(propertyId, file, "image"),
+        remove: (photo) => deletePropertyMedia(photo.id),
+      });
+      // The photo requests skip the per-request refresh the hooks do; refresh once, now they are done.
+      for (const queryKey of [["properties"], ["my-properties"], ["admin", "properties"], ["property", propertyId]]) {
+        void queryClient.invalidateQueries({ queryKey });
       }
 
-      // The API decides whether the save changed anything, so ask it what happened.
-      const saved = reviewNotice ? (await getPropertyById(propertyId)).data : null;
+      // The API decides whether the save changed anything, so ask it what happened. A listing
+      // sent for review is no longer public, and the save already worked, so a failed read is
+      // not an error.
+      const saved = reviewNotice ? await fetchPropertyForViewer(propertyId).catch(() => null) : null;
       const inReview = saved?.status === "pending";
       notify(t("common.success"), t(inReview ? "property.editInReview" : "property.updateSuccess"), { onConfirm: () => router.back() });
     } catch (err: any) {
       notify(t("common.error"), toApiError(err).message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -129,7 +144,8 @@ export function PropertyEditScreen() {
           onSubmit={handleSubmit}
           onCancel={() => router.back()}
           reviewNotice={reviewNotice}
-          loading={updateProperty.isPending || uploadMedia.isPending}
+          keepLastPhoto={!hasOtherMedia}
+          loading={saving}
           error={updateProperty.error ? toApiError(updateProperty.error).message : null}
         />
       </View>

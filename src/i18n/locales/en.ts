@@ -1636,6 +1636,7 @@ export const en = {
       addImagesAria: "Add images",
       addBtn: "Add",
       imagesCountHint: "Upload up to {{max}} images ({{current}}/{{max}})",
+      keepOneHint: "A live listing needs at least one photo. Add another before removing this one.",
     },
     review: {
       readyTitle: "Ready for verification",
@@ -1734,6 +1735,7 @@ export const en = {
     editConfirmMessage: "Saving sends \"{{title}}\" back for review and hides it from search until it is approved. Save your changes?",
     editConfirmAction: "Save and send for review",
     editInReview: "Changes saved. Your listing is in review and hidden until an admin approves it.",
+    approvalTitle: "When it is approved",
     goLiveLabel: "Go live as soon as it is approved",
     goLiveOnHint: "Your listing returns to search the moment an admin approves it.",
     goLiveOffHint: "After approval your listing waits until you press Publish.",
@@ -2462,6 +2464,8 @@ export const en = {
     browse: {
       heading: "Shared living in Dhaka",
       headingCampus: "Shared living near {{campus}}",
+      mapPlace: "Dhaka",
+      mapShowing: "Showing {{pinned}} of {{count}} listings on the map",
       intro: "Every listing shows the all-in monthly cost, the walk to your campus and the house rules.",
       resultsOne: "1 listing",
       results: "{{count}} listings",

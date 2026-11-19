@@ -1,5 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { getProperties, getPropertyById } from "@/services/propertyApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiError } from "@/services/apiClient";
+import { getAdminPropertyById, getMyPropertyById, getProperties, getPropertyById } from "@/services/propertyApi";
+import type { ApiResponse } from "@/types/api";
+import type { Property } from "../types/property";
+import { hasPermission } from "@/lib/permissions";
+import { useAuthStore } from "@/stores/authStore";
 import { isMessSubtype } from "@/lib/listingPath";
 
 export interface PropertyDetailArea {
@@ -58,6 +63,80 @@ export interface PropertyDetail {
   _count: { media: number };
 }
 
+const HYDRATION_WAIT_MS = 5_000;
+
+/** The session is read from storage once at start-up; a listing opened by link can ask before that is done. */
+function waitForSession(): Promise<void> {
+  if (useAuthStore.getState().hydrated) return Promise.resolve();
+  return new Promise((resolve) => {
+    const timer = setTimeout(done, HYDRATION_WAIT_MS);
+    const unsubscribe = useAuthStore.subscribe((state) => {
+      if (state.hydrated) done();
+    });
+    function done() {
+      clearTimeout(timer);
+      unsubscribe();
+      resolve();
+    }
+  });
+}
+
+const isStatus = (error: unknown, ...statuses: number[]) =>
+  error instanceof ApiError && error.status !== null && statuses.includes(error.status);
+
+/** The API's listing payload, typed as the screen that reads it expects. */
+const unwrap = <T,>(response: ApiResponse<Property>): T => {
+  if (!response.data) throw new Error(response.message || "Property not found");
+  return response.data as unknown as T;
+};
+
+/**
+ * The listing as its viewer may see it. The public route answers "not found"
+ * for a listing that is pending, a draft or archived, so its owner and staff
+ * would see the same dead end as everyone else. When the public route says
+ * not found and someone is signed in, ask for their own copy, then (for staff
+ * with manage_properties) any copy. If none opens it, the public error stands.
+ * Any other failure (a 500, no connection) is not a missing listing and is
+ * passed on as it is.
+ *
+ * `knownNonPublic` is for a listing already seen as pending or a draft (a
+ * refresh of a listing in review): its own copy is asked for first, and the
+ * public route only if that fails, as the listing may have gone live.
+ */
+export async function fetchPropertyForViewer<T = Property>(
+  id: string,
+  { knownNonPublic = false }: { knownNonPublic?: boolean } = {},
+): Promise<T> {
+  const readPublic = async () => unwrap<T>(await getPropertyById(id));
+
+  const readOwn = async (): Promise<T | undefined> => {
+    await waitForSession();
+    const { user, userRoles } = useAuthStore.getState();
+    if (!user) return undefined;
+    const reads = [getMyPropertyById];
+    if (hasPermission(userRoles, "manage_properties")) reads.push(getAdminPropertyById);
+    for (const read of reads) {
+      try {
+        return unwrap<T>(await read(id));
+      } catch (error) {
+        // Not theirs (404) or not allowed (403): try the next.
+        if (!isStatus(error, 403, 404)) throw error;
+      }
+    }
+    return undefined;
+  };
+
+  if (knownNonPublic) return (await readOwn()) ?? readPublic();
+  try {
+    return await readPublic();
+  } catch (publicError) {
+    if (!isStatus(publicError, 404)) throw publicError;
+    const own = await readOwn();
+    if (own !== undefined) return own;
+    throw publicError;
+  }
+}
+
 // A pending listing is polled for its review result: quickly at first, then
 // slower, then not at all. Window focus refetches still pick up a late change.
 const INITIAL_POLL_INTERVAL_MS = 10_000;
@@ -73,12 +152,14 @@ const MAX_POLL_ATTEMPTS = 10;
  */
 export function usePropertyDetail(id: string, initial?: PropertyDetail) {
   const cleanId = (typeof id === "string" ? id : String(id || "")).trim();
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: ["property", cleanId],
-    queryFn: async () => {
-      const response = await getPropertyById(cleanId);
-      if (!response.data) throw new Error(response.message || "Property not found");
-      return response.data as PropertyDetail;
+    queryFn: () => {
+      // A listing already seen as not public (in review) is asked for as its owner or staff first.
+      const seen = queryClient.getQueryData<PropertyDetail>(["property", cleanId]);
+      const knownNonPublic = seen !== undefined && seen.status !== "active" && seen.status !== "sold";
+      return fetchPropertyForViewer<PropertyDetail>(cleanId, { knownNonPublic });
     },
     initialData: initial,
     initialDataUpdatedAt: 0,

@@ -69,6 +69,18 @@ export async function getMyProperties(params: PropertyFilters = {}) {
   return data;
 }
 
+/** The caller's own listing in any status (GET /v1/properties/my/:id); anyone else's is not found. */
+export async function getMyPropertyById(id: string) {
+  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/properties/my/${encodeURIComponent(id.trim())}`);
+  return data;
+}
+
+/** Any listing in any status, for staff with manage_properties (GET /v1/properties/admin/:id). */
+export async function getAdminPropertyById(id: string) {
+  const { data } = await apiClient.get<ApiResponse<Property>>(`/v1/properties/admin/${encodeURIComponent(id.trim())}`);
+  return data;
+}
+
 export async function getPropertyById(id: string) {
   if (!id || typeof id !== "string") {
     throw new Error("Property ID is required");
