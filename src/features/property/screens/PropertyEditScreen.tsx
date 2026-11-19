@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
@@ -26,6 +26,8 @@ export function PropertyEditScreen() {
   const updateProperty = useUpdateProperty();
   const uploadMedia = useUploadMedia();
   const deleteMedia = useDeleteMedia();
+  // One save is several requests; the form stays locked from the first to the last.
+  const [saving, setSaving] = useState(false);
 
   const { data: propertyData, error: propertyError, isLoading } = useQuery({
     queryKey: ["property", id],
@@ -39,7 +41,7 @@ export function PropertyEditScreen() {
   const reviewNotice = propertyData?.status === "active" ? "offline" : propertyData?.ready_to_publish ? "held" : null;
 
   const handleSubmit = async (dto: UpsertPropertyDto, images: { uri: string; file?: Blob | File }[]) => {
-    if (!id || !isOwner) return;
+    if (!id || !isOwner || saving) return;
     if (reviewNotice) {
       const confirmed = await confirmAction(
         t("property.editConfirmTitle"),
@@ -48,6 +50,7 @@ export function PropertyEditScreen() {
       );
       if (!confirmed) return;
     }
+    setSaving(true);
     try {
       const result = await updateProperty.mutateAsync({ id, dto });
       const propertyId = result.data?.id ?? id;
@@ -73,6 +76,8 @@ export function PropertyEditScreen() {
       notify(t("common.success"), t(inReview ? "property.editInReview" : "property.updateSuccess"), { onConfirm: () => router.back() });
     } catch (err: any) {
       notify(t("common.error"), toApiError(err).message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -138,7 +143,7 @@ export function PropertyEditScreen() {
           onSubmit={handleSubmit}
           onCancel={() => router.back()}
           reviewNotice={reviewNotice}
-          loading={updateProperty.isPending || uploadMedia.isPending || deleteMedia.isPending}
+          loading={saving}
           error={updateProperty.error ? toApiError(updateProperty.error).message : null}
         />
       </View>
