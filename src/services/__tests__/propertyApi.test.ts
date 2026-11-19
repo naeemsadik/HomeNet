@@ -1,14 +1,27 @@
 import apiClient from "@/services/apiClient";
-import { getPropertiesInAreas } from "@/services/propertyApi";
+import { getPropertiesInAreas, publishProperty } from "@/services/propertyApi";
 import type { Property } from "@/features/property/types/property";
 
-jest.mock("@/services/apiClient", () => ({ __esModule: true, default: { get: jest.fn() } }));
+jest.mock("@/services/apiClient", () => ({ __esModule: true, default: { get: jest.fn(), post: jest.fn() } }));
 
 const get = apiClient.get as jest.Mock;
 const property = (id: string, created_at: string) => ({ id, created_at }) as Property;
 const page = (items: Property[], total = items.length) => ({ data: { data: { items, total, page: 1, limit: 12 } } });
 
-beforeEach(() => get.mockReset());
+const post = apiClient.post as jest.Mock;
+
+beforeEach(() => {
+  get.mockReset();
+  post.mockReset();
+});
+
+describe("publishProperty", () => {
+  it("posts to the publish route and returns the API body", async () => {
+    post.mockResolvedValue({ data: { data: { id: "p1", status: "active" } } });
+    await expect(publishProperty("p1")).resolves.toEqual({ data: { id: "p1", status: "active" } });
+    expect(post).toHaveBeenCalledWith("/v1/properties/p1/publish");
+  });
+});
 
 describe("getPropertiesInAreas", () => {
   it("passes the filters straight through when no area was chosen", async () => {

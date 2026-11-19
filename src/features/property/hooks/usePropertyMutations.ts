@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   archiveProperty,
+  publishProperty,
   unarchiveProperty,
   createProperty,
   deleteProperty,
@@ -38,6 +39,11 @@ export function useUpdateProperty() {
 export function useArchiveProperty() {
   const invalidate = useInvalidateProperties();
   return useMutation({ mutationFn: archiveProperty, onSuccess: (_, id) => invalidate(id) });
+}
+
+export function usePublishProperty() {
+  const invalidate = useInvalidateProperties();
+  return useMutation({ mutationFn: publishProperty, onSuccess: (_, id) => invalidate(id) });
 }
 
 export function useUnarchiveProperty() {

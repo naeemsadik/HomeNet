@@ -27,6 +27,7 @@ const STATUS_META: Record<PropertyStatus, { labelKey: TranslationKey; dot: strin
   draft: { labelKey: "moderation.statusDraft", dot: colorTokens.muted },
   archived: { labelKey: "moderation.statusArchived", dot: colorTokens.subtle },
   sold: { labelKey: "moderation.statusSold", dot: colorTokens.muted },
+  rejected: { labelKey: "moderation.statusRejected", dot: colorTokens.errorText },
 };
 
 /** The statuses a moderator may set by hand. Sold is the owner's to say. */
