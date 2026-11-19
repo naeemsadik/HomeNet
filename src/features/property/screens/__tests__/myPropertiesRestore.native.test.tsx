@@ -23,6 +23,7 @@ jest.mock("@/features/property/hooks/usePropertyMutations", () => ({
   useArchiveProperty: () => ({ mutateAsync: jest.fn() }),
   useDeleteProperty: () => ({ mutateAsync: jest.fn() }),
   useUnarchiveProperty: () => ({ mutateAsync: mockUnarchive }),
+  usePublishProperty: () => ({ mutateAsync: jest.fn() }),
 }));
 jest.mock("@/features/property/hooks/useMyProperties", () => ({
   useMyProperties: () => ({

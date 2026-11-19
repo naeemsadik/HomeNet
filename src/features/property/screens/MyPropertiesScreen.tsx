@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Archive, ArchiveRestore, Building2, CheckCircle2, Edit, Eye, Heart, MessageSquare, MoreVertical, Plus, RotateCcw, Trash2, Zap } from "@/components/icons";
+import { Archive, ArchiveRestore, Building2, CheckCircle2, Edit, Eye, Heart, MessageSquare, MoreVertical, Plus, RotateCcw, Send, Trash2, Zap } from "@/components/icons";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -23,7 +23,7 @@ import { openExternalUrl } from "@/lib/safeUrl";
 import { displaySubtype } from "../constants/holidayStay";
 import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
 import { useMyProperties } from "../hooks/useMyProperties";
-import { useArchiveProperty, useDeleteProperty, useUnarchiveProperty } from "../hooks/usePropertyMutations";
+import { useArchiveProperty, useDeleteProperty, usePublishProperty, useUnarchiveProperty } from "../hooks/usePropertyMutations";
 import { toApiError } from "@/services/apiClient";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { listingEditPath, listingPath } from "@/lib/listingPath";
@@ -33,7 +33,7 @@ import { NoTranslateText } from "@/components/NoTranslateText";
 import { formatLocalizedNumber, isPriceOnRequest, priceOnRequestLabel, translateListingStatus, useTranslation } from "@/i18n";
 import { listingCover } from "@/features/property/utils/listingMedia";
 
-export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "archived";
+export type ListingFilter = "all" | "active" | "draft" | "pending" | "rejected" | "sold" | "archived";
 
 interface ListingItemData {
   id: string;
@@ -46,7 +46,9 @@ interface ListingItemData {
   type: string;
   listingType: string;
   price: string;
-  status: "active" | "draft" | "pending" | "sold" | "archived";
+  status: "active" | "draft" | "pending" | "sold" | "archived" | "rejected";
+  /** Approved, and waiting for its owner to press Publish. */
+  readyToPublish: boolean;
   boostText?: string;
   isVerified?: boolean;
   isBoosted?: boolean;
@@ -63,11 +65,13 @@ export function MyPropertiesScreen() {
   const deleteMutation = useDeleteProperty();
   const archiveMutation = useArchiveProperty();
   const unarchiveMutation = useUnarchiveProperty();
+  const publishMutation = usePublishProperty();
   const [activeMenu, setActiveMenu] = useState<{
     id: string;
     editHref: string;
     title: string;
     status: ListingItemData["status"];
+    readyToPublish: boolean;
     right: number;
     top: number;
   } | null>(null);
@@ -93,6 +97,7 @@ export function MyPropertiesScreen() {
         ? priceOnRequestLabel(language)
         : `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${pricePeriodFor(p.listing_type)}`,
       status: p.status,
+      readyToPublish: Boolean(p.ready_to_publish),
       isVerified: p.is_verified,
       isBoosted: false,
       boostText: undefined,
@@ -122,6 +127,7 @@ export function MyPropertiesScreen() {
       active: allListings.filter((i) => i.status === "active").length,
       draft: allListings.filter((i) => i.status === "draft").length,
       pending: allListings.filter((i) => i.status === "pending").length,
+      rejected: allListings.filter((i) => i.status === "rejected").length,
       sold: allListings.filter((i) => i.status === "sold").length,
       archived: allListings.filter((i) => i.status === "archived").length,
     };
@@ -146,7 +152,25 @@ export function MyPropertiesScreen() {
     }
   };
 
+  const handlePublish = async (id: string) => {
+    setActiveMenu(null);
+    try {
+      await publishMutation.mutateAsync(id);
+    } catch (publishError) {
+      notify(t("seller.publishFailed"), toApiError(publishError).message);
+    }
+  };
+
   // The API archives only active or sold listings; anything else can only be deleted.
+  const statusLabel = (item: ListingItemData) =>
+    item.readyToPublish
+      ? t("seller.readyToPublish")
+      : item.status === "pending"
+        ? t("seller.inReview")
+        : item.status === "rejected"
+          ? t("seller.notApproved")
+          : translateListingStatus(item.status, language);
+
   const canArchive = (status: ListingItemData["status"]) => status === "active" || status === "sold";
 
   const handleArchive = async (id: string, title: string) => {
@@ -215,6 +239,7 @@ export function MyPropertiesScreen() {
           editHref: item.editHref,
           title: item.title,
           status: item.status,
+          readyToPublish: item.readyToPublish,
           right,
           top,
         });
@@ -228,6 +253,7 @@ export function MyPropertiesScreen() {
       editHref: item.editHref,
       title: item.title,
       status: item.status,
+      readyToPublish: item.readyToPublish,
       right: 60,
       top: pageY - 40,
     });
@@ -252,6 +278,7 @@ export function MyPropertiesScreen() {
                   ["active", t("seller.filters.active"), counts.active],
                   ["draft", t("seller.filters.draft"), counts.draft],
                   ["pending", t("seller.filters.pending"), counts.pending],
+                  ["rejected", t("seller.filters.rejected"), counts.rejected],
                   ["sold", t("seller.filters.sold"), counts.sold],
                   ["archived", t("seller.filters.archived"), counts.archived],
                 ] as const
@@ -378,9 +405,9 @@ export function MyPropertiesScreen() {
 
                       {/* Status Column */}
                       <View style={[styles.colStatus, styles.colBorder, { gap: 4, justifyContent: "center" }]}>
-                        <View style={[styles.statusBadge, getStatusStyle(item.status).bgStyle]}>
-                          <Text style={[styles.statusBadgeText, getStatusStyle(item.status).textStyle]}>
-                            {translateListingStatus(item.status, language)}
+                        <View style={[styles.statusBadge, getStatusStyle(item).bgStyle]}>
+                          <Text style={[styles.statusBadgeText, getStatusStyle(item).textStyle]}>
+                            {statusLabel(item)}
                           </Text>
                         </View>
                         {item.boostText ? (
@@ -446,9 +473,9 @@ export function MyPropertiesScreen() {
                           <View style={styles.forSaleBadge}>
                             <Text style={styles.forSaleBadgeText}>{item.listingType}</Text>
                           </View>
-                          <View style={[styles.statusBadge, getStatusStyle(item.status).bgStyle]}>
-                            <Text style={[styles.statusBadgeText, getStatusStyle(item.status).textStyle]}>
-                              {translateListingStatus(item.status, language)}
+                          <View style={[styles.statusBadge, getStatusStyle(item).bgStyle]}>
+                            <Text style={[styles.statusBadgeText, getStatusStyle(item).textStyle]}>
+                              {statusLabel(item)}
                             </Text>
                           </View>
                         </View>
@@ -484,6 +511,18 @@ export function MyPropertiesScreen() {
                           <Edit color="#04cf92" size={14} />
                           <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
                         </AppLink>
+                        {item.readyToPublish ? (
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={t("seller.actions.publish")}
+                            hitSlop={8}
+                            onPress={() => handlePublish(item.id)}
+                            style={({ pressed }) => [styles.mobileActionBtn, pressed && styles.pressed]}
+                          >
+                            <Send color="#04cf92" size={14} />
+                            <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.publish")}</Text>
+                          </Pressable>
+                        ) : null}
                         {item.status === "archived" ? (
                           <Pressable onPress={() => handleUnarchive(item.id, item.title)} style={styles.mobileActionBtn}>
                             <ArchiveRestore color="#04cf92" size={14} />
@@ -554,6 +593,18 @@ export function MyPropertiesScreen() {
                 <Text style={[styles.menuItemText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
               </Pressable>
 
+              {activeMenu.readyToPublish ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t("seller.actions.publish")}
+                  style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
+                  onPress={() => handlePublish(activeMenu.id)}
+                >
+                  <Send color="#04cf92" size={15} />
+                  <Text style={[styles.menuItemText, { color: "#04cf92" }]}>{t("seller.actions.publish")}</Text>
+                </Pressable>
+              ) : null}
+
               {activeMenu.status === "archived" ? (
                 <Pressable
                   style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
@@ -590,8 +641,13 @@ export function MyPropertiesScreen() {
 }
 
 // Helper to style status badges
-function getStatusStyle(status: string) {
-  switch (status) {
+function getStatusStyle(item: Pick<ListingItemData, "status" | "readyToPublish">) {
+  if (item.readyToPublish) {
+    return { bgStyle: { backgroundColor: colorTokens.brandSurface }, textStyle: { color: colorTokens.brandText } };
+  }
+  switch (item.status) {
+    case "rejected":
+      return { bgStyle: { backgroundColor: colorTokens.errorSurface }, textStyle: { color: colorTokens.errorText } };
     case "active":
       return { bgStyle: { backgroundColor: "#E6FAF4" }, textStyle: { color: "#04cf92" } };
     case "pending":

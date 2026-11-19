@@ -4,11 +4,12 @@ import { PRICE_ON_REQUEST, isPriceOnRequest, priceOnRequestLabel, useTranslation
 import { Send, ArrowRight, ArrowLeft, Check, MapPin } from "@/components/icons";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { colorTokens, fonts } from "@/theme";
+import { colorTokens, fonts, radius } from "@/theme";
 import { FormFloatingInput } from "@/components/FormFloatingInput";
 import { FormSelectField } from "@/components/FormSelectField";
 import { ErrorBanner, AuthButton } from "@/components/AuthFormFields";
 import { AreaPicker } from "@/components/AreaPicker";
+import { ToggleRow } from "@/components/ToggleRow";
 import { ImageUploader } from "./ImageUploader";
 import { HOLIDAY_STAY_LABEL } from "../constants/holidayStay";
 import {
@@ -27,6 +28,8 @@ interface PropertyFormProps {
   onCancel?: () => void;
   loading?: boolean;
   error?: string | null;
+  /** Edit only: saving takes this listing offline for review (it is live, or approved and held). */
+  reviewNotice?: "offline" | "held" | null;
 }
 
 const STEPS = ["Details", "Location", "Features", "Images"] as const;
@@ -40,10 +43,12 @@ export function PropertyForm({
   onCancel,
   loading = false,
   error = null,
+  reviewNotice = null,
 }: PropertyFormProps) {
   const { t, language } = useTranslation();
   // "Contact for price" is stored as price 1; the box is then locked.
   const [onRequest, setOnRequest] = useState(isPriceOnRequest(initialData?.price));
+  const [goLiveOnApproval, setGoLiveOnApproval] = useState(initialData?.go_live_on_approval ?? true);
   const [step, setStep] = useState(0);
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
   const [area, setArea] = useState<Area | null>(initialArea);
@@ -100,6 +105,7 @@ export function PropertyForm({
         bathrooms: data.bathrooms ? Number(data.bathrooms) : undefined,
       },
       virtual_tour_url: initialData?.virtual_tour_url,
+      ...(mode === "edit" ? { go_live_on_approval: goLiveOnApproval } : {}),
     };
 
     onSubmit(dto, images);
@@ -264,6 +270,24 @@ export function PropertyForm({
               onRemove={(idx) => setImages((prev) => prev.filter((_, i) => i !== idx))}
               maxImages={20}
             />
+            {mode === "edit" ? (
+              <View style={styles.reviewBox}>
+                {reviewNotice ? (
+                  <View accessibilityRole="alert" style={styles.reviewNotice}>
+                    <Text style={styles.reviewNoticeTitle}>{t("property.editOfflineTitle")}</Text>
+                    <Text style={styles.reviewNoticeBody}>
+                      {t(reviewNotice === "held" ? "property.editHeldBody" : "property.editOfflineBody")}
+                    </Text>
+                  </View>
+                ) : null}
+                <ToggleRow
+                  label={t("property.goLiveLabel")}
+                  hint={t(goLiveOnApproval ? "property.goLiveOnHint" : "property.goLiveOffHint")}
+                  value={goLiveOnApproval}
+                  onChange={setGoLiveOnApproval}
+                />
+              </View>
+            ) : null}
           </View>
         )}
 
@@ -325,6 +349,17 @@ export function PropertyForm({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  reviewBox: { gap: 16, marginTop: 8 },
+  reviewNotice: {
+    gap: 4,
+    padding: 16,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colorTokens.warningText,
+    backgroundColor: colorTokens.warningSurface,
+  },
+  reviewNoticeTitle: { fontFamily: fonts.semiBold, fontSize: 15, color: colorTokens.warningText },
+  reviewNoticeBody: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 20, color: colorTokens.ink },
   priceLocked: {
     minHeight: 56,
     justifyContent: "center",

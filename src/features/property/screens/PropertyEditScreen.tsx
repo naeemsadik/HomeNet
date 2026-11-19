@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
-import { notify } from "@/lib/alert";
+import { confirmAction, notify } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyForm } from "../components/PropertyForm";
@@ -35,9 +35,19 @@ export function PropertyEditScreen() {
   });
 
   const isOwner = Boolean(user && propertyData && user.id === propertyData.user_id);
+  // A save sends a live listing, or one approved and held for its owner, back to review.
+  const reviewNotice = propertyData?.status === "active" ? "offline" : propertyData?.ready_to_publish ? "held" : null;
 
   const handleSubmit = async (dto: UpsertPropertyDto, images: { uri: string; file?: Blob | File }[]) => {
     if (!id || !isOwner) return;
+    if (reviewNotice) {
+      const confirmed = await confirmAction(
+        t("property.editConfirmTitle"),
+        t("property.editConfirmMessage", { title: propertyData?.title?.trim() || t("property.thisListing") }),
+        { confirmLabel: t("property.editConfirmAction"), cancelLabel: t("common.cancel") },
+      );
+      if (!confirmed) return;
+    }
     try {
       const result = await updateProperty.mutateAsync({ id, dto });
       const propertyId = result.data?.id ?? id;
@@ -48,7 +58,10 @@ export function PropertyEditScreen() {
         }
       }
 
-      notify(t("common.success"), t("property.updateSuccess"), { onConfirm: () => router.back() });
+      // The API decides whether the save changed anything, so ask it what happened.
+      const saved = reviewNotice ? (await getPropertyById(propertyId)).data : null;
+      const inReview = saved?.status === "pending";
+      notify(t("common.success"), t(inReview ? "property.editInReview" : "property.updateSuccess"), { onConfirm: () => router.back() });
     } catch (err: any) {
       notify(t("common.error"), toApiError(err).message);
     }
@@ -97,6 +110,7 @@ export function PropertyEditScreen() {
     amenities: propertyData.amenities ?? undefined,
     subtype: propertyData.subtype ?? undefined,
     virtual_tour_url: propertyData.virtual_tour_url ?? undefined,
+    go_live_on_approval: propertyData.go_live_on_approval ?? true,
   };
 
   // The edit form shows every photo the listing has (see listingMedia.ts).
@@ -114,6 +128,7 @@ export function PropertyEditScreen() {
           initialImages={initialImages}
           onSubmit={handleSubmit}
           onCancel={() => router.back()}
+          reviewNotice={reviewNotice}
           loading={updateProperty.isPending || uploadMedia.isPending}
           error={updateProperty.error ? toApiError(updateProperty.error).message : null}
         />

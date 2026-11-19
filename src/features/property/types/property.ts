@@ -39,6 +39,10 @@ export interface Property {
   whatsapp_number?: string | null;
   amenities: Record<string, unknown> | null;
   status: PropertyStatus;
+  /** Owner's choice for when an admin approves: true goes live at once, false waits for Publish. */
+  go_live_on_approval?: boolean;
+  /** Approved and waiting for its owner to press Publish (status is draft). */
+  ready_to_publish?: boolean;
   is_verified: boolean;
   virtual_tour_url: string | null;
   view_count: number;

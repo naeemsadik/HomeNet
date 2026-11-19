@@ -134,7 +134,7 @@ export type UpdateAreaDto = Partial<CreateAreaDto>;
 export type PropertyType = "residential" | "commercial" | "land" | "parking";
 /** `short_let` is a holiday stay: people see "Holiday stay", the API stores `short_let`. */
 export type ListingType = "sale" | "rent" | "short_let";
-export type PropertyStatus = "draft" | "pending" | "active" | "sold" | "archived";
+export type PropertyStatus = "draft" | "pending" | "active" | "sold" | "archived" | "rejected";
 
 export interface UpsertPropertyDto {
   property_id?: string;
@@ -155,6 +155,8 @@ export interface UpsertPropertyDto {
   whatsapp_number?: string;
   amenities?: Record<string, unknown>;
   virtual_tour_url?: string;
+  /** After an admin approves: true goes live at once, false waits for the owner to publish. */
+  go_live_on_approval?: boolean;
   status?: PropertyStatus;
 }
 
