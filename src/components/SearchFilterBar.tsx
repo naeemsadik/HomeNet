@@ -250,13 +250,16 @@ const styles = StyleSheet.create({
     rowGap: 8,
     columnGap: 6,
   },
+  // City 156 + place box 150 + radius 150 + two gaps. The group may not shrink below what its
+  // three controls need: when it did, the radius select spilled over the price select beside it.
+  // Short of that width the group wraps to its own row instead.
   whereGroup: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     flexGrow: 1,
-    flexBasis: 300,
-    minWidth: 280,
+    flexShrink: 0,
+    flexBasis: 468,
   },
   locationBox: {
     flex: 1,
