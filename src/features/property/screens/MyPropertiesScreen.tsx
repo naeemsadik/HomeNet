@@ -3,8 +3,8 @@ import { Archive, ArchiveRestore, Building2, CheckCircle2, Edit, Eye, Heart, Mes
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   Modal,
-  FlatList,
   Platform,
   Pressable,
   ScrollView,
@@ -12,10 +12,8 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import { confirmAction, notify } from "@/lib/alert";
 import { AppLink } from "@/components/ui";
-import { Footer } from "@/components/Footer";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { SellerShell } from "@/features/seller/components/SellerShell";
@@ -28,6 +26,7 @@ import { useMyProperties } from "../hooks/useMyProperties";
 import { useArchiveProperty, useDeleteProperty, useUnarchiveProperty } from "../hooks/usePropertyMutations";
 import { toApiError } from "@/services/apiClient";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { listingEditPath, listingPath } from "@/lib/listingPath";
 
 import { LiveText } from "@/components/LiveText";
 import { NoTranslateText } from "@/components/NoTranslateText";
@@ -38,6 +37,9 @@ export type ListingFilter = "all" | "active" | "draft" | "pending" | "sold" | "a
 
 interface ListingItemData {
   id: string;
+  /** The listing page and the edit form: /mess for a mess listing, /property for the rest. */
+  href: string;
+  editHref: string;
   title: string;
   location: string;
   imageUrl?: string;
@@ -53,8 +55,6 @@ interface ListingItemData {
   inquiries: string;
 }
 
-const MobileCardSeparator = () => <View style={{ height: 16 }} />;
-
 export function MyPropertiesScreen() {
   const { isPhone } = useResponsive();
   const { t, language } = useTranslation();
@@ -65,6 +65,7 @@ export function MyPropertiesScreen() {
   const unarchiveMutation = useUnarchiveProperty();
   const [activeMenu, setActiveMenu] = useState<{
     id: string;
+    editHref: string;
     title: string;
     status: ListingItemData["status"];
     right: number;
@@ -77,6 +78,8 @@ export function MyPropertiesScreen() {
   const allListings = useMemo(() => {
     return apiProperties.map((p): ListingItemData => ({
       id: p.id,
+      href: listingPath(p),
+      editHref: listingEditPath(p),
       title: p.title || "Untitled Property",
       location: [p.area?.name, (p.area as any)?.city].filter(Boolean).join(", ") || p.address || "Location unavailable",
       imageUrl: cdnImage(
@@ -97,7 +100,7 @@ export function MyPropertiesScreen() {
       likes: "0",
       inquiries: "0",
     }));
-  }, [apiProperties, language]);
+  }, [apiProperties]);
 
   // Filter listings based on active filter and search query
   const filteredListings = useMemo(() => {
@@ -209,6 +212,7 @@ export function MyPropertiesScreen() {
         top = Math.max(16, Math.min(top, windowHeight - menuHeight - 16));
         setActiveMenu({
           id: item.id,
+          editHref: item.editHref,
           title: item.title,
           status: item.status,
           right,
@@ -217,9 +221,11 @@ export function MyPropertiesScreen() {
         return;
       }
     }
+    const pageX = event?.nativeEvent?.pageX || 200;
     const pageY = event?.nativeEvent?.pageY || 100;
     setActiveMenu({
       id: item.id,
+      editHref: item.editHref,
       title: item.title,
       status: item.status,
       right: 60,
@@ -227,67 +233,71 @@ export function MyPropertiesScreen() {
     });
   };
 
-  const filterBar = (
-    <>
-    {/* Top Filter Bar + Add New Property */}
-    <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
-      {/* Filter Pills */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
-        <View style={styles.pillsRow}>
-          {(
-            [
-              ["all", t("seller.filters.all"), counts.all],
-              ["active", t("seller.filters.active"), counts.active],
-              ["draft", t("seller.filters.draft"), counts.draft],
-              ["pending", t("seller.filters.pending"), counts.pending],
-              ["sold", t("seller.filters.sold"), counts.sold],
-              ["archived", t("seller.filters.archived"), counts.archived],
-            ] as const
-          ).map(([key, label, count]) => {
-            const isSelected = activeFilter === key;
-            return (
-              <Pressable
-                key={key}
-                onPress={() => setActiveFilter(key as ListingFilter)}
-                style={({ pressed }) => [
-                  styles.filterPill,
-                  isSelected && styles.filterPillActive,
-                  webPointer,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text style={[styles.pillLabel, isSelected && styles.pillLabelActive]}>
-                  {label}
-                </Text>
-                <View style={[styles.pillCountBg, isSelected && styles.pillCountBgActive]}>
-                  <LiveText style={[styles.pillCountText, isSelected && styles.pillCountTextActive]}>
-                    {formatLocalizedNumber(count, language)}
-                  </LiveText>
-                </View>
-              </Pressable>
-            );
-          })}
+  return (
+    <SellerShell
+      activeNav="listings"
+      onSearchQueryChange={setSearchQuery}
+      searchQuery={searchQuery}
+      title={t("seller.myListings")}
+    >
+      <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
+        {/* Top Filter Bar + Add New Property */}
+        <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
+          {/* Filter Pills */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
+            <View style={styles.pillsRow}>
+              {(
+                [
+                  ["all", t("seller.filters.all"), counts.all],
+                  ["active", t("seller.filters.active"), counts.active],
+                  ["draft", t("seller.filters.draft"), counts.draft],
+                  ["pending", t("seller.filters.pending"), counts.pending],
+                  ["sold", t("seller.filters.sold"), counts.sold],
+                  ["archived", t("seller.filters.archived"), counts.archived],
+                ] as const
+              ).map(([key, label, count]) => {
+                const isSelected = activeFilter === key;
+                return (
+                  <Pressable
+                    key={key}
+                    onPress={() => setActiveFilter(key as ListingFilter)}
+                    style={({ pressed }) => [
+                      styles.filterPill,
+                      isSelected && styles.filterPillActive,
+                      webPointer,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Text style={[styles.pillLabel, isSelected && styles.pillLabelActive]}>
+                      {label}
+                    </Text>
+                    <View style={[styles.pillCountBg, isSelected && styles.pillCountBgActive]}>
+                      <LiveText style={[styles.pillCountText, isSelected && styles.pillCountTextActive]}>
+                        {formatLocalizedNumber(count, language)}
+                      </LiveText>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
+
+          {/* Add Property Primary Button */}
+          <AppLink href="/property/create" style={styles.addPropertyBtn}>
+            <Plus color={colorTokens.onBrand} size={16} />
+            <Text style={styles.addPropertyBtnText}>{t("seller.addNewProperty")}</Text>
+          </AppLink>
         </View>
-      </ScrollView>
 
-      {/* Add Property Primary Button */}
-      <AppLink href="/property/create" style={styles.addPropertyBtn}>
-        <Plus color={colorTokens.onBrand} size={16} />
-        <Text style={styles.addPropertyBtnText}>{t("seller.addNewProperty")}</Text>
-      </AppLink>
-    </View>
-    </>
-  );
-
-  const loadingView = (
-    <View style={styles.emptyContainer}>
+        {/* Listings Table / Card View */}
+        <View style={styles.tableCard}>
+          {isLoading ? (
+            <View style={styles.emptyContainer}>
               <ActivityIndicator color="#04cf92" size="large" />
               <Text style={styles.emptySub}>{t("dashboard.loadingListings")}</Text>
             </View>
-  );
-
-  const errorView = (
-    <View style={styles.emptyContainer}>
+          ) : error ? (
+            <View style={styles.emptyContainer}>
               <Text style={styles.emptyTitle}>{t("dashboard.couldNotLoadListings")}</Text>
               <Text style={styles.emptySub}>{toApiError(error).message}</Text>
               <Pressable onPress={() => void refetch()} style={styles.retryButton}>
@@ -295,146 +305,6 @@ export function MyPropertiesScreen() {
                 <Text style={styles.retryText}>{t("dashboard.retry")}</Text>
               </Pressable>
             </View>
-  );
-
-  const emptyView = (
-    <View style={styles.emptyContainer}>
-      <Building2 color="#5C6B66" size={40} />
-      <Text style={styles.emptyTitle}>{t("dashboard.noListingsFound")}</Text>
-      <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
-    </View>
-  );
-
-  const loadMoreButton = (
-    <>
-      {hasNextPage && !isLoading && !error ? (
-        <Pressable
-          disabled={isFetchingNextPage}
-          onPress={() => void fetchNextPage()}
-          style={styles.loadMoreButton}
-        >
-          {isFetchingNextPage ? <ActivityIndicator color="#04cf92" size="small" /> : null}
-          <Text style={styles.loadMoreText}>{isFetchingNextPage ? t("dashboard.loading") : t("dashboard.loadMore")}</Text>
-        </Pressable>
-      ) : null}
-    </>
-  );
-
-  const renderMobileCard = (item: ListingItemData) => (
-            <View key={item.id} style={styles.mobileCard}>
-              <View style={styles.mobileCardHead}>
-                {item.imageUrl ? (
-                  <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.mobileThumb} />
-                ) : (
-                  <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
-                    <Building2 color="#6B7D78" size={20} />
-                  </View>
-                )}
-                <View style={{ flex: 1, gap: 4 }}>
-                  <Text style={styles.propTitle}>{item.title}</Text>
-                  <Text style={styles.propLocation}>{item.location}</Text>
-                  <View style={{ flexDirection: "row", gap: 6, marginTop: 4 }}>
-                    <View style={styles.forSaleBadge}>
-                      <Text style={styles.forSaleBadgeText}>{item.listingType}</Text>
-                    </View>
-                    <View style={[styles.statusBadge, getStatusStyle(item.status).bgStyle]}>
-                      <Text style={[styles.statusBadgeText, getStatusStyle(item.status).textStyle]}>
-                        {translateListingStatus(item.status, language)}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-    
-              <View style={styles.mobileCardBody}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
-                  <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
-                </View>
-    
-                <View style={styles.mobileMetricsRow}>
-                  <View style={styles.metricItem}>
-                    <Eye color="#5C6B66" size={14} />
-                    <Text style={styles.metricValue}>{item.views}</Text>
-                  </View>
-                  <View style={styles.metricItem}>
-                    <Heart color="#5C6B66" size={14} />
-                    <Text style={styles.metricValue}>{item.likes}</Text>
-                  </View>
-                  <View style={styles.metricItem}>
-                    <MessageSquare color="#5C6B66" size={14} />
-                    <Text style={styles.metricValue}>{item.inquiries}</Text>
-                  </View>
-                </View>
-    
-                <View style={styles.mobileActionsRow}>
-                  <AppLink href={`/property/${item.id}`} style={styles.mobileActionBtn}>
-                    <Eye color="#5C6B66" size={14} />
-                    <Text style={styles.mobileActionText}>{t("seller.actions.view")}</Text>
-                  </AppLink>
-                  <AppLink href={`/property/edit?id=${item.id}`} style={styles.mobileActionBtn}>
-                    <Edit color="#04cf92" size={14} />
-                    <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
-                  </AppLink>
-                  {item.status === "archived" ? (
-                    <Pressable onPress={() => handleUnarchive(item.id, item.title)} style={styles.mobileActionBtn}>
-                      <ArchiveRestore color="#04cf92" size={14} />
-                      <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t(OWNER_UNARCHIVE_ENABLED ? "seller.actions.unarchive" : "seller.actions.askToRestore")}</Text>
-                    </Pressable>
-                  ) : canArchive(item.status) ? (
-                    <Pressable onPress={() => handleArchive(item.id, item.title)} style={styles.mobileActionBtn}>
-                      <Archive color="#5C6B66" size={14} />
-                      <Text style={styles.mobileActionText}>{t("seller.actions.archive")}</Text>
-                    </Pressable>
-                  ) : null}
-                  <Pressable onPress={() => handleDelete(item.id, item.title)} style={styles.mobileActionBtn}>
-                    <Trash2 color="#D4183D" size={14} />
-                    <Text style={[styles.mobileActionText, { color: "#D4183D" }]}>{t("seller.actions.delete")}</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-  );
-
-  // In the app a phone's listings are a FlatList, so only the cards near the
-  // screen are mounted however many pages the owner has loaded. The website
-  // keeps the shell's own scrolling, and its table.
-  const virtualPhone = isPhone && Platform.OS !== "web";
-
-  return (
-    <SellerShell
-      activeNav="listings"
-      scrollable={!virtualPhone}
-      onSearchQueryChange={setSearchQuery}
-      searchQuery={searchQuery}
-      title={t("seller.myListings")}
-    >
-      {virtualPhone ? (
-        <FlatList
-          contentContainerStyle={[styles.scrollBody, styles.scrollBodyPhone]}
-          data={isLoading || error ? [] : filteredListings}
-          ItemSeparatorComponent={MobileCardSeparator}
-          keyExtractor={(item) => item.id}
-          ListEmptyComponent={isLoading ? loadingView : error ? errorView : emptyView}
-          ListFooterComponent={
-            <>
-              {loadMoreButton}
-              <Footer />
-            </>
-          }
-          ListHeaderComponent={filterBar}
-          renderItem={({ item }) => renderMobileCard(item)}
-          showsVerticalScrollIndicator={false}
-        />
-      ) : (
-      <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
-        {filterBar}
-
-        {/* Listings Table / Card View */}
-        <View style={styles.tableCard}>
-          {isLoading ? (
-            loadingView
-          ) : error ? (
-            errorView
           ) : !isPhone ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tableScrollContent}>
               <View style={styles.table}>
@@ -472,7 +342,7 @@ export function MyPropertiesScreen() {
                     <View key={item.id} style={styles.tableDataRow}>
                       {/* Property Info (Thumbnail, Title, Verified, Boost, Location) */}
                       <View style={[styles.colProperty, styles.colBorder, { flexDirection: "row", gap: 12, alignItems: "center" }]}>
-                        <AppLink href={`/property/${item.id}`} style={styles.propThumb}>
+                        <AppLink href={item.href} style={styles.propThumb}>
                           {item.imageUrl ? (
                             <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.propThumb} />
                           ) : (
@@ -483,7 +353,7 @@ export function MyPropertiesScreen() {
                         </AppLink>
                         <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                            <AppLink href={`/property/${item.id}`} style={{ flexShrink: 1 }}>
+                            <AppLink href={item.href} style={{ flexShrink: 1 }}>
                               <Text style={styles.propTitle} numberOfLines={1}>{item.title}</Text>
                             </AppLink>
                             {item.isVerified ? <CheckCircle2 color="#04cf92" size={16} /> : null}
@@ -559,14 +429,95 @@ export function MyPropertiesScreen() {
                   <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
                 </View>
               ) : (
-                filteredListings.map(renderMobileCard)
+                filteredListings.map((item) => (
+                  <View key={item.id} style={styles.mobileCard}>
+                    <View style={styles.mobileCardHead}>
+                      {item.imageUrl ? (
+                        <Image source={{ uri: item.imageUrl }} accessibilityLabel={item.title} style={styles.mobileThumb} />
+                      ) : (
+                        <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
+                          <Building2 color="#6B7D78" size={20} />
+                        </View>
+                      )}
+                      <View style={{ flex: 1, gap: 4 }}>
+                        <Text style={styles.propTitle}>{item.title}</Text>
+                        <Text style={styles.propLocation}>{item.location}</Text>
+                        <View style={{ flexDirection: "row", gap: 6, marginTop: 4 }}>
+                          <View style={styles.forSaleBadge}>
+                            <Text style={styles.forSaleBadgeText}>{item.listingType}</Text>
+                          </View>
+                          <View style={[styles.statusBadge, getStatusStyle(item.status).bgStyle]}>
+                            <Text style={[styles.statusBadgeText, getStatusStyle(item.status).textStyle]}>
+                              {translateListingStatus(item.status, language)}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+
+                    <View style={styles.mobileCardBody}>
+                      <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
+                        <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
+                      </View>
+
+                      <View style={styles.mobileMetricsRow}>
+                        <View style={styles.metricItem}>
+                          <Eye color="#5C6B66" size={14} />
+                          <Text style={styles.metricValue}>{item.views}</Text>
+                        </View>
+                        <View style={styles.metricItem}>
+                          <Heart color="#5C6B66" size={14} />
+                          <Text style={styles.metricValue}>{item.likes}</Text>
+                        </View>
+                        <View style={styles.metricItem}>
+                          <MessageSquare color="#5C6B66" size={14} />
+                          <Text style={styles.metricValue}>{item.inquiries}</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.mobileActionsRow}>
+                        <AppLink href={item.href} style={styles.mobileActionBtn}>
+                          <Eye color="#5C6B66" size={14} />
+                          <Text style={styles.mobileActionText}>{t("seller.actions.view")}</Text>
+                        </AppLink>
+                        <AppLink href={item.editHref} style={styles.mobileActionBtn}>
+                          <Edit color="#04cf92" size={14} />
+                          <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
+                        </AppLink>
+                        {item.status === "archived" ? (
+                          <Pressable onPress={() => handleUnarchive(item.id, item.title)} style={styles.mobileActionBtn}>
+                            <ArchiveRestore color="#04cf92" size={14} />
+                            <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t(OWNER_UNARCHIVE_ENABLED ? "seller.actions.unarchive" : "seller.actions.askToRestore")}</Text>
+                          </Pressable>
+                        ) : canArchive(item.status) ? (
+                          <Pressable onPress={() => handleArchive(item.id, item.title)} style={styles.mobileActionBtn}>
+                            <Archive color="#5C6B66" size={14} />
+                            <Text style={styles.mobileActionText}>{t("seller.actions.archive")}</Text>
+                          </Pressable>
+                        ) : null}
+                        <Pressable onPress={() => handleDelete(item.id, item.title)} style={styles.mobileActionBtn}>
+                          <Trash2 color="#D4183D" size={14} />
+                          <Text style={[styles.mobileActionText, { color: "#D4183D" }]}>{t("seller.actions.delete")}</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  </View>
+                ))
               )}
             </View>
           )}
-          {loadMoreButton}
+          {hasNextPage && !isLoading && !error ? (
+            <Pressable
+              disabled={isFetchingNextPage}
+              onPress={() => void fetchNextPage()}
+              style={styles.loadMoreButton}
+            >
+              {isFetchingNextPage ? <ActivityIndicator color="#04cf92" size="small" /> : null}
+              <Text style={styles.loadMoreText}>{isFetchingNextPage ? t("dashboard.loading") : t("dashboard.loadMore")}</Text>
+            </Pressable>
+          ) : null}
         </View>
       </View>
-      )}
 
       {/* 3-Dot Actions Dropdown Modal with Blurred Background */}
       <Modal
@@ -594,9 +545,9 @@ export function MyPropertiesScreen() {
               <Pressable
                 style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
                 onPress={() => {
-                  const id = activeMenu.id;
+                  const editHref = activeMenu.editHref;
                   setActiveMenu(null);
-                  router.push(`/property/edit?id=${id}` as any);
+                  router.push(editHref as never);
                 }}
               >
                 <Edit color="#04cf92" size={15} />

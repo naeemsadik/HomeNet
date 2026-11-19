@@ -21,7 +21,7 @@ const press = (node: ReactTestInstance) => act(() => node.props.onPress());
 const buttons = (tree: ReactTestRenderer) =>
   tree.root.findAll((n) => n.props.accessibilityRole === "button" && typeof n.props.onPress === "function");
 const rows = (tree: ReactTestRenderer) =>
-  tree.root.findAll((n) => n.props.accessibilityRole === "menuitem" && typeof n.props.onPress === "function");
+  tree.root.findAll((n) => n.props.role === "option" && typeof n.props.onPress === "function");
 
 const OPTIONS = [
   { label: "This area only", value: "" },
@@ -38,7 +38,7 @@ describe("OptionPicker on Android", () => {
     press(buttons(tree)[0]);
 
     expect(rows(tree).map(textOf)).toEqual(["This area only", "+ 1 km", "+ 5 km"]);
-    expect(rows(tree)[1].props.accessibilityState.selected).toBe(true);
+    expect(rows(tree)[1].props["aria-selected"]).toBe(true);
   });
 
   it("reports the chosen value and closes the list", () => {
@@ -69,7 +69,7 @@ describe("OptionPicker on Android", () => {
     const tree = render(<OptionPicker value="" options={OPTIONS} onChange={() => undefined} disabled />);
     const box = buttons(tree)[0];
     expect(box.props.disabled).toBe(true);
-    expect(box.props.accessibilityState.disabled).toBe(true);
+    expect(box.props["aria-disabled"]).toBe(true);
   });
 
   it("trims the indent used to nest sub-areas in the closed box but keeps it in the list", () => {

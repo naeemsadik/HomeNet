@@ -27,6 +27,7 @@ import { LiveText } from "@/components/LiveText";
 import { allAreasQuery, filterAreas, pageAreas } from "@/hooks/useAllAreas";
 import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTranslation } from "@/i18n";
+import { parseCoordinate } from "@/lib/coordinates";
 
 const ADMIN_AREAS_PAGE_SIZE = 20;
 
@@ -37,14 +38,6 @@ interface AreaFormProps {
   error: string | null;
   onClose: () => void;
   onSubmit: (dto: CreateAreaDto) => void;
-}
-
-/** A finite number within ±limit, or null. Empty or partly numeric text ("12abc") is rejected. */
-function parseCoordinate(text: string, limit: number): number | null {
-  const trimmed = text.trim();
-  if (!/^-?\d+(\.\d+)?$/.test(trimmed)) return null;
-  const value = Number(trimmed);
-  return Math.abs(value) <= limit ? value : null;
 }
 
 function areaErrorMessage(error: unknown, t: (key: any) => string) {

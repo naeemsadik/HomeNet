@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { STUDENT_ACCOMMODATION_HREF } from "@/constants/navigation";
 import {
   Pressable,
   StyleSheet,
@@ -141,7 +142,7 @@ export const RENTER_DEEP_DIVE_GUIDES: RenterDeepDiveGuide[] = [
     categoryKey: "renterGuides.guide3Category",
     titleKey: "renterGuides.guide3Title",
     descKey: "renterGuides.guide3Desc",
-    href: "/rent?subtype=student",
+    href: STUDENT_ACCOMMODATION_HREF ?? "/rent",
   },
   {
     id: "guide-4",
@@ -341,7 +342,7 @@ export function RenterGuidesScreen() {
                   <Pressable
                     key={item.id}
                     accessibilityRole="checkbox"
-                    accessibilityState={{ checked: isChecked }}
+                    aria-checked={isChecked}
                     onPress={() => toggleCheck(idx)}
                     style={[
                       styles.checkRow,
@@ -508,7 +509,7 @@ export function RenterGuidesScreen() {
                 <View key={index} style={styles.faqCard}>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityState={{ expanded: isExpanded }}
+                    aria-expanded={isExpanded}
                     onPress={() => toggleFaq(index)}
                     style={[styles.faqQuestionRow, webPointer]}
                   >

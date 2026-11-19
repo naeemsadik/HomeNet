@@ -13,7 +13,7 @@
 export const SUPPORT_EMAIL = "support@homenetbd.com";
 
 /** Where candidates send their resumes and applications for open roles. */
-export const CAREERS_EMAIL = "careers@homenet.com.bd";
+export const CAREERS_EMAIL = "careers@homenetbd.com";
 
 export interface LegalSection {
   heading: string;

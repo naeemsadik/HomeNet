@@ -16,12 +16,142 @@ import type CircleAlertIcon from "lucide-react-native/icons/circle-alert";
 /** Same type as lucide-react-native's LucideIcon, taken from one icon file so the full library is never imported. */
 export type LucideIcon = typeof CircleAlertIcon;
 
+export type IconName =
+  | "AlertCircle"
+  | "AlertTriangle"
+  | "Archive"
+  | "ArchiveRestore"
+  | "ArrowLeft"
+  | "ArrowRight"
+  | "ArrowUp"
+  | "ArrowUpDown"
+  | "ArrowUpRight"
+  | "AtSign"
+  | "BadgeCheck"
+  | "BarChart2"
+  | "BarChart3"
+  | "Bath"
+  | "Bed"
+  | "BedDouble"
+  | "Bell"
+  | "BookOpen"
+  | "Bookmark"
+  | "Briefcase"
+  | "Building"
+  | "Building2"
+  | "Calculator"
+  | "Calendar"
+  | "CalendarCheck"
+  | "Camera"
+  | "Car"
+  | "ChartNoAxesCombined"
+  | "Check"
+  | "CheckCircle2"
+  | "ChevronDown"
+  | "ChevronLeft"
+  | "ChevronRight"
+  | "CigaretteOff"
+  | "CircleHelp"
+  | "Clock"
+  | "Clock3"
+  | "Compass"
+  | "Copy"
+  | "Cpu"
+  | "CreditCard"
+  | "Database"
+  | "DatabaseZap"
+  | "DoorOpen"
+  | "Edit"
+  | "Edit3"
+  | "ExternalLink"
+  | "Eye"
+  | "EyeOff"
+  | "FileCheck"
+  | "FileCheck2"
+  | "FileEdit"
+  | "FileText"
+  | "Filter"
+  | "Flag"
+  | "Footprints"
+  | "Globe"
+  | "GraduationCap"
+  | "Grid2X2"
+  | "Handshake"
+  | "Heart"
+  | "HeartHandshake"
+  | "Home"
+  | "IdCard"
+  | "Image"
+  | "Info"
+  | "KeyRound"
+  | "LandPlot"
+  | "Languages"
+  | "Layers"
+  | "LayoutDashboard"
+  | "LineChart"
+  | "List"
+  | "LoaderCircle"
+  | "LocateFixed"
+  | "Lock"
+  | "LogOut"
+  | "Mail"
+  | "MapIcon"
+  | "MapPin"
+  | "MapPinned"
+  | "Maximize"
+  | "Maximize2"
+  | "Menu"
+  | "MessageSquare"
+  | "Minus"
+  | "MoreVertical"
+  | "Pause"
+  | "Pencil"
+  | "Phone"
+  | "Play"
+  | "Plus"
+  | "PlusCircle"
+  | "Receipt"
+  | "RefreshCw"
+  | "Rocket"
+  | "RotateCcw"
+  | "Save"
+  | "Search"
+  | "SearchX"
+  | "Send"
+  | "Settings"
+  | "Share2"
+  | "Shield"
+  | "ShieldAlert"
+  | "ShieldCheck"
+  | "Sliders"
+  | "SlidersHorizontal"
+  | "Star"
+  | "Store"
+  | "Tag"
+  | "Trash2"
+  | "TrendingUp"
+  | "Upload"
+  | "User"
+  | "UserCheck"
+  | "UserRound"
+  | "Users"
+  | "Utensils"
+  | "Video"
+  | "Volume2"
+  | "VolumeX"
+  | "WalletCards"
+  | "X"
+  | "XCircle"
+  | "Zap";
+
 export { default as AlertCircle } from "lucide-react-native/icons/circle-alert";
 export { default as AlertTriangle } from "lucide-react-native/icons/triangle-alert";
 export { default as Archive } from "lucide-react-native/icons/archive";
 export { default as ArchiveRestore } from "lucide-react-native/icons/archive-restore";
 export { default as ArrowLeft } from "lucide-react-native/icons/arrow-left";
 export { default as ArrowRight } from "lucide-react-native/icons/arrow-right";
+export { default as ArrowUp } from "lucide-react-native/icons/arrow-up";
+export { default as ArrowUpDown } from "lucide-react-native/icons/arrow-up-down";
 export { default as ArrowUpRight } from "lucide-react-native/icons/arrow-up-right";
 export { default as AtSign } from "lucide-react-native/icons/at-sign";
 export { default as BadgeCheck } from "lucide-react-native/icons/badge-check";
@@ -47,6 +177,7 @@ export { default as CheckCircle2 } from "lucide-react-native/icons/circle-check"
 export { default as ChevronDown } from "lucide-react-native/icons/chevron-down";
 export { default as ChevronLeft } from "lucide-react-native/icons/chevron-left";
 export { default as ChevronRight } from "lucide-react-native/icons/chevron-right";
+export { default as CigaretteOff } from "lucide-react-native/icons/cigarette-off";
 export { default as CircleHelp } from "lucide-react-native/icons/circle-question-mark";
 export { default as Clock } from "lucide-react-native/icons/clock";
 export { default as Clock3 } from "lucide-react-native/icons/clock-3";
@@ -56,6 +187,7 @@ export { default as Cpu } from "lucide-react-native/icons/cpu";
 export { default as CreditCard } from "lucide-react-native/icons/credit-card";
 export { default as Database } from "lucide-react-native/icons/database";
 export { default as DatabaseZap } from "lucide-react-native/icons/database-zap";
+export { default as DoorOpen } from "lucide-react-native/icons/door-open";
 export { default as Edit } from "lucide-react-native/icons/square-pen";
 export { default as Edit3 } from "lucide-react-native/icons/pen-line";
 export { default as ExternalLink } from "lucide-react-native/icons/external-link";
@@ -67,7 +199,9 @@ export { default as FileEdit } from "lucide-react-native/icons/file-pen";
 export { default as FileText } from "lucide-react-native/icons/file-text";
 export { default as Filter } from "lucide-react-native/icons/funnel";
 export { default as Flag } from "lucide-react-native/icons/flag";
+export { default as Footprints } from "lucide-react-native/icons/footprints";
 export { default as Globe } from "lucide-react-native/icons/globe";
+export { default as GraduationCap } from "lucide-react-native/icons/graduation-cap";
 export { default as Grid2X2 } from "lucide-react-native/icons/grid-2x2";
 export { default as Handshake } from "lucide-react-native/icons/handshake";
 export { default as Heart } from "lucide-react-native/icons/heart";
@@ -75,6 +209,7 @@ export { default as HeartHandshake } from "lucide-react-native/icons/heart-hands
 export { default as Home } from "lucide-react-native/icons/house";
 export { default as IdCard } from "lucide-react-native/icons/id-card";
 export { default as Image } from "lucide-react-native/icons/image";
+export { default as Info } from "lucide-react-native/icons/info";
 export { default as KeyRound } from "lucide-react-native/icons/key-round";
 export { default as LandPlot } from "lucide-react-native/icons/land-plot";
 export { default as Languages } from "lucide-react-native/icons/languages";
@@ -108,6 +243,7 @@ export { default as Rocket } from "lucide-react-native/icons/rocket";
 export { default as RotateCcw } from "lucide-react-native/icons/rotate-ccw";
 export { default as Save } from "lucide-react-native/icons/save";
 export { default as Search } from "lucide-react-native/icons/search";
+export { default as SearchX } from "lucide-react-native/icons/search-x";
 export { default as Store } from "lucide-react-native/icons/store";
 export { default as Send } from "lucide-react-native/icons/send";
 export { default as Settings } from "lucide-react-native/icons/settings";
@@ -124,8 +260,10 @@ export { default as Trash2 } from "lucide-react-native/icons/trash-2";
 export { default as TrendingUp } from "lucide-react-native/icons/trending-up";
 export { default as Upload } from "lucide-react-native/icons/upload";
 export { default as User } from "lucide-react-native/icons/user";
+export { default as UserCheck } from "lucide-react-native/icons/user-check";
 export { default as UserRound } from "lucide-react-native/icons/user-round";
 export { default as Users } from "lucide-react-native/icons/users";
+export { default as Utensils } from "lucide-react-native/icons/utensils";
 export { default as Video } from "lucide-react-native/icons/video";
 export { default as Volume2 } from "lucide-react-native/icons/volume-2";
 export { default as VolumeX } from "lucide-react-native/icons/volume-x";

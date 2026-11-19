@@ -1,3 +1,4 @@
+import { pressedState } from "@/lib/a11yState";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Modal,
@@ -218,7 +219,7 @@ export function AdvancedFiltersModal({
         return (
           <Pressable
             accessibilityRole="button"
-            accessibilityState={{ selected: isSelected }}
+            {...pressedState(isSelected)}
             key={`${group}-${value || "any"}`}
             onPress={() => patchRange(group, maxKey, "min", value)}
             style={[
@@ -445,7 +446,7 @@ export function AdvancedFiltersModal({
                   return (
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
+                      {...pressedState(isSelected)}
                       key={option.value}
                       onPress={() => toggleAmenity(option.value)}
                       style={[
@@ -470,8 +471,8 @@ export function AdvancedFiltersModal({
 
             {/* Verified listings only */}
             <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ checked: localFilters.verifiedOnly }}
+              accessibilityRole="switch"
+              aria-checked={localFilters.verifiedOnly}
               onPress={() => patch({ verifiedOnly: !localFilters.verifiedOnly })}
               style={[styles.verifiedRowCard, webPointer]}
             >

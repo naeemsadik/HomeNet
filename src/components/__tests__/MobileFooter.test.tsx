@@ -84,4 +84,97 @@ describe("MobileFooter", () => {
 
     await act(async () => root.unmount());
   });
+
+  it("renders all 7 resource links when opening the Resources section", async () => {
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<MobileFooter />);
+    });
+    await open("Resources");
+
+    const hrefs = Array.from(container.querySelectorAll("a")).map((a) => a.getAttribute("href"));
+    expect(hrefs).toContain("/resources/stamp-duty-tax-guide");
+    expect(hrefs).toContain("/resources/property-price-index");
+    expect(hrefs).toContain("/resources/property-valuation-guide");
+    expect(hrefs).toContain("/resources/property-news-trends");
+    expect(hrefs).toContain("/resources/buyer-guides");
+    expect(hrefs).toContain("/resources/seller-guides");
+    expect(hrefs).toContain("/resources/renter-guides");
+
+    // Old stale links must not be present
+    expect(hrefs).not.toContain("/guides");
+    expect(hrefs).not.toContain("/market");
+    expect(hrefs).not.toContain("/instant-valuation");
+
+    // Excluded links must not be present
+    expect(container.textContent).not.toContain("Landlord Guides");
+    expect(container.textContent).not.toContain("Mortgage Calculator");
+
+    await act(async () => root.unmount());
+  });
+
+  it("renders all 3 corporate links when opening the Homenet section", async () => {
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<MobileFooter />);
+    });
+    await open("Homenet");
+
+    const hrefs = Array.from(container.querySelectorAll("a")).map((a) => a.getAttribute("href"));
+    expect(hrefs).toContain("/press");
+    expect(hrefs).toContain("/investors");
+    expect(hrefs).toContain("/tech-blog");
+    expect(hrefs).toContain("/about");
+    expect(hrefs).toContain("/careers");
+
+    // All links in Homenet section are distinct
+    const homenetLinks = hrefs.filter((href): href is string =>
+      ["/press", "/investors", "/tech-blog", "/about", "/careers"].includes(href ?? "")
+    );
+    expect(new Set(homenetLinks).size).toBe(5);
+
+    // Corporate link texts are rendered
+    expect(container.textContent).toContain("Press centre");
+    expect(container.textContent).toContain("Investor relations");
+    expect(container.textContent).toContain("Tech blog & AI models");
+
+    await act(async () => root.unmount());
+  });
+
+  it("renders all 7 professional links with unique destinations and zero /seller or /about catch-alls", async () => {
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<MobileFooter />);
+    });
+    await open("Professional");
+
+    const professionalLinks = Array.from(container.querySelectorAll("a"))
+      .map((a) => a.getAttribute("href"))
+      .filter((href): href is string => Boolean(href?.startsWith("/professionals/")));
+
+    expect(professionalLinks).toHaveLength(7);
+    expect(new Set(professionalLinks).size).toBe(7);
+
+    expect(professionalLinks).toContain("/professionals/boosting");
+    expect(professionalLinks).toContain("/professionals/priority-alerts");
+    expect(professionalLinks).toContain("/professionals/analytics");
+    expect(professionalLinks).toContain("/professionals/verified-agency");
+    expect(professionalLinks).toContain("/professionals/whatsapp-inquiries");
+    expect(professionalLinks).toContain("/professionals/account-support");
+    expect(professionalLinks).toContain("/professionals/advertise");
+
+    // Zero catch-all links to /seller or /about among professional links
+    expect(professionalLinks.some((h) => h === "/seller" || h === "/about")).toBe(false);
+
+    // Labels rendered
+    expect(container.textContent).toContain("Property Boosting");
+    expect(container.textContent).toContain("Priority Notice & Alerts");
+    expect(container.textContent).toContain("Listing Analytics");
+    expect(container.textContent).toContain("Verified Agency Badge");
+    expect(container.textContent).toContain("Direct WhatsApp Inquiries");
+    expect(container.textContent).toContain("Dedicated Account Support");
+    expect(container.textContent).toContain("Advertise on Homenet");
+
+    await act(async () => root.unmount());
+  });
 });

@@ -59,6 +59,9 @@ describe("MobileHeroSearchCard", () => {
     expect(container.textContent).toContain("Holiday stay");
     expect(container.textContent).toContain("Sold");
 
+    // Natural-language search placeholder
+    expect(container.textContent).toContain("Search by area, project, or keyword");
+
     // Mobile search button displays "Search"
     expect(container.textContent).toContain("Search");
     expect(container.querySelector('[aria-label="Search properties for sale"]')).toBeTruthy();

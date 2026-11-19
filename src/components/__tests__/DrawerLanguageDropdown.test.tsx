@@ -7,11 +7,25 @@ import { useLanguageStore } from "@/i18n";
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 jest.mock("@/components/icons", () => ({
-  ChevronDown: (props: any) => "ChevronDown",
+  ChevronDown: () => "ChevronDown",
+  Globe: () => "Globe",
+  Check: () => "Check",
 }));
 
-describe("DrawerLanguageDropdown (Bproperty style)", () => {
+describe("DrawerLanguageDropdown", () => {
   let container: HTMLDivElement;
+
+  const mount = async () => {
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<DrawerLanguageDropdown />);
+    });
+    return root;
+  };
+  const click = (el: Element | null | undefined) =>
+    act(async () => {
+      el?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
 
   beforeEach(() => {
     useLanguageStore.getState().setLanguage("en");
@@ -24,107 +38,43 @@ describe("DrawerLanguageDropdown (Bproperty style)", () => {
     useLanguageStore.getState().setLanguage("en");
   });
 
-  it("renders closed trigger with ENG and UK flag initially", async () => {
-    const root = createRoot(container);
-
-    await act(async () => {
-      root.render(<DrawerLanguageDropdown />);
-    });
-
-    expect(container.textContent).toContain("ENG");
-    expect(container.textContent).toContain("ChevronDown");
-    // UK flag accessible label
-    expect(container.querySelector('[aria-label="UK flag"]')).toBeTruthy();
-    // Dropdown list should NOT be visible
-    expect(container.querySelector('[aria-label="English"]')).toBeFalsy();
-
-    await act(async () => {
-      root.unmount();
-    });
+  it("names the current language in full and shows no flag or three-letter code", async () => {
+    const root = await mount();
+    expect(container.textContent).toContain("English");
+    expect(container.textContent).not.toMatch(/\bENG\b|\bBEN\b/);
+    expect(container.querySelector('[aria-label*="flag"]')).toBeNull();
+    // The list is closed until the trigger is pressed.
+    expect(container.querySelector('[role="radio"]')).toBeNull();
+    await act(async () => root.unmount());
   });
 
-  it("toggles dropdown list when trigger is pressed", async () => {
-    const root = createRoot(container);
+  it("opens a list of both languages, each in its own script, with the current one marked", async () => {
+    const root = await mount();
+    await click(container.querySelector('[aria-label="Language selector: English"]'));
 
-    await act(async () => {
-      root.render(<DrawerLanguageDropdown />);
-    });
-
-    const trigger = container.querySelector('[aria-label="Language selector: ENG"]');
-    expect(trigger).toBeTruthy();
-
-    // Tap trigger to expand
-    await act(async () => {
-      trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
-
-    // Options should now be visible
-    expect(container.querySelector('[aria-label="English"]')).toBeTruthy();
-    expect(container.querySelector('[aria-label="বাংলা"]')).toBeTruthy();
-    expect(container.textContent).toContain("BEN");
-
-    // Tap trigger again to collapse
-    await act(async () => {
-      trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
-
-    expect(container.querySelector('[aria-label="English"]')).toBeFalsy();
-
-    await act(async () => {
-      root.unmount();
-    });
+    const options = Array.from(container.querySelectorAll('[role="radio"]'));
+    expect(options.map((o) => o.getAttribute("aria-label"))).toEqual(["English", "বাংলা"]);
+    expect(options.map((o) => o.getAttribute("aria-checked"))).toEqual(["true", "false"]);
+    await act(async () => root.unmount());
   });
 
-  it("selects BEN, updates language immediately and collapses dropdown", async () => {
-    const root = createRoot(container);
+  it("switches language at once and closes the list", async () => {
+    const root = await mount();
+    await click(container.querySelector('[aria-label="Language selector: English"]'));
+    await click(container.querySelector('[aria-label="বাংলা"]'));
 
-    await act(async () => {
-      root.render(<DrawerLanguageDropdown />);
-    });
-
-    const trigger = container.querySelector('[aria-label="Language selector: ENG"]');
-
-    // Open dropdown
-    await act(async () => {
-      trigger?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
-
-    const bengaliOption = container.querySelector('[aria-label="বাংলা"]');
-    expect(bengaliOption).toBeTruthy();
-
-    // Select Bengali
-    await act(async () => {
-      bengaliOption?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
-
-    // Language store should be updated to "bn"
     expect(useLanguageStore.getState().language).toBe("bn");
-
-    // Dropdown should be collapsed
-    expect(container.querySelector('[aria-label="বাংলা"]')).toBeFalsy();
-
-    // Trigger should now show BEN and Bangladesh flag
-    expect(container.textContent).toContain("BEN");
-    expect(container.querySelector('[aria-label="Bangladesh flag"]')).toBeTruthy();
-
-    await act(async () => {
-      root.unmount();
-    });
+    expect(container.querySelector('[role="radio"]')).toBeNull();
+    expect(container.textContent).toContain("বাংলা");
+    await act(async () => root.unmount());
   });
 
-  it("renders BEN trigger and BD flag when language is Bengali", async () => {
+  it("is findable in either language: the names do not change with the language", async () => {
     useLanguageStore.getState().setLanguage("bn");
-    const root = createRoot(container);
-
-    await act(async () => {
-      root.render(<DrawerLanguageDropdown />);
-    });
-
-    expect(container.textContent).toContain("BEN");
-    expect(container.querySelector('[aria-label="Bangladesh flag"]')).toBeTruthy();
-
-    await act(async () => {
-      root.unmount();
-    });
+    const root = await mount();
+    await click(container.querySelector('[role="button"]'));
+    const labels = Array.from(container.querySelectorAll('[role="radio"]')).map((o) => o.getAttribute("aria-label"));
+    expect(labels).toEqual(["English", "বাংলা"]);
+    await act(async () => root.unmount());
   });
 });

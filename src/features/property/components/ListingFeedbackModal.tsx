@@ -112,7 +112,7 @@ export function ListingFeedbackModal({
       visible={visible}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "web" ? undefined : "padding"}
         style={[styles.overlay, isPhone && styles.overlayPhone]}
       >
         <Pressable
@@ -176,7 +176,7 @@ export function ListingFeedbackModal({
                       key={tag.id}
                       accessibilityLabel={label}
                       accessibilityRole="checkbox"
-                      accessibilityState={{ checked: selected }}
+                      aria-checked={selected}
                       disabled={submitting}
                       onPress={() => toggleTag(tag.id)}
                       style={({ pressed }) => [
@@ -263,7 +263,7 @@ export function ListingFeedbackModal({
             <Pressable
               accessibilityLabel={t("moderation.feedbackSubmit")}
               accessibilityRole="button"
-              accessibilityState={{ disabled: submitting || !canSubmit }}
+              aria-disabled={submitting || !canSubmit}
               disabled={submitting}
               onPress={handleSubmit}
               style={({ pressed }) => [

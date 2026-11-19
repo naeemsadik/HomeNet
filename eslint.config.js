@@ -32,6 +32,18 @@ module.exports = defineConfig([
           ],
         },
       ],
+      // react-native-web 0.21 reads only aria-* props and ignores the
+      // accessibilityState object, so state written that way never reaches a
+      // screen reader on the website. pressedState() and currentState() in
+      // src/lib/a11yState.ts cover the two states React Native's types lack.
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='accessibilityState']",
+          message:
+            "react-native-web 0.21 ignores accessibilityState. Use aria-selected, aria-checked, aria-expanded, aria-disabled or aria-busy, or pressedState()/currentState() from @/lib/a11yState.",
+        },
+      ],
       // React Compiler rules that eslint-config-expo enables as errors. The
       // existing code predates them (e.g. `useRef(new Animated.Value()).current`),
       // so they warn until those components are reworked.

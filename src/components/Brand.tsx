@@ -44,6 +44,7 @@ export function Brand({
   const isLight = variant === "light";
   const tone = isLight ? "light" : "dark";
   const brandRef = useNoTranslate<View>();
+  const wordmarkHeight = isCompact ? 15 : isLarge ? 19 : 17;
 
   return (
     <AppLink
@@ -56,7 +57,9 @@ export function Brand({
         <BrandMark size={isCompact ? 30 : isLarge ? 40 : 36} tone={tone} />
       </View>
       <View ref={brandRef} style={[styles.textWrap, subtitle ? styles.textWrapFill : null]}>
-        <BrandWordmark height={isCompact ? 15 : isLarge ? 19 : 17} tone={tone} />
+        <View style={[styles.wordmark, { height: wordmarkHeight }]}>
+          <BrandWordmark height={wordmarkHeight} tone={tone} />
+        </View>
         {subtitle ? (
           // On a phone the line can be wider than the room beside the logo, and it was cut to
           // "property mark…". It shrinks to fit (down to 85%), and where even that is too wide
@@ -82,7 +85,10 @@ const styles = StyleSheet.create({
   link: { flexDirection: "row", alignItems: "center", gap: 9, flexShrink: 1, minWidth: 0, overflow: "hidden" },
   linkCompact: { gap: 6, flexShrink: 1, minWidth: 0, overflow: "hidden" },
   mark: { flexShrink: 0 },
-  textWrap: { justifyContent: "center", gap: 2, flexShrink: 1, minWidth: 0, overflow: "hidden" },
+  // The wordmark keeps its own height (flexShrink 0), and the padding stops "overflow: hidden", which
+  // is only here to hold the tagline to the room beside the logo, from shaving the top of the letters.
+  wordmark: { flexShrink: 0 },
+  textWrap: { justifyContent: "center", gap: 2, flexShrink: 1, minWidth: 0, overflow: "hidden", paddingVertical: 2 },
   // With a tagline, the brand takes the room up to the bar's right-hand buttons, so the tagline's
   // width comes from the bar, not from the text (FitText sizes the text to that width).
   linkFill: { flexGrow: 1 },

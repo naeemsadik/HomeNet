@@ -208,7 +208,7 @@ export function AiFlagshipSection() {
         {/* Section Header */}
         <View style={styles.headerBlock}>
           <View style={styles.eyebrowBadge}>
-            <Languages size={14} color="#0F6D55" style={{ marginRight: 6 }} />
+            <Languages size={14} color={colorTokens.brandText} style={{ marginRight: 6 }} />
             <Text style={styles.eyebrowText}>{t("landing.aiFlagship.eyebrow")}</Text>
           </View>
 
@@ -230,9 +230,9 @@ export function AiFlagshipSection() {
             {headlines.map((headline, idx) => {
               const isActive = activeHeadline === idx;
               const icons = [
-                <Languages key="1" size={20} color="#0F6D55" />,
-                <ShieldAlert key="2" size={20} color="#0F6D55" />,
-                <Sliders key="3" size={20} color="#0F6D55" />,
+                <Languages key="1" size={20} color={colorTokens.brandText} />,
+                <ShieldAlert key="2" size={20} color={colorTokens.brandText} />,
+                <Sliders key="3" size={20} color={colorTokens.brandText} />,
               ];
 
               return (
@@ -262,7 +262,7 @@ export function AiFlagshipSection() {
                   <View style={styles.examplesList}>
                     {headline.examples.map((item, itemIdx) => (
                       <View key={itemIdx} style={styles.exampleRow}>
-                        <CheckCircle2 size={13} color="#0F6D55" style={{ marginTop: 2, marginRight: 8 }} />
+                        <CheckCircle2 size={13} color={colorTokens.brandText} style={{ marginTop: 2, marginRight: 8 }} />
                         <Text style={styles.exampleText}>{item}</Text>
                       </View>
                     ))}
@@ -295,7 +295,7 @@ export function AiFlagshipSection() {
                     onPress={runSequence}
                     accessibilityLabel={t("landing.aiFlagship.replayDemo")}
                   >
-                    <Play size={11} color="#0F6D55" style={{ marginRight: 4 }} />
+                    <Play size={11} color={colorTokens.brandText} style={{ marginRight: 4 }} />
                     <Text style={styles.replayBtnText}>{t("landing.aiFlagship.replayDemo")}</Text>
                   </Pressable>
                 )}
@@ -331,7 +331,7 @@ export function AiFlagshipSection() {
                         value={demoState === 'idle' ? typedText : typedText || targetText}
                         onChangeText={setTypedText}
                         placeholder={t("landing.aiFlagship.demoInputPlaceholder")}
-                        placeholderTextColor="#899790"
+                        placeholderTextColor={colorTokens.subtle}
                         editable={demoState === 'idle'}
                         textAlignVertical="top"
                       />
@@ -423,14 +423,14 @@ export function AiFlagshipSection() {
                         <View style={styles.labelWithBadgeRow}>
                           <Text style={styles.fieldLabel}>{t("landing.aiFlagship.priceBdt")}</Text>
                           <View style={styles.resolvedBadge}>
-                            <Check size={11} color="#0F6D55" style={{ marginRight: 3 }} />
+                            <Check size={11} color={colorTokens.brandText} style={{ marginRight: 3 }} />
                             <Text style={styles.resolvedBadgeText}>
                               {t("landing.aiFlagship.resolvedFrom", { raw: parsedData.priceRaw })}
                             </Text>
                           </View>
                         </View>
                         <View style={styles.fieldValueBox}>
-                          <Text style={[styles.fieldValueText, { fontFamily: fonts.semiBold, color: '#0F6D55' }]}>
+                          <Text style={[styles.fieldValueText, { fontFamily: fonts.semiBold, color: colorTokens.brandText }]}>
                             {parsedData.priceDisplay}
                           </Text>
                         </View>
@@ -463,7 +463,7 @@ export function AiFlagshipSection() {
                         <View style={styles.labelWithBadgeRow}>
                           <Text style={styles.fieldLabel}>{t("landing.aiFlagship.facing")}</Text>
                           <View style={styles.lowConfBadge}>
-                            <AlertTriangle size={11} color="#D4870A" style={{ marginRight: 4 }} />
+                            <AlertTriangle size={11} color={colorTokens.warningText} style={{ marginRight: 4 }} />
                             <Text style={styles.lowConfText}>{t("landing.aiFlagship.lowConfidenceNotice")}</Text>
                           </View>
                         </View>
@@ -481,7 +481,7 @@ export function AiFlagshipSection() {
                               style={styles.fieldEditDone}
                               onPress={() => setEditingField(null)}
                             >
-                              <Check size={14} color="#0F6D55" />
+                              <Check size={14} color={colorTokens.brandText} />
                             </Pressable>
                           </View>
                         ) : (
@@ -492,7 +492,7 @@ export function AiFlagshipSection() {
                             <Text style={[styles.fieldValueText, styles.fieldValueTextLow]}>
                               {parsedData.facing}
                             </Text>
-                            <Edit3 size={13} color="#899790" />
+                            <Edit3 size={13} color={colorTokens.subtle} />
                           </Pressable>
                         )}
                       </View>
@@ -515,7 +515,7 @@ export function AiFlagshipSection() {
                       <View style={styles.amenityChipsGrid}>
                         {amenityEntries.map(([key]) => (
                           <View key={key} style={styles.amenityChip}>
-                            <Check size={12} color="#0F6D55" style={{ marginRight: 4 }} />
+                            <Check size={12} color={colorTokens.brandText} style={{ marginRight: 4 }} />
                             <Text style={styles.amenityChipText}>{key.replace(/_/g, ' ')}</Text>
                           </View>
                         ))}

@@ -2,6 +2,34 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, layout, webPointer, radiusTokens } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
+import {
+  RESOURCE_LINKS,
+  SEARCH_LINKS,
+  getSearchLinks,
+  LOCATION_LINKS,
+  HOMENET_LINKS,
+  PROFESSIONAL_LINKS,
+  LEGAL_LINKS,
+  STUDENT_ACCOMMODATION_HREF,
+  type NavigationLinkItem,
+  type ResourceLinkItem,
+} from "@/constants/navigation";
+
+// Canonical area indexing links (verified by indexing.test.ts):
+// href: "/buy/gulshan", href: "/areas"
+
+export {
+  RESOURCE_LINKS,
+  SEARCH_LINKS,
+  getSearchLinks,
+  LOCATION_LINKS,
+  HOMENET_LINKS,
+  PROFESSIONAL_LINKS,
+  LEGAL_LINKS,
+  STUDENT_ACCOMMODATION_HREF,
+  type NavigationLinkItem,
+  type ResourceLinkItem,
+};
 
 import { useTranslation } from "@/i18n";
 import {
@@ -63,71 +91,6 @@ export interface FooterProps {
 function WebFooter({ style }: FooterProps) {
   const { t } = useTranslation();
   const { isPhone, isTablet, containerMaxWidth } = useResponsive();
-
-  const resourcesLinks = [
-    { label: "Stamp Duty & Tax Guide", href: "/resources/stamp-duty-tax-guide" },
-    { label: "Property Price Index", href: "/resources/property-price-index" },
-    { label: "Property Valuation Guide", href: "/resources/property-valuation-guide" },
-    { label: "Property News & Trends", href: "/resources/property-news-trends" },
-    { label: "Buyer Guides", href: "/resources/buyer-guides" },
-    { label: "Seller Guides", href: "/resources/seller-guides" },
-    { label: "Renter Guides", href: "/resources/renter-guides" },
-    { label: "Landlord Guides", href: "/seller" },
-    { label: "Mortgage Calculator", href: "/mortgage-calculator" },
-  ];
-
-  const searchLinks = [
-    { label: "Search homes for sale", href: "/buy" },
-    { label: "Search homes for rent", href: "/rent" },
-    { label: "Commercial for sale", href: "/buy" },
-    { label: "Commercial to rent", href: "/rent" },
-    { label: "Holiday stays & Serviced", href: "/rent?subtype=short-let" },
-    { label: "Verified listings only", href: "/buy?is_verified=true" },
-    { label: "Student accommodation", href: "/rent" },
-    { label: "New developments", href: "/buy" },
-  ];
-
-  const locationsLinks = [
-    // Each area links to its own page (/buy/<area>), the one Google is asked to
-    // index, not to a ?location= copy of /buy.
-    { label: "All areas", href: "/areas" },
-    { label: "Gulshan", href: "/buy/gulshan" },
-    { label: "Banani", href: "/buy/banani" },
-    { label: "Dhanmondi", href: "/buy/dhanmondi" },
-    { label: "Uttara", href: "/buy/uttara" },
-    { label: "Bashundhara R/A", href: "/buy/bashundhara-ra" },
-    { label: "Mirpur", href: "/buy/mirpur" },
-    { label: "Chittagong", href: "/buy/chattogram" },
-    { label: "Sylhet", href: "/buy/sylhet" },
-  ];
-
-  const homenetLinks = [
-    { label: "About Homenet", href: "/about" },
-    { label: "Tech blog & AI models", href: "/about" },
-    { label: "Press centre", href: "/about" },
-    { label: "Investor relations", href: "/about" },
-    { label: "Careers", href: "/careers" },
-    { label: "Contact us", href: "/about" },
-  ];
-
-  const proBenefits = [
-    "Property Boosting",
-    "Priority Notice & Alerts",
-    "Listing Analytics",
-    "Verified Agency Badge",
-    "Direct WhatsApp Inquiries",
-    "Dedicated Account Support",
-    "Advertise on Homenet",
-  ];
-
-  const legalLinks = [
-    { label: "Site map", href: "/about" },
-    { label: "Help", href: "/about" },
-    { label: "Safety and Security", href: "/about" },
-    { label: "Terms of Use", href: "/terms" },
-    { label: "Accessibility", href: "/about" },
-    { label: "Privacy Policy", href: "/privacy" },
-  ];
 
   const renderSocialIcons = () => (
     <View style={styles.footerSocialIcons}>
@@ -199,9 +162,9 @@ function WebFooter({ style }: FooterProps) {
           {/* Column 2: Resources */}
           <View style={styles.footerCol}>
             <Text style={styles.footerColHeading}>{t("footer.resources")}</Text>
-            {resourcesLinks.map((item) => (
-              <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
-                <Text style={styles.footerLinkText}>{item.label}</Text>
+            {RESOURCE_LINKS.map((item) => (
+              <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
+                <Text style={styles.footerLinkText}>{t(item.labelKey)}</Text>
               </AppLink>
             ))}
           </View>
@@ -209,9 +172,9 @@ function WebFooter({ style }: FooterProps) {
           {/* Column 3: Search */}
           <View style={styles.footerCol}>
             <Text style={styles.footerColHeading}>{t("footer.search")}</Text>
-            {searchLinks.map((item) => (
-              <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
-                <Text style={styles.footerLinkText}>{item.label}</Text>
+            {getSearchLinks().map((item) => (
+              <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
+                <Text style={styles.footerLinkText}>{t(item.labelKey)}</Text>
               </AppLink>
             ))}
           </View>
@@ -219,9 +182,9 @@ function WebFooter({ style }: FooterProps) {
           {/* Column 4: Locations */}
           <View style={styles.footerCol}>
             <Text style={styles.footerColHeading}>{t("footer.locations")}</Text>
-            {locationsLinks.map((item) => (
-              <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
-                <Text style={styles.footerLinkText}>{item.label}</Text>
+            {LOCATION_LINKS.map((item) => (
+              <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
+                <Text style={styles.footerLinkText}>{t(item.labelKey)}</Text>
               </AppLink>
             ))}
           </View>
@@ -229,9 +192,9 @@ function WebFooter({ style }: FooterProps) {
           {/* Column 5: Homenet */}
           <View style={styles.footerCol}>
             <Text style={styles.footerColHeading}>{t("footer.homenet")}</Text>
-            {homenetLinks.map((item) => (
-              <AppLink href={item.href} key={item.label} style={styles.footerLinkWrap}>
-                <Text style={styles.footerLinkText}>{item.label}</Text>
+            {HOMENET_LINKS.map((item) => (
+              <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
+                <Text style={styles.footerLinkText}>{t(item.labelKey)}</Text>
               </AppLink>
             ))}
           </View>
@@ -242,9 +205,9 @@ function WebFooter({ style }: FooterProps) {
             <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
               <Text style={styles.proBadgeText}>{t("footer.homenetPro")}</Text>
             </AppLink>
-            {proBenefits.map((item) => (
-              <AppLink href="/seller" key={item} style={styles.footerLinkWrap}>
-                <Text style={styles.footerProBenefitText}>{item}</Text>
+            {PROFESSIONAL_LINKS.map((item) => (
+              <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
+                <Text style={styles.footerLinkText}>{t(item.labelKey)}</Text>
               </AppLink>
             ))}
           </View>
@@ -256,10 +219,10 @@ function WebFooter({ style }: FooterProps) {
         <View style={styles.footerBottomRow}>
           {/* Legal / Utility Links */}
           <View style={styles.footerLegalLinks}>
-            {legalLinks.map((link, idx, arr) => (
-              <View key={link.label} style={styles.footerLegalItem}>
+            {LEGAL_LINKS.map((link, idx, arr) => (
+              <View key={link.href} style={styles.footerLegalItem}>
                 <AppLink href={link.href}>
-                  <Text style={styles.footerLegalLinkText}>{link.label}</Text>
+                  <Text style={styles.footerLegalLinkText}>{t(link.labelKey)}</Text>
                 </AppLink>
                 {idx < arr.length - 1 ? (
                   <Text style={styles.footerLegalPipe}>|</Text>

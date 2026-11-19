@@ -8,7 +8,7 @@ import {
   SlidersHorizontal,
   X,
 } from "@/components/icons";
-import { colorTokens, colors, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, colors, fonts, radius, webPointer, brandButtonState } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
@@ -69,6 +69,11 @@ export function HeroSearchWidget({
   // Switching tabs keeps the query, the area and every filter that still
   // applies. "Include sold" only means something while looking at Sold.
   const handleTabChange = (tab: HeroSearchTab) => {
+    // Mess & Seats is its own search, campus first, so the tab opens it.
+    if (tab === "mess") {
+      router.push("/mess" as never);
+      return;
+    }
     setActiveTab(tab);
     setFilters((prev) => ({
       ...prev,
@@ -330,7 +335,7 @@ const styles = StyleSheet.create({
     ...(Platform.select({
       web: { boxShadow: "0 24px 60px -20px rgba(11, 26, 23, 0.28)" },
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: colorTokens.ink,
         shadowOffset: { width: 0, height: 20 },
         shadowOpacity: 0.22,
         shadowRadius: 44,
@@ -485,11 +490,8 @@ const styles = StyleSheet.create({
     backgroundColor: colorTokens.brand,
   },
   searchButtonPhone: { height: 50, paddingHorizontal: 20 },
-  searchButtonHovered: {
-    backgroundColor: colorTokens.brand,
-    ...(Platform.OS === "web" ? { boxShadow: "0 4px 12px rgba(11, 26, 23, 0.12)" } : {}),
-  },
-  searchButtonPressed: { opacity: 0.9, backgroundColor: colorTokens.brand },
+  searchButtonHovered: brandButtonState.hovered,
+  searchButtonPressed: brandButtonState.pressed,
   searchLabel: {
     color: colorTokens.onBrand,
     fontFamily: fonts.bold,

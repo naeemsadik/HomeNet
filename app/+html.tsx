@@ -8,6 +8,7 @@ export default function Root({ children }: PropsWithChildren) {
       <head>
         <meta charSet="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta name="yandex-verification" content="bc39c4d488d0a3ba" />
         {/* The title and description are supplied per route via PageMeta
             (expo-router/head), which fills Expo Router's own react-helmet tags.
             A static <title> or description here would be a second, competing

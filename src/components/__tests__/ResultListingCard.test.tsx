@@ -48,3 +48,28 @@ describe("ResultListingCard photos (the wide search result card)", () => {
     await done();
   });
 });
+
+describe("ResultListingCard with a mess listing (a mess row in generic results)", () => {
+  const messRow = () =>
+    ({
+      ...(listing([]) as unknown as Record<string, unknown>),
+      id: "m1",
+      subtype: "mess",
+      listing_type: "rent",
+      phone: ["01711000000"],
+      whatsapp_number: "+8801711000000",
+    }) as unknown as Property;
+
+  it("never prints the lister's number or a WhatsApp link: those are revealed on the mess page", async () => {
+    const { container, done } = await render(messRow());
+    expect(container.textContent).not.toContain("01711000000");
+    expect(container.innerHTML).not.toContain("wa.me");
+    await done();
+  });
+
+  it("still shows a normal listing's number", async () => {
+    const { container, done } = await render({ ...(messRow() as unknown as Record<string, unknown>), subtype: "apartment" } as unknown as Property);
+    expect(container.textContent).toContain("01711000000");
+    await done();
+  });
+});

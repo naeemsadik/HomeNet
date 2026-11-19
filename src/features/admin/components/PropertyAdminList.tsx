@@ -17,6 +17,9 @@ interface PropertyAdminListProps {
   searchQuery: string;
   onStatusChange: (status: string) => void;
   onSearchChange: (query: string) => void;
+  /** The "Mess & seats" filter; left out when the mess module is off. */
+  messOnly?: boolean;
+  onMessOnlyChange?: (messOnly: boolean) => void;
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onDelete: (id: string) => void;
@@ -34,6 +37,8 @@ export function PropertyAdminList({
   searchQuery,
   onStatusChange,
   onSearchChange,
+  messOnly = false,
+  onMessOnlyChange,
   onApprove,
   onReject,
   onDelete,
@@ -61,6 +66,17 @@ export function PropertyAdminList({
             </Pressable>
           );
         })}
+        {onMessOnlyChange ? (
+          <Pressable
+            onPress={() => onMessOnlyChange(!messOnly)}
+            style={[styles.filterChip, messOnly && styles.filterChipActive]}
+            accessibilityRole="switch"
+            aria-checked={messOnly}
+            accessibilityLabel={t("mess.nav")}
+          >
+            <Text style={[styles.filterText, messOnly && styles.filterTextActive]}>{t("mess.nav")}</Text>
+          </Pressable>
+        ) : null}
       </View>
 
       <View style={styles.searchRow}>

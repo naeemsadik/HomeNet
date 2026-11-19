@@ -12,6 +12,7 @@ import { showToast } from "@/lib/toast";
 import { translateListingStatus, useTranslation } from "@/i18n";
 import type { ApiResponse, PropertyFeedbackDto, PropertyStatus } from "@/types/api";
 import type { Property } from "../types/property";
+import { messKeys } from "@/features/mess/hooks/messKeys";
 
 /**
  * Two cache shapes live under the `["properties"]` prefix:
@@ -30,6 +31,7 @@ type FlatFeed = { items?: Property[]; total?: number };
 type EnvelopeFeed = { data?: Property[] };
 type CachedFeed = PagedFeed & FlatFeed & EnvelopeFeed;
 type CachedDetail = ApiResponse<{ id: string; status: PropertyStatus } & Record<string, unknown>>;
+type CachedMessDetail = { id: string; status: PropertyStatus } & Record<string, unknown>;
 
 /** Every cached property list, whatever its filters. */
 const FEED_FILTER = { queryKey: ["properties"] } as const;
@@ -114,10 +116,16 @@ export function useListingModeration() {
           data: { ...current.data, status: nextStatus },
         };
       });
+      // A mess listing is moderated from its own page (/mess/:id), whose cache holds
+      // the listing itself rather than the API envelope.
+      const messKey = messKeys.detail(id);
+      const prevMess = queryClient.getQueryData<CachedMessDetail>(messKey);
+      queryClient.setQueryData<CachedMessDetail>(messKey, (current) => (current ? { ...current, status: nextStatus } : current));
       return () => {
         if (prev !== undefined) {
           queryClient.setQueryData(["property", id], prev);
         }
+        if (prevMess !== undefined) queryClient.setQueryData(messKey, prevMess);
       };
     },
     [queryClient],
@@ -166,6 +174,7 @@ export function useListingModeration() {
                 await staffRestoreProperty(property.id);
                 void queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
                 void queryClient.invalidateQueries({ queryKey: ["property", property.id] });
+                void queryClient.invalidateQueries({ queryKey: messKeys.detail(property.id) });
               } catch (error) {
                 // The row is already back on screen; say the server disagreed.
                 removeFromCache(property.id);
@@ -223,6 +232,7 @@ export function useListingModeration() {
         await adminUpdateProperty(property.id, { status: nextStatus });
         void queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
         void queryClient.invalidateQueries({ queryKey: ["property", property.id] });
+        void queryClient.invalidateQueries({ queryKey: messKeys.detail(property.id) });
         const statusLabel = translateListingStatus(nextStatus, language);
         showToast(
           t("moderation.statusUpdated", {
@@ -254,6 +264,7 @@ export function useListingModeration() {
         await submitPropertyFeedback(property.id, payload);
         void queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
         void queryClient.invalidateQueries({ queryKey: ["property", property.id] });
+        void queryClient.invalidateQueries({ queryKey: messKeys.detail(property.id) });
         showToast(t("moderation.feedbackSent", { title: property.title }), {
           durationMs: 5000,
         });
@@ -286,6 +297,7 @@ export function useListingModeration() {
         removeFromCache(property.id);
         void queryClient.invalidateQueries({ queryKey: ["admin", "properties"] });
         void queryClient.invalidateQueries({ queryKey: ["property", property.id] });
+        void queryClient.invalidateQueries({ queryKey: messKeys.detail(property.id) });
         showToast(t("moderation.deleted", { title: property.title }));
         return true;
       } catch (error) {

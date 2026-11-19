@@ -5,7 +5,7 @@ import { IfPermitted } from "@/components/IfPermitted";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { useIsModerating } from "@/stores/useAdminContextStore";
-import { colorTokens, fonts, layout, radius, shadow, webPointer } from "@/theme";
+import { colorTokens, fonts, layout, radius, shadow, webPointer, brandButtonState } from "@/theme";
 import type { PropertyStatus } from "@/types/api";
 import { useListingModeration } from "../hooks/useListingModeration";
 import { ListingFeedbackModal } from "./ListingFeedbackModal";
@@ -122,9 +122,10 @@ function CommandDeckInner({ property }: AdminPropertyCommandDeckProps) {
               accessibilityRole="button"
               disabled={isBusy}
               onPress={handleArchiveOrRestore}
+              // On a phone Archive keeps its own width and the main action takes the rest,
+              // so "Request changes" fits instead of being cut off beside an equal-width Archive.
               style={({ pressed }) => [
                 styles.secondaryBtn,
-                isPhone && styles.grow,
                 pressed && styles.pressed,
                 isBusy && styles.busy,
                 webPointer,
@@ -195,7 +196,7 @@ function CommandDeckInner({ property }: AdminPropertyCommandDeckProps) {
                   key={status}
                   accessibilityLabel={label}
                   accessibilityRole="radio"
-                  accessibilityState={{ checked: selected }}
+                  aria-checked={selected}
                   onPress={() => void handleStatusSelect(status)}
                   style={({ pressed }) => [
                     styles.option,
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
   },
-  primaryPressed: { backgroundColor: colorTokens.brand, opacity: 0.88 },
+  primaryPressed: brandButtonState.pressed,
   primaryText: { color: colorTokens.onBrand, fontFamily: fonts.semiBold, fontSize: 14, lineHeight: 20 },
   pressed: { opacity: 0.7 },
   busy: { opacity: 0.55 },

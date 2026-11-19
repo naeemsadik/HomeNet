@@ -9,7 +9,7 @@ import {
   SlidersHorizontal,
   X,
 } from "@/components/icons";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, radius, webPointer, brandButtonState } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { AreaPicker, type AreaLocationSelection } from "./AreaPicker";
 import { AdvancedFiltersModal } from "./AdvancedFiltersModal";
@@ -24,8 +24,12 @@ import {
 import type { Area } from "@/types/api";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
+import { MESS_ENABLED } from "@/lib/features";
 
-type MobileTab = "buy" | "rent" | "holiday" | "sold";
+/** "mess" opens Mess & Seat Share (/mess), its own search. */
+type MobileTab = "buy" | "rent" | "holiday" | "sold" | "mess";
+
+const MOBILE_TABS: MobileTab[] = ["buy", "rent", "holiday", "sold", ...(MESS_ENABLED ? (["mess"] as const) : [])];
 
 export function MobileHeroSearchCard() {
   const { t } = useTranslation();
@@ -57,6 +61,10 @@ export function MobileHeroSearchCard() {
   };
 
   const handleTabChange = (tab: MobileTab) => {
+    if (tab === "mess") {
+      router.push("/mess" as never);
+      return;
+    }
     setActiveTab(tab);
     setFilters((prev) => ({
       ...prev,
@@ -140,7 +148,7 @@ export function MobileHeroSearchCard() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.tabsScrollContent}
           >
-            {(["buy", "rent", "holiday", "sold"] as const).map((tab) => {
+            {MOBILE_TABS.map((tab) => {
               const isSelected = activeTab === tab;
               const tabLabel =
                 tab === "buy"
@@ -149,13 +157,15 @@ export function MobileHeroSearchCard() {
                   ? t("search.tabs.rent")
                   : tab === "holiday"
                   ? t("search.tabs.holidayStay")
+                  : tab === "mess"
+                  ? t("mess.tab")
                   : t("search.tabs.sold");
 
               return (
                 <Pressable
                   key={tab}
                   accessibilityRole="tab"
-                  accessibilityState={{ selected: isSelected }}
+                  aria-selected={isSelected}
                   accessibilityLabel={tabLabel}
                   onPress={() => handleTabChange(tab)}
                   style={[styles.tab, webPointer]}
@@ -246,8 +256,8 @@ export function MobileHeroSearchCard() {
             style={({ hovered, pressed }: any) => [
               styles.primaryButton,
               webPointer,
-              hovered && { opacity: 0.95 },
-              pressed && { opacity: 0.88 },
+              hovered && brandButtonState.hovered,
+              pressed && brandButtonState.pressed,
             ]}
           >
             <Text style={styles.primaryButtonText}>{t("hero.search")}</Text>
@@ -369,7 +379,7 @@ const styles = StyleSheet.create({
     ...(Platform.select({
       web: { boxShadow: "0 18px 40px -18px rgba(11, 26, 23, 0.35)" },
       default: {
-        shadowColor: "#0B1A17",
+        shadowColor: colorTokens.ink,
         shadowOffset: { width: 0, height: 12 },
         shadowOpacity: 0.18,
         shadowRadius: 24,

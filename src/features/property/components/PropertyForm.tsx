@@ -106,7 +106,7 @@ export function PropertyForm({
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.flex}>
+    <KeyboardAvoidingView behavior={Platform.OS === "web" ? undefined : "padding"} style={styles.flex}>
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         {/* Step Indicator */}
         <View style={styles.stepIndicator}>
@@ -173,7 +173,7 @@ export function PropertyForm({
               </View>
             </View>
             {onRequest ? (
-              <View accessibilityState={{ disabled: true }} style={styles.priceLocked}>
+              <View aria-disabled={true} style={styles.priceLocked}>
                 <Text style={styles.priceLockedLabel}>{t("wizard.form.priceLabel")}</Text>
                 <Text style={styles.priceLockedValue}>{priceOnRequestLabel(language)}</Text>
               </View>
@@ -189,7 +189,6 @@ export function PropertyForm({
               accessibilityLabel={priceOnRequestLabel(language)}
               accessibilityHint={t("wizard.details.contactForPriceHint")}
               accessibilityRole="checkbox"
-              accessibilityState={{ checked: onRequest }}
               aria-checked={onRequest}
               onPress={() => {
                 const next = !onRequest;

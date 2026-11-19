@@ -17,6 +17,7 @@ import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
 import { cdnImage } from "@/lib/cloudinaryImage";
+import { formatPrice } from "@/lib/format";
 import { BrowserFrame } from "./BrowserFrame";
 import { PhoneFrame } from "./PhoneFrame";
 import { previewProperties } from "@/data/landingPreview";
@@ -28,6 +29,7 @@ interface PhoneDetailPreviewProps {
   location: string;
   verifiedLabel: string;
   contactLabel: string;
+  price: string;
 }
 
 /** Shared phone mockup preview rendered in both the desktop overlap and mobile view. */
@@ -37,6 +39,7 @@ function PhoneDetailPreview({
   location,
   verifiedLabel,
   contactLabel,
+  price,
 }: PhoneDetailPreviewProps) {
   return (
     <View style={styles.mobileDetailPreview}>
@@ -61,7 +64,7 @@ function PhoneDetailPreview({
         <Text numberOfLines={1} style={styles.mobileDetailTitle}>
           {title}
         </Text>
-        <Text style={styles.mobileDetailPrice}>৳4.85 Crore</Text>
+        <Text style={styles.mobileDetailPrice}>{price}</Text>
 
         <View style={styles.mobileContactBtn} testID="hero-contact-cta">
           <Mail color={colorTokens.onBrand} size={13} strokeWidth={2} />
@@ -147,6 +150,7 @@ export function HeroProductVisual() {
             <PhoneFrame style={styles.phoneFrame}>
               <PhoneDetailPreview
                 contactLabel={t("landing.heroVisual.contactDirect")}
+                price={formatPrice(p1.price, p1.price_currency)}
                 imageUrl={p1.media?.[0]?.url}
                 location="Road 92, Gulshan-2"
                 title={p1.title}
@@ -161,6 +165,7 @@ export function HeroProductVisual() {
           <PhoneFrame style={styles.mobileStandalonePhone}>
             <PhoneDetailPreview
               contactLabel={t("landing.heroVisual.contactDirect")}
+              price={formatPrice(p1.price, p1.price_currency)}
               imageUrl={p1.media?.[0]?.url}
               location="Road 92, Gulshan-2, Dhaka"
               title={p1.title}

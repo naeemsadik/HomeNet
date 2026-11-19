@@ -1,24 +1,21 @@
 import { useState } from "react";
-import { FlatList, Platform, StyleSheet, Text, View } from "react-native";
-import { Footer } from "@/components/Footer";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Eyebrow } from "@/components/ui";
 import { AppChrome } from "@/components/AppChrome";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens, fontTokens } from "@/theme";
-import { AdminTabNav } from "../components/AdminTabNav";
+import { AdminTabNav, type AdminTab } from "../components/AdminTabNav";
 import { AdminPropertiesScreen } from "./AdminPropertiesScreen";
 import { AdminUsersScreen } from "./AdminUsersScreen";
 import { AdminRolesScreen } from "./AdminRolesScreen";
 import { AdminAreasScreen } from "./AdminAreasScreen";
+import { AdminUniversitiesScreen } from "./AdminUniversitiesScreen";
+import { MESS_ENABLED } from "@/lib/features";
 import { hasAnyAdminPermission, isAdmin } from "@/lib/permissions";
 import { NotificationList } from "@/features/notification/components/NotificationList";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 import { useTranslation } from "@/i18n";
-
-const NO_ROWS: string[] = [];
-
-type AdminTab = "properties" | "notifications" | "users" | "roles" | "areas" | "settings";
 
 export function AdminDashboardScreen() {
   const { t } = useTranslation();
@@ -35,13 +32,14 @@ export function AdminDashboardScreen() {
     ),
   );
   const allowedTabs: AdminTab[] = isFullAdmin
-    ? ["properties", "notifications", "users", "roles", "areas", "settings"]
+    ? ["properties", "notifications", "users", "roles", "areas", ...(MESS_ENABLED ? (["universities"] as const) : []), "settings"]
     : [
         ...(["manage_properties", "moderate_listing", "review_verification"].some((name) => permissionNames.has(name)) ? ["properties" as const] : []),
         ...(permissionNames.has("moderate_listing") ? ["notifications" as const] : []),
         ...(permissionNames.has("manage_users") ? ["users" as const] : []),
         ...(["view_roles", "manage_roles"].some((name) => permissionNames.has(name)) ? ["roles" as const] : []),
         ...(permissionNames.has("manage_areas") ? ["areas" as const] : []),
+        ...(MESS_ENABLED && permissionNames.has("manage_areas") ? ["universities" as const] : []),
         "settings" as const,
       ];
   const visibleTab = allowedTabs.includes(activeTab) ? activeTab : allowedTabs[0];
@@ -59,8 +57,12 @@ export function AdminDashboardScreen() {
     );
   }
 
-  const content = (
-    <>
+  return (
+    <AppChrome active="home">
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingHorizontal: contentPadding }, isPhone && styles.containerPhone]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.headerSection}>
           <Eyebrow>{t("admin.eyebrow")}</Eyebrow>
           <Text style={styles.title}>{t("admin.dashboardTitle")}</Text>
@@ -80,41 +82,19 @@ export function AdminDashboardScreen() {
           {visibleTab === "users" && <AdminUsersScreen />}
           {visibleTab === "roles" && <AdminRolesScreen />}
           {visibleTab === "areas" && <AdminAreasScreen />}
+          {visibleTab === "universities" && <AdminUniversitiesScreen />}
           {visibleTab === "settings" && (
             <View style={styles.settingsPlaceholder}>
               <Text style={styles.settingsText}>{t("admin.settingsComingSoon")}</Text>
             </View>
           )}
         </View>
-    </>
-  );
-  const containerStyle = [styles.container, { paddingHorizontal: contentPadding }, isPhone && styles.containerPhone];
-
-  // In the app the page is one FlatList, so the lists inside the tabs (listings,
-  // users, areas) share its window instead of sitting in a ScrollView. The
-  // website keeps the chrome's own scrolling.
-  const native = Platform.OS !== "web";
-  return (
-    <AppChrome active="home" scroll={!native}>
-      {native ? (
-        <FlatList
-          data={NO_ROWS}
-          keyExtractor={(row) => row}
-          ListFooterComponent={<Footer />}
-          ListHeaderComponent={<View style={containerStyle}>{content}</View>}
-          renderItem={null}
-          showsVerticalScrollIndicator={false}
-          style={styles.nativeList}
-        />
-      ) : (
-        <View style={containerStyle}>{content}</View>
-      )}
+      </ScrollView>
     </AppChrome>
   );
 }
 
 const styles = StyleSheet.create({
-  nativeList: { flex: 1, width: "100%" },
   container: { gap: 18, paddingBottom: 30 },
   containerPhone: { gap: 14 },
   headerSection: { gap: 6 },

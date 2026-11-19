@@ -33,7 +33,7 @@ export function AuthModal() {
           accessibilityLabel={t("auth.close")}
         />
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior={Platform.OS === "web" ? undefined : "padding"}
           style={modalStyles.keyboardWrap}
         >
           <AuthCard

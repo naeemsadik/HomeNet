@@ -455,3 +455,161 @@ Asked for: let the submit check accept 0, and decide how an unset price is told 
 from a deliberate 0 (for example make the submit check require that `price` was sent,
 or store `null` for "not set"). Also check anything that sorts or filters by price:
 listings priced 0 sort first on "price low to high" and match "under ৳X" filters.
+
+
+
+## 12. Location and the gaps between the app and the API
+
+Read from the code on `main` (843f5a7, 9 Nov) and `staging` (a697ef9, 12 Nov) on
+2026-11-12, plus one request to the staging `GET /v1/areas`. Nothing here was run
+against the production database.
+
+### 12a. What the API already has, and the app now uses
+
+Both branches use **Division → District → Area**. An area has `district_id` and,
+on the list and detail routes, a nested `district: { id, name, division_id }` and
+`center_lat` / `center_lng`. There is no `city` anywhere in the API. In the staging
+response the district is named `"Dhaka District"`, which the app reads as the city
+"Dhaka".
+
+| The API has | The app now |
+|---|---|
+| `district` on every area | Reads the city from it (`normalizeArea`, `src/services/areaApi.ts`) instead of guessing from the area's name |
+| `district_id` and `division_id` on `GET /v1/areas` | Sends them (no longer sends `?city=`, which the API does not have) |
+| `district_id` and `division_id` on `GET /v1/properties` | A whole-city search sends `district_id`. It falls back to a text search for the name only when the area list has not said which district the city is. |
+| `GET /v1/divisions`, `/divisions/:id/districts`, `/districts/:id/areas` | Not used yet; the city list is built from the areas |
+
+### 12b. Missing on both branches: the app calls these and gets a 404
+
+| Call | Used for | What the app does meanwhile |
+|---|---|---|
+| `POST /v1/properties/:id/feedback` | A moderator's "Request changes" notes to a seller | Tells the moderator nothing was sent and leaves the listing alone |
+| `POST /v1/properties/smart-search` | AI search | The feature is off or fails |
+| `POST /v1/ai/parse-property` | AI quick listing | Same |
+| `GET /v1/guides`, `GET /v1/guides/:id` | Guides pages | Falls back to the guides bundled in the app |
+| `POST /v1/properties/:id/unarchive` | Owner unarchive | Falls back to `POST /restore`, then two PATCH variants |
+
+`smart-listing` / `smart-search` exist only on the old `28-featai-add-ai-assistant-service`
+and `grok_api_key` branches (last commit 9 Oct) and never reached `staging`.
+
+### 12c. Missing: fields and filters
+
+1. **`aliases: string[]` on areas**, for known alternate spellings (`Adabar` / `Adabor`,
+   `Shajahanpur` / `Shahjahanpur`). The app matches by fuzzy similarity instead, which can
+   choose the wrong neighbour.
+2. **A parent `area_id` should match its sub-areas** (see 1c). The app still sends one request
+   per sub-area and merges the pages.
+3. **`center_lat` / `center_lng` on every area.** Distance search and the nearest-area match skip
+   areas without one. A sub-area is placed by its parent when it has none.
+4. **A plain city name.** The district is `"Dhaka District"`; the app strips the word District. If
+   other names carry other suffixes, a `short_name` on districts would remove the guessing.
+5. **Whether property responses include the area's district**, so a listing card can show the city
+   without a second lookup. Not confirmed from the code.
+
+### 12d. Data
+
+On staging today `GET /v1/areas?limit=100` returns **1 area** (Adabar). The geography seed
+(`apps/api/prisma/seeds/geography.seed.ts`, `areas.seed.ts`) needs to be run there before the
+city picker, area picker and area search can be tested properly. Also the six "Postman Area"
+rows noted in 1c.
+
+### 12e. Release gap: `staging` is 6 commits ahead of `main`
+
+Staging has, and `main` does not:
+
+- `GET /v1/properties/my/:id` and `GET /v1/properties/admin/:id` (owner and staff detail). The
+  edit-listing screen needs the first.
+- The revision flow: `GET /v1/properties/:id/revision` and `/admin/revision`, and
+  `POST /v1/properties/:id/admin/revision/approve`, `/admin/revision/reject` and `/admin/reject`.
+- `POST /v1/properties/make-archive/:id`.
+
+**A breaking change when staging is released:** `DELETE /v1/property-delete/:id` exists only on
+`main`. The app's owner "permanent delete" still calls it, so it will 404 after the release unless
+the route is kept or the app is changed to match.
+
+### 12f. Security
+
+If the API ever calls Google Geocoding or Places itself, it needs its **own key restricted by
+server IP address**. The website key is restricted by HTTP referrer, must not be reused on the
+server, and would fail there anyway (a server request has no `Referer`). See
+`docs/GOOGLE_MAPS_AND_LOCATION_GUIDE.md`.
+
+---
+
+## 13. Mess & Seat Share API
+
+The app's Mess & Seat Share module (`/mess`, PRD v1.0) is built and switched off behind
+`EXPO_PUBLIC_MESS_ENABLED` until these routes are live. The contract is the code:
+
+- **Shapes:** `src/features/mess/types/mess.ts` (field names are the JSON keys, snake_case).
+- **Calls:** `src/features/mess/api/messApi.ts`, one function per route.
+- **Reference behaviour:** `src/features/mess/api/fixtures/server.ts` answers every route from
+  demo data in a build made with `EXPO_PUBLIC_MESS_FIXTURES=true`. It enforces the rules below,
+  and its tests (`api/__tests__/fixtureServer.test.ts`) are the cases the API should pass too.
+
+A mess listing is a `Property` row (`type: residential`, `listing_type: rent`, `subtype: "mess"` or
+`"seat_share"`) plus a 1:1 `MessDetails` row, seats, utility charges and precomputed campus
+distances (PRD 2.1 and 2.2). Media, submit, moderation and saved listings use the existing
+`/v1/properties/:id/*` routes.
+
+### 13a. Routes
+
+| Method and path | Auth | Body or query | `data` | Errors the app handles |
+|---|---|---|---|---|
+| `GET /v1/universities` | public | `include_inactive=true` (staff, `manage_areas`) | `University[]`, campuses nested | — |
+| `POST /v1/universities`, `PATCH /v1/universities/:id` | 🔒 `manage_areas` | `UniversityInput` | `University` | 403, 404, **409 duplicate `short_name`** |
+| `DELETE /v1/universities/:id` | 🔒 `manage_areas` | — | — | 403, 404 |
+| `POST /v1/campuses`, `PATCH /v1/campuses/:id` | 🔒 `manage_areas` | `CampusInput` (PATCH without `university_id`) | `Campus` | 403, 404 |
+| `DELETE /v1/campuses/:id` | 🔒 `manage_areas` | — | — | 403, 404 |
+| `GET /v1/mess` | public | `MessFilters` + `page`, `limit` (max 30) | `{ items: MessCard[], total, page, limit }` | — |
+| `GET /v1/mess/:id` | public | — | `MessDetail` | 404 (also for a listing that is not active, unless owner or `moderate_listing`) |
+| `GET /v1/mess/my` | 🔒 | `page`, `limit` | `{ items: MyMessListing[], ... }` | 401 |
+| `POST /v1/mess` | 🔒 `manage_properties` | `UpsertMessDto` (`property_id` present = update) | `{ id, status }` | 401, 403 (not the owner), 422 `data.errors` |
+| `PATCH /v1/mess/:id/seats/:seatId` | 🔒 owner | `{ status: "available" \| "reserved" \| "filled" }` | — | 403, 404 |
+| `POST /v1/mess/:id/confirm` | 🔒 owner | — | — | 403, 404 |
+| `POST /v1/mess/:id/contact` | 🔒 | `{ channel: "phone" \| "whatsapp" }` | `{ phone }` or `{ whatsapp_url }` | **401** sign in, **403** verified only, **400** channel not offered, **429** rate limit |
+| `POST /v1/mess/:id/report` | 🔒 | `{ reason, note? }`, reason one of `fake_listing`, `already_filled`, `wrong_price`, `broker_spam`, `inappropriate`, `other` | — | 401, 404 |
+| `GET` / `PUT /v1/me/seat-preferences` | 🔒 | `SeekerPreference` | `SeekerPreference` or `null` | 401 |
+
+Search query encoding (`utils/filterParams.ts` `toApiParams`): booleans are sent only when true;
+`meal_system` and `guest_policy` are comma-separated lists (any-of); `max_walk_min` is sent only
+with `campus_id`; `sort_by=walk_asc` only with `campus_id`. `walk` on each card is `null` when no
+campus was asked for. Order by the sort, then `p.id`, so offset pages never repeat a card.
+
+### 13b. Rules the app relies on
+
+1. **No phone or email outside `/contact`.** `GET /v1/mess/:id` and `GET /v1/mess` never carry
+   `phone`, `whatsapp_number` or `user.auth_identities`.
+2. **Generic routes must not leak mess rows.** `GET /v1/properties` (search, similar listings,
+   valuation comparables, the build's pre-render) should leave out `subtype` `mess` and
+   `seat_share` unless `subtype` is asked for; the admin list honours `subtype=mess,seat_share`.
+   `GET /v1/properties/:id` for a mess row must not include phone or WhatsApp either. The app
+   already sends mess rows to `/mess/:id`, hides their numbers on search cards and skips them in
+   the pre-render, but an old app build or a direct API call would still see them.
+3. **Derived fields are computed on the server, with the app's formulas** (port them with their
+   tests, so the two can never disagree):
+   - all-in cost: `utils/allInCost.ts` (`allInCost`, `cheapestAllIn`, `costsComplete`). Write
+     `all_in_min`, `all_in_max`, `costs_complete`, `available_seats` and `Property.price = all_in_min`
+     in the same transaction as the upsert, and again on a seat status change.
+   - house-rule keys on cards and detail: `utils/rules.ts` (`deriveRuleKeys`).
+4. **Submit checks.** `POST /v1/properties/:id/submit` on a mess subtype answers 422 with one
+   message per failed check in `data.errors`, from the list in `utils/completeness.ts`
+   (`completenessChecks`): pin, gender policy, current residents, residents ≤ total seats, an
+   available seat, all eight bill categories answered, smoking, meal and guest policy, a `room`,
+   `washroom` and `building` photo, and at least one contact channel. The moderator's checklist on
+   `/mess/:id` shows the same list.
+5. **Photo labels.** `POST /v1/properties/:id/media` accepts a `label` form field: `room`,
+   `washroom`, `building`, `kitchen`, `common_area` or `other`, returned on each media item.
+6. **Contact.** Reveals are free and need sign-in. Limits: 5 an hour and 20 a day per seeker
+   across listings; above 30 in 24 hours on one listing, alert the lister and admins. With
+   `verified_seekers_only`, require `email_verified`. `whatsapp_url` is a `https://wa.me/<digits>`
+   link; the app adds the prefilled text.
+7. **Walking distances** are computed when a listing's pin is saved, never per search: one OSRM
+   `table` call (foot profile) for every campus within 6 km, falling back to straight line × 1.35
+   at 80 m a minute with `approximate: true` (PRD 2.4). Recompute when a campus is added or moved.
+8. **Freshness.** `last_confirmed_at` older than 30 days leaves search; a daily job sends a
+   "Still available?" notification at 14 days (`link: "/mess/my"`) and archives at 60. When the
+   last seat fills, the listing leaves search and users who saved it are notified.
+9. **Universities.** Seed the 15 survey universities (BRACU, UIU, ULAB, DIU, DU, EWU, IUB, NSU,
+   UAP, AUST, AIUB, BUET, BUP, IUT, JU) with campus **gate** coordinates checked on a map. The
+   fixture coordinates in the app are made up and must not be copied.

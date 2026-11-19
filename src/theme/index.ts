@@ -72,6 +72,16 @@ export const textBase: TextStyle = {
   fontFamily: fontTokens.regular,
 };
 
+/**
+ * Hover and pressed fills for a button on the brand green: the one definition
+ * every primary button uses, so hover reads the same on the hero search, the
+ * valuation button and the admin bar. Both are shades of the one brand green.
+ */
+export const brandButtonState = {
+  hovered: { backgroundColor: colorTokens.brandHover },
+  pressed: { backgroundColor: colorTokens.brandPressed },
+} as const;
+
 export const webPointer = { cursor: "pointer" } as ViewStyle;
 
 export function columnsWidth(columns: number, gap: number) {

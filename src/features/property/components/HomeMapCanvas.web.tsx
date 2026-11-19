@@ -61,6 +61,7 @@ export function HomeMapCanvas({
   // Create the map once.
   useEffect(() => {
     let cancelled = false;
+    let frame = 0;
     const placed = markerRefs.current;
     (async () => {
       try {
@@ -102,7 +103,11 @@ export function HomeMapCanvas({
         leafletRef.current = L;
         mapRef.current = map;
         clusterRef.current = cluster;
-        requestAnimationFrame(() => map.invalidateSize());
+        // Frames and animations outlive the component. A map that was removed has no
+        // panes, so touching it afterwards throws "reading '_leaflet_pos'".
+        frame = requestAnimationFrame(() => {
+          if (mapRef.current === map) map.invalidateSize();
+        });
         setReady(true);
       } catch (error) {
         console.error("HomeMapCanvas: the map could not load", error);
@@ -111,6 +116,10 @@ export function HomeMapCanvas({
 
     return () => {
       cancelled = true;
+      cancelAnimationFrame(frame);
+      // Stop a pan or zoom in flight and the cluster's own animation before the panes go.
+      mapRef.current?.stop();
+      clusterRef.current?.clearLayers();
       mapRef.current?.remove();
       mapRef.current = null;
       clusterRef.current = null;

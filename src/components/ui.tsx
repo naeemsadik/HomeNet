@@ -15,7 +15,7 @@ import {
   type ViewStyle,
   View,
 } from "react-native";
-import { colors, colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colors, colorTokens, fonts, radius, webPointer, brandButtonState } from "@/theme";
 import { OverlayModal } from "@/components/OverlayModal";
 import { useResponsive } from "@/hooks/useResponsive";
 import { openExternalUrl } from "@/lib/safeUrl";
@@ -123,7 +123,7 @@ export function AppButton({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ disabled: isInert, busy: loading }}
+      aria-disabled={isInert} aria-busy={loading}
       disabled={isInert}
       onPress={onPress}
       style={({ pressed, hovered }: any) => [
@@ -370,10 +370,7 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   buttonPrimary: { backgroundColor: colorTokens.brand },
-  buttonPrimaryHovered: {
-    backgroundColor: colorTokens.brand,
-    ...(Platform.OS === "web" ? { boxShadow: "0 4px 12px rgba(11, 26, 23, 0.12)" } : {}),
-  },
+  buttonPrimaryHovered: brandButtonState.hovered,
   buttonSecondary: {
     backgroundColor: colorTokens.surface,
     borderColor: colorTokens.divider,
