@@ -1,6 +1,6 @@
 // First, so production is silent before anything else can log.
 import "@/lib/productionConsole";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
@@ -37,6 +37,10 @@ export default function RootLayout() {
   // Latin subsets with font-display: swap on web; full files on native.
   const [loaded] = useFonts(appFonts);
   const pathname = usePathname();
+  const hydrated = useAuthStore((s) => s.hydrated);
+  const [splashTimedOut, setSplashTimedOut] = useState(false);
+  // The website renders as soon as fonts load; the app also waits for the saved sign-in.
+  const ready = Platform.OS === "web" ? loaded : loaded && (hydrated || splashTimedOut);
 
   // Tells app/+html.tsx's CSS the page is hydrated and laid out for this screen, so it can show
   // the pre-rendered page it hid on wider screens (see the comment there). Two frames: the first

@@ -83,6 +83,22 @@ export async function getPropertyById(id: string) {
   return data;
 }
 
+/** The signed-in owner's own listing, in any status (pending, draft, archived). */
+export async function getMyPropertyById(id: string) {
+  const { data } = await apiClient.get<ApiResponse<Property>>(
+    `/v1/properties/my/${encodeURIComponent(id.trim())}`,
+  );
+  return data;
+}
+
+/** Any listing in any status, for staff with manage_properties. */
+export async function getAdminPropertyById(id: string) {
+  const { data } = await apiClient.get<ApiResponse<Property>>(
+    `/v1/properties/admin/${encodeURIComponent(id.trim())}`,
+  );
+  return data;
+}
+
 export async function upsertProperty(dto: UpsertPropertyDto) {
   const validated = upsertPropertyDtoSchema.parse(dto);
   const { data } = await apiClient.post<ApiResponse<PropertyMutationResult>>("/v1/properties", validated);

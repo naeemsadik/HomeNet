@@ -1,5 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProperties, getPropertyById } from "@/services/propertyApi";
+import {
+  getAdminPropertyById,
+  getMyPropertyById,
+  getProperties,
+  getPropertyById,
+} from "@/services/propertyApi";
+import { useAuthStore } from "@/stores/authStore";
 import { isMessSubtype } from "@/lib/listingPath";
 
 export interface PropertyDetailArea {
@@ -73,10 +79,27 @@ const MAX_POLL_ATTEMPTS = 10;
  */
 export function usePropertyDetail(id: string, initial?: PropertyDetail) {
   const cleanId = (typeof id === "string" ? id : String(id || "")).trim();
+  const userId = useAuthStore((s) => s.user?.id ?? null);
   return useQuery({
     queryKey: ["property", cleanId],
     queryFn: async () => {
-      const response = await getPropertyById(cleanId);
+      let response;
+      try {
+        response = await getPropertyById(cleanId);
+      } catch (publicError) {
+        // The public endpoint only serves live listings. A pending or draft one is
+        // still visible to its owner, and to staff who moderate it.
+        if (!userId) throw publicError;
+        try {
+          response = await getMyPropertyById(cleanId);
+        } catch {
+          try {
+            response = await getAdminPropertyById(cleanId);
+          } catch {
+            throw publicError;
+          }
+        }
+      }
       if (!response.data) throw new Error(response.message || "Property not found");
       return response.data as PropertyDetail;
     },
