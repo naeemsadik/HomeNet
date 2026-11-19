@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Image } from "expo-image";
+import { cdnImage } from "@/lib/cloudinaryImage";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Check, Eye, Trash2, UserRound, X } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { PropertyStatusBadge } from "./StatusBadge";
@@ -33,7 +33,7 @@ export function PropertyAdminItemRow({
       <View style={styles.topRow}>
         <View style={styles.thumbnailWrap}>
           {thumbnail ? (
-            <Image source={{ uri: thumbnail }} accessibilityLabel={item.title} style={styles.thumbnail} />
+            <Image source={{ uri: cdnImage(thumbnail, 240) }} accessibilityLabel={item.title} style={styles.thumbnail} />
           ) : (
             <View style={styles.thumbnailPlaceholder}>
               <UserRound color={colorTokens.textMuted} size={20} />

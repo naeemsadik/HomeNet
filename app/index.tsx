@@ -2,15 +2,15 @@ import Head from "expo-router/head";
 import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
-import { HERO_IMAGE_URL } from "@/lib/heroImage";
+import { HERO_IMAGE_MOBILE_URL, HERO_IMAGE_URL } from "@/lib/heroImage";
 import { HomeScreen } from "@/screens/HomeScreen";
 
 export default function IndexRoute() {
   return (
     <>
       <PageMeta
-        title="HomeNet BD | Verified Property Listings in Bangladesh"
-        description="Flats, houses, plots and commercial space for sale or rent in Dhaka and across Bangladesh. Listing is free, and you contact property owners directly."
+        title="HomeNet BD | Property Marketplace in Bangladesh"
+        description="A property marketplace for Bangladesh: flats, houses, plots and commercial space for sale or rent. List free and deal with owners directly, no broker."
       />
       {/* The hero is the LCP element and a CSS background image, which the
           preload scanner cannot see until the bundle has rendered. Announcing
@@ -21,7 +21,8 @@ export default function IndexRoute() {
           and answer engines look for the brand's entity data. */}
       <JsonLd nodes={[organizationSchema(), websiteSchema()]} />
       <Head>
-        <link rel="preload" as="image" fetchPriority="high" href={HERO_IMAGE_URL} />
+        <link rel="preload" as="image" fetchPriority="high" href={HERO_IMAGE_MOBILE_URL} media="(max-width: 600px)" />
+        <link rel="preload" as="image" fetchPriority="high" href={HERO_IMAGE_URL} media="(min-width: 601px)" />
       </Head>
       <HomeScreen />
     </>

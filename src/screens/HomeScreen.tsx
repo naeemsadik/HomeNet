@@ -21,7 +21,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { layout, webPointer } from "@/theme";
-import { HERO_IMAGE_URL } from "@/lib/heroImage";
+import { HERO_IMAGE_MOBILE_URL, HERO_IMAGE_URL } from "@/lib/heroImage";
 import { styles } from "./HomeScreen.styles";
 
 /**
@@ -32,6 +32,7 @@ import { styles } from "./HomeScreen.styles";
  * the left-to-centre area uncluttered so the headline sits on calm pixels.
  */
 const HERO_IMAGE = { uri: HERO_IMAGE_URL };
+const HERO_IMAGE_MOBILE = { uri: HERO_IMAGE_MOBILE_URL };
 
 /**
  * The "See How HomeNet Works" explainer video is hidden while a new video is
@@ -99,7 +100,7 @@ export function HomeScreen() {
     // web), which is where the headline sits, so the app hid it under the card.
     <View style={[styles.mobileHeroPhoto, { height: 236 + insets.top }]}>
       <ImageBackground
-        source={HERO_IMAGE}
+        source={HERO_IMAGE_MOBILE}
         style={[styles.mobileHeroBg, { height: 236 + insets.top, paddingTop: insets.top }]}
         resizeMode="cover"
       >

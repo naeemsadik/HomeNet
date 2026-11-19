@@ -1,4 +1,4 @@
-import { ANDROID_PACKAGE, APP_SCHEME, isPrivatePath, isShellPath, SITE_SHARE_IMAGE, SITE_URL } from "../seo";
+import { ANDROID_PACKAGE, APP_SCHEME, fallbackTitleForPath, isPrivatePath, isShellPath, SITE_SHARE_IMAGE, SITE_URL } from "../seo";
 
 describe("isPrivatePath", () => {
   it.each([
@@ -84,5 +84,24 @@ describe("isShellPath", () => {
     expect(isShellPath("/property/94ea3a90-1c2d-4e5f-8a9b-0c1d2e3f4a5b")).toBe(false);
     expect(isShellPath("/buy/gulshan")).toBe(false);
     expect(isShellPath("/")).toBe(false);
+  });
+});
+
+describe("fallbackTitleForPath", () => {
+  it("gives each route without its own title a different one, not the home page's", () => {
+    const paths = ["/profile", "/saved", "/admin", "/admin/roles", "/seller/settings", "/users", "/users/[id]", "/profile/change-password"];
+    const titles = paths.map(fallbackTitleForPath);
+    expect(new Set(titles).size).toBe(paths.length);
+    for (const title of titles) expect(title).not.toBe(fallbackTitleForPath("/"));
+  });
+
+  it("names the page from its path", () => {
+    expect(fallbackTitleForPath("/admin/roles")).toBe("Admin Roles | HomeNet BD");
+    expect(fallbackTitleForPath("/profile/change-password")).toBe("Profile Change Password | HomeNet BD");
+    expect(fallbackTitleForPath("/users/[id]")).toBe("Users Details | HomeNet BD");
+  });
+
+  it("keeps the marketplace title for the home page", () => {
+    expect(fallbackTitleForPath("/")).toBe("HomeNet BD | Property Marketplace in Bangladesh");
   });
 });

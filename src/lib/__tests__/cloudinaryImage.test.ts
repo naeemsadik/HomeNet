@@ -1,4 +1,4 @@
-import { cdnImage } from "@/lib/cloudinaryImage";
+import { cdnImage, stockImage } from "@/lib/cloudinaryImage";
 
 const ORIGINAL = "https://res.cloudinary.com/demo/image/upload/v1788701402/homenet/flat.jpg";
 
@@ -28,5 +28,12 @@ describe("cdnImage", () => {
   it("maps null and undefined to undefined", () => {
     expect(cdnImage(null, 640)).toBeUndefined();
     expect(cdnImage(undefined, 640)).toBeUndefined();
+  });
+});
+
+describe("stockImage in a browser", () => {
+  it("leaves auto=format alone, so the browser negotiates AVIF or WebP", () => {
+    const url = "https://images.unsplash.com/photo-1?auto=format&fit=crop&w=800&q=80";
+    expect(stockImage(url)).toBe(url);
   });
 });

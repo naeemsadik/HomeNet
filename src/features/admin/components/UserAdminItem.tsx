@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Image } from "expo-image";
+import { cdnImage } from "@/lib/cloudinaryImage";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Settings, Trash2, UserRound } from "@/components/icons";
 import { colorTokens, fontTokens } from "@/theme";
 import { RoleBadge } from "./StatusBadge";
@@ -23,7 +23,7 @@ export function UserAdminItemRow({ item, onManageRoles, onView, onDelete }: User
       <View style={styles.topRow}>
         <View style={styles.avatarWrap}>
           {item.avatar_url ? (
-            <Image source={{ uri: item.avatar_url }} style={styles.avatar} />
+            <Image source={{ uri: cdnImage(item.avatar_url, 160) }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
               <UserRound color={colorTokens.textMuted} size={20} />

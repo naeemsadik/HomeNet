@@ -1,3 +1,4 @@
+import { stockImage } from "@/lib/cloudinaryImage";
 import { ExternalLink, MapPin, type LucideIcon } from "@/components/icons";
 import { Platform, Pressable, Text, View } from "react-native";
 import { openExternalUrl } from "@/lib/safeUrl";
@@ -66,7 +67,7 @@ export function PropertyLocationSection({
             style={styles.nativeMapContainer}
           >
             <Image
-              source={{ uri: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80" }}
+              source={{ uri: stockImage("https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80") }}
               style={styles.mapImage}
             />
             <View style={styles.mapPinOverlay}>

@@ -58,3 +58,18 @@ export const APP_SCHEME = "homenet";
 export function isShellPath(pathname: string): boolean {
   return pathname.includes("[");
 }
+
+/**
+ * The title for a route that does not set its own (see app/_layout.tsx). Without one, every such
+ * page (the signed-in workspaces, mostly) carried the home page's title, and crawlers reported
+ * dozens of pages sharing it. "/admin/roles" becomes "Admin Roles | HomeNet BD".
+ */
+export function fallbackTitleForPath(pathname: string): string {
+  const words = pathname
+    .split("/")
+    .filter(Boolean)
+    // A dynamic segment such as [id] has no name of its own.
+    .flatMap((segment) => (/^\[.*\]$/.test(segment) ? ["Details"] : segment.split("-")))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1));
+  return words.length ? `${words.join(" ")} | ${SITE_NAME}` : `${SITE_NAME} | Property Marketplace in Bangladesh`;
+}

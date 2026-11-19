@@ -1,3 +1,4 @@
+import { cdnImage } from "@/lib/cloudinaryImage";
 import { router } from "expo-router";
 import {
   AtSign,
@@ -132,7 +133,7 @@ export function UsersScreen() {
           >
             <View style={styles.userAvatar}>
               {item.avatar_url ? (
-                <Image source={{ uri: item.avatar_url }} style={styles.userAvatarImage} />
+                <Image source={{ uri: cdnImage(item.avatar_url, 160) }} style={styles.userAvatarImage} />
               ) : (
                 <UserRound color={colors.muted} size={20} />
               )}

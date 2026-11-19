@@ -1,3 +1,4 @@
+import { stockImage } from "@/lib/cloudinaryImage";
 import { memo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
@@ -101,7 +102,7 @@ const FeatureCardView = memo(function FeatureCardView({ card }: { card: FeatureC
       style={({ pressed }) => [styles.card, webPointer, pressed && { opacity: 0.92 }]}
     >
       <Image
-        source={{ uri: card.image }}
+        source={{ uri: stockImage(card.image) }}
         style={styles.cardBanner}
         contentFit="cover"
         accessibilityLabel={title}

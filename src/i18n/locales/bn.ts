@@ -2051,15 +2051,13 @@ export const bn: TranslationSchema = {
     },
     heroVisual: {
       openAppAria: "হোমনেটে লাইভ প্রোপার্টি দেখুন",
-      searchPlaceholder: "এলাকা, প্রজেক্ট বা কিওয়ার্ড দিয়ে খুঁজুন (যেমন: গুলশান, ধানমন্ডি, উত্তরা)",
       city: "ঢাকা",
-      searchBtn: "অনুসন্ধান",
       verifiedBadge: "১০০% যাচাইকৃত",
       contactDirect: "সরাসরি মালিকের সাথে যোগাযোগ",
     },
     browserFrame: {
       url: "homenetbd.com/buy",
-      dhakaUrl: "homenetbd.com/buy?city=Dhaka",
+      dhakaUrl: "homenetbd.com/buy?listing_type=sale&city=Dhaka&searched=1",
     },
     journey: {
       seekersTitle: "প্রোপার্টি সন্ধানকারীদের জন্য",
