@@ -4,7 +4,7 @@ import { confirmAction, notify } from "@/lib/alert";
 import { router, useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyForm } from "../components/PropertyForm";
-import { useUpdateProperty, useUploadMedia } from "../hooks/usePropertyMutations";
+import { useDeleteMedia, useUpdateProperty, useUploadMedia } from "../hooks/usePropertyMutations";
 import type { UpsertPropertyDto } from "@/types/api";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchPropertyForViewer } from "../hooks/usePropertyDetail";
 import { toApiError } from "@/services/apiClient";
 import { isListingPhoto } from "@/features/property/utils/listingMedia";
+import { removedPhotos } from "@/features/property/utils/removedPhotos";
 import { NotFoundScreen } from "@/screens/NotFoundScreen";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -24,6 +25,7 @@ export function PropertyEditScreen() {
   const hydrated = useAuthStore((s) => s.hydrated);
   const updateProperty = useUpdateProperty();
   const uploadMedia = useUploadMedia();
+  const deleteMedia = useDeleteMedia();
 
   const { data: propertyData, error: propertyError, isLoading } = useQuery({
     queryKey: ["property", id],
@@ -54,6 +56,13 @@ export function PropertyEditScreen() {
         if (img.file && !img.uri.startsWith("http")) {
           await uploadMedia.mutateAsync({ propertyId, file: img.file });
         }
+      }
+
+      // New photos go up before removed ones come down, so a listing that must keep a photo
+      // never passes through having none (the API refuses to remove the last one).
+      const photos = (propertyData?.media ?? []).filter(isListingPhoto);
+      for (const photo of removedPhotos(photos, images)) {
+        await deleteMedia.mutateAsync({ mediaId: photo.id, propertyId });
       }
 
       // The API decides whether the save changed anything, so ask it what happened. A listing
@@ -129,7 +138,7 @@ export function PropertyEditScreen() {
           onSubmit={handleSubmit}
           onCancel={() => router.back()}
           reviewNotice={reviewNotice}
-          loading={updateProperty.isPending || uploadMedia.isPending}
+          loading={updateProperty.isPending || uploadMedia.isPending || deleteMedia.isPending}
           error={updateProperty.error ? toApiError(updateProperty.error).message : null}
         />
       </View>

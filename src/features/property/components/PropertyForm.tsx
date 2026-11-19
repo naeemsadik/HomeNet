@@ -269,6 +269,7 @@ export function PropertyForm({
               onAdd={(newImgs) => setImages((prev) => [...prev, ...newImgs])}
               onRemove={(idx) => setImages((prev) => prev.filter((_, i) => i !== idx))}
               maxImages={20}
+              keepLast={mode === "edit" && reviewNotice !== null}
             />
             {mode === "edit" ? (
               <View style={styles.reviewBox}>

@@ -11,10 +11,13 @@ interface ImageUploaderProps {
   onAdd: (images: { uri: string; file?: Blob | File }[]) => void;
   onRemove: (index: number) => void;
   maxImages?: number;
+  /** The last photo cannot be removed: a live listing must keep one while it is reviewed. */
+  keepLast?: boolean;
 }
 
-export function ImageUploader({ images, onAdd, onRemove, maxImages = 10 }: ImageUploaderProps) {
+export function ImageUploader({ images, onAdd, onRemove, maxImages = 10, keepLast = false }: ImageUploaderProps) {
   const { t } = useTranslation();
+  const lastIsLocked = keepLast && images.length <= 1;
 
   const handlePick = async () => {
     // No permission request: the system photo picker needs none. On Android 11-12 the
@@ -62,19 +65,24 @@ export function ImageUploader({ images, onAdd, onRemove, maxImages = 10 }: Image
     <View style={styles.container}>
       <Text style={styles.label}>{t("wizard.media.imagesLabel")}</Text>
       <Text style={styles.hint}>{t("wizard.media.imagesCountHint", { max: maxImages, current: images.length })}</Text>
+      {lastIsLocked ? <Text style={styles.hint}>{t("wizard.media.keepOneHint")}</Text> : null}
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollArea}>
         <View style={styles.imageRow}>
           {images.map((img, index) => (
             <View key={`${img.uri}-${index}`} style={styles.imageWrap}>
               <Image source={{ uri: img.uri }} style={styles.image} />
-              <Pressable
-                onPress={() => onRemove(index)}
-                style={styles.removeBtn}
-                accessibilityLabel={t("wizard.media.removeImageAria", { index: index + 1 })}
-              >
-                <Trash2 color={colorTokens.textInverse} size={14} />
-              </Pressable>
+              {lastIsLocked ? null : (
+                <Pressable
+                  onPress={() => onRemove(index)}
+                  hitSlop={8}
+                  style={styles.removeBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("wizard.media.removeImageAria", { index: index + 1 })}
+                >
+                  <Trash2 color={colorTokens.textInverse} size={14} />
+                </Pressable>
+              )}
             </View>
           ))}
           {images.length < maxImages ? (
