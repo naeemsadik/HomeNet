@@ -23,28 +23,23 @@ jest.mock("expo-image", () => {
   };
 });
 
-jest.mock("@/components/PropertyCard", () => {
-  const mockReact = require("react");
-  return {
-    PropertyCard: ({ property }: { property: { title: string } }) =>
-      mockReact.createElement("div", null, property.title),
-  };
-});
-
 jest.mock("@/hooks/useResponsive", () => ({
   useResponsive: jest.fn(),
 }));
 
+// The real result card and filter bar draw many icons; any icon not named here renders nothing.
 jest.mock("@/components/icons", () => {
   const mockReact = require("react");
-  return {
+  const named: Record<string, unknown> = {
+    __esModule: true,
     Lock: () => "Lock",
     Mail: ({ color }: { color?: string }) =>
       mockReact.createElement("span", { "data-testid": "mail-icon", "data-color": color }),
-    MapPin: () => "MapPin",
-    Search: () => "Search",
     ShieldCheck: () => "ShieldCheck",
   };
+  return new Proxy(named, {
+    get: (target, key) => (key in target ? target[key as string] : () => null),
+  });
 });
 
 function setViewport(isPhone: boolean) {
@@ -98,19 +93,12 @@ describe("HeroProductVisual", () => {
     const mailIcon = container.querySelector('[data-testid="mail-icon"]');
     expect(mailIcon?.getAttribute("data-color")).toBe(colorTokens.onBrand);
 
-    const searchBtn = container.querySelector('[data-testid="hero-search-cta"]') as HTMLElement;
-    const searchBtnText = container.querySelector(
-      '[data-testid="hero-search-cta-text"]',
-    ) as HTMLElement;
-    expect(getComputedStyle(searchBtn).backgroundColor).toBe("rgb(4, 207, 146)");
-    expect(getComputedStyle(searchBtnText).color).toBe("rgb(11, 26, 23)");
-
     act(() => {
       root.unmount();
     });
   });
 
-  it("renders the matching brand CTA on phone widths and navigates to /buy on press", () => {
+  it("renders the matching brand CTA on phone widths and opens the Dhaka sale results on press", () => {
     setViewport(true);
     const root = createRoot(container);
     act(() => {
@@ -129,22 +117,22 @@ describe("HeroProductVisual", () => {
     act(() => {
       link?.click();
     });
-    expect(router.push).toHaveBeenCalledWith("/buy");
+    expect(router.push).toHaveBeenCalledWith("/buy?listing_type=sale&city=Dhaka&searched=1");
 
     act(() => {
       root.unmount();
     });
   });
 
-  it("renders canonical homenetbd.com domain and natural language placeholder with no homenet.com.bd", () => {
+  it("renders the canonical homenetbd.com address of the Dhaka sale results with no homenet.com.bd", () => {
     const root = createRoot(container);
     act(() => {
       root.render(<HeroProductVisual />);
     });
 
     expect(container.textContent).not.toContain("homenet.com.bd");
-    expect(container.textContent).toContain("homenetbd.com/buy?city=Dhaka");
-    expect(container.textContent).toContain("Search by area, project, or keyword");
+    expect(container.textContent).toContain("homenetbd.com/buy?listing_type=sale&city=Dhaka&searched=1");
+    expect(container.textContent).toContain("Properties for Sale in Dhaka");
 
     act(() => {
       root.unmount();

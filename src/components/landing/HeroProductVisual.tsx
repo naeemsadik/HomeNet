@@ -7,12 +7,7 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import {
-  Mail,
-  MapPin,
-  Search,
-  ShieldCheck,
-} from "@/components/icons";
+import { Mail, ShieldCheck } from "@/components/icons";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -21,7 +16,14 @@ import { formatPrice } from "@/lib/format";
 import { BrowserFrame } from "./BrowserFrame";
 import { PhoneFrame } from "./PhoneFrame";
 import { previewProperties } from "@/data/landingPreview";
-import { PropertyCard } from "@/components/PropertyCard";
+import { SearchFilterBar } from "@/components/SearchFilterBar";
+import { ResultListingCard } from "@/components/ResultListingCard";
+import { defaultSearchFilters, type SearchFilters } from "@/features/property/utils/searchFilters";
+
+/** The address the browser frame shows, and the page a click opens: the real Dhaka sale results. */
+const PREVIEW_PATH = "/buy?listing_type=sale&city=Dhaka&searched=1";
+const PREVIEW_FILTERS: SearchFilters = { ...defaultSearchFilters, purpose: "sale", city: "Dhaka" };
+const noop = () => undefined;
 
 interface PhoneDetailPreviewProps {
   imageUrl?: string;
@@ -82,11 +84,10 @@ export function HeroProductVisual() {
   const { isPhone, isCompact, isLargeScreen, isTall } = useResponsive();
 
   const handleOpenApp = () => {
-    router.push("/buy" as any);
+    router.push(PREVIEW_PATH as any);
   };
 
   const p1 = previewProperties[0];
-  const p2 = previewProperties[1];
 
   return (
     <Pressable
@@ -113,35 +114,26 @@ export function HeroProductVisual() {
             ]}
             contentStyle={styles.browserBody}
           >
-            {/* Decorative Search Bar Replica */}
-            <View style={styles.searchReplicaBar}>
-              <View style={styles.searchReplicaInput}>
-                <Search color={colorTokens.muted} size={16} strokeWidth={2} />
-                <Text numberOfLines={1} style={styles.searchReplicaPlaceholder}>
-                  {t("landing.heroVisual.searchPlaceholder")}
-                </Text>
-              </View>
-              <View style={styles.searchReplicaAreaBtn}>
-                <MapPin color={colorTokens.brandText} size={14} strokeWidth={2} />
-                <Text style={styles.searchReplicaAreaText}>{t("landing.heroVisual.city")}</Text>
-              </View>
-              <View style={styles.searchReplicaBtn} testID="hero-search-cta">
-                <Text style={styles.searchReplicaBtnText} testID="hero-search-cta-text">
-                  {t("landing.heroVisual.searchBtn")}
-                </Text>
-              </View>
-            </View>
-
-            {/* Two Live Property Cards */}
-            <View style={styles.cardsRow}>
-              <View style={styles.cardCol}>
-                <PropertyCard
-                  decorative property={p1} onPress={handleOpenApp} />
-              </View>
-              <View style={styles.cardCol}>
-                <PropertyCard
-                  decorative property={p2} onPress={handleOpenApp} />
-              </View>
+            {/* The real results page, shown as a picture: the same filter bar and result
+                card the /buy page draws, so the preview cannot drift from the product. */}
+            <View
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              aria-hidden
+              style={styles.replica}
+            >
+              <SearchFilterBar
+                areaOptions={[{ label: t("filters.allAreas"), value: "" }]}
+                cityOptions={[{ label: t("landing.heroVisual.city"), value: "Dhaka" }]}
+                filters={PREVIEW_FILTERS}
+                locationName={t("landing.heroVisual.city")}
+                onFilterChange={noop}
+                onOpenMoreFilters={noop}
+              />
+              <Text style={styles.replicaHeading}>
+                {t("search.rightmove.headingSale", { location: t("landing.heroVisual.city") })}
+              </Text>
+              <ResultListingCard compact={isCompact} onSave={noop} property={p1} saved={false} />
             </View>
           </BrowserFrame>
 
@@ -214,61 +206,15 @@ const styles = StyleSheet.create({
     padding: 18,
     backgroundColor: colorTokens.canvas,
   },
-  searchReplicaBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: colorTokens.surface,
-    padding: 6,
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colorTokens.border,
-    marginBottom: 16,
+  replica: {
+    gap: 12,
+    pointerEvents: "none",
   },
-  searchReplicaInput: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 10,
-  },
-  searchReplicaPlaceholder: {
-    color: colorTokens.muted,
-    fontFamily: fonts.regular,
-    fontSize: 13,
-  },
-  searchReplicaAreaBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: colorTokens.brandSurface,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: radius.md,
-  },
-  searchReplicaAreaText: {
-    color: colorTokens.brandText,
-    fontFamily: fonts.semiBold,
-    fontSize: 12,
-  },
-  searchReplicaBtn: {
-    backgroundColor: colorTokens.brand,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: radius.lg,
-  },
-  searchReplicaBtnText: {
-    color: colorTokens.onBrand,
-    fontFamily: fonts.bold,
-    fontSize: 13,
+  replicaHeading: {
+    color: colorTokens.ink,
+    fontFamily: fonts.headingBold,
+    fontSize: 16,
     fontWeight: "700",
-  },
-  cardsRow: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  cardCol: {
-    flex: 1,
   },
   phoneOverlapWrap: {
     position: "absolute",
