@@ -978,6 +978,13 @@ export const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
   },
+  drawerStatusStrip: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colorTokens.surface,
+  },
   drawerOverlay: {
     position: "absolute",
     top: 0,
