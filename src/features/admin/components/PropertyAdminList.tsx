@@ -6,7 +6,7 @@ import type { PropertyAdminItem } from "../types/admin";
 import { LiveText } from "@/components/LiveText";
 import { useTranslation, translateListingStatus, formatLocalizedNumber } from "@/i18n";
 
-const STATUS_FILTERS = ["all", "draft", "pending", "active", "sold", "archived"] as const;
+export const ADMIN_STATUS_FILTERS = ["all", "draft", "pending", "active", "sold", "archived", "rejected"] as const;
 
 type PressState = { pressed: boolean; hovered?: boolean };
 
@@ -55,10 +55,16 @@ export function PropertyAdminList({
 }: PropertyAdminListProps) {
   const { t, language } = useTranslation();
 
+  // A listing opened from a notification comes first, so it is seen without scrolling.
+  // When it is not in this list (another page, or another status) the banner says so
+  // instead of claiming a listing is being reviewed.
+  const highlighted = highlightId ? properties.find((property) => property.id === highlightId) : undefined;
+  const rows = highlighted ? [highlighted, ...properties.filter((property) => property !== highlighted)] : properties;
+
   return (
     <View style={styles.container}>
       <View style={styles.filterRow}>
-        {STATUS_FILTERS.map((status) => {
+        {ADMIN_STATUS_FILTERS.map((status) => {
           const label =
             status === "all"
               ? t("admin.filters.all")
@@ -133,7 +139,7 @@ export function PropertyAdminList({
           <View style={styles.highlightBannerLeft}>
             <Bell color={colorTokens.brand} size={16} strokeWidth={2.2} />
             <Text style={styles.highlightBannerText}>
-              {t("admin.reviewingFromNotification")}
+              {t(highlighted ? "admin.reviewingFromNotification" : "admin.highlightNotInList")}
             </Text>
           </View>
           {onClearHighlight ? (
@@ -200,7 +206,7 @@ export function PropertyAdminList({
         </View>
       ) : (
         <FlatList
-          data={properties}
+          data={rows}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <PropertyAdminItemRow

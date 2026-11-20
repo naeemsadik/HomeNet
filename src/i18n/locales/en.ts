@@ -633,6 +633,7 @@ export const en = {
     backToNotifications: "Back to Notifications",
     backToDashboard: "Back to Admin Dashboard",
     reviewingFromNotification: "Reviewing listing for moderation",
+    highlightNotInList: "That listing is not in this list. Try another status or clear the filter.",
     clearFilter: "Clear filter",
     clearSearch: "Clear search",
     emptyFilterTitle: "No listings match this filter",

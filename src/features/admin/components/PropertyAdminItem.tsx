@@ -1,5 +1,6 @@
+import type { ComponentProps } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Bell, Building2, Check, Clock, Eye, MessageSquare, RotateCcw, Trash2, UserRound } from "@/components/icons";
+import { Building2, Check, Clock, Eye, MessageSquare, RotateCcw, Trash2, UserRound } from "@/components/icons";
 import { cdnImage } from "@/lib/cloudinaryImage";
 import { colorTokens, fontTokens, radius, webPointer } from "@/theme";
 import { PropertyStatusBadge } from "./StatusBadge";
@@ -19,6 +20,7 @@ export interface PropertyAdminItemProps {
   onView: (id: string) => void;
   onRequestChanges?: (item: PropertyAdminItem) => void;
   isMutating?: boolean;
+  /** The listing a notification pointed at: its card gets the brand outline. */
   isHighlighted?: boolean;
 }
 
@@ -50,13 +52,6 @@ export function PropertyAdminItemRow({
 
   return (
     <View style={[styles.card, isHighlighted && styles.cardHighlighted]}>
-      {isHighlighted ? (
-        <View style={styles.highlightPill}>
-          <Bell color={colorTokens.brand} size={12} strokeWidth={2.2} />
-          <Text style={styles.highlightPillText}>{t("admin.reviewingFromNotification")}</Text>
-        </View>
-      ) : null}
-
       <View style={[styles.mainRow, isPhone && styles.mainRowPhone]}>
         <View style={styles.thumbnailWrap}>
           {thumbnail ? (
@@ -106,7 +101,7 @@ export function PropertyAdminItemRow({
         </View>
 
         <View style={styles.statusWrap}>
-          <PropertyStatusBadge status={item.status as "draft" | "active" | "pending" | "sold" | "archived" | "rejected" | "changes_requested"} />
+          <PropertyStatusBadge status={item.status as ComponentProps<typeof PropertyStatusBadge>["status"]} />
         </View>
       </View>
 
@@ -125,6 +120,7 @@ export function PropertyAdminItemRow({
                   pressed && styles.actionBtnPressed,
                   webPointer,
                 ]}
+                accessibilityRole="button"
                 accessibilityLabel={t("admin.actions.activateAria")}
                 disabled={isMutating}
               >
@@ -143,6 +139,7 @@ export function PropertyAdminItemRow({
                   pressed && styles.actionBtnPressed,
                   webPointer,
                 ]}
+                accessibilityRole="button"
                 accessibilityLabel={t("admin.actions.moveToDraftAria")}
                 disabled={isMutating}
               >
@@ -164,7 +161,8 @@ export function PropertyAdminItemRow({
                 pressed && styles.actionBtnPressed,
                 webPointer,
               ]}
-              accessibilityLabel={t("admin.actions.requestChangesAria")}
+              accessibilityRole="button"
+                accessibilityLabel={t("admin.actions.requestChangesAria")}
               disabled={isMutating}
             >
               <MessageSquare color={colorTokens.textPrimary} size={13} strokeWidth={2} />
@@ -183,7 +181,8 @@ export function PropertyAdminItemRow({
               pressed && styles.actionBtnPressed,
               webPointer,
             ]}
-            accessibilityLabel={t("admin.actions.viewAria")}
+            accessibilityRole="button"
+                accessibilityLabel={t("admin.actions.viewAria")}
           >
             <Eye color={colorTokens.verified} size={14} strokeWidth={2} />
             <Text style={[styles.actionText, { color: colorTokens.verified }]}>
@@ -200,7 +199,8 @@ export function PropertyAdminItemRow({
             pressed && styles.actionBtnPressed,
             webPointer,
           ]}
-          accessibilityLabel={t("admin.actions.deleteAria")}
+          accessibilityRole="button"
+                accessibilityLabel={t("admin.actions.deleteAria")}
           disabled={isMutating}
         >
           <Trash2 color={colorTokens.error} size={14} strokeWidth={2} />
@@ -223,23 +223,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colorTokens.brand,
     backgroundColor: colorTokens.brandSurface,
-  },
-  highlightPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    alignSelf: "flex-start",
-    paddingVertical: 3,
-    paddingHorizontal: 8,
-    borderRadius: 999,
-    backgroundColor: colorTokens.background,
-    borderWidth: 1,
-    borderColor: colorTokens.brand,
-  },
-  highlightPillText: {
-    fontSize: 11,
-    fontFamily: fontTokens.bold,
-    color: colorTokens.brandText,
   },
   mainRow: {
     flexDirection: "row",
@@ -335,8 +318,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingVertical: 7,
-    paddingHorizontal: 11,
+    minHeight: 44,
+    paddingHorizontal: 12,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: "transparent",
@@ -372,7 +355,8 @@ const styles = StyleSheet.create({
   deleteBtn: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 7,
+    width: 44,
+    height: 44,
     borderRadius: radius.md,
     backgroundColor: colorTokens.errorLight,
   },

@@ -74,8 +74,10 @@ describe("AdminShell", () => {
     });
 
     expect(container.querySelector('[data-testid="app-chrome"]')).not.toBeNull();
-    expect(container.textContent).toContain("Admin Dashboard");
-    expect(container.textContent).toContain("Properties");
+    // One heading, and it names the page: the old "Admin Dashboard" banner is gone.
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(container.querySelector("h1")?.textContent).toBe("Properties");
+    expect(container.textContent).not.toContain("Admin Dashboard");
     expect(container.querySelector('[data-testid="admin-child-content"]')).not.toBeNull();
   });
 
@@ -107,12 +109,10 @@ describe("AdminShell", () => {
     expect(mockBack).toHaveBeenCalled();
   });
 
-  it("navigates to the selected tab when a tab is clicked", async () => {
-    const mockTabChange = jest.fn();
-
+  it("opens the page of the tab that is clicked, replacing the current one", async () => {
     await act(async () => {
       root.render(
-        <AdminShell activeTab="properties" onTabChange={mockTabChange}>
+        <AdminShell activeTab="properties">
           <div>Content</div>
         </AdminShell>,
       );
@@ -127,6 +127,7 @@ describe("AdminShell", () => {
       notifTab?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(mockTabChange).toHaveBeenCalledWith("notifications");
+    expect(router.replace).toHaveBeenCalledWith("/admin/notifications");
+    expect(router.push).not.toHaveBeenCalled();
   });
 });

@@ -3,26 +3,24 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import { ArrowLeft } from "@/components/icons";
 import { AppChrome } from "@/components/AppChrome";
-import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 import { hasAnyAdminPermission } from "@/lib/permissions";
 import { colorTokens, fontTokens, radius, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
-import { AdminTabNav, type AdminTab } from "./AdminTabNav";
+import { ADMIN_TAB_PATH, AdminTabNav, type AdminTab } from "./AdminTabNav";
 
 export interface AdminShellProps {
   children: ReactNode;
   activeTab: AdminTab;
-  onTabChange?: (tab: AdminTab) => void;
   backAction?: {
     label: string;
     onPress: () => void;
   };
 }
 
-export function AdminShell({ children, activeTab, onTabChange, backAction }: AdminShellProps) {
+export function AdminShell({ children, activeTab, backAction }: AdminShellProps) {
   const { t } = useTranslation();
   const { isPhone, contentPadding, containerMaxWidth } = useResponsive();
   const userRoles = useAuthStore((s) => s.userRoles);
@@ -30,12 +28,9 @@ export function AdminShell({ children, activeTab, onTabChange, backAction }: Adm
 
   const hasAccess = hasAnyAdminPermission(userRoles);
 
+  // Replace, not push: moving between tabs should not fill the back button with every tab visited.
   function handleTabChange(tab: AdminTab) {
-    if (onTabChange) {
-      onTabChange(tab);
-    } else {
-      router.push({ pathname: "/admin", params: { tab } });
-    }
+    router.replace(ADMIN_TAB_PATH[tab] as never);
   }
 
   if (!hasAccess) {
@@ -83,11 +78,9 @@ export function AdminShell({ children, activeTab, onTabChange, backAction }: Adm
           </View>
         ) : null}
 
-        <View style={styles.headerSection}>
-          <Eyebrow>{t("admin.eyebrow")}</Eyebrow>
-          <Text style={styles.title}>{t("admin.dashboardTitle")}</Text>
-          <Text style={styles.subtitle}>{t("admin.dashboardSubtitle")}</Text>
-        </View>
+        <Text accessibilityRole="header" aria-level={1} style={styles.title}>
+          {t(`admin.tabs.${activeTab}` as never)}
+        </Text>
 
         <AdminTabNav
           active={activeTab}
@@ -140,20 +133,11 @@ const styles = StyleSheet.create({
     fontFamily: fontTokens.semiBold,
     color: colorTokens.textPrimary,
   },
-  headerSection: {
-    gap: 6,
-  },
   title: {
     fontSize: 28,
     fontFamily: fontTokens.extraBold,
     color: colorTokens.textPrimary,
     letterSpacing: -0.4,
-  },
-  subtitle: {
-    fontSize: 13,
-    fontFamily: fontTokens.regular,
-    color: colorTokens.textSecondary,
-    lineHeight: 18,
   },
   tabContent: {
     marginTop: 4,
