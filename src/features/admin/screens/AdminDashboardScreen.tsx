@@ -1,30 +1,43 @@
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { Eyebrow } from "@/components/ui";
-import { AppChrome } from "@/components/AppChrome";
-import { useResponsive } from "@/hooks/useResponsive";
+import { StyleSheet, Text, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/stores/authStore";
 import { colorTokens, fontTokens } from "@/theme";
-import { AdminTabNav, type AdminTab } from "../components/AdminTabNav";
+import type { AdminTab } from "../components/AdminTabNav";
+import { AdminShell } from "../components/AdminShell";
 import { AdminPropertiesScreen } from "./AdminPropertiesScreen";
 import { AdminUsersScreen } from "./AdminUsersScreen";
 import { AdminRolesScreen } from "./AdminRolesScreen";
 import { AdminAreasScreen } from "./AdminAreasScreen";
 import { AdminUniversitiesScreen } from "./AdminUniversitiesScreen";
 import { MESS_ENABLED } from "@/lib/features";
-import { hasAnyAdminPermission, isAdmin } from "@/lib/permissions";
+import { isAdmin } from "@/lib/permissions";
 import { NotificationList } from "@/features/notification/components/NotificationList";
-import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 import { useTranslation } from "@/i18n";
+import type { Notification } from "@/types/api";
+
+export function AdminSettingsTab() {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.settingsPlaceholder}>
+      <Text style={styles.settingsText}>{t("admin.settingsComingSoon")}</Text>
+    </View>
+  );
+}
 
 export function AdminDashboardScreen() {
   const { t } = useTranslation();
-  const { isPhone, contentPadding } = useResponsive();
   const userRoles = useAuthStore((s) => s.userRoles);
-  const [activeTab, setActiveTab] = useState<AdminTab>("properties");
-  const { data: adminUnread } = useUnreadCount("admin");
+  const params = useLocalSearchParams<{
+    tab?: AdminTab;
+    from?: string;
+    highlight?: string;
+    status?: string;
+  }>();
 
-  const hasAccess = hasAnyAdminPermission(userRoles);
+  const [localTab, setLocalTab] = useState<AdminTab>("properties");
+  const activeTab = params.tab || localTab;
+
   const isFullAdmin = isAdmin(userRoles);
   const permissionNames = new Set(
     userRoles.flatMap((userRole) =>
@@ -32,104 +45,112 @@ export function AdminDashboardScreen() {
     ),
   );
   const allowedTabs: AdminTab[] = isFullAdmin
-    ? ["properties", "notifications", "users", "roles", "areas", ...(MESS_ENABLED ? (["universities"] as const) : []), "settings"]
+    ? [
+        "properties",
+        "notifications",
+        "users",
+        "roles",
+        "areas",
+        ...(MESS_ENABLED ? (["universities"] as const) : []),
+        "settings",
+      ]
     : [
-        ...(["manage_properties", "moderate_listing", "review_verification"].some((name) => permissionNames.has(name)) ? ["properties" as const] : []),
-        ...(permissionNames.has("moderate_listing") ? ["notifications" as const] : []),
-        ...(permissionNames.has("manage_users") ? ["users" as const] : []),
-        ...(["view_roles", "manage_roles"].some((name) => permissionNames.has(name)) ? ["roles" as const] : []),
-        ...(permissionNames.has("manage_areas") ? ["areas" as const] : []),
-        ...(MESS_ENABLED && permissionNames.has("manage_areas") ? ["universities" as const] : []),
+        ...( [
+          "manage_properties",
+          "moderate_listing",
+          "review_verification",
+        ].some((name) => permissionNames.has(name))
+          ? (["properties"] as const)
+          : []),
+        ...(permissionNames.has("moderate_listing") ? (["notifications"] as const) : []),
+        ...(permissionNames.has("manage_users") ? (["users"] as const) : []),
+        ...([
+          "view_roles",
+          "manage_roles",
+        ].some((name) => permissionNames.has(name))
+          ? (["roles"] as const)
+          : []),
+        ...(permissionNames.has("manage_areas") ? (["areas"] as const) : []),
+        ...(MESS_ENABLED && permissionNames.has("manage_areas")
+          ? (["universities"] as const)
+          : []),
         "settings" as const,
       ];
   const visibleTab = allowedTabs.includes(activeTab) ? activeTab : allowedTabs[0];
 
-  if (!hasAccess) {
-    return (
-      <AppChrome active="home">
-        <View style={styles.denied}>
-          <Text style={styles.deniedTitle}>{t("admin.accessDenied")}</Text>
-          <Text style={styles.deniedText}>
-            {t("admin.accessDeniedDesc")}
-          </Text>
-        </View>
-      </AppChrome>
-    );
+  function handleTabChange(tab: AdminTab) {
+    setLocalTab(tab);
+    router.replace({ pathname: "/admin", params: { tab } });
   }
 
+  function handleNotificationPress(notification: Notification) {
+    const meta = notification.metadata as Record<string, unknown> | null;
+    let propertyId = (meta?.property_id || meta?.id || "") as string;
+    if (!propertyId && notification.link) {
+      const match =
+        notification.link.match(/properties\/([a-zA-Z0-9-]+)/) ||
+        notification.link.match(/property\/([a-zA-Z0-9-]+)/);
+      if (match) propertyId = match[1];
+    }
+
+    if (
+      notification.link?.includes("/admin/properties") ||
+      notification.link?.includes("/property/") ||
+      notification.type?.includes("property") ||
+      propertyId
+    ) {
+      router.push({
+        pathname: "/admin/properties",
+        params: {
+          from: "notifications",
+          status: "pending",
+          ...(propertyId ? { highlight: propertyId } : {}),
+        },
+      });
+      return;
+    }
+
+    if (notification.link) {
+      router.push(notification.link as never);
+    }
+  }
+
+  const isFromNotifications = params.from === "notifications";
+
   return (
-    <AppChrome active="home">
-      <ScrollView
-        contentContainerStyle={[styles.container, { paddingHorizontal: contentPadding }, isPhone && styles.containerPhone]}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.headerSection}>
-          <Eyebrow>{t("admin.eyebrow")}</Eyebrow>
-          <Text style={styles.title}>{t("admin.dashboardTitle")}</Text>
-          <Text style={styles.subtitle}>{t("admin.dashboardSubtitle")}</Text>
-        </View>
-
-        <AdminTabNav
-          active={visibleTab}
-          onChange={setActiveTab}
-          userRoles={userRoles}
-          badges={{ notifications: adminUnread?.data?.count ?? 0 }}
-        />
-
-        <View style={styles.tabContent}>
-          {visibleTab === "properties" && <AdminPropertiesScreen />}
-          {visibleTab === "notifications" && <NotificationList audience="admin" />}
-          {visibleTab === "users" && <AdminUsersScreen />}
-          {visibleTab === "roles" && <AdminRolesScreen />}
-          {visibleTab === "areas" && <AdminAreasScreen />}
-          {visibleTab === "universities" && <AdminUniversitiesScreen />}
-          {visibleTab === "settings" && (
-            <View style={styles.settingsPlaceholder}>
-              <Text style={styles.settingsText}>{t("admin.settingsComingSoon")}</Text>
-            </View>
-          )}
-        </View>
-      </ScrollView>
-    </AppChrome>
+    <AdminShell
+      activeTab={visibleTab}
+      onTabChange={handleTabChange}
+      backAction={
+        isFromNotifications
+          ? {
+              label: t("admin.backToNotifications"),
+              onPress: () => handleTabChange("notifications"),
+            }
+          : undefined
+      }
+    >
+      <View style={styles.tabContent}>
+        {visibleTab === "properties" && <AdminPropertiesScreen />}
+        {visibleTab === "notifications" && (
+          <NotificationList
+            audience="admin"
+            onPressItem={handleNotificationPress}
+          />
+        )}
+        {visibleTab === "users" && <AdminUsersScreen />}
+        {visibleTab === "roles" && <AdminRolesScreen />}
+        {visibleTab === "areas" && <AdminAreasScreen />}
+        {visibleTab === "universities" && <AdminUniversitiesScreen />}
+        {visibleTab === "settings" && <AdminSettingsTab />}
+      </View>
+    </AdminShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 18, paddingBottom: 30 },
-  containerPhone: { gap: 14 },
-  headerSection: { gap: 6 },
-  title: {
-    fontSize: 28,
-    fontFamily: fontTokens.extraBold,
-    color: colorTokens.textPrimary,
-    letterSpacing: -0.4,
-  },
-  subtitle: {
-    fontSize: 13,
-    fontFamily: fontTokens.regular,
-    color: colorTokens.textSecondary,
-    lineHeight: 18,
-  },
   tabContent: {
     marginTop: 4,
-  },
-  denied: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-    gap: 12,
-  },
-  deniedTitle: {
-    fontSize: 20,
-    fontFamily: fontTokens.bold,
-    color: colorTokens.textPrimary,
-  },
-  deniedText: {
-    fontSize: 14,
-    fontFamily: fontTokens.regular,
-    color: colorTokens.textSecondary,
-    textAlign: "center",
-    maxWidth: 300,
   },
   settingsPlaceholder: {
     alignItems: "center",

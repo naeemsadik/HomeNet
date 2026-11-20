@@ -1,20 +1,25 @@
-import { cdnImage } from "@/lib/cloudinaryImage";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Check, Eye, Trash2, UserRound, X } from "@/components/icons";
-import { colorTokens, fontTokens } from "@/theme";
+import { Bell, Building2, Check, Clock, Eye, MessageSquare, RotateCcw, Trash2, UserRound } from "@/components/icons";
+import { cdnImage } from "@/lib/cloudinaryImage";
+import { colorTokens, fontTokens, radius, webPointer } from "@/theme";
 import { PropertyStatusBadge } from "./StatusBadge";
 import type { PropertyAdminItem } from "../types/admin";
 import { NoTranslateText } from "@/components/NoTranslateText";
-import { isPriceOnRequest, priceOnRequestLabel, useTranslation } from "@/i18n";
+import { isPriceOnRequest, priceOnRequestLabel, useTranslation, formatLocalizedNumber } from "@/i18n";
 import { isMessSubtype } from "@/lib/listingPath";
+import { useResponsive } from "@/hooks/useResponsive";
 
-interface PropertyAdminItemProps {
+type PressState = { pressed: boolean; hovered?: boolean };
+
+export interface PropertyAdminItemProps {
   item: PropertyAdminItem;
   onApprove: (id: string) => void;
   onReject: (id: string) => void;
   onDelete: (id: string) => void;
   onView: (id: string) => void;
+  onRequestChanges?: (item: PropertyAdminItem) => void;
   isMutating?: boolean;
+  isHighlighted?: boolean;
 }
 
 export function PropertyAdminItemRow({
@@ -23,80 +28,182 @@ export function PropertyAdminItemRow({
   onReject,
   onDelete,
   onView,
+  onRequestChanges,
   isMutating = false,
+  isHighlighted = false,
 }: PropertyAdminItemProps) {
   const { t, language } = useTranslation();
+  const { isPhone } = useResponsive();
   const thumbnail = item.media?.[0]?.thumbnail_url ?? item.media?.[0]?.url;
 
+  const formattedDate = new Date(item.created_at).toLocaleDateString(
+    language === "bn" ? "bn-BD" : "en-US",
+    { year: "numeric", month: "short", day: "numeric" },
+  );
+
+  const priceText = isPriceOnRequest(item.price)
+    ? priceOnRequestLabel(language)
+    : `${item.price_currency || "BDT"} ${formatLocalizedNumber(item.price, language)}`;
+
+  const isPending = item.status === "pending";
+  const isActive = item.status === "active";
+
   return (
-    <View style={styles.card}>
-      <View style={styles.topRow}>
+    <View style={[styles.card, isHighlighted && styles.cardHighlighted]}>
+      {isHighlighted ? (
+        <View style={styles.highlightPill}>
+          <Bell color={colorTokens.brand} size={12} strokeWidth={2.2} />
+          <Text style={styles.highlightPillText}>{t("admin.reviewingFromNotification")}</Text>
+        </View>
+      ) : null}
+
+      <View style={[styles.mainRow, isPhone && styles.mainRowPhone]}>
         <View style={styles.thumbnailWrap}>
           {thumbnail ? (
-            <Image source={{ uri: cdnImage(thumbnail, 240) }} accessibilityLabel={item.title} style={styles.thumbnail} />
+            <Image
+              source={{ uri: cdnImage(thumbnail, 240) }}
+              accessibilityLabel={item.title}
+              style={styles.thumbnail}
+            />
           ) : (
             <View style={styles.thumbnailPlaceholder}>
-              <UserRound color={colorTokens.textMuted} size={20} />
+              <Building2 color={colorTokens.textMuted} size={24} strokeWidth={1.5} />
             </View>
           )}
         </View>
+
         <View style={styles.info}>
-          <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
+          <Text style={styles.title} numberOfLines={2}>
+            {item.title}
+          </Text>
+
           {isMessSubtype(item.subtype) ? (
-            <Text style={styles.kindTag}>{t(item.subtype?.trim().toLowerCase() === "seat_share" ? "mess.subtype.seat_share" : "mess.subtype.mess")}</Text>
+            <Text style={styles.kindTag}>
+              {t(
+                item.subtype?.trim().toLowerCase() === "seat_share"
+                  ? "mess.subtype.seat_share"
+                  : "mess.subtype.mess",
+              )}
+            </Text>
           ) : null}
-          <NoTranslateText style={styles.price}>
-            {isPriceOnRequest(item.price) ? priceOnRequestLabel(language) : `${item.price_currency} ${item.price.toLocaleString()}`}
-          </NoTranslateText>
-          {item.user ? (
-            <Text style={styles.owner} numberOfLines={1}>by {item.user.full_name}</Text>
-          ) : null}
+
+          <NoTranslateText style={styles.price}>{priceText}</NoTranslateText>
+
+          <View style={styles.metaRow}>
+            {item.user ? (
+              <View style={styles.metaItem}>
+                <UserRound color={colorTokens.textMuted} size={12} strokeWidth={2} />
+                <Text style={styles.metaText} numberOfLines={1}>
+                  {item.user.full_name}
+                </Text>
+              </View>
+            ) : null}
+            <View style={styles.metaItem}>
+              <Clock color={colorTokens.textMuted} size={12} strokeWidth={2} />
+              <Text style={styles.metaText}>{formattedDate}</Text>
+            </View>
+          </View>
         </View>
-        <PropertyStatusBadge status={item.status} />
+
+        <View style={styles.statusWrap}>
+          <PropertyStatusBadge status={item.status as "draft" | "active" | "pending" | "sold" | "archived" | "rejected" | "changes_requested"} />
+        </View>
       </View>
 
-      <Text style={styles.date}>
-        {new Date(item.created_at).toLocaleDateString()}
-      </Text>
+      <View style={styles.divider} />
 
-      <View style={styles.actions}>
-        {item.status === "pending" ? (
-          <>
+      <View style={styles.actionsRow}>
+        <View style={styles.actionGroup}>
+          {isPending ? (
+            <>
+              <Pressable
+                onPress={() => onApprove(item.id)}
+                style={({ pressed, hovered }: PressState) => [
+                  styles.actionBtn,
+                  styles.activateBtn,
+                  hovered && styles.activateBtnHovered,
+                  pressed && styles.actionBtnPressed,
+                  webPointer,
+                ]}
+                accessibilityLabel={t("admin.actions.activateAria")}
+                disabled={isMutating}
+              >
+                <Check color={colorTokens.primary} size={14} strokeWidth={2.2} />
+                <Text style={[styles.actionText, { color: colorTokens.primary }]}>
+                  {t("admin.actions.activate")}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => onReject(item.id)}
+                style={({ pressed, hovered }: PressState) => [
+                  styles.actionBtn,
+                  styles.draftBtn,
+                  hovered && styles.draftBtnHovered,
+                  pressed && styles.actionBtnPressed,
+                  webPointer,
+                ]}
+                accessibilityLabel={t("admin.actions.moveToDraftAria")}
+                disabled={isMutating}
+              >
+                <RotateCcw color={colorTokens.warning} size={13} strokeWidth={2.2} />
+                <Text style={[styles.actionText, { color: colorTokens.warning }]}>
+                  {t("admin.actions.moveToDraft")}
+                </Text>
+              </Pressable>
+            </>
+          ) : null}
+
+          {(isPending || isActive) && onRequestChanges ? (
             <Pressable
-              onPress={() => onApprove(item.id)}
-              style={[styles.actionBtn, { backgroundColor: colorTokens.primaryLight }]}
-              accessibilityLabel={t("admin.actions.activateAria")}
+              onPress={() => onRequestChanges(item)}
+              style={({ pressed, hovered }: PressState) => [
+                styles.actionBtn,
+                styles.feedbackBtn,
+                hovered && styles.feedbackBtnHovered,
+                pressed && styles.actionBtnPressed,
+                webPointer,
+              ]}
+              accessibilityLabel={t("admin.actions.requestChangesAria")}
               disabled={isMutating}
             >
-              <Check color={colorTokens.primary} size={14} />
-              <Text style={[styles.actionText, { color: colorTokens.primary }]}>{t("admin.actions.activate")}</Text>
+              <MessageSquare color={colorTokens.textPrimary} size={13} strokeWidth={2} />
+              <Text style={[styles.actionText, { color: colorTokens.textPrimary }]}>
+                {t("admin.actions.requestChanges")}
+              </Text>
             </Pressable>
-            <Pressable
-              onPress={() => onReject(item.id)}
-              style={[styles.actionBtn, { backgroundColor: colorTokens.warningLight }]}
-              accessibilityLabel={t("admin.actions.moveToDraftAria")}
-              disabled={isMutating}
-            >
-              <X color={colorTokens.warning} size={14} />
-              <Text style={[styles.actionText, { color: colorTokens.warning }]}>{t("admin.actions.moveToDraft")}</Text>
-            </Pressable>
-          </>
-        ) : null}
-        <Pressable
-          onPress={() => onView(item.id)}
-          style={[styles.actionBtn, { backgroundColor: colorTokens.verifiedLight }]}
-          accessibilityLabel={t("admin.actions.viewAria")}
-        >
-          <Eye color={colorTokens.verified} size={14} />
-          <Text style={[styles.actionText, { color: colorTokens.verified }]}>{t("admin.actions.view")}</Text>
-        </Pressable>
+          ) : null}
+
+          <Pressable
+            onPress={() => onView(item.id)}
+            style={({ pressed, hovered }: PressState) => [
+              styles.actionBtn,
+              styles.viewBtn,
+              hovered && styles.viewBtnHovered,
+              pressed && styles.actionBtnPressed,
+              webPointer,
+            ]}
+            accessibilityLabel={t("admin.actions.viewAria")}
+          >
+            <Eye color={colorTokens.verified} size={14} strokeWidth={2} />
+            <Text style={[styles.actionText, { color: colorTokens.verified }]}>
+              {t("admin.actions.view")}
+            </Text>
+          </Pressable>
+        </View>
+
         <Pressable
           onPress={() => onDelete(item.id)}
-          style={[styles.actionBtn, { backgroundColor: colorTokens.errorLight }]}
+          style={({ pressed, hovered }: PressState) => [
+            styles.deleteBtn,
+            hovered && styles.deleteBtnHovered,
+            pressed && styles.actionBtnPressed,
+            webPointer,
+          ]}
           accessibilityLabel={t("admin.actions.deleteAria")}
           disabled={isMutating}
         >
-          <Trash2 color={colorTokens.error} size={14} />
+          <Trash2 color={colorTokens.error} size={14} strokeWidth={2} />
         </Pressable>
       </View>
     </View>
@@ -105,43 +212,74 @@ export function PropertyAdminItemRow({
 
 const styles = StyleSheet.create({
   card: {
-    padding: 14,
-    borderRadius: 14,
+    padding: 16,
+    borderRadius: radius.lg,
     backgroundColor: colorTokens.background,
     borderWidth: 1,
-    borderColor: colorTokens.divider,
-    gap: 10,
+    borderColor: colorTokens.cardBorder,
+    gap: 12,
   },
-  topRow: {
+  cardHighlighted: {
+    borderWidth: 2,
+    borderColor: colorTokens.brand,
+    backgroundColor: colorTokens.brandSurface,
+  },
+  highlightPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    backgroundColor: colorTokens.background,
+    borderWidth: 1,
+    borderColor: colorTokens.brand,
+  },
+  highlightPillText: {
+    fontSize: 11,
+    fontFamily: fontTokens.bold,
+    color: colorTokens.brandText,
+  },
+  mainRow: {
     flexDirection: "row",
     alignItems: "flex-start",
+    gap: 14,
+  },
+  mainRowPhone: {
     gap: 12,
   },
   thumbnailWrap: {
-    width: 56,
-    height: 56,
-    borderRadius: 10,
+    width: 72,
+    height: 72,
+    borderRadius: radius.md,
     overflow: "hidden",
     backgroundColor: colorTokens.backgroundAlt,
+    borderWidth: 1,
+    borderColor: colorTokens.cardBorder,
   },
   thumbnail: {
-    width: 56,
-    height: 56,
+    width: 72,
+    height: 72,
   },
   thumbnailPlaceholder: {
-    width: 56,
-    height: 56,
+    width: 72,
+    height: 72,
     alignItems: "center",
     justifyContent: "center",
   },
   info: {
     flex: 1,
-    gap: 3,
+    gap: 4,
   },
   title: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: fontTokens.bold,
     color: colorTokens.textPrimary,
+    lineHeight: 20,
+  },
+  statusWrap: {
+    alignItems: "flex-end",
   },
   kindTag: {
     alignSelf: "flex-start",
@@ -152,34 +290,97 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 2,
+    marginTop: 2,
   },
   price: {
-    fontSize: 13,
-    fontFamily: fontTokens.semiBold,
+    fontSize: 14,
+    fontFamily: fontTokens.bold,
     color: colorTokens.primary,
   },
-  owner: {
-    fontSize: 11,
-    fontFamily: fontTokens.regular,
-    color: colorTokens.textMuted,
-  },
-  date: {
-    fontSize: 11,
-    fontFamily: fontTokens.regular,
-    color: colorTokens.textMuted,
-  },
-  actions: {
+  metaRow: {
     flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 12,
+    marginTop: 2,
+  },
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  metaText: {
+    fontSize: 12,
+    fontFamily: fontTokens.regular,
+    color: colorTokens.textMuted,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colorTokens.cardBorder,
+  },
+  actionsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 8,
     flexWrap: "wrap",
+  },
+  actionGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
   },
   actionBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    gap: 6,
+    paddingVertical: 7,
+    paddingHorizontal: 11,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  activateBtn: {
+    backgroundColor: colorTokens.primaryLight,
+    borderColor: colorTokens.primaryLight,
+  },
+  activateBtnHovered: {
+    opacity: 0.9,
+  },
+  draftBtn: {
+    backgroundColor: colorTokens.warningLight,
+    borderColor: colorTokens.warningLight,
+  },
+  draftBtnHovered: {
+    opacity: 0.9,
+  },
+  feedbackBtn: {
+    backgroundColor: colorTokens.backgroundAlt,
+    borderColor: colorTokens.cardBorder,
+  },
+  feedbackBtnHovered: {
+    backgroundColor: colorTokens.cardBorder,
+  },
+  viewBtn: {
+    backgroundColor: colorTokens.verifiedLight,
+    borderColor: colorTokens.verifiedLight,
+  },
+  viewBtnHovered: {
+    opacity: 0.9,
+  },
+  deleteBtn: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 7,
+    borderRadius: radius.md,
+    backgroundColor: colorTokens.errorLight,
+  },
+  deleteBtnHovered: {
+    opacity: 0.85,
+  },
+  actionBtnPressed: {
+    opacity: 0.75,
   },
   actionText: {
     fontSize: 12,

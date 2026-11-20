@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { colorTokens, fontTokens } from "@/theme";
 import { useTranslation, translateListingStatus } from "@/i18n";
 
-type PropertyStatus = "draft" | "active" | "pending" | "sold" | "archived" | "rejected";
+type PropertyStatus = "draft" | "active" | "pending" | "sold" | "archived" | "rejected" | "changes_requested";
 
 const STATUS_CONFIG: Record<PropertyStatus, { bg: string; text: string; label: string }> = {
   draft: { bg: colorTokens.backgroundAlt, text: colorTokens.textSecondary, label: "Draft" },
@@ -11,6 +11,7 @@ const STATUS_CONFIG: Record<PropertyStatus, { bg: string; text: string; label: s
   sold: { bg: colorTokens.verifiedLight, text: colorTokens.verified, label: "Sold" },
   archived: { bg: colorTokens.backgroundAlt, text: colorTokens.textMuted, label: "Archived" },
   rejected: { bg: colorTokens.errorSurface, text: colorTokens.errorText, label: "Rejected" },
+  changes_requested: { bg: colorTokens.warningLight, text: colorTokens.warning, label: "Changes Requested" },
 };
 
 export function PropertyStatusBadge({ status }: { status: PropertyStatus }) {

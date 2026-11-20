@@ -1,23 +1,44 @@
 import { useState } from "react";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { colorTokens, fontTokens } from "@/theme";
 import { useAdminProperties, useAdminPropertyMutations } from "../hooks/useAdminProperties";
 import { PropertyAdminList } from "../components/PropertyAdminList";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { AdminShell } from "../components/AdminShell";
+import { ListingFeedbackModal } from "@/features/property/components/ListingFeedbackModal";
+import type { Property } from "@/features/property/types/property";
+import type { PropertyAdminItem } from "../types/admin";
 import { toApiError } from "@/services/apiClient";
 import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTranslation } from "@/i18n";
 import { MESS_ENABLED } from "@/lib/features";
 import { listingPath } from "@/lib/listingPath";
 
-export function AdminPropertiesScreen() {
+export interface AdminPropertiesScreenProps {
+  standalone?: boolean;
+}
+
+export function AdminPropertiesScreen({ standalone = false }: AdminPropertiesScreenProps) {
   const { t } = useTranslation();
-  const [status, setStatus] = useState("all");
+  const params = useLocalSearchParams<{
+    from?: string;
+    highlight?: string;
+    id?: string;
+    property_id?: string;
+    status?: string;
+  }>();
+
+  const [status, setStatus] = useState<string>(params.status || "all");
   const [search, setSearch] = useState("");
   // Mess listings only (PRD 2.5, moderation): shown with the mess module.
   const [messOnly, setMessOnly] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [feedbackProperty, setFeedbackProperty] = useState<PropertyAdminItem | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(
+    params.highlight || params.id || params.property_id || null,
+  );
+
   const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
 
   const { data, error, isLoading, refetch, hasNextPage, fetchNextPage } = useAdminProperties({
@@ -42,7 +63,12 @@ export function AdminPropertiesScreen() {
     router.push(listingPath({ id, subtype: listing?.subtype }) as never);
   }
 
-  return (
+  function handleClearHighlight() {
+    setHighlightId(null);
+    setStatus("all");
+  }
+
+  const content = (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{t("admin.propertyManagement")}</Text>
@@ -64,9 +90,13 @@ export function AdminPropertiesScreen() {
         onReject={(id) => rejectProperty.mutate(id)}
         onDelete={setDeleteTarget}
         onView={handleView}
+        onRequestChanges={setFeedbackProperty}
         onLoadMore={() => void fetchNextPage()}
         hasMore={hasNextPage}
+        highlightId={highlightId}
+        onClearHighlight={handleClearHighlight}
       />
+
       {error ? (
         <Text onPress={() => void refetch()} style={styles.errorText}>
           {toApiError(error).message} {t("admin.roles.retry")}
@@ -88,8 +118,45 @@ export function AdminPropertiesScreen() {
         onCancel={() => setDeleteTarget(null)}
         loading={deleteProperty.isPending}
       />
+
+      {feedbackProperty ? (
+        <ListingFeedbackModal
+          visible={!!feedbackProperty}
+          property={{
+            id: feedbackProperty.id,
+            title: feedbackProperty.title,
+            status: feedbackProperty.status as Property["status"],
+            sellerName: feedbackProperty.user?.full_name,
+          }}
+          onClose={() => setFeedbackProperty(null)}
+          onSuccess={() => {
+            setFeedbackProperty(null);
+            void refetch();
+          }}
+        />
+      ) : null}
     </View>
   );
+
+  if (standalone) {
+    const isFromNotifications = params.from === "notifications";
+    return (
+      <AdminShell
+        activeTab="properties"
+        backAction={{
+          label: isFromNotifications
+            ? t("admin.backToNotifications")
+            : t("admin.backToDashboard"),
+          onPress: () =>
+            router.push(isFromNotifications ? "/admin?tab=notifications" : "/admin"),
+        }}
+      >
+        {content}
+      </AdminShell>
+    );
+  }
+
+  return content;
 }
 
 const styles = StyleSheet.create({
