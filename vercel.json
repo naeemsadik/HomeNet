@@ -41,6 +41,11 @@
       "source": "/messages",
       "destination": "/",
       "permanent": false
+    },
+    {
+      "source": "/mess/my",
+      "destination": "/my-properties",
+      "permanent": true
     }
   ],
   "rewrites": [

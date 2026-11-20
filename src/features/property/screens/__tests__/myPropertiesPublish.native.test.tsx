@@ -79,8 +79,11 @@ describe("an edited listing on My Properties", () => {
     expect(text).toContain("In review");
     expect(text).toContain("Not approved");
 
-    const publish = tree.root.findAll((n) => typeof n.props.onPress === "function" && n.props.accessibilityLabel === "Publish");
-    expect(publish).toHaveLength(1);
+    // Each action names its listing for a screen reader: "Publish: Flat held".
+    const publish = tree.root.findAll(
+      (n) => typeof n.props.onPress === "function" && typeof n.props.accessibilityLabel === "string" && n.props.accessibilityLabel.startsWith("Publish:"),
+    );
+    expect(publish.map((n) => n.props.accessibilityLabel)).toEqual(["Publish: Flat held"]);
     await act(async () => {
       await publish[0].props.onPress();
     });

@@ -254,6 +254,8 @@ export interface MyMessListing {
   last_confirmed_at: string;
   /** Contact reveals in the last 7 days. */
   reveals_7d: number;
+  /** Approved and waiting for its owner to press Publish (status is draft), as on a Property. */
+  ready_to_publish?: boolean;
 }
 
 // ─── Search ──────────────────────────────────────────────────────────────────

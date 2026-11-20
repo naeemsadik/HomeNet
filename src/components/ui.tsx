@@ -107,6 +107,7 @@ export function AppButton({
   disabled,
   loading = false,
   style,
+  accessibilityLabel,
 }: {
   label: string;
   onPress?: () => void;
@@ -116,6 +117,8 @@ export function AppButton({
   disabled?: boolean;
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** A fuller name for a screen reader, e.g. which listing a repeated button acts on. */
+  accessibilityLabel?: string;
 }) {
   const isInert = disabled || loading;
   const fg = isInert ? colorTokens.subtle : VARIANT_FG[variant];
@@ -123,6 +126,8 @@ export function AppButton({
   return (
     <Pressable
       accessibilityRole="button"
+      // While loading only a spinner shows, so the name has to come from here.
+      accessibilityLabel={accessibilityLabel ?? label}
       aria-disabled={isInert} aria-busy={loading}
       disabled={isInert}
       onPress={onPress}

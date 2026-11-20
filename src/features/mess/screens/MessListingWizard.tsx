@@ -230,7 +230,8 @@ function WizardForm({ start, isEdit, onStartOver }: { start: WizardStart; isEdit
       if (!id) return;
       if (isEdit && start.status && start.status !== "draft") {
         showToast(t("mess.wizard.changesSaved"));
-        router.replace("/mess/my" as never);
+        // Seat listings live on My listings with the seller's properties.
+        router.replace("/my-properties" as never);
         return;
       }
       await submit.mutateAsync(id);
@@ -257,7 +258,7 @@ function WizardForm({ start, isEdit, onStartOver }: { start: WizardStart; isEdit
         </Text>
         <Text style={styles.doneBody}>{t("mess.wizard.submittedBody")}</Text>
         <View style={styles.doneActions}>
-          <AppButton label={t("mess.my.title")} onPress={() => router.replace("/mess/my" as never)} />
+          <AppButton label={t("seller.myListings")} onPress={() => router.replace("/my-properties" as never)} />
           <AppButton label={t("mess.my.view")} onPress={() => router.replace(`/mess/${submittedId}` as never)} variant="secondary" />
         </View>
       </View>
