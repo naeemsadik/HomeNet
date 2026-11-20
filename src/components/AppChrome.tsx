@@ -946,8 +946,11 @@ export function AppChrome({
           <Pressable
             accessibilityLabel="Close navigation"
             onPress={() => setMenuOpen(false)}
-            style={styles.drawerOverlay}
+            style={[styles.drawerOverlay, { top: insets.top }]}
           />
+          {/* The status bar keeps one colour across the whole width: white beside the drawer, and
+              not greyed by the scrim on the other side, as in the apps people compare it with. */}
+          <View pointerEvents="none" style={[styles.drawerStatusStrip, { height: insets.top }]} />
           <SideBar
             active={active}
             modal
