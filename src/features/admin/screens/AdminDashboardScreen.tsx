@@ -1,144 +1,15 @@
-import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { Eyebrow } from "@/components/ui";
-import { AppChrome } from "@/components/AppChrome";
-import { useResponsive } from "@/hooks/useResponsive";
+import { Redirect, useLocalSearchParams } from "expo-router";
 import { useAuthStore } from "@/stores/authStore";
-import { colorTokens, fontTokens } from "@/theme";
-import { AdminTabNav, type AdminTab } from "../components/AdminTabNav";
-import { AdminPropertiesScreen } from "./AdminPropertiesScreen";
-import { AdminUsersScreen } from "./AdminUsersScreen";
-import { AdminRolesScreen } from "./AdminRolesScreen";
-import { AdminAreasScreen } from "./AdminAreasScreen";
-import { AdminUniversitiesScreen } from "./AdminUniversitiesScreen";
-import { MESS_ENABLED } from "@/lib/features";
-import { hasAnyAdminPermission, isAdmin } from "@/lib/permissions";
-import { NotificationList } from "@/features/notification/components/NotificationList";
-import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
-import { useTranslation } from "@/i18n";
+import { ADMIN_TAB_PATH, visibleAdminTabs } from "../components/AdminTabNav";
 
+/**
+ * /admin has no content of its own: every tab is a page of its own (ADMIN_TAB_PATH). It sends
+ * the visitor to the tab named in an old ?tab= link, or to the first tab they may open.
+ */
 export function AdminDashboardScreen() {
-  const { t } = useTranslation();
-  const { isPhone, contentPadding } = useResponsive();
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
   const userRoles = useAuthStore((s) => s.userRoles);
-  const [activeTab, setActiveTab] = useState<AdminTab>("properties");
-  const { data: adminUnread } = useUnreadCount("admin");
-
-  const hasAccess = hasAnyAdminPermission(userRoles);
-  const isFullAdmin = isAdmin(userRoles);
-  const permissionNames = new Set(
-    userRoles.flatMap((userRole) =>
-      userRole.role.role_permissions?.map((rolePermission) => rolePermission.permission.name) ?? [],
-    ),
-  );
-  const allowedTabs: AdminTab[] = isFullAdmin
-    ? ["properties", "notifications", "users", "roles", "areas", ...(MESS_ENABLED ? (["universities"] as const) : []), "settings"]
-    : [
-        ...(["manage_properties", "moderate_listing", "review_verification"].some((name) => permissionNames.has(name)) ? ["properties" as const] : []),
-        ...(permissionNames.has("moderate_listing") ? ["notifications" as const] : []),
-        ...(permissionNames.has("manage_users") ? ["users" as const] : []),
-        ...(["view_roles", "manage_roles"].some((name) => permissionNames.has(name)) ? ["roles" as const] : []),
-        ...(permissionNames.has("manage_areas") ? ["areas" as const] : []),
-        ...(MESS_ENABLED && permissionNames.has("manage_areas") ? ["universities" as const] : []),
-        "settings" as const,
-      ];
-  const visibleTab = allowedTabs.includes(activeTab) ? activeTab : allowedTabs[0];
-
-  if (!hasAccess) {
-    return (
-      <AppChrome active="home">
-        <View style={styles.denied}>
-          <Text style={styles.deniedTitle}>{t("admin.accessDenied")}</Text>
-          <Text style={styles.deniedText}>
-            {t("admin.accessDeniedDesc")}
-          </Text>
-        </View>
-      </AppChrome>
-    );
-  }
-
-  return (
-    <AppChrome active="home">
-      <ScrollView
-        contentContainerStyle={[styles.container, { paddingHorizontal: contentPadding }, isPhone && styles.containerPhone]}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.headerSection}>
-          <Eyebrow>{t("admin.eyebrow")}</Eyebrow>
-          <Text style={styles.title}>{t("admin.dashboardTitle")}</Text>
-          <Text style={styles.subtitle}>{t("admin.dashboardSubtitle")}</Text>
-        </View>
-
-        <AdminTabNav
-          active={visibleTab}
-          onChange={setActiveTab}
-          userRoles={userRoles}
-          badges={{ notifications: adminUnread?.data?.count ?? 0 }}
-        />
-
-        <View style={styles.tabContent}>
-          {visibleTab === "properties" && <AdminPropertiesScreen />}
-          {visibleTab === "notifications" && <NotificationList audience="admin" />}
-          {visibleTab === "users" && <AdminUsersScreen />}
-          {visibleTab === "roles" && <AdminRolesScreen />}
-          {visibleTab === "areas" && <AdminAreasScreen />}
-          {visibleTab === "universities" && <AdminUniversitiesScreen />}
-          {visibleTab === "settings" && (
-            <View style={styles.settingsPlaceholder}>
-              <Text style={styles.settingsText}>{t("admin.settingsComingSoon")}</Text>
-            </View>
-          )}
-        </View>
-      </ScrollView>
-    </AppChrome>
-  );
+  const tabs = visibleAdminTabs(userRoles);
+  const target = tabs.find((candidate) => candidate.key === tab) ?? tabs[0];
+  return <Redirect href={ADMIN_TAB_PATH[target.key] as never} />;
 }
-
-const styles = StyleSheet.create({
-  container: { gap: 18, paddingBottom: 30 },
-  containerPhone: { gap: 14 },
-  headerSection: { gap: 6 },
-  title: {
-    fontSize: 28,
-    fontFamily: fontTokens.extraBold,
-    color: colorTokens.textPrimary,
-    letterSpacing: -0.4,
-  },
-  subtitle: {
-    fontSize: 13,
-    fontFamily: fontTokens.regular,
-    color: colorTokens.textSecondary,
-    lineHeight: 18,
-  },
-  tabContent: {
-    marginTop: 4,
-  },
-  denied: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-    gap: 12,
-  },
-  deniedTitle: {
-    fontSize: 20,
-    fontFamily: fontTokens.bold,
-    color: colorTokens.textPrimary,
-  },
-  deniedText: {
-    fontSize: 14,
-    fontFamily: fontTokens.regular,
-    color: colorTokens.textSecondary,
-    textAlign: "center",
-    maxWidth: 300,
-  },
-  settingsPlaceholder: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  settingsText: {
-    fontSize: 14,
-    fontFamily: fontTokens.regular,
-    color: colorTokens.textMuted,
-  },
-});
