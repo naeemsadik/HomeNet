@@ -18,6 +18,7 @@ import {
   type PropertyFormData,
 } from "@/lib/schemas/property";
 import type { Area, UpsertPropertyDto } from "@/types/api";
+import { goLivePatch } from "../utils/goLivePatch";
 
 interface PropertyFormProps {
   mode: "create" | "edit";
@@ -51,7 +52,8 @@ export function PropertyForm({
   const { t, language } = useTranslation();
   // "Contact for price" is stored as price 1; the box is then locked.
   const [onRequest, setOnRequest] = useState(isPriceOnRequest(initialData?.price));
-  const [goLiveOnApproval, setGoLiveOnApproval] = useState(initialData?.go_live_on_approval ?? true);
+  const initialGoLive = initialData?.go_live_on_approval ?? true;
+  const [goLiveOnApproval, setGoLiveOnApproval] = useState(initialGoLive);
   const [step, setStep] = useState(0);
   const [areaPickerVisible, setAreaPickerVisible] = useState(false);
   const [area, setArea] = useState<Area | null>(initialArea);
@@ -108,7 +110,7 @@ export function PropertyForm({
         bathrooms: data.bathrooms ? Number(data.bathrooms) : undefined,
       },
       virtual_tour_url: initialData?.virtual_tour_url,
-      ...(mode === "edit" ? { go_live_on_approval: goLiveOnApproval } : {}),
+      ...goLivePatch(mode, goLiveOnApproval, initialGoLive),
     };
 
     onSubmit(dto, images);

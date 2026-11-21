@@ -99,13 +99,15 @@ const unwrap = <T,>(response: ApiResponse<Property>): T => {
  * Any other failure (a 500, no connection) is not a missing listing and is
  * passed on as it is.
  *
- * `knownNonPublic` is for a listing already seen as pending or a draft (a
- * refresh of a listing in review): its own copy is asked for first, and the
- * public route only if that fails, as the listing may have gone live.
+ * `ownFirst` asks for the viewer's own copy first, and the public route only
+ * if that fails. Use it for a listing already seen as pending or a draft (a
+ * refresh of a listing in review, as it may have gone live), and for the edit
+ * screen: the public copy leaves out the owner-only publishing flags
+ * (`go_live_on_approval`, `ready_to_publish`).
  */
 export async function fetchPropertyForViewer<T = Property>(
   id: string,
-  { knownNonPublic = false }: { knownNonPublic?: boolean } = {},
+  { ownFirst = false }: { ownFirst?: boolean } = {},
 ): Promise<T> {
   const readPublic = async () => unwrap<T>(await getPropertyById(id));
 
@@ -126,7 +128,7 @@ export async function fetchPropertyForViewer<T = Property>(
     return undefined;
   };
 
-  if (knownNonPublic) return (await readOwn()) ?? readPublic();
+  if (ownFirst) return (await readOwn()) ?? readPublic();
   try {
     return await readPublic();
   } catch (publicError) {
@@ -158,8 +160,8 @@ export function usePropertyDetail(id: string, initial?: PropertyDetail) {
     queryFn: () => {
       // A listing already seen as not public (in review) is asked for as its owner or staff first.
       const seen = queryClient.getQueryData<PropertyDetail>(["property", cleanId]);
-      const knownNonPublic = seen !== undefined && seen.status !== "active" && seen.status !== "sold";
-      return fetchPropertyForViewer<PropertyDetail>(cleanId, { knownNonPublic });
+      const ownFirst = seen !== undefined && seen.status !== "active" && seen.status !== "sold";
+      return fetchPropertyForViewer<PropertyDetail>(cleanId, { ownFirst });
     },
     initialData: initial,
     initialDataUpdatedAt: 0,
