@@ -30,9 +30,10 @@ export function PropertyEditScreen() {
   const [saving, setSaving] = useState(false);
 
   const { data: propertyData, error: propertyError, isLoading } = useQuery({
-    queryKey: ["property", id],
-    // The public route hides a pending listing, which is the one an owner edits most.
-    queryFn: () => fetchPropertyForViewer(id!),
+    queryKey: ["property", id, "own"],
+    // The owner's copy first: the public route hides a pending listing, and leaves out
+    // the publishing flags this screen needs (go_live_on_approval, ready_to_publish).
+    queryFn: () => fetchPropertyForViewer(id!, { ownFirst: true }),
     enabled: !!id,
   });
 
@@ -72,7 +73,7 @@ export function PropertyEditScreen() {
       // The API decides whether the save changed anything, so ask it what happened. A listing
       // sent for review is no longer public, and the save already worked, so a failed read is
       // not an error.
-      const saved = reviewNotice ? await fetchPropertyForViewer(propertyId).catch(() => null) : null;
+      const saved = reviewNotice ? await fetchPropertyForViewer(propertyId, { ownFirst: true }).catch(() => null) : null;
       const inReview = saved?.status === "pending";
       notify(t("common.success"), t(inReview ? "property.editInReview" : "property.updateSuccess"), { onConfirm: () => router.back() });
     } catch (err: any) {
