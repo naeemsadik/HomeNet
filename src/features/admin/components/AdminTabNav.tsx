@@ -18,6 +18,17 @@ interface AdminTabNavProps {
   badges?: Partial<Record<AdminTab, number>>;
 }
 
+/** Each tab is its own page, so the address bar, the back button and a shared link all name it. */
+export const ADMIN_TAB_PATH: Record<AdminTab, string> = {
+  properties: "/admin/properties",
+  notifications: "/admin/notifications",
+  users: "/admin/users",
+  roles: "/admin/roles",
+  areas: "/admin/areas",
+  universities: "/admin/universities",
+  settings: "/admin/settings",
+};
+
 const TABS: {
   key: AdminTab;
   label: string;
@@ -38,12 +49,17 @@ const TABS: {
 
 import { useTranslation } from "@/i18n";
 
-export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNavProps) {
-  const { t } = useTranslation();
-  const visibleTabs = TABS.filter((tab) => {
+/** The tabs this user may open: all of them for an admin, otherwise those their permissions allow. */
+export function visibleAdminTabs(userRoles: UserRole[]) {
+  return TABS.filter((tab) => {
     if (!tab.permissions) return true;
     return isAdmin(userRoles) || tab.permissions.some((permission) => hasPermission(userRoles, permission));
   });
+}
+
+export function AdminTabNav({ active, onChange, userRoles, badges }: AdminTabNavProps) {
+  const { t } = useTranslation();
+  const visibleTabs = visibleAdminTabs(userRoles);
 
   return (
     <View accessibilityRole="tablist" style={styles.container}>

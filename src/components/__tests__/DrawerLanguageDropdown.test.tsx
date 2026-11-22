@@ -9,7 +9,6 @@ import { useLanguageStore } from "@/i18n";
 jest.mock("@/components/icons", () => ({
   ChevronDown: () => "ChevronDown",
   Globe: () => "Globe",
-  Check: () => "Check",
 }));
 
 describe("DrawerLanguageDropdown", () => {
@@ -44,17 +43,17 @@ describe("DrawerLanguageDropdown", () => {
     expect(container.textContent).not.toMatch(/\bENG\b|\bBEN\b/);
     expect(container.querySelector('[aria-label*="flag"]')).toBeNull();
     // The list is closed until the trigger is pressed.
-    expect(container.querySelector('[role="radio"]')).toBeNull();
+    expect(container.querySelector('[aria-label="বাংলা"]')).toBeNull();
     await act(async () => root.unmount());
   });
 
-  it("opens a list of both languages, each in its own script, with the current one marked", async () => {
+  it("offers only the other language, in its own script, and not the one already in use", async () => {
     const root = await mount();
     await click(container.querySelector('[aria-label="Language selector: English"]'));
 
-    const options = Array.from(container.querySelectorAll('[role="radio"]'));
-    expect(options.map((o) => o.getAttribute("aria-label"))).toEqual(["English", "বাংলা"]);
-    expect(options.map((o) => o.getAttribute("aria-checked"))).toEqual(["true", "false"]);
+    expect(container.querySelector('[aria-label="বাংলা"]')?.getAttribute("role")).toBe("button");
+    // "English" appears once, on the trigger, and is not repeated in the list.
+    expect(container.textContent?.match(/English/g)).toHaveLength(1);
     await act(async () => root.unmount());
   });
 
@@ -64,17 +63,18 @@ describe("DrawerLanguageDropdown", () => {
     await click(container.querySelector('[aria-label="বাংলা"]'));
 
     expect(useLanguageStore.getState().language).toBe("bn");
-    expect(container.querySelector('[role="radio"]')).toBeNull();
+    expect(container.querySelector('[aria-label="English"]')).toBeNull();
     expect(container.textContent).toContain("বাংলা");
     await act(async () => root.unmount());
   });
 
-  it("is findable in either language: the names do not change with the language", async () => {
+  it("is findable in either language: the names do not change, and the other one is offered", async () => {
     useLanguageStore.getState().setLanguage("bn");
     const root = await mount();
-    await click(container.querySelector('[role="button"]'));
-    const labels = Array.from(container.querySelectorAll('[role="radio"]')).map((o) => o.getAttribute("aria-label"));
-    expect(labels).toEqual(["English", "বাংলা"]);
+    expect(container.textContent).toContain("বাংলা");
+    await click(container.querySelector('[aria-expanded]'));
+    expect(container.querySelector('[aria-label="English"]')).not.toBeNull();
+    expect(container.textContent?.match(/বাংলা/g)).toHaveLength(1);
     await act(async () => root.unmount());
   });
 });

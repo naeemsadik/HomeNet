@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Check, ChevronDown, Globe } from "@/components/icons";
+import { ChevronDown, Globe } from "@/components/icons";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 
@@ -9,7 +9,8 @@ type LanguageCode = "en" | "bn";
 /**
  * A language is named in its own script and shown the same way whichever language
  * is on, so a person who has landed in the wrong one can still find theirs. A flag
- * is a country, not a language, so there are none.
+ * is a country, not a language, so there are none. The button names the language in use;
+ * the list under it offers only the others, so nothing already chosen is offered again.
  */
 const LANGUAGES: { code: LanguageCode; name: "common.english" | "common.bangla" }[] = [
   { code: "en", name: "common.english" },
@@ -22,6 +23,7 @@ export function DrawerLanguageDropdown() {
 
   const current = LANGUAGES.find((item) => item.code === language) ?? LANGUAGES[0];
   const currentName = t(current.name);
+  const others = LANGUAGES.filter((item) => item.code !== current.code);
 
   const handleSelect = (code: LanguageCode) => {
     setLanguage(code);
@@ -45,30 +47,23 @@ export function DrawerLanguageDropdown() {
       </Pressable>
 
       {open ? (
-        <View accessibilityRole="radiogroup" style={styles.dropdownMenu}>
-          {LANGUAGES.map((item, index) => {
-            const selected = item.code === language;
-            const name = t(item.name);
-            return (
-              <Pressable
-                key={item.code}
-                accessibilityLabel={name}
-                accessibilityRole="radio"
-                aria-checked={selected}
-                onPress={() => handleSelect(item.code)}
-                style={({ pressed }) => [
-                  styles.optionItem,
-                  index < LANGUAGES.length - 1 && styles.optionDivider,
-                  selected && styles.optionItemActive,
-                  pressed && styles.pressed,
-                  webPointer,
-                ]}
-              >
-                <Text style={[styles.optionLabel, selected && styles.optionLabelActive]}>{name}</Text>
-                {selected ? <Check color={colorTokens.brandText} size={18} strokeWidth={2.4} /> : null}
-              </Pressable>
-            );
-          })}
+        <View style={styles.dropdownMenu}>
+          {others.map((item, index) => (
+            <Pressable
+              key={item.code}
+              accessibilityLabel={t(item.name)}
+              accessibilityRole="button"
+              onPress={() => handleSelect(item.code)}
+              style={({ pressed }) => [
+                styles.optionItem,
+                index < others.length - 1 && styles.optionDivider,
+                pressed && styles.pressed,
+                webPointer,
+              ]}
+            >
+              <Text style={styles.optionLabel}>{t(item.name)}</Text>
+            </Pressable>
+          ))}
         </View>
       ) : null}
     </View>
@@ -102,14 +97,10 @@ const styles = StyleSheet.create({
   },
   optionItem: {
     minHeight: layout.touchTarget,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     paddingHorizontal: 14,
     backgroundColor: colorTokens.surface,
   },
   optionDivider: { borderBottomWidth: 1, borderBottomColor: colorTokens.border },
-  optionItemActive: { backgroundColor: colorTokens.brandSurface },
   optionLabel: { fontFamily: fonts.medium, fontSize: 15, color: colorTokens.ink },
-  optionLabelActive: { fontFamily: fonts.semiBold, color: colorTokens.brandText },
 });

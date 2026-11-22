@@ -1,25 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { colorTokens, fontTokens } from "@/theme";
 import { useAdminProperties, useAdminPropertyMutations } from "../hooks/useAdminProperties";
-import { PropertyAdminList } from "../components/PropertyAdminList";
+import { ADMIN_STATUS_FILTERS, PropertyAdminList } from "../components/PropertyAdminList";
 import { ConfirmDialog } from "../components/ConfirmDialog";
-import { AdminShell } from "../components/AdminShell";
 import { ListingFeedbackModal } from "@/features/property/components/ListingFeedbackModal";
 import type { Property } from "@/features/property/types/property";
 import type { PropertyAdminItem } from "../types/admin";
 import { toApiError } from "@/services/apiClient";
 import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTranslation } from "@/i18n";
-import { MESS_ENABLED } from "@/lib/features";
+import { MESS_ENABLED, SELLER_FEEDBACK_ENABLED } from "@/lib/features";
 import { listingPath } from "@/lib/listingPath";
 
-export interface AdminPropertiesScreenProps {
-  standalone?: boolean;
-}
+/** A ?status= from a link counts only when it names a filter the list has. */
+const statusFromLink = (value: string | undefined) =>
+  ADMIN_STATUS_FILTERS.find((status) => status === value) ?? "all";
 
-export function AdminPropertiesScreen({ standalone = false }: AdminPropertiesScreenProps) {
+export function AdminPropertiesScreen() {
   const { t } = useTranslation();
   const params = useLocalSearchParams<{
     from?: string;
@@ -29,7 +28,7 @@ export function AdminPropertiesScreen({ standalone = false }: AdminPropertiesScr
     status?: string;
   }>();
 
-  const [status, setStatus] = useState<string>(params.status || "all");
+  const [status, setStatus] = useState<string>(statusFromLink(params.status));
   const [search, setSearch] = useState("");
   // Mess listings only (PRD 2.5, moderation): shown with the mess module.
   const [messOnly, setMessOnly] = useState(false);
@@ -38,6 +37,12 @@ export function AdminPropertiesScreen({ standalone = false }: AdminPropertiesScr
   const [highlightId, setHighlightId] = useState<string | null>(
     params.highlight || params.id || params.property_id || null,
   );
+
+  // Another notification opens this same page with a different status and listing.
+  useEffect(() => {
+    setStatus(statusFromLink(params.status));
+    setHighlightId(params.highlight || params.id || params.property_id || null);
+  }, [params.status, params.highlight, params.id, params.property_id]);
 
   const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
 
@@ -68,7 +73,7 @@ export function AdminPropertiesScreen({ standalone = false }: AdminPropertiesScr
     setStatus("all");
   }
 
-  const content = (
+  return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{t("admin.propertyManagement")}</Text>
@@ -90,7 +95,7 @@ export function AdminPropertiesScreen({ standalone = false }: AdminPropertiesScr
         onReject={(id) => rejectProperty.mutate(id)}
         onDelete={setDeleteTarget}
         onView={handleView}
-        onRequestChanges={setFeedbackProperty}
+        onRequestChanges={SELLER_FEEDBACK_ENABLED ? setFeedbackProperty : undefined}
         onLoadMore={() => void fetchNextPage()}
         hasMore={hasNextPage}
         highlightId={highlightId}
@@ -137,26 +142,6 @@ export function AdminPropertiesScreen({ standalone = false }: AdminPropertiesScr
       ) : null}
     </View>
   );
-
-  if (standalone) {
-    const isFromNotifications = params.from === "notifications";
-    return (
-      <AdminShell
-        activeTab="properties"
-        backAction={{
-          label: isFromNotifications
-            ? t("admin.backToNotifications")
-            : t("admin.backToDashboard"),
-          onPress: () =>
-            router.push(isFromNotifications ? "/admin?tab=notifications" : "/admin"),
-        }}
-      >
-        {content}
-      </AdminShell>
-    );
-  }
-
-  return content;
 }
 
 const styles = StyleSheet.create({

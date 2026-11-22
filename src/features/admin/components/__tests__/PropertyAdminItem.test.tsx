@@ -107,7 +107,31 @@ describe("PropertyAdminItemRow", () => {
     expect(onRequestChanges).toHaveBeenCalledWith(samplePendingItem);
   });
 
-  it("renders highlight indicator when isHighlighted is true", async () => {
+  it("gives every action a button role and a 44 px target, so the delete icon is easy to hit and announced", async () => {
+    await act(async () => {
+      root.render(
+        <PropertyAdminItemRow
+          item={samplePendingItem}
+          onApprove={jest.fn()}
+          onReject={jest.fn()}
+          onDelete={jest.fn()}
+          onView={jest.fn()}
+          onRequestChanges={jest.fn()}
+        />,
+      );
+    });
+
+    const labels = ["Activate property", "Move property to draft", "Request changes on property", "View property", "Delete property"];
+    for (const label of labels) {
+      const button = container.querySelector(`[aria-label="${label}"]`) as HTMLElement;
+      expect(button).not.toBeNull();
+      expect(button.getAttribute("role")).toBe("button");
+      const style = getComputedStyle(button);
+      expect(Math.max(parseFloat(style.minHeight) || 0, parseFloat(style.height) || 0)).toBeGreaterThanOrEqual(44);
+    }
+  });
+
+  it("does not say it is reviewing the listing on the card itself; the list banner says it once", async () => {
     await act(async () => {
       root.render(
         <PropertyAdminItemRow
@@ -121,6 +145,6 @@ describe("PropertyAdminItemRow", () => {
       );
     });
 
-    expect(container.textContent).toContain("Reviewing listing for moderation");
+    expect(container.textContent).not.toContain("Reviewing listing for moderation");
   });
 });

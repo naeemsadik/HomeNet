@@ -100,3 +100,11 @@ export const MESS_ENABLED = process.env.EXPO_PUBLIC_MESS_ENABLED === "true";
  * message anyone: the people and numbers in the samples are made up.
  */
 export const MESS_DEMO = MESS_ENABLED && process.env.EXPO_PUBLIC_MESS_FIXTURES === "true";
+
+/**
+ * Moderator "Request changes" on the admin listing cards. It posts to
+ * POST /v1/properties/:id/feedback, which the API does not have yet (backend issue 123), so
+ * every press would end in "Nothing was sent". Set EXPO_PUBLIC_SELLER_FEEDBACK_ENABLED=true
+ * once the endpoint is deployed.
+ */
+export const SELLER_FEEDBACK_ENABLED = process.env.EXPO_PUBLIC_SELLER_FEEDBACK_ENABLED === "true";

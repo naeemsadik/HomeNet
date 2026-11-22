@@ -635,6 +635,7 @@ export const bn: TranslationSchema = {
     backToNotifications: "নোটিফিকেশনে ফিরে যান",
     backToDashboard: "অ্যাডমিন ড্যাশবোর্ডে ফিরে যান",
     reviewingFromNotification: "মডারেশনের জন্য তালিকা পর্যালোচনা করা হচ্ছে",
+    highlightNotInList: "এই তালিকাটি এখানে নেই। অন্য স্ট্যাটাস বেছে নিন বা ফিল্টার মুছুন।",
     clearFilter: "ফিল্টার মুছুন",
     clearSearch: "অনুসন্ধান মুছুন",
     emptyFilterTitle: "এই ফিল্টারে কোনো তালিকা মেলেনি",

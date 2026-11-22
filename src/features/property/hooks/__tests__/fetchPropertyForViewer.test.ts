@@ -107,7 +107,7 @@ describe("fetchPropertyForViewer", () => {
       signIn();
       myRead.mockResolvedValue(listing("mine"));
 
-      await expect(fetchPropertyForViewer("p1", { knownNonPublic: true })).resolves.toMatchObject({ title: "mine" });
+      await expect(fetchPropertyForViewer("p1", { ownFirst: true })).resolves.toMatchObject({ title: "mine" });
       expect(publicRead).not.toHaveBeenCalled();
     });
 
@@ -116,14 +116,14 @@ describe("fetchPropertyForViewer", () => {
       myRead.mockRejectedValue(notFound());
       publicRead.mockResolvedValue(listing("public"));
 
-      await expect(fetchPropertyForViewer("p1", { knownNonPublic: true })).resolves.toMatchObject({ title: "public" });
+      await expect(fetchPropertyForViewer("p1", { ownFirst: true })).resolves.toMatchObject({ title: "public" });
     });
 
     it("asks the public route when nobody is signed in, and keeps its error", async () => {
       const original = notFound();
       publicRead.mockRejectedValue(original);
 
-      await expect(fetchPropertyForViewer("p1", { knownNonPublic: true })).rejects.toBe(original);
+      await expect(fetchPropertyForViewer("p1", { ownFirst: true })).rejects.toBe(original);
       expect(myRead).not.toHaveBeenCalled();
     });
   });
