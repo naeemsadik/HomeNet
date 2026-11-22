@@ -59,12 +59,22 @@
             {
               "scheme": "https",
               "host": "www.homenetbd.com",
-              "pathPrefix": "/buy"
+              "pathPrefix": "/buy/"
             },
             {
               "scheme": "https",
               "host": "www.homenetbd.com",
-              "pathPrefix": "/rent"
+              "path": "/buy"
+            },
+            {
+              "scheme": "https",
+              "host": "www.homenetbd.com",
+              "pathPrefix": "/rent/"
+            },
+            {
+              "scheme": "https",
+              "host": "www.homenetbd.com",
+              "path": "/rent"
             },
             {
               "scheme": "https",

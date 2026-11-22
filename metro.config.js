@@ -16,10 +16,12 @@ config.server = {
 
 config.resolver.sourceExts.push('mjs');
 
-config.transformer.getTransformOptions = async () => ({
+// Inline requires speed up app start on phones; the website keeps eager loading,
+// so import-time side effects (DOM guard, console silencing) run at startup there.
+config.transformer.getTransformOptions = async (_entryPoints, options) => ({
   transform: {
     experimentalImportSupport: false,
-    inlineRequires: true,
+    inlineRequires: options?.platform !== 'web',
   },
 });
 

@@ -26,7 +26,7 @@ import { installFieldFocus } from "@/lib/fieldFocus";
 // no native splash, and its static HTML must not wait on anything.
 void SplashScreen.preventAutoHideAsync().catch(() => {});
 // A slow network must not hold the splash forever.
-const SPLASH_MAX_MS = 5000;
+const SPLASH_MAX_MS = 2000;
 
 // Before React renders: browser translation/extensions might rewrite text nodes.
 installDomGuard();
@@ -35,7 +35,9 @@ installFieldFocus();
 
 export default function RootLayout() {
   // Latin subsets with font-display: swap on web; full files on native.
-  const [loaded] = useFonts(appFonts);
+  const [fontsLoaded, fontError] = useFonts(appFonts);
+  // A font that fails to load must not hold the app (or the native splash) forever.
+  const loaded = fontsLoaded || Boolean(fontError);
   const pathname = usePathname();
   const hydrated = useAuthStore((s) => s.hydrated);
   const [splashTimedOut, setSplashTimedOut] = useState(false);
