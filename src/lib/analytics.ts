@@ -16,8 +16,6 @@ export interface PropertyViewParams {
 export interface ContactOwnerParams {
   propertyId: string;
   method: "call" | "whatsapp" | "message";
-  sellerName?: string | null;
-  phone?: string | null;
 }
 
 export interface ListPropertySubmitParams {
@@ -83,10 +81,12 @@ export function trackPropertyView(params: PropertyViewParams): void {
 
 /** Track when a user clicks to contact the property owner (call, whatsapp, message) */
 export function trackContactOwner(params: ContactOwnerParams): void {
+  // No owner name and no phone number. Both identify a private individual,
+  // and Google Analytics' terms forbid sending personal data. The property id
+  // answers every question this event exists to answer.
   trackEvent("contact_owner_click", {
     property_id: params.propertyId,
     contact_method: params.method,
-    seller_name: params.sellerName,
   });
 }
 

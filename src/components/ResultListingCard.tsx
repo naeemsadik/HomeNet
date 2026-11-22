@@ -123,7 +123,6 @@ function ResultListingCardComponent({
     trackContactOwner({
       propertyId: property.id,
       method: "whatsapp",
-      sellerName: ownerName,
     });
     if (whatsappLink && isSafeLinkUrl(whatsappLink)) openExternalUrl(whatsappLink);
   };
@@ -133,8 +132,6 @@ function ResultListingCardComponent({
     trackContactOwner({
       propertyId: property.id,
       method: "call",
-      sellerName: ownerName,
-      phone: ownerPhone,
     });
     const url = `tel:${ownerPhone.replace(/[^\d+]/g, "")}`;
     if (isSafeLinkUrl(url)) openExternalUrl(url);

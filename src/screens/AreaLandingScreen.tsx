@@ -4,7 +4,7 @@ import { NearbyAreasSection } from "@/components/NearbyAreasSection";
 import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
 import { SEO_AREAS, seoAreaBySlug } from "@/content/areas";
-import { areaFaq } from "@/content/areaFaq";
+import { areaFaq, areaFaqForSchema } from "@/content/areaFaq";
 import { useTranslation } from "@/i18n";
 import { areaPageMeta } from "@/lib/areaPageMeta";
 import { browseSnapshot, type BrowseSnapshot } from "@/lib/browseSnapshot";
@@ -92,8 +92,10 @@ export function AreaLandingScreen({
           }),
           breadcrumbSchema(areaCrumbs(area, intent)),
           ...(listed.length ? [itemListSchema(listed, pageUrl)] : []),
-          // Returns undefined for an empty list, which <JsonLd> drops.
-          faqPageSchema(faq, pageUrl),
+          // Only the answers written for this area; the shared platform ones
+          // stay visible but out of the markup. Returns undefined for an
+          // empty list, which <JsonLd> drops.
+          faqPageSchema(isZero ? [] : areaFaqForSchema(area.slug, intent), pageUrl),
         ]}
       />
       <BrowseScreen

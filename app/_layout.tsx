@@ -10,7 +10,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthModal } from "@/components/AuthModal";
 import { ToastHost } from "@/components/ToastHost";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { initGoogleAnalytics } from "@/lib/ga";
+import { trackPageView } from "@/lib/ga";
 import { setUnauthorizedHandler } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { appFonts } from "@/theme/appFonts";
@@ -46,11 +46,15 @@ export default function RootLayout() {
     };
   }, [loaded]);
 
+  // One GA4 page view per route. The app navigates on the client, so a single
+  // config call at startup would record one page view for an entire session.
+  // trackPageView configures GA4 on its first call, so this covers the
+  // landing page too. A no-op unless EXPO_PUBLIC_GA_MEASUREMENT_ID is set.
   useEffect(() => {
-    // Configures GA4 once the bundle runs. A no-op unless
-    // EXPO_PUBLIC_GA_MEASUREMENT_ID is set at build time.
-    initGoogleAnalytics();
+    trackPageView(pathname);
+  }, [pathname]);
 
+  useEffect(() => {
     // Browser and phone alike: the language the user picked last time.
     void restoreSavedLanguage();
 

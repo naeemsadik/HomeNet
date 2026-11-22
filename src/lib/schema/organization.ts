@@ -53,46 +53,12 @@ export function organizationSchema(): SchemaNode {
       availableLanguage: ["English", "Bengali"],
     },
     sameAs: BRAND.sameAs.length ? BRAND.sameAs : undefined,
-    /**
-     * The differentiators as plain machine-readable facts, for the answer
-     * engines that read the graph rather than the prose. Each one is true of
-     * the product as built — the four verification steps are the ones in
-     * src/content/landingCopy.ts, and the valuation is described as what it
-     * is (an estimate from comparable listings) rather than as AI, which is
-     * what the listing parser and the natural-language search are.
-     */
-    additionalProperty: [
-      {
-        "@type": "PropertyValue",
-        name: "Commission",
-        value:
-          "No broker and no commission. Every listing is posted by the owner or someone acting for them, and enquiries go straight to that person. Listing is free.",
-      },
-      {
-        "@type": "PropertyValue",
-        name: "Listing verification",
-        value:
-          "Four steps before a listing is public: owner submission with photos; an automated completeness check on price, dimensions, map coordinates and photo count; a verification review; then publication with a Verified badge. Unverified listings return 404.",
-      },
-      {
-        "@type": "PropertyValue",
-        name: "Property valuation",
-        value:
-          "A free instant valuation estimates a property's sale value and monthly rent from its area, size, configuration and comparable HomeNet listings. No sign-up and no broker.",
-      },
-      {
-        "@type": "PropertyValue",
-        name: "AI features",
-        value:
-          "Listings can be created from a plain Bangla or English description, which is parsed into structured fields, and properties can be searched in natural language.",
-      },
-      {
-        "@type": "PropertyValue",
-        name: "Coverage",
-        value:
-          "Bangladesh, centred on Dhaka and organised by neighbourhood, with area pages for Chattogram, Sylhet and Cox's Bazar. Prices in BDT; land in katha and bigha.",
-      },
-    ],
+    // No `additionalProperty` block of product claims here. Statements like
+    // "four verification steps" or "unverified listings return 404" describe
+    // today's implementation, and structured data is the worst place to keep
+    // something that changes: it is cached and re-read long after the product
+    // moves on. Those facts live in the visible copy and in public/llms.txt,
+    // where they are edited alongside the behaviour they describe.
   };
 }
 

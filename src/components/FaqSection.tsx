@@ -7,9 +7,9 @@ import type { FaqEntry } from "@/lib/schema";
 /**
  * The questions behind a page's FAQPage markup.
  *
- * Google accepts that markup only while the same questions and answers are
- * visible on the page, so whatever is passed here must be exactly what the
- * page's `faqPageSchema` call receives.
+ * Whatever is passed here must be exactly what the page's `faqPageSchema`
+ * call receives, or a subset of it: Google accepts that markup only while the
+ * questions and answers are visible on the page.
  *
  * Collapsed by default, but the answers are always in the DOM rather than
  * mounted on expand: the static export is what Googlebot and the answer
@@ -30,11 +30,7 @@ export function FaqSection({
 
   return (
     <View style={styles.section}>
-      <Text
-        accessibilityRole="header"
-        aria-level={headingLevel}
-        style={styles.sectionTitle}
-      >
+      <Text accessibilityRole="header" aria-level={headingLevel} style={styles.sectionTitle}>
         {title}
       </Text>
       <View style={styles.list}>
@@ -51,20 +47,35 @@ function FaqRow({ entry, headingLevel }: { entry: FaqEntry; headingLevel: number
 
   return (
     <View style={styles.row}>
-      <Pressable
-        accessibilityRole="button"
-        aria-expanded={open}
-        accessibilityLabel={entry.question}
-        onPress={() => setOpen((wasOpen) => !wasOpen)}
-        style={[styles.question, webPointer]}
-      >
-        <Text accessibilityRole="header" aria-level={headingLevel} style={styles.questionText}>
-          {entry.question}
-        </Text>
-        <View style={[styles.chevron, open && styles.chevronOpen]}>
-          <ChevronDown size={18} color={colorTokens.muted} />
-        </View>
-      </Pressable>
+      {/*
+        Heading outside the button, per the WAI-ARIA accordion pattern: a
+        heading nested inside a button is flattened into that button's
+        accessible name, so screen-reader users lose the question from the
+        page's heading list and cannot jump between questions.
+
+        The state is `aria-expanded`, not the `pressedState` helper: that
+        emits `aria-pressed`, which describes a toggle button that stays in.
+        This row discloses a panel, and announcing both would describe two
+        different widgets at once.
+      */}
+      <View accessibilityRole="header" aria-level={headingLevel}>
+        <Pressable
+          accessibilityRole="button"
+          aria-expanded={open}
+          onPress={() => setOpen((wasOpen) => !wasOpen)}
+          style={({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => [
+            styles.question,
+            hovered && styles.questionHovered,
+            pressed && styles.questionPressed,
+            webPointer,
+          ]}
+        >
+          <Text style={styles.questionText}>{entry.question}</Text>
+          <View style={open ? styles.chevronOpen : styles.chevron}>
+            <ChevronDown size={18} color={colorTokens.muted} />
+          </View>
+        </Pressable>
+      </View>
 
       {/* Kept mounted and hidden rather than unmounted: see the note above. */}
       <View style={open ? styles.answerOpen : styles.answerClosed} aria-hidden={!open}>
@@ -86,7 +97,7 @@ const styles = StyleSheet.create({
   },
   list: {
     backgroundColor: colorTokens.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colorTokens.border,
     overflow: "hidden",
@@ -101,6 +112,15 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
+    // 44px minimum touch target: 14 + 14 padding over a 22px line box.
+    minHeight: 44,
+  },
+  questionHovered: {
+    backgroundColor: colorTokens.surfaceSunken,
+  },
+  questionPressed: {
+    backgroundColor: colorTokens.surfaceSunken,
+    opacity: 0.85,
   },
   questionText: {
     flex: 1,

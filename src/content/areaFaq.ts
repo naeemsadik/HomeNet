@@ -23,14 +23,24 @@ import type { FaqEntry, ListingIntent } from "@/lib/schema";
  *   src/content/landingCopy.ts, not a nicer version of them.
  */
 
+/**
+ * `shared` marks an answer that is the same on every area page — how
+ * verification works, or that there is no broker commission. Those stay
+ * visible, because they are what a reader on an area page actually asks,
+ * but they are kept out of the FAQPage markup: the same answer repeated
+ * across dozens of pages is what duplicate-content heuristics look for.
+ */
+type AreaFaqEntry = FaqEntry & { shared?: boolean };
+
 interface AreaFaqContent {
-  buy: FaqEntry[];
-  rent: FaqEntry[];
+  buy: AreaFaqEntry[];
+  rent: AreaFaqEntry[];
 }
 
 /** The verification answer, worded per area. The four steps are the product's own. */
-function verificationEntry(area: string): FaqEntry {
+function verificationEntry(area: string): AreaFaqEntry {
   return {
+    shared: true,
     question: `Are ${area} listings on HomeNet verified?`,
     answer:
       `Yes. A listing in ${area} cannot appear publicly until it passes HomeNet's four verification steps, and an unverified listing returns a 404 rather than sitting half-visible. ` +
@@ -39,9 +49,10 @@ function verificationEntry(area: string): FaqEntry {
 }
 
 /** The no-commission answer, worded per area. */
-function directOwnerEntry(area: string, intent: ListingIntent): FaqEntry {
+function directOwnerEntry(area: string, intent: ListingIntent): AreaFaqEntry {
   const act = intent === "buy" ? "buy" : "rent";
   return {
+    shared: true,
     question: `Can I contact the owner directly for a ${area} property, without a broker?`,
     answer:
       `Yes, and there is no commission. Every HomeNet listing is posted by the owner or someone acting for them, and your message goes straight to that person — HomeNet does not take a cut of the ${act}.` +
@@ -370,11 +381,25 @@ const AREA_FAQ: Record<string, AreaFaqContent> = {
  * The FAQ for one area page, or an empty list where the area has no curated
  * entry. The caller renders nothing and emits no FAQPage for an empty list.
  */
-export function areaFaq(slug: string | undefined, intent: ListingIntent): FaqEntry[] {
+export function areaFaq(slug: string | undefined, intent: ListingIntent): AreaFaqEntry[] {
   if (!slug) return [];
   const content = AREA_FAQ[slug];
   if (!content) return [];
   return intent === "buy" ? content.buy : content.rent;
+}
+
+/**
+ * The entries worth putting in FAQPage markup: the ones written for this area
+ * and no other.
+ *
+ * Google withdrew FAQ rich results for commercial sites, so this markup earns
+ * no snippet either way; what it still does is tell an answer engine which
+ * question a passage answers. That is only worth saying where the answer is
+ * specific to the page, which is why the shared platform answers are dropped
+ * here while staying on screen.
+ */
+export function areaFaqForSchema(slug: string | undefined, intent: ListingIntent): FaqEntry[] {
+  return areaFaq(slug, intent).filter((entry) => !entry.shared);
 }
 
 /** Slugs with curated FAQ content, for tests and for anything that needs the list. */

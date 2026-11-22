@@ -134,7 +134,7 @@ export function RelatedPropertyHubs() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colorTokens.cardBorder,

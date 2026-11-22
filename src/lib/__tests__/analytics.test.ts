@@ -51,11 +51,20 @@ describe("analytics", () => {
     );
   });
 
+  it("never sends the owner's name or phone to an analytics provider", () => {
+    trackContactOwner({ propertyId: "prop-123", method: "call" });
+
+    const [, , payload] = (window.gtag as jest.Mock).mock.calls[0];
+    expect(Object.keys(payload)).toEqual(["property_id", "contact_method"]);
+    // Personal data in an analytics payload breaks Google Analytics' terms,
+    // so this asserts the shape rather than the absence of one key.
+    expect(JSON.stringify(payload)).not.toMatch(/name|phone/i);
+  });
+
   it("tracks contact_owner_click correctly", () => {
     trackContactOwner({
       propertyId: "prop-123",
       method: "whatsapp",
-      sellerName: "Rahim",
     });
 
     expect(window.gtag).toHaveBeenCalledWith(
@@ -64,7 +73,6 @@ describe("analytics", () => {
       expect.objectContaining({
         property_id: "prop-123",
         contact_method: "whatsapp",
-        seller_name: "Rahim",
       }),
     );
   });

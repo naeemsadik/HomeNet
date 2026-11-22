@@ -311,6 +311,20 @@ export async function fetchPropertyGuideBySlug(
   return curatedGuideBySlug(slug);
 }
 
+/**
+ * The bundled copy of the guide list, filtered and paginated the same way the
+ * API response would be.
+ *
+ * `usePropertyGuides` seeds React Query with this. A query function does not
+ * run during the static export, so without a seed the archive rendered its
+ * empty state into the HTML and the export carried no link to any guide —
+ * leaving every guide reachable only through the sitemap for the crawlers
+ * that do not run JavaScript, which is most of the AI answer engines.
+ */
+export function curatedGuideList(params: FetchPropertyGuidesParams): PropertyGuideList {
+  return filterCuratedGuides(params);
+}
+
 /** The bundled copy of a guide, or null. Shown before the API answers. */
 export function curatedGuideBySlug(slug: string): PropertyGuide | null {
   const fallback = CURATED_PROPERTY_GUIDES.find((g) => g.slug === slug);

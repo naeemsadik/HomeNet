@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   crossLinkCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: "rgba(4, 207, 146, 0.25)",
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   crossLinkIconWrap: {
     width: 36,
     height: 36,
-    borderRadius: 8,
+    borderRadius: radius.card,
     backgroundColor: colorTokens.brandSurface,
     alignItems: "center",
     justifyContent: "center",
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     color: colorTokens.onBrand,
   },
   hubSection: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colorTokens.surface,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colorTokens.cardBorder,

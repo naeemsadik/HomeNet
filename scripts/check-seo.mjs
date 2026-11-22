@@ -51,7 +51,16 @@ for (const file of htmlFiles(DIST)) {
   const h1s = (html.match(/<h1[\s>]/gi) ?? []).length;
   // PageMeta always emits one, so a page without it is not rendering PageMeta
   // at all — the share card would fall back to whatever the platform guesses.
-  const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]*)"/i)?.[1]?.trim();
+  //
+  // Read attribute by attribute rather than in one pattern: a single regex
+  // fixes the order of `property` and `content`, and a renderer that emits
+  // them the other way round is still valid HTML. Failing the build over
+  // attribute order would be a false alarm.
+  const ogImage = [...html.matchAll(/<meta\b[^>]*>/gi)]
+    .map((tag) => tag[0])
+    .filter((tag) => /\bproperty=["']og:image["']/i.test(tag))
+    .map((tag) => tag.match(/\bcontent=["']([^"']*)["']/i)?.[1]?.trim())
+    .find((value) => value);
 
   if (!title) errors.push(`${where}: no <title>`);
   if (!canonical) errors.push(`${where}: no canonical link`);

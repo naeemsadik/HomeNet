@@ -238,7 +238,6 @@ function PropertyCardComponent({
     trackContactOwner({
       propertyId: property.id,
       method: "call",
-      sellerName: property.user?.full_name,
     });
     const clean = sellerPhone.replace(/[^\d+]/g, "");
     const telUrl = `tel:${clean}`;
@@ -256,7 +255,6 @@ function PropertyCardComponent({
     trackContactOwner({
       propertyId: property.id,
       method: "whatsapp",
-      sellerName: property.user?.full_name,
     });
     const defaultSeller = language === "bn" ? "মালিক" : "Seller";
     const defaultProp = language === "bn" ? "প্রোপার্টি" : "Property";
@@ -278,7 +276,6 @@ function PropertyCardComponent({
     trackContactOwner({
       propertyId: property.id,
       method: "message",
-      sellerName: property.user?.full_name,
     });
     open();
   };

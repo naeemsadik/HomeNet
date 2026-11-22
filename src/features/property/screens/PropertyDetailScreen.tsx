@@ -205,17 +205,25 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
     };
   }, [apiDetail, similarProperties, language, t]);
 
+  // Reported once per property, and only once the API detail is in hand.
+  // `property` can be built from the build-time snapshot before the request
+  // resolves, so keying this on its id alone sent price and listing type as
+  // undefined and never corrected them. The ref keeps a later render of the
+  // same listing from counting a second view.
+  const reportedViewFor = useRef<string | null>(null);
   useEffect(() => {
-    if (!property) return;
+    if (!property || !apiDetail) return;
+    if (reportedViewFor.current === apiDetail.id) return;
+    reportedViewFor.current = apiDetail.id;
     trackPropertyView({
       id: property.id,
       title: property.title,
-      price: apiDetail?.price,
+      price: apiDetail.price,
       area: property.location,
-      listingType: apiDetail?.listing_type,
+      listingType: apiDetail.listing_type,
       propertyType: property.type,
     });
-  }, [property?.id]);
+  }, [apiDetail, property]);
 
   const handleCall = () => {
     if (!property?.seller.phone) {
@@ -225,8 +233,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
     trackContactOwner({
       propertyId: property.id,
       method: "call",
-      sellerName: property.seller.name,
-      phone: property.seller.phone,
     });
     void Linking.openURL(`tel:${property.seller.phone}`);
   };
@@ -248,7 +254,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       trackContactOwner({
         propertyId: property.id,
         method: "whatsapp",
-        sellerName: property.seller.name,
       });
     }
     void Linking.openURL(url).catch(() => {
@@ -275,7 +280,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       trackContactOwner({
         propertyId: property.id,
         method: "message",
-        sellerName: property.seller.name,
       });
     }
     const link = Platform.OS === "web" && typeof window !== "undefined" ? ` (${window.location.href})` : "";
@@ -471,7 +475,6 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
           title: apiDetail.title,
           status: apiDetail.status,
           areaName: property.location,
-          sellerName: property.seller.name,
         }}
       />
     ) : undefined;
