@@ -58,7 +58,7 @@ Direct owner contact with zero broker commission is the standing commercial posi
 
 ## Brand Commitments
 
-- Name: **HomeNet**. Android package `com.homenet.app`, scheme `homenet`.
+- Name: **HomeNet**. Android package `com.homenetbd.app`, scheme `homenet`.
 - The existing token system in `src/theme/` is the incumbent visual authority: green primary `#04cf92`, near-black warm-green ink `#0B1A17`, white canvas, blue `#2251D6` reserved for the verified badge, orange `#F4823A` for notification/warning/error. Tokens are annotated as matching a Figma source.
 - Voice, as committed in `src/content/landingCopy.ts`: plain, specific, verifiable. It names the problem directly and avoids superlatives. Landing copy is centralised in that one file deliberately so claims can be reviewed and swapped without touching layout.
 - `MARKET_POSITION_CLAIM` ("Bangladesh's first AI property marketplace") is **disabled in code pending business and legal approval** and must not be used until someone with authority flips it.
