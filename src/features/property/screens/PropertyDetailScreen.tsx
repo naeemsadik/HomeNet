@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
+import Head from "expo-router/head";
 import { ArrowLeft, Bath, BedDouble, Building2, Calendar, Camera, Check, ChevronLeft, ChevronRight, Flag, Heart, MapPin, Maximize2, Phone, RotateCcw, Share2, ShieldCheck, TrendingUp, UserRound } from "@/components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -39,6 +40,7 @@ import { PropertyLocationSection, type NearbyPlace } from "../components/Propert
 import { WhatsAppIcon } from "../components/WhatsAppIcon";
 import { contactPhone, listerDisplay, whatsappUrl } from "../utils/lister";
 import { NoTranslateText } from "@/components/NoTranslateText";
+import { trackContactOwner, trackPropertyView } from "@/lib/analytics";
 
 import {
   useTranslation,
@@ -50,6 +52,7 @@ import {
   translateAreaUnit,
 } from "@/i18n";
 import { listingCover, listingPhotos } from "@/features/property/utils/listingMedia";
+import { webImageProps } from "@/lib/webImageProps";
 
 type AiValuation = {
   estimatedValue: string;
@@ -202,11 +205,29 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
     };
   }, [apiDetail, similarProperties, language, t]);
 
+  useEffect(() => {
+    if (!property) return;
+    trackPropertyView({
+      id: property.id,
+      title: property.title,
+      price: apiDetail?.price,
+      area: property.location,
+      listingType: apiDetail?.listing_type,
+      propertyType: property.type,
+    });
+  }, [property?.id]);
+
   const handleCall = () => {
     if (!property?.seller.phone) {
       notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;
     }
+    trackContactOwner({
+      propertyId: property.id,
+      method: "call",
+      sellerName: property.seller.name,
+      phone: property.seller.phone,
+    });
     void Linking.openURL(`tel:${property.seller.phone}`);
   };
 
@@ -222,6 +243,13 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
     if (!url) {
       notify(t("propertyDetail.phoneUnavailableTitle"), t("propertyDetail.phoneUnavailableBody"));
       return;
+    }
+    if (property) {
+      trackContactOwner({
+        propertyId: property.id,
+        method: "whatsapp",
+        sellerName: property.seller.name,
+      });
     }
     void Linking.openURL(url).catch(() => {
       notify(
@@ -243,6 +271,13 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   // There is no visit-booking API, so the request goes to the seller directly
   // instead of a confirmation screen promising a callback nobody schedules.
   const handleRequestVisit = () => {
+    if (property) {
+      trackContactOwner({
+        propertyId: property.id,
+        method: "message",
+        sellerName: property.seller.name,
+      });
+    }
     const link = Platform.OS === "web" && typeof window !== "undefined" ? ` (${window.location.href})` : "";
     const defaultSeller = language === "bn" ? "মালিক" : "Seller";
     const defaultProp = language === "bn" ? "প্রোপার্টি" : "Property";
@@ -456,6 +491,11 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       {apiDetail ? (
         <JsonLd nodes={[listingSchema(apiDetail), breadcrumbSchema(listingCrumbs(apiDetail))]} />
       ) : null}
+      {property.mediaImages[0] ? (
+        <Head>
+          <link rel="preload" as="image" fetchPriority="high" href={cdnImage(property.mediaImages[0], 1400)} />
+        </Head>
+      ) : null}
       <ScrollView
         contentContainerStyle={[
           styles.scrollBody,
@@ -522,6 +562,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                       source={{ uri: cdnImage(property.mediaImages[0], 1400) }}
                       accessibilityLabel={`${property.title}, photo 1`}
                       style={styles.mainImage}
+                      {...webImageProps({ fetchPriority: "high", loading: "eager" })}
                     />
                     {galleryBadges}
                   </Pressable>
@@ -594,6 +635,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                       source={{ uri: cdnImage(property.mediaImages[activeImageIndex] || property.mediaImages[0], 1400) }}
                       accessibilityLabel={`${property.title}, photo ${activeImageIndex + 1}`}
                       style={styles.mainImage}
+                      {...webImageProps({ fetchPriority: "high", loading: "eager" })}
                     />
                   ) : (
                     <View style={styles.mediaPlaceholder}>
@@ -675,7 +717,12 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                             webPointer,
                           ]}
                         >
-                          <Image source={{ uri: cdnImage(img, 240) }} accessibilityLabel={`${property.title}, photo ${idx + 1}`} style={styles.thumbnailImg} />
+                          <Image
+                            source={{ uri: cdnImage(img, 240) }}
+                            accessibilityLabel={`${property.title}, photo ${idx + 1}`}
+                            style={styles.thumbnailImg}
+                            {...webImageProps({ loading: "lazy" })}
+                          />
                           {showPlusBadge ? (
                             <View style={styles.moreImagesOverlay}>
                               <Text style={styles.moreImagesText}>
@@ -855,7 +902,12 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                     {property.similarProperties.map((sim) => (
                       <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
                         {sim.imageUrl ? (
-                          <Image source={{ uri: cdnImage(sim.imageUrl, 480) }} accessibilityLabel={sim.title} style={styles.similarThumb} />
+                          <Image
+                            source={{ uri: cdnImage(sim.imageUrl, 480) }}
+                            accessibilityLabel={sim.title}
+                            style={styles.similarThumb}
+                            {...webImageProps({ loading: "lazy" })}
+                          />
                         ) : (
                           <View style={[styles.similarThumb, styles.similarThumbPlaceholder]}>
                             <Building2 color="#6B7D78" size={24} />

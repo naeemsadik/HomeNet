@@ -1,7 +1,7 @@
 // Checks the exported HTML the way a crawler that runs no JavaScript sees it.
 // Every page meant to be indexed (no robots noindex, canonical pointing at
-// itself) must have a title, a canonical URL and exactly one <h1>, and must not
-// claim a Bangla alternate that does not exist. Those fail the build. Titles
+// itself) must have a title, a canonical URL, an og:image and exactly one <h1>,
+// and must not claim a Bangla alternate that does not exist. Those fail the build. Titles
 // over 60 characters and descriptions outside 120-160 are reported as warnings:
 // they are copy decisions, not breakage.
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -49,9 +49,17 @@ for (const file of htmlFiles(DIST)) {
   const title = decode(html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1] ?? "").trim();
   const description = decode(html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"/i)?.[1] ?? "").trim();
   const h1s = (html.match(/<h1[\s>]/gi) ?? []).length;
+  // PageMeta always emits one, so a page without it is not rendering PageMeta
+  // at all — the share card would fall back to whatever the platform guesses.
+  const ogImage = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]*)"/i)?.[1]?.trim();
 
   if (!title) errors.push(`${where}: no <title>`);
   if (!canonical) errors.push(`${where}: no canonical link`);
+  if (!ogImage) errors.push(`${where}: no og:image`);
+  else if (!/^https:\/\//i.test(ogImage)) {
+    // Facebook, X and LinkedIn all refuse a relative or insecure share image.
+    errors.push(`${where}: og:image is not an absolute https URL: ${ogImage}`);
+  }
   if (h1s !== 1) errors.push(`${where}: ${h1s} <h1> elements, expected exactly 1`);
   if (/hreflang="bn-BD"/i.test(html)) errors.push(`${where}: claims a bn-BD alternate, but Bangla has no URL of its own`);
 

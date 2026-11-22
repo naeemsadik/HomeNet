@@ -21,6 +21,7 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { openExternalUrl } from "@/lib/safeUrl";
 import { AppChrome } from "@/components/AppChrome";
+import { RelatedPropertyHubs } from "@/components/RelatedPropertyHubs";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
@@ -365,6 +366,10 @@ export function GuidesArchiveScreen() {
             contentContainerStyle={styles.listContainer}
           />
         )}
+
+        {/* Internal links from the content hub to the pages that matter:
+            search, valuation, listing, and the busiest area pages. */}
+        <RelatedPropertyHubs />
       </View>
     </AppChrome>
   );

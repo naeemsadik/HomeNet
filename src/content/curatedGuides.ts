@@ -1444,4 +1444,502 @@ Our [khatian verification guide](/guides/how-to-verify-khatian-cs-sa-rs-bs) expl
 হস্তান্তরের আগে রেকর্ডে কী আছে দেখতে পড়ুন আমাদের [খতিয়ান যাচাই গাইড](/guides/how-to-verify-khatian-cs-sa-rs-bs)।
 `,
   },
+  {
+    id: "guide-gulshan-banani-bashundhara-compare",
+    slug: "gulshan-vs-banani-vs-bashundhara-dhaka",
+    category: "Buying",
+    title: "Gulshan vs Banani vs Bashundhara R/A: Where Should You Buy or Rent in Dhaka?",
+    seoTitle: "Gulshan vs Banani vs Bashundhara R/A",
+    titleBn: "গুলশান বনাম বনানী বনাম বসুন্ধরা আ/এ: ঢাকায় কোথায় কিনবেন বা ভাড়া নেবেন?",
+    excerpt:
+      "A side-by-side comparison of Dhaka's three most-searched addresses: what each costs relative to the others, who each suits, and the trade-off you are making.",
+    excerptBn:
+      "ঢাকার তিনটি জনপ্রিয় এলাকার তুলনা: তুলনামূলক দাম, কার জন্য কোনটি উপযুক্ত, এবং প্রতিটি পছন্দে আপনি আসলে কী ছাড় দিচ্ছেন।",
+    readTime: "7 min read",
+    imageUrl: null,
+    publishedAt: "2026-11-22T09:00:00.000Z",
+    updatedAt: "2026-11-22T00:00:00.000Z",
+    href: "/guides/gulshan-vs-banani-vs-bashundhara-dhaka",
+    sourceType: "internal",
+    sourceName: "HomeNet Team",
+    sourceUrl: null,
+    tags: ["Gulshan", "Banani", "Bashundhara R/A", "Dhaka", "Area Comparison"],
+    tagsBn: ["গুলশান", "বনানী", "বসুন্ধরা আ/এ", "ঢাকা", "এলাকা তুলনা"],
+    contentMarkdown: `
+# Gulshan vs Banani vs Bashundhara R/A
+
+> **On prices:** this guide does not quote taka figures. HomeNet publishes no price
+> index, and a number written here would be out of date within months. Where price
+> matters, it is described in relative terms and linked to the live listings, which
+> are the current answer.
+
+Three areas account for a large share of every Dhaka property search. They are not
+competing for the same buyer, though, and most people choose between them on one
+trade-off: **how central you need to be, against how much floor area you get.**
+
+---
+
+## The short answer
+
+- **Gulshan** — the most expensive of the three per square foot. Choose it if proximity to diplomatic missions, international schools and corporate offices is the point, and the budget allows.
+- **Banani** — central, mixed residential and commercial, generally cheaper per square foot than Gulshan. Choose it for a central address at a lower price, if you can live with more traffic and noise.
+- **Bashundhara R/A** — a large planned area, the most floor area per taka of the three. Choose it if space, parking and wide roads matter more than being in the middle of the city.
+
+---
+
+## Side by side
+
+| | Gulshan | Banani | Bashundhara R/A |
+| :--- | :--- | :--- | :--- |
+| **Character** | Diplomatic and corporate, quietest of the three | Mixed residential and commercial | Large planned residential grid |
+| **Relative price per sqft** | Highest | Middle | Lowest |
+| **Layout** | Two blocks (Gulshan 1 and 2) around the lake | Numbered roads plus a commercial avenue | Lettered blocks on a planned grid |
+| **Typical stock** | Large high-specification flats, serviced apartments | Family flats, offices, serviced apartments | Newer flats and houses, more plots |
+| **Parking** | Usually included in newer buildings | Varies; commercial buildings compete for it | Generally the easiest of the three |
+| **Best for** | Expatriates, diplomats, corporate tenancies | Central living on a smaller budget | Families and students wanting space |
+
+---
+
+## Gulshan
+
+**Pros**
+- The quietest and most orderly of the three, particularly Gulshan 2.
+- Closest to diplomatic missions, international schools and corporate head offices.
+- Deepest stock of large, high-specification and serviced flats.
+- Holds value well — it has been Dhaka's prime address for decades.
+
+**Cons**
+- The highest prices and rents in the city, for both sale and rent.
+- Advances demanded from tenants are typically larger than elsewhere.
+- You pay a premium per square foot, so the same budget buys noticeably less space.
+
+Gulshan 2 is the quieter and more expensive block; Gulshan 1 sits closer to Mohakhali
+and the commercial strip and is better connected. Browse
+[flats for sale in Gulshan](/buy/gulshan) or [to rent in Gulshan](/rent/gulshan),
+or go straight to [Gulshan 1](/buy/gulshan-1) and [Gulshan 2](/buy/gulshan-2).
+
+---
+
+## Banani
+
+**Pros**
+- Central, between Gulshan, Mohakhali and the airport road.
+- Generally cheaper per square foot than Gulshan for a comparable flat.
+- Good mix of family flats, offices and serviced apartments.
+- Banani DOHS, adjoining, is quieter again.
+
+**Cons**
+- Mixed-use buildings mean offices, restaurants or showrooms may share your block.
+- The main roads carry heavy traffic and evening noise.
+- Lift traffic and parking pressure in buildings with commercial floors.
+
+Before buying or renting in Banani, check what occupies the rest of the building —
+it is the single thing people most often discover after signing. Browse
+[Banani for sale](/buy/banani) or [Banani to rent](/rent/banani).
+
+---
+
+## Bashundhara R/A
+
+**Pros**
+- The most floor area per taka of the three.
+- Planned grid: wide roads, easier parking, more consistent layout.
+- A lot of newer construction.
+- More realistic for bachelor and student tenancies, which much of Dhaka restricts.
+
+**Cons**
+- Furthest from the diplomatic and corporate centre.
+- Access to the rest of the city runs through a few main entrances, which congest.
+- The outer blocks are still filling in — check what is actually built and running nearby.
+
+Blocks near the main gate and the commercial roads are the best served; the outer
+blocks are quieter and cheaper. Browse
+[Bashundhara R/A for sale](/buy/bashundhara-ra) or [to rent](/rent/bashundhara-ra).
+
+---
+
+## Which option is right for you?
+
+**Choose Gulshan if** your work, your embassy or your children's school is there, or
+you want the address that has held its value longest — and the budget is not the
+binding constraint.
+
+**Choose Banani if** you want to stay central but Gulshan prices do not work. You are
+trading quiet for price. Check the building's other tenants before you commit.
+
+**Choose Bashundhara R/A if** space is the priority — a bigger flat, parking, somewhere
+for children to be outside — and you are willing to accept a longer, less predictable
+commute into the centre.
+
+**Still deciding?** Run a free [instant valuation](/instant-valuation) on a flat you are
+considering: it estimates sale value and monthly rent from the area, size and
+configuration, using comparable HomeNet listings. No sign-up, no broker.
+
+---
+
+## Before you commit, in any of the three
+
+1. Confirm the building is **RAJUK-approved** and that the floors on site match the approved plan — see [how to verify a RAJUK-approved flat](/guides/rajuk-approved-flat-how-to-verify).
+2. Trace the **khatian and chain of deeds** — see [verifying a khatian](/guides/how-to-verify-khatian-cs-sa-rs-bs).
+3. If buying, budget the **registration costs** — see [Dhaka flat registration costs](/guides/dhaka-flat-registration-costs-breakdown).
+4. If renting, know what the law says about **advance rent** — see [rent advances and tenant rights](/guides/bangladesh-rent-advance-law-tenant-rights).
+`,
+    faq: [
+      {
+        question: "Which is cheaper, Gulshan or Banani?",
+        answer:
+          "Banani is generally cheaper than Gulshan per square foot for a comparable flat, for both sale and rent. What you give up is quiet: Banani is more commercial and its main roads carry heavier traffic. Current asking prices for both are on HomeNet's Gulshan and Banani area pages.",
+      },
+      {
+        question: "Is Bashundhara R/A better value than Gulshan or Banani?",
+        answer:
+          "For floor area per taka, yes — Bashundhara R/A generally gives you the most space of the three. The trade-off is distance from the diplomatic and corporate centre, and a commute that runs through a few congested main entrances.",
+      },
+      {
+        question: "Which area is best for families in Dhaka?",
+        answer:
+          "Bashundhara R/A is usually the strongest of the three for families on space alone: wider roads, easier parking and larger flats for the same money. Gulshan suits families whose children attend international schools nearby, and Banani sits between the two on both price and space.",
+      },
+      {
+        question: "Is Gulshan 1 or Gulshan 2 better?",
+        answer:
+          "Gulshan 2 is quieter and more expensive; Gulshan 1 is busier and better connected. Gulshan 2 holds most of the diplomatic missions and newer high-specification buildings, while Gulshan 1 sits closer to Mohakhali and the commercial strip.",
+      },
+      {
+        question: "Do I need a broker to buy or rent in these areas?",
+        answer:
+          "No. Every listing on HomeNet is posted by the owner or someone acting for them, and your message goes straight to that person with no commission to HomeNet. In Dhaka a broker typically takes a fee from both sides of a deal, so going direct removes that cost.",
+      },
+    ],
+  },
+  {
+    id: "guide-buying-vs-renting-dhaka",
+    slug: "buying-vs-renting-apartment-dhaka",
+    category: "Buying",
+    title: "Buying vs Renting an Apartment in Dhaka: Cost Breakdown & Decision Guide",
+    seoTitle: "Buying vs Renting an Apartment in Dhaka",
+    titleBn: "ঢাকায় ফ্ল্যাট কেনা বনাম ভাড়া নেওয়া: খরচের হিসাব ও সিদ্ধান্ত গাইড",
+    excerpt:
+      "The real cost of buying a Dhaka flat beyond the price, what renting ties up, and how to work out which is cheaper for you.",
+    excerptBn:
+      "ঢাকায় ফ্ল্যাট কেনার প্রকৃত খরচ, ভাড়ায় কত টাকা আটকে থাকে, এবং আপনার ক্ষেত্রে কোনটি সাশ্রয়ী তা হিসাব করার পদ্ধতি।",
+    readTime: "8 min read",
+    imageUrl: null,
+    publishedAt: "2026-11-22T09:30:00.000Z",
+    updatedAt: "2026-11-22T00:00:00.000Z",
+    href: "/guides/buying-vs-renting-apartment-dhaka",
+    sourceType: "internal",
+    sourceName: "HomeNet Team",
+    sourceUrl: null,
+    tags: ["Buying", "Renting", "Costs", "Stamp Duty", "Dhaka"],
+    tagsBn: ["ক্রয়", "ভাড়া", "খরচ", "স্ট্যাম্প ডিউটি", "ঢাকা"],
+    contentMarkdown: `
+# Buying vs Renting an Apartment in Dhaka
+
+> **Disclaimer:** Statutory rates cited here are for reference only, and change with
+> every Finance Act. Verify them with the relevant Sub-registry, an NBR circular or a
+> qualified lawyer before you budget. This guide quotes no market prices or rents —
+> those are on the live listings, which stay current.
+
+The honest answer is that neither is universally cheaper. What decides it is **how
+long you will stay**, and almost nothing else. This guide sets out what each side
+actually costs so you can work out your own crossover point.
+
+---
+
+## The short answer
+
+**Buy** if you expect to hold the flat for roughly five years or more, you have the
+registration costs in cash on top of the price, and the title is clean.
+
+**Rent** if your time in the city is uncertain, you need the capital for something
+else, or you are not yet sure which area you want to live in.
+
+---
+
+## What buying actually costs
+
+The asking price is not the cost. On top of it, a buyer in a Dhaka city corporation
+area pays statutory charges at registration:
+
+| Charge | Paid by | Rate | Source |
+| :--- | :--- | :--- | :--- |
+| **Stamp Duty** | Buyer | 1.5% of the deed value | [Finance Act 2022, Schedule I](https://bdlaws.minlaw.gov.bd/act-1409/act-chapter-print-2323.html) |
+| **Registration Fee** | Buyer | Sub-registry charters list 1% to 2% of the deed value; confirm the current rate | [Registration Act 1908, s.78](https://bdlaws.minlaw.gov.bd/act-90/part-details-293.html) |
+| **Local Government Tax** | Buyer | Reported as 2% in Dhaka's city corporations; 3% elsewhere | Confirm at your Sub-registry |
+
+Together these commonly come to roughly **4.5% to 6.5% of the deed value**, before
+deed-writing and drafting charges, which vary. On top of that, a buyer should expect:
+
+- **Legal fees** for title verification — the one cost worth not economising on.
+- **Namzari (mutation)** to get the record into your name. Registering the deed is not the end of it; see [the Namzari guide](/guides/namzari-mutation-bangladesh-guide).
+- **Utility connection transfers** and, in older buildings, immediate repairs.
+- **Service charge** every month thereafter, which a tenant usually does not pay separately.
+
+The full breakdown, with a worked example, is in
+[Dhaka flat registration costs](/guides/dhaka-flat-registration-costs-breakdown).
+
+**Pros of buying**
+- The monthly outgoing stops once any financing is repaid.
+- No landlord, no annual rent increase, no notice to quit.
+- You can renovate, sublet or sell.
+- Property has historically held value in prime Dhaka areas.
+
+**Cons of buying**
+- The entry cost is large and mostly non-recoverable: the registration charges above are gone the day you pay them.
+- Your capital is illiquid — selling a Dhaka flat takes months, not days.
+- Title risk is real. An unapproved floor or a broken chain of deeds can cost far more than it saved.
+- You carry the repairs.
+
+---
+
+## What renting actually costs
+
+Rent is the visible cost. The ones people forget:
+
+- **Advance money.** Dhaka custom is three to six months. The law is stricter: under the Premises Rent Control Act 1991 a landlord **may not take more than one month's rent in advance** without the Rent Controller's prior written permission, and security deposits are barred outright. What is demanded and what is lawful are two different things — see [rent advances and tenant rights](/guides/bangladesh-rent-advance-law-tenant-rights).
+- **The opportunity cost of that advance**, which earns you nothing while it is held.
+- **Annual increases**, which compound over a long tenancy.
+- **Moving costs**, every time.
+
+**Pros of renting**
+- Low entry cost and you keep your capital.
+- You can leave — for another area, another city, another country.
+- Major repairs are the landlord's problem.
+- You can try an area before committing to it.
+
+**Cons of renting**
+- The payments never stop and never build anything.
+- Advance money is tied up, and recovering it at the end is not always straightforward.
+- Little control: rent rises, and the tenancy can end.
+- Many Dhaka landlords restrict who may rent, which narrows the search.
+
+---
+
+## Working out your own crossover point
+
+Rather than trusting a rule of thumb, do this with your own numbers:
+
+1. **Get the two figures for a comparable flat.** Use HomeNet's area pages — the same area, a similar size and configuration — for both [sale](/buy/dhaka) and [rent](/rent/dhaka) asking prices. Or run a free [instant valuation](/instant-valuation), which estimates sale value *and* monthly rent for the same property.
+2. **Add the one-off cost of buying:** roughly 4.5% to 6.5% of the deed value in statutory charges, plus legal fees, mutation and any immediate repairs.
+3. **Add the recurring cost of owning:** monthly service charge, annual land development tax, maintenance, and financing if any.
+4. **Add the recurring cost of renting:** the monthly rent, plus what the advance would have earned you elsewhere, plus an allowance for annual increases.
+5. **Divide the one-off cost of buying by the monthly difference** between the two recurring figures. That is roughly how many months you must stay before buying wins.
+
+If that number is longer than you expect to stay in the flat, rent.
+
+---
+
+## Which option is right for you?
+
+**Buy if** you are settled in a city and an area, you can cover the registration costs
+without borrowing for them, you have had the title checked, and you expect to hold for
+five years or more.
+
+**Rent if** your plans are uncertain, you have not settled on an area, you need the
+capital elsewhere, or you simply cannot cover the entry cost yet — which is a timing
+problem, not a failure.
+
+**Do neither in a hurry.** The most expensive mistakes in Dhaka property are made by
+buyers who skipped the title check to close quickly, and by tenants who paid a large
+advance on a verbal agreement.
+`,
+    faq: [
+      {
+        question: "Is it cheaper to buy or rent an apartment in Dhaka?",
+        answer:
+          "Buying generally only beats renting if you stay about five years or more. It carries a large one-off cost — roughly 4.5% to 6.5% of the deed value in statutory charges alone, plus legal fees — and below that holding period renting is usually cheaper. How long you will stay decides it; almost nothing else does.",
+      },
+      {
+        question: "What are the registration costs when buying a flat in Dhaka?",
+        answer:
+          "A buyer in a Dhaka city corporation area pays stamp duty at 1.5% of the deed value, a registration fee that Sub-registry charters list at 1% to 2%, and local government tax reported at 2%. Together that commonly comes to roughly 4.5% to 6.5%, before deed-writing charges. Rates change with each Finance Act, so confirm them at your Sub-registry.",
+      },
+      {
+        question: "How much advance rent can a landlord legally demand in Bangladesh?",
+        answer:
+          "Under the Premises Rent Control Act 1991 a landlord may not take more than one month's rent in advance without the prior written permission of the Rent Controller, and security deposits are barred outright. Three to six months is routinely demanded in Dhaka, but that practice has no basis in the Act.",
+      },
+      {
+        question: "Is registering the deed enough to own a flat in Bangladesh?",
+        answer:
+          "No. Until the record is mutated into your name through Namzari, the government revenue record still shows the previous owner. Without it you cannot pay land development tax in your own name or secure a mortgage, and the previous owner may still appear as owner on old records.",
+      },
+      {
+        question: "How do I estimate what a flat is worth before deciding?",
+        answer:
+          "Use HomeNet's free instant valuation, which estimates both sale value and monthly rent from the area, size, configuration and comparable listings. It needs no sign-up and involves no broker, and it gives you the two figures you need to compare buying against renting.",
+      },
+    ],
+  },
+  {
+    id: "guide-direct-owner-vs-broker",
+    slug: "direct-owner-vs-broker-bangladesh",
+    category: "Buying",
+    title: "Direct Owner vs Property Broker in Bangladesh: Fees, Verification & Risks",
+    seoTitle: "Direct Owner vs Property Broker in Bangladesh",
+    titleBn: "বাংলাদেশে সরাসরি মালিক বনাম দালাল: কমিশন, যাচাই ও ঝুঁকি",
+    excerpt:
+      "What a Dhaka broker actually charges, what they do and do not verify, and which checks remain yours either way — plus when using one is still the right call.",
+    excerptBn:
+      "ঢাকায় দালালের কমিশন কত, তারা কী যাচাই করে আর কী করে না, এবং কোন কাজগুলো যেভাবেই হোক আপনাকেই করতে হবে।",
+    readTime: "6 min read",
+    imageUrl: null,
+    publishedAt: "2026-11-22T10:00:00.000Z",
+    updatedAt: "2026-11-22T00:00:00.000Z",
+    href: "/guides/direct-owner-vs-broker-bangladesh",
+    sourceType: "internal",
+    sourceName: "HomeNet Team",
+    sourceUrl: null,
+    tags: ["Broker", "Commission", "Verification", "Direct Owner", "Bangladesh"],
+    tagsBn: ["দালাল", "কমিশন", "যাচাই", "সরাসরি মালিক", "বাংলাদেশ"],
+    contentMarkdown: `
+# Direct Owner vs Property Broker in Bangladesh
+
+> **On commission rates:** broker fees in Bangladesh are set by custom and negotiation,
+> not by statute. The figures described below are the commonly reported practice, not a
+> regulated scale. Agree the fee and who pays it in writing before any viewing.
+
+Most Dhaka property has historically changed hands through a broker (*dalal*). That is
+changing, and the question worth asking is not which is better in the abstract, but
+**what the broker is actually doing for the fee** — and whether you still have to do
+it yourself.
+
+---
+
+## The short answer
+
+Going direct removes the commission and the telephone game. It does not remove the
+legal checks — **those are yours either way**, and a broker's involvement is not
+verification.
+
+---
+
+## Side by side
+
+| | Direct from owner | Through a broker |
+| :--- | :--- | :--- |
+| **Commission** | None | Customarily a fee from one or both sides, negotiated not regulated |
+| **Who you talk to** | The owner or someone acting for them | An intermediary relaying both ways |
+| **Price information** | The owner's own asking price | May be marked up, or the fee added on top |
+| **Title and approval checks** | Yours to do | Still yours to do |
+| **Availability of stock** | What is listed | May include unlisted properties |
+| **Negotiation** | Direct, and you hear the actual answer | Mediated, and you may not |
+
+---
+
+## Going direct
+
+**Pros**
+- **No commission.** In Dhaka a broker commonly takes a fee from both sides, so removing them removes that cost from the transaction entirely.
+- **You speak to the person who can actually decide.** Questions about the floor, the gas line, the service charge or the advance get answered by the one who knows.
+- **No distortion.** You hear the owner's asking price and the owner hears your offer, without a third party with an interest in the number.
+- **A faster loop.** Scheduling a viewing does not require a middleman's diary.
+
+**Cons**
+- **You do your own filtering.** Without someone shortlisting for you, you look at more listings.
+- **You arrange your own viewings** and follow up yourself.
+- **No one is pushing the deal along** when either side goes quiet.
+
+On HomeNet every listing is posted by the owner or someone acting for them, and your
+message goes straight to that person. HomeNet charges no commission on a sale or a
+let. There is more on the economics in
+[how listing directly saves broker commission](/guides/direct-listing-saves-broker-commission-dhaka).
+
+---
+
+## Using a broker
+
+**Pros**
+- **Access to unlisted stock**, particularly in areas where owners do not advertise.
+- **Someone else does the legwork** — shortlisting, scheduling, chasing.
+- **Local knowledge** of a specific building or road that is hard to get otherwise.
+- **A go-between** where direct negotiation would be awkward.
+
+**Cons**
+- **The fee**, which is customary rather than regulated and is often paid by both sides.
+- **An interest in the deal closing**, which is not the same as an interest in it being right for you.
+- **Information passes through someone else**, and detail is lost or shaded on the way.
+- **No verification value.** A broker introducing a property is not a check on its title.
+
+---
+
+## What a broker does not do
+
+This is the part that costs people money. Whoever introduces you to a property, these
+remain your responsibility:
+
+1. **The title and chain of deeds.** Trace the khatian yourself or through a lawyer — see [verifying a khatian](/guides/how-to-verify-khatian-cs-sa-rs-bs).
+2. **RAJUK approval and the approved floor count.** Unapproved floors are common and expensive — see [how to verify a RAJUK-approved flat](/guides/rajuk-approved-flat-how-to-verify).
+3. **Namzari (mutation)** after purchase — see [the Namzari guide](/guides/namzari-mutation-bangladesh-guide).
+4. **The baina nama** if you are paying an advance against a future sale — see [baina nama, the agreement to sell](/guides/baina-nama-agreement-to-sell-bangladesh).
+5. **A physical inspection** of the flat itself — see [seven things to inspect](/guides/dhaka-apartment-buyer-inspection-checklist).
+
+A broker may help you gather these documents. Gathering is not verifying.
+
+---
+
+## How HomeNet's verification differs from a broker's assurance
+
+HomeNet verifies that a **listing** is complete and genuine before it is published. It
+does not verify **title** — no marketplace can, and anyone claiming to should be
+treated with suspicion.
+
+A listing cannot appear publicly until it passes four steps:
+
+1. **Submission** — the owner drafts the details and uploads photos.
+2. **Completeness check** — an automated check validates price, dimensions, map coordinates and photo count.
+3. **Verification gate** — the listing is reviewed before its status becomes active.
+4. **Publication** — it publishes with a Verified badge. Unverified entries return 404 rather than sitting half-visible.
+
+So the listing in front of you is real, complete and locatable. The legal checks in
+the previous section are still yours.
+
+---
+
+## Which option is right for you?
+
+**Go direct if** you are comfortable doing your own shortlisting and you intend to
+instruct a lawyer for the title work regardless — which you should. You keep the
+commission and you get your answers first-hand. Start with
+[property for sale](/buy) or [property to rent](/rent), or an area page such as
+[Gulshan](/buy/gulshan), [Banani](/rent/banani) or [Bashundhara R/A](/buy/bashundhara-ra).
+
+**Use a broker if** you are searching in an area where little is listed publicly, you
+have no time for the legwork, or you need someone on the ground in a city you are not
+in. Agree the fee and who pays it in writing, up front.
+
+**Either way, instruct a lawyer** for the title and approval checks, and budget
+[the registration costs](/guides/dhaka-flat-registration-costs-breakdown) before you
+commit. Not sure what the property is worth? Run a free
+[instant valuation](/instant-valuation) first.
+`,
+    faq: [
+      {
+        question: "How much commission does a property broker charge in Bangladesh?",
+        answer:
+          "Broker fees in Bangladesh are set by custom and negotiation rather than by statute, and a broker commonly takes a fee from both sides of a deal. Because there is no regulated scale, agree the amount and who pays it in writing before any viewing.",
+      },
+      {
+        question: "Can I buy or rent property in Bangladesh without a broker?",
+        answer:
+          "Yes. On HomeNet every listing is posted by the owner or someone acting for them, and your message goes straight to that person with no commission charged. You still need to do the legal checks — title, chain of deeds and RAJUK approval — which are yours whether or not a broker is involved.",
+      },
+      {
+        question: "Does a broker verify that a property's title is clean?",
+        answer:
+          "No. Introducing a property is not verifying it. Tracing the khatian and chain of deeds, confirming RAJUK approval and checking the approved floor count remain the buyer's responsibility, normally through a lawyer, however the property was found.",
+      },
+      {
+        question: "What does HomeNet's Verified badge actually mean?",
+        answer:
+          "It means the listing passed four checks before publication: owner submission with photos, an automated completeness check on price, dimensions, coordinates and photo count, a verification review, and then publication. It confirms the listing is real and complete — it is not a check on legal title, which no marketplace can provide.",
+      },
+      {
+        question: "Is it safe to pay an advance directly to an owner?",
+        answer:
+          "Only against a written agreement. An advance paid towards a future sale should be covered by a baina nama (agreement to sell), and advance rent should be documented with the amount and refund terms in writing. A verbal arrangement is where most disputes start, broker or no broker.",
+      },
+    ],
+  },
 ];

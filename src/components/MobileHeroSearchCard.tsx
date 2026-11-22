@@ -13,6 +13,7 @@ import { colorTokens, fonts, radius, webPointer, brandButtonState } from "@/them
 import { useTranslation } from "@/i18n";
 import { AreaPicker, type AreaLocationSelection } from "./AreaPicker";
 import { AdvancedFiltersModal } from "./AdvancedFiltersModal";
+import { trackSearchFilter } from "@/lib/analytics";
 import type { GeoPoint } from "@/lib/areaMatcher";
 import {
   countActiveFilters,
@@ -105,6 +106,15 @@ export function MobileHeroSearchCard() {
       params.set("lat", String(selectedCoords.lat));
       params.set("lng", String(selectedCoords.lng));
     }
+
+    trackSearchFilter({
+      purpose: purposeForTab(activeTab),
+      location: areaName || city || undefined,
+      propertyType: filters.propertyType !== "all" ? filters.propertyType : undefined,
+      minPrice: filters.minPrice || undefined,
+      maxPrice: filters.maxPrice || undefined,
+      beds: filters.minBedrooms || filters.maxBedrooms || undefined,
+    });
 
     const qs = params.toString();
     router.push((qs ? `${target}?${qs}` : target) as never);

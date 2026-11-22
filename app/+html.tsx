@@ -1,6 +1,7 @@
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { PropsWithChildren } from "react";
 import { FIELD_FOCUS_CSS, STYLE_ID as FIELD_FOCUS_STYLE_ID } from "@/lib/fieldFocus";
+import { GA_MEASUREMENT_ID, isValidMeasurementId } from "@/lib/ga";
 
 export default function Root({ children }: PropsWithChildren) {
   return (
@@ -19,6 +20,18 @@ export default function Root({ children }: PropsWithChildren) {
             this file, and on the others an unused preload logs a console
             warning. */}
         <link rel="preconnect" href="https://images.unsplash.com" />
+        {/* GA4's loader, and nothing at all when EXPO_PUBLIC_GA_MEASUREMENT_ID
+            is unset. `async` keeps it off the critical path. The gtag stub and
+            the config call live in src/lib/ga.ts rather than in an inline
+            script here: script-src has no 'unsafe-inline', so an inline script
+            would need a sha256 hash in vercel.json that changed with the
+            measurement ID. An external src needs no hash. */}
+        {isValidMeasurementId(GA_MEASUREMENT_ID) ? (
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_MEASUREMENT_ID)}`}
+          />
+        ) : null}
         <ScrollViewStyleReset />
         {/*
           Inter and Plus Jakarta Sans are bundled and registered by useFonts in
