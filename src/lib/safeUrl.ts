@@ -33,9 +33,21 @@ export function sanitizeExternalUrl(url: string | null | undefined): string | nu
   if (lower.startsWith("mailto:")) {
     const rest = trimmed.slice(7);
     const q = rest.indexOf("?");
-    const address = decodeURIComponent(q === -1 ? rest : rest.slice(0, q)).trim();
+    let address: string;
+    try {
+      address = decodeURIComponent(q === -1 ? rest : rest.slice(0, q)).trim();
+    } catch {
+      return null; // a malformed % sequence
+    }
     if (!/^[^\s@<>,;"]+@[^\s@<>,;"]+\.[^\s@<>,;"]+$/.test(address)) return null;
-    return `mailto:${encodeURIComponent(address).replace(/%40/g, "@")}${q === -1 ? "" : rest.slice(q)}`;
+    // Only subject and body may follow the address: cc= and bcc= would add hidden recipients.
+    const kept = q === -1
+      ? []
+      : rest
+          .slice(q + 1)
+          .split("&")
+          .filter((pair) => /^(subject|body)=/i.test(pair));
+    return `mailto:${encodeURIComponent(address).replace(/%40/g, "@")}${kept.length ? `?${kept.join("&")}` : ""}`;
   }
   return trimmed;
 }

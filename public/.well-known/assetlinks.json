@@ -4,7 +4,11 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.homenetbd.app",
-      "sha256_cert_fingerprints": ["15:D1:F2:29:34:EA:F3:69:3D:8C:5E:40:0F:A1:41:24:7B:32:0B:56:B6:0B:0C:B8:C1:09:E1:D8:51:BC:0D:45"]
+      "sha256_cert_fingerprints": [
+        "15:D1:F2:29:34:EA:F3:69:3D:8C:5E:40:0F:A1:41:24:7B:32:0B:56:B6:0B:0C:B8:C1:09:E1:D8:51:BC:0D:45",
+        "7B:3B:46:C0:0F:52:53:88:9B:17:CF:22:C2:64:B1:77:63:ED:75:EE:8C:F2:65:4E:AC:33:47:B9:A4:D3:2D:73",
+        "3D:ED:D7:F9:AC:5B:09:E6:72:E7:15:AD:49:A0:31:D4:57:AA:76:20:52:DD:BB:B9:5A:FE:0C:77:8E:82:C9:B3"
+      ]
     }
   }
 ]
