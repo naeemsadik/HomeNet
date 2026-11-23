@@ -40,7 +40,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.homenet.app",
+      "package": "com.homenetbd.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundImage": "./assets/adaptive-icon-background.png",
