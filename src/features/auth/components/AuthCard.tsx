@@ -70,7 +70,11 @@ export function AuthCard({
   const keyboardVisible = useKeyboardVisible();
   const compactHeader = isModal && keyboardVisible;
 
-  // The return key walks the fields in order and submits from the last one.
+  // The return key walks the fields in order and submits from the last one. Like the button,
+  // it does nothing while a request is in flight, so Go pressed twice sends one sign-in.
+  const submitFromKeyboard = () => {
+    if (!loading) void handleSubmit(onSubmit)();
+  };
   const nameRef = useRef<TextInput>(null);
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
@@ -363,7 +367,7 @@ export function AuthCard({
                     returnKeyType={mode === "signin" ? "go" : "next"}
                     submitBehavior={mode === "signin" ? "blurAndSubmit" : "submit"}
                     onSubmitEditing={() =>
-                      mode === "signin" ? void handleSubmit(onSubmit)() : confirmPasswordRef.current?.focus()
+                      mode === "signin" ? submitFromKeyboard() : confirmPasswordRef.current?.focus()
                     }
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -412,7 +416,7 @@ export function AuthCard({
                       ref={confirmPasswordRef}
                       returnKeyType="go"
                       submitBehavior="blurAndSubmit"
-                      onSubmitEditing={() => void handleSubmit(onSubmit)()}
+                      onSubmitEditing={submitFromKeyboard}
                       autoCapitalize="none"
                       autoCorrect={false}
                       onChangeText={(val) => {

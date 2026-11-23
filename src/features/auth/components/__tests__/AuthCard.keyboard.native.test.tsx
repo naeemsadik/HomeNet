@@ -9,12 +9,13 @@ jest.mock("@/components/GoogleSignInButton", () => ({ GoogleSignInButton: () => 
 jest.mock("@/lib/features", () => ({ ...jest.requireActual("@/lib/features"), GOOGLE_SIGN_IN_AVAILABLE: false }));
 
 const mockLogin = jest.fn().mockResolvedValue(false);
+const mockAuth = { loading: false };
 jest.mock("@/stores/authStore", () => ({
   useAuthStore: () => ({
     login: mockLogin,
     register: jest.fn().mockResolvedValue(false),
     googleLogin: jest.fn(),
-    loading: false,
+    loading: mockAuth.loading,
     error: null,
     clearError: jest.fn(),
   }),
@@ -35,6 +36,7 @@ describe("the sign-in card with the keyboard open", () => {
       return { remove: jest.fn() };
     }) as unknown as typeof Keyboard.addListener);
     mockLogin.mockClear();
+    mockAuth.loading = false;
   });
 
   afterEach(() => jest.restoreAllMocks());
@@ -82,6 +84,19 @@ describe("the sign-in card with the keyboard open", () => {
       password.props.onSubmitEditing();
     });
     expect(mockLogin).toHaveBeenCalledWith({ email: "owner@example.com", password: "a-test-password" });
+    act(() => tree.unmount());
+  });
+
+  it("does not send a second sign-in from the keyboard while one is in flight", async () => {
+    mockAuth.loading = true;
+    const tree = render();
+    const [email, password] = inputs(tree);
+    act(() => email.props.onChangeText("owner@example.com"));
+    act(() => password.props.onChangeText("a-test-password"));
+    await act(async () => {
+      password.props.onSubmitEditing();
+    });
+    expect(mockLogin).not.toHaveBeenCalled();
     act(() => tree.unmount());
   });
 
