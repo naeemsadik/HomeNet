@@ -7,6 +7,13 @@ import { filterAreas, useAllAreas } from "@/hooks/useAllAreas";
 import { useDebouncedValue, SEARCH_DEBOUNCE_MS } from "@/hooks/useDebouncedValue";
 import { collectAvailableCities, isNationwideValue, normalizeCityName } from "@/lib/areaMatcher";
 
+/**
+ * One empty list for every render. `data ?? []` makes a new array each time
+ * while a query is loading, and anything that reacts to the list changing
+ * (AreaPicker resets its keyboard focus when it does) then never settles.
+ */
+const NO_AREAS: Area[] = [];
+
 export interface UseAreaPickerOptions {
   initialCity?: string;
   /** Fetch only while the picker is open; cached lists still show at once. */
@@ -44,7 +51,7 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
   const showingChildren = Boolean(currentParentId) && !search;
 
   const allAreas = useAllAreas({ enabled });
-  const allAreaItems = allAreas.data?.items ?? [];
+  const allAreaItems = allAreas.data?.items ?? NO_AREAS;
   const availableCities = useMemo(() => collectAvailableCities(allAreaItems), [allAreaItems]);
 
   const children = useQuery({
@@ -56,7 +63,7 @@ export function useAreaPicker(options: UseAreaPickerOptions = {}) {
   const areas = useMemo(
     () =>
       showingChildren
-        ? children.data ?? []
+        ? children.data ?? NO_AREAS
         : filterAreas(allAreaItems, {
             city: selectedCity,
             search,
