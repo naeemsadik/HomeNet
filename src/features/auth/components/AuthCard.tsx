@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -33,6 +33,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { authModalSchema, type AuthModalFormData } from "@/lib/schemas/auth";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
+import { useKeyboardVisible } from "@/hooks/useKeyboardVisible";
 
 // WebP: 40 KB, against 890 KB for the PNG it replaces, with no visible difference at the size
 // it is shown (at most 448 wide, under the green gradient).
@@ -63,6 +64,17 @@ export function AuthCard({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { login, register, googleLogin, loading, error: storeError, clearError } = useAuthStore();
+
+  // With the keyboard open on a phone, the brand header gives its room to the form: only the
+  // wordmark stays, so the fields and the submit button are not pushed under the keyboard.
+  const keyboardVisible = useKeyboardVisible();
+  const compactHeader = isModal && keyboardVisible;
+
+  // The return key walks the fields in order and submits from the last one.
+  const nameRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   const {
     control,
@@ -148,7 +160,7 @@ export function AuthCard({
   return (
     <View style={[styles.card, isModal && styles.modalCard, style]} testID="auth-card-container">
       {/* ─── Top Header with Building Image and Figma Gradient (Node 282:5) ─── */}
-      <View style={styles.headerContainer}>
+      <View style={styles.headerContainer} testID={compactHeader ? "auth-header-compact" : "auth-header"}>
         <ImageBackground
           source={authBuildingImage}
           style={styles.headerImageBg}
@@ -160,7 +172,7 @@ export function AuthCard({
             locations={[0, 0.572, 1]}
             start={{ x: 0.18, y: 0 }}
             end={{ x: 0.82, y: 1 }}
-            style={styles.headerGradient}
+            style={[styles.headerGradient, compactHeader && styles.headerGradientCompact]}
           >
             {/* Optional Close Button (Node 282:81) */}
             {showClose && onClose ? (
@@ -168,26 +180,34 @@ export function AuthCard({
                 accessibilityRole="button"
                 accessibilityLabel={t("auth.close")}
                 onPress={onClose}
-                style={[styles.closeButton, webPointer]}
+                style={[styles.closeButton, compactHeader && styles.closeButtonCompact, webPointer]}
               >
                 <X color={colorTokens.ink} size={18} strokeWidth={2.2} />
               </Pressable>
             ) : null}
 
             {/* Center Logo Icon Tile (Node 282:6 - 67.37px x 67.37px) */}
-            <View style={styles.logoIconTile}>
-              <BrandMark size={64} />
-            </View>
+            {compactHeader ? null : (
+              <View style={styles.logoIconTile}>
+                <BrandMark size={64} />
+              </View>
+            )}
 
             {/* App Title (Node 282:10) */}
-            <View accessibilityRole="header" accessibilityLabel="Homenet BD" style={styles.brandTitle}>
-              <BrandWordmark height={26} tone="light" />
+            <View
+              accessibilityRole="header"
+              accessibilityLabel="Homenet BD"
+              style={[styles.brandTitle, compactHeader && styles.brandTitleCompact]}
+            >
+              <BrandWordmark height={compactHeader ? 20 : 26} tone="light" />
             </View>
 
             {/* Subtitle (Node 282:12) */}
-            <Text style={styles.brandSubtitle}>
-              {t("auth.brandSubtitle")}
-            </Text>
+            {compactHeader ? null : (
+              <Text style={styles.brandSubtitle}>
+                {t("auth.brandSubtitle")}
+              </Text>
+            )}
           </LinearGradient>
         </ImageBackground>
       </View>
@@ -271,6 +291,10 @@ export function AuthCard({
                   name="full_name"
                   render={({ field: { onChange, value } }) => (
                     <TextInput
+                      ref={nameRef}
+                      returnKeyType="next"
+                      submitBehavior="submit"
+                      onSubmitEditing={() => emailRef.current?.focus()}
                       autoCapitalize="words"
                       onChangeText={(val) => {
                         onChange(val);
@@ -299,6 +323,10 @@ export function AuthCard({
                 name="email"
                 render={({ field: { onChange, value } }) => (
                   <TextInput
+                    ref={emailRef}
+                    returnKeyType="next"
+                    submitBehavior="submit"
+                    onSubmitEditing={() => passwordRef.current?.focus()}
                     autoCapitalize="none"
                     autoCorrect={false}
                     keyboardType="email-address"
@@ -331,6 +359,12 @@ export function AuthCard({
                 rules={{ deps: ["confirmPassword"] }}
                 render={({ field: { onChange, value } }) => (
                   <TextInput
+                    ref={passwordRef}
+                    returnKeyType={mode === "signin" ? "go" : "next"}
+                    submitBehavior={mode === "signin" ? "blurAndSubmit" : "submit"}
+                    onSubmitEditing={() =>
+                      mode === "signin" ? void handleSubmit(onSubmit)() : confirmPasswordRef.current?.focus()
+                    }
                     autoCapitalize="none"
                     autoCorrect={false}
                     onChangeText={(val) => {
@@ -375,6 +409,10 @@ export function AuthCard({
                   name="confirmPassword"
                   render={({ field: { onChange, value } }) => (
                     <TextInput
+                      ref={confirmPasswordRef}
+                      returnKeyType="go"
+                      submitBehavior="blurAndSubmit"
+                      onSubmitEditing={() => void handleSubmit(onSubmit)()}
                       autoCapitalize="none"
                       autoCorrect={false}
                       onChangeText={(val) => {
@@ -523,6 +561,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: "center",
     position: "relative",
+  },
+  headerGradientCompact: {
+    paddingTop: 14,
+    paddingBottom: 14,
+  },
+  closeButtonCompact: {
+    top: 10,
+  },
+  brandTitleCompact: {
+    height: 24,
   },
   closeButton: {
     position: "absolute",
