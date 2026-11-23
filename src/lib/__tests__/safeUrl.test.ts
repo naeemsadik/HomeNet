@@ -64,6 +64,8 @@ describe("sanitizeExternalUrl", () => {
     );
     expect(sanitizeExternalUrl("mailto:not-an-address")).toBeNull();
     expect(sanitizeExternalUrl("mailto:a@b.com,c@d.com")).toBeNull();
+    expect(sanitizeExternalUrl("mailto:a%@b.com")).toBeNull();
+    expect(sanitizeExternalUrl("mailto:a@b.com?subject=Hi&bcc=x@y.com")).toBe("mailto:a@b.com?subject=Hi");
   });
 
   it("leaves https URLs alone and rejects unsafe ones", () => {
