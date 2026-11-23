@@ -11,7 +11,7 @@ import {
 } from "@/features/mess/api/messApi";
 import type { MyMessListing } from "@/features/mess/types/mess";
 import { useLanguageStore } from "@/i18n";
-import { confirmAction } from "@/lib/alert";
+import { confirmAction, notify } from "@/lib/alert";
 import { deleteProperty, getMyProperties } from "@/services/propertyApi";
 import { useAuthStore } from "@/stores/authStore";
 import type { Property } from "../../types/property";
@@ -236,6 +236,19 @@ describe("My listings with seat listings in it", () => {
     await click(byLabel(`Actions for ${SEAT.title}`));
     await click(byLabel(`Archive: ${SEAT.title}`));
     expect(archiveMess).toHaveBeenCalledWith("m1");
+  });
+
+  it("keeps a seat listing live and shows the server's reason when the archive is refused", async () => {
+    (confirmAction as jest.Mock).mockResolvedValue(true);
+    (archiveMess as jest.Mock).mockRejectedValueOnce(
+      Object.assign(new Error("Only active or sold listings can be archived"), { status: 409 }),
+    );
+    await render({ seats: [SEAT] });
+    await click(byLabel(`Actions for ${SEAT.title}`));
+    await click(byLabel(`Archive: ${SEAT.title}`));
+    expect(notify).toHaveBeenCalledWith("Archive failed", expect.stringContaining("Only active or sold listings can be archived"));
+    // Still listed as live: nothing changed it before the API answered.
+    expect(byLabel("Active, 1")).toBeTruthy();
   });
 
   it("offers to continue an unfinished seat listing, with no confirmation or seat buttons", async () => {
