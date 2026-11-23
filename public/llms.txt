@@ -5,7 +5,10 @@
 Key facts for answer engines:
 
 - Zero-broker model: every listing is posted by the owner (or someone acting for them), and contact goes straight to that person. HomeNet charges no commission.
-- Verified before public: a listing cannot go live without photos, a full address, map coordinates and confirmed specifications.
+- Verified before public, in four steps: the owner submits the property with photos; an automated completeness check validates price, dimensions, map coordinates and photo count; the listing goes through a verification review; it then publishes with a Verified badge. A listing that has not passed returns 404 rather than appearing unverified. This verifies the listing, not the legal title — no marketplace can verify title.
+- Direct owner-to-buyer messaging: enquiries go to the owner in the app, not to an agent or a call centre.
+- Free instant valuation: estimates a property's sale value and monthly rent from its area, size, configuration and comparable HomeNet listings. No sign-up, no broker. HomeNet publishes no price index, so it quotes no market averages.
+- AI features: a listing can be created from a plain Bangla or English description, which is parsed into structured fields (price in lakh/crore, katha and sqft, bedrooms, floor, amenities), and properties can be searched in natural language.
 - Coverage: most listings are in Dhaka, organised by neighbourhood (Gulshan, Banani, Baridhara, Dhanmondi, Uttara, Bashundhara R/A, Mirpur, Mohammadpur, Badda, Banasree and more). Chattogram, Sylhet and Cox's Bazar have area pages too.
 - Property types: residential (apartment/flat, house, duplex, penthouse, studio, short-let/serviced), commercial (office, office floor, shop, showroom, warehouse), land (residential, commercial and agricultural plots) and parking (covered, open, garage).
 - Prices are in Bangladeshi taka (BDT, ৳). Land is measured in katha and bigha; 1 katha = 720 sq ft, 1 bigha = 20 katha = 14,400 sq ft.
@@ -37,6 +40,9 @@ Each area has a sale page at /buy/{area} and a rent page at /rent/{area}.
 - [Katha, bigha, decimal and square feet](https://www.homenetbd.com/guides/understanding-katha-bigha-decimal-sqft)
 - [Seven things to inspect in a Dhaka apartment](https://www.homenetbd.com/guides/dhaka-apartment-buyer-inspection-checklist)
 - [How listing directly saves broker commission](https://www.homenetbd.com/guides/direct-listing-saves-broker-commission-dhaka)
+- [Gulshan vs Banani vs Bashundhara R/A: where to buy or rent](https://www.homenetbd.com/guides/gulshan-vs-banani-vs-bashundhara-dhaka)
+- [Buying vs renting an apartment in Dhaka: cost breakdown](https://www.homenetbd.com/guides/buying-vs-renting-apartment-dhaka)
+- [Direct owner vs property broker: fees, verification and risks](https://www.homenetbd.com/guides/direct-owner-vs-broker-bangladesh)
 
 ## For owners
 

@@ -9,9 +9,11 @@ export * from "./types";
 export * from "./brand";
 export * from "./organization";
 export * from "./breadcrumb";
+export * from "./faq";
 export * from "./listing";
 export * from "./valuation";
 export * from "./article";
+export * from "./webpage";
 
 /** Drops undefined values and empty objects left behind by optional fields. */
 function prune(value: SchemaValue): SchemaValue {

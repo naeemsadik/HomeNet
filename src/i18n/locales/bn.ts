@@ -3778,6 +3778,11 @@ export const bn: TranslationSchema = {
     feedbackHeading: "মতামত ও সহায়তা",
     feedbackBody: "ব্রাউজ করতে কোনো প্রতিবন্ধকতা অনুভব করলে আমাদের জানান: accessibility@homenetbd.com অথবা support@homenetbd.com।",
   },
+  faq: {
+    areaHeading: "{{area}} সম্পর্কে সাধারণ জিজ্ঞাসা",
+    guideHeading: "সাধারণ জিজ্ঞাসা",
+  },
+
   sitemap: {
     metaTitle: "সাইট ম্যাপ | HomeNet BD",
     metaDescription: "HomeNet BD-এর সমস্ত প্রপার্টি পেজ, এলাকা ভিত্তিক গাইড, রিসোর্স ও আইনি ডকুমেন্টের ডিরেক্টরি।",

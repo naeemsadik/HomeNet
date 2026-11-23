@@ -3,23 +3,6 @@ import { ORGANIZATION_ID } from "./brand";
 import type { FaqEntry, SchemaNode } from "./types";
 
 /**
- * FAQPage markup. Google only accepts it when the same questions and answers
- * are visible on the page, so pass the entries the page actually renders.
- */
-export function faqPageSchema(entries: FaqEntry[], pageUrl: string): SchemaNode {
-  return {
-    "@type": "FAQPage",
-    "@id": `${pageUrl}#faq`,
-    url: pageUrl,
-    mainEntity: entries.map((entry) => ({
-      "@type": "Question",
-      name: entry.question,
-      acceptedAnswer: { "@type": "Answer", text: entry.answer },
-    })),
-  };
-}
-
-/**
  * The valuation tool as a free web application. Mounted on /instant-valuation
  * (src/features/valuation/screens/InstantValuationScreen.tsx), alongside the
  * breadcrumb and the FAQPage built from VALUATION_FAQ below.

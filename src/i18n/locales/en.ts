@@ -3779,6 +3779,11 @@ export const en = {
     feedbackHeading: "Feedback & Assistance",
     feedbackBody: "If you experience any accessibility barrier while browsing properties on HomeNet, please email our accessibility team at accessibility@homenetbd.com or support@homenetbd.com. We investigate every issue promptly.",
   },
+  faq: {
+    areaHeading: "Frequently asked questions about {{area}}",
+    guideHeading: "Frequently asked questions",
+  },
+
   sitemap: {
     metaTitle: "Site Map | HomeNet BD",
     metaDescription: "Complete directory of HomeNet BD property pages, area guides, resources, legal documentation, and company portals.",

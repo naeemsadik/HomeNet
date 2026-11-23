@@ -17,8 +17,10 @@ import { JsonLd } from "@/components/JsonLd";
 import { PageMeta } from "@/components/PageMeta";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
-import { articleSchema, breadcrumbSchema, guideCrumbs } from "@/lib/schema";
+import { articleSchema, breadcrumbSchema, faqPageSchema, guideCrumbs } from "@/lib/schema";
+import { SITE_URL } from "@/lib/seo";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
+import { FaqSection } from "@/components/FaqSection";
 import { MarkdownRenderer } from "../components/MarkdownRenderer";
 import { usePropertyGuide, usePropertyGuides } from "../hooks/usePropertyGuides";
 import type { PropertyGuide } from "../types/news";
@@ -157,11 +159,24 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
       {/* Each guide is its own search result, so it carries its own title. A
           slug with no guide is a soft 404 and stays out of the index. */}
       <PageMeta
-        title={guide && guideTitle ? `${guideTitle} | HomeNet BD` : "Property Guide | HomeNet BD"}
+        title={
+          guide && guideTitle
+            ? `${guide.seoTitle ?? guideTitle} | HomeNet BD`
+            : "Property Guide | HomeNet BD"
+        }
         description={guideExcerpt || "Property advice, land verification procedures and Dhaka market updates."}
         noindex={!isLoading && (isError || !guide) ? true : undefined}
       />
-      {guide && !isRss ? <JsonLd nodes={[articleSchema(guide), breadcrumbSchema(guideCrumbs(guide))]} /> : null}
+      {guide && !isRss ? (
+        <JsonLd
+          nodes={[
+            articleSchema(guide),
+            breadcrumbSchema(guideCrumbs(guide)),
+            // Undefined when the guide carries no FAQ, which <JsonLd> drops.
+            faqPageSchema(guide.faq ?? [], `${SITE_URL}${guide.href}`),
+          ]}
+        />
+      ) : null}
       <View
         style={[
           styles.container,
@@ -428,6 +443,14 @@ export function GuideDetailScreen({ slug }: GuideDetailScreenProps) {
                       content={guideContent}
                     />
                   </View>
+
+                  {/* The questions behind the FAQPage markup above. Both come
+                      from guide.faq, so the two cannot drift apart. */}
+                  {!isRss && guide.faq?.length ? (
+                    <View style={styles.markdownWrapper}>
+                      <FaqSection entries={guide.faq} title={t("faq.guideHeading")} />
+                    </View>
+                  ) : null}
 
                   {/* Tags Footer */}
                   {guideTags && guideTags.length > 0 ? (

@@ -21,6 +21,8 @@ import { Image } from "expo-image";
 import { router } from "expo-router";
 import { openExternalUrl } from "@/lib/safeUrl";
 import { AppChrome } from "@/components/AppChrome";
+import { AppLink } from "@/components/ui";
+import { RelatedPropertyHubs } from "@/components/RelatedPropertyHubs";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { colors, fonts, radius, shadow, webPointer } from "@/theme";
@@ -81,18 +83,13 @@ const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: Prop
     ? guide.sourceName || t("guides.externalNews")
     : t("guides.homeNetGuide");
 
-  return (
-    <Pressable
-      accessibilityRole="link"
-      accessibilityLabel={`${sourceLabel} - ${title}`}
-      onPress={handlePress}
-      style={({ pressed, hovered }: any) => [
-        styles.card,
-        hovered && styles.cardHovered,
-        pressed && styles.cardPressed,
-        webPointer,
-      ]}
-    >
+  // An in-house guide is a page, so its card has to be a real <a href>:
+  // AppLink renders one, and the comment on AppLink explains what a
+  // <div role="link"> costs — Googlebot follows anchors only, so a card that
+  // merely calls router.push leaves the guide reachable through the sitemap
+  // and nothing else. An RSS card leaves the site, so it keeps the Pressable.
+  const body = (
+    <>
       <View style={styles.cardThumb}>
         <Image
           source={{ uri: imgUri }}
@@ -144,7 +141,35 @@ const ArchiveGuideCard = memo(function ArchiveGuideCard({ guide }: { guide: Prop
           </View>
         ) : null}
       </View>
-    </Pressable>
+    </>
+  );
+
+  if (isRss) {
+    return (
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel={`${sourceLabel} - ${title}`}
+        onPress={handlePress}
+        style={({ pressed, hovered }: any) => [
+          styles.card,
+          hovered && styles.cardHovered,
+          pressed && styles.cardPressed,
+          webPointer,
+        ]}
+      >
+        {body}
+      </Pressable>
+    );
+  }
+
+  return (
+    <AppLink
+      href={guide.href}
+      accessibilityLabel={`${sourceLabel} - ${title}`}
+      style={styles.card}
+    >
+      {body}
+    </AppLink>
   );
 });
 
@@ -357,14 +382,21 @@ export function GuidesArchiveScreen() {
             renderItem={renderGuideItem}
             keyExtractor={keyExtractor}
             numColumns={numColumns}
-            initialNumToRender={6}
-            maxToRenderPerBatch={8}
-            windowSize={5}
+            // The list does not scroll itself (the page does), so virtualising
+            // it saves nothing and costs crawlability: only the first batch
+            // reaches the exported HTML, and the rest of the guides have no
+            // anchor pointing at them. The archive holds tens of items, not
+            // thousands, so it renders whole.
+            initialNumToRender={filteredGuides.length || 1}
             scrollEnabled={false}
             columnWrapperStyle={numColumns > 1 ? styles.gridRow : undefined}
             contentContainerStyle={styles.listContainer}
           />
         )}
+
+        {/* Internal links from the content hub to the pages that matter:
+            search, valuation, listing, and the busiest area pages. */}
+        <RelatedPropertyHubs />
       </View>
     </AppChrome>
   );

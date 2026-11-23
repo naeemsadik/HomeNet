@@ -125,7 +125,7 @@ export async function submitToIndexNow({
     } catch (error) {
       console.warn(
         `IndexNow: request failed or timed out for batch ${Math.floor(i / BATCH_SIZE) + 1}:`,
-        error?.message || error,
+        error?.cause?.message || error?.cause || error?.message || error,
       );
     }
   }

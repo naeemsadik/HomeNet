@@ -23,7 +23,17 @@ export function organizationSchema(): SchemaNode {
       ? { "@type": "PostalAddress", ...BRAND.address, addressRegion: "Dhaka", addressCountry: "BD" }
       : { "@type": "PostalAddress", addressLocality: "Dhaka", addressCountry: "BD" },
     geo: BRAND.geo ? { "@type": "GeoCoordinates", ...BRAND.geo } : undefined,
-    areaServed: BRAND.areaServed.map((name) => ({ "@type": "City", name })),
+    // Cities as cities, neighbourhoods as places inside Dhaka. Google reads
+    // the containment, so "Gulshan" is understood as the Dhaka one rather
+    // than any other place of that name.
+    areaServed: [
+      ...BRAND.areaServed.map((name) => ({ "@type": "City", name, addressCountry: "BD" })),
+      ...BRAND.neighbourhoodsServed.map((name) => ({
+        "@type": "Place",
+        name,
+        containedInPlace: { "@type": "City", name: "Dhaka", addressCountry: "BD" },
+      })),
+    ],
     knowsLanguage: ["en", "bn"],
     knowsAbout: [
       "Flat rent in Dhaka",
@@ -43,6 +53,12 @@ export function organizationSchema(): SchemaNode {
       availableLanguage: ["English", "Bengali"],
     },
     sameAs: BRAND.sameAs.length ? BRAND.sameAs : undefined,
+    // No `additionalProperty` block of product claims here. Statements like
+    // "four verification steps" or "unverified listings return 404" describe
+    // today's implementation, and structured data is the worst place to keep
+    // something that changes: it is cached and re-read long after the product
+    // moves on. Those facts live in the visible copy and in public/llms.txt,
+    // where they are edited alongside the behaviour they describe.
   };
 }
 

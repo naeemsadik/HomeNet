@@ -1,3 +1,4 @@
+import type { FaqEntry } from "@/lib/schema";
 import { z } from "@/lib/zod";
 import apiClient from "@/services/apiClient";
 import type { ApiResponse } from "@/types/api";
@@ -131,6 +132,7 @@ function normalizeGuide(raw: any): PropertyGuide {
     category,
     title,
     titleBn: raw.title_bn ?? raw.titleBn ?? undefined,
+    seoTitle: raw.seo_title ?? raw.seoTitle ?? undefined,
     excerpt: raw.excerpt || "",
     excerptBn: raw.excerpt_bn ?? raw.excerptBn ?? undefined,
     readTime: raw.read_time || raw.readTime || "4 min read",
@@ -148,7 +150,28 @@ function normalizeGuide(raw: any): PropertyGuide {
     contentMarkdown: raw.content_markdown ?? raw.contentMarkdown ?? null,
     contentMarkdownBn: raw.content_markdown_bn ?? raw.contentMarkdownBn ?? null,
     author,
+    faq: normalizeFaq(raw.faq),
   };
+}
+
+/**
+ * FAQ entries, kept only when they are complete.
+ *
+ * This builds the page's FAQPage markup, and Google rejects a Question with
+ * an empty answer, so a half-filled entry is worse than none. Whatever the
+ * backend starts sending here is unvalidated, so it is checked rather than
+ * trusted.
+ */
+function normalizeFaq(raw: unknown): FaqEntry[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const entries = raw
+    .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === "object")
+    .map((entry) => ({
+      question: typeof entry.question === "string" ? entry.question.trim() : "",
+      answer: typeof entry.answer === "string" ? entry.answer.trim() : "",
+    }))
+    .filter((entry) => entry.question && entry.answer);
+  return entries.length ? entries : undefined;
 }
 
 /**
@@ -286,6 +309,20 @@ export async function fetchPropertyGuideBySlug(
   }
 
   return curatedGuideBySlug(slug);
+}
+
+/**
+ * The bundled copy of the guide list, filtered and paginated the same way the
+ * API response would be.
+ *
+ * `usePropertyGuides` seeds React Query with this. A query function does not
+ * run during the static export, so without a seed the archive rendered its
+ * empty state into the HTML and the export carried no link to any guide —
+ * leaving every guide reachable only through the sitemap for the crawlers
+ * that do not run JavaScript, which is most of the AI answer engines.
+ */
+export function curatedGuideList(params: FetchPropertyGuidesParams): PropertyGuideList {
+  return filterCuratedGuides(params);
 }
 
 /** The bundled copy of a guide, or null. Shown before the API answers. */

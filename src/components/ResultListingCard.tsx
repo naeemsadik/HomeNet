@@ -30,6 +30,8 @@ import type { Property } from "@/features/property/types/property";
 import { contactPhone, listerDisplay, whatsappUrl } from "@/features/property/utils/lister";
 import { listingPhotos } from "@/features/property/utils/listingMedia";
 import { listingAddress, listingTypeName } from "@/features/property/utils/typeName";
+import { trackContactOwner } from "@/lib/analytics";
+import { webImageProps } from "@/lib/webImageProps";
 
 export interface ResultListingCardProps {
   property: Property;
@@ -118,11 +120,19 @@ function ResultListingCardComponent({
   };
 
   const chat = () => {
+    trackContactOwner({
+      propertyId: property.id,
+      method: "whatsapp",
+    });
     if (whatsappLink && isSafeLinkUrl(whatsappLink)) openExternalUrl(whatsappLink);
   };
 
   const call = () => {
     if (!ownerPhone) return open();
+    trackContactOwner({
+      propertyId: property.id,
+      method: "call",
+    });
     const url = `tel:${ownerPhone.replace(/[^\d+]/g, "")}`;
     if (isSafeLinkUrl(url)) openExternalUrl(url);
   };
@@ -134,6 +144,7 @@ function ResultListingCardComponent({
       style={style}
       contentFit="cover"
       cachePolicy="memory-disk"
+      {...webImageProps({ loading: "lazy" })}
     />
   );
 
