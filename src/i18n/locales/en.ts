@@ -1392,6 +1392,53 @@ export const en = {
     },
   },
   home: {
+    featureSections: {
+      accountBanner: {
+        title: "Stay organised. Sign in or create an account",
+        subtitle: "Save properties, create alerts and keep track of the enquiries you send.",
+        cta: "Sign in or create an account",
+        ariaLabel: "Account and saved properties banner",
+      },
+      photoCards: {
+        regionLabel: "Core property actions",
+        listProperty: {
+          badge: "LISTING",
+          title: "List your property",
+          description: "List for free and connect directly with verified buyers and tenants across Bangladesh.",
+          cta: "List your property",
+        },
+        valuation: {
+          badge: "VALUATION",
+          title: "Instant valuation",
+          description: "Find out what your property is worth in under a minute using 2026 market data.",
+          cta: "Get a valuation",
+        },
+        guides: {
+          badge: "GUIDES",
+          title: "Property guides & 2026 price index",
+          description: "Explore area price benchmarks, buyer guides, and Bangladesh stamp duty rules.",
+          cta: "Read our guides",
+        },
+      },
+      utilityCards: {
+        regionLabel: "Property categories and accommodation",
+        commercial: {
+          title: "Commercial property",
+          description: "Search offices, retail spaces, and commercial properties for sale or rent.",
+          cta: "Search now",
+        },
+        mess: {
+          title: "Mess & student accommodation",
+          description: "Find verified student seats, messes, and shared living near your campus.",
+          cta: "Explore mess",
+        },
+        holiday: {
+          title: "Holiday stay",
+          description: "Discover furnished apartments and short-term stays across Bangladesh.",
+          cta: "Search stays",
+        },
+      },
+    },
     mobileCards: {
       valuation: {
         title: "Instant valuation",
