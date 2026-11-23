@@ -13,7 +13,6 @@ import { MobileHeroSearchCard } from "@/components/MobileHeroSearchCard";
 import { MobileHomeSections } from "@/components/MobileHomeSections";
 import { FitText } from "@/components/FitText";
 import { NoTranslateText } from "@/components/NoTranslateText";
-import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
 import { HomeNetExplainerSection } from "@/components/landing/HomeNetExplainerSection";
 import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
@@ -230,14 +229,7 @@ export function HomeScreen() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          6. AI LISTING, describe it, HomeNet fills the fields
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <AiFlagshipSection />
-      </View>
-
-      {/* ─────────────────────────────────────────────────────────────
-          8. GUIDES & INSIGHTS, editorial, API-ready
+          6. GUIDES & INSIGHTS, editorial, API-ready
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
         <PropertyGuidesSection />
