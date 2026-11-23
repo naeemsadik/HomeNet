@@ -9,11 +9,12 @@ import { colorTokens, fonts, layout, radius } from "@/theme";
  * real, nothing posted is kept, and no number in them belongs to anyone. Renders nothing
  * once the page is on the real API.
  */
-export function DemoNotice() {
+export function DemoNotice({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useTranslation();
   if (!MESS_DEMO) return null;
   return (
-    <View accessibilityRole="alert" style={styles.wrap}>
+    // Embedded: inside a page that already has its own width and gutter (My listings).
+    <View accessibilityRole="alert" style={embedded ? null : styles.wrap}>
       <View style={styles.box}>
         <AlertCircle color={colorTokens.warningText} size={18} strokeWidth={2} />
         <View style={styles.text}>

@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useLanguageStore } from "@/i18n";
 import { ApiError } from "@/services/apiClient";
+import { router } from "expo-router";
 import { useAuthStore } from "@/stores/authStore";
 import { getMessDetail, submitMess, uploadMessMedia, upsertMess } from "../../api/messApi";
 import { useMessWizardStore } from "../../stores/messWizardStore";
@@ -176,7 +177,12 @@ describe("MessListingWizard", () => {
     expect(upsert).toHaveBeenLastCalledWith({ property_id: "d1", title: "Shared seat in 4-person mess, Badda", description: "" });
     expect(submitMess).toHaveBeenCalledWith("d1");
     expect(text()).toContain("Submitted for review");
+    expect(text()).toContain("You can see it under My Listings.");
     expect(useMessWizardStore.getState().values).toBeNull();
+
+    // Seat listings live on My listings, not a page of their own (issue 197).
+    await press(byText("My Listings"));
+    expect(router.replace).toHaveBeenCalledWith("/my-properties");
   });
 
   it("resumes an unfinished listing and shows the server's reasons when submit is refused", async () => {

@@ -98,13 +98,52 @@ describe("fixture backend listing flow", () => {
     }
     await expect(settle(fixtureBackend.submitMess(id))).resolves.toEqual({ id, status: "pending" });
 
-    const mine = await settle(fixtureBackend.getMyMessListings());
+    const mine = await settle(fixtureBackend.getMyMessListings(1));
     expect(mine.items.map((item) => item.id)).toContain(id);
   });
 
   it("lets only the owner change a listing", async () => {
     signIn("someone-else");
     await expect(settle(fixtureBackend.setSeatStatus("fx-mess-1", "fx-s1-1", "filled"))).rejects.toMatchObject({ status: 403 });
+  });
+});
+
+describe("fixture backend on My listings", () => {
+  it("pages the owner's seat listings", async () => {
+    signIn("fx-user-rafi");
+    const first = await settle(fixtureBackend.getMyMessListings(1));
+    expect(first).toMatchObject({ page: 1, limit: 50, total: 1 });
+    expect(first.items.map((item) => item.id)).toEqual(["fx-mess-1"]);
+    expect(first.items[0].ready_to_publish).toBe(false);
+    const second = await settle(fixtureBackend.getMyMessListings(2));
+    expect(second).toMatchObject({ page: 2, items: [] });
+  });
+
+  it("archives only a live or closed listing, and only for its owner", async () => {
+    signIn("lister-archive");
+    const { id: draft } = await settle(fixtureBackend.upsertMess({ subtype: "mess", title: "Draft seat" }));
+    await expect(settle(fixtureBackend.archiveMess(draft))).rejects.toMatchObject({ status: 409 });
+
+    signIn("someone-else");
+    await expect(settle(fixtureBackend.archiveMess("fx-mess-5"))).rejects.toMatchObject({ status: 403 });
+
+    signIn("fx-user-arif");
+    await settle(fixtureBackend.archiveMess("fx-mess-5"));
+    const mine = await settle(fixtureBackend.getMyMessListings(1));
+    expect(mine.items.find((item) => item.id === "fx-mess-5")?.status).toBe("archived");
+  });
+
+  it("deletes the owner's listing for good", async () => {
+    signIn("lister-delete");
+    const { id } = await settle(fixtureBackend.upsertMess({ subtype: "seat_share", title: "Seat to remove" }));
+    await settle(fixtureBackend.deleteMess(id));
+    expect((await settle(fixtureBackend.getMyMessListings(1))).items).toEqual([]);
+    await expect(settle(fixtureBackend.getMessDetail(id))).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("refuses to publish a listing no moderator approved", async () => {
+    signIn("fx-user-rafi");
+    await expect(settle(fixtureBackend.publishMess("fx-mess-1"))).rejects.toMatchObject({ status: 409 });
   });
 });
 

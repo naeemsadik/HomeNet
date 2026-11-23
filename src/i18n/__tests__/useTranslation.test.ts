@@ -70,7 +70,7 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("bn", "auth.resetPassword")).toBe("পাসওয়ার্ড রিসেট করুন");
       expect(translate("bn", "dashboard.sellerDashboard")).toBe("সেলার ড্যাশবোর্ড");
       expect(translate("bn", "dashboard.totalListings")).toBe("মোট প্রপার্টি");
-      expect(translate("bn", "dashboard.tabs.myListings")).toBe("আমার প্রপার্টি");
+      expect(translate("bn", "dashboard.tabs.myListings")).toBe("আমার লিস্টিং");
       expect(translate("bn", "admin.dashboardTitle")).toBe("অ্যাডমিন ড্যাশবোর্ড");
       expect(translate("bn", "admin.eyebrow")).toBe("অ্যাডমিন নিয়ন্ত্রণ প্যানেল");
       expect(translate("bn", "admin.columns.property")).toBe("প্রপার্টি");
@@ -81,7 +81,7 @@ describe("i18n engine and useTranslation hook", () => {
       expect(translate("bn", "admin.permissions.moderateListing")).toBe("প্রোপার্টি যাচাই ও নিয়ন্ত্রণ");
       expect(translate("bn", "admin.actions.delete")).toBe("অপসারণ করুন");
       expect(translate("bn", "admin.actions.confirm")).toBe("নিশ্চিত করুন");
-      expect(translate("bn", "seller.myListings")).toBe("আমার প্রপার্টি");
+      expect(translate("bn", "seller.myListings")).toBe("আমার লিস্টিং");
       expect(translate("bn", "seller.actions.edit")).toBe("সম্পাদনা");
     });
 

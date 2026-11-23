@@ -14,6 +14,7 @@ import { hasPermission, isAdmin } from "@/lib/permissions";
 import { queryClient } from "@/lib/queryClient";
 import { allAreasQuery, type AllAreas } from "@/hooks/useAllAreas";
 import type { PaginatedResponse } from "@/features/property/types/property";
+import { MY_MESS_PAGE_SIZE } from "../../constants/paging";
 import { FRESHNESS_HIDE_DAYS } from "../../constants/vocabulary";
 import { cheapestAllIn, costsComplete } from "../../utils/allInCost";
 import { estimatedWalk, straightMetres } from "../../utils/geo";
@@ -39,6 +40,8 @@ import { FIXTURE_DEFAULT_PHONE, FIXTURE_UNIVERSITIES, seedListings } from "./dat
 interface StoredListing {
   owner_id: string;
   owner_phone: string;
+  /** Approved by a moderator and held for the owner to publish (status stays draft). */
+  ready_to_publish?: boolean;
   detail: Omit<MessDetail, "mess" | "distances" | "rules"> & { mess: Partial<MessDetailsInput> & { last_confirmed_at: string } };
 }
 
@@ -379,7 +382,7 @@ export const fixtureBackend: MessBackend = {
     return delay(toDetail(listing));
   },
 
-  getMyMessListings() {
+  getMyMessListings(page) {
     const user = currentUser();
     if (!user) return fail("Sign in to continue", 401);
     const weekAgo = Date.now() - 7 * 86_400_000;
@@ -401,10 +404,12 @@ export const fixtureBackend: MessBackend = {
           costs_complete: detail.mess.costs_complete,
           last_confirmed_at: detail.mess.last_confirmed_at,
           reveals_7d: reveals.filter((reveal) => reveal.listing_id === detail.id && reveal.at > weekAgo).length,
+          ready_to_publish: Boolean(listing.ready_to_publish),
         };
       })
       .sort((a, b) => b.id.localeCompare(a.id));
-    return delay({ items, total: items.length, page: 1, limit: 50 });
+    const start = (page - 1) * MY_MESS_PAGE_SIZE;
+    return delay({ items: items.slice(start, start + MY_MESS_PAGE_SIZE), total: items.length, page, limit: MY_MESS_PAGE_SIZE });
   },
 
   upsertMess(dto) {
@@ -483,6 +488,32 @@ export const fixtureBackend: MessBackend = {
       if (own.detail.status === "pending") own.detail.status = "active";
     }, 5000);
     return delay({ id, status: own.detail.status });
+  },
+
+  archiveMess(id) {
+    const own = ownListing(id);
+    if (isError(own)) return fail(own.message, own.status ?? 400);
+    // Like the property API: only a live or closed listing can be archived.
+    if (own.detail.status !== "active" && own.detail.status !== "sold") return fail("Only a live or closed listing can be archived", 409);
+    own.detail.status = "archived";
+    return delay(undefined);
+  },
+
+  deleteMess(id) {
+    const own = ownListing(id);
+    if (isError(own)) return fail(own.message, own.status ?? 400);
+    listings.delete(id);
+    return delay(undefined);
+  },
+
+  publishMess(id) {
+    const own = ownListing(id);
+    if (isError(own)) return fail(own.message, own.status ?? 400);
+    if (!own.ready_to_publish) return fail("This listing has not been approved yet", 409);
+    own.ready_to_publish = false;
+    own.detail.status = "active";
+    own.detail.mess.last_confirmed_at = new Date().toISOString();
+    return delay(undefined);
   },
 
   uploadMessMedia(id, file, label, displayOrder) {

@@ -1,5 +1,5 @@
 import apiClient from "@/services/apiClient";
-import { submitProperty, uploadPropertyMedia } from "@/services/propertyApi";
+import { archiveProperty, deleteProperty, publishProperty, submitProperty, uploadPropertyMedia } from "@/services/propertyApi";
 import { httpBackend } from "../messApi";
 
 jest.mock("@/services/apiClient", () => ({
@@ -10,6 +10,9 @@ jest.mock("@/services/apiClient", () => ({
 
 jest.mock("@/services/propertyApi", () => ({
   submitProperty: jest.fn(),
+  archiveProperty: jest.fn(),
+  deleteProperty: jest.fn(),
+  publishProperty: jest.fn(),
   uploadPropertyMedia: jest.fn(),
   deletePropertyMedia: jest.fn(),
 }));
@@ -78,6 +81,25 @@ describe("httpBackend (the PRD 2.3 contract)", () => {
     const file = { uri: "file://x.jpg", name: "x.jpg", type: "image/jpeg" };
     await expect(httpBackend.uploadMessMedia("m1", file, "washroom", 2)).resolves.toEqual({ id: "p1", url: "u", label: "washroom", display_order: 2 });
     expect(uploadPropertyMedia).toHaveBeenCalledWith("m1", file, "image", 2, "washroom");
+  });
+
+  it("pages the lister's own listings with GET /v1/mess/my", async () => {
+    client.get.mockResolvedValueOnce(ok({ items: [], total: 0, page: 2, limit: 50 }));
+    await httpBackend.getMyMessListings(2);
+    expect(client.get).toHaveBeenCalledWith("/v1/mess/my", { params: { page: 2, limit: 50 } });
+  });
+
+  it("archives, deletes and publishes through the owner's property routes", async () => {
+    const done = { success: true, message: "OK", data: null };
+    (archiveProperty as jest.Mock).mockResolvedValueOnce(done);
+    (deleteProperty as jest.Mock).mockResolvedValueOnce(done);
+    (publishProperty as jest.Mock).mockResolvedValueOnce(done);
+    await httpBackend.archiveMess("m1");
+    await httpBackend.deleteMess("m1");
+    await httpBackend.publishMess("m1");
+    expect(archiveProperty).toHaveBeenCalledWith("m1");
+    expect(deleteProperty).toHaveBeenCalledWith("m1");
+    expect(publishProperty).toHaveBeenCalledWith("m1");
   });
 
   it("reads seat preferences as null when there are none", async () => {

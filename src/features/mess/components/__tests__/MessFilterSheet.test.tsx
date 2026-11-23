@@ -17,7 +17,7 @@ let root: { render: (node: React.ReactNode) => void; unmount: () => void };
 
 /** The sheet renders in a portal, so look in the whole document. */
 const byLabel = (label: string) => document.querySelector(`[aria-label="${label}"]`) as HTMLElement | null;
-/** AppButton has no aria-label of its own: its text names it. */
+/** A button by its visible text, for controls with no aria-label of their own. */
 const byText = (text: string) =>
   ([...document.querySelectorAll('[role="button"], button')] as HTMLElement[]).find((el) => el.textContent?.trim() === text) ?? null;
 const press = (label: string) => act(async () => (byLabel(label) ?? byText(label))!.click());
