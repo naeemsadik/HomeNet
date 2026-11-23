@@ -47,10 +47,10 @@ export const UtilityLinkCard = memo(function UtilityLinkCard({ item }: UtilityLi
         </View>
 
         <View style={styles.content}>
-          <Text numberOfLines={1} style={styles.title}>
+          <Text style={styles.title}>
             {title}
           </Text>
-          <Text numberOfLines={2} style={styles.description}>
+          <Text style={styles.description}>
             {description}
           </Text>
         </View>
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     }),
   },
   cardHovered: {
-    borderColor: "rgba(11, 26, 23, 0.16)",
+    borderColor: colorTokens.brandBorder,
     ...Platform.select({
       web: {
         boxShadow: "0 4px 16px rgba(11, 26, 23, 0.06)",
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   iconBadge: {
     width: 40,
     height: 40,
-    borderRadius: 8,
+    borderRadius: radius.md,
     backgroundColor: colorTokens.brandSurface,
     alignItems: "center",
     justifyContent: "center",

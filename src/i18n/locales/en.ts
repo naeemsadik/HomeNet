@@ -1406,18 +1406,21 @@ export const en = {
           title: "List your property",
           description: "List for free and connect directly with verified buyers and tenants across Bangladesh.",
           cta: "List your property",
+          imageAlt: "A modern apartment building (illustration)",
         },
         valuation: {
           badge: "VALUATION",
           title: "Instant valuation",
           description: "Find out what your property is worth in under a minute using 2026 market data.",
           cta: "Get a valuation",
+          imageAlt: "A house with a garden (illustration)",
         },
         guides: {
           badge: "GUIDES",
           title: "Property guides & 2026 price index",
           description: "Explore area price benchmarks, buyer guides, and Bangladesh stamp duty rules.",
           cta: "Read our guides",
+          imageAlt: "A city skyline (illustration)",
         },
       },
       utilityCards: {

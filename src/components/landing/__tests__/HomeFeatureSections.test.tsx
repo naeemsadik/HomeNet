@@ -84,11 +84,10 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       expect(new Set(allIds).size).toBe(7);
 
       const allHrefs = [
-        "/saved",
         ...PHOTO_FEATURE_CARDS.map((c) => c.href),
         ...UTILITY_FEATURE_CARDS.map((c) => c.href),
       ];
-      expect(new Set(allHrefs).size).toBe(7);
+      expect(new Set(allHrefs).size).toBe(6);
     });
 
     it("verifies all 7 routes point to legitimate HomeNet destinations", () => {
@@ -154,7 +153,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       expect(bnBadges).toEqual(["লিস্টিং", "মূল্যায়ন", "গাইড"]);
     });
 
-    it("renders badges in the tree with default hidden rest state (opacity: 0)", () => {
+    it("shows badges at rest, so touch screens without hover see them", () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<HomeFeatureSections />);
@@ -168,7 +167,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       const enBadgeTexts = ["LISTING", "VALUATION", "GUIDES"];
       badgeContainers.forEach((container, idx) => {
         const styles = StyleSheet.flatten(container.props.style);
-        expect(styles.opacity).toBe(0);
+        expect(styles.opacity ?? 1).toBe(1);
         expect(styles.position).toBe("absolute");
         expect(styles.top).toBe(12);
         expect(styles.left).toBe(12);
@@ -225,7 +224,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       expect(regionLabels).toContain(en.home.featureSections.utilityCards.regionLabel);
     });
 
-    it("renders all 7 interactive links with valid href props for SSR static HTML crawlability", () => {
+    it("renders the 6 card links with valid href props for SSR static HTML crawlability", () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<HomeFeatureSections />);
@@ -234,14 +233,15 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       const linkNodes = tree!.root.findAll((node: ReactTestInstance) => node.type === "a");
 
       const renderedHrefs = linkNodes.map((n) => n.props.href);
-      expect(renderedHrefs).toContain("/saved");
       expect(renderedHrefs).toContain("/sell");
       expect(renderedHrefs).toContain("/instant-valuation");
       expect(renderedHrefs).toContain("/resources/property-price-index");
       expect(renderedHrefs).toContain("/buy?type=commercial");
       expect(renderedHrefs).toContain("/mess");
       expect(renderedHrefs).toContain("/rent?subtype=short-let");
-      expect(renderedHrefs).toHaveLength(7);
+      // The sign-in control opens a dialog, so it is a button and not a seventh link.
+      expect(renderedHrefs).not.toContain("/saved");
+      expect(renderedHrefs).toHaveLength(6);
     });
 
     it("enforces explicit 16:9 aspect ratio container on photo cards for CLS = 0", () => {
@@ -276,7 +276,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
         });
 
         const links = tree!.root.findAll((node: ReactTestInstance) => node.type === "a");
-        expect(links).toHaveLength(7);
+        expect(links).toHaveLength(6);
       }
     });
 
@@ -304,7 +304,29 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
 
       expect(buttonStyles.borderWidth).toBe(1.5);
       expect(buttonStyles.minHeight).toBe(44);
-      expect(buttonStyles.borderRadius).toBe(8);
+      expect(buttonStyles.borderRadius).toBe(10);
+    });
+
+    it("opens the sign-in modal and stays on the page instead of going to /saved", () => {
+      mockResponsive = { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 };
+      const { useAuthModalStore } = require("@/stores/useAuthModalStore");
+      const open = jest.spyOn(useAuthModalStore.getState(), "open");
+      let tree: renderer.ReactTestRenderer;
+      act(() => {
+        tree = renderer.create(<HomeFeatureSections />);
+      });
+      const button = tree!.root.find(
+        (node: ReactTestInstance) =>
+          node.props.accessibilityRole === "button" &&
+          node.props.accessibilityLabel === en.home.featureSections.accountBanner.cta &&
+          typeof node.props.onPress === "function",
+      );
+      act(() => {
+        button.props.onPress();
+      });
+      expect(open).toHaveBeenCalledWith();
+      expect(mockPush).not.toHaveBeenCalled();
+      open.mockRestore();
     });
   });
 });

@@ -11,7 +11,7 @@ export interface PhotoFeatureItem {
   ctaKey: TranslationKey;
   href: Href;
   imageSource: string;
-  imageAlt: string;
+  imageAltKey: TranslationKey;
 }
 
 export interface UtilityFeatureItem {
@@ -38,7 +38,7 @@ export const PHOTO_FEATURE_CARDS: readonly PhotoFeatureItem[] = [
     imageSource: stockImage(
       "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80"
     ),
-    imageAlt: "Modern residential flat in Bangladesh ready for direct listing",
+    imageAltKey: "home.featureSections.photoCards.listProperty.imageAlt",
   },
   {
     id: "instant-valuation",
@@ -50,7 +50,7 @@ export const PHOTO_FEATURE_CARDS: readonly PhotoFeatureItem[] = [
     imageSource: stockImage(
       "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"
     ),
-    imageAlt: "Property valuation and market inspection",
+    imageAltKey: "home.featureSections.photoCards.valuation.imageAlt",
   },
   {
     id: "property-guides",
@@ -62,7 +62,7 @@ export const PHOTO_FEATURE_CARDS: readonly PhotoFeatureItem[] = [
     imageSource: stockImage(
       "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80"
     ),
-    imageAlt: "Dhaka city skyline showing real estate price benchmarks",
+    imageAltKey: "home.featureSections.photoCards.guides.imageAlt",
   },
 ] as const;
 

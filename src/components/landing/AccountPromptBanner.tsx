@@ -1,15 +1,5 @@
 import React, { memo, useState } from "react";
-import {
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type StyleProp,
-  type TextStyle,
-  type ViewStyle,
-} from "react-native";
-import { Link, router, type Href } from "expo-router";
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { useTranslation } from "@/i18n";
 import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
@@ -21,13 +11,13 @@ export interface AccountPromptBannerProps {
 }
 
 /**
- * "Stay organised. Sign in or create an account" Banner
- * - Desktop & Tablet (>= 768px): Horizontal flex layout with left text block and right crisp outlined button.
- * - Mobile (< 768px): Original stacked layout with self-aligned outlined button.
+ * "Stay organised. Sign in or create an account", for signed-out visitors only.
+ * The button opens the sign-in modal and the visitor stays on this page after
+ * signing in. It is a button, not a link: it opens a dialog, it goes nowhere.
+ * - Desktop and tablet (>= 768px): text on the left, button on the right.
+ * - Phone (< 768px): stacked.
  */
-export const AccountPromptBanner = memo(function AccountPromptBanner({
-  style,
-}: AccountPromptBannerProps) {
+export const AccountPromptBanner = memo(function AccountPromptBanner({ style }: AccountPromptBannerProps) {
   const { t } = useTranslation();
   const user = useAuthStore((s) => s.user);
   const { isPhone, width } = useResponsive();
@@ -37,22 +27,11 @@ export const AccountPromptBanner = memo(function AccountPromptBanner({
   if (user) return null;
 
   const isMobile = isPhone || width < 768;
-
   const title = t("home.featureSections.accountBanner.title");
   const subtitle = t("home.featureSections.accountBanner.subtitle");
   const ctaText = t("home.featureSections.accountBanner.cta");
 
-  const handleAuthAction = () => {
-    if (user) {
-      router.push("/saved" as Href);
-    } else {
-      useAuthModalStore.getState().open(() => router.push("/saved" as Href));
-    }
-  };
-
-  const buttonStyle = isMobile ? styles.signInButtonMobile : styles.signInButtonDesktop;
-
-  const buttonElement = (
+  const button = (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={ctaText}
@@ -60,14 +39,9 @@ export const AccountPromptBanner = memo(function AccountPromptBanner({
       onBlur={() => setFocused(false)}
       onHoverIn={() => setHovered(true)}
       onHoverOut={() => setHovered(false)}
-      onPress={(e) => {
-        if (Platform.OS === "web") {
-          e.preventDefault();
-        }
-        handleAuthAction();
-      }}
+      onPress={() => useAuthModalStore.getState().open()}
       style={({ pressed }) => [
-        buttonStyle,
+        isMobile ? styles.signInButtonMobile : styles.signInButtonDesktop,
         webPointer,
         hovered && styles.buttonHovered,
         focused && styles.buttonFocused,
@@ -83,22 +57,7 @@ export const AccountPromptBanner = memo(function AccountPromptBanner({
       <View style={[styles.cardMobile, style]}>
         <Text style={styles.titleMobile}>{title}</Text>
         <Text style={styles.subtitleMobile}>{subtitle}</Text>
-        <Link
-          asChild
-          href="/saved"
-          style={
-            Platform.OS === "web"
-              ? (StyleSheet.flatten([
-                  styles.signInButtonMobile,
-                  hovered && styles.buttonHovered,
-                  focused && styles.buttonFocused,
-                  webPointer,
-                ]) as TextStyle)
-              : undefined
-          }
-        >
-          {buttonElement}
-        </Link>
+        {button}
       </View>
     );
   }
@@ -109,24 +68,7 @@ export const AccountPromptBanner = memo(function AccountPromptBanner({
         <Text style={styles.titleDesktop}>{title}</Text>
         <Text style={styles.subtitleDesktop}>{subtitle}</Text>
       </View>
-      <View style={styles.rightBlock}>
-        <Link
-          asChild
-          href="/saved"
-          style={
-            Platform.OS === "web"
-              ? (StyleSheet.flatten([
-                  styles.signInButtonDesktop,
-                  hovered && styles.buttonHovered,
-                  focused && styles.buttonFocused,
-                  webPointer,
-                ]) as TextStyle)
-              : undefined
-          }
-        >
-          {buttonElement}
-        </Link>
-      </View>
+      <View style={styles.rightBlock}>{button}</View>
     </View>
   );
 });
@@ -136,7 +78,7 @@ const styles = StyleSheet.create({
   cardMobile: {
     width: "100%",
     backgroundColor: colorTokens.surfaceSunken,
-    borderRadius: radius.lg,
+    borderRadius: radius.card,
     padding: 20,
     gap: 8,
   },
@@ -157,7 +99,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     minHeight: 46,
     paddingHorizontal: 18,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1.5,
     borderColor: colorTokens.ink,
     backgroundColor: colorTokens.surface,
@@ -175,7 +117,7 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 1200,
     backgroundColor: colorTokens.surfaceSunken,
-    borderRadius: 12,
+    borderRadius: radius.card,
     borderWidth: 1,
     borderColor: colorTokens.border,
     paddingHorizontal: 28,
@@ -210,7 +152,7 @@ const styles = StyleSheet.create({
   signInButtonDesktop: {
     borderWidth: 1.5,
     borderColor: colorTokens.ink,
-    borderRadius: 8,
+    borderRadius: radius.lg,
     paddingHorizontal: 20,
     paddingVertical: 12,
     backgroundColor: colorTokens.surface,
@@ -229,7 +171,7 @@ const styles = StyleSheet.create({
 
   // Interactive states
   buttonHovered: {
-    backgroundColor: "#F4F6F8",
+    backgroundColor: colorTokens.canvas,
   },
   buttonFocused: {
     outlineColor: colorTokens.brandText,

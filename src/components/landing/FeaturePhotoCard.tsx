@@ -37,27 +37,26 @@ export const FeaturePhotoCard = memo(function FeaturePhotoCard({ item }: Feature
     >
       <View style={styles.imageContainer}>
         <Image
-          accessibilityLabel={item.imageAlt}
+          accessibilityLabel={t(item.imageAltKey)}
           accessibilityIgnoresInvertColors
           cachePolicy="memory-disk"
           contentFit="cover"
           source={{ uri: item.imageSource }}
           style={[styles.image, isRevealed && styles.imageHovered]}
         />
-        <View
-          aria-hidden={true}
-          style={[styles.badge, isRevealed && styles.badgeRevealed]}
-        >
+        {/* Always shown, so touch screens see it too. Hidden from screen readers:
+            the link's label already says it. */}
+        <View aria-hidden={true} style={styles.badge}>
           <Text style={styles.badgeText}>{badge}</Text>
         </View>
       </View>
 
       <View style={styles.body}>
         <View style={styles.content}>
-          <Text numberOfLines={1} style={styles.title}>
+          <Text style={styles.title}>
             {title}
           </Text>
-          <Text numberOfLines={2} style={styles.description}>
+          <Text style={styles.description}>
             {description}
           </Text>
         </View>
@@ -105,7 +104,7 @@ const styles = StyleSheet.create({
     }),
   },
   cardHovered: {
-    borderColor: "rgba(11, 26, 23, 0.16)",
+    borderColor: colorTokens.brandBorder,
     ...Platform.select({
       web: {
         boxShadow: "0 6px 20px rgba(11, 26, 23, 0.08)",
@@ -141,27 +140,14 @@ const styles = StyleSheet.create({
     top: 12,
     left: 12,
     zIndex: 2,
-    backgroundColor: "#181A1B",
+    backgroundColor: colorTokens.ink,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 4,
-    opacity: 0,
-    transform: [{ translateY: -4 }],
+    borderRadius: radius.sm,
     pointerEvents: "none",
-    ...Platform.select({
-      web: {
-        transitionProperty: "opacity, transform",
-        transitionDuration: "180ms",
-        transitionTimingFunction: "ease-out",
-      },
-    }),
-  },
-  badgeRevealed: {
-    opacity: 1,
-    transform: [{ translateY: 0 }],
   },
   badgeText: {
-    color: "#FFFFFF",
+    color: colorTokens.surface,
     fontSize: 11,
     fontFamily: fonts.headingBold,
     fontWeight: "700",
