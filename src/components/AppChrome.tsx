@@ -928,11 +928,13 @@ export function AppChrome({
           <Pressable
             accessibilityLabel="Close navigation"
             onPress={() => setMenuOpen(false)}
-            style={[styles.drawerOverlay, { top: insets.top }]}
+            style={[styles.drawerOverlay, { top: insets.top, bottom: insets.bottom }]}
           />
-          {/* The status bar keeps one colour across the whole width: white beside the drawer, and
-              not greyed by the scrim on the other side, as in the apps people compare it with. */}
+          {/* The system bars keep one colour across the whole width: white beside the drawer, and
+              not greyed by the scrim on the other side, as in the apps people compare it with. The
+              status bar at the top and the navigation bar at the bottom get the same strip. */}
           <View pointerEvents="none" style={[styles.drawerStatusStrip, { height: insets.top }]} />
+          <View pointerEvents="none" style={[styles.drawerNavigationStrip, { height: insets.bottom }]} />
           <SideBar
             active={active}
             modal

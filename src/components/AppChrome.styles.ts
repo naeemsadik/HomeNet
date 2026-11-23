@@ -985,6 +985,13 @@ export const styles = StyleSheet.create({
     right: 0,
     backgroundColor: colorTokens.surface,
   },
+  drawerNavigationStrip: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colorTokens.surface,
+  },
   drawerOverlay: {
     position: "absolute",
     top: 0,
