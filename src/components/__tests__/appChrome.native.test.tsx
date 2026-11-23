@@ -28,13 +28,13 @@ const metrics = {
 
 const mounted: ReactTestRenderer[] = [];
 
-function mount(): ReactTestRenderer {
+function mount(initialMetrics = metrics): ReactTestRenderer {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
   let tree!: ReactTestRenderer;
   act(() => {
     tree = renderer.create(
       <QueryClientProvider client={client}>
-        <SafeAreaProvider initialMetrics={metrics}>
+        <SafeAreaProvider initialMetrics={initialMetrics}>
           <AppChrome active="market">
             <Text>Page body</Text>
           </AppChrome>
@@ -62,6 +62,26 @@ afterEach(() => {
 });
 
 describe("the page chrome on a phone", () => {
+  it("keeps the status bar and the navigation bar one colour behind the open drawer", () => {
+    const NAV_BAR = 48;
+    const tree = mount({ ...metrics, insets: { ...metrics.insets, bottom: NAV_BAR } });
+    const menuButton = tree.root.find((n) => n.props.accessibilityLabel === "Open navigation menu" && typeof n.props.onPress === "function");
+    act(() => menuButton.props.onPress());
+
+    // The scrim stops at both system bars instead of greying the half beside the drawer.
+    const scrim = tree.root.find(
+      (n) => n.props.accessibilityLabel === "Close navigation" && typeof n.props.onPress === "function" && flat(n.props.style).position === "absolute",
+    );
+    expect(flat(scrim.props.style)).toMatchObject({ top: STATUS_BAR, bottom: NAV_BAR });
+
+    // And a full-width strip of the drawer's own colour sits under each bar.
+    const strips = tree.root.findAll(
+      (n) => n.props.pointerEvents === "none" && [STATUS_BAR, NAV_BAR].includes(flat(n.props.style).height as number) && flat(n.props.style).left === 0 && flat(n.props.style).right === 0,
+    );
+    const edges = strips.map((strip) => ("top" in flat(strip.props.style) ? "top" : "bottom")).sort();
+    expect(edges).toEqual(expect.arrayContaining(["bottom", "top"]));
+  });
+
   it("starts the page below the navbar and the status bar, not under them", () => {
     const tree = mount();
     const scroll = tree.root.find((n) => typeof n.props.contentContainerStyle !== "undefined" && n.props.showsVerticalScrollIndicator === false);
