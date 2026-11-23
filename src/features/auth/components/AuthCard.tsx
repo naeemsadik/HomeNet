@@ -63,7 +63,7 @@ export function AuthCard({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const { login, register, googleLogin, loading, error: storeError, clearError } = useAuthStore();
+  const { login, register, googleLogin, loading, error: storeError, errorCode, clearError } = useAuthStore();
 
   // With the keyboard open on a phone, the brand header gives its room to the form: only the
   // wordmark stays, so the fields and the submit button are not pushed under the keyboard.
@@ -84,6 +84,7 @@ export function AuthCard({
     control,
     handleSubmit,
     reset,
+    getValues,
     formState: { errors },
   } = useForm<AuthModalFormData>({
     resolver: zodResolver(
@@ -96,10 +97,22 @@ export function AuthCard({
     mode: "onSubmit",
   });
 
-  // Rules differ per mode, so a stale value from the other tab must not survive.
+  // Rules differ per mode, so a stale value from the other tab must not survive. The one
+  // exception is "Sign in instead" after a taken email: that email comes along.
+  const carriedEmail = useRef<string | null>(null);
   useEffect(() => {
-    reset({ full_name: "", email: "", password: "", confirmPassword: "" });
+    reset({ full_name: "", email: carriedEmail.current ?? "", password: "", confirmPassword: "" });
+    carriedEmail.current = null;
   }, [mode, reset]);
+
+  // Signing up with an email that already has an account: offer the way forward, not just the
+  // reason. 1101 is the API's "email in use".
+  const emailTaken = mode === "signup" && errorCode === 1101;
+  const signInInstead = () => {
+    carriedEmail.current = getValues("email")?.trim() || null;
+    handleTabSwitch("signin");
+    requestAnimationFrame(() => passwordRef.current?.focus());
+  };
 
   const handleTabSwitch = (newMode: AuthMode) => {
     setMode(newMode);
@@ -281,6 +294,17 @@ export function AuthCard({
             accessibilityLiveRegion="polite"
           >
             <Text style={styles.errorText}>{storeError}</Text>
+            {emailTaken ? (
+              <Pressable
+                accessibilityRole="button"
+                testID="auth-sign-in-instead"
+                onPress={signInInstead}
+                hitSlop={8}
+                style={({ pressed }) => [styles.errorAction, webPointer, pressed && { opacity: 0.7 }]}
+              >
+                <Text style={styles.errorActionText}>{t("auth.signInInstead")}</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
 
@@ -669,6 +693,23 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     marginTop: 12,
+  },
+  errorAction: {
+    alignSelf: "center",
+    marginTop: 8,
+    minHeight: 36,
+    paddingHorizontal: 16,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colorTokens.errorText,
+    backgroundColor: colorTokens.surface,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorActionText: {
+    color: colorTokens.errorText,
+    fontFamily: fonts.semiBold,
+    fontSize: 14,
   },
   errorText: {
     color: colorTokens.errorText,
