@@ -1,5 +1,5 @@
 import { useResponsive } from "@/hooks/useResponsive";
-import { fonts, layout, webPointer } from "@/theme";
+import { colorTokens, fonts, layout, webPointer } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
 import {
@@ -82,6 +82,22 @@ export function GooglePlayButton() {
   );
 }
 
+/**
+ * "Download the Homenet app" and the Google Play badge, above the phone footer's sections. Only
+ * the phone website shows it: inside the app the app is already installed.
+ */
+function PhoneDownloadCard() {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.phoneDownloadCard}>
+      <Text accessibilityRole="header" style={styles.phoneDownloadHeading}>
+        {t("footer.downloadHeading")}
+      </Text>
+      <GooglePlayButton />
+    </View>
+  );
+}
+
 export interface FooterProps {
   style?: StyleProp<ViewStyle>;
   /** The collapsible phone footer, for pages that keep to a short phone layout. */
@@ -133,7 +149,7 @@ function WebFooter({ style }: FooterProps) {
     </View>
   );
 
-  if (isPhone) return <MobileFooter style={style} />;
+  if (isPhone) return <MobileFooter style={style} header={<PhoneDownloadCard />} />;
 
   return (
     <View style={[styles.footer, style]}>
@@ -247,10 +263,12 @@ function WebFooter({ style }: FooterProps) {
 /**
  * The Android app and compact pages get the phone footer: its policy strip keeps Privacy, Terms,
  * Delete account and Contact on screen without opening a section. The website's full footer
- * (a Google Play badge, links that open /about) has no place inside the app.
+ * (links that open /about) has no place inside the app, and neither has the Google Play badge:
+ * the phone website shows it above the sections, the app does not.
  */
 export function Footer({ style, compact }: FooterProps = {}) {
-  if (Platform.OS !== "web" || compact) return <MobileFooter style={style} />;
+  if (Platform.OS !== "web") return <MobileFooter style={style} />;
+  if (compact) return <MobileFooter style={style} header={<PhoneDownloadCard />} />;
   return <WebFooter style={style} />;
 }
 
@@ -279,6 +297,23 @@ const styles = StyleSheet.create({
     paddingTop: 28,
     paddingBottom: 28,
     width: "100%",
+  },
+  phoneDownloadCard: {
+    backgroundColor: colorTokens.surface,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    gap: 14,
+    alignItems: "flex-start",
+    borderTopWidth: 1,
+    borderTopColor: colorTokens.divider,
+  },
+  phoneDownloadHeading: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontFamily: fonts.headingBold,
+    fontWeight: "700",
+    color: colorTokens.ink,
+    letterSpacing: -0.3,
   },
   mobileDownloadCard: {
     backgroundColor: "#FFFFFF",

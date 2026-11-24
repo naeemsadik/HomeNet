@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useState, type ReactNode } from "react";
 import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { AppLink } from "@/components/ui";
 import { ChevronDown, Facebook, Linkedin, Youtube } from "@/components/icons";
@@ -158,7 +158,7 @@ const Section = memo(function Section({
  * then a white strip with the policy links (always visible, each once), the social links
  * (Facebook, LinkedIn, YouTube) and the copyright notice.
  */
-export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
+export function MobileFooter({ style, header }: { style?: StyleProp<ViewStyle>; header?: ReactNode }) {
   const { t } = useTranslation();
   const [openKey, setOpenKey] = useState<string | null>(null);
   const toggle = (key: string) => setOpenKey((current) => (current === key ? null : key));
@@ -171,6 +171,7 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
 
   return (
     <View style={[styles.root, style]}>
+      {header}
       <View style={styles.sections}>
         {getSections().map((section) => (
           <Section key={section.key} onToggle={toggle} open={openKey === section.key} section={section} />
