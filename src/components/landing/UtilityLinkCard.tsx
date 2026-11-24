@@ -1,16 +1,15 @@
 import React, { memo, useState } from "react";
 import {
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { Link } from "expo-router";
-import { ArrowRight, Bed, Building2, Compass, type LucideIcon } from "@/components/icons";
+import { Bed, Building2, Compass, type LucideIcon } from "@/components/icons";
 import { useTranslation } from "@/i18n";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, radius } from "@/theme";
 import type { UtilityFeatureItem } from "@/content/homeFeatureSections";
+import { CardTitleLinkRow } from "./CardTitleLinkRow";
 
 const ICONS: Record<string, LucideIcon> = {
   Building2,
@@ -31,13 +30,22 @@ export const UtilityLinkCard = memo(function UtilityLinkCard({ item }: UtilityLi
 
   const title = t(item.titleKey);
   const description = t(item.descriptionKey);
-  const ctaText = t(item.ctaKey);
 
   const IconComponent = ICONS[item.iconName] ?? Building2;
 
   return (
     <View
-      onPointerEnter={() => setIsHovered(true)}
+      onPointerEnter={() => {
+        if (
+          Platform.OS === "web" &&
+          typeof window !== "undefined" &&
+          window.matchMedia &&
+          !window.matchMedia("(hover: hover)").matches
+        ) {
+          return;
+        }
+        setIsHovered(true);
+      }}
       onPointerLeave={() => setIsHovered(false)}
       style={[styles.card, isLifted && styles.cardHovered]}
     >
@@ -47,34 +55,17 @@ export const UtilityLinkCard = memo(function UtilityLinkCard({ item }: UtilityLi
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>
-            {title}
-          </Text>
+          <CardTitleLinkRow
+            href={item.href}
+            onFocusChange={setIsFocused}
+            onHoverChange={setIsHovered}
+            title={title}
+            titleStyle={styles.title}
+          />
           <Text style={styles.description}>
             {description}
           </Text>
         </View>
-      </View>
-
-      <View style={styles.ctaContainer}>
-        <Link asChild href={item.href}>
-          <Pressable
-            accessibilityRole="link"
-            accessibilityLabel={`${title} - ${ctaText}`}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onHoverIn={() => setIsHovered(true)}
-            onHoverOut={() => setIsHovered(false)}
-            style={({ hovered }: { hovered?: boolean }) => [
-              styles.ctaPressable,
-              hovered && styles.ctaPressableHovered,
-              webPointer,
-            ]}
-          >
-            <Text style={styles.ctaText}>{ctaText}</Text>
-            <ArrowRight color={colorTokens.brandText} size={15} strokeWidth={2.2} />
-          </Pressable>
-        </Link>
       </View>
     </View>
   );
@@ -89,7 +80,7 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
     minWidth: 280,
-    justifyContent: "space-between",
+    position: "relative",
     gap: 16,
     ...Platform.select({
       web: {
@@ -122,7 +113,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   content: {
-    gap: 6,
+    gap: 8,
   },
   title: {
     fontSize: 17,
@@ -137,26 +128,5 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     fontFamily: fonts.regular,
     color: colorTokens.muted,
-  },
-  ctaContainer: {
-    marginTop: "auto",
-  },
-  ctaPressable: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    flexWrap: "nowrap",
-    minHeight: 44,
-  },
-  ctaPressableHovered: {
-    opacity: 0.82,
-  },
-  ctaText: {
-    fontSize: 14.5,
-    lineHeight: 20,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: colorTokens.brandText,
-    textDecorationLine: "underline",
   },
 });

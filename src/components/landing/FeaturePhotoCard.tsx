@@ -1,17 +1,15 @@
 import React, { memo, useState } from "react";
 import {
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { Image } from "expo-image";
-import { Link } from "expo-router";
-import { ArrowRight } from "@/components/icons";
 import { useTranslation } from "@/i18n";
-import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { colorTokens, fonts, radius } from "@/theme";
 import type { PhotoFeatureItem } from "@/content/homeFeatureSections";
+import { CardTitleLinkRow } from "./CardTitleLinkRow";
 
 export interface FeaturePhotoCardProps {
   item: PhotoFeatureItem;
@@ -26,12 +24,21 @@ export const FeaturePhotoCard = memo(function FeaturePhotoCard({ item }: Feature
 
   const title = t(item.titleKey);
   const description = t(item.descriptionKey);
-  const ctaText = t(item.ctaKey);
   const badge = t(item.badgeKey);
 
   return (
     <View
-      onPointerEnter={() => setIsHovered(true)}
+      onPointerEnter={() => {
+        if (
+          Platform.OS === "web" &&
+          typeof window !== "undefined" &&
+          window.matchMedia &&
+          !window.matchMedia("(hover: hover)").matches
+        ) {
+          return;
+        }
+        setIsHovered(true);
+      }}
       onPointerLeave={() => setIsHovered(false)}
       style={[styles.card, isRevealed && styles.cardHovered]}
     >
@@ -44,8 +51,7 @@ export const FeaturePhotoCard = memo(function FeaturePhotoCard({ item }: Feature
           source={{ uri: item.imageSource }}
           style={[styles.image, isRevealed && styles.imageHovered]}
         />
-        {/* Always shown, so touch screens see it too. Hidden from screen readers:
-            the link's label already says it. */}
+        {/* Category badge pill in top-left */}
         <View aria-hidden={true} style={styles.badge}>
           <Text style={styles.badgeText}>{badge}</Text>
         </View>
@@ -53,33 +59,16 @@ export const FeaturePhotoCard = memo(function FeaturePhotoCard({ item }: Feature
 
       <View style={styles.body}>
         <View style={styles.content}>
-          <Text style={styles.title}>
-            {title}
-          </Text>
+          <CardTitleLinkRow
+            href={item.href}
+            onFocusChange={setIsFocused}
+            onHoverChange={setIsHovered}
+            title={title}
+            titleStyle={styles.title}
+          />
           <Text style={styles.description}>
             {description}
           </Text>
-        </View>
-
-        <View style={styles.ctaContainer}>
-          <Link asChild href={item.href}>
-            <Pressable
-              accessibilityRole="link"
-              accessibilityLabel={`${badge} - ${title} - ${ctaText}`}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              onHoverIn={() => setIsHovered(true)}
-              onHoverOut={() => setIsHovered(false)}
-              style={({ hovered }: { hovered?: boolean }) => [
-                styles.ctaPressable,
-                hovered && styles.ctaPressableHovered,
-                webPointer,
-              ]}
-            >
-              <Text style={styles.ctaText}>{ctaText}</Text>
-              <ArrowRight color={colorTokens.brandText} size={16} strokeWidth={2.4} />
-            </Pressable>
-          </Link>
         </View>
       </View>
     </View>
@@ -95,6 +84,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     flex: 1,
     minWidth: 280,
+    position: "relative",
     ...Platform.select({
       web: {
         transitionProperty: "border-color, box-shadow",
@@ -157,11 +147,9 @@ const styles = StyleSheet.create({
   body: {
     padding: 20,
     flex: 1,
-    justifyContent: "space-between",
-    gap: 16,
   },
   content: {
-    gap: 6,
+    gap: 8,
   },
   title: {
     fontSize: 18,
@@ -176,26 +164,5 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontFamily: fonts.regular,
     color: colorTokens.muted,
-  },
-  ctaContainer: {
-    marginTop: "auto",
-  },
-  ctaPressable: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    flexWrap: "nowrap",
-    minHeight: 44,
-  },
-  ctaPressableHovered: {
-    opacity: 0.82,
-  },
-  ctaText: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontFamily: fonts.semiBold,
-    fontWeight: "600",
-    color: colorTokens.brandText,
-    textDecorationLine: "underline",
   },
 });

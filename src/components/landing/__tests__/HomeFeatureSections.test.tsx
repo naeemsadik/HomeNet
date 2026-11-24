@@ -119,13 +119,11 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
         ...PHOTO_FEATURE_CARDS.flatMap((item) => [
           item.titleKey,
           item.descriptionKey,
-          item.ctaKey,
           ...(item.badgeKey ? [item.badgeKey] : []),
         ]),
         ...UTILITY_FEATURE_CARDS.flatMap((item) => [
           item.titleKey,
           item.descriptionKey,
-          item.ctaKey,
         ]),
       ];
 
@@ -138,6 +136,32 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
 
         expect(bnVal).toBeDefined();
         expect(bnVal?.length).toBeGreaterThan(0);
+      }
+    });
+
+    it("ensures no orphaned cta keys remain in photoCards or utilityCards in EN and BN locales", () => {
+      // Photo cards in en & bn
+      expect((en.home.featureSections.photoCards.listProperty as any).cta).toBeUndefined();
+      expect((en.home.featureSections.photoCards.valuation as any).cta).toBeUndefined();
+      expect((en.home.featureSections.photoCards.guides as any).cta).toBeUndefined();
+      expect((bn.home.featureSections.photoCards.listProperty as any).cta).toBeUndefined();
+      expect((bn.home.featureSections.photoCards.valuation as any).cta).toBeUndefined();
+      expect((bn.home.featureSections.photoCards.guides as any).cta).toBeUndefined();
+
+      // Utility cards in en & bn
+      expect((en.home.featureSections.utilityCards.commercial as any).cta).toBeUndefined();
+      expect((en.home.featureSections.utilityCards.mess as any).cta).toBeUndefined();
+      expect((en.home.featureSections.utilityCards.holiday as any).cta).toBeUndefined();
+      expect((bn.home.featureSections.utilityCards.commercial as any).cta).toBeUndefined();
+      expect((bn.home.featureSections.utilityCards.mess as any).cta).toBeUndefined();
+      expect((bn.home.featureSections.utilityCards.holiday as any).cta).toBeUndefined();
+
+      // Config items
+      for (const card of PHOTO_FEATURE_CARDS) {
+        expect((card as any).ctaKey).toBeUndefined();
+      }
+      for (const card of UTILITY_FEATURE_CARDS) {
+        expect((card as any).ctaKey).toBeUndefined();
       }
     });
   });
@@ -160,7 +184,10 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       });
 
       const badgeContainers = tree!.root.findAll(
-        (node: ReactTestInstance) => node.type === View && node.props["aria-hidden"] === true
+        (node: ReactTestInstance) =>
+          node.type === View &&
+          node.props["aria-hidden"] === true &&
+          StyleSheet.flatten(node.props.style)?.top === 12
       );
       expect(badgeContainers).toHaveLength(3);
 
@@ -181,23 +208,26 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       });
     });
 
-    it("ensures photo card link accessibility labels include the badge prefix for screen readers", () => {
+    it("ensures each card renders a single semantic link whose accessible name matches the concise card title", () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<HomeFeatureSections />);
       });
 
-      const photoLinks = [
-        `LISTING - ${en.home.featureSections.photoCards.listProperty.title} - ${en.home.featureSections.photoCards.listProperty.cta}`,
-        `VALUATION - ${en.home.featureSections.photoCards.valuation.title} - ${en.home.featureSections.photoCards.valuation.cta}`,
-        `GUIDES - ${en.home.featureSections.photoCards.guides.title} - ${en.home.featureSections.photoCards.guides.cta}`,
+      const cardTitles = [
+        en.home.featureSections.photoCards.listProperty.title,
+        en.home.featureSections.photoCards.valuation.title,
+        en.home.featureSections.photoCards.guides.title,
+        en.home.featureSections.utilityCards.commercial.title,
+        en.home.featureSections.utilityCards.mess.title,
+        en.home.featureSections.utilityCards.holiday.title,
       ];
 
-      for (const expectedLabel of photoLinks) {
+      for (const expectedTitle of cardTitles) {
         const linkNode = tree!.root.find(
           (node: ReactTestInstance) =>
             node.props.accessibilityRole === "link" &&
-            node.props.accessibilityLabel === expectedLabel
+            node.props.accessibilityLabel === expectedTitle
         );
         expect(linkNode).toBeDefined();
       }
