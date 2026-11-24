@@ -9,14 +9,15 @@ jest.mock("@/components/GoogleSignInButton", () => ({ GoogleSignInButton: () => 
 jest.mock("@/lib/features", () => ({ ...jest.requireActual("@/lib/features"), GOOGLE_SIGN_IN_AVAILABLE: false }));
 
 const mockLogin = jest.fn().mockResolvedValue(false);
-const mockAuth = { loading: false };
+const mockAuth = { loading: false, error: null as string | null, errorCode: null as number | null };
 jest.mock("@/stores/authStore", () => ({
   useAuthStore: () => ({
     login: mockLogin,
     register: jest.fn().mockResolvedValue(false),
     googleLogin: jest.fn(),
     loading: mockAuth.loading,
-    error: null,
+    error: mockAuth.error,
+    errorCode: mockAuth.errorCode,
     clearError: jest.fn(),
   }),
 }));
@@ -37,6 +38,8 @@ describe("the sign-in card with the keyboard open", () => {
     }) as unknown as typeof Keyboard.addListener);
     mockLogin.mockClear();
     mockAuth.loading = false;
+    mockAuth.error = null;
+    mockAuth.errorCode = null;
   });
 
   afterEach(() => jest.restoreAllMocks());
@@ -109,6 +112,27 @@ describe("the sign-in card with the keyboard open", () => {
     const fields = inputs(tree);
     expect(fields).toHaveLength(4);
     expect(fields.map((field) => field.props.returnKeyType)).toEqual(["next", "next", "next", "go"]);
+    act(() => tree.unmount());
+  });
+
+  it("offers Sign in instead when the email already has an account, keeping the email", () => {
+    mockAuth.error = "An account with this email already exists. Please sign in instead.";
+    mockAuth.errorCode = 1101;
+    const tree = render();
+    const createTab = tree.root.findAll(
+      (node: ReactTestInstance) => typeof node.props.onPress === "function" && node.props.accessibilityRole === "button",
+    )[2];
+    act(() => createTab.props.onPress());
+    const [, email] = inputs(tree);
+    act(() => email.props.onChangeText("owner@example.com"));
+
+    const instead = tree.root.findAll((node: ReactTestInstance) => node.props.testID === "auth-sign-in-instead" && typeof node.props.onPress === "function");
+    expect(instead).toHaveLength(1);
+    act(() => instead[0].props.onPress());
+
+    const signInFields = inputs(tree);
+    expect(signInFields).toHaveLength(2);
+    expect(signInFields[0].props.value).toBe("owner@example.com");
     act(() => tree.unmount());
   });
 });

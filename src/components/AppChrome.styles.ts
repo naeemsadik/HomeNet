@@ -185,9 +185,9 @@ export const styles = StyleSheet.create({
         transition: "background-color 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease",
       },
       default: {
-        // No backdrop blur in the app, so the web's 76% white let the photo show
-        // through the bar. Near-opaque matches what the blurred web bar looks like.
-        backgroundColor: "rgba(255, 255, 255, 0.94)",
+        // No backdrop blur in the app: even 94% white let the page's text show through the
+        // status bar and the top bar as it scrolled under them. The bar is solid in the app.
+        backgroundColor: colorTokens.surface,
         shadowColor: "#0B1A17",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.03,
