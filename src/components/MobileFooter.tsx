@@ -107,7 +107,6 @@ const LEGAL_LINKS: { label: TranslationKey; href: string }[] = MOBILE_LEGAL_LINK
 }));
 
 /** A divider and the space after it: each link starts with one, and the row starts this far left so the first in every row is cut off. */
-const LEGAL_DIVIDER_SPACE = 15;
 
 const Section = memo(function Section({
   section,
@@ -178,18 +177,16 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
       </View>
 
       <View style={styles.legal}>
-        {/* Clips the divider in front of the first link on each row. */}
-        <View style={styles.legalClip}>
-          <View style={styles.legalLinks}>
-            {LEGAL_LINKS.map((link) => (
-              <View key={link.href} style={styles.legalItem}>
-                <View style={styles.legalDivider} />
-                <AppLink href={link.href} style={styles.legalLink}>
-                  <Text style={styles.legalLinkText}>{t(link.label)}</Text>
-                </AppLink>
-              </View>
-            ))}
-          </View>
+        {/* Two equal columns: the second link of every row starts at the same place, whatever the
+            words or the language, instead of wherever the first link happens to end. */}
+        <View style={styles.legalLinks}>
+          {LEGAL_LINKS.map((link) => (
+            <View key={link.href} style={styles.legalItem}>
+              <AppLink href={link.href} style={styles.legalLink}>
+                <Text style={styles.legalLinkText}>{t(link.label)}</Text>
+              </AppLink>
+            </View>
+          ))}
         </View>
 
         <View style={styles.socialStrip}>
@@ -273,28 +270,17 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     gap: 10,
   },
-  legalClip: {
-    overflow: "hidden",
-  },
   legalLinks: {
     flexDirection: "row",
     flexWrap: "wrap",
-    marginLeft: -LEGAL_DIVIDER_SPACE,
   },
   legalItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  legalDivider: {
-    width: 1,
-    height: 18,
-    marginRight: LEGAL_DIVIDER_SPACE - 1,
-    backgroundColor: colorTokens.divider,
+    width: "50%",
   },
   legalLink: {
     minHeight: 44,
     justifyContent: "center",
-    paddingRight: LEGAL_DIVIDER_SPACE - 1,
+    paddingRight: 12,
   },
   legalLinkText: {
     fontFamily: fonts.regular,

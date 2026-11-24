@@ -82,13 +82,15 @@ export function Brand({
 const SUBTITLE_SIZE = 10.5;
 
 const styles = StyleSheet.create({
-  link: { flexDirection: "row", alignItems: "center", gap: 9, flexShrink: 1, minWidth: 0, overflow: "hidden" },
-  linkCompact: { gap: 6, flexShrink: 1, minWidth: 0, overflow: "hidden" },
+  // No overflow: hidden on the brand or its text block. It was there to hold the tagline to the room
+  // beside the logo, but FitText already sizes or wraps the tagline to its box, and on a phone with a
+  // two-line tagline (a 360 dp screen, a larger system font) it cut the top off the wordmark.
+  link: { flexDirection: "row", alignItems: "center", gap: 9, flexShrink: 1, minWidth: 0 },
+  linkCompact: { gap: 6, flexShrink: 1, minWidth: 0 },
   mark: { flexShrink: 0 },
-  // The wordmark keeps its own height (flexShrink 0), and the padding stops "overflow: hidden", which
-  // is only here to hold the tagline to the room beside the logo, from shaving the top of the letters.
+  // The wordmark keeps its own height (flexShrink 0). The padding below keeps the letters off the edge.
   wordmark: { flexShrink: 0 },
-  textWrap: { justifyContent: "center", gap: 2, flexShrink: 1, minWidth: 0, overflow: "hidden", paddingVertical: 2 },
+  textWrap: { justifyContent: "center", gap: 2, flexShrink: 1, minWidth: 0, paddingVertical: 2 },
   // With a tagline, the brand takes the room up to the bar's right-hand buttons, so the tagline's
   // width comes from the bar, not from the text (FitText sizes the text to that width).
   linkFill: { flexGrow: 1 },
