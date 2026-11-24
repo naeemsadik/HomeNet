@@ -1,5 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import { MessDetailScreen } from "@/features/mess/screens/MessDetailScreen";
+import { MESS_ENABLED } from "@/lib/features";
 import { NotFoundScreen } from "@/screens/NotFoundScreen";
 
 /**
@@ -8,6 +9,6 @@ import { NotFoundScreen } from "@/screens/NotFoundScreen";
  */
 export default function MessDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  if (!id) return <NotFoundScreen />;
+  if (!MESS_ENABLED || !id) return <NotFoundScreen />;
   return <MessDetailScreen key={id} id={id} />;
 }

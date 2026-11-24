@@ -18,6 +18,14 @@ jest.mock("@/features/mess/screens/MessBrowseScreen", () => ({
   MessBrowseScreen: () => <div data-testid="mess-browse-screen">Mess Browse Screen</div>,
 }));
 
+let mockMessEnabled = true;
+jest.mock("@/lib/features", () => ({
+  ...jest.requireActual("@/lib/features"),
+  get MESS_ENABLED() {
+    return mockMessEnabled;
+  },
+}));
+
 jest.mock("@/screens/NotFoundScreen", () => ({
   NotFoundScreen: () => <div>Page not found</div>,
 }));
@@ -27,6 +35,7 @@ let root: { render: (node: React.ReactNode) => void; unmount: () => void };
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockMessEnabled = true;
   useLanguageStore.getState().setLanguage("en");
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -39,7 +48,15 @@ afterEach(async () => {
 });
 
 describe("/mess route", () => {
-  it("renders MessBrowseScreen with SEO metadata and never falls back to 404", async () => {
+  it("is the not-found page while the mess feature is off", async () => {
+    mockMessEnabled = false;
+    await act(async () => root.render(<MessRoute />));
+
+    expect(container.textContent).toContain("Page not found");
+    expect(container.textContent).not.toContain("Mess Browse Screen");
+  });
+
+  it("renders MessBrowseScreen with SEO metadata when the mess feature is on", async () => {
     await act(async () => root.render(<MessRoute />));
 
     expect(container.textContent).toContain("Mess Browse Screen");

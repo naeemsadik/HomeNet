@@ -92,9 +92,7 @@ export const OWNER_UNARCHIVE_ENABLED = false;
  * src/features/mess/api/messApi.ts, where the bundler can drop the demo data
  * from builds without it.
  */
-export const MESS_ENABLED =
-  process.env.EXPO_PUBLIC_MESS_ENABLED === "true" ||
-  process.env.EXPO_PUBLIC_MESS_USE_MOCK === "true";
+export const MESS_ENABLED = process.env.EXPO_PUBLIC_MESS_ENABLED === "true";
 
 /**
  * Mess & Seat Share is showing sample listings (EXPO_PUBLIC_MESS_FIXTURES=true) rather

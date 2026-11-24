@@ -135,11 +135,7 @@ export const CardTitleLinkRow = memo(function CardTitleLinkRow({
           onHoverOut={handleHoverOut}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          style={({ hovered }: { hovered?: boolean }) => [
-            styles.pressable,
-            hovered && styles.pressableHovered,
-            webPointer,
-          ]}
+          style={StyleSheet.flatten([styles.pressable, isHovered && styles.pressableHovered, webPointer])}
         >
           <View style={[styles.row, isFocused && styles.rowFocused]}>
             <Text numberOfLines={1} style={[styles.title, titleStyle]}>

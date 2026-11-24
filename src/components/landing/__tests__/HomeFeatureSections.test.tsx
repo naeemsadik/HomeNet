@@ -4,9 +4,6 @@ import renderer, { act, type ReactTestInstance } from "react-test-renderer";
 import {
   HomeFeatureSections,
 } from "@/components/landing/HomeFeatureSections";
-import { AccountPromptBanner } from "@/components/landing/AccountPromptBanner";
-import { ProductPreviewShowcase } from "@/components/landing/ProductPreviewShowcase";
-import { FeaturePhotoCard } from "@/components/landing/FeaturePhotoCard";
 import {
   PHOTO_FEATURE_CARDS,
 } from "@/content/homeFeatureSections";

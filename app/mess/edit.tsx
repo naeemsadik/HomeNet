@@ -1,6 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 import { RequireAuth } from "@/components/RequireAuth";
 import { MessListingWizard } from "@/features/mess/screens/MessListingWizard";
+import { MESS_ENABLED } from "@/lib/features";
 import { NotFoundScreen } from "@/screens/NotFoundScreen";
 
 /**
@@ -14,6 +15,7 @@ import { NotFoundScreen } from "@/screens/NotFoundScreen";
  * check's loading state.
  */
 export default function MessEditRoute() {
+  if (!MESS_ENABLED) return <NotFoundScreen />;
   return (
     <RequireAuth active="post">
       <MessEditBody />
