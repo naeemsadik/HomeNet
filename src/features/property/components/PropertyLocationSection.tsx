@@ -1,8 +1,9 @@
-import { stockImage } from "@/lib/cloudinaryImage";
 import { ExternalLink, MapPin, type LucideIcon } from "@/components/icons";
-import { Image, Linking, Platform, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { openExternalUrl } from "@/lib/safeUrl";
 import { colorTokens, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
+import { GoogleMapEmbed } from "./GoogleMapEmbed";
 import { styles } from "../screens/PropertyDetailScreen.styles";
 
 export type NearbyPlace = {
@@ -20,7 +21,11 @@ type PropertyLocationSectionProps = {
   mapExternalUrl: string;
 };
 
-/** Map (embedded on web, a tap-through preview on native) and nearby places. */
+/**
+ * The listing's location: Google's embedded map, on the web and in the app alike. In the app it
+ * used to be a stock photo of a wooden world map with a pin drawn on top, which looked like a
+ * real map and pointed nowhere.
+ */
 export function PropertyLocationSection({
   title,
   address,
@@ -30,59 +35,31 @@ export function PropertyLocationSection({
   mapExternalUrl,
 }: PropertyLocationSectionProps) {
   const { t } = useTranslation();
+  const place = address || location;
+
   return (
     <View style={styles.sectionCard}>
-      <View style={styles.sectionHeaderBetween}>
+      <View style={styles.locationHeader}>
         <Text style={styles.sectionHeading}>{t("propertyDetail.location")}</Text>
         <Pressable
+          accessibilityRole="link"
           accessibilityLabel={t("propertyDetail.openGoogleMaps")}
-          onPress={() => void Linking.openURL(mapExternalUrl)}
+          onPress={() => openExternalUrl(mapExternalUrl)}
+          hitSlop={8}
           style={({ pressed }) => [styles.openMapsBtn, webPointer, pressed && styles.pressed]}
         >
-          <ExternalLink color="#04cf92" size={14} />
+          <ExternalLink color={colorTokens.brandText} size={14} />
           <Text style={styles.openMapsBtnText}>{t("propertyDetail.openGoogleMaps")}</Text>
         </Pressable>
       </View>
 
       <View style={styles.mapCard}>
-        {Platform.OS === "web" ? (
-          <iframe
-            title={`Google Map for ${title}`}
-            src={mapEmbedUrl}
-            style={{
-              width: "100%",
-              height: "100%",
-              border: 0,
-              borderRadius: 16,
-            }}
-            loading="lazy"
-            allowFullScreen
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        ) : (
-          <Pressable
-            onPress={() => void Linking.openURL(mapExternalUrl)}
-            style={styles.nativeMapContainer}
-          >
-            <Image
-              source={{ uri: stockImage("https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80") }}
-              style={styles.mapImage}
-            />
-            <View style={styles.mapPinOverlay}>
-              <View style={styles.mapTooltip}>
-                <Text style={styles.mapTooltipText}>{address || location}</Text>
-              </View>
-              <View style={styles.mapPinCircle}>
-                <MapPin color={colorTokens.onBrand} size={18} />
-              </View>
-            </View>
-          </Pressable>
-        )}
+        <GoogleMapEmbed title={title} embedUrl={mapEmbedUrl} />
 
-        <View style={styles.mapAddressPill}>
-          <MapPin color="#04cf92" size={14} />
+        <View pointerEvents="none" style={styles.mapAddressPill}>
+          <MapPin color={colorTokens.brandText} size={14} />
           <Text numberOfLines={1} style={styles.mapAddressPillText}>
-            {address || location}
+            {place}
           </Text>
         </View>
       </View>

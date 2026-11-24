@@ -169,17 +169,44 @@ const AMENITY_MAP_BN: Record<string, string> = {
   wifi: "ওয়াইফাই",
   internet: "ইন্টারনেট",
   laundry: "লন্ড্রি",
+  "cc camera": "সিসি ক্যামেরা",
+  kitchen: "রান্নাঘর",
+  kitchens: "রান্নাঘর",
+  balconies: "ব্যালকনি",
+  water: "পানি",
+  electricity: "বিদ্যুৎ",
+  "tiled floor": "টাইলস করা মেঝে",
+  "drawing dining": "ড্রয়িং ও ডাইনিং",
+  "security guard": "নিরাপত্তা প্রহরী",
 };
+
+/** Amenity keys the API stores in snake_case whose plain form needs more than spaces. */
+const AMENITY_LABEL_EN: Record<string, string> = {
+  cc_camera: "CC camera",
+  cctv: "CCTV",
+  ac: "AC",
+  "central ac": "Central AC",
+  wifi: "Wi-Fi",
+  drawing_dining: "Drawing & dining",
+};
+
+/** "tiled_floor" → "Tiled floor". Text that already reads as words is left as it is. */
+function humanizeAmenity(amenity: string): string {
+  const trimmed = amenity.trim();
+  if (!/[_-]/.test(trimmed) && trimmed !== trimmed.toLowerCase()) return trimmed;
+  const words = trimmed.replace(/[_-]+/g, " ").replace(/\s+/g, " ").toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
 
 /**
  * Safely translates amenity names without modifying underlying raw values.
  */
 export function translateAmenity(amenity: string, lang: SupportedLanguage): string {
   if (!amenity || typeof amenity !== "string") return "";
-  if (lang !== "bn") return amenity;
-
   const normalized = amenity.trim().toLowerCase();
-  return AMENITY_MAP_BN[normalized] || amenity;
+  const spaced = normalized.replace(/[_-]+/g, " ");
+  if (lang === "bn") return AMENITY_MAP_BN[normalized] || AMENITY_MAP_BN[spaced] || humanizeAmenity(amenity);
+  return AMENITY_LABEL_EN[normalized] || AMENITY_LABEL_EN[spaced] || humanizeAmenity(amenity);
 }
 
 const FACING_MAP_BN: Record<string, string> = {
