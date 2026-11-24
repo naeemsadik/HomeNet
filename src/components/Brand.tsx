@@ -62,13 +62,15 @@ export function Brand({
         </View>
         {subtitle ? (
           // On a phone the line can be wider than the room beside the logo, and it was cut to
-          // "property mark…". It shrinks to fit (down to 85%), and where even that is too wide
-          // (signed out, the Sign in button takes the room) it wraps onto a second line, which the
-          // bar has height for. Website and app alike; with room to spare it keeps its own size.
+          // "property mark…". It shrinks to fit (down to 85%). Where even that is too wide (a 320 to
+          // 360 dp phone, or the Sign in button taking the room), the compact bar drops it: a second
+          // line is taller than the bar's fixed height and the squeeze cut the top off the wordmark,
+          // as seen on the Android app. Elsewhere, with a taller box, it wraps onto a second line.
           <FitText
             maxFontSize={SUBTITLE_SIZE}
             minFontSize={SUBTITLE_SIZE * 0.85}
-            wrapWhenTooLong
+            wrapWhenTooLong={!isCompact}
+            hideWhenTooLong={isCompact}
             style={[styles.subtitle, isLight && styles.subtitleLight]}
           >
             {subtitle}
