@@ -21,12 +21,19 @@ export function reportError(
   context?: Record<string, unknown>,
 ): DetailedErrorReport {
   const isErr = error instanceof Error;
+  const status =
+    (error as any)?.status ??
+    (error as any)?.statusCode ??
+    (error as any)?.response?.status ??
+    (context?.status as number | undefined) ??
+    null;
+
   const errorReport: DetailedErrorReport = {
     timestamp: new Date().toISOString(),
     name: isErr ? error.name : "UnknownError",
     message: isErr ? error.message : String(error),
     stack: isErr ? error.stack : undefined,
-    status: (error as any)?.status ?? null,
+    status,
     // An AxiosError carries none of these at the top level: the API's code
     // lives at `response.data.error_code`. Reading only the top level logged
     // `null` for every request failure, whatever the API actually said.
@@ -39,10 +46,20 @@ export function reportError(
     context,
   };
 
-  // Always logged. This used to log only in development and on a server, so a crash in the
-  // installed Android app left no trace anywhere. A release build's console.error reaches
-  // `adb logcat` (tag ReactNativeJS) and a browser's console.
-  if (__DEV__) {
+  // For expected transient rate-limit responses (status === 429), downgrade __DEV__ logging
+  // from console.error to console.warn so Expo's dev LogBox does not trigger a red fatal overlay,
+  // while still preserving visibility in the console.
+  if (status === 429) {
+    if (__DEV__) {
+      console.warn("[HomeNet Rate Limit 429]", errorReport);
+    } else {
+      try {
+        console.warn(JSON.stringify({ level: "warn", ...errorReport }));
+      } catch {
+        console.warn("[HomeNet Rate Limit 429]", errorReport.message);
+      }
+    }
+  } else if (__DEV__) {
     console.error("[HomeNet Error Report]", errorReport);
   } else {
     try {

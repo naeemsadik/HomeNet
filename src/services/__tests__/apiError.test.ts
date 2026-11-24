@@ -39,4 +39,24 @@ describe("toApiError", () => {
     expect(error.message).toBe("Some details aren't quite right. Please check them and try again.");
     expect(error.validationErrors).toEqual(["Some details aren't quite right. Please check them and try again."]);
   });
+
+  it("handles 429 rate-limit responses gracefully and logs warning instead of error in dev", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const error = toApiError(
+        httpError(429, { success: false, message: "Too many requests", error_code: 1029, data: null }),
+      );
+      expect(error.status).toBe(429);
+      expect(error.message).toBe("You're going a little fast. Please wait a moment and try again.");
+      expect(warnSpy).toHaveBeenCalledWith(
+        "[HomeNet Rate Limit 429]",
+        expect.objectContaining({ status: 429 }),
+      );
+      expect(errorSpy).not.toHaveBeenCalled();
+    } finally {
+      warnSpy.mockRestore();
+      errorSpy.mockRestore();
+    }
+  });
 });
