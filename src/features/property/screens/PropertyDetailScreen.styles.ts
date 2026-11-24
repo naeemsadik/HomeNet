@@ -1,5 +1,5 @@
 import { Platform, StyleSheet } from "react-native";
-import { colorTokens, fonts, layout, shadow } from "@/theme";
+import { colorTokens, fonts, layout, radius, shadow } from "@/theme";
 
 export const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
@@ -596,17 +596,45 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.08)",
     backgroundColor: "#E8EEEC",
   },
+  // The heading and the Google Maps link share a row while they fit and wrap when they do not
+  // (a phone in Bangla), instead of the link running off the card.
+  locationHeader: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    rowGap: 8,
+    columnGap: 12,
+  },
+  locationAddressOnly: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: 16,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colorTokens.border,
+    backgroundColor: colorTokens.surfaceSunken,
+  },
+  locationAddressOnlyText: {
+    flex: 1,
+    color: colorTokens.ink,
+    fontFamily: fonts.medium,
+    fontSize: 15,
+    lineHeight: 22,
+  },
   openMapsBtn: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     backgroundColor: "#E6FAF4",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 4,
+    paddingHorizontal: 12,
+    minHeight: 36,
+    borderRadius: radius.lg,
   },
   openMapsBtnText: {
-    color: "#04cf92",
+    // Text-size green is brandText: the brand green is 2:1 on this pale fill.
+    color: colorTokens.brandText,
     fontSize: 13,
     fontFamily: fonts.semiBold,
   },

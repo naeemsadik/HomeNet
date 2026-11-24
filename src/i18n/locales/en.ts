@@ -503,6 +503,7 @@ export const en = {
     dontHaveAccount: "Don't have an account?",
     alreadyHaveAccount: "Already have an account?",
     signInButton: "Sign In",
+    signInInstead: "Sign in instead",
     signUpButton: "Sign Up",
     createAccountButton: "Create Account",
     signUpFree: "Sign up free",

@@ -131,6 +131,23 @@ describe("dataTranslators", () => {
   });
 
   describe("translateAmenity", () => {
+    // The API stores amenities as snake_case keys; they used to reach the page as "cc_camera".
+    it("turns the API's snake_case keys into words in English", () => {
+      expect(translateAmenity("cc_camera", "en")).toBe("CC camera");
+      expect(translateAmenity("tiled_floor", "en")).toBe("Tiled floor");
+      expect(translateAmenity("drawing_dining", "en")).toBe("Drawing & dining");
+      expect(translateAmenity("security_guard", "en")).toBe("Security guard");
+      expect(translateAmenity("kitchens", "en")).toBe("Kitchens");
+      expect(translateAmenity("Swimming Pool", "en")).toBe("Swimming Pool");
+    });
+
+    it("translates the snake_case keys in Bengali, and words the rest", () => {
+      expect(translateAmenity("cc_camera", "bn")).toBe("সিসি ক্যামেরা");
+      expect(translateAmenity("security_guard", "bn")).toBe("নিরাপত্তা প্রহরী");
+      expect(translateAmenity("tiled_floor", "bn")).toBe("টাইলস করা মেঝে");
+      expect(translateAmenity("rooftop_garden", "bn")).toBe("Rooftop garden");
+    });
+
     it("returns raw amenity in English", () => {
       expect(translateAmenity("Lift", "en")).toBe("Lift");
       expect(translateAmenity("Parking", "en")).toBe("Parking");
