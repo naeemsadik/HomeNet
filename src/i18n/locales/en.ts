@@ -1425,6 +1425,9 @@ export const en = {
         cta: "Sign in or create an account",
         ariaLabel: "Account and saved properties banner",
       },
+      showcase: {
+        regionLabel: "Product preview showcase",
+      },
       photoCards: {
         regionLabel: "Core property actions",
         listProperty: {

@@ -1427,6 +1427,9 @@ export const bn: TranslationSchema = {
         cta: "সাইন ইন বা অ্যাকাউন্ট তৈরি করুন",
         ariaLabel: "অ্যাকাউন্ট ও সংরক্ষিত প্রপার্টি ব্যানার",
       },
+      showcase: {
+        regionLabel: "প্রোডাক্ট প্রিভিউ শোকেস",
+      },
       photoCards: {
         regionLabel: "মূল প্রপার্টি সেবা",
         listProperty: {

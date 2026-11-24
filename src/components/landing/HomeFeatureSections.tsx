@@ -6,6 +6,7 @@ import { layout } from "@/theme";
 import { PHOTO_FEATURE_CARDS } from "@/content/homeFeatureSections";
 import { AccountPromptBanner } from "./AccountPromptBanner";
 import { FeaturePhotoCard } from "./FeaturePhotoCard";
+import { ProductPreviewShowcase } from "./ProductPreviewShowcase";
 
 export const HomeFeatureSections = memo(function HomeFeatureSections() {
   const { t } = useTranslation();
@@ -22,9 +23,10 @@ export const HomeFeatureSections = memo(function HomeFeatureSections() {
       : layout.gutter;
 
   const maxWidth = Math.min(containerMaxWidth ?? 1200, 1200);
+  const containerGap = isPhoneViewport ? 16 : isTabletViewport ? 20 : 24;
 
   return (
-    <View style={[styles.container, { maxWidth, paddingHorizontal: padHorizontal }]}>
+    <View style={[styles.container, { maxWidth, paddingHorizontal: padHorizontal, gap: containerGap }]}>
       {/* ─────────────────────────────────────────────────────────────
           Tier 1 — Account & Alerts Banner
       ───────────────────────────────────────────────────────────── */}
@@ -37,7 +39,20 @@ export const HomeFeatureSections = memo(function HomeFeatureSections() {
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
-          Tier 2 — 6-Card Photo Grid (3 cols x 2 rows on desktop, 2 cols x 3 rows on tablet)
+          Tier 2 — Product Preview Showcase (Desktop & Tablet >= 768px)
+      ───────────────────────────────────────────────────────────── */}
+      {!isPhoneViewport ? (
+        <View
+          role="region"
+          accessibilityLabel={t("home.featureSections.showcase.regionLabel")}
+          style={styles.section}
+        >
+          <ProductPreviewShowcase />
+        </View>
+      ) : null}
+
+      {/* ─────────────────────────────────────────────────────────────
+          Tier 3 — 6-Card Photo Grid (3 cols x 2 rows on desktop, 2 cols x 3 rows on tablet)
       ───────────────────────────────────────────────────────────── */}
       <View
         role="region"

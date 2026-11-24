@@ -4,6 +4,9 @@ import renderer, { act, type ReactTestInstance } from "react-test-renderer";
 import {
   HomeFeatureSections,
 } from "@/components/landing/HomeFeatureSections";
+import { AccountPromptBanner } from "@/components/landing/AccountPromptBanner";
+import { ProductPreviewShowcase } from "@/components/landing/ProductPreviewShowcase";
+import { FeaturePhotoCard } from "@/components/landing/FeaturePhotoCard";
 import {
   PHOTO_FEATURE_CARDS,
 } from "@/content/homeFeatureSections";
@@ -117,6 +120,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
         "home.featureSections.accountBanner.subtitle",
         "home.featureSections.accountBanner.cta",
         "home.featureSections.accountBanner.ariaLabel",
+        "home.featureSections.showcase.regionLabel",
         "home.featureSections.photoCards.regionLabel",
         ...PHOTO_FEATURE_CARDS.flatMap((item) => [
           item.titleKey,
@@ -314,7 +318,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
   });
 
   describe("Render Hierarchy, Semantic Regions & WCAG AA Compliance", () => {
-    it("renders exactly 2 semantic regions with accessible region labels", () => {
+    it("renders exactly 3 semantic regions with accessible region labels on desktop", () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<HomeFeatureSections />);
@@ -326,13 +330,14 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
           Boolean(node.props.accessibilityLabel)
       );
       const regionLabels = Array.from(new Set(regions.map((r) => r.props.accessibilityLabel)));
-      expect(regionLabels).toHaveLength(2);
+      expect(regionLabels).toHaveLength(3);
 
       expect(regionLabels).toContain(en.home.featureSections.accountBanner.ariaLabel);
+      expect(regionLabels).toContain(en.home.featureSections.showcase.regionLabel);
       expect(regionLabels).toContain(en.home.featureSections.photoCards.regionLabel);
     });
 
-    it("renders all 6 card links with valid href props for SSR static HTML crawlability", () => {
+    it("renders all card and showcase links with valid href props for SSR static HTML crawlability", () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<HomeFeatureSections />);
@@ -342,6 +347,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
 
       const renderedHrefs = linkNodes.map((n) => n.props.href);
       expect(renderedHrefs).toEqual([
+        "/buy?listing_type=sale&city=Dhaka",
         "/sell",
         "/instant-valuation",
         "/resources/property-price-index",
@@ -351,7 +357,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       ]);
       // The sign-in control opens a dialog, so it is a button and not a link.
       expect(renderedHrefs).not.toContain("/saved");
-      expect(renderedHrefs).toHaveLength(6);
+      expect(renderedHrefs).toHaveLength(7);
     });
 
     it("enforces explicit 16:9 aspect ratio container on photo cards for CLS = 0", () => {
@@ -373,9 +379,9 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
 
     it("renders responsive layout seamlessly across desktop, tablet, and mobile viewports", () => {
       const viewports = [
-        { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 },
-        { isPhone: false, isTablet: true, width: 800, containerMaxWidth: 800 },
-        { isPhone: true, isTablet: false, width: 375, containerMaxWidth: 375 },
+        { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200, expectedLinks: 7 },
+        { isPhone: false, isTablet: true, width: 800, containerMaxWidth: 800, expectedLinks: 7 },
+        { isPhone: true, isTablet: false, width: 375, containerMaxWidth: 375, expectedLinks: 6 },
       ];
 
       for (const vp of viewports) {
@@ -386,7 +392,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
         });
 
         const links = tree!.root.findAll((node: ReactTestInstance) => node.type === "a");
-        expect(links).toHaveLength(6);
+        expect(links).toHaveLength(vp.expectedLinks);
       }
     });
 
@@ -437,6 +443,180 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       expect(open).toHaveBeenCalledWith();
       expect(mockPush).not.toHaveBeenCalled();
       open.mockRestore();
+    });
+  });
+
+  describe("Option A Hierarchy & ProductPreviewShowcase Integration", () => {
+    it("renders Option A hierarchy in exact order: AccountPromptBanner -> ProductPreviewShowcase -> 6 FeaturePhotoCard items", () => {
+      let tree: renderer.ReactTestRenderer;
+      act(() => {
+        tree = renderer.create(<HomeFeatureSections />);
+      });
+
+      const regions = tree!.root.findAll(
+        (node: ReactTestInstance) =>
+          (node.props.role === "region" || node.props.accessibilityRole === "region") &&
+          Boolean(node.props.accessibilityLabel)
+      );
+      expect(regions).toHaveLength(3);
+
+      // Tier 1: Account Prompt Banner
+      expect(regions[0].props.accessibilityLabel).toBe(en.home.featureSections.accountBanner.ariaLabel);
+      const bannerBtn = regions[0].find(
+        (n: ReactTestInstance) =>
+          n.props.accessibilityRole === "button" &&
+          n.props.accessibilityLabel === en.home.featureSections.accountBanner.cta
+      );
+      expect(bannerBtn).toBeDefined();
+
+      // Tier 2: Product Preview Showcase
+      expect(regions[1].props.accessibilityLabel).toBe(en.home.featureSections.showcase.regionLabel);
+      const showcaseLink = regions[1].find(
+        (n: ReactTestInstance) =>
+          n.props.accessibilityRole === "link" &&
+          n.props.accessibilityLabel === "Browse verified properties for sale in Dhaka"
+      );
+      expect(showcaseLink).toBeDefined();
+
+      // Tier 3: 6 Photo Cards Grid
+      expect(regions[2].props.accessibilityLabel).toBe(en.home.featureSections.photoCards.regionLabel);
+      const photoLinks = regions[2].findAll(
+        (n: ReactTestInstance) => n.type === "a" && n.props.href !== "/buy?listing_type=sale&city=Dhaka"
+      );
+      expect(photoLinks).toHaveLength(6);
+      expect(photoLinks.map((l: ReactTestInstance) => l.props.href)).toEqual([
+        "/sell",
+        "/instant-valuation",
+        "/resources/property-price-index",
+        "/buy?type=commercial",
+        "/mess",
+        "/rent?subtype=short-let",
+      ]);
+    });
+
+    it("renders ProductPreviewShowcase with link to /buy?listing_type=sale&city=Dhaka and zero AI claims", () => {
+      let tree: renderer.ReactTestRenderer;
+      act(() => {
+        tree = renderer.create(<HomeFeatureSections />);
+      });
+
+      const showcaseLink = tree!.root.find(
+        (node: ReactTestInstance) =>
+          node.props.accessibilityRole === "link" &&
+          node.props.accessibilityLabel === "Browse verified properties for sale in Dhaka"
+      );
+      expect(showcaseLink).toBeDefined();
+
+      const linkWrapper = tree!.root.findAll((node: ReactTestInstance) => node.type === "a")[0];
+      expect(linkWrapper.props.href).toBe("/buy?listing_type=sale&city=Dhaka");
+
+      const regions = tree!.root.findAll(
+        (node: ReactTestInstance) =>
+          (node.props.role === "region" || node.props.accessibilityRole === "region") &&
+          node.props.accessibilityLabel === en.home.featureSections.showcase.regionLabel
+      );
+      expect(regions).toHaveLength(1);
+
+      const textNodes = regions[0].findAllByType(Text);
+      const allText = textNodes.map((n) => n.props.children).flat().join(" ");
+
+      expect(allText).toContain("Properties for Sale in Dhaka");
+      expect(allText).toContain("VERIFIED LISTING");
+      expect(allText).toContain("Road 92, Gulshan-2, Dhaka");
+      expect(allText).toContain("৳ 4.85 Cr");
+      expect(allText).toContain("Contact Owner Directly");
+      expect(allText).toContain("Tanvir Rahman");
+
+      expect(allText.toLowerCase()).not.toContain("ai finder");
+      expect(allText.toLowerCase()).not.toContain("ai match");
+      expect(allText.toLowerCase()).not.toContain("ai search");
+      expect(allText.toLowerCase()).not.toContain("ai-powered");
+      expect(allText.toLowerCase()).not.toContain("smart ai");
+    });
+
+    it("ensures pointer press/click on ProductPreviewShowcase does not apply green focus outline, while keyboard focus does", () => {
+      let tree: renderer.ReactTestRenderer;
+      act(() => {
+        tree = renderer.create(<HomeFeatureSections />);
+      });
+
+      const showcaseLink = tree!.root.find(
+        (node: ReactTestInstance) =>
+          node.props.accessibilityRole === "link" &&
+          node.props.accessibilityLabel === "Browse verified properties for sale in Dhaka"
+      );
+      expect(showcaseLink).toBeDefined();
+
+      const showcaseRegion = tree!.root.find(
+        (node: ReactTestInstance) =>
+          (node.props.role === "region" || node.props.accessibilityRole === "region") &&
+          node.props.accessibilityLabel === en.home.featureSections.showcase.regionLabel
+      );
+
+      // 1. Pointer click sequence: onPressIn -> onFocus (pointer-driven, matches returns false)
+      act(() => {
+        showcaseLink.props.onPressIn?.();
+        showcaseLink.props.onFocus?.({
+          nativeEvent: {
+            target: {
+              matches: () => false,
+            },
+          },
+        });
+      });
+
+      const browserFramePointer = showcaseRegion.find(
+        (node: ReactTestInstance) =>
+          node.type === View &&
+          Array.isArray(node.props.style) &&
+          node.props.style.some((s: any) => s && s.borderRadius === 16)
+      );
+      const frameStylesPointer = StyleSheet.flatten(browserFramePointer.props.style);
+      expect(frameStylesPointer.outlineColor).toBeUndefined();
+
+      // 2. Keyboard focus sequence: onBlur -> onFocus (keyboard-driven with :focus-visible)
+      act(() => {
+        showcaseLink.props.onBlur?.();
+        showcaseLink.props.onFocus?.({
+          nativeEvent: {
+            target: {
+              matches: (selector: string) => selector === ":focus-visible",
+            },
+          },
+        });
+      });
+
+      const browserFrameKeyboard = showcaseRegion.find(
+        (node: ReactTestInstance) =>
+          node.type === View &&
+          Array.isArray(node.props.style) &&
+          node.props.style.some((s: any) => s && s.borderRadius === 16)
+      );
+      const frameStylesKeyboard = StyleSheet.flatten(browserFrameKeyboard.props.style);
+      expect(frameStylesKeyboard.outlineColor).toBe(colorTokens.brand);
+      expect(frameStylesKeyboard.outlineWidth).toBe(2);
+    });
+
+    it("applies 24px spatial rhythm on desktop and 20px on tablet between tiers", () => {
+      // Desktop (>= 1024px)
+      mockResponsive = { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 };
+      let treeDesktop: renderer.ReactTestRenderer;
+      act(() => {
+        treeDesktop = renderer.create(<HomeFeatureSections />);
+      });
+      const desktopRootView = treeDesktop!.root.findByType(View);
+      const desktopStyles = StyleSheet.flatten(desktopRootView.props.style);
+      expect(desktopStyles.gap).toBe(24);
+
+      // Tablet (768px-1023px)
+      mockResponsive = { isPhone: false, isTablet: true, width: 800, containerMaxWidth: 800 };
+      let treeTablet: renderer.ReactTestRenderer;
+      act(() => {
+        treeTablet = renderer.create(<HomeFeatureSections />);
+      });
+      const tabletRootView = treeTablet!.root.findByType(View);
+      const tabletStyles = StyleSheet.flatten(tabletRootView.props.style);
+      expect(tabletStyles.gap).toBe(20);
     });
   });
 });

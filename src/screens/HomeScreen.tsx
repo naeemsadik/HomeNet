@@ -15,7 +15,6 @@ import { FitText } from "@/components/FitText";
 import { NoTranslateText } from "@/components/NoTranslateText";
 import { HomeFeatureSections } from "@/components/landing/HomeFeatureSections";
 import { HomeNetExplainerSection } from "@/components/landing/HomeNetExplainerSection";
-import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
@@ -230,14 +229,7 @@ export function HomeScreen() {
           ) : null}
 
           {/* ─────────────────────────────────────────────────────────────
-              5. PRODUCT VISUAL, browser + phone preview of real listings
-          ───────────────────────────────────────────────────────────── */}
-          <View style={styles.sectionSpacing}>
-            <HeroProductVisual />
-          </View>
-
-          {/* ─────────────────────────────────────────────────────────────
-              6. GUIDES & INSIGHTS, editorial, API-ready
+              4. GUIDES & INSIGHTS, editorial, API-ready
           ───────────────────────────────────────────────────────────── */}
           <View style={styles.sectionSpacing}>
             <PropertyGuidesSection />
