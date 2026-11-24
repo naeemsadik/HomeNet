@@ -56,7 +56,13 @@ function sitemapWith(...locs: string[]) {
 
 /** Starts from a clean slate so a developer's own Vercel variables can't change the result. */
 function scriptEnv(extra: Record<string, string>, indexNowEndpoint = endpoint): NodeJS.ProcessEnv {
-  return { NODE_ENV: "test", PATH: process.env.PATH ?? "", INDEXNOW_ENDPOINT: indexNowEndpoint, ...extra };
+  return {
+    NODE_ENV: "test",
+    PATH: process.env.PATH ?? "",
+    SystemRoot: process.env.SystemRoot ?? process.env.SYSTEMROOT ?? "C:\\Windows",
+    INDEXNOW_ENDPOINT: indexNowEndpoint,
+    ...extra,
+  };
 }
 
 /** Runs the script like the build does. Resolves on exit 0 and rejects on any other exit code. */

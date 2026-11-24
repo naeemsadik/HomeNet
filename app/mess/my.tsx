@@ -1,14 +1,10 @@
-import { RequireAuth } from "@/components/RequireAuth";
-import { MyMessListingsScreen } from "@/features/mess/screens/MyMessListingsScreen";
-import { MESS_ENABLED } from "@/lib/features";
-import { NotFoundScreen } from "@/screens/NotFoundScreen";
+import { Redirect } from "expo-router";
 
-/** The lister's seat listings: confirm availability, mark seats filled. */
-export default function MyMessListingsRoute() {
-  if (!MESS_ENABLED) return <NotFoundScreen />;
-  return (
-    <RequireAuth active="seller">
-      <MyMessListingsScreen />
-    </RequireAuth>
-  );
+/**
+ * The old "My seat listings" address. Seat listings now sit on My listings with
+ * the seller's properties, so saved links land there. vercel.json redirects it on
+ * the website too, ahead of the /mess/:id rewrite that would read "my" as an id.
+ */
+export default function MyMessListingsRedirect() {
+  return <Redirect href="/my-properties" />;
 }

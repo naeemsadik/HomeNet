@@ -1,6 +1,5 @@
 import {
   BarChart2,
-  BedDouble,
   Building2,
   CircleHelp,
   CreditCard,
@@ -33,12 +32,11 @@ import { useAuthStore } from "@/stores/authStore";
 import { confirmAction } from "@/lib/alert";
 import { colors, colorTokens, fonts } from "@/theme";
 import { useTranslation } from "@/i18n";
-import { isSellerSectionOn, MESS_ENABLED } from "@/lib/features";
+import { isSellerSectionOn } from "@/lib/features";
 
 export type SellerNavKey =
   | "dashboard"
   | "listings"
-  | "seats"
   | "create"
   | "boost"
   | "insights"
@@ -87,7 +85,6 @@ export function SellerShell({
   }[] = [
     { key: "dashboard", label: t("dashboard.tabs.dashboard"), icon: LayoutDashboard, href: "/seller" },
     { key: "listings", label: t("dashboard.tabs.myListings"), icon: Building2, href: "/my-properties" },
-    { key: "seats", label: t("mess.my.title"), icon: BedDouble, href: "/mess/my" },
     { key: "create", label: t("dashboard.tabs.createProperty"), icon: PlusCircle, href: "/property/create" },
     { key: "boost", label: t("dashboard.tabs.boostListings"), icon: Rocket, href: "/seller?tab=boost" },
     { key: "insights", label: t("dashboard.tabs.aiInsights"), icon: LineChart, href: "/seller?tab=insights" },
@@ -98,8 +95,7 @@ export function SellerShell({
     { key: "logout", label: t("dashboard.tabs.logout"), icon: LogOut, danger: true, href: "/" },
   ];
   // AI Insights, Analytics and Payments stay out of the menu until they are ready (src/lib/features.ts).
-  // Seat listings appear with the mess module (MESS_ENABLED).
-  const sidebarNavItems = allNavItems.filter((item) => isSellerSectionOn(item.key) && (item.key !== "seats" || MESS_ENABLED));
+  const sidebarNavItems = allNavItems.filter((item) => isSellerSectionOn(item.key));
 
   const handleLogout = async () => {
     const confirmed = await confirmAction(
@@ -168,7 +164,7 @@ export function SellerShell({
                   <IconComp
                     color={
                       item.danger
-                        ? "#D4183D"
+                        ? colorTokens.errorText
                         : isActive
                         ? colors.green
                         : colors.muted
@@ -252,13 +248,13 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: (Platform.OS === "web" ? "100dvh" : undefined) as unknown as number | undefined,
     flexDirection: "row",
-    backgroundColor: "#F8FAF9",
+    backgroundColor: colorTokens.canvas,
   },
   sidebar: {
     width: 256,
     backgroundColor: colors.white,
     borderRightWidth: 0.8,
-    borderRightColor: "rgba(11,26,23,0.08)",
+    borderRightColor: colorTokens.border,
     paddingVertical: 20,
     paddingHorizontal: 16,
   },
@@ -309,7 +305,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
-    color: "#D4183D",
+    color: colorTokens.errorText,
   },
   badgeCountPill: {
     backgroundColor: colors.orange,

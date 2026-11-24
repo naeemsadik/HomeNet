@@ -7,10 +7,18 @@
  * backend in ./fixtures instead (see fixtureBackend below).
  */
 import apiClient, { ApiError } from "@/services/apiClient";
-import { deletePropertyMedia, submitProperty, uploadPropertyMedia } from "@/services/propertyApi";
+import {
+  archiveProperty,
+  deleteProperty,
+  deletePropertyMedia,
+  publishProperty,
+  submitProperty,
+  uploadPropertyMedia,
+} from "@/services/propertyApi";
 import type { UploadInput } from "@/services/upload";
 import type { ApiResponse } from "@/types/api";
 import type { PaginatedResponse } from "@/features/property/types/property";
+import { MY_MESS_PAGE_SIZE } from "../constants/paging";
 import { toApiParams } from "../utils/filterParams";
 import type {
   Campus,
@@ -44,9 +52,15 @@ export interface MessBackend {
   deleteCampus(id: string): Promise<void>;
   searchMess(filters: MessFilters, page: number, limit: number): Promise<PaginatedResponse<MessCard>>;
   getMessDetail(id: string): Promise<MessDetail>;
-  getMyMessListings(): Promise<PaginatedResponse<MyMessListing>>;
+  getMyMessListings(page: number): Promise<PaginatedResponse<MyMessListing>>;
   upsertMess(dto: UpsertMessDto): Promise<MessMutationResult>;
   submitMess(id: string): Promise<MessMutationResult>;
+  /** Owner archive: hides a live or closed listing but keeps it. */
+  archiveMess(id: string): Promise<void>;
+  /** Owner-only permanent delete, any status. */
+  deleteMess(id: string): Promise<void>;
+  /** Puts live a listing a moderator approved and held for its owner. */
+  publishMess(id: string): Promise<void>;
   uploadMessMedia(id: string, file: UploadInput, label: MediaLabel, displayOrder?: number): Promise<MessMedia>;
   deleteMessMedia(mediaId: string): Promise<void>;
   setSeatStatus(id: string, seatId: string, status: SeatStatus): Promise<void>;
@@ -118,9 +132,9 @@ export const httpBackend: MessBackend = {
     return unwrap(data);
   },
 
-  async getMyMessListings() {
+  async getMyMessListings(page) {
     const { data } = await apiClient.get<ApiResponse<PaginatedResponse<MyMessListing>>>("/v1/mess/my", {
-      params: { page: 1, limit: 50 },
+      params: { page, limit: MY_MESS_PAGE_SIZE },
     });
     return unwrap(data);
   },
@@ -132,6 +146,20 @@ export const httpBackend: MessBackend = {
 
   async submitMess(id) {
     return unwrap(await submitProperty(id));
+  },
+
+  // Archive, delete and publish are the owner's /v1/properties routes, like submit:
+  // the mess API (PRD 2.3) adds none of its own.
+  async archiveMess(id) {
+    await archiveProperty(id);
+  },
+
+  async deleteMess(id) {
+    await deleteProperty(id);
+  },
+
+  async publishMess(id) {
+    await publishProperty(id);
   },
 
   async uploadMessMedia(id, file, label, displayOrder) {
@@ -198,9 +226,12 @@ export const updateCampus = (id: string, input: Omit<CampusInput, "university_id
 export const deleteCampus = (id: string) => backend().deleteCampus(id);
 export const searchMess = (filters: MessFilters, page: number, limit: number) => backend().searchMess(filters, page, limit);
 export const getMessDetail = (id: string) => backend().getMessDetail(id);
-export const getMyMessListings = () => backend().getMyMessListings();
+export const getMyMessListings = (page = 1) => backend().getMyMessListings(page);
 export const upsertMess = (dto: UpsertMessDto) => backend().upsertMess(dto);
 export const submitMess = (id: string) => backend().submitMess(id);
+export const archiveMess = (id: string) => backend().archiveMess(id);
+export const deleteMess = (id: string) => backend().deleteMess(id);
+export const publishMess = (id: string) => backend().publishMess(id);
 export const uploadMessMedia = (id: string, file: UploadInput, label: MediaLabel, displayOrder?: number) =>
   backend().uploadMessMedia(id, file, label, displayOrder);
 export const deleteMessMedia = (mediaId: string) => backend().deleteMessMedia(mediaId);
