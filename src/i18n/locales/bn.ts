@@ -442,6 +442,7 @@ export const bn: TranslationSchema = {
     goBack: "পেছনে যান",
     back: "পেছনে",
     openGoogleMaps: "গুগল ম্যাপে দেখুন",
+    mapFor: "{{title}}-এর গুগল ম্যাপ",
     similarProperties: "অনুরূপ প্রপার্টিসমূহ",
     seeAll: "সবগুলো দেখুন",
     similarError: "অনুরূপ প্রপার্টি লোড করা যায়নি।",

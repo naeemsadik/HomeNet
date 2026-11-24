@@ -84,6 +84,9 @@ export function FitText({
         // the last pixel off instead. It only ever shrinks, from the size worked out here.
         adjustsFontSizeToFit={Platform.OS !== "web" && !wraps}
         numberOfLines={wraps ? 2 : 1}
+        {...(hidden
+          ? { accessibilityElementsHidden: true, importantForAccessibility: "no-hide-descendants" as const, "aria-hidden": true }
+          : null)}
         style={[style, scaled(fitted), styles.visible, hidden && styles.hidden]}
       >
         {children}

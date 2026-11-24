@@ -178,14 +178,14 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
         {/* Two equal columns: the second link of every row starts at the same place, whatever the
             words or the language, instead of wherever the first link happens to end. */}
         <View style={styles.legalLinks}>
-          {LEGAL_LINKS.map((link, index) => (
+          {LEGAL_LINKS.map((link, index, all) => (
             <View key={link.href} style={styles.legalItem}>
               <AppLink href={link.href} style={styles.legalLink}>
                 <Text style={styles.legalLinkText}>{t(link.label)}</Text>
               </AppLink>
               {/* The "|" the website footer has, drawn at the right edge of the left column so it
                   never moves the columns. */}
-              {index % 2 === 0 ? (
+              {index % 2 === 0 && index < all.length - 1 ? (
                 <Text
                   accessibilityElementsHidden
                   importantForAccessibility="no"
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     textAlignVertical: "center",
     lineHeight: 44,
-    color: "rgba(11, 26, 23, 0.22)",
+    color: colorTokens.subtle,
     fontSize: 13,
   },
   legalLink: {

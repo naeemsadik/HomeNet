@@ -440,6 +440,7 @@ export const en = {
     goBack: "Go Back",
     back: "Back",
     openGoogleMaps: "Open Google Maps",
+    mapFor: "Google Map for {{title}}",
     similarProperties: "Similar properties",
     seeAll: "See all",
     similarError: "Could not load similar listings.",
