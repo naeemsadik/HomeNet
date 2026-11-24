@@ -6,7 +6,6 @@ import {
 } from "@/components/landing/HomeFeatureSections";
 import {
   PHOTO_FEATURE_CARDS,
-  UTILITY_FEATURE_CARDS,
 } from "@/content/homeFeatureSections";
 import { en } from "@/i18n/locales/en";
 import { bn } from "@/i18n/locales/bn";
@@ -72,34 +71,37 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
   });
 
   describe("Configuration & Route Integrity", () => {
-    it("defines exactly 3 photo cards and 3 utility cards with unique IDs and unique destinations", () => {
-      expect(PHOTO_FEATURE_CARDS).toHaveLength(3);
-      expect(UTILITY_FEATURE_CARDS).toHaveLength(3);
+    it("defines exactly 6 photo cards with unique IDs, destinations, and image sources", () => {
+      expect(PHOTO_FEATURE_CARDS).toHaveLength(6);
+
+      expect(PHOTO_FEATURE_CARDS.map((c) => c.id)).toEqual([
+        "list-property",
+        "instant-valuation",
+        "property-guides",
+        "commercial-property",
+        "mess-accommodation",
+        "holiday-stay",
+      ]);
 
       const allIds = [
         "account-banner",
         ...PHOTO_FEATURE_CARDS.map((c) => c.id),
-        ...UTILITY_FEATURE_CARDS.map((c) => c.id),
       ];
       expect(new Set(allIds).size).toBe(7);
 
-      const allHrefs = [
-        ...PHOTO_FEATURE_CARDS.map((c) => c.href),
-        ...UTILITY_FEATURE_CARDS.map((c) => c.href),
-      ];
+      const allHrefs = PHOTO_FEATURE_CARDS.map((c) => c.href);
       expect(new Set(allHrefs).size).toBe(6);
+
+      const allImages = PHOTO_FEATURE_CARDS.map((c) => c.imageSource);
+      expect(new Set(allImages).size).toBe(6);
     });
 
-    it("verifies all 7 routes point to legitimate HomeNet destinations", () => {
+    it("verifies all 6 routes point to legitimate HomeNet destinations", () => {
       const photoHrefs = PHOTO_FEATURE_CARDS.map((c) => c.href);
       expect(photoHrefs).toEqual([
         "/sell",
         "/instant-valuation",
         "/resources/property-price-index",
-      ]);
-
-      const utilityHrefs = UTILITY_FEATURE_CARDS.map((c) => c.href);
-      expect(utilityHrefs).toEqual([
         "/buy?type=commercial",
         "/mess",
         "/rent?subtype=short-let",
@@ -115,15 +117,11 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
         "home.featureSections.accountBanner.cta",
         "home.featureSections.accountBanner.ariaLabel",
         "home.featureSections.photoCards.regionLabel",
-        "home.featureSections.utilityCards.regionLabel",
         ...PHOTO_FEATURE_CARDS.flatMap((item) => [
           item.titleKey,
           item.descriptionKey,
-          ...(item.badgeKey ? [item.badgeKey] : []),
-        ]),
-        ...UTILITY_FEATURE_CARDS.flatMap((item) => [
-          item.titleKey,
-          item.descriptionKey,
+          item.badgeKey,
+          item.imageAltKey,
         ]),
       ];
 
@@ -139,45 +137,66 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       }
     });
 
-    it("ensures no orphaned cta keys remain in photoCards or utilityCards in EN and BN locales", () => {
-      // Photo cards in en & bn
+    it("ensures zero AI cards, zero orphaned utilityCards keys, and zero cta keys in EN and BN locales", () => {
+      // Photo cards in en & bn: ensure no unwanted cards exist
+      expect((en.home.featureSections.photoCards as any).aiFinder).toBeUndefined();
+      expect((en.home.featureSections.photoCards as any).verified).toBeUndefined();
+      expect((en.home.featureSections.photoCards as any).newDevelopments).toBeUndefined();
+      expect((bn.home.featureSections.photoCards as any).aiFinder).toBeUndefined();
+      expect((bn.home.featureSections.photoCards as any).verified).toBeUndefined();
+      expect((bn.home.featureSections.photoCards as any).newDevelopments).toBeUndefined();
+
+      // Ensure utilityCards dictionary is removed
+      expect((en.home.featureSections as any).utilityCards).toBeUndefined();
+      expect((bn.home.featureSections as any).utilityCards).toBeUndefined();
+
+      // Ensure no orphaned cta keys in photo cards
       expect((en.home.featureSections.photoCards.listProperty as any).cta).toBeUndefined();
       expect((en.home.featureSections.photoCards.valuation as any).cta).toBeUndefined();
       expect((en.home.featureSections.photoCards.guides as any).cta).toBeUndefined();
+      expect((en.home.featureSections.photoCards.commercial as any).cta).toBeUndefined();
+      expect((en.home.featureSections.photoCards.mess as any).cta).toBeUndefined();
+      expect((en.home.featureSections.photoCards.holiday as any).cta).toBeUndefined();
       expect((bn.home.featureSections.photoCards.listProperty as any).cta).toBeUndefined();
       expect((bn.home.featureSections.photoCards.valuation as any).cta).toBeUndefined();
       expect((bn.home.featureSections.photoCards.guides as any).cta).toBeUndefined();
-
-      // Utility cards in en & bn
-      expect((en.home.featureSections.utilityCards.commercial as any).cta).toBeUndefined();
-      expect((en.home.featureSections.utilityCards.mess as any).cta).toBeUndefined();
-      expect((en.home.featureSections.utilityCards.holiday as any).cta).toBeUndefined();
-      expect((bn.home.featureSections.utilityCards.commercial as any).cta).toBeUndefined();
-      expect((bn.home.featureSections.utilityCards.mess as any).cta).toBeUndefined();
-      expect((bn.home.featureSections.utilityCards.holiday as any).cta).toBeUndefined();
+      expect((bn.home.featureSections.photoCards.commercial as any).cta).toBeUndefined();
+      expect((bn.home.featureSections.photoCards.mess as any).cta).toBeUndefined();
+      expect((bn.home.featureSections.photoCards.holiday as any).cta).toBeUndefined();
 
       // Config items
       for (const card of PHOTO_FEATURE_CARDS) {
-        expect((card as any).ctaKey).toBeUndefined();
-      }
-      for (const card of UTILITY_FEATURE_CARDS) {
         expect((card as any).ctaKey).toBeUndefined();
       }
     });
   });
 
   describe("Rightmove-Style Card Badges & Hover Reveal", () => {
-    it("ensures all 3 photo cards define a mandatory badgeKey with valid EN and BN values", () => {
+    it("ensures all 6 photo cards define a mandatory badgeKey with valid EN and BN values", () => {
       expect(PHOTO_FEATURE_CARDS.every((card) => Boolean(card.badgeKey))).toBe(true);
 
       const enBadges = PHOTO_FEATURE_CARDS.map((c) => getNestedValue(en, c.badgeKey));
       const bnBadges = PHOTO_FEATURE_CARDS.map((c) => getNestedValue(bn, c.badgeKey));
 
-      expect(enBadges).toEqual(["LISTING", "VALUATION", "GUIDES"]);
-      expect(bnBadges).toEqual(["লিস্টিং", "মূল্যায়ন", "গাইড"]);
+      expect(enBadges).toEqual([
+        "LISTING",
+        "VALUATION",
+        "GUIDES",
+        "COMMERCIAL",
+        "STUDENT & MESS",
+        "HOLIDAY STAY",
+      ]);
+      expect(bnBadges).toEqual([
+        "লিস্টিং",
+        "মূল্যায়ন",
+        "গাইড",
+        "কমার্শিয়াল",
+        "মেস ও ছাত্রাবাস",
+        "হলিডে স্টে",
+      ]);
     });
 
-    it("shows badges at rest, so touch screens without hover see them", () => {
+    it("enforces hidden-at-rest top-left badges (opacity: 0)", () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<HomeFeatureSections />);
@@ -189,12 +208,19 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
           node.props["aria-hidden"] === true &&
           StyleSheet.flatten(node.props.style)?.top === 12
       );
-      expect(badgeContainers).toHaveLength(3);
+      expect(badgeContainers).toHaveLength(6);
 
-      const enBadgeTexts = ["LISTING", "VALUATION", "GUIDES"];
+      const enBadgeTexts = [
+        "LISTING",
+        "VALUATION",
+        "GUIDES",
+        "COMMERCIAL",
+        "STUDENT & MESS",
+        "HOLIDAY STAY",
+      ];
       badgeContainers.forEach((container, idx) => {
         const styles = StyleSheet.flatten(container.props.style);
-        expect(styles.opacity ?? 1).toBe(1);
+        expect(styles.opacity).toBe(0);
         expect(styles.position).toBe("absolute");
         expect(styles.top).toBe(12);
         expect(styles.left).toBe(12);
@@ -218,9 +244,9 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
         en.home.featureSections.photoCards.listProperty.title,
         en.home.featureSections.photoCards.valuation.title,
         en.home.featureSections.photoCards.guides.title,
-        en.home.featureSections.utilityCards.commercial.title,
-        en.home.featureSections.utilityCards.mess.title,
-        en.home.featureSections.utilityCards.holiday.title,
+        en.home.featureSections.photoCards.commercial.title,
+        en.home.featureSections.photoCards.mess.title,
+        en.home.featureSections.photoCards.holiday.title,
       ];
 
       for (const expectedTitle of cardTitles) {
@@ -235,7 +261,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
   });
 
   describe("Render Hierarchy, Semantic Regions & WCAG AA Compliance", () => {
-    it("renders all 3 semantic regions with accessible region labels", () => {
+    it("renders exactly 2 semantic regions with accessible region labels", () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<HomeFeatureSections />);
@@ -247,14 +273,13 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
           Boolean(node.props.accessibilityLabel)
       );
       const regionLabels = Array.from(new Set(regions.map((r) => r.props.accessibilityLabel)));
-      expect(regionLabels).toHaveLength(3);
+      expect(regionLabels).toHaveLength(2);
 
       expect(regionLabels).toContain(en.home.featureSections.accountBanner.ariaLabel);
       expect(regionLabels).toContain(en.home.featureSections.photoCards.regionLabel);
-      expect(regionLabels).toContain(en.home.featureSections.utilityCards.regionLabel);
     });
 
-    it("renders the 6 card links with valid href props for SSR static HTML crawlability", () => {
+    it("renders all 6 card links with valid href props for SSR static HTML crawlability", () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<HomeFeatureSections />);
@@ -263,13 +288,15 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       const linkNodes = tree!.root.findAll((node: ReactTestInstance) => node.type === "a");
 
       const renderedHrefs = linkNodes.map((n) => n.props.href);
-      expect(renderedHrefs).toContain("/sell");
-      expect(renderedHrefs).toContain("/instant-valuation");
-      expect(renderedHrefs).toContain("/resources/property-price-index");
-      expect(renderedHrefs).toContain("/buy?type=commercial");
-      expect(renderedHrefs).toContain("/mess");
-      expect(renderedHrefs).toContain("/rent?subtype=short-let");
-      // The sign-in control opens a dialog, so it is a button and not a seventh link.
+      expect(renderedHrefs).toEqual([
+        "/sell",
+        "/instant-valuation",
+        "/resources/property-price-index",
+        "/buy?type=commercial",
+        "/mess",
+        "/rent?subtype=short-let",
+      ]);
+      // The sign-in control opens a dialog, so it is a button and not a link.
       expect(renderedHrefs).not.toContain("/saved");
       expect(renderedHrefs).toHaveLength(6);
     });
@@ -288,7 +315,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
               node.props.style.some((s: any) => s?.aspectRatio === 16 / 9)))
       );
 
-      expect(imageContainers).toHaveLength(3);
+      expect(imageContainers).toHaveLength(6);
     });
 
     it("renders responsive layout seamlessly across desktop, tablet, and mobile viewports", () => {

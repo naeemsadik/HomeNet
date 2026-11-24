@@ -1445,20 +1445,23 @@ export const en = {
           description: "Explore area price benchmarks, buyer guides, and Bangladesh stamp duty rules.",
           imageAlt: "A city skyline (illustration)",
         },
-      },
-      utilityCards: {
-        regionLabel: "Property categories and accommodation",
         commercial: {
+          badge: "COMMERCIAL",
           title: "Commercial property",
           description: "Search offices, retail spaces, and commercial properties for sale or rent.",
+          imageAlt: "Modern commercial office building (illustration)",
         },
         mess: {
+          badge: "STUDENT & MESS",
           title: "Mess & student accommodation",
           description: "Find verified student seats, messes, and shared living near your campus.",
+          imageAlt: "Student room and accommodation (illustration)",
         },
         holiday: {
+          badge: "HOLIDAY STAY",
           title: "Holiday stay",
           description: "Discover furnished apartments and short-term stays across Bangladesh.",
+          imageAlt: "Furnished holiday apartment with balcony (illustration)",
         },
       },
     },

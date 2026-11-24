@@ -1,6 +1,5 @@
 import type { Href } from "expo-router";
 import type { TranslationKey } from "@/i18n";
-import type { IconName } from "@/components/icons";
 import { stockImage } from "@/lib/cloudinaryImage";
 
 export interface PhotoFeatureItem {
@@ -13,17 +12,9 @@ export interface PhotoFeatureItem {
   imageAltKey: TranslationKey;
 }
 
-export interface UtilityFeatureItem {
-  id: string;
-  titleKey: TranslationKey;
-  descriptionKey: TranslationKey;
-  href: Href;
-  iconName: IconName;
-}
-
 /**
- * Tier 2 — 3-Column Core Action Photo Cards
- * Rightmove-style high-intent cards for listing creation, algorithmic valuation, and price index guides.
+ * 6 Core HomeNet Feature Cards
+ * High-intent Rightmove-style cards arranged in a symmetrical 3-col x 2-row grid.
  */
 export const PHOTO_FEATURE_CARDS: readonly PhotoFeatureItem[] = [
   {
@@ -59,32 +50,37 @@ export const PHOTO_FEATURE_CARDS: readonly PhotoFeatureItem[] = [
     ),
     imageAltKey: "home.featureSections.photoCards.guides.imageAlt",
   },
-] as const;
-
-/**
- * Tier 3 — 3-Column Utility Cards
- * Focused discovery pathways for commercial spaces, mess/student accommodation, and holiday stays.
- */
-export const UTILITY_FEATURE_CARDS: readonly UtilityFeatureItem[] = [
   {
-    id: "commercial",
-    titleKey: "home.featureSections.utilityCards.commercial.title",
-    descriptionKey: "home.featureSections.utilityCards.commercial.description",
+    id: "commercial-property",
+    badgeKey: "home.featureSections.photoCards.commercial.badge",
+    titleKey: "home.featureSections.photoCards.commercial.title",
+    descriptionKey: "home.featureSections.photoCards.commercial.description",
     href: "/buy?type=commercial",
-    iconName: "Building2",
+    imageSource: stockImage(
+      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80"
+    ),
+    imageAltKey: "home.featureSections.photoCards.commercial.imageAlt",
   },
   {
-    id: "mess",
-    titleKey: "home.featureSections.utilityCards.mess.title",
-    descriptionKey: "home.featureSections.utilityCards.mess.description",
+    id: "mess-accommodation",
+    badgeKey: "home.featureSections.photoCards.mess.badge",
+    titleKey: "home.featureSections.photoCards.mess.title",
+    descriptionKey: "home.featureSections.photoCards.mess.description",
     href: "/mess",
-    iconName: "Bed",
+    imageSource: stockImage(
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80"
+    ),
+    imageAltKey: "home.featureSections.photoCards.mess.imageAlt",
   },
   {
-    id: "holiday",
-    titleKey: "home.featureSections.utilityCards.holiday.title",
-    descriptionKey: "home.featureSections.utilityCards.holiday.description",
+    id: "holiday-stay",
+    badgeKey: "home.featureSections.photoCards.holiday.badge",
+    titleKey: "home.featureSections.photoCards.holiday.title",
+    descriptionKey: "home.featureSections.photoCards.holiday.description",
     href: "/rent?subtype=short-let",
-    iconName: "Compass",
+    imageSource: stockImage(
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80"
+    ),
+    imageAltKey: "home.featureSections.photoCards.holiday.imageAlt",
   },
 ] as const;

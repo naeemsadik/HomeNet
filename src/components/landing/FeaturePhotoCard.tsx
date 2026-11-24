@@ -52,7 +52,7 @@ export const FeaturePhotoCard = memo(function FeaturePhotoCard({ item }: Feature
           style={[styles.image, isRevealed && styles.imageHovered]}
         />
         {/* Category badge pill in top-left */}
-        <View aria-hidden={true} style={styles.badge}>
+        <View aria-hidden={true} style={[styles.badge, isRevealed && styles.badgeRevealed]}>
           <Text style={styles.badgeText}>{badge}</Text>
         </View>
       </View>
@@ -135,6 +135,19 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: radius.sm,
     pointerEvents: "none",
+    opacity: 0,
+    transform: [{ translateY: -4 }],
+    ...Platform.select({
+      web: {
+        transitionProperty: "opacity, transform",
+        transitionDuration: "180ms",
+        transitionTimingFunction: "ease-out",
+      },
+    }),
+  },
+  badgeRevealed: {
+    opacity: 1,
+    transform: [{ translateY: 0 }],
   },
   badgeText: {
     color: colorTokens.surface,
