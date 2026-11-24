@@ -6,7 +6,7 @@ export default function SellRoute() {
     <>
       <PageMeta
         title="List Your Property | HomeNet BD"
-        description="List your flat, house, plot or commercial space on HomeNet BD for free. Describe it in one sentence, add photos and a map pin, and buyers contact you directly."
+        description="List your flat, house, plot or commercial space on HomeNet BD for free. Publish in minutes, add photos and a map pin, and buyers contact you directly."
       />
       <SellScreen />
     </>

@@ -26,6 +26,7 @@ import { toApiError } from "@/services/apiClient";
 import { notify } from "@/lib/alert";
 import type { UploadInput } from "@/services/upload";
 import { colorTokens, webPointer } from "@/theme";
+import { trackListPropertySubmit } from "@/lib/analytics";
 import type { Area, PropertyType, UpsertPropertyDto } from "@/types/api";
 import {
   PROPERTY_TYPE_CONFIGS,
@@ -392,6 +393,13 @@ export function PropertyCreateWizard() {
       const propertyId = await saveListing();
       await uploadPendingMedia(propertyId);
       await submitMutation.mutateAsync(propertyId);
+      trackListPropertySubmit({
+        propertyId,
+        purpose: store.listingType,
+        propertyType: store.type,
+        area: store.areaName || store.district || undefined,
+        price: store.price ? Number(store.price) : undefined,
+      });
       notify(t("wizard.toast.submittedTitle"), t("wizard.toast.submittedMessage"), {
         confirmLabel: t("wizard.toast.viewMyListings"),
         onConfirm: () => {

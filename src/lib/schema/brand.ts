@@ -32,6 +32,26 @@ export const BRAND = {
   geo: null as { latitude: number; longitude: number } | null,
   sameAs: [] as string[],
   areaServed: ["Dhaka", "Chattogram", "Sylhet", "Cox's Bazar"],
+  /**
+   * Dhaka neighbourhoods stated separately in `areaServed`, so a local search
+   * for "flat rent Gulshan" can match the business as well as the area page.
+   *
+   * A curated subset of src/content/areas.ts, not the whole list: forty
+   * entries would say less than ten, and these are the ones with meaningful
+   * search volume. Add to it when an area earns it.
+   */
+  neighbourhoodsServed: [
+    "Gulshan",
+    "Banani",
+    "Baridhara",
+    "Dhanmondi",
+    "Uttara",
+    "Bashundhara R/A",
+    "Mirpur",
+    "Mirpur DOHS",
+    "Mohammadpur",
+    "Banasree",
+  ],
 };
 
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`;

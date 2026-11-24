@@ -13,7 +13,7 @@ import { MobileHeroSearchCard } from "@/components/MobileHeroSearchCard";
 import { MobileHomeSections } from "@/components/MobileHomeSections";
 import { FitText } from "@/components/FitText";
 import { NoTranslateText } from "@/components/NoTranslateText";
-import { AiFlagshipSection } from "@/components/landing/AiFlagshipSection";
+import { HomeFeatureSections } from "@/components/landing/HomeFeatureSections";
 import { HomeNetExplainerSection } from "@/components/landing/HomeNetExplainerSection";
 import { HeroProductVisual } from "@/components/landing/HeroProductVisual";
 import { PropertyGuidesSection } from "@/features/news/components/PropertyGuidesSection";
@@ -212,36 +212,36 @@ export function HomeScreen() {
         <MobileHomeSections />
       ) : (
         <>
-      {/* ─────────────────────────────────────────────────────────────
-          3. EXPLAINER VIDEO, 30s auto-preview + full walkthrough video.
-          Hidden until the new video is ready; see SHOW_EXPLAINER_VIDEO.
-      ───────────────────────────────────────────────────────────── */}
-      {SHOW_EXPLAINER_VIDEO ? (
-        <View style={styles.sectionSpacing}>
-          <HomeNetExplainerSection />
-        </View>
-      ) : null}
+          {/* ─────────────────────────────────────────────────────────────
+              Rightmove-Style Desktop & Tablet 3-Column Feature Sections
+          ───────────────────────────────────────────────────────────── */}
+          <View style={styles.sectionSpacing}>
+            <HomeFeatureSections />
+          </View>
 
-      {/* ─────────────────────────────────────────────────────────────
-          5. PRODUCT VISUAL, browser + phone preview of real listings
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <HeroProductVisual />
-      </View>
+          {/* ─────────────────────────────────────────────────────────────
+              3. EXPLAINER VIDEO, 30s auto-preview + full walkthrough video.
+              Hidden until the new video is ready; see SHOW_EXPLAINER_VIDEO.
+          ───────────────────────────────────────────────────────────── */}
+          {SHOW_EXPLAINER_VIDEO ? (
+            <View style={styles.sectionSpacing}>
+              <HomeNetExplainerSection />
+            </View>
+          ) : null}
 
-      {/* ─────────────────────────────────────────────────────────────
-          6. AI LISTING, describe it, HomeNet fills the fields
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <AiFlagshipSection />
-      </View>
+          {/* ─────────────────────────────────────────────────────────────
+              5. PRODUCT VISUAL, browser + phone preview of real listings
+          ───────────────────────────────────────────────────────────── */}
+          <View style={styles.sectionSpacing}>
+            <HeroProductVisual />
+          </View>
 
-      {/* ─────────────────────────────────────────────────────────────
-          8. GUIDES & INSIGHTS, editorial, API-ready
-      ───────────────────────────────────────────────────────────── */}
-      <View style={styles.sectionSpacing}>
-        <PropertyGuidesSection />
-      </View>
+          {/* ─────────────────────────────────────────────────────────────
+              6. GUIDES & INSIGHTS, editorial, API-ready
+          ───────────────────────────────────────────────────────────── */}
+          <View style={styles.sectionSpacing}>
+            <PropertyGuidesSection />
+          </View>
         </>
       )}
     </AppChrome>

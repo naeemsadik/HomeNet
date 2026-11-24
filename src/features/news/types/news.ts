@@ -1,3 +1,4 @@
+import type { FaqEntry } from "@/lib/schema";
 /**
  * Editorial and market content for HomeNet guides & news.
  *
@@ -30,6 +31,12 @@ export interface PropertyGuide {
   title: string;
   /** Optional Bengali title for native reader localization. */
   titleBn?: string;
+  /**
+   * A shorter title for the <title> tag, when the editorial headline is too
+   * long for a search result. Google truncates around 60 characters, and
+   * " | HomeNet BD" costs 13 of them. The on-page heading still uses `title`.
+   */
+  seoTitle?: string;
   excerpt: string;
   /** Optional Bengali excerpt. */
   excerptBn?: string;
@@ -59,6 +66,12 @@ export interface PropertyGuide {
   contentMarkdownBn?: string | null;
   /** Author information. */
   author?: GuideAuthor | null;
+  /**
+   * Direct-answer questions rendered at the end of the guide and emitted as
+   * FAQPage markup. Google accepts that markup only while the questions are
+   * visible, so these two always come from this one list.
+   */
+  faq?: FaqEntry[];
 }
 
 export interface PropertyGuideList {

@@ -228,57 +228,6 @@ export const landingCopy = {
       { id: "dashboard", label: "Seller Studio" },
     ],
   },
-  aiFlagship: {
-    eyebrow: "Bangladeshi Property Intelligence",
-    title: "Skip the 14-field form. Just describe your property.",
-    subtitle:
-      "Listing a property usually means twenty minutes of repetitive typing. Instead, paste or type a description in your own words. HomeNet extracts the specs, formats the figures, and populates your listing in seconds.",
-    demoInputPlaceholder:
-      "e.g. 3 bedroom apartment in Gulshan 2, 1800 sqft, south facing, 4th floor, lift and generator, 2.5 crore",
-    analyzeBtn: "Analyze with AI",
-    analyzingState: "AI is reading your description…",
-    applyBtn: "Apply & Continue",
-    tryAgainBtn: "Try again",
-    disclaimer: "AI may make mistakes. You can edit before submitting",
-    lowConfidenceNotice: "AI is less certain, please verify",
-    priceConversionBadge: "2.5 crore → BDT 25,000,000",
-    headlines: [
-      {
-        num: "01",
-        title: "It speaks Bangladeshi property language",
-        tag: "Local Vocabulary",
-        desc: "Purpose-built for Bangladesh. It translates crore and lakh directly into figures (1 crore = 10,000,000; 1 lakh = 100,000), understands katha and bigha alongside sqft and sqm, and recognizes the amenities that matter in Dhaka, standby generator, lift, gas line, servant quarter, nearby mosque, rooftop, and CCTV.",
-        examples: [
-          "Crore & Lakh: 2.5 crore converts to BDT 25,000,000 automatically",
-          "Land units: Understands katha and bigha without conversion errors",
-          "Dhaka amenities: Detects generator, lift, gas line, and servant quarters",
-          "Neighborhoods: Recognizes Gulshan, Banani, Dhanmondi, Uttara, Mirpur",
-        ],
-      },
-      {
-        num: "02",
-        title: "It tells you how sure it is, field by field",
-        tag: "Field Transparency",
-        desc: "Honesty before automation. HomeNet returns a confidence level for every single extracted field and flags anything it is less certain about. You only spend time checking the fields that actually need human review.",
-        examples: [
-          "High confidence on standard specs: price, bedrooms, size, and area",
-          "Flags ambiguous entries with a clear notice: 'AI is less certain, please verify'",
-          "Saves you from re-checking verified details",
-        ],
-      },
-      {
-        num: "03",
-        title: "You stay in control",
-        tag: "Zero Lock-In",
-        desc: "Every single extracted field is inline-editable right inside the preview before anything is applied. One tap on 'Apply & Continue' carries your confirmed details directly into the listing wizard.",
-        examples: [
-          "Inline-editable fields: Tap any row to adjust text or numbers instantly",
-          "Seamless handover: 'Apply & Continue' populates the 5-step wizard",
-          "Zero manual duplication: Start with your draft and finish in minutes",
-        ],
-      },
-    ],
-  },
   seekersSection: {
     eyebrow: "For Seekers",
     title: "Find Your Dream With Trust, without the runaround",

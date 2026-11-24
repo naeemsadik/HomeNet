@@ -137,7 +137,7 @@ export function listingSchema(detail: PropertyDetail): SchemaNode {
     description: detail.description || undefined,
     image: images.length ? images : undefined,
     datePosted: detail.published_at || detail.created_at,
-    dateModified: detail.updated_at,
+    dateModified: detail.updated_at || detail.published_at || detail.created_at,
     inLanguage: "en-BD",
     about: subject,
     provider: { "@type": "Organization", "@id": ORGANIZATION_ID },

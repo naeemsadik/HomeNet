@@ -13,6 +13,7 @@ import {
   organizationSchema,
   serializeJsonLd,
   VALUATION_FAQ,
+  webPageSchema,
   websiteSchema,
 } from "..";
 import { seoAreaBySlug } from "@/content/areas";
@@ -100,6 +101,11 @@ describe("listingSchema", () => {
     expect(node.offers.priceSpecification).toBeUndefined();
     expect(node.offers.availability).toBe("https://schema.org/SoldOut");
     expect(node.offers.businessFunction).toContain("#Sell");
+  });
+
+  it("falls back to published_at or created_at for dateModified when updated_at is absent", () => {
+    const node = listingSchema(detail({ updated_at: undefined, published_at: "2026-10-01T00:00:00Z" })) as Record<string, any>;
+    expect(node.dateModified).toBe("2026-10-01T00:00:00Z");
   });
 
   it.each([
@@ -190,5 +196,22 @@ describe("itemListSchema", () => {
       url: "https://www.homenetbd.com/property/b2",
       name: "Office floor",
     });
+  });
+});
+
+describe("webPageSchema", () => {
+  it("describes an area landing page with title, description, and freshness timestamp", () => {
+    const node = webPageSchema({
+      url: "https://www.homenetbd.com/buy/gulshan",
+      name: "Flats for Sale in Gulshan",
+      description: "Find verified flats in Gulshan directly from owners.",
+      dateModified: "2026-11-20T12:00:00Z",
+    }) as Record<string, any>;
+
+    expect(node["@type"]).toEqual(["WebPage", "CollectionPage"]);
+    expect(node.url).toBe("https://www.homenetbd.com/buy/gulshan");
+    expect(node.name).toBe("Flats for Sale in Gulshan");
+    expect(node.dateModified).toBe("2026-11-20T12:00:00Z");
+    expect(node.isPartOf).toMatchObject({ "@type": "WebSite" });
   });
 });

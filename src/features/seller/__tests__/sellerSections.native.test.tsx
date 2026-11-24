@@ -8,6 +8,9 @@ import { isSellerSectionOn, SELLER_SECTIONS } from "@/lib/features";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
+// Shared living on, as in a build that has it: seat listings must still not get a menu item of their own.
+jest.mock("@/lib/features", () => ({ ...jest.requireActual("@/lib/features"), MESS_ENABLED: true }));
+
 jest.mock("expo-router", () => ({
   ...jest.requireActual("expo-router"),
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
@@ -45,6 +48,8 @@ describe("seller sections that are not ready", () => {
     const menu = textOf(tree.root);
     for (const shown of ["Dashboard", "My Listings", "Help Center"]) expect(menu).toContain(shown);
     for (const hidden of ["Boost Listings", "AI Insights", "Analytics", "Payments"]) expect(menu).not.toContain(hidden);
+    // Seat listings are on My Listings with the properties (issue 197).
+    expect(menu).not.toContain("My seat listings");
     act(() => tree.unmount());
     jest.restoreAllMocks();
   });

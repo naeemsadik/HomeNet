@@ -1,7 +1,6 @@
 import React from "react";
 import renderer, { act, type ReactTestRenderer, type ReactTestInstance } from "react-test-renderer";
-import { Text } from "react-native";
-import { Image } from "expo-image";
+import { Image, Text } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { MobileNav } from "@/components/AppChrome";
 import { initialsOf } from "@/components/UserAvatar";

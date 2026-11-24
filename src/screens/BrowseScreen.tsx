@@ -1,4 +1,5 @@
 import { pressedState } from "@/lib/a11yState";
+import { trackSearchFilter } from "@/lib/analytics";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Modal,
@@ -78,6 +79,7 @@ export function BrowseScreen({
   location: fixedLocation,
   initialResults,
   onTotalChange,
+  footer,
 }: {
   mode?: "buy" | "rent" | "sold";
   /** Pins the area filter, for the /buy/<area> and /rent/<area> landing pages. */
@@ -86,6 +88,11 @@ export function BrowseScreen({
   initialResults?: BrowseSnapshot;
   /** Called with the result count once the feed has loaded; not called while loading or after an error. */
   onTotalChange?: (total: number) => void;
+  /**
+   * Rendered below the results, inside the page scroll. The area landing
+   * pages put their FAQ here; the browse screen itself has no opinion on it.
+   */
+  footer?: React.ReactNode;
 }) {
   const { t, language } = useTranslation();
   const { isPhone, width, height } = useResponsive();
@@ -158,6 +165,14 @@ export function BrowseScreen({
 
   const applyFilters = useCallback(
     (next: SearchFilters) => {
+      trackSearchFilter({
+        purpose: next.purpose,
+        location: next.area || next.city || fixedLocation,
+        minPrice: next.minPrice || undefined,
+        maxPrice: next.maxPrice || undefined,
+        beds: next.minBedrooms || next.maxBedrooms || undefined,
+        propertyType: next.propertyType !== "all" ? next.propertyType : undefined,
+      });
       router.setParams(filtersToParamPatch(next, { fixedLocation, current: params }));
     },
     [fixedLocation, params]
@@ -841,6 +856,8 @@ export function BrowseScreen({
           showLocation
           visible={isFilterModalOpen}
         />
+
+        {footer}
       </View>
 
       {/* ── Mobile: Sort Dropdown Sheet Modal ────────────────────────────── */}

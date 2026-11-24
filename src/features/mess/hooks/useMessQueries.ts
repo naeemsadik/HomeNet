@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useQuery, type QueryClient } from "@tanstack/react-query";
+import { MESS_ENABLED } from "@/lib/features";
 import { toApiError } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
 import { getMessDetail, getMyMessListings, searchMess } from "../api/messApi";
@@ -47,11 +48,20 @@ export function prefetchMessDetail(client: QueryClient, id: string) {
   return client.prefetchQuery({ queryKey: messKeys.detail(id), queryFn: () => getMessDetail(id) });
 }
 
+/**
+ * The lister's own seat listings, shown on My listings next to their properties.
+ * Off with the module, so a build without the mess API never calls it. Polls while
+ * one is in review, like useMyProperties, so an approval shows without a reload.
+ */
 export function useMyMessListings() {
   const userId = useAuthStore((s) => s.user?.id);
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: messKeys.my(userId),
-    queryFn: getMyMessListings,
-    enabled: Boolean(userId),
+    enabled: MESS_ENABLED && Boolean(userId),
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => getMyMessListings(pageParam),
+    getNextPageParam: (lastPage) => (lastPage.page * lastPage.limit < lastPage.total ? lastPage.page + 1 : undefined),
+    refetchInterval: (query) =>
+      query.state.data?.pages.some((page) => page.items.some((listing) => listing.status === "pending")) ? 10_000 : false,
   });
 }

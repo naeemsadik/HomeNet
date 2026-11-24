@@ -19,7 +19,7 @@ import { useLocalSearchParams } from "expo-router";
 import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
-import { colors, webPointer } from "@/theme";
+import { colors, colorTokens, webPointer } from "@/theme";
 import { useMyProperties } from "@/features/property/hooks/useMyProperties";
 import { SellerWelcomeBanner } from "../components/SellerWelcomeBanner";
 import { SellerBoostWorkspace } from "../components/SellerBoostWorkspace";
@@ -132,7 +132,7 @@ export function SellerDashboardScreen() {
       label: t("dashboard.draftListings"),
       value: formatLocalizedNumber(draftCount, language),
       icon: FileText,
-      iconBg: "#F4F6F5",
+      iconBg: colorTokens.surfaceSunken,
       iconColor: colors.muted,
     },
     {
@@ -202,7 +202,6 @@ export function SellerDashboardScreen() {
   const titles: Record<SellerNavKey, string> = {
     dashboard: t("dashboard.tabs.dashboard"),
     listings: t("dashboard.tabs.myListings"),
-    seats: t("mess.my.title"),
     create: t("dashboard.tabs.createProperty"),
     boost: t("dashboard.tabs.boostListings"),
     insights: t("dashboard.tabs.aiInsights"),

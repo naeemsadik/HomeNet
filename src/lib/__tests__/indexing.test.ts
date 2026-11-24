@@ -21,6 +21,9 @@ describe("what Google is asked to index", () => {
     expect(redirects["/valuation"]).toBe("/instant-valuation");
     expect(redirects["/search"]).toBe("/buy");
     expect(redirects["/home"]).toBe("/");
+    // The old seat-listings page: saved links land on My listings, and the
+    // redirect runs before the /mess/:id rewrite that would read "my" as an id.
+    expect(redirects["/mess/my"]).toBe("/my-properties");
   });
 
   it("does not inject a blanket canonical Link header on /property/:id responses, so deleted/unknown IDs on the 200 shell never carry a self-referencing canonical", () => {
@@ -33,7 +36,7 @@ describe("what Google is asked to index", () => {
   });
 
   it("does not link to an alias page that redirects", () => {
-    const aliases = ["/valuation", "/search", "/home"];
+    const aliases = ["/valuation", "/search", "/home", "/mess/my"];
     const offenders = [...sourceFiles("src"), ...sourceFiles("app")].filter((file) => {
       const text = read(file);
       return aliases.some((alias) => new RegExp(`(href|push|replace)[:=(\\s{]+["']${alias}["'?]`).test(text));

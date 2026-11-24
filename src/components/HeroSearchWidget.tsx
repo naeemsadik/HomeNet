@@ -14,6 +14,7 @@ import { useTranslation } from "@/i18n";
 import { SearchTabs, type SearchTabType } from "./SearchTabs";
 import { AreaPicker, type AreaLocationSelection } from "./AreaPicker";
 import { AdvancedFiltersModal } from "./AdvancedFiltersModal";
+import { trackSearchFilter } from "@/lib/analytics";
 import type { GeoPoint } from "@/lib/areaMatcher";
 import {
   countActiveFilters,
@@ -139,6 +140,14 @@ export function HeroSearchWidget({
       })
     );
     locationParams(params);
+    trackSearchFilter({
+      purpose: purposeForTab(activeTab),
+      location: query.trim() || undefined,
+      propertyType: filters.propertyType !== "all" ? filters.propertyType : undefined,
+      minPrice: filters.minPrice || undefined,
+      maxPrice: filters.maxPrice || undefined,
+      beds: filters.minBedrooms || filters.maxBedrooms || undefined,
+    });
     const qs = params.toString();
     router.push((qs ? `${target}?${qs}` : target) as never);
   };

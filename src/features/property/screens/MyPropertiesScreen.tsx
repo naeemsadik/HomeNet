@@ -1,1038 +1,318 @@
-import { router } from "expo-router";
-import { Archive, ArchiveRestore, Building2, CheckCircle2, Edit, Eye, Heart, MessageSquare, MoreVertical, Plus, RotateCcw, Send, Trash2, Zap } from "@/components/icons";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
-  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
+  type GestureResponderEvent,
+  type LayoutChangeEvent,
 } from "react-native";
-import { confirmAction, notify } from "@/lib/alert";
-import { AppLink } from "@/components/ui";
-import { useResponsive } from "@/hooks/useResponsive";
-import { colorTokens, fonts, webPointer } from "@/theme";
-import { SellerShell } from "@/features/seller/components/SellerShell";
-import { SUPPORT_EMAIL } from "@/content/legal";
-import { OWNER_UNARCHIVE_ENABLED } from "@/lib/features";
-import { openExternalUrl } from "@/lib/safeUrl";
-import { displaySubtype } from "../constants/holidayStay";
-import { listingTypeLabel, pricePeriodFor } from "../utils/listingType";
-import { useMyProperties } from "../hooks/useMyProperties";
-import { useArchiveProperty, useDeleteProperty, usePublishProperty, useUnarchiveProperty } from "../hooks/usePropertyMutations";
-import { toApiError } from "@/services/apiClient";
-import { cdnImage } from "@/lib/cloudinaryImage";
-import { listingEditPath, listingPath } from "@/lib/listingPath";
-
+import { BedDouble, Plus, RotateCcw } from "@/components/icons";
 import { LiveText } from "@/components/LiveText";
-import { NoTranslateText } from "@/components/NoTranslateText";
-import { formatLocalizedNumber, isPriceOnRequest, priceOnRequestLabel, translateListingStatus, useTranslation } from "@/i18n";
-import { listingCover } from "@/features/property/utils/listingMedia";
+import { AppButton, AppLink } from "@/components/ui";
+import { DemoNotice } from "@/features/mess/components/DemoNotice";
+import { seatFreshness } from "@/features/mess/components/SeatListingTools";
+import { useMyMessListings } from "@/features/mess/hooks/useMessQueries";
+import { SellerShell } from "@/features/seller/components/SellerShell";
+import { useResponsive } from "@/hooks/useResponsive";
+import { formatLocalizedNumber, useTranslation, type TranslationKey } from "@/i18n";
+import { pressedState } from "@/lib/a11yState";
+import { MESS_ENABLED } from "@/lib/features";
+import { LIST_PROPERTY_PATH, LIST_SEAT_PATH } from "@/lib/startListing";
+import { toApiError } from "@/services/apiClient";
+import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { ListingActionsMenu, MENU_ITEM_HEIGHT, type OpenMenu } from "../components/myListings/ListingActionsMenu";
+import { ListingCard } from "../components/myListings/ListingCard";
+import { ListingsEmpty, SourceNotice, type EmptyKind } from "../components/myListings/ListingParts";
+import { ListingTableHeader, ListingTableRow } from "../components/myListings/ListingTableRow";
+import { useListingViews, type ListingView } from "../components/myListings/listingView";
+import { useListingActions } from "../components/myListings/useListingActions";
+import { useMyProperties } from "../hooks/useMyProperties";
+import { countByFilter, LISTING_FILTERS, matchesFilter, mergeMyListings, type ListingFilter } from "../utils/myListings";
 
-export type ListingFilter = "all" | "active" | "draft" | "pending" | "rejected" | "sold" | "archived";
+/** Below this the table scrolls sideways rather than squeezing its columns. */
+const TABLE_MIN_WIDTH = 920;
 
-interface ListingItemData {
-  id: string;
-  /** The listing page and the edit form: /mess for a mess listing, /property for the rest. */
-  href: string;
-  editHref: string;
-  title: string;
-  location: string;
-  imageUrl?: string;
-  type: string;
-  listingType: string;
-  price: string;
-  status: "active" | "draft" | "pending" | "sold" | "archived" | "rejected";
-  /** Approved, and waiting for its owner to press Publish. */
-  readyToPublish: boolean;
-  boostText?: string;
-  isVerified?: boolean;
-  isBoosted?: boolean;
-  views: string;
-  likes: string;
-  inquiries: string;
-}
+const FILTER_LABELS: Record<ListingFilter, TranslationKey> = {
+  all: "seller.filters.all",
+  active: "seller.filters.active",
+  draft: "seller.filters.draft",
+  pending: "seller.inReview",
+  rejected: "seller.filters.rejected",
+  sold: "seller.filters.sold",
+  archived: "seller.filters.archived",
+};
 
+/**
+ * My listings: every listing the seller owns, properties and shared-living seat
+ * listings in one list, with one place to edit, publish, archive or delete them
+ * and see where each stands. A seat listing also carries its seats and the
+ * two-week "Still available" reminder.
+ */
 export function MyPropertiesScreen() {
   const { isPhone } = useResponsive();
   const { t, language } = useTranslation();
   const [activeFilter, setActiveFilter] = useState<ListingFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const deleteMutation = useDeleteProperty();
-  const archiveMutation = useArchiveProperty();
-  const unarchiveMutation = useUnarchiveProperty();
-  const publishMutation = usePublishProperty();
-  const [activeMenu, setActiveMenu] = useState<{
-    id: string;
-    editHref: string;
-    title: string;
-    status: ListingItemData["status"];
-    readyToPublish: boolean;
-    right: number;
-    top: number;
-  } | null>(null);
+  const [menu, setMenu] = useState<OpenMenu | null>(null);
+  /** Seats opened or closed by hand. */
+  const [seatToggles, setSeatToggles] = useState<Record<string, boolean>>({});
+  /**
+   * Seat listings that opened by themselves because they needed confirming. They
+   * stay open once confirmed, so the panel does not shut under the lister's hand.
+   */
+  const [autoOpened, setAutoOpened] = useState<ReadonlySet<string>>(() => new Set());
+  /**
+   * The table's width, measured: inside a sideways ScrollView a percentage width
+   * has nothing to resolve against, and the table grew to fit its longest title,
+   * pushing the actions column out of sight.
+   */
+  const [tableWidth, setTableWidth] = useState(0);
+  const onTableLayout = (event: LayoutChangeEvent) => setTableWidth(event.nativeEvent.layout.width);
 
-  const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } = useMyProperties();
-  const apiProperties = useMemo(() => data?.pages.flatMap((p) => p.data?.items ?? []) ?? [], [data]);
+  const properties = useMyProperties();
+  const seats = useMyMessListings();
+  const { actionsFor } = useListingActions();
 
-  const allListings = useMemo(() => {
-    return apiProperties.map((p): ListingItemData => ({
-      id: p.id,
-      href: listingPath(p),
-      editHref: listingEditPath(p),
-      title: p.title || "Untitled Property",
-      location: [p.area?.name, (p.area as any)?.city].filter(Boolean).join(", ") || p.address || "Location unavailable",
-      imageUrl: cdnImage(
-        listingCover(p.media) || p.media?.[0]?.url,
-        700,
-        460,
+  const propertyItems = useMemo(() => properties.data?.pages.flatMap((page) => page.data?.items ?? []) ?? [], [properties.data]);
+  const seatItems = useMemo(() => seats.data?.pages.flatMap((page) => page.items) ?? [], [seats.data]);
+  const rows = useMemo(() => mergeMyListings(propertyItems, seatItems), [propertyItems, seatItems]);
+  const views = useListingViews(rows);
+  const counts = useMemo(() => countByFilter(rows), [rows]);
+
+  const query = searchQuery.trim().toLowerCase();
+  const visible = useMemo(
+    () =>
+      views.filter(
+        (view) =>
+          matchesFilter(view.row, activeFilter) &&
+          (!query || view.title.toLowerCase().includes(query) || view.location.toLowerCase().includes(query)),
       ),
-      type: displaySubtype(p.subtype) || p.type || "Apartment",
-      listingType: listingTypeLabel(p.listing_type),
-      price: isPriceOnRequest(p.price)
-        ? priceOnRequestLabel(language)
-        : `${p.price_currency === "BDT" ? "৳" : (p.price_currency || "৳")} ${typeof p.price === "number" ? p.price.toLocaleString("en-BD") : p.price}${pricePeriodFor(p.listing_type)}`,
-      status: p.status,
-      readyToPublish: Boolean(p.ready_to_publish),
-      isVerified: p.is_verified,
-      isBoosted: false,
-      boostText: undefined,
-      views: (p.view_count || 0).toLocaleString(),
-      likes: "0",
-      inquiries: "0",
-    }));
-  }, [apiProperties]);
+    [views, activeFilter, query],
+  );
 
-  // Filter listings based on active filter and search query
-  const filteredListings = useMemo(() => {
-    return allListings.filter((item) => {
-      const matchesFilter =
-        activeFilter === "all" || item.status === activeFilter;
-      const matchesSearch =
-        !searchQuery ||
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.location.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesFilter && matchesSearch;
-    });
-  }, [allListings, activeFilter, searchQuery]);
+  const propertiesFailed = Boolean(properties.error);
+  const seatsFailed = MESS_ENABLED && Boolean(seats.error);
+  // A disabled query (mess off, or signed out) stays "pending" forever; isLoading does not.
+  const loading = properties.isLoading || seats.isLoading;
+  const nothingLoaded = rows.length === 0 && (propertiesFailed || seatsFailed);
+  const hasMore = Boolean(properties.hasNextPage || seats.hasNextPage);
+  const fetchingMore = properties.isFetchingNextPage || seats.isFetchingNextPage;
+  const hasSeatRows = rows.some((row) => row.kind === "seat");
 
-  // Filter count calculations
-  const counts = useMemo(() => {
-    return {
-      all: allListings.length,
-      active: allListings.filter((i) => i.status === "active").length,
-      draft: allListings.filter((i) => i.status === "draft").length,
-      pending: allListings.filter((i) => i.status === "pending").length,
-      rejected: allListings.filter((i) => i.status === "rejected").length,
-      sold: allListings.filter((i) => i.status === "sold").length,
-      archived: allListings.filter((i) => i.status === "archived").length,
-    };
-  }, [allListings]);
-
-  // Delete listing
-  const handleDelete = async (id: string, title: string) => {
-    setActiveMenu(null);
-    const confirmed = await confirmAction(
-      t("seller.deleteConfirmTitle"),
-      t("seller.deleteConfirmMessage", { title }),
-      {
-        confirmLabel: t("seller.actions.delete"),
-        destructive: true,
-      }
-    );
-    if (!confirmed) return;
-    try {
-      await deleteMutation.mutateAsync(id);
-    } catch (deleteError) {
-      notify(t("seller.deleteFailed"), toApiError(deleteError).message);
-    }
+  const retryFailed = () => {
+    if (propertiesFailed) void properties.refetch();
+    if (seatsFailed) void seats.refetch();
+  };
+  /**
+   * A source that failed after rows of it showed (Load more, or a refresh while one
+   * is in review) still has those rows on screen: say some did not load, not all,
+   * and retry the fetch that failed.
+   */
+  const sourceNotice = (source: typeof properties | typeof seats, noneLoaded: TranslationKey) => (
+    <SourceNotice
+      message={t(source.data ? "seller.someLoadFailed" : noneLoaded)}
+      onRetry={() => void (source.isFetchNextPageError ? source.fetchNextPage() : source.refetch())}
+    />
+  );
+  const loadMore = () => {
+    if (properties.hasNextPage) void properties.fetchNextPage();
+    if (seats.hasNextPage) void seats.fetchNextPage();
   };
 
-  const handlePublish = async (id: string) => {
-    setActiveMenu(null);
-    try {
-      await publishMutation.mutateAsync(id);
-    } catch (publishError) {
-      notify(t("seller.publishFailed"), toApiError(publishError).message);
-    }
-  };
+  // Adjusting state while rendering (not in an effect), so the first paint is already open.
+  const due = views.filter((view) => view.seat && (seatFreshness(view.seat).remind || seatFreshness(view.seat).hidden));
+  if (due.some((view) => !autoOpened.has(view.id))) {
+    setAutoOpened(new Set([...autoOpened, ...due.map((view) => view.id)]));
+  }
 
-  // The API archives only active or sold listings; anything else can only be deleted.
-  const statusLabel = (item: ListingItemData) =>
-    item.readyToPublish
-      ? t("seller.readyToPublish")
-      : item.status === "pending"
-        ? t("seller.inReview")
-        : item.status === "rejected"
-          ? t("seller.notApproved")
-          : translateListingStatus(item.status, language);
+  const isExpanded = (view: ListingView) => seatToggles[view.id] ?? autoOpened.has(view.id);
+  const toggleSeats = (view: ListingView) => setSeatToggles((current) => ({ ...current, [view.id]: !isExpanded(view) }));
 
-  const canArchive = (status: ListingItemData["status"]) => status === "active" || status === "sold";
-
-  const handleArchive = async (id: string, title: string) => {
-    setActiveMenu(null);
-    const confirmed = await confirmAction(
-      t("seller.archiveConfirmTitle"),
-      // Owners can't restore an archive themselves yet, so say so before they do it.
-      t(OWNER_UNARCHIVE_ENABLED ? "seller.archiveConfirmMessage" : "seller.archiveConfirmMessageNoUndo", { title }),
-      { confirmLabel: t("seller.actions.archive") }
-    );
-    if (!confirmed) return;
-    try {
-      await archiveMutation.mutateAsync(id);
-    } catch (archiveError) {
-      notify(t("seller.archiveFailed"), toApiError(archiveError).message);
-    }
-  };
-
-  // Until the API lets owners restore their own archive (OWNER_UNARCHIVE_ENABLED),
-  // "Ask to restore" opens an email to support naming the listing, instead of a
-  // restore call that would report success and change nothing.
-  const handleAskToRestore = async (id: string, title: string) => {
-    setActiveMenu(null);
-    const confirmed = await confirmAction(
-      t("seller.restoreViaSupportTitle"),
-      t("seller.restoreViaSupportMessage", { title }),
-      { confirmLabel: t("seller.restoreViaSupportConfirm") }
-    );
-    if (!confirmed) return;
-    const subject = encodeURIComponent(t("seller.restoreViaSupportSubject"));
-    const body = encodeURIComponent(`${title}\nListing ID: ${id}`);
-    openExternalUrl(`mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`);
-  };
-
-  const handleUnarchive = async (id: string, title: string) => {
-    if (!OWNER_UNARCHIVE_ENABLED) return handleAskToRestore(id, title);
-    setActiveMenu(null);
-    const confirmed = await confirmAction(
-      t("seller.unarchiveConfirmTitle"),
-      t("seller.unarchiveConfirmMessage", { title }),
-      { confirmLabel: t("seller.actions.unarchive") }
-    );
-    if (!confirmed) return;
-    try {
-      await unarchiveMutation.mutateAsync(id);
-    } catch (unarchiveError) {
-      notify(t("seller.unarchiveFailed"), toApiError(unarchiveError).message);
-    }
-  };
-
-  const handleOpenMenu = (event: any, item: ListingItemData) => {
+  const openMenu = (event: GestureResponderEvent, view: ListingView) => {
+    const actions = actionsFor(view);
+    const menuHeight = actions.length * MENU_ITEM_HEIGHT + 17;
     if (Platform.OS === "web") {
-      const rect = (event?.currentTarget as HTMLElement)?.getBoundingClientRect?.();
-      if (rect) {
-        const windowWidth = typeof window !== "undefined" ? window.innerWidth : 800;
-        const windowHeight = typeof window !== "undefined" ? window.innerHeight : 800;
-        const menuHeight = 120;
-        // Position menu to the LEFT of the 3-dots button:
-        const right = Math.max(16, windowWidth - rect.left + 8);
-        // Vertically center with the 3-dots button:
-        const centerY = rect.top + rect.height / 2;
-        let top = centerY - menuHeight / 2;
-        top = Math.max(16, Math.min(top, windowHeight - menuHeight - 16));
-        setActiveMenu({
-          id: item.id,
-          editHref: item.editHref,
-          title: item.title,
-          status: item.status,
-          readyToPublish: item.readyToPublish,
-          right,
-          top,
-        });
+      const rect = (event?.currentTarget as unknown as HTMLElement | null)?.getBoundingClientRect?.();
+      if (rect && typeof window !== "undefined") {
+        // To the left of the button, centred on it, and kept inside the window.
+        const top = Math.max(16, Math.min(rect.top + rect.height / 2 - menuHeight / 2, window.innerHeight - menuHeight - 16));
+        setMenu({ title: view.title, actions, top, right: Math.max(16, window.innerWidth - rect.left + 8) });
         return;
       }
     }
-    const pageX = event?.nativeEvent?.pageX || 200;
-    const pageY = event?.nativeEvent?.pageY || 100;
-    setActiveMenu({
-      id: item.id,
-      editHref: item.editHref,
-      title: item.title,
-      status: item.status,
-      readyToPublish: item.readyToPublish,
-      right: 60,
-      top: pageY - 40,
-    });
+    setMenu({ title: view.title, actions, top: (event?.nativeEvent?.pageY || 100) - 40, right: 60 });
   };
 
-  return (
-    <SellerShell
-      activeNav="listings"
-      onSearchQueryChange={setSearchQuery}
-      searchQuery={searchQuery}
-      title={t("seller.myListings")}
-    >
-      <View style={[styles.scrollBody, isPhone && styles.scrollBodyPhone]}>
-        {/* Top Filter Bar + Add New Property */}
-        <View style={[styles.filterBarRow, isPhone && styles.filterBarRowPhone]}>
-          {/* Filter Pills */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
-            <View style={styles.pillsRow}>
-              {(
-                [
-                  ["all", t("seller.filters.all"), counts.all],
-                  ["active", t("seller.filters.active"), counts.active],
-                  ["draft", t("seller.filters.draft"), counts.draft],
-                  ["pending", t("seller.inReview"), counts.pending],
-                  ["rejected", t("seller.filters.rejected"), counts.rejected],
-                  ["sold", t("seller.filters.sold"), counts.sold],
-                  ["archived", t("seller.filters.archived"), counts.archived],
-                ] as const
-              ).map(([key, label, count]) => {
-                const isSelected = activeFilter === key;
-                return (
-                  <Pressable
-                    key={key}
-                    onPress={() => setActiveFilter(key as ListingFilter)}
-                    style={({ pressed }) => [
-                      styles.filterPill,
-                      isSelected && styles.filterPillActive,
-                      webPointer,
-                      pressed && styles.pressed,
-                    ]}
-                  >
-                    <Text style={[styles.pillLabel, isSelected && styles.pillLabelActive]}>
-                      {label}
-                    </Text>
-                    <View style={[styles.pillCountBg, isSelected && styles.pillCountBgActive]}>
-                      <LiveText style={[styles.pillCountText, isSelected && styles.pillCountTextActive]}>
-                        {formatLocalizedNumber(count, language)}
-                      </LiveText>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </ScrollView>
+  const emptyKind: EmptyKind = rows.length === 0 ? "none" : query ? "search" : "filter";
+  const empty = (
+    <ListingsEmpty kind={emptyKind} filterLabel={t(FILTER_LABELS[activeFilter])} query={searchQuery.trim()} seatsOn={MESS_ENABLED} />
+  );
 
-          {/* Add Property Primary Button */}
-          <AppLink href="/property/create" style={styles.addPropertyBtn}>
-            <Plus color={colorTokens.onBrand} size={16} />
-            <Text style={styles.addPropertyBtnText}>{t("seller.addNewProperty")}</Text>
-          </AppLink>
+  return (
+    <SellerShell activeNav="listings" onSearchQueryChange={setSearchQuery} searchQuery={searchQuery} title={t("seller.myListings")}>
+      <View style={[styles.body, isPhone && styles.bodyPhone]}>
+        <View style={[styles.toolbar, isPhone && styles.toolbarPhone]}>
+          <View style={[styles.pills, !isPhone && styles.pillsBeside]}>
+            {LISTING_FILTERS.map((key) => {
+              const selected = activeFilter === key;
+              const label = t(FILTER_LABELS[key]);
+              const count = formatLocalizedNumber(counts[key], language);
+              return (
+                <Pressable
+                  key={key}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("seller.filterCount", { label, count })}
+                  {...pressedState(selected)}
+                  hitSlop={{ top: 3, bottom: 3 }}
+                  onPress={() => setActiveFilter(key)}
+                  style={({ pressed }) => [styles.pill, selected && styles.pillSelected, webPointer, pressed && styles.pressed]}
+                >
+                  <Text style={[styles.pillLabel, selected && styles.pillTextSelected]}>{label}</Text>
+                  <LiveText style={[styles.pillCount, selected && styles.pillTextSelected]}>{count}</LiveText>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <View style={[styles.addActions, isPhone && styles.addActionsPhone]}>
+            <AppLink href={LIST_PROPERTY_PATH} style={[styles.addButton, styles.addPrimary, isPhone && styles.addButtonPhone]}>
+              <Plus color={colorTokens.onBrand} size={16} />
+              <Text style={[styles.addText, styles.addTextPrimary]}>{t("seller.addNewProperty")}</Text>
+            </AppLink>
+            {MESS_ENABLED ? (
+              <AppLink href={LIST_SEAT_PATH} style={[styles.addButton, styles.addSecondary, isPhone && styles.addButtonPhone]}>
+                <BedDouble color={colorTokens.ink} size={16} />
+                <Text style={styles.addText}>{t("mess.my.create")}</Text>
+              </AppLink>
+            ) : null}
+          </View>
         </View>
 
-        {/* Listings Table / Card View */}
-        <View style={styles.tableCard}>
-          {isLoading ? (
-            <View style={styles.emptyContainer}>
-              <ActivityIndicator color="#04cf92" size="large" />
-              <Text style={styles.emptySub}>{t("dashboard.loadingListings")}</Text>
+        {hasSeatRows ? <DemoNotice embedded /> : null}
+        {!loading && !nothingLoaded && seatsFailed ? sourceNotice(seats, "seller.seatsLoadFailed") : null}
+        {!loading && !nothingLoaded && propertiesFailed ? sourceNotice(properties, "seller.propertiesLoadFailed") : null}
+
+        <View style={isPhone ? null : styles.listCard}>
+          {loading ? (
+            <View style={styles.state}>
+              <ActivityIndicator color={colorTokens.brand} size="large" />
+              <Text style={styles.stateBody}>{t("dashboard.loadingListings")}</Text>
             </View>
-          ) : error ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyTitle}>{t("dashboard.couldNotLoadListings")}</Text>
-              <Text style={styles.emptySub}>{toApiError(error).message}</Text>
-              <Pressable onPress={() => void refetch()} style={styles.retryButton}>
+          ) : nothingLoaded ? (
+            <View accessibilityRole="alert" style={styles.state}>
+              <Text style={styles.stateTitle}>{t("dashboard.couldNotLoadListings")}</Text>
+              <Text style={styles.stateBody}>{toApiError(properties.error ?? seats.error).message}</Text>
+              <Pressable accessibilityRole="button" onPress={retryFailed} style={({ pressed }) => [styles.retry, webPointer, pressed && styles.pressed]}>
                 <RotateCcw color={colorTokens.onBrand} size={16} />
                 <Text style={styles.retryText}>{t("dashboard.retry")}</Text>
               </Pressable>
             </View>
           ) : !isPhone ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tableScrollContent}>
-              <View style={styles.table}>
-                {/* Table Header with Column-wise Borders */}
-                <View style={styles.tableHeaderRow}>
-                  <View style={[styles.colProperty, styles.colBorder]}>
-                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.property")}</Text>
-                  </View>
-                  <View style={[styles.colType, styles.colBorder]}>
-                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.type")}</Text>
-                  </View>
-                  <View style={[styles.colPrice, styles.colBorder]}>
-                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.price")}</Text>
-                  </View>
-                  <View style={[styles.colStatus, styles.colBorder]}>
-                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.status")}</Text>
-                  </View>
-                  <View style={[styles.colPerformance, styles.colBorder]}>
-                    <Text style={styles.thCell} numberOfLines={1}>{t("admin.columns.performance")}</Text>
-                  </View>
-                  <View style={styles.colActions}>
-                    <Text style={[styles.thCell, { textAlign: "center" }]} numberOfLines={1}>{t("admin.columns.actions")}</Text>
-                  </View>
-                </View>
-
-                {/* Table Data Rows with Column-wise Borders */}
-                {filteredListings.length === 0 ? (
-                  <View style={styles.emptyContainer}>
-                    <Building2 color="#5C6B66" size={40} />
-                    <Text style={styles.emptyTitle}>{t("dashboard.noListingsFound")}</Text>
-                    <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
-                  </View>
-                ) : (
-                  filteredListings.map((item) => (
-                    <View key={item.id} style={styles.tableDataRow}>
-                      {/* Property Info (Thumbnail, Title, Verified, Boost, Location) */}
-                      <View style={[styles.colProperty, styles.colBorder, { flexDirection: "row", gap: 12, alignItems: "center" }]}>
-                        <AppLink href={item.href} style={styles.propThumb}>
-                          {item.imageUrl ? (
-                            <Image source={{ uri: cdnImage(item.imageUrl, 240) }} accessibilityLabel={item.title} style={styles.propThumb} />
-                          ) : (
-                            <View style={[styles.propThumb, styles.imagePlaceholder]}>
-                              <Building2 color="#6B7D78" size={20} />
-                            </View>
-                          )}
-                        </AppLink>
-                        <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
-                          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                            <AppLink href={item.href} style={{ flexShrink: 1 }}>
-                              <Text style={styles.propTitle} numberOfLines={1}>{item.title}</Text>
-                            </AppLink>
-                            {item.isVerified ? <CheckCircle2 color="#04cf92" size={16} /> : null}
-                            {item.isBoosted ? <Zap color="#F4823A" size={14} /> : null}
-                          </View>
-                          <Text style={styles.propLocation} numberOfLines={1}>{item.location}</Text>
-                        </View>
-                      </View>
-
-                      {/* Type Column */}
-                      <View style={[styles.colType, styles.colBorder, { gap: 4, justifyContent: "center" }]}>
-                        <Text style={styles.typeText} numberOfLines={1}>{item.type}</Text>
-                        <View style={styles.forSaleBadge}>
-                          <Text style={styles.forSaleBadgeText}>{item.listingType}</Text>
-                        </View>
-                      </View>
-
-                      {/* Price Column */}
-                      <View style={[styles.colPrice, styles.colBorder, { justifyContent: "center" }]}>
-                        <NoTranslateText style={styles.priceText} numberOfLines={1}>{item.price}</NoTranslateText>
-                      </View>
-
-                      {/* Status Column */}
-                      <View style={[styles.colStatus, styles.colBorder, { gap: 4, justifyContent: "center" }]}>
-                        <View style={[styles.statusBadge, getStatusStyle(item).bgStyle]}>
-                          <Text style={[styles.statusBadgeText, getStatusStyle(item).textStyle]}>
-                            {statusLabel(item)}
-                          </Text>
-                        </View>
-                        {item.boostText ? (
-                          <Text style={styles.boostCountdown} numberOfLines={1}>{item.boostText}</Text>
-                        ) : null}
-                      </View>
-
-                      {/* AI Value Column */}
-                      <View style={[styles.colPerformance, styles.colBorder, { flexDirection: "row", alignItems: "center", gap: 10 }]}>
-                        <View style={styles.metricItem}>
-                          <Eye color="#5C6B66" size={14} />
-                          <Text style={styles.metricValue}>{item.views}</Text>
-                        </View>
-                        <View style={styles.metricItem}>
-                          <Heart color="#5C6B66" size={14} />
-                          <Text style={styles.metricValue}>{item.likes}</Text>
-                        </View>
-                        <View style={styles.metricItem}>
-                          <MessageSquare color="#5C6B66" size={14} />
-                          <Text style={styles.metricValue}>{item.inquiries}</Text>
-                        </View>
-                      </View>
-
-                      {/* Actions Column - 3 dot menu only */}
-                      <View style={styles.colActions}>
-                        <Pressable
-                          accessibilityLabel={t("admin.columns.actions")}
-                          onPress={(e) => handleOpenMenu(e, item)}
-                          style={({ pressed }) => [styles.actionIconButton, webPointer, pressed && styles.pressed]}
-                        >
-                          <MoreVertical color="#5C6B66" size={16} />
-                        </Pressable>
-                      </View>
-                    </View>
-                  ))
-                )}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} onLayout={onTableLayout}>
+              <View role="table" aria-label={t("seller.myListings")} style={{ width: Math.max(tableWidth, TABLE_MIN_WIDTH) }}>
+                <ListingTableHeader />
+                {visible.length === 0
+                  ? empty
+                  : visible.map((view) => (
+                      <ListingTableRow
+                        key={view.id}
+                        view={view}
+                        expanded={isExpanded(view)}
+                        onToggle={() => toggleSeats(view)}
+                        onOpenMenu={openMenu}
+                      />
+                    ))}
               </View>
             </ScrollView>
+          ) : visible.length === 0 ? (
+            empty
           ) : (
-            /* Mobile Card View */
-            <View style={styles.mobileCardList}>
-              {filteredListings.length === 0 ? (
-                <View style={styles.emptyContainer}>
-                  <Building2 color="#5C6B66" size={40} />
-                  <Text style={styles.emptyTitle}>{t("dashboard.noListingsFound")}</Text>
-                  <Text style={styles.emptySub}>{t("dashboard.noListingsMatchFilter")}</Text>
-                </View>
-              ) : (
-                filteredListings.map((item) => (
-                  <View key={item.id} style={styles.mobileCard}>
-                    <View style={styles.mobileCardHead}>
-                      {item.imageUrl ? (
-                        <Image source={{ uri: cdnImage(item.imageUrl, 240) }} accessibilityLabel={item.title} style={styles.mobileThumb} />
-                      ) : (
-                        <View style={[styles.mobileThumb, styles.imagePlaceholder]}>
-                          <Building2 color="#6B7D78" size={20} />
-                        </View>
-                      )}
-                      <View style={{ flex: 1, gap: 4 }}>
-                        <Text style={styles.propTitle}>{item.title}</Text>
-                        <Text style={styles.propLocation}>{item.location}</Text>
-                        <View style={{ flexDirection: "row", gap: 6, marginTop: 4 }}>
-                          <View style={styles.forSaleBadge}>
-                            <Text style={styles.forSaleBadgeText}>{item.listingType}</Text>
-                          </View>
-                          <View style={[styles.statusBadge, getStatusStyle(item).bgStyle]}>
-                            <Text style={[styles.statusBadgeText, getStatusStyle(item).textStyle]}>
-                              {statusLabel(item)}
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                    </View>
-
-                    <View style={styles.mobileCardBody}>
-                      <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%" }}>
-                        <NoTranslateText style={styles.priceText}>{item.price}</NoTranslateText>
-                      </View>
-
-                      <View style={styles.mobileMetricsRow}>
-                        <View style={styles.metricItem}>
-                          <Eye color="#5C6B66" size={14} />
-                          <Text style={styles.metricValue}>{item.views}</Text>
-                        </View>
-                        <View style={styles.metricItem}>
-                          <Heart color="#5C6B66" size={14} />
-                          <Text style={styles.metricValue}>{item.likes}</Text>
-                        </View>
-                        <View style={styles.metricItem}>
-                          <MessageSquare color="#5C6B66" size={14} />
-                          <Text style={styles.metricValue}>{item.inquiries}</Text>
-                        </View>
-                      </View>
-
-                      <View style={styles.mobileActionsRow}>
-                        <AppLink href={item.href} style={styles.mobileActionBtn}>
-                          <Eye color="#5C6B66" size={14} />
-                          <Text style={styles.mobileActionText}>{t("seller.actions.view")}</Text>
-                        </AppLink>
-                        <AppLink href={item.editHref} style={styles.mobileActionBtn}>
-                          <Edit color="#04cf92" size={14} />
-                          <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
-                        </AppLink>
-                        {item.readyToPublish ? (
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t("seller.actions.publish")}
-                            hitSlop={8}
-                            onPress={() => handlePublish(item.id)}
-                            style={({ pressed }) => [styles.mobileActionBtn, pressed && styles.pressed]}
-                          >
-                            <Send color="#04cf92" size={14} />
-                            <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t("seller.actions.publish")}</Text>
-                          </Pressable>
-                        ) : null}
-                        {item.status === "archived" ? (
-                          <Pressable onPress={() => handleUnarchive(item.id, item.title)} style={styles.mobileActionBtn}>
-                            <ArchiveRestore color="#04cf92" size={14} />
-                            <Text style={[styles.mobileActionText, { color: "#04cf92" }]}>{t(OWNER_UNARCHIVE_ENABLED ? "seller.actions.unarchive" : "seller.actions.askToRestore")}</Text>
-                          </Pressable>
-                        ) : canArchive(item.status) ? (
-                          <Pressable onPress={() => handleArchive(item.id, item.title)} style={styles.mobileActionBtn}>
-                            <Archive color="#5C6B66" size={14} />
-                            <Text style={styles.mobileActionText}>{t("seller.actions.archive")}</Text>
-                          </Pressable>
-                        ) : null}
-                        <Pressable onPress={() => handleDelete(item.id, item.title)} style={styles.mobileActionBtn}>
-                          <Trash2 color="#D4183D" size={14} />
-                          <Text style={[styles.mobileActionText, { color: "#D4183D" }]}>{t("seller.actions.delete")}</Text>
-                        </Pressable>
-                      </View>
-                    </View>
-                  </View>
-                ))
-              )}
+            <View role="list" style={styles.cards}>
+              {visible.map((view) => (
+                <ListingCard key={view.id} view={view} actions={actionsFor(view)} expanded={isExpanded(view)} onToggle={() => toggleSeats(view)} />
+              ))}
             </View>
           )}
-          {hasNextPage && !isLoading && !error ? (
-            <Pressable
-              disabled={isFetchingNextPage}
-              onPress={() => void fetchNextPage()}
-              style={styles.loadMoreButton}
-            >
-              {isFetchingNextPage ? <ActivityIndicator color="#04cf92" size="small" /> : null}
-              <Text style={styles.loadMoreText}>{isFetchingNextPage ? t("dashboard.loading") : t("dashboard.loadMore")}</Text>
-            </Pressable>
+
+          {hasMore && !loading && !nothingLoaded ? (
+            <View style={styles.loadMore}>
+              <AppButton label={t("dashboard.loadMore")} loading={fetchingMore} onPress={loadMore} variant="ghost" />
+            </View>
           ) : null}
         </View>
       </View>
 
-      {/* 3-Dot Actions Dropdown Modal with Blurred Background */}
-      <Modal
-        animationType="fade"
-        onRequestClose={() => setActiveMenu(null)}
-        transparent
-        visible={!!activeMenu}
-      >
-        <Pressable
-          accessibilityLabel={t("common.close") || "Close"}
-          onPress={() => setActiveMenu(null)}
-          style={styles.menuOverlay}
-        >
-          {activeMenu && (
-            <View
-              style={[
-                styles.menuDropdown,
-                {
-                  top: activeMenu.top,
-                  right: activeMenu.right,
-                },
-              ]}
-              onStartShouldSetResponder={() => true}
-            >
-              <Pressable
-                style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
-                onPress={() => {
-                  const editHref = activeMenu.editHref;
-                  setActiveMenu(null);
-                  router.push(editHref as never);
-                }}
-              >
-                <Edit color="#04cf92" size={15} />
-                <Text style={[styles.menuItemText, { color: "#04cf92" }]}>{t("seller.actions.edit")}</Text>
-              </Pressable>
-
-              {activeMenu.readyToPublish ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t("seller.actions.publish")}
-                  style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
-                  onPress={() => handlePublish(activeMenu.id)}
-                >
-                  <Send color="#04cf92" size={15} />
-                  <Text style={[styles.menuItemText, { color: "#04cf92" }]}>{t("seller.actions.publish")}</Text>
-                </Pressable>
-              ) : null}
-
-              {activeMenu.status === "archived" ? (
-                <Pressable
-                  style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
-                  onPress={() => handleUnarchive(activeMenu.id, activeMenu.title)}
-                >
-                  <ArchiveRestore color="#04cf92" size={15} />
-                  <Text style={[styles.menuItemText, { color: "#04cf92" }]}>{t(OWNER_UNARCHIVE_ENABLED ? "seller.actions.unarchive" : "seller.actions.askToRestore")}</Text>
-                </Pressable>
-              ) : canArchive(activeMenu.status) ? (
-                <Pressable
-                  style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
-                  onPress={() => handleArchive(activeMenu.id, activeMenu.title)}
-                >
-                  <Archive color="#5C6B66" size={15} />
-                  <Text style={styles.menuItemText}>{t("seller.actions.archive")}</Text>
-                </Pressable>
-              ) : null}
-
-              <View style={styles.menuDivider} />
-
-              <Pressable
-                style={({ pressed }) => [styles.menuItem, webPointer, pressed && styles.menuItemPressed]}
-                onPress={() => handleDelete(activeMenu.id, activeMenu.title)}
-              >
-                <Trash2 color="#D4183D" size={15} />
-                <Text style={[styles.menuItemText, { color: "#D4183D" }]}>{t("seller.actions.delete")}</Text>
-              </Pressable>
-            </View>
-          )}
-        </Pressable>
-      </Modal>
+      <ListingActionsMenu menu={menu} onClose={() => setMenu(null)} />
     </SellerShell>
   );
 }
 
-// Helper to style status badges
-function getStatusStyle(item: Pick<ListingItemData, "status" | "readyToPublish">) {
-  if (item.readyToPublish) {
-    return { bgStyle: { backgroundColor: colorTokens.brandSurface }, textStyle: { color: colorTokens.brandText } };
-  }
-  switch (item.status) {
-    case "rejected":
-      return { bgStyle: { backgroundColor: colorTokens.errorSurface }, textStyle: { color: colorTokens.errorText } };
-    case "active":
-      return { bgStyle: { backgroundColor: "#E6FAF4" }, textStyle: { color: "#04cf92" } };
-    case "pending":
-      return { bgStyle: { backgroundColor: "#FDEEE2" }, textStyle: { color: "#F4823A" } };
-    case "sold":
-      return { bgStyle: { backgroundColor: "#E8EEFC" }, textStyle: { color: "#2251D6" } };
-    case "draft":
-      return { bgStyle: { backgroundColor: "#F4F6F5" }, textStyle: { color: "#5C6B66" } };
-    case "archived":
-      return { bgStyle: { backgroundColor: "#F4F6F5" }, textStyle: { color: "#899790" } };
-    default:
-      return { bgStyle: { backgroundColor: "#E6FAF4" }, textStyle: { color: "#04cf92" } };
-  }
-}
-
 const styles = StyleSheet.create({
   pressed: { opacity: 0.85 },
-  scrollBody: {
-    padding: 24,
-    gap: 20,
-  },
-  scrollBodyPhone: {
-    padding: 16,
-  },
-  filterBarRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 16,
-  },
-  filterBarRowPhone: {
-    flexDirection: "column",
-    alignItems: "stretch",
-  },
-  pillsScroll: {
-    flex: 1,
-  },
-  pillsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  filterPill: {
+  body: { padding: 24, gap: 20 },
+  bodyPhone: { padding: 16, gap: 16 },
+  toolbar: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 16 },
+  toolbarPhone: { flexDirection: "column", alignItems: "stretch" },
+  // The pills wrap, so every count shows at every width.
+  pills: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8, paddingVertical: 3 },
+  pillsBeside: { flex: 1 },
+  pill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     height: 38,
     paddingHorizontal: 16,
-    borderRadius: 999,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.08)",
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colorTokens.border,
+    backgroundColor: colorTokens.surface,
   },
-  filterPillActive: {
-    backgroundColor: "#04cf92",
-    borderColor: "#04cf92",
-  },
-  pillLabel: {
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-    color: "#0B1A17",
-  },
-  pillLabelActive: {
-    color: colorTokens.onBrand,
-  },
-  pillCountBg: {
-    backgroundColor: "transparent",
-  },
-  pillCountBgActive: {},
-  pillCountText: {
-    fontSize: 12,
-    fontFamily: fonts.semiBold,
-    color: "#5C6B66",
-  },
-  pillCountTextActive: {
-    color: colorTokens.onBrand,
-  },
-  addPropertyBtn: {
-    height: 40,
+  pillSelected: { backgroundColor: colorTokens.brand, borderColor: colorTokens.brand },
+  pillLabel: { fontFamily: fonts.semiBold, fontSize: 14, color: colorTokens.ink },
+  pillCount: { fontFamily: fonts.semiBold, fontSize: 12, color: colorTokens.muted },
+  pillTextSelected: { color: colorTokens.onBrand },
+  addActions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  // No wrap here: in a wrapping column, stretch reaches only the width of each wrapped line.
+  addActionsPhone: { flexDirection: "column", flexWrap: "nowrap", alignItems: "stretch" },
+  addButton: {
+    minHeight: 44,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 8,
-    backgroundColor: "#04cf92",
-    borderRadius: 999,
     paddingHorizontal: 18,
+    borderRadius: radius.pill,
   },
-  addPropertyBtnText: {
-    color: colorTokens.onBrand,
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-  },
-  tableCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.08)",
+  addButtonPhone: { alignSelf: "stretch" },
+  addPrimary: { backgroundColor: colorTokens.brand },
+  addSecondary: { backgroundColor: colorTokens.surface, borderWidth: 1, borderColor: colorTokens.border },
+  addText: { fontFamily: fonts.semiBold, fontSize: 14, color: colorTokens.ink },
+  addTextPrimary: { color: colorTokens.onBrand },
+  listCard: {
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colorTokens.border,
+    backgroundColor: colorTokens.surface,
     overflow: "hidden",
   },
-  tableScrollContent: {
-    minWidth: "100%",
-  },
-  table: {
-    width: "100%",
-    minWidth: 840,
-  },
-  tableHeaderRow: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    backgroundColor: "#F8FAF9",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(11,26,23,0.08)",
-  },
-  thCell: {
-    fontSize: 12,
-    fontFamily: fonts.bold,
-    color: "#5C6B66",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  tableDataRow: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(11,26,23,0.06)",
-  },
-  // Column border for vertical column separators
-  colBorder: {
-    borderRightWidth: 1,
-    borderRightColor: "rgba(11,26,23,0.08)",
-  },
-  // Column sizing & padding
-  colProperty: {
-    flex: 2.8,
-    minWidth: 220,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    justifyContent: "center",
-  },
-  colType: {
-    flex: 1.1,
-    minWidth: 100,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    justifyContent: "center",
-  },
-  colPrice: {
-    flex: 1.3,
-    minWidth: 120,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    justifyContent: "center",
-  },
-  colStatus: {
-    flex: 1.0,
-    minWidth: 96,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    justifyContent: "center",
-  },
-  colPerformance: {
-    flex: 1.4,
-    minWidth: 120,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    justifyContent: "center",
-  },
-  colActions: {
-    width: 88,
-    minWidth: 88,
-    paddingHorizontal: 8,
-    paddingVertical: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  propThumb: {
-    width: 60,
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: "#F4F6F5",
-  },
-  imagePlaceholder: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  propTitle: {
-    fontSize: 14,
-    fontFamily: fonts.bold,
-    color: "#0B1A17",
-  },
-  propLocation: {
-    fontSize: 12,
-    fontFamily: fonts.regular,
-    color: "#5C6B66",
-  },
-  typeText: {
-    fontSize: 14,
-    fontFamily: fonts.semiBold,
-    color: "#0B1A17",
-  },
-  forSaleBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: "#E8EEFC",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  forSaleBadgeText: {
-    fontSize: 11,
-    fontFamily: fonts.semiBold,
-    color: "#2251D6",
-  },
-  priceText: {
-    fontSize: 15,
-    fontFamily: fonts.bold,
-    color: "#0B1A17",
-  },
-  statusBadge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  statusBadgeText: {
-    fontSize: 12,
-    fontFamily: fonts.semiBold,
-  },
-  boostCountdown: {
-    fontSize: 12,
-    fontFamily: fonts.regular,
-    color: "#F4823A",
-  },
-  metricItem: {
+  cards: { gap: 16 },
+  state: { padding: 48, alignItems: "center", justifyContent: "center", gap: 8 },
+  stateTitle: { marginTop: 8, fontFamily: fonts.bold, fontSize: 16, color: colorTokens.ink, textAlign: "center" },
+  stateBody: { fontFamily: fonts.regular, fontSize: 13, color: colorTokens.muted, textAlign: "center" },
+  retry: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-  },
-  metricValue: {
-    fontSize: 12,
-    fontFamily: fonts.regular,
-    color: "#5C6B66",
-  },
-  actionIconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.08)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyContainer: {
-    padding: 48,
-    alignItems: "center",
-    justifyContent: "center",
     gap: 8,
-  },
-  emptyTitle: {
-    fontSize: 16,
-    fontFamily: fonts.bold,
-    color: "#0B1A17",
-    marginTop: 8,
-  },
-  emptySub: {
-    fontSize: 13,
-    fontFamily: fonts.regular,
-    color: "#5C6B66",
-    textAlign: "center",
-  },
-  retryButton: {
-    alignItems: "center",
-    backgroundColor: "#04cf92",
-    borderRadius: 10,
-    flexDirection: "row",
-    gap: 8,
+    minHeight: 44,
     marginTop: 8,
     paddingHorizontal: 18,
-    paddingVertical: 10,
+    borderRadius: radius.lg,
+    backgroundColor: colorTokens.brand,
   },
-  retryText: { color: colorTokens.onBrand, fontFamily: fonts.semiBold, fontSize: 14 },
-  loadMoreButton: {
-    alignItems: "center",
-    alignSelf: "center",
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  loadMoreText: { color: "#04cf92", fontFamily: fonts.semiBold, fontSize: 13 },
-  mobileCardList: {
-    padding: 16,
-    gap: 16,
-  },
-  mobileCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.08)",
-    padding: 16,
-    gap: 12,
-  },
-  mobileCardHead: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  mobileThumb: {
-    width: 64,
-    height: 64,
-    borderRadius: 12,
-    backgroundColor: "#F4F6F5",
-  },
-  mobileCardBody: {
-    gap: 10,
-    borderTopWidth: 0.8,
-    borderTopColor: "rgba(11,26,23,0.08)",
-    paddingTop: 10,
-  },
-  mobileMetricsRow: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  mobileActionsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 4,
-  },
-  mobileActionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  mobileActionText: {
-    fontSize: 12,
-    fontFamily: fonts.semiBold,
-    color: "#5C6B66",
-  },
-  // Blurred Backdrop & Dropdown menu styles
-  menuOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(11, 26, 23, 0.22)",
-    ...Platform.select({
-      web: {
-        backdropFilter: "blur(4px)",
-        WebkitBackdropFilter: "blur(4px)",
-      },
-      default: {},
-    }),
-  },
-  menuDropdown: {
-    position: "absolute",
-    zIndex: 9999,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    borderWidth: 0.8,
-    borderColor: "rgba(11,26,23,0.10)",
-    paddingVertical: 4,
-    minWidth: 150,
-    ...Platform.select({
-      web: {
-        boxShadow: "0 8px 24px rgba(11,26,23,0.18)",
-      },
-      default: {
-        elevation: 10,
-      },
-    }),
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-  },
-  menuItemPressed: {
-    backgroundColor: "#F4F6F5",
-  },
-  menuItemText: {
-    fontSize: 13,
-    fontFamily: fonts.semiBold,
-    color: "#0B1A17",
-  },
-  menuDivider: {
-    height: 0.8,
-    backgroundColor: "rgba(11,26,23,0.06)",
-    marginVertical: 4,
-  },
+  retryText: { fontFamily: fonts.semiBold, fontSize: 14, color: colorTokens.onBrand },
+  loadMore: { alignItems: "center", paddingVertical: 8 },
 });

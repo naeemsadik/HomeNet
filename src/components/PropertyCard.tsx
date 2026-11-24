@@ -37,6 +37,8 @@ import { AdminListingActions } from "@/features/property/components/AdminListing
 import { useSavedStore } from "@/stores/savedStore";
 import { listingCover, listingPhotos } from "@/features/property/utils/listingMedia";
 import { listingAddress, listingTypeName } from "@/features/property/utils/typeName";
+import { trackContactOwner } from "@/lib/analytics";
+import { webImageProps } from "@/lib/webImageProps";
 
 export type PropertyCardVariant = "standard" | "feature";
 
@@ -233,6 +235,10 @@ function PropertyCardComponent({
       open();
       return;
     }
+    trackContactOwner({
+      propertyId: property.id,
+      method: "call",
+    });
     const clean = sellerPhone.replace(/[^\d+]/g, "");
     const telUrl = `tel:${clean}`;
     if (isSafeLinkUrl(telUrl)) {
@@ -246,6 +252,10 @@ function PropertyCardComponent({
       open();
       return;
     }
+    trackContactOwner({
+      propertyId: property.id,
+      method: "whatsapp",
+    });
     const defaultSeller = language === "bn" ? "মালিক" : "Seller";
     const defaultProp = language === "bn" ? "প্রোপার্টি" : "Property";
     const greeting = language === "bn"
@@ -263,6 +273,10 @@ function PropertyCardComponent({
 
   const handleInquire = (e?: any) => {
     e?.stopPropagation?.();
+    trackContactOwner({
+      propertyId: property.id,
+      method: "message",
+    });
     open();
   };
 
@@ -319,6 +333,7 @@ function PropertyCardComponent({
                         style={styles.fill}
                         contentFit="cover"
                         cachePolicy="memory-disk"
+                        {...webImageProps({ loading: "lazy" })}
                       />
                     </View>
                   ))}
@@ -330,6 +345,7 @@ function PropertyCardComponent({
                   style={styles.fill}
                   contentFit="cover"
                   cachePolicy="memory-disk"
+                  {...webImageProps({ loading: "lazy" })}
                 />
               ) : (
                 placeholder
