@@ -3,7 +3,8 @@ import renderer, { act } from "react-test-renderer";
 import { Image } from "react-native";
 import { WebView } from "react-native-webview";
 import { PropertyLocationSection } from "../PropertyLocationSection";
-import { allowEmbedNavigation } from "../GoogleMapEmbed.native";
+import { allowEmbedNavigation, mapPage } from "../GoogleMapEmbed.native";
+import { SITE_URL } from "@/lib/seo";
 
 jest.mock("@/components/icons", () => new Proxy({}, { get: () => () => null }));
 const mockOpen = jest.fn();
@@ -32,10 +33,19 @@ describe("the listing's location in the app", () => {
         />,
       );
     });
-    expect(tree.root.findByType(WebView).props.source).toEqual({ uri: EMBED });
+    const source = tree.root.findByType(WebView).props.source;
+    expect(source.baseUrl).toBe(`${SITE_URL}/`);
+    expect(source.html).toContain("<iframe");
+    expect(source.html).toContain("maps?q=26%2F1%20Jafrabad&amp;output=embed");
     expect(tree.root.findAllByType(Image)).toHaveLength(0);
     expect(JSON.stringify(tree.toJSON())).toContain("26/1 Jafrabad");
     act(() => tree.unmount());
+  });
+
+  it("escapes the address and title so a listing cannot break out of the page", () => {
+    const html = mapPage('https://maps.google.com/maps?q="><script>x</script>&output=embed', 'a"b<c');
+    expect(html).not.toContain("<script>");
+    expect(html).toContain("a&quot;b&lt;c");
   });
 
   it("keeps the map on the card and sends any other link to the phone's browser", () => {
