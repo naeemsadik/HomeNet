@@ -196,7 +196,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       ]);
     });
 
-    it("enforces hidden-at-rest top-left badges (opacity: 0)", () => {
+    it("shows badges at rest, permanently visible across all 6 photo cards (opacity: 1)", () => {
       let tree: renderer.ReactTestRenderer;
       act(() => {
         tree = renderer.create(<HomeFeatureSections />);
@@ -220,7 +220,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       ];
       badgeContainers.forEach((container, idx) => {
         const styles = StyleSheet.flatten(container.props.style);
-        expect(styles.opacity).toBe(0);
+        expect(styles.opacity ?? 1).toBe(1);
         expect(styles.position).toBe("absolute");
         expect(styles.top).toBe(12);
         expect(styles.left).toBe(12);
