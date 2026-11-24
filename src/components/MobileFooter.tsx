@@ -106,8 +106,6 @@ const LEGAL_LINKS: { label: TranslationKey; href: string }[] = MOBILE_LEGAL_LINK
   href: link.href,
 }));
 
-/** A divider and the space after it: each link starts with one, and the row starts this far left so the first in every row is cut off. */
-
 const Section = memo(function Section({
   section,
   open,
@@ -180,11 +178,23 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
         {/* Two equal columns: the second link of every row starts at the same place, whatever the
             words or the language, instead of wherever the first link happens to end. */}
         <View style={styles.legalLinks}>
-          {LEGAL_LINKS.map((link) => (
+          {LEGAL_LINKS.map((link, index) => (
             <View key={link.href} style={styles.legalItem}>
               <AppLink href={link.href} style={styles.legalLink}>
                 <Text style={styles.legalLinkText}>{t(link.label)}</Text>
               </AppLink>
+              {/* The "|" the website footer has, drawn at the right edge of the left column so it
+                  never moves the columns. */}
+              {index % 2 === 0 ? (
+                <Text
+                  accessibilityElementsHidden
+                  importantForAccessibility="no"
+                  aria-hidden
+                  style={styles.legalPipe}
+                >
+                  |
+                </Text>
+              ) : null}
             </View>
           ))}
         </View>
@@ -276,6 +286,16 @@ const styles = StyleSheet.create({
   },
   legalItem: {
     width: "50%",
+  },
+  legalPipe: {
+    position: "absolute",
+    right: 12,
+    top: 0,
+    bottom: 0,
+    textAlignVertical: "center",
+    lineHeight: 44,
+    color: "rgba(11, 26, 23, 0.22)",
+    fontSize: 13,
   },
   legalLink: {
     minHeight: 44,

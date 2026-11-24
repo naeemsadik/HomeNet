@@ -34,8 +34,11 @@ describe("the phone footer's policy links", () => {
     const columns = tree.root.findAll(
       (n) => n.type === View && StyleSheet.flatten(n.props.style)?.width === "50%",
     );
-    const labels = columns.map((column) => textOf(column).trim());
+    const labels = columns.map((column) => textOf(column).replace("|", "").trim());
     expect(labels).toEqual(["Privacy Policy", "Terms of Use", "Delete account", "Contact us"]);
+    // A "|" after the left link of each row, as on the website footer; none after the right link.
+    const hasPipe = columns.map((column) => textOf(column).includes("|"));
+    expect(hasPipe).toEqual([true, false, true, false]);
     act(() => tree.unmount());
   });
 });
