@@ -108,4 +108,29 @@ describe("FitText", () => {
     const hidden = tree.root.find((n) => n.props.importantForAccessibility === "no-hide-descendants");
     expect(hidden.props.accessibilityElementsHidden).toBe(true);
   });
+
+  it("hides a line that cannot fit at its smallest size when asked to, and shows it again when it fits", () => {
+    let tree!: ReactTestRenderer;
+    act(() => {
+      tree = renderer.create(
+        <FitText minFontSize={9} maxFontSize={10.5} hideWhenTooLong style={{ fontSize: 10.5, lineHeight: 13 }}>
+          Bangladesh's trusted property marketplace
+        </FitText>,
+      );
+    });
+    const texts = () => tree.root.findAllByType(Text);
+    const visible = () => texts().find((t) => t.props.numberOfLines === 1)!;
+    const measuring = texts().find((t) => typeof t.props.onLayout === "function")!;
+    const box = tree.root.find((n) => typeof n.props.onLayout === "function" && n.type !== Text);
+
+    // 100-point copy is 3000 wide: a 240-wide box needs about 8, under the 9 minimum.
+    act(() => measuring.props.onLayout(layout(3000)));
+    act(() => box.props.onLayout(layout(240)));
+    expect(flat(visible().props.style).height).toBe(0);
+
+    // The same line in a 330-wide box needs 11: it fits and is shown.
+    act(() => box.props.onLayout(layout(330)));
+    expect(flat(visible().props.style).height).toBeUndefined();
+    act(() => tree.unmount());
+  });
 });

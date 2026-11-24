@@ -24,6 +24,7 @@ export function FitText({
   maxFontSize = 96,
   noTranslate = false,
   wrapWhenTooLong = false,
+  hideWhenTooLong = false,
   ...textProps
 }: Omit<TextProps, "numberOfLines"> & {
   minFontSize?: number;
@@ -33,6 +34,11 @@ export function FitText({
    * instead of cutting it with "…". For short lines where both are better than tiny type.
    */
   wrapWhenTooLong?: boolean;
+  /**
+   * When even `minFontSize` is too big for one line, show nothing. For a secondary line (a
+   * tagline) that must not grow the bar it sits in: two lines there squeezed the logo above it.
+   */
+  hideWhenTooLong?: boolean;
   /** Keep browser translation off this text (and its measuring copy), as NoTranslateText does. */
   noTranslate?: boolean;
 }) {
@@ -60,7 +66,9 @@ export function FitText({
 
   // The size that would make the line exactly as wide as the box, once both widths are known.
   const needed = boxWidth > 0 && textWidth > 0 ? ((MEASURE_SIZE * boxWidth) / textWidth) * SAFETY : null;
-  const wraps = wrapWhenTooLong && needed !== null && needed < minFontSize;
+  const tooLong = needed !== null && needed < minFontSize;
+  const wraps = wrapWhenTooLong && tooLong;
+  const hidden = hideWhenTooLong && tooLong;
   const fitted = needed === null ? baseSize : Math.min(maxFontSize, Math.max(minFontSize, needed));
 
   const onBox = (e: LayoutChangeEvent) => setBoxWidth(e.nativeEvent.layout.width);
@@ -76,7 +84,7 @@ export function FitText({
         // the last pixel off instead. It only ever shrinks, from the size worked out here.
         adjustsFontSizeToFit={Platform.OS !== "web" && !wraps}
         numberOfLines={wraps ? 2 : 1}
-        style={[style, scaled(fitted), styles.visible]}
+        style={[style, scaled(fitted), styles.visible, hidden && styles.hidden]}
       >
         {children}
       </Text>
@@ -102,6 +110,8 @@ export function FitText({
 const styles = StyleSheet.create({
   box: { alignSelf: "stretch" },
   visible: { textAlign: "left" },
+  // Zero height, so it takes no room; the measuring copy keeps working, so it comes back when it fits.
+  hidden: { height: 0, opacity: 0, overflow: "hidden" },
   measureClip: { position: "absolute", top: 0, left: 0, width: 0, height: 0, overflow: "hidden", opacity: 0 },
   // Room for the copy to run to its natural width without wrapping.
   measureRoom: { width: 10000, alignItems: "flex-start" },

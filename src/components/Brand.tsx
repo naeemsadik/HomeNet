@@ -62,13 +62,15 @@ export function Brand({
         </View>
         {subtitle ? (
           // On a phone the line can be wider than the room beside the logo, and it was cut to
-          // "property mark…". It shrinks to fit (down to 85%), and where even that is too wide
-          // (signed out, the Sign in button takes the room) it wraps onto a second line, which the
-          // bar has height for. Website and app alike; with room to spare it keeps its own size.
+          // "property mark…". It shrinks to fit (down to 85%). Where even that is too wide (a 320 to
+          // 360 dp phone, or the Sign in button taking the room), the compact bar drops it: a second
+          // line is taller than the bar's fixed height and the squeeze cut the top off the wordmark,
+          // as seen on the Android app. Elsewhere, with a taller box, it wraps onto a second line.
           <FitText
             maxFontSize={SUBTITLE_SIZE}
             minFontSize={SUBTITLE_SIZE * 0.85}
-            wrapWhenTooLong
+            wrapWhenTooLong={!isCompact}
+            hideWhenTooLong={isCompact}
             style={[styles.subtitle, isLight && styles.subtitleLight]}
           >
             {subtitle}
@@ -82,13 +84,15 @@ export function Brand({
 const SUBTITLE_SIZE = 10.5;
 
 const styles = StyleSheet.create({
-  link: { flexDirection: "row", alignItems: "center", gap: 9, flexShrink: 1, minWidth: 0, overflow: "hidden" },
-  linkCompact: { gap: 6, flexShrink: 1, minWidth: 0, overflow: "hidden" },
+  // No overflow: hidden on the brand or its text block. It was there to hold the tagline to the room
+  // beside the logo, but FitText already sizes or wraps the tagline to its box, and on a phone with a
+  // two-line tagline (a 360 dp screen, a larger system font) it cut the top off the wordmark.
+  link: { flexDirection: "row", alignItems: "center", gap: 9, flexShrink: 1, minWidth: 0 },
+  linkCompact: { gap: 6, flexShrink: 1, minWidth: 0 },
   mark: { flexShrink: 0 },
-  // The wordmark keeps its own height (flexShrink 0), and the padding stops "overflow: hidden", which
-  // is only here to hold the tagline to the room beside the logo, from shaving the top of the letters.
+  // The wordmark keeps its own height (flexShrink 0). The padding below keeps the letters off the edge.
   wordmark: { flexShrink: 0 },
-  textWrap: { justifyContent: "center", gap: 2, flexShrink: 1, minWidth: 0, overflow: "hidden", paddingVertical: 2 },
+  textWrap: { justifyContent: "center", gap: 2, flexShrink: 1, minWidth: 0, paddingVertical: 2 },
   // With a tagline, the brand takes the room up to the bar's right-hand buttons, so the tagline's
   // width comes from the bar, not from the text (FitText sizes the text to that width).
   linkFill: { flexGrow: 1 },
