@@ -9,6 +9,7 @@ import {
 } from "@/content/homeFeatureSections";
 import { en } from "@/i18n/locales/en";
 import { bn } from "@/i18n/locales/bn";
+import { colorTokens } from "@/theme";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -20,8 +21,8 @@ jest.mock("expo-router", () => {
   return {
     useRouter: () => ({ push: (...args: any[]) => mockPush(...args) }),
     router: { push: (...args: any[]) => mockPush(...args) },
-    Link: ({ children, href, style }: any) => {
-      return React.createElement("a", { href, style }, children);
+    Link: ({ children, href, style, ...rest }: any) => {
+      return React.createElement("a", { href, style, ...rest }, children);
     },
   };
 });
@@ -257,6 +258,58 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
         );
         expect(linkNode).toBeDefined();
       }
+    });
+
+    it("ensures pointer press/click on a card link does not apply green focus outline, while keyboard focus does", () => {
+      let tree: renderer.ReactTestRenderer;
+      act(() => {
+        tree = renderer.create(<HomeFeatureSections />);
+      });
+
+      const firstLink = tree!.root.find(
+        (node: ReactTestInstance) =>
+          node.props.accessibilityRole === "link" &&
+          node.props.accessibilityLabel === en.home.featureSections.photoCards.listProperty.title
+      );
+      expect(firstLink).toBeDefined();
+
+      // 1. Pointer click sequence: onPressIn -> onFocus (pointer-driven, matches returns false)
+      act(() => {
+        firstLink.props.onPressIn?.();
+        firstLink.props.onFocus?.({
+          nativeEvent: {
+            target: {
+              matches: () => false,
+            },
+          },
+        });
+      });
+
+      // Find the row inside firstLink
+      const row = firstLink.find(
+        (node: ReactTestInstance) =>
+          node.type === View &&
+          Array.isArray(node.props.style) &&
+          node.props.style.some((s: any) => s && s.flexDirection === "row")
+      );
+      const rowStylesPointer = StyleSheet.flatten(row.props.style);
+      expect(rowStylesPointer.outlineColor).toBeUndefined();
+
+      // 2. Keyboard focus sequence: onBlur -> onFocus (keyboard-driven with :focus-visible)
+      act(() => {
+        firstLink.props.onBlur?.();
+        firstLink.props.onFocus?.({
+          nativeEvent: {
+            target: {
+              matches: (selector: string) => selector === ":focus-visible",
+            },
+          },
+        });
+      });
+
+      const rowStylesKeyboard = StyleSheet.flatten(row.props.style);
+      expect(rowStylesKeyboard.outlineColor).toBe(colorTokens.brand);
+      expect(rowStylesKeyboard.outlineWidth).toBe(2);
     });
   });
 

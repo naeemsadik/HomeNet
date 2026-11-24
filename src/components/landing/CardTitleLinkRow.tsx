@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   Platform,
@@ -41,6 +41,16 @@ export const CardTitleLinkRow = memo(function CardTitleLinkRow({
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const isPointerDownRef = useRef(false);
+  const pointerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pointerTimeoutRef.current) {
+        clearTimeout(pointerTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (Platform.OS === "web" && typeof window !== "undefined" && window.matchMedia) {
@@ -75,12 +85,37 @@ export const CardTitleLinkRow = memo(function CardTitleLinkRow({
     onHoverChange?.(false);
   };
 
-  const handleFocus = () => {
-    setIsFocused(true);
-    onFocusChange?.(true);
+  const handlePressIn = () => {
+    isPointerDownRef.current = true;
+  };
+
+  const handlePressOut = () => {
+    pointerTimeoutRef.current = setTimeout(() => {
+      isPointerDownRef.current = false;
+    }, 0);
+  };
+
+  const handleFocus = (e?: any) => {
+    if (Platform.OS === "web") {
+      const target = (e?.nativeEvent?.target ?? e?.target) as
+        | { matches?: (selector: string) => boolean }
+        | undefined;
+      const isKeyboardFocus =
+        !isPointerDownRef.current &&
+        (typeof target?.matches === "function" ? target.matches(":focus-visible") : false);
+      setIsFocused(isKeyboardFocus);
+      onFocusChange?.(isKeyboardFocus);
+    } else {
+      setIsFocused(true);
+      onFocusChange?.(true);
+    }
   };
 
   const handleBlur = () => {
+    if (pointerTimeoutRef.current) {
+      clearTimeout(pointerTimeoutRef.current);
+    }
+    isPointerDownRef.current = false;
     setIsFocused(false);
     onFocusChange?.(false);
   };
@@ -98,6 +133,8 @@ export const CardTitleLinkRow = memo(function CardTitleLinkRow({
           onFocus={handleFocus}
           onHoverIn={handleHoverIn}
           onHoverOut={handleHoverOut}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
           style={({ hovered }: { hovered?: boolean }) => [
             styles.pressable,
             hovered && styles.pressableHovered,
