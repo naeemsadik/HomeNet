@@ -1,8 +1,9 @@
 import { ExternalLink, MapPin, type LucideIcon } from "@/components/icons";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { openExternalUrl } from "@/lib/safeUrl";
 import { colorTokens, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
+import { GoogleMapEmbed } from "./GoogleMapEmbed";
 import { styles } from "../screens/PropertyDetailScreen.styles";
 
 export type NearbyPlace = {
@@ -21,10 +22,9 @@ type PropertyLocationSectionProps = {
 };
 
 /**
- * The listing's location. On the web, Google's embedded map. In the app, the address and the
- * link to Google Maps: it used to be a stock photo of a world map with a pin drawn on top, which
- * looked like a real map and pointed nowhere. A real map with this listing's pin can replace the
- * address card once the pin is checked on a device.
+ * The listing's location: Google's embedded map, on the web and in the app alike. In the app it
+ * used to be a stock photo of a wooden world map with a pin drawn on top, which looked like a
+ * real map and pointed nowhere.
  */
 export function PropertyLocationSection({
   title,
@@ -36,7 +36,6 @@ export function PropertyLocationSection({
 }: PropertyLocationSectionProps) {
   const { t } = useTranslation();
   const place = address || location;
-  const showMap = Platform.OS === "web";
 
   return (
     <View style={styles.sectionCard}>
@@ -54,30 +53,16 @@ export function PropertyLocationSection({
         </Pressable>
       </View>
 
-      {showMap ? (
-        <View style={styles.mapCard}>
-          <iframe
-            title={`Google Map for ${title}`}
-            src={mapEmbedUrl}
-            style={{ width: "100%", height: "100%", border: 0, borderRadius: 16 }}
-            loading="lazy"
-            allowFullScreen
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+      <View style={styles.mapCard}>
+        <GoogleMapEmbed title={title} embedUrl={mapEmbedUrl} />
 
-          <View pointerEvents="none" style={styles.mapAddressPill}>
-            <MapPin color={colorTokens.brandText} size={14} />
-            <Text numberOfLines={1} style={styles.mapAddressPillText}>
-              {place}
-            </Text>
-          </View>
+        <View pointerEvents="none" style={styles.mapAddressPill}>
+          <MapPin color={colorTokens.brandText} size={14} />
+          <Text numberOfLines={1} style={styles.mapAddressPillText}>
+            {place}
+          </Text>
         </View>
-      ) : (
-        <View style={styles.locationAddressOnly}>
-          <MapPin color={colorTokens.brandText} size={18} />
-          <Text style={styles.locationAddressOnlyText}>{place}</Text>
-        </View>
-      )}
+      </View>
 
       {/* Nearby Points of Interest */}
       {nearbyPlaces.length > 0 && (
