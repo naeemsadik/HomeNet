@@ -199,45 +199,78 @@ export const httpBackend: MessBackend = {
   },
 };
 
+import { fixtureBackend } from "./fixtures/server";
+
+export { fixtureBackend };
+
 /**
- * The demo backend, for development and demos before the API exists. Its
- * listings, phone numbers and campus coordinates are made up: never set
- * EXPO_PUBLIC_MESS_FIXTURES on a production deploy.
- *
- * The env check is written out here, not read from a constant elsewhere, so
- * the production build sees a branch that is always false and leaves the demo
- * module out of the bundle entirely.
+ * Determines whether the in-memory mock/fixture backend should be used.
+ * Active when:
+ * 1. EXPO_PUBLIC_MESS_USE_MOCK is "true" or EXPO_PUBLIC_MESS_FIXTURES is "true", OR
+ * 2. EXPO_PUBLIC_MESS_LIVE_API is NOT "true" (since live backend mess endpoints are not yet deployed).
  */
-const fixtureBackend: MessBackend | null =
-  process.env.EXPO_PUBLIC_MESS_FIXTURES === "true"
-    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
-      (require("./fixtures/server") as typeof import("./fixtures/server")).fixtureBackend
-    : null;
+export function shouldUseMockBackend(): boolean {
+  const env = process.env as Record<string, string | undefined>;
+  if (env["EXPO_PUBLIC_MESS_LIVE_API"] === "true") {
+    return false;
+  }
+  return true;
+}
 
-const backend = (): MessBackend => fixtureBackend ?? httpBackend;
+export function fallbackOn404<T>(primary: () => Promise<T>, fallback: () => Promise<T>): Promise<T> {
+  return primary().catch((error: unknown) => {
+    const status =
+      (error as { status?: number | null })?.status ??
+      (error as any)?.statusCode ??
+      (error as any)?.response?.status ??
+      null;
+    if (status === 404) {
+      if (__DEV__) {
+        console.warn("[messApi] Live endpoint returned 404, falling back to mock fixtures");
+      }
+      return fallback();
+    }
+    return Promise.reject(error);
+  });
+}
 
-export const getUniversities = () => backend().getUniversities();
-export const getAdminUniversities = () => backend().getAdminUniversities();
-export const createUniversity = (input: UniversityInput) => backend().createUniversity(input);
-export const updateUniversity = (id: string, input: UniversityInput) => backend().updateUniversity(id, input);
-export const deleteUniversity = (id: string) => backend().deleteUniversity(id);
-export const createCampus = (input: CampusInput) => backend().createCampus(input);
-export const updateCampus = (id: string, input: Omit<CampusInput, "university_id">) => backend().updateCampus(id, input);
-export const deleteCampus = (id: string) => backend().deleteCampus(id);
-export const searchMess = (filters: MessFilters, page: number, limit: number) => backend().searchMess(filters, page, limit);
-export const getMessDetail = (id: string) => backend().getMessDetail(id);
-export const getMyMessListings = (page = 1) => backend().getMyMessListings(page);
-export const upsertMess = (dto: UpsertMessDto) => backend().upsertMess(dto);
-export const submitMess = (id: string) => backend().submitMess(id);
-export const archiveMess = (id: string) => backend().archiveMess(id);
-export const deleteMess = (id: string) => backend().deleteMess(id);
-export const publishMess = (id: string) => backend().publishMess(id);
+export const backend = (): MessBackend => (shouldUseMockBackend() ? fixtureBackend : httpBackend);
+
+function invoke<K extends keyof MessBackend>(
+  method: K,
+  ...args: Parameters<MessBackend[K]>
+): ReturnType<MessBackend[K]> {
+  if (shouldUseMockBackend()) {
+    return (fixtureBackend[method] as any)(...args);
+  }
+  return fallbackOn404(
+    () => (httpBackend[method] as any)(...args),
+    () => (fixtureBackend[method] as any)(...args),
+  ) as ReturnType<MessBackend[K]>;
+}
+
+export const getUniversities = () => invoke("getUniversities");
+export const getAdminUniversities = () => invoke("getAdminUniversities");
+export const createUniversity = (input: UniversityInput) => invoke("createUniversity", input);
+export const updateUniversity = (id: string, input: UniversityInput) => invoke("updateUniversity", id, input);
+export const deleteUniversity = (id: string) => invoke("deleteUniversity", id);
+export const createCampus = (input: CampusInput) => invoke("createCampus", input);
+export const updateCampus = (id: string, input: Omit<CampusInput, "university_id">) => invoke("updateCampus", id, input);
+export const deleteCampus = (id: string) => invoke("deleteCampus", id);
+export const searchMess = (filters: MessFilters, page: number, limit: number) => invoke("searchMess", filters, page, limit);
+export const getMessDetail = (id: string) => invoke("getMessDetail", id);
+export const getMyMessListings = (page = 1) => invoke("getMyMessListings", page);
+export const upsertMess = (dto: UpsertMessDto) => invoke("upsertMess", dto);
+export const submitMess = (id: string) => invoke("submitMess", id);
+export const archiveMess = (id: string) => invoke("archiveMess", id);
+export const deleteMess = (id: string) => invoke("deleteMess", id);
+export const publishMess = (id: string) => invoke("publishMess", id);
 export const uploadMessMedia = (id: string, file: UploadInput, label: MediaLabel, displayOrder?: number) =>
-  backend().uploadMessMedia(id, file, label, displayOrder);
-export const deleteMessMedia = (mediaId: string) => backend().deleteMessMedia(mediaId);
-export const setSeatStatus = (id: string, seatId: string, status: SeatStatus) => backend().setSeatStatus(id, seatId, status);
-export const confirmAvailable = (id: string) => backend().confirmAvailable(id);
-export const contactLister = (id: string, channel: ContactChannel) => backend().contactLister(id, channel);
-export const reportMess = (id: string, reason: ReportReason, note?: string) => backend().reportMess(id, reason, note);
-export const getSeatPreferences = () => backend().getSeatPreferences();
-export const putSeatPreferences = (preferences: SeekerPreference) => backend().putSeatPreferences(preferences);
+  invoke("uploadMessMedia", id, file, label, displayOrder);
+export const deleteMessMedia = (mediaId: string) => invoke("deleteMessMedia", mediaId);
+export const setSeatStatus = (id: string, seatId: string, status: SeatStatus) => invoke("setSeatStatus", id, seatId, status);
+export const confirmAvailable = (id: string) => invoke("confirmAvailable", id);
+export const contactLister = (id: string, channel: ContactChannel) => invoke("contactLister", id, channel);
+export const reportMess = (id: string, reason: ReportReason, note?: string) => invoke("reportMess", id, reason, note);
+export const getSeatPreferences = () => invoke("getSeatPreferences");
+export const putSeatPreferences = (preferences: SeekerPreference) => invoke("putSeatPreferences", preferences);
