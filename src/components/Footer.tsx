@@ -90,7 +90,9 @@ function PhoneDownloadCard() {
   const { t } = useTranslation();
   return (
     <View style={styles.phoneDownloadCard}>
-      <Text accessibilityRole="header" style={styles.phoneDownloadHeading}>
+      {/* aria-level: a bare "header" role is an <h1> on the web, and the page already has one
+          (scripts/check-seo.mjs fails the build on a second). */}
+      <Text accessibilityRole="header" aria-level={3} style={styles.phoneDownloadHeading}>
         {t("footer.downloadHeading")}
       </Text>
       <GooglePlayButton />

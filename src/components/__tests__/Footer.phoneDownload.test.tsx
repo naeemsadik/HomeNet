@@ -42,6 +42,13 @@ describe("the phone footer on the website", () => {
     act(() => tree.unmount());
   });
 
+  it("does not add a second <h1>: the heading is a level 3 heading", () => {
+    const tree = render();
+    const heading = tree.root.find((n) => n.props.accessibilityRole === "header" && textOf(n).includes("Download the Homenet app"));
+    expect(heading.props["aria-level"]).toBe(3);
+    act(() => tree.unmount());
+  });
+
   it("shows it on the compact phone footer too", () => {
     const tree = render({ compact: true });
     expect(textOf(tree.root)).toContain("Download the Homenet app");
