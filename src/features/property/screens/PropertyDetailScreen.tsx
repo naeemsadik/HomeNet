@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
 import Head from "expo-router/head";
 import { ArrowLeft, Bath, BedDouble, Building2, Calendar, Camera, Check, ChevronLeft, ChevronRight, Flag, Heart, MapPin, Maximize2, Phone, RotateCcw, Share2, ShieldCheck, TrendingUp, UserRound } from "@/components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -29,7 +29,7 @@ import { type PropertyDetail, usePropertyDetail, useSimilarProperties } from "..
 import { useSavedStore } from "@/stores/savedStore";
 import { useAuthStore } from "@/stores/authStore";
 import { hasPermission } from "@/lib/permissions";
-import { listingPath, opensOnMessPage } from "@/lib/listingPath";
+import { listingKeyFromSegment, listingPath, opensOnMessPage, propertyPath, samePath } from "@/lib/listingPath";
 import { toApiError } from "@/services/apiClient";
 import { styles } from "./PropertyDetailScreen.styles";
 import { AdminPropertyCommandDeck } from "../components/AdminPropertyCommandDeck";
@@ -64,7 +64,8 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   const { t, language } = useTranslation();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const rawId = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
-  const propertyId = (rawId ?? "").trim();
+  // The URL reads /property/<title words>-<uuid>; the API is asked for the uuid.
+  const propertyId = listingKeyFromSegment(rawId);
   const id = propertyId;
   const { isPhone, isTablet } = useResponsive();
   const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId, initialDetail);
@@ -74,6 +75,15 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   useEffect(() => {
     if (messPage) router.replace(messPage as never);
   }, [messPage]);
+  // An old /property/<uuid> link, or one from before a title change, is swapped
+  // for the listing's current URL, which is also the page's canonical.
+  const canonicalPath = apiDetail && !messPage ? listingPath(apiDetail) : undefined;
+  const pathname = usePathname();
+  useEffect(() => {
+    if (canonicalPath && !samePath(pathname, canonicalPath)) {
+      router.replace(canonicalPath as never);
+    }
+  }, [canonicalPath, pathname]);
   const {
     data: similarProperties = [],
     error: similarError,
@@ -489,6 +499,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
           title={listingMetaTitle(apiDetail)}
           description={listingMetaDescription(apiDetail)}
           image={listingShareImage(apiDetail)}
+          canonicalPath={canonicalPath}
         />
       ) : null}
       {apiDetail ? (
@@ -903,7 +914,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.similarScroll}>
                   <View style={styles.similarRow}>
                     {property.similarProperties.map((sim) => (
-                      <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
+                      <AppLink href={propertyPath(sim)} key={sim.id} style={styles.similarCard}>
                         {sim.imageUrl ? (
                           <Image
                             source={{ uri: cdnImage(sim.imageUrl, 480) }}

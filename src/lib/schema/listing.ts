@@ -5,6 +5,7 @@ import { INTENT_LABEL, type ListingIntent } from "./breadcrumb";
 import { ORGANIZATION_ID } from "./brand";
 import type { BreadcrumbCrumb, SchemaNode } from "./types";
 import { listingPhotos } from "@/features/property/utils/listingMedia";
+import { propertyPath } from "@/lib/listingPath";
 
 const APARTMENT_SUBTYPES = new Set(["apartment", "flat", "condo", "short-let", "studio", "penthouse"]);
 const HOUSE_SUBTYPES = new Set(["house", "villa", "duplex", "bungalow"]);
@@ -63,8 +64,8 @@ function amenityFeatures(detail: PropertyDetail): SchemaNode[] | undefined {
   return features.length ? features : undefined;
 }
 
-export function listingUrl(id: string): string {
-  return `${SITE_URL}/property/${encodeURIComponent(id)}`;
+export function listingUrl(listing: { id: string; title?: string | null; slug?: string | null }): string {
+  return `${SITE_URL}${propertyPath(listing)}`;
 }
 
 /**
@@ -80,7 +81,7 @@ export function itemListSchema(items: { id: string; title: string }[], pageUrl: 
     itemListElement: items.map((item, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      url: listingUrl(item.id),
+      url: listingUrl(item),
       name: item.title,
     })),
   };
@@ -92,7 +93,7 @@ export function itemListSchema(items: { id: string; title: string }[], pageUrl: 
  * numbers are shown to visitors, not handed to scrapers.
  */
 export function listingSchema(detail: PropertyDetail): SchemaNode {
-  const url = listingUrl(detail.id);
+  const url = listingUrl(detail);
   const amenities = detail.amenities ?? {};
   const subjectType = listingSubjectType(detail.type, detail.subtype);
   const isRent = detail.listing_type === "rent";
@@ -172,6 +173,6 @@ export function listingCrumbs(detail: PropertyDetail): BreadcrumbCrumb[] {
   const city = seoAreaBySlug(area?.parent) ?? (area?.parent ? undefined : area) ?? seoAreaForName(detail.area?.city);
   if (city) crumbs.push({ name: city.name, url: `${SITE_URL}/${intent}/${city.slug}` });
   if (area && area !== city) crumbs.push({ name: area.name, url: `${SITE_URL}/${intent}/${area.slug}` });
-  crumbs.push({ name: detail.title, url: listingUrl(detail.id) });
+  crumbs.push({ name: detail.title, url: listingUrl(detail) });
   return crumbs;
 }

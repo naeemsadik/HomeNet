@@ -34,7 +34,11 @@ jest.mock("@/components/PropertyResultsMap", () => ({
 }));
 jest.mock("@/features/property/components/PropertyLightbox", () => ({ PropertyLightbox: () => null }));
 jest.mock("@/features/property/components/WhatsAppIcon", () => ({ WhatsAppIcon: () => null }));
-jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false } }));
+jest.mock("expo-router", () => ({
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false },
+  // DETAIL's id is not a uuid, so its URL is the id alone.
+  usePathname: () => "/mess/m1",
+}));
 jest.mock("../../api/messApi", () => ({
   getMessDetail: jest.fn(),
   getUniversities: jest.fn(),

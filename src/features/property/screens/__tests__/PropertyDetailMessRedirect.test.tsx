@@ -19,9 +19,11 @@ jest.mock("@/components/icons", () => {
   const Icon = () => null;
   return new Proxy({}, { get: () => Icon });
 });
+let mockSegment = "m1";
 jest.mock("expo-router", () => ({
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
-  useLocalSearchParams: () => ({ id: "m1" }),
+  useLocalSearchParams: () => ({ id: mockSegment }),
+  usePathname: () => `/property/${mockSegment}`,
 }));
 jest.mock("@/components/AppChrome", () => ({
   AppChrome: ({ children }: { children: React.ReactNode }) => children,
@@ -29,8 +31,8 @@ jest.mock("@/components/AppChrome", () => ({
 jest.mock("@/components/PageMeta", () => ({ PageMeta: () => null }));
 jest.mock("@/components/JsonLd", () => ({ JsonLd: () => null }));
 
-const detail = (subtype: string) => ({
-  id: "m1",
+const detail = (subtype: string, id = "m1") => ({
+  id,
   title: "Single seat in a 4-person mess",
   description: null,
   type: "residential",
@@ -54,8 +56,12 @@ const detail = (subtype: string) => ({
 });
 
 let mockCurrent: ReturnType<typeof detail>;
+const mockAskedFor = jest.fn();
 jest.mock("../../hooks/usePropertyDetail", () => ({
-  usePropertyDetail: () => ({ data: mockCurrent, error: null, isLoading: false, refetch: jest.fn() }),
+  usePropertyDetail: (id: string) => {
+    mockAskedFor(id);
+    return { data: mockCurrent, error: null, isLoading: false, refetch: jest.fn() };
+  },
   useSimilarProperties: () => ({ data: [], error: null, isLoading: false, refetch: jest.fn() }),
 }));
 
@@ -64,6 +70,7 @@ let root: { render: (node: React.ReactNode) => void; unmount: () => void };
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockSegment = "m1";
   useLanguageStore.getState().setLanguage("en");
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -88,5 +95,33 @@ describe("PropertyDetailScreen with a mess listing", () => {
     await act(async () => root.render(<PropertyDetailScreen />));
     expect(router.replace).not.toHaveBeenCalled();
     expect(container.textContent).toContain("Single seat in a 4-person mess");
+  });
+});
+
+describe("PropertyDetailScreen URLs", () => {
+  const ID = "0b6f3c1e-1234-4abc-8def-0123456789ab";
+  const READABLE = `/property/single-seat-in-a-4-person-mess-${ID}`;
+
+  it("asks the API for the uuid at the end of a readable URL, and stays there", async () => {
+    mockSegment = READABLE.slice("/property/".length);
+    mockCurrent = detail("apartment", ID);
+    await act(async () => root.render(<PropertyDetailScreen />));
+    expect(mockAskedFor).toHaveBeenCalledWith(ID);
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("moves an old /property/<uuid> link to the readable URL", async () => {
+    mockSegment = ID;
+    mockCurrent = detail("apartment", ID);
+    await act(async () => root.render(<PropertyDetailScreen />));
+    expect(mockAskedFor).toHaveBeenCalledWith(ID);
+    expect(router.replace).toHaveBeenCalledWith(READABLE);
+  });
+
+  it("moves a link with an outdated title to the current one", async () => {
+    mockSegment = `old-title-${ID}`;
+    mockCurrent = detail("apartment", ID);
+    await act(async () => root.render(<PropertyDetailScreen />));
+    expect(router.replace).toHaveBeenCalledWith(READABLE);
   });
 });
