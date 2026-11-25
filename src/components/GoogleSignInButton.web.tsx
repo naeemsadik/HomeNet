@@ -19,10 +19,11 @@ interface GoogleAccountsId {
       type: "standard";
       theme: "outline";
       size: "large";
-      shape: "pill";
+      shape: "rectangular";
       text: "signin_with" | "signup_with";
       logo_alignment: "left";
       width: number;
+      locale: string;
     },
   ) => void;
 }
@@ -99,7 +100,7 @@ function initializeOnce(api: GoogleAccountsId, clientId: string) {
  * is drawn and the email form below still works.
  */
 export function GoogleSignInButton({ mode, onCredential, disabled }: GoogleSignInButtonProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const slot = useRef<HTMLDivElement | null>(null);
   // The latest handler, without redrawing Google's button when it changes.
   const onCredentialRef = useRef(onCredential);
@@ -119,16 +120,19 @@ export function GoogleSignInButton({ mode, onCredential, disabled }: GoogleSignI
         if (cancelled) return;
         initializeOnce(api, clientId);
         receiver = send;
-        const available = element.parentElement?.clientWidth ?? MAX_WIDTH;
+        // The slot, not its parent: the parent's width includes the form's side padding.
+        const available = element.clientWidth || MAX_WIDTH;
         element.replaceChildren();
         api.renderButton(element, {
           type: "standard",
           theme: "outline",
           size: "large",
-          shape: "pill",
+          shape: "rectangular",
           text: mode === "signup" ? "signup_with" : "signin_with",
           logo_alignment: "left",
           width: Math.round(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, available))),
+          // The page's language, not the browser's.
+          locale: language,
         });
       })
       .catch(() => {
@@ -139,7 +143,7 @@ export function GoogleSignInButton({ mode, onCredential, disabled }: GoogleSignI
       cancelled = true;
       if (receiver === send) receiver = null;
     };
-  }, [mode]);
+  }, [mode, language]);
 
   return (
     <div

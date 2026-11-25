@@ -14,7 +14,7 @@ type ButtonProps = { mode: "signin" | "signup"; onCredential: (t: string) => voi
 function setup() {
   process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID = CLIENT_ID;
   const initialize: Config[] = [];
-  const rendered: { text: string; width: number }[] = [];
+  const rendered: { text: string; width: number; shape?: string; locale?: string }[] = [];
   let appended = 0;
 
   const api = {
@@ -91,6 +91,9 @@ describe("GoogleSignInButton (web)", () => {
 
     expect(t.api.renderButton).toHaveBeenCalledTimes(1);
     expect(t.rendered[0].text).toBe("signin_with");
+    // Squared like the fields beside it, and in the page's language rather than the browser's.
+    expect(t.rendered[0].shape).toBe("rectangular");
+    expect(t.rendered[0].locale).toBe("en");
     expect(t.rendered[0].width).toBeGreaterThanOrEqual(200);
     expect(t.rendered[0].width).toBeLessThanOrEqual(400);
     expect(t.initialize).toHaveLength(1);
