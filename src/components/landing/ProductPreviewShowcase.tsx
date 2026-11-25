@@ -5,6 +5,8 @@ import {
   StyleSheet,
   Text,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
@@ -17,7 +19,13 @@ import { previewProperties } from "@/data/landingPreview";
 const PREVIEW_HREF = "/buy?listing_type=sale&city=Dhaka";
 const PREVIEW_URL_DISPLAY = "homenetbd.com/buy?listing_type=sale&city=Dhaka&searched=1";
 
-export const ProductPreviewShowcase = memo(function ProductPreviewShowcase() {
+export interface ProductPreviewShowcaseProps {
+  style?: StyleProp<ViewStyle>;
+}
+
+export const ProductPreviewShowcase = memo(function ProductPreviewShowcase({
+  style,
+}: ProductPreviewShowcaseProps = {}) {
   const { width, isTablet, isPhone } = useResponsive();
   const isTabletViewport =
     (width != null && width >= 768 && width < 1024) || (isTablet && !isPhone);
@@ -105,7 +113,7 @@ export const ProductPreviewShowcase = memo(function ProductPreviewShowcase() {
   };
 
   return (
-    <View style={styles.outerContainer}>
+    <View style={[styles.outerContainer, style]}>
       <Link asChild href={PREVIEW_HREF}>
         <Pressable
           accessibilityRole="link"

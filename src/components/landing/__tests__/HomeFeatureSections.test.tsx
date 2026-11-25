@@ -615,5 +615,78 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       const tabletStyles = StyleSheet.flatten(tabletRootView.props.style);
       expect(tabletStyles.gap).toBe(20);
     });
+
+    it("enforces 8pt section breathing room (40px desktop, 32px tablet) from phone bezel to the 6-card grid", () => {
+      // Desktop (>= 1024px): 24px container gap + 16px showcase marginBottom = 40px (5 x 8pt)
+      mockResponsive = { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 };
+      let treeDesktop: renderer.ReactTestRenderer;
+      act(() => {
+        treeDesktop = renderer.create(<HomeFeatureSections />);
+      });
+      const desktopContainer = treeDesktop!.root.findByType(View);
+      const desktopContainerStyles = StyleSheet.flatten(desktopContainer.props.style);
+      expect(desktopContainerStyles.gap).toBe(24);
+
+      const desktopShowcaseRegion = treeDesktop!.root.find(
+        (node: ReactTestInstance) =>
+          (node.props.role === "region" || node.props.accessibilityRole === "region") &&
+          node.props.accessibilityLabel === en.home.featureSections.showcase.regionLabel
+      );
+      const desktopShowcaseStyles = StyleSheet.flatten(desktopShowcaseRegion.props.style);
+      expect(desktopShowcaseStyles.marginBottom).toBe(16);
+
+      const desktopTotalClearance = (desktopContainerStyles.gap ?? 0) + (desktopShowcaseStyles.marginBottom ?? 0);
+      expect(desktopTotalClearance).toBe(40); // 5 x 8pt
+
+      // Tablet (768px-1023px): 20px container gap + 12px showcase marginBottom = 32px (4 x 8pt)
+      mockResponsive = { isPhone: false, isTablet: true, width: 800, containerMaxWidth: 800 };
+      let treeTablet: renderer.ReactTestRenderer;
+      act(() => {
+        treeTablet = renderer.create(<HomeFeatureSections />);
+      });
+      const tabletContainer = treeTablet!.root.findByType(View);
+      const tabletContainerStyles = StyleSheet.flatten(tabletContainer.props.style);
+      expect(tabletContainerStyles.gap).toBe(20);
+
+      const tabletShowcaseRegion = treeTablet!.root.find(
+        (node: ReactTestInstance) =>
+          (node.props.role === "region" || node.props.accessibilityRole === "region") &&
+          node.props.accessibilityLabel === en.home.featureSections.showcase.regionLabel
+      );
+      const tabletShowcaseStyles = StyleSheet.flatten(tabletShowcaseRegion.props.style);
+      expect(tabletShowcaseStyles.marginBottom).toBe(12);
+
+      const tabletTotalClearance = (tabletContainerStyles.gap ?? 0) + (tabletShowcaseStyles.marginBottom ?? 0);
+      expect(tabletTotalClearance).toBe(32); // 4 x 8pt
+    });
+
+    it("ensures zero horizontal drift with 100% outer width across all tiers at 768px, 1024px, 1280px, and 1440px", () => {
+      const viewports = [
+        { width: 768, isTablet: true },
+        { width: 1024, isTablet: false },
+        { width: 1280, isTablet: false },
+        { width: 1440, isTablet: false },
+      ];
+
+      for (const vp of viewports) {
+        mockResponsive = { isPhone: false, isTablet: vp.isTablet, width: vp.width, containerMaxWidth: 1200 };
+        let tree: renderer.ReactTestRenderer;
+        act(() => {
+          tree = renderer.create(<HomeFeatureSections />);
+        });
+
+        const regions = tree!.root.findAll(
+          (node: ReactTestInstance) =>
+            (node.props.role === "region" || node.props.accessibilityRole === "region") &&
+            Boolean(node.props.accessibilityLabel)
+        );
+        expect(regions).toHaveLength(3);
+
+        for (const r of regions) {
+          const regionStyles = StyleSheet.flatten(r.props.style);
+          expect(regionStyles.width).toBe("100%");
+        }
+      }
+    });
   });
 });
