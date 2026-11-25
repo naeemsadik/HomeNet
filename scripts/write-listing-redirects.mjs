@@ -41,12 +41,15 @@ function redirectPage(path, title) {
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>${escapeHtml(title)} | HomeNet BD</title>
 <meta http-equiv="refresh" content="0; url=${url}">
 <link rel="canonical" href="${canonical}">
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;padding:16px;box-sizing:border-box;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;text-align:center}a{color:#0F6D55;overflow-wrap:anywhere}@media (prefers-color-scheme:dark){a{color:#04cf92}}</style>
 </head>
 <body>
-<p>This listing has moved to <a href="${url}">${canonical}</a>.</p>
+<p>This listing has a new address.<br><a href="${url}">Open the listing</a></p>
 </body>
 </html>
 `;
