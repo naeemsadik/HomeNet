@@ -1,7 +1,8 @@
 import { useResponsive } from "@/hooks/useResponsive";
-import { fonts, layout, webPointer, radiusTokens } from "@/theme";
+import { colorTokens, fonts, layout, webPointer, radiusTokens } from "@/theme";
 import { AppLink } from "@/components/ui";
 import { MobileFooter } from "@/components/MobileFooter";
+import { GooglePlayButton } from "@/components/GooglePlayButton";
 import {
   RESOURCE_LINKS,
   SEARCH_LINKS,
@@ -13,10 +14,13 @@ import {
   STUDENT_ACCOMMODATION_HREF,
   type NavigationLinkItem,
   type ResourceLinkItem,
+  SOCIAL_LINKS,
 } from "@/constants/navigation";
 
 // Canonical area indexing links (verified by indexing.test.ts):
 // href: "/buy/gulshan", href: "/areas"
+
+export { GooglePlayButton };
 
 export {
   RESOURCE_LINKS,
@@ -41,46 +45,10 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { notify } from "@/lib/alert";
-import Svg, { Line, Path, Rect } from "react-native-svg";
+import { openExternalUrl } from "@/lib/safeUrl";
+import { Facebook, Linkedin, Youtube } from "@/components/icons";
 
-export function GooglePlayButton() {
-  return (
-    <Pressable
-      accessibilityLabel="Get it on Google Play"
-      style={[styles.playStoreBtn, webPointer]}
-      onPress={() => {
-        notify(
-          "Download Homenet",
-          "Homenet for Android is launching soon on the Google Play Store!"
-        );
-      }}
-    >
-      <Svg width="22" height="24" viewBox="0 0 512 512">
-        <Path
-          fill="#4285F4"
-          d="M32.5 48.3v415.4c0 10.9 5.8 20.9 15.1 26.4l230.9-234.1L47.6 21.9c-9.3 5.5-15.1 15.5-15.1 26.4z"
-        />
-        <Path
-          fill="#FBBC04"
-          d="M380.2 329.8l-101.7-73.8 101.7-73.8 54.3 31.3c15.4 8.9 25 25.3 25 42.5s-9.6 33.6-25 42.5l-54.3 31.3z"
-        />
-        <Path
-          fill="#EA4335"
-          d="M278.5 256L47.6 489.1c11.9 6.8 26.6 6.8 38.5 0l294.1-159.3-101.7-73.8z"
-        />
-        <Path
-          fill="#34A853"
-          d="M380.2 182.2L86.1 22.9C74.2 16 59.5 16 47.6 22.9L278.5 256l101.7-73.8z"
-        />
-      </Svg>
-      <View style={styles.playStoreTextWrap}>
-        <Text style={styles.playStoreSub}>GET IT ON</Text>
-        <Text style={styles.playStoreTitle}>Google Play</Text>
-      </View>
-    </Pressable>
-  );
-}
+const SOCIAL_ICONS = { Facebook, LinkedIn: Linkedin, YouTube: Youtube } as const;
 
 export interface FooterProps {
   style?: StyleProp<ViewStyle>;
@@ -90,46 +58,27 @@ export interface FooterProps {
 
 function WebFooter({ style }: FooterProps) {
   const { t } = useTranslation();
-  const { isPhone, isTablet, containerMaxWidth } = useResponsive();
+  const { isPhone, isTablet, isCompact, containerMaxWidth } = useResponsive();
+  // Below desktop width the six columns sit three to a row, all one width, so the rows line up.
+  const third = isCompact ? styles.footerColThird : null;
 
   const renderSocialIcons = () => (
     <View style={styles.footerSocialIcons}>
-      {/* Facebook */}
-      <Pressable accessibilityRole="link" accessibilityLabel="Facebook" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="16" height="16" viewBox="0 0 24 24" fill="#0B1A17">
-          <Path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-        </Svg>
-      </Pressable>
-
-      {/* X / Twitter */}
-      <Pressable accessibilityRole="link" accessibilityLabel="X" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="15" height="15" viewBox="0 0 24 24" fill="#0B1A17">
-          <Path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-        </Svg>
-      </Pressable>
-
-      {/* Instagram */}
-      <Pressable accessibilityRole="link" accessibilityLabel="Instagram" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B1A17" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <Rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-          <Path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-          <Line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-        </Svg>
-      </Pressable>
-
-      {/* TikTok */}
-      <Pressable accessibilityRole="link" accessibilityLabel="TikTok" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="16" height="16" viewBox="0 0 24 24" fill="#0B1A17">
-          <Path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68 6.34 6.34 0 0 0 9.33 22a6.33 6.33 0 0 0 6.33-6.32V8.75a8.28 8.28 0 0 0 3.93 1.07V6.69z" />
-        </Svg>
-      </Pressable>
-
-      {/* YouTube */}
-      <Pressable accessibilityRole="link" accessibilityLabel="YouTube" style={[styles.socialIconBtn, webPointer]}>
-        <Svg width="17" height="17" viewBox="0 0 24 24" fill="#0B1A17">
-          <Path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-        </Svg>
-      </Pressable>
+      {SOCIAL_LINKS.map(({ name, url }) => {
+        const Icon = SOCIAL_ICONS[name];
+        return (
+          <Pressable
+            key={name}
+            accessibilityRole="link"
+            accessibilityLabel={name}
+            hitSlop={8}
+            onPress={() => openExternalUrl(url)}
+            style={({ pressed }) => [styles.socialIconBtn, webPointer, pressed && { opacity: 0.7 }]}
+          >
+            <Icon color={colorTokens.ink} size={18} strokeWidth={2} />
+          </Pressable>
+        );
+      })}
     </View>
   );
 
@@ -152,7 +101,7 @@ function WebFooter({ style }: FooterProps) {
           ]}
         >
           {/* Column 1: Download the Homenet app */}
-          <View style={styles.footerDownloadCol}>
+          <View style={[styles.footerDownloadCol, third]}>
             <Text style={styles.footerDownloadHeading}>
               {t("footer.downloadHeading")}
             </Text>
@@ -160,7 +109,7 @@ function WebFooter({ style }: FooterProps) {
           </View>
 
           {/* Column 2: Resources */}
-          <View style={styles.footerCol}>
+          <View style={[styles.footerCol, third]}>
             <Text style={styles.footerColHeading}>{t("footer.resources")}</Text>
             {RESOURCE_LINKS.map((item) => (
               <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
@@ -170,7 +119,7 @@ function WebFooter({ style }: FooterProps) {
           </View>
 
           {/* Column 3: Search */}
-          <View style={styles.footerCol}>
+          <View style={[styles.footerCol, third]}>
             <Text style={styles.footerColHeading}>{t("footer.search")}</Text>
             {getSearchLinks().map((item) => (
               <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
@@ -180,7 +129,7 @@ function WebFooter({ style }: FooterProps) {
           </View>
 
           {/* Column 4: Locations */}
-          <View style={styles.footerCol}>
+          <View style={[styles.footerCol, third]}>
             <Text style={styles.footerColHeading}>{t("footer.locations")}</Text>
             {LOCATION_LINKS.map((item) => (
               <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
@@ -190,7 +139,7 @@ function WebFooter({ style }: FooterProps) {
           </View>
 
           {/* Column 5: Homenet */}
-          <View style={styles.footerCol}>
+          <View style={[styles.footerCol, third]}>
             <Text style={styles.footerColHeading}>{t("footer.homenet")}</Text>
             {HOMENET_LINKS.map((item) => (
               <AppLink href={item.href} key={item.href} style={styles.footerLinkWrap}>
@@ -200,7 +149,7 @@ function WebFooter({ style }: FooterProps) {
           </View>
 
           {/* Column 6: Professional / Pro Plan Benefits */}
-          <View style={[styles.footerCol, styles.footerProCol]}>
+          <View style={[styles.footerCol, styles.footerProCol, third]}>
             <Text style={styles.footerColHeading}>{t("footer.professional")}</Text>
             <AppLink href="/seller" style={[styles.proBadgeButton, webPointer]}>
               <Text style={styles.proBadgeText}>{t("footer.homenetPro")}</Text>
@@ -376,33 +325,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     letterSpacing: -0.3,
   },
-  playStoreBtn: {
-    backgroundColor: "#000000",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 7.5,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 9,
-    alignSelf: "flex-start",
+  footerColThird: {
+    flexGrow: 0,
     flexShrink: 0,
-  },
-  playStoreTextWrap: {
-    justifyContent: "center",
-  },
-  playStoreSub: {
-    color: "#FFFFFF",
-    fontSize: 8.5,
-    fontFamily: fonts.medium,
-    letterSpacing: 0.5,
-    lineHeight: 11,
-  },
-  playStoreTitle: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontFamily: fonts.bold,
-    fontWeight: "700",
-    lineHeight: 17,
+    flexBasis: "30%",
+    minWidth: 0,
   },
   footerCol: {
     flex: 1,

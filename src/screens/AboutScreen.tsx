@@ -8,7 +8,7 @@ import {
 } from "@/components/icons";
 import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { AppLink, Eyebrow, FeatureCard } from "@/components/ui";
+import { AppLink, FeatureCard } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, colors, fonts, shadow, webPointer } from "@/theme";
 import { SUPPORT_EMAIL } from "@/content/legal";
@@ -22,7 +22,6 @@ export function AboutScreen() {
   return (
     <AppChrome active="home">
       <View style={[styles.intro, isPhone && styles.introPhone]}>
-        <Eyebrow style={styles.eyebrow}>{t("about.eyebrow")}</Eyebrow>
         <Text accessibilityRole="header" aria-level={1} style={[styles.title, isPhone && styles.titlePhone]}>
           {t("about.title")}
         </Text>
@@ -253,7 +252,7 @@ const styles = StyleSheet.create({
     minHeight: 46,
   },
   contactLinkText: {
-    color: colors.green,
+    color: colors.greenOnLight,
     fontFamily: fonts.bold,
     fontSize: 14,
   },

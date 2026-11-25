@@ -588,9 +588,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    flexWrap: "wrap",
   },
   headingText: {
+    // Wraps inside its own room, so the pencil stays beside it instead of on a line of its own.
+    flexShrink: 1,
     fontFamily: fonts.semiBold,
     fontSize: 23,
     fontWeight: "700",
@@ -602,6 +603,7 @@ const styles = StyleSheet.create({
     lineHeight: 25,
   },
   editIcon: {
+    flexShrink: 0,
     opacity: 0.6,
   },
   editTitleRow: {

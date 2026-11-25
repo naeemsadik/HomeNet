@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { useTranslation } from "@/i18n";
 import { useResponsive } from "@/hooks/useResponsive";
-import { webPointer } from "@/theme";
+import { colorTokens, webPointer } from "@/theme";
 import type { PropertyType } from "@/types/api";
 import {
   CUSTOM_SUBTYPE_MAX_LENGTH,
@@ -94,7 +94,7 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
                   ]}
                 >
                   <TypeIcon
-                    color={isSelected ? "#04cf92" : "#5C6B66"}
+                    color={isSelected ? colorTokens.brandText : colorTokens.muted}
                     size={20}
                   />
                 </View>

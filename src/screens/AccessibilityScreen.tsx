@@ -1,7 +1,7 @@
 import React from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { Eyebrow, FeatureCard } from "@/components/ui";
+import { FeatureCard } from "@/components/ui";
 import {
   Compass,
   Eye,
@@ -44,7 +44,6 @@ export function AccessibilityScreen() {
       <View style={[styles.container, { maxWidth: containerMaxWidth }]}>
         {/* Intro */}
         <View style={[styles.intro, isPhone && styles.introPhone]}>
-          <Eyebrow style={styles.eyebrow}>{t("accessibility.eyebrow")}</Eyebrow>
           <Text
             accessibilityRole="header"
             aria-level={1}

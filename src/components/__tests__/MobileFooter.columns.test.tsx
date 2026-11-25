@@ -22,23 +22,26 @@ const textOf = (node: ReactTestInstance | string | number | null | undefined): s
 };
 
 /**
- * The policy links used to flow one after another with a divider, so on the second row "Contact us"
- * started wherever "Delete account" happened to end, and did not line up with "Terms of Use" above.
+ * The phone footer's links follow the layout of large property sites: left-aligned rows with a
+ * divider between neighbours, three to a row, so the spacing is the same everywhere.
  */
 describe("the phone footer's policy links", () => {
-  it("sit in two equal columns, so each row lines up", () => {
+  it("sit in left-aligned rows with a divider between neighbours", () => {
     let tree!: renderer.ReactTestRenderer;
     act(() => {
       tree = renderer.create(<MobileFooter />);
     });
-    const columns = tree.root.findAll(
-      (n) => n.type === View && StyleSheet.flatten(n.props.style)?.width === "50%",
-    );
-    const labels = columns.map((column) => textOf(column).replace("|", "").trim());
-    expect(labels).toEqual(["Privacy Policy", "Terms of Use", "Delete account", "Contact us"]);
-    // A "|" after the left link of each row, as on the website footer; none after the right link.
-    const hasPipe = columns.map((column) => textOf(column).includes("|"));
-    expect(hasPipe).toEqual([true, false, true, false]);
+    const byTestId = (root: ReactTestInstance, id: string) => root.findAll((n) => n.type === View && n.props.testID === id);
+    const rows = byTestId(tree.root, "footer-legal-row");
+    expect(rows.map((row) => textOf(row).replace(/\s+/g, " ").trim())).toEqual([
+      "Site map Help Safety and Security",
+      "Terms of Use Accessibility Privacy Policy",
+      "Delete account Contact us",
+    ]);
+    expect(rows.map((row) => byTestId(row, "footer-legal-divider").length)).toEqual([2, 2, 1]);
+    for (const row of rows) {
+      expect(StyleSheet.flatten(row.props.style)?.justifyContent).toBeUndefined();
+    }
     act(() => tree.unmount());
   });
 });

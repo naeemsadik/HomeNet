@@ -448,9 +448,6 @@ export function OwnerListPropertySection() {
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <View style={{ flex: 1 }}>
-                <View style={styles.modalEyebrowRow}>
-                  <Text style={styles.modalEyebrow}>{t("search.ownerSection.modalEyebrow")}</Text>
-                </View>
                 <Text style={styles.modalTitle}>{t("search.ownerSection.modalTitle")}</Text>
                 <Text style={styles.modalSubtitle}>
                   {t("search.ownerSection.modalSubtitle")}

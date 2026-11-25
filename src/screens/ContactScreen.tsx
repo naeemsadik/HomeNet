@@ -1,7 +1,7 @@
 import React from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { Eyebrow, FeatureCard } from "@/components/ui";
+import { FeatureCard } from "@/components/ui";
 import {
   Building2,
   Clock,
@@ -58,7 +58,6 @@ export function ContactScreen() {
       <View style={[styles.container, { maxWidth: containerMaxWidth }]}>
         {/* Hero Section */}
         <View style={[styles.intro, isPhone && styles.introPhone]}>
-          <Eyebrow style={styles.eyebrow}>{t("contact.eyebrow")}</Eyebrow>
           <Text
             accessibilityRole="header"
             aria-level={1}

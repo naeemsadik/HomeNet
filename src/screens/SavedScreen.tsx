@@ -134,27 +134,32 @@ export function SavedScreen() {
           </Text>
         </View>
 
-        <View style={styles.headerActions}>
-          <AppLink href="/buy" style={styles.exploreLink}>
-            <Text style={styles.exploreLinkText}>{t("saved.browseMore")}</Text>
-          </AppLink>
-        </View>
+        {/* With nothing saved, the empty state below already offers the one way to browse. */}
+        {savedListings.length > 0 ? (
+          <View style={styles.headerActions}>
+            <AppLink href="/buy" style={styles.exploreLink}>
+              <Text style={styles.exploreLinkText}>{t("saved.browseMore")}</Text>
+            </AppLink>
+          </View>
+        ) : null}
       </View>
 
       {/* ─────────────────────────────────────────────────────────────
           2. SAVED PROPERTIES
       ───────────────────────────────────────────────────────────── */}
       <View style={styles.sectionSpacing}>
-        <View style={styles.sectionHeader}>
-          <View style={styles.titleWithIconRow}>
-            <Bookmark color="#0B1A17" size={20} />
-            <LiveText style={styles.sectionTitle}>
-              {savedListings.length === 1
-                ? t("saved.singleCount", { count: formatLocalizedNumber(1, language) })
-                : t("saved.count", { count: formatLocalizedNumber(savedListings.length, language) })}
-            </LiveText>
+        {savedListings.length > 0 ? (
+          <View style={styles.sectionHeader}>
+            <View style={styles.titleWithIconRow}>
+              <Bookmark color="#0B1A17" size={20} />
+              <LiveText style={styles.sectionTitle}>
+                {savedListings.length === 1
+                  ? t("saved.singleCount", { count: formatLocalizedNumber(1, language) })
+                  : t("saved.count", { count: formatLocalizedNumber(savedListings.length, language) })}
+              </LiveText>
+            </View>
           </View>
-        </View>
+        ) : null}
 
         {isLoading && savedListings.length === 0 ? (
           <PropertySkeletonFeed />
@@ -282,7 +287,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E6FAF4",
   },
   exploreLinkText: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
     fontFamily: fonts.semiBold,
     fontSize: 13,
   },

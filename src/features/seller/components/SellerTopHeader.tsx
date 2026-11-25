@@ -70,6 +70,7 @@ export function SellerTopHeader({
         <Pressable
           accessibilityLabel={t("seller.header.openMenuAria")}
           accessibilityRole="button"
+          hitSlop={4}
           onPress={onPressMenu}
           style={({ pressed }) => [
             styles.iconCircleBtn,

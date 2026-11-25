@@ -41,7 +41,7 @@ export const styles = StyleSheet.create({
     color: "#0B1A17",
   },
   brandTextAccent: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   sellerRolePill: {
     backgroundColor: "#E8EEFC",
@@ -81,7 +81,7 @@ export const styles = StyleSheet.create({
     color: "#5C6B66",
   },
   navItemTextActive: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
@@ -243,7 +243,7 @@ export const styles = StyleSheet.create({
   unreadCountPillText: {
     fontSize: 11,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   markAllReadBtn: {
     paddingVertical: 4,
@@ -253,7 +253,7 @@ export const styles = StyleSheet.create({
   markAllReadText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   dropdownScroll: {
     maxHeight: 320,
@@ -287,7 +287,7 @@ export const styles = StyleSheet.create({
   viewAllNotificationsText: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   headerDotIndicator: {
     position: "absolute",
@@ -384,7 +384,7 @@ export const styles = StyleSheet.create({
     color: "#5C6B66",
   },
   stepCircleTextCurrent: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   // Long labels (Bangla, a narrow phone) wrap to a second line inside their slot.
   stepLabelText: {
@@ -402,22 +402,15 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     color: "#0B1A17",
   },
-  // Half of the line between two circles; it stops 6 short of the circle (18 radius + 6).
+  // From the previous slot's centre to this one's, stopping 6 short of each circle (18 + 6).
   stepConnector: {
     position: "absolute",
     top: 17,
     height: 2,
-    backgroundColor: "rgba(11,26,23,0.12)",
-  },
-  stepConnectorBefore: {
-    left: 0,
+    left: "-50%",
     right: "50%",
-    marginRight: 24,
-  },
-  stepConnectorAfter: {
-    left: "50%",
-    right: 0,
-    marginLeft: 24,
+    marginHorizontal: 24,
+    backgroundColor: "rgba(11,26,23,0.12)",
   },
   stepConnectorLineDone: {
     backgroundColor: "#04cf92",
@@ -623,7 +616,7 @@ export const styles = StyleSheet.create({
     color: "#5C6B66",
   },
   toggleBtnTextActive: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   toggleGridMobile: {
     flexDirection: "row",
@@ -671,7 +664,7 @@ export const styles = StyleSheet.create({
   },
   amenityPillTextSelected: {
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   categoryGrid: {
     flexDirection: "row",
@@ -718,7 +711,7 @@ export const styles = StyleSheet.create({
     color: "#0B1A17",
   },
   categoryLabelSelected: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   categoryDesc: {
     fontSize: 12,
@@ -756,7 +749,7 @@ export const styles = StyleSheet.create({
   },
   subtypePillTextSelected: {
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   customSubtypeGroup: {
     gap: 6,
@@ -983,7 +976,7 @@ export const styles = StyleSheet.create({
   readyAlertTitle: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   readyAlertDesc: {
     fontSize: 14,

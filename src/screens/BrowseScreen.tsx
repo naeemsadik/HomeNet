@@ -9,7 +9,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useIsFocused, useLocalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -95,6 +96,7 @@ export function BrowseScreen({
   footer?: React.ReactNode;
 }) {
   const { t, language } = useTranslation();
+  const isFocused = useIsFocused();
   const { isPhone, width, height } = useResponsive();
   const isMobile = isPhone || width < 768;
   // The mini map and cross-links sit beside the results only when the cards
@@ -436,6 +438,9 @@ export function BrowseScreen({
   // ── Mobile Search Results Top App Bar ────────────────────────────────────
   const mobileTopBar = isMobile ? (
     <SafeAreaView edges={["top"]} style={styles.mobileTopBarSafe}>
+      {/* This bar is dark, so the phone's clock and battery must be light here. Only while this
+          screen is in front: it stays mounted under whatever is opened on top of it. */}
+      {isFocused ? <StatusBar style="light" /> : null}
       <View style={styles.mobileTopBar}>
         <Pressable
           accessibilityRole="button"

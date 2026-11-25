@@ -26,7 +26,6 @@ import {
 import { Image } from "expo-image";
 import { notify } from "@/lib/alert";
 import { AppChrome } from "@/components/AppChrome";
-import { Eyebrow } from "@/components/ui";
 import { colors, fonts, webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import {
@@ -209,7 +208,6 @@ export function UsersScreen() {
   return (
     <AppChrome active="users">
       <View style={styles.header}>
-        <Eyebrow>{t("userDirectory.eyebrow")}</Eyebrow>
         <Text style={styles.title}>{t("userDirectory.title")}</Text>
         <View style={styles.searchBox}>
           <Search color={colors.muted} size={16} />

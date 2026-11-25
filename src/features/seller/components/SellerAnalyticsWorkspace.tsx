@@ -16,7 +16,7 @@ export function SellerAnalyticsWorkspace() {
       label: t("seller.analytics.kpis.avgSqFt"),
       value: t("seller.payments.currencyAmount", { amount: formatLocalizedNumber(16840, language) }),
       sub: t("seller.analytics.kpis.avgSqFtSub"),
-      color: colors.green,
+      color: colors.greenOnLight,
     },
     {
       label: t("seller.analytics.kpis.avgDaysOnMarket"),
@@ -98,7 +98,7 @@ export function SellerAnalyticsWorkspace() {
               <Text style={[styles.tableCellText, { flex: 2 }]}>{row.price}</Text>
               <View style={{ flex: 1.5, flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <TrendingUp color={colors.green} size={14} />
-                <Text style={{ fontSize: 13, fontFamily: fonts.semiBold, color: colors.green }}>{row.trend}</Text>
+                <Text style={{ fontSize: 13, fontFamily: fonts.semiBold, color: colors.greenOnLight }}>{row.trend}</Text>
               </View>
               <View style={{ flex: 1.5 }}>
                 <View style={styles.demandBadge}>
