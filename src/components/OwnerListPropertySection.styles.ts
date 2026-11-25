@@ -258,7 +258,7 @@ export const styles = StyleSheet.create({
     paddingTop: 4,
   },
   plaqueActionText: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
     fontFamily: fonts.semiBold,
     fontSize: 13,
   },
@@ -307,7 +307,7 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
   },
   modalEyebrow: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
     fontFamily: fonts.semiBold,
     fontSize: 12,
     textTransform: "uppercase",

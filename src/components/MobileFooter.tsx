@@ -1,6 +1,7 @@
 import { memo, useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions, type StyleProp, type ViewStyle } from "react-native";
 import { AppLink } from "@/components/ui";
+import { GooglePlayButton } from "@/components/GooglePlayButton";
 import { ChevronDown, Facebook, Linkedin, Youtube } from "@/components/icons";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { useTranslation, type TranslationKey } from "@/i18n";
@@ -11,7 +12,8 @@ import {
   LOCATION_LINKS,
   HOMENET_LINKS,
   PROFESSIONAL_LINKS,
-  MOBILE_LEGAL_LINKS,
+  MOBILE_LEGAL_ROWS,
+  SOCIAL_LINKS,
 } from "@/constants/navigation";
 
 // Canonical area indexing links (verified by indexing.test.ts):
@@ -31,24 +33,7 @@ interface FooterSection {
 
 const isKey = (label: string): label is TranslationKey => label.includes(".");
 
-/** Targeted mobile social media links: Facebook, LinkedIn, YouTube only. */
-const SOCIAL_LINKS = [
-  {
-    name: "Facebook",
-    url: "https://www.facebook.com/homenetbd",
-    icon: Facebook,
-  },
-  {
-    name: "LinkedIn",
-    url: "https://www.linkedin.com/company/homenetbd",
-    icon: Linkedin,
-  },
-  {
-    name: "YouTube",
-    url: "https://www.youtube.com/@homenetbd",
-    icon: Youtube,
-  },
-] as const;
+const SOCIAL_ICONS = { Facebook, LinkedIn: Linkedin, YouTube: Youtube } as const;
 
 /** Every link opens a page that exists. */
 const getSections = (): FooterSection[] => [
@@ -81,7 +66,7 @@ const getSections = (): FooterSection[] => [
     title: "footer.homenet",
     // Links already pinned in the mobile legal strip (e.g. Contact us) are not listed a second time.
     links: HOMENET_LINKS.filter(
-      (link) => !MOBILE_LEGAL_LINKS.some((m) => m.href === link.href)
+      (link) => !MOBILE_LEGAL_ROWS.flat().some((m) => m.href === link.href)
     ).map((link) => ({
       label: link.labelKey,
       href: link.href,
@@ -96,15 +81,6 @@ const getSections = (): FooterSection[] => [
     })),
   },
 ];
-
-/**
- * Always on screen, under the sections: the policies, account deletion and contact.
- * A store reviewer (and anyone else) finds them without opening anything.
- */
-const LEGAL_LINKS: { label: TranslationKey; href: string }[] = MOBILE_LEGAL_LINKS.map((link) => ({
-  label: link.labelKey,
-  href: link.href,
-}));
 
 const Section = memo(function Section({
   section,
@@ -158,6 +134,9 @@ const Section = memo(function Section({
 export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
   const { t } = useTranslation();
   const [openKey, setOpenKey] = useState<string | null>(null);
+  // Under 360 points three links need tighter spacing, or a long word broke in the middle.
+  const { width } = useWindowDimensions();
+  const narrow = width > 0 && width < 360;
   const toggle = (key: string) => setOpenKey((current) => (current === key ? null : key));
 
   const handleSocialPress = (url: string) => {
@@ -169,45 +148,51 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
   return (
     <View style={[styles.root, style]}>
       <View style={styles.sections}>
-        {getSections().map((section) => (
-          <Section key={section.key} onToggle={toggle} open={openKey === section.key} section={section} />
-        ))}
+        <View style={styles.column}>
+          {/* Offered on the website only: inside the app it is already installed. */}
+          {Platform.OS === "web" ? (
+            <View style={styles.download}>
+              <Text style={styles.downloadHeading}>{t("footer.downloadHeading")}</Text>
+              <GooglePlayButton />
+            </View>
+          ) : null}
+          {getSections().map((section) => (
+            <Section key={section.key} onToggle={toggle} open={openKey === section.key} section={section} />
+          ))}
+        </View>
       </View>
 
       <View style={styles.legal}>
-        {/* Two equal columns: the second link of every row starts at the same place, whatever the
-            words or the language, instead of wherever the first link happens to end. */}
-        <View style={styles.legalLinks}>
-          {LEGAL_LINKS.map((link, index, all) => (
-            <View key={link.href} style={styles.legalItem}>
-              <AppLink href={link.href} style={styles.legalLink}>
-                <Text style={styles.legalLinkText}>{t(link.label)}</Text>
-              </AppLink>
-              {/* The "|" the website footer has, drawn at the right edge of the left column so it
-                  never moves the columns. */}
-              {index % 2 === 0 && index < all.length - 1 ? (
-                <Text
-                  accessibilityElementsHidden
-                  importantForAccessibility="no"
-                  aria-hidden
-                  style={styles.legalPipe}
+        {/* Always on screen: left-aligned rows with a divider between neighbours. */}
+        <View style={styles.column}>
+          {MOBILE_LEGAL_ROWS.map((row) => (
+            <View key={row[0].href} style={styles.legalRow} testID="footer-legal-row">
+              {row.map((link, index) => (
+                <View
+                  key={link.href}
+                  style={[styles.legalItem, index > 0 && styles.legalItemNext, index > 0 && narrow && styles.legalItemNarrow]}
                 >
-                  |
-                </Text>
-              ) : null}
+                  {index > 0 ? <View style={styles.legalDivider} testID="footer-legal-divider" /> : null}
+                  <AppLink href={link.href} style={styles.legalLink}>
+                    <Text style={[styles.legalLinkText, narrow && styles.legalLinkTextNarrow]}>{t(link.labelKey)}</Text>
+                  </AppLink>
+                </View>
+              ))}
             </View>
           ))}
-        </View>
 
-        <View style={styles.socialStrip}>
-          {SOCIAL_LINKS.map(({ name, url, icon: Icon }) => (
+          <View style={styles.socialStrip}>
+          {SOCIAL_LINKS.map(({ name, url }) => {
+            const Icon = SOCIAL_ICONS[name];
+            return (
             <Pressable
               key={name}
               accessibilityRole="link"
               accessibilityLabel={name}
-              onPress={() => handleSocialPress(url)}
+              // On the web the icon is a real link (href below); opening it here too made two tabs.
+              onPress={Platform.OS === "web" ? undefined : () => handleSocialPress(url)}
               {...(Platform.OS === "web"
-                ? ({ href: url, target: "_blank", rel: "noopener noreferrer" } as any)
+                ? ({ href: url, hrefAttrs: { target: "_blank", rel: "noopener noreferrer" } } as any)
                 : {})}
               style={({ pressed }) => [styles.socialBtn, webPointer, pressed && { opacity: 0.7 }]}
             >
@@ -219,10 +204,12 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
                 />
               )}
             </Pressable>
-          ))}
+            );
+          })}
         </View>
 
         <Text style={styles.copyrightText}>{t("footer.copyright")}</Text>
+        </View>
       </View>
     </View>
   );
@@ -278,44 +265,72 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 28,
-    gap: 10,
   },
-  legalLinks: {
+  // On a tablet the footer stays one readable column in the middle.
+  column: {
+    width: "100%",
+    maxWidth: 560,
+    alignSelf: "center",
+  },
+  download: {
+    gap: 14,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },
+  downloadHeading: {
+    fontFamily: fonts.bold,
+    fontSize: 17,
+    color: colorTokens.ink,
+  },
+  legalRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
+    alignItems: "center",
   },
+  // Long words wrap inside their own item on a narrow phone, so a divider never starts a line.
   legalItem: {
-    width: "50%",
+    flexDirection: "row",
+    alignItems: "center",
+    flexShrink: 1,
   },
-  legalPipe: {
-    position: "absolute",
-    right: 12,
-    top: 0,
-    bottom: 0,
-    textAlignVertical: "center",
-    lineHeight: 44,
-    color: colorTokens.subtle,
-    fontSize: 13,
+  legalItemNext: {
+    marginLeft: 14,
+    gap: 14,
+  },
+  legalItemNarrow: {
+    marginLeft: 8,
+    gap: 8,
+  },
+  legalDivider: {
+    width: 1,
+    height: 22,
+    backgroundColor: colorTokens.subtle,
+    opacity: 0.45,
   },
   legalLink: {
-    minHeight: 44,
+    minHeight: 48,
     justifyContent: "center",
-    paddingRight: 12,
+    flexShrink: 1,
   },
   legalLinkText: {
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colorTokens.ink,
   },
-  // Each icon has 10 of padding to make a 40-point target; the row starts 10 left so the icons line up with the text.
+  legalLinkTextNarrow: {
+    fontSize: 12,
+  },
+  // The icons sit in 44-point targets; the row starts left so the first icon lines up with the text.
   socialStrip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginLeft: -10,
+    gap: 4,
+    marginLeft: -12,
+    marginTop: 4,
+    marginBottom: 6,
   },
   socialBtn: {
-    padding: 10,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
   },

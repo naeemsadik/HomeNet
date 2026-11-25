@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
-import { Eyebrow } from "@/components/ui";
 import {
   AlertCircle,
   AlertTriangle,
@@ -243,7 +242,6 @@ export function RenterGuidesScreen() {
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         {/* Hero Section */}
         <View style={[styles.hero, isPhone && styles.heroPhone]}>
-          <Eyebrow style={styles.eyebrow}>{t("renterGuides.eyebrow")}</Eyebrow>
           <Text
             accessibilityRole="header"
             aria-level={1}

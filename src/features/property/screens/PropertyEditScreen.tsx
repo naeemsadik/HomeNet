@@ -135,7 +135,7 @@ export function PropertyEditScreen() {
     .map((m) => ({ uri: m.url }));
 
   return (
-    <AppChrome active="sell">
+    <AppChrome formPage active="sell">
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         <PropertyForm
           mode="edit"

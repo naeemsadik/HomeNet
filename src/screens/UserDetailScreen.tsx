@@ -4,7 +4,6 @@ import { LoaderCircle, Mail, ShieldCheck, UserRound, XCircle } from "@/component
 import { useEffect, useState } from "react";
 import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colors, fonts, shadow } from "@/theme";
 import { getUser, type UserProfile } from "@/services/userApi";
@@ -76,7 +75,6 @@ export function UserDetailScreen({ userId }: { userId: string }) {
             )}
           </View>
           <View style={styles.heroContent}>
-            <Eyebrow light>{t("userDirectory.detail.eyebrow")}</Eyebrow>
             <Text style={styles.title}>{user.full_name}</Text>
             <View style={styles.badgeRow}>
               <View style={[styles.badge, isVerified && styles.badgeVerified]}>

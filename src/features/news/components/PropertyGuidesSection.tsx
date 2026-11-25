@@ -199,7 +199,6 @@ export const PropertyGuidesSection = memo(function PropertyGuidesSection() {
     <View style={styles.section}>
       <View style={[styles.header, isPhone && styles.headerPhone]}>
         <View style={styles.headerCopy}>
-          <Text style={styles.eyebrow}>{t("guides.eyebrow")}</Text>
           <Text style={[styles.title, isPhone && styles.titlePhone]}>
             {t("guides.title")}
           </Text>

@@ -17,6 +17,8 @@ jest.mock("expo-router", () => ({
   useLocalSearchParams: () => mockParams,
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), setParams: jest.fn() },
   usePathname: () => "/rent",
+  // The screen is rendered without a navigator here.
+  useIsFocused: () => true,
 }));
 jest.mock("@/services/propertyApi", () => ({
   getProperties: jest.fn(),

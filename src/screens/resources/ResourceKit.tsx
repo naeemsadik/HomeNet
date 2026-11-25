@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, fonts, layout, radius } from "@/theme";
 
@@ -10,10 +9,9 @@ export function ResourcePage({ children }: { children: ReactNode }) {
   return <View style={[styles.page, isPhone && styles.pagePhone]}>{children}</View>;
 }
 
-export function ResourceHero({ eyebrow, title, intro }: { eyebrow: string; title: string; intro: string }) {
+export function ResourceHero({ title, intro }: { title: string; intro: string }) {
   return (
     <View style={styles.hero}>
-      <Eyebrow>{eyebrow}</Eyebrow>
       <Text accessibilityRole="header" aria-level={1} style={styles.title}>
         {title}
       </Text>

@@ -13,6 +13,7 @@ jest.mock("@/components/icons", () => ({
   Linkedin: () => null,
   Youtube: () => null,
 }));
+jest.mock("@/components/GooglePlayButton", () => ({ GooglePlayButton: () => null }));
 
 describe("MobileFooter", () => {
   let container: HTMLDivElement;
@@ -29,7 +30,7 @@ describe("MobileFooter", () => {
     });
   }
 
-  it("shows the social links and the copyright notice, and no links to pages we do not have", async () => {
+  it("shows the social links and the copyright notice, and only social pages we have", async () => {
     const root = createRoot(container);
     await act(async () => {
       root.render(<MobileFooter />);
@@ -39,9 +40,8 @@ describe("MobileFooter", () => {
       expect(container.querySelector(`[aria-label="${name}"]`)).toBeTruthy();
     }
     expect(container.textContent).toContain("HomeNet Group Limited");
-    // These used to all open /about.
-    for (const word of ["Site map", "Safety and Security", "Accessibility"]) {
-      expect(container.textContent).not.toContain(word);
+    for (const name of ["X", "Instagram", "TikTok"]) {
+      expect(container.querySelector(`[aria-label="${name}"]`)).toBeNull();
     }
 
     await act(async () => root.unmount());
@@ -57,7 +57,7 @@ describe("MobileFooter", () => {
     // Contact is a mailto: link, which AppLink opens itself rather than rendering as an <a>.
     const contactLinks = () =>
       Array.from(container.querySelectorAll('[role="link"]')).filter((el) => el.textContent === "Contact us");
-    const policyLinks = ["/privacy", "/terms", "/delete-account"];
+    const policyLinks = ["/sitemap", "/help", "/safety", "/terms", "/accessibility", "/privacy", "/delete-account"];
     for (const href of policyLinks) expect(linkTo(href)).toHaveLength(1);
     expect(contactLinks()).toHaveLength(1);
 

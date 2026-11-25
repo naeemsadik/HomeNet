@@ -92,7 +92,7 @@ export function MessListingWizard({ editId }: { editId?: string }) {
   if (start && !frozen) setFrozen(start);
 
   return (
-    <AppChrome active="post">
+    <AppChrome formPage active="post">
       <PageMeta title={editId ? t("mess.meta.editTitle") : t("mess.meta.createTitle")} noindex />
       <DemoNotice />
       {start ? (

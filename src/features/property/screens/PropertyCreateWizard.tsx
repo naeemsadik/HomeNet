@@ -25,7 +25,7 @@ import {
   useUnreadCount,
 } from "@/features/notification/hooks/useNotifications";
 import { SellerShell } from "@/features/seller/components/SellerShell";
-import { Footer } from "@/components/Footer";
+import { FormFooter } from "@/components/FormFooter";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
@@ -462,7 +462,7 @@ export function PropertyCreateWizard() {
             <View style={styles.stepperRow}>
               {/* Five equal slots, each circle at the centre of its own, so the steps sit evenly
                   across the page however long the labels are (the Bangla ones are much longer).
-                  The line between two circles is drawn in two halves, one in each slot. */}
+                  The line between two circles is one view, reaching back from each slot to the one before it. */}
               {steps.map((st, idx) => {
                 const isDone = st.num < store.currentStep;
                 const isCurrent = st.num === store.currentStep;
@@ -473,17 +473,7 @@ export function PropertyCreateWizard() {
                       <View
                         style={[
                           styles.stepConnector,
-                          styles.stepConnectorBefore,
                           st.num <= store.currentStep && styles.stepConnectorLineDone,
-                        ]}
-                      />
-                    ) : null}
-                    {idx < steps.length - 1 ? (
-                      <View
-                        style={[
-                          styles.stepConnector,
-                          styles.stepConnectorAfter,
-                          isDone && styles.stepConnectorLineDone,
                         ]}
                       />
                     ) : null}
@@ -660,7 +650,7 @@ export function PropertyCreateWizard() {
             </View>
           </View>
         </View>
-        <Footer />
+        <FormFooter />
       </ScrollView>
       <AreaPicker
         visible={areaPickerVisible}
