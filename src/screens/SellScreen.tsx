@@ -1,9 +1,8 @@
-import { LinearGradient } from "expo-linear-gradient";
 import { ArrowRight, BadgeCheck, BarChart3, Building2, CheckCircle2, Clock3, MapPin, ShieldCheck, type LucideIcon } from "@/components/icons";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { AppButton, AppLink, Eyebrow, FeatureCard, SectionHeader, SelectField } from "@/components/ui";
+import { AppButton, AppLink, FeatureCard, SectionHeader, SelectField } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, colors, fonts, radiusTokens, shadow } from "@/theme";
 
@@ -25,9 +24,8 @@ export function SellScreen() {
 
   return (
     <AppChrome active="sell">
-      <LinearGradient colors={["#075C46", "#086B55", "#365FB7"]} end={{ x: 1, y: 0 }} style={[styles.hero, isTablet && styles.heroTablet, isPhone && styles.heroPhone]}>
+      <View style={[styles.hero, isTablet && styles.heroTablet, isPhone && styles.heroPhone]}>
         <View style={styles.heroCopyWrap}>
-          <View style={styles.heroKicker}><Eyebrow light>{t("sellScreen.kicker")}</Eyebrow></View>
           <Text accessibilityRole="header" aria-level={1} style={[styles.heroTitle, isPhone && styles.heroTitlePhone]}>{t("sellScreen.heroTitle")}</Text>
           <Text style={styles.heroCopy}>{t("sellScreen.heroCopy")}</Text>
           <View style={styles.proofRow}>
@@ -56,10 +54,10 @@ export function SellScreen() {
           />
           {submitted ? <View style={styles.valuationResult}><CheckCircle2 color={colors.greenDark} size={15} /><Text style={styles.valuationResultText}>{t("sellScreen.valuationResult", { address: address || t("sellScreen.defaultProperty") })}</Text></View> : null}
         </View>
-      </LinearGradient>
+      </View>
 
       <View style={styles.processSection}>
-        <SectionHeader eyebrow={t("sellScreen.processEyebrow")} right={<View />} title={t("sellScreen.processTitle")} />
+        <SectionHeader right={<View />} title={t("sellScreen.processTitle")} />
         <View style={[styles.stepGrid, isPhone && styles.stepGridPhone]}>
           {[
             [BarChart3, t("sellScreen.step1Title"), t("sellScreen.step1Copy")],
@@ -83,9 +81,8 @@ export function SellScreen() {
         </View>
       </View>
 
-      <LinearGradient colors={["#EEF8F3", "#EFF3FB"]} end={{ x: 1, y: 0 }} style={[styles.insightCard, isCompact && styles.insightCardCompact, isPhone && styles.insightCardPhone]}>
+      <View style={[styles.insightCard, isCompact && styles.insightCardCompact, isPhone && styles.insightCardPhone]}>
         <View style={styles.insightCopyWrap}>
-          <Eyebrow style={styles.insightEyebrow}>{t("sellScreen.intelEyebrow")}</Eyebrow>
           <Text style={styles.insightTitle}>{t("sellScreen.intelTitle")}</Text>
           <Text style={styles.insightCopy}>{t("sellScreen.intelCopy")}</Text>
           <AppLink href="/market" style={styles.insightLink}><Text style={styles.insightLinkText}>{t("sellScreen.openMarket")}</Text><ArrowRight color={colors.green} size={15} /></AppLink>
@@ -97,17 +94,16 @@ export function SellScreen() {
             [t("sellScreen.statContact"), t("sellScreen.statContactVal"), t("sellScreen.statContactSub")],
           ].map(([label, value, detail]) => <View key={label} style={[styles.statCard, isPhone && styles.statCardPhone]}><Text style={styles.statLabel}>{label}</Text><Text style={styles.statValue}>{value}</Text><Text style={styles.statDetail}>{detail}</Text></View>)}
         </View>
-      </LinearGradient>
+      </View>
     </AppChrome>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: { minHeight: 480, flexDirection: "row", alignItems: "center", gap: 70, overflow: "hidden", padding: 72, borderRadius: radiusTokens.xl },
+  hero: { backgroundColor: colorTokens.brandText, minHeight: 480, flexDirection: "row", alignItems: "center", gap: 70, overflow: "hidden", padding: 72, borderRadius: radiusTokens.xl },
   heroTablet: { flexDirection: "column", alignItems: "stretch", gap: 30 },
   heroPhone: { minHeight: 0, paddingHorizontal: 20, paddingVertical: 30, borderRadius: radiusTokens.xl },
   heroCopyWrap: { flex: 1.1 },
-  heroKicker: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 13 },
   heroTitle: { maxWidth: 560, color: colors.white, fontFamily: fonts.bold, fontSize: 50, lineHeight: 54, letterSpacing: -0.5 },
   heroTitlePhone: { fontSize: 32, lineHeight: 38, letterSpacing: -0.4 },
   heroCopy: { maxWidth: 510, marginTop: 17, marginBottom: 24, color: "rgba(255,255,255,0.85)", fontFamily: fonts.regular, fontSize: 15, lineHeight: 24 },
@@ -137,7 +133,7 @@ const styles = StyleSheet.create({
   stepIcon: { width: 42, height: 42, alignItems: "center", justifyContent: "center", borderRadius: 12, backgroundColor: colors.greenLight },
   stepTitle: { marginTop: 17, marginBottom: 7, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 16 },
   stepCopy: { color: colors.muted, fontFamily: fonts.regular, fontSize: 13, lineHeight: 18 },
-  insightCard: { flexDirection: "row", alignItems: "center", gap: 50, marginTop: 50, padding: 48, borderRadius: radiusTokens.xl, borderWidth: 1, borderColor: "#E0E9E5" },
+  insightCard: { backgroundColor: colorTokens.brandSurface, flexDirection: "row", alignItems: "center", gap: 50, marginTop: 50, padding: 48, borderRadius: radiusTokens.xl, borderWidth: 1, borderColor: "#E0E9E5" },
   insightCardCompact: { flexDirection: "column", alignItems: "stretch" },
   insightCardPhone: { gap: 28, paddingHorizontal: 19, paddingVertical: 25 },
   insightCopyWrap: { flex: 1 },
@@ -145,7 +141,7 @@ const styles = StyleSheet.create({
   insightTitle: { maxWidth: 490, color: colors.ink, fontFamily: fonts.extraBold, fontSize: 32, lineHeight: 38, letterSpacing: -0.5 },
   insightCopy: { maxWidth: 500, marginTop: 13, marginBottom: 19, color: colors.muted, fontFamily: fonts.regular, fontSize: 15, lineHeight: 22 },
   insightLink: { alignSelf: "flex-start", minHeight: 44, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 20, borderRadius: 999, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
-  insightLinkText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 14 },
+  insightLinkText: { color: colors.greenOnLight, fontFamily: fonts.extraBold, fontSize: 14 },
   stats: { flex: 1, flexDirection: "row", flexWrap: "wrap", gap: 12 },
   statsPhone: { flexDirection: "column" },
   statCard: { minHeight: 130, minWidth: 140, flex: 1, justifyContent: "center", padding: 18, borderRadius: radiusTokens.xl, backgroundColor: "rgba(255,255,255,0.85)", borderWidth: 1, borderColor: "rgba(255,255,255,0.9)" },

@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
 import { PageMeta } from "@/components/PageMeta";
-import { AppLink, Eyebrow } from "@/components/ui";
+import { AppLink } from "@/components/ui";
 import {
   type IconName,
   AlertCircle,
@@ -336,7 +336,6 @@ export function ProfessionalLandingTemplate({
         <View style={[styles.container, { maxWidth: containerMaxWidth }]}>
           {/* Hero Section */}
           <View style={[styles.intro, isPhone && styles.introPhone]}>
-            <Eyebrow style={styles.eyebrow}>{badge}</Eyebrow>
             <Text
               accessibilityRole="header"
               aria-level={1}

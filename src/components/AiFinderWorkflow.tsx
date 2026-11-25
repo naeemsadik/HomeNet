@@ -15,7 +15,7 @@ import { useTranslation } from "@/i18n";
 import { AiDescribeSearch } from "@/components/AiDescribeSearch";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyGrid } from "@/components/PropertyGrid";
-import { AppButton, Eyebrow } from "@/components/ui";
+import { AppButton } from "@/components/ui";
 import { getPropertiesInAreas } from "@/services/propertyApi";
 import { useAllAreas } from "@/hooks/useAllAreas";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -381,7 +381,6 @@ export function AiFinderWorkflow({ isModal = false, onClose, initialPrompt = "" 
                 <Home color={colorTokens.onBrand} size={22} />
               </View>
               <View style={styles.resultCopyWrap}>
-                <Eyebrow style={styles.resultEyebrow}>{t("search.aiFinder.matchingEyebrow")}</Eyebrow>
                 <Text style={styles.resultTitle}>{t("search.aiFinder.matchingTitle")}</Text>
                 <Text style={styles.resultCopy}>
                   {t("search.aiFinder.matchingSummary", {
@@ -504,7 +503,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   aiPillText: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
     fontFamily: fonts.bold,
     fontSize: 12,
     fontWeight: "700",
@@ -640,7 +639,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   questionKicker: {
-    color: colors.green,
+    color: colors.greenOnLight,
     fontFamily: fonts.extraBold,
     fontSize: 11,
     textTransform: "uppercase",

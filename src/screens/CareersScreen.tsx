@@ -2,7 +2,7 @@ import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { openExternalUrl } from "@/lib/safeUrl";
 import { AppChrome } from "@/components/AppChrome";
-import { AppButton, Eyebrow } from "@/components/ui";
+import { AppButton } from "@/components/ui";
 import { Briefcase, Send, ShieldCheck, Users, Zap } from "@/components/icons";
 import { CAREERS_EMAIL } from "@/content/legal";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -56,7 +56,6 @@ export function CareersScreen() {
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         {/* Hero Section */}
         <View style={[styles.hero, isPhone && styles.heroPhone]}>
-          <Eyebrow style={styles.eyebrow}>{t("careers.eyebrow")}</Eyebrow>
           <Text
             accessibilityRole="header"
             aria-level={1}

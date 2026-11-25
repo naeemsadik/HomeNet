@@ -191,7 +191,7 @@ export const styles = StyleSheet.create({
   breadcrumbTextHome: {
     fontSize: 12,
     fontFamily: fonts.bold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   breadcrumbText: {
     fontSize: 12,
@@ -216,7 +216,7 @@ export const styles = StyleSheet.create({
   backStepText: {
     fontSize: 12,
     fontFamily: fonts.bold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
 
   // Selection Banner
@@ -426,7 +426,7 @@ export const styles = StyleSheet.create({
   retryButtonText: {
     fontSize: 13,
     fontFamily: fonts.bold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   emptyContainer: {
     flex: 1,

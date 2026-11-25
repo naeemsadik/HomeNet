@@ -195,19 +195,13 @@ export function FeatureCard({
   );
 }
 
-export function Eyebrow({ children, light = false, style }: { children: ReactNode; light?: boolean; style?: StyleProp<TextStyle> }) {
-  return <Text style={[styles.eyebrow, light && styles.eyebrowLight, style]}>{children}</Text>;
-}
-
 export function SectionHeader({
-  eyebrow,
   title,
   action = "View all",
   href,
   onAction,
   right,
 }: {
-  eyebrow?: string;
   title: string;
   action?: string;
   href?: string;
@@ -225,7 +219,6 @@ export function SectionHeader({
   return (
     <View style={[styles.sectionHeading, isPhone && styles.sectionHeadingPhone]}>
       <View style={styles.sectionHeadingCopy}>
-        {eyebrow ? <Eyebrow style={styles.headingEyebrow}>{eyebrow}</Eyebrow> : null}
         <Text style={[styles.sectionTitle, isPhone && styles.sectionTitlePhone]}>{title}</Text>
       </View>
       {right ??
@@ -390,14 +383,6 @@ const styles = StyleSheet.create({
     borderColor: "transparent",
   },
   buttonLabel: { fontFamily: fonts.bold, fontSize: 14 },
-  eyebrow: {
-    color: colors.green,
-    fontFamily: fonts.extraBold,
-    fontSize: 11,
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  eyebrowLight: { color: "rgba(255,255,255,0.82)" },
   sectionHeading: {
     flexDirection: "row",
     alignItems: "flex-end",
@@ -411,7 +396,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   sectionHeadingCopy: { flexShrink: 1 },
-  headingEyebrow: { marginBottom: 4 },
   sectionTitle: {
     color: colors.ink,
     fontFamily: fonts.extraBold,
@@ -426,7 +410,7 @@ const styles = StyleSheet.create({
   textLink: { paddingVertical: 5 },
   textLinkPhone: { paddingVertical: 3 },
   textLinkInner: { flexDirection: "row", alignItems: "center", gap: 6 },
-  textLinkText: { color: colors.green, fontFamily: fonts.extraBold, fontSize: 13 },
+  textLinkText: { color: colors.greenOnLight, fontFamily: fonts.extraBold, fontSize: 13 },
   textLinkTextPhone: { fontSize: 12 },
   field: {
     minHeight: 46,

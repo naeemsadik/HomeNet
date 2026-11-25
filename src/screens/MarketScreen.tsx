@@ -1,7 +1,7 @@
 import { ArrowRight, ChartNoAxesCombined, MapPin, ShieldCheck } from "@/components/icons";
 import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { AppLink, Eyebrow } from "@/components/ui";
+import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { colorTokens, colors, fonts, radius } from "@/theme";
 import { useTranslation } from "@/i18n";
@@ -37,7 +37,6 @@ export function MarketScreen() {
             <ChartNoAxesCombined color={colors.greenOnLight} size={26} />
           </View>
 
-          <Eyebrow>{t("market.eyebrow")}</Eyebrow>
           <Text style={[styles.title, isPhone && styles.titlePhone]}>
             {t("market.comingSoonTitle")}
           </Text>

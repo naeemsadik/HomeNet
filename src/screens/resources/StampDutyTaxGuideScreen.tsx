@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { Eyebrow } from "@/components/ui";
 import { AlertCircle, Building2, Check, CheckCircle2, ChevronDown, CircleHelp, FileCheck, FileText, Receipt, ShieldCheck } from "@/components/icons";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
@@ -92,7 +91,6 @@ export function StampDutyTaxGuideScreen() {
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         {/* Hero Section */}
         <View style={[styles.hero, isPhone && styles.heroPhone]}>
-          <Eyebrow style={styles.eyebrow}>{t("stampDutyGuide.eyebrow")}</Eyebrow>
           <Text
             accessibilityRole="header"
             aria-level={1}

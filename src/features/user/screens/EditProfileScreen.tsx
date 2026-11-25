@@ -10,7 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AppChrome } from "@/components/AppChrome";
 import { FormFloatingInput } from "@/components/FormFloatingInput";
 import { ErrorBanner, AuthButton } from "@/components/AuthFormFields";
-import { Eyebrow } from "@/components/ui";
 import { useAuthStore } from "@/stores/authStore";
 import { useUpdateUserProfile, useUploadAvatar, useDeleteAvatar } from "../hooks/useUserMutations";
 import { editProfileSchema, type EditProfileFormData } from "@/lib/schemas/user";
@@ -95,7 +94,6 @@ export function EditProfileScreen() {
     <AppChrome active="profile">
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View style={styles.headerSection}>
-          <Eyebrow>{t("userProfile.editProfileEyebrow")}</Eyebrow>
           <Text style={styles.title}>{t("userProfile.editProfileTitle")}</Text>
         </View>
 
