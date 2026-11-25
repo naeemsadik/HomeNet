@@ -45,7 +45,12 @@ export const HomeFeatureSections = memo(function HomeFeatureSections() {
         <View
           role="region"
           accessibilityLabel={t("home.featureSections.showcase.regionLabel")}
-          style={styles.section}
+          style={[
+            styles.section,
+            isTabletViewport
+              ? styles.showcaseSectionTablet
+              : styles.showcaseSectionDesktop,
+          ]}
         >
           <ProductPreviewShowcase />
         </View>
@@ -98,6 +103,12 @@ const styles = StyleSheet.create({
   },
   section: {
     width: "100%",
+  },
+  showcaseSectionDesktop: {
+    marginBottom: 16,
+  },
+  showcaseSectionTablet: {
+    marginBottom: 12,
   },
   grid: {
     flexDirection: "row",
