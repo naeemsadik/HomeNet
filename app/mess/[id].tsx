@@ -9,6 +9,6 @@ import { NotFoundScreen } from "@/screens/NotFoundScreen";
  */
 export default function MessDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  if (!MESS_ENABLED) return <NotFoundScreen />;
+  if (!MESS_ENABLED || !id) return <NotFoundScreen />;
   return <MessDetailScreen key={id} id={id} />;
 }

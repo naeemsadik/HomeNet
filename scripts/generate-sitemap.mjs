@@ -71,7 +71,7 @@ const STATIC_PAGES = [
   { path: "/professionals/advertise", file: "app/professionals/advertise.tsx", changefreq: "monthly", priority: "0.5" },
   // Mess & Seat Share: listed only when the build exported it as a real page.
   // With MESS_ENABLED off it is the not-found page (noindex) and is left out.
-  { path: "/mess", file: "app/mess/index.tsx", changefreq: "daily", priority: "0.8", onlyIfIndexable: "mess/index.html" },
+  { path: "/mess", file: "app/mess.tsx", changefreq: "daily", priority: "0.8", onlyIfIndexable: "mess.html" },
 ];
 // /buy/<area> and /rent/<area>, one pair per area in src/content/areas.ts.
 const AREA_INTENTS = ["buy", "rent"];

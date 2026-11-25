@@ -44,4 +44,42 @@ describe("errorLogger", () => {
     const line = consoleSpy.mock.calls.map((call) => String(call[0])).join("\n");
     expect(JSON.parse(line)).toMatchObject({ level: "error", message: "Release crash", endpoint: "/buy" });
   });
+
+  it("downgrades HTTP 429 rate limit logging from console.error to console.warn in __DEV__", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const error = Object.assign(new Error("Too Many Requests"), { status: 429 });
+      const report = reportError(error, { endpoint: "/v1/properties" });
+
+      expect(report.status).toBe(429);
+      expect(warnSpy).toHaveBeenCalledWith("[HomeNet Rate Limit 429]", report);
+      expect(consoleSpy).not.toHaveBeenCalled();
+    } finally {
+      warnSpy.mockRestore();
+    }
+  });
+
+  it("extracts status 429 from response.status and logs warn in release mode", () => {
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const globals = globalThis as { __DEV__?: boolean };
+    const wasDev = globals.__DEV__;
+    globals.__DEV__ = false;
+    try {
+      const axiosLikeError = {
+        name: "AxiosError",
+        message: "Request failed with status code 429",
+        response: { status: 429, data: { message: "Too many requests" } },
+      };
+      const report = reportError(axiosLikeError, { endpoint: "/v1/properties" });
+
+      expect(report.status).toBe(429);
+      expect(warnSpy).toHaveBeenCalled();
+      const line = warnSpy.mock.calls.map((call) => String(call[0])).join("\n");
+      expect(JSON.parse(line)).toMatchObject({ level: "warn", status: 429 });
+      expect(consoleSpy).not.toHaveBeenCalled();
+    } finally {
+      globals.__DEV__ = wasDev;
+      warnSpy.mockRestore();
+    }
+  });
 });
