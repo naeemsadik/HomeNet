@@ -5,8 +5,6 @@ import {
   StyleSheet,
   Text,
   View,
-  type StyleProp,
-  type ViewStyle,
 } from "react-native";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
@@ -19,16 +17,13 @@ import { previewProperties } from "@/data/landingPreview";
 const PREVIEW_HREF = "/buy?listing_type=sale&city=Dhaka";
 const PREVIEW_URL_DISPLAY = "homenetbd.com/buy?listing_type=sale&city=Dhaka&searched=1";
 
-export interface ProductPreviewShowcaseProps {
-  style?: StyleProp<ViewStyle>;
-}
-
-export const ProductPreviewShowcase = memo(function ProductPreviewShowcase({
-  style,
-}: ProductPreviewShowcaseProps = {}) {
+export const ProductPreviewShowcase = memo(function ProductPreviewShowcase() {
   const { width, isTablet, isPhone } = useResponsive();
   const isTabletViewport =
     (width != null && width >= 768 && width < 1024) || (isTablet && !isPhone);
+  // Below this width the phone mockup would sit on the listing's words, so the photo goes
+  // under it instead.
+  const photoOnRight = width != null && width < 1200;
 
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -113,7 +108,7 @@ export const ProductPreviewShowcase = memo(function ProductPreviewShowcase({
   };
 
   return (
-    <View style={[styles.outerContainer, style]}>
+    <View style={styles.outerContainer}>
       <Link asChild href={PREVIEW_HREF}>
         <Pressable
           accessibilityRole="link"
@@ -199,7 +194,10 @@ export const ProductPreviewShowcase = memo(function ProductPreviewShowcase({
                   </View>
 
                   {/* Split 2-column body */}
-                  <View style={styles.splitBody}>
+                  <View
+                    testID="preview-listing-body"
+                    style={[styles.splitBody, photoOnRight && styles.splitBodyPhotoRight]}
+                  >
                     {/* Left 52% property photo */}
                     <View style={styles.photoColumn}>
                       <Image
@@ -500,6 +498,9 @@ const styles = StyleSheet.create({
   splitBody: {
     flexDirection: "row",
     alignItems: "stretch",
+  },
+  splitBodyPhotoRight: {
+    flexDirection: "row-reverse",
   },
   photoColumn: {
     width: "52%",

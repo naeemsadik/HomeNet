@@ -660,7 +660,7 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
       expect(tabletTotalClearance).toBe(32); // 4 x 8pt
     });
 
-    it("ensures zero horizontal drift with 100% outer width across all tiers at 768px, 1024px, 1280px, and 1440px", () => {
+    it("keeps every section full width at 768px, 1024px, 1280px, and 1440px", () => {
       const viewports = [
         { width: 768, isTablet: true },
         { width: 1024, isTablet: false },
@@ -687,6 +687,20 @@ describe("HomeFeatureSections & 3-Tier Rightmove Architecture", () => {
           expect(regionStyles.width).toBe("100%");
         }
       }
+    });
+
+    it.each([
+      [768, "row-reverse"],
+      [1024, "row-reverse"],
+      [1280, "row"],
+    ])("keeps the preview listing's words clear of the phone mockup at %ipx", (width, direction) => {
+      mockResponsive = { isPhone: false, isTablet: width < 1024, width, containerMaxWidth: 1200 };
+      let tree: renderer.ReactTestRenderer;
+      act(() => {
+        tree = renderer.create(<HomeFeatureSections />);
+      });
+      const body = tree!.root.findAll((node) => node.props.testID === "preview-listing-body")[0];
+      expect(StyleSheet.flatten(body.props.style).flexDirection).toBe(direction);
     });
   });
 });
