@@ -38,8 +38,8 @@ describe("AuthCard Localization", () => {
       root.render(<AuthCard initialMode="signin" />);
     });
 
-    expect(container.textContent).toContain("Sign In");
-    expect(container.textContent).toContain("Create Account");
+    expect(container.textContent).toContain("Sign in");
+    expect(container.textContent).toContain("Create account");
     expect(container.textContent).toContain("Forgot password?");
 
     await act(async () => {

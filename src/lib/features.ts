@@ -19,9 +19,10 @@ export const AI_SEARCH_ENABLED = process.env.EXPO_PUBLIC_AI_SEARCH_ENABLED === "
  * and is read from EXPO_PUBLIC_GOOGLE_CLIENT_ID at build time. The client secret
  * is never used by this flow and must not be set anywhere in this project.
  *
- * The button is shown only on the website and only when the id is present and
- * well-formed, so a deploy without it simply has no Google button. Android has
- * none yet: it needs its own client id and a native sign-in.
+ * The button is shown on the website and in the Android app, and only when the id
+ * is present and well-formed, so a build without it simply has no Google button.
+ * Android signs in natively with this same web client id as the token's audience;
+ * the app itself is registered as an Android client in the same Google project.
  *
  * There is no Facebook sign-in: the API has no route for it.
  */
@@ -32,7 +33,8 @@ export const GOOGLE_CLIENT_ID = (() => {
   return GOOGLE_CLIENT_ID_PATTERN.test(id) ? id : null;
 })();
 
-export const GOOGLE_SIGN_IN_AVAILABLE = Platform.OS === "web" && GOOGLE_CLIENT_ID !== null;
+export const GOOGLE_SIGN_IN_AVAILABLE =
+  (Platform.OS === "web" || Platform.OS === "android") && GOOGLE_CLIENT_ID !== null;
 
 /**
  * Google Maps (map, place search and address lookup in the listing wizard),
