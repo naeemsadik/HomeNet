@@ -160,13 +160,23 @@ export const LEGAL_LINKS: readonly NavigationLinkItem[] = [
 ] as const;
 
 /**
- * Mobile-specific legal strip (including account deletion for app stores).
+ * The phone footer's link rows, always on screen: the website footer's six, three to a row, then
+ * account deletion (app stores require it to be findable) and contact.
  */
-export const MOBILE_LEGAL_LINKS: readonly NavigationLinkItem[] = [
-  { labelKey: "footer.privacyPolicy", label: "Privacy Policy", href: "/privacy" },
-  { labelKey: "footer.termsOfUse", label: "Terms of Use", href: "/terms" },
-  { labelKey: "footer.deleteAccount", label: "Delete account", href: "/delete-account" },
-  { labelKey: "footer.contactUs", label: "Contact us", href: "/contact" },
-] as const;
+export const MOBILE_LEGAL_ROWS: readonly (readonly NavigationLinkItem[])[] = [
+  LEGAL_LINKS.slice(0, 3),
+  LEGAL_LINKS.slice(3),
+  [
+    { labelKey: "footer.deleteAccount", label: "Delete account", href: "/delete-account" },
+    { labelKey: "footer.contactUs", label: "Contact us", href: "/contact" },
+  ],
+];
 
 export const STUDENT_ACCOMMODATION_HREF: string | null = MESS_ENABLED ? "/mess" : null;
+
+/** HomeNet's social pages. Both footers show these and only these: every icon opens a real page. */
+export const SOCIAL_LINKS = [
+  { name: "Facebook", url: "https://www.facebook.com/homenetbd" },
+  { name: "LinkedIn", url: "https://www.linkedin.com/company/homenetbd" },
+  { name: "YouTube", url: "https://www.youtube.com/@homenetbd" },
+] as const;

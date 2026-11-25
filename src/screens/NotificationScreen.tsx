@@ -3,7 +3,6 @@ import { View, Text, StyleSheet } from "react-native";
 import { AppChrome, type ActivePage } from "@/components/AppChrome";
 import { NotificationList } from "@/features/notification/components/NotificationList";
 import { colorTokens, fonts } from "@/theme";
-import { Eyebrow } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 
 import { useTranslation } from "@/i18n";
@@ -20,8 +19,7 @@ export function NotificationScreen({
     <AppChrome active={activePage}>
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         <View style={styles.headerSection}>
-          <Eyebrow>{t("notifications.heading")}</Eyebrow>
-          <Text style={styles.title}>{t("notifications.title")}</Text>
+          <Text accessibilityRole="header" aria-level={1} style={styles.title}>{t("notifications.heading")}</Text>
           <Text style={styles.subtitle}>
             {t("notifications.subtitle")}
           </Text>

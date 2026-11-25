@@ -37,7 +37,7 @@ export function SellerPaymentsWorkspace() {
 
       <View style={styles.kpiRow}>
         <View style={[styles.kpiCard, isPhone && styles.kpiCardPhone]}>
-          <Text style={[styles.kpiValue, { color: colors.green }]}>{zeroAmount}</Text>
+          <Text style={[styles.kpiValue, { color: colors.greenOnLight }]}>{zeroAmount}</Text>
           <Text style={styles.kpiLabel}>{t("seller.payments.availableBalance")}</Text>
           <Text style={styles.kpiSub}>{t("seller.payments.readyForWithdrawal")}</Text>
         </View>

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
-import { Eyebrow } from "@/components/ui";
 import { AlertCircle, ArrowRight, Building2, Check, ChevronDown, CircleHelp, Clock, Compass, FileCheck, Layers } from "@/components/icons";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
@@ -103,9 +102,6 @@ export function PropertyValuationGuideScreen() {
       <View style={[styles.container, isPhone && styles.containerPhone]}>
         {/* Hero Section */}
         <View style={[styles.hero, isPhone && styles.heroPhone]}>
-          <Eyebrow style={styles.eyebrow}>
-            {t("propertyValuationGuide.eyebrow")}
-          </Eyebrow>
           <Text
             accessibilityRole="header"
             aria-level={1}

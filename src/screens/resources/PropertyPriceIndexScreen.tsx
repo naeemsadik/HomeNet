@@ -56,7 +56,6 @@ export function PropertyPriceIndexScreen() {
     <AppChrome>
       <ResourcePage>
         <ResourceHero
-          eyebrow={t("propertyPriceIndex.eyebrow")}
           title={t("propertyPriceIndex.headline")}
           intro={t("propertyPriceIndex.subheading", { count: index.listingsKept, sites: index.siteCount, date: when })}
         />

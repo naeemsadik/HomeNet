@@ -47,7 +47,7 @@ export function ToggleViewButton({
     <Pressable
       accessibilityLabel={t("seller.toggleView.aria")}
       accessibilityRole="link"
-      // The icon-only button is 34-38px; this brings the tap area past 44px.
+      // The icon-only button is 40px; this brings the tap area past 44px.
       hitSlop={iconOnly ? 6 : undefined}
       onHoverIn={() => setIsHovered(true)}
       onHoverOut={() => setIsHovered(false)}
@@ -62,7 +62,7 @@ export function ToggleViewButton({
         style,
       ]}
     >
-      <Store color={colors.ink} size={size === "sm" ? 14 : 15} strokeWidth={2} />
+      <Store color={colors.ink} size={iconOnly ? 20 : size === "sm" ? 14 : 15} strokeWidth={iconOnly ? 1.8 : 2} />
       {iconOnly ? null : (
         <Text style={[styles.text, size === "sm" && styles.textSm]}>
           {t("seller.toggleView.label")}
@@ -95,13 +95,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     gap: 6,
   },
+  // The same 40-point circle as the bell and menu buttons beside it.
   btnIconOnly: {
-    width: 38,
+    width: 40,
+    height: 40,
     paddingHorizontal: 0,
     justifyContent: "center",
   },
   btnIconOnlySm: {
-    width: 34,
+    width: 40,
+    height: 40,
     paddingHorizontal: 0,
     justifyContent: "center",
   },

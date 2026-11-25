@@ -1,7 +1,7 @@
 import React from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { AppLink, Eyebrow, FeatureCard } from "@/components/ui";
+import { AppLink, FeatureCard } from "@/components/ui";
 import {
   BarChart3,
   Building2,
@@ -67,7 +67,6 @@ export function InvestorsScreen() {
       <View style={[styles.container, { maxWidth: containerMaxWidth }]}>
         {/* Intro */}
         <View style={[styles.intro, isPhone && styles.introPhone]}>
-          <Eyebrow style={styles.eyebrow}>{t("investors.eyebrow")}</Eyebrow>
           <Text
             accessibilityRole="header"
             aria-level={1}

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { AppLink, Eyebrow } from "@/components/ui";
+import { AppLink } from "@/components/ui";
 import { useResponsive } from "@/hooks/useResponsive";
 import { DELETE_ACCOUNT, PRIVACY_POLICY, TERMS_OF_USE, type LegalDocument } from "@/content/legal";
 import { colors, fonts } from "@/theme";
@@ -32,7 +32,6 @@ export function LegalScreen({ document }: { document: LegalDocument }) {
   return (
     <AppChrome active="home">
       <View style={[styles.page, isPhone && styles.pagePhone]}>
-        <Eyebrow style={styles.eyebrow}>{t("legal.eyebrow")}</Eyebrow>
         {/* React Native Web renders a header with no aria-level as <h1>: say the level. */}
         <Text accessibilityRole="header" aria-level={1} style={[styles.title, isPhone && styles.titlePhone]}>
           {document.title}

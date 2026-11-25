@@ -263,7 +263,6 @@ export function GuidesArchiveScreen() {
             <Text style={styles.backLinkText}>{t("guides.archive.home")}</Text>
           </Pressable>
 
-          <Text style={styles.eyebrow}>{t("guides.archive.eyebrow")}</Text>
           <Text accessibilityRole="header" aria-level={1} style={[styles.title, isPhone && styles.titlePhone]}>
             {t("guides.archive.title")}
           </Text>

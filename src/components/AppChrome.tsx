@@ -39,7 +39,8 @@ import {
 import { confirmAction } from "@/lib/alert";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
-import { Link, router, usePathname, type Href } from "expo-router";
+import { Link, router, useIsFocused, usePathname, type Href } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { Brand } from "./Brand";
 import { UserAvatar } from "./UserAvatar";
@@ -47,6 +48,7 @@ import { InstantValuationModal } from "@/features/valuation/components/InstantVa
 import { LanguageToggle } from "./LanguageToggle";
 import { DrawerLanguageDropdown } from "./DrawerLanguageDropdown";
 import { Footer } from "./Footer";
+import { FormFooter } from "./FormFooter";
 import { NotificationPreview } from "@/features/notification/components/NotificationPreview";
 import { useUnreadCount } from "@/features/notification/hooks/useNotifications";
 import { styles } from "./AppChrome.styles";
@@ -76,10 +78,18 @@ export type ActivePage =
   | "guides"
   | "mess";
 
+/**
+ * Light clock and battery icons while the header sits clear over a dark photo. Only while its
+ * screen is in front: it stays mounted under whatever is opened on top of it.
+ */
+function LightStatusBar() {
+  return useIsFocused() ? <StatusBar style="light" /> : null;
+}
+
 /** Below this width the phone bar is used (matches the phone home and search screens). */
 export const isMobileWidth = (width: number) => width < 768;
 /** Below this width the web navbar's links no longer fit beside the brand and actions. */
-const isCollapsedNavWidth = (width: number) => width < 1024;
+const isCollapsedNavWidth = (width: number) => width < 1280;
 
 /**
  * The search intents the web navbar leads with. The phone drawer lists the same
@@ -387,6 +397,7 @@ function TopBar({
       edges={["top"]}
       style={[styles.topbarSafe, isCrystal && styles.topbarSafeCrystal]}
     >
+      {isCrystal && Platform.OS !== "web" ? <LightStatusBar /> : null}
       <View
         style={[
           styles.topbar,
@@ -801,6 +812,7 @@ export function AppChrome({
   fluid,
   customTopBar,
   compactFooter,
+  formPage,
   floating,
 }: {
   children: ReactNode;
@@ -810,6 +822,8 @@ export function AppChrome({
   customTopBar?: ReactNode;
   /** Show only the short footer (policies and contact), for the phone homepage. */
   compactFooter?: boolean;
+  /** A create or edit form: the app leaves the footer off (see FormFooter). */
+  formPage?: boolean;
   /**
    * Pinned over the page, just above the bottom tabs, while the page scrolls
    * under it (the search results' List | Map switcher). The web pins such
@@ -891,7 +905,7 @@ export function AppChrome({
           {children}
         </View>
       </View>
-      <Footer compact={compactFooter} />
+      {formPage ? <FormFooter /> : <Footer compact={compactFooter} />}
     </ScrollView>
   );
 

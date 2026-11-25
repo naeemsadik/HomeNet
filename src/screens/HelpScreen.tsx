@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { AppLink, Eyebrow } from "@/components/ui";
+import { AppLink } from "@/components/ui";
 import {
   ChevronDown,
   CircleHelp,
@@ -94,7 +94,6 @@ export function HelpScreen() {
       <View style={[styles.container, { maxWidth: containerMaxWidth }]}>
         {/* Intro */}
         <View style={[styles.intro, isPhone && styles.introPhone]}>
-          <Eyebrow style={styles.eyebrow}>{t("helpCenter.eyebrow")}</Eyebrow>
           <Text
             accessibilityRole="header"
             aria-level={1}

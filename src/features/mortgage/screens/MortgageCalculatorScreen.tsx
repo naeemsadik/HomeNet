@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
-import { AppButton, Eyebrow } from "@/components/ui";
+import { AppButton } from "@/components/ui";
 import { ChoiceChips, FieldBlock, textInputStyle } from "@/features/valuation/components/FormKit";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation, type TranslationKey } from "@/i18n";
@@ -155,7 +155,6 @@ export function MortgageCalculatorScreen() {
     <AppChrome>
       <View style={[styles.page, isPhone && styles.pagePhone]}>
         <View style={styles.hero}>
-          <Eyebrow>{t("mortgage.eyebrow")}</Eyebrow>
           <Text accessibilityRole="header" aria-level={1} style={[styles.title, isPhone && styles.titlePhone]}>
             {t("mortgage.headline")}
           </Text>
