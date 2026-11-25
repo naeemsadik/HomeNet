@@ -55,5 +55,8 @@ describe("the listing's location in the app", () => {
     expect(mockOpen).toHaveBeenCalledWith("https://www.google.com/maps/place/x");
     expect(allowEmbedNavigation(EMBED, { url: "intent://maps#Intent;scheme=geo;end" })).toBe(false);
     expect(mockOpen).toHaveBeenCalledTimes(1);
+    // A load inside the map's own frame is Google's redirect, not a tapped link.
+    expect(allowEmbedNavigation(EMBED, { url: "https://www.google.com/maps/embed?x", isTopFrame: false })).toBe(true);
+    expect(mockOpen).toHaveBeenCalledTimes(1);
   });
 });
