@@ -362,7 +362,7 @@ export const styles = StyleSheet.create({
     }) as any),
   },
   topNavLinkTextActive: {
-    color: "#04cf92",
+    color: colorTokens.brandText,
     fontWeight: "700",
   },
   topNavIndicator: {

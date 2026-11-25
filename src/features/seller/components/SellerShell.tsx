@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     color: colors.muted,
   },
   navItemTextActive: {
-    color: colors.green,
+    color: colors.greenOnLight,
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {

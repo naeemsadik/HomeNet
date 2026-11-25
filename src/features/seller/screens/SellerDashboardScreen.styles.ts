@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
     color: colors.ink,
   },
   brandTextAccent: {
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   sellerRolePill: {
     backgroundColor: colors.blueLight,
@@ -85,7 +85,7 @@ export const styles = StyleSheet.create({
     color: colors.muted,
   },
   navItemTextActive: {
-    color: colors.green,
+    color: colors.greenOnLight,
     fontFamily: fonts.bold,
   },
   navItemTextDanger: {
@@ -228,7 +228,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   heroBtnPrimaryText: {
-    color: colors.green,
+    color: colors.greenOnLight,
     fontSize: 14,
     fontFamily: fonts.semiBold,
   },
@@ -295,7 +295,7 @@ export const styles = StyleSheet.create({
   trendPillTextDesktop: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   statValueDesktop: {
     fontSize: 24,
@@ -360,7 +360,7 @@ export const styles = StyleSheet.create({
   analyticsLinkText: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   chartHeaderStats: {
     flexDirection: "row",
@@ -646,7 +646,7 @@ export const styles = StyleSheet.create({
   pkgBadgeText: {
     fontSize: 11,
     fontFamily: fonts.bold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   pkgDesc: {
     fontSize: 13,
@@ -657,7 +657,7 @@ export const styles = StyleSheet.create({
   pkgPrice: {
     fontSize: 13,
     fontFamily: fonts.semiBold,
-    color: colors.green,
+    color: colors.greenOnLight,
     marginTop: 4,
   },
   boostModalActions: {
@@ -928,7 +928,7 @@ export const styles = StyleSheet.create({
   boostPkgPrice: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: colors.green,
+    color: colors.greenOnLight,
     marginTop: 4,
     marginBottom: 14,
   },
@@ -963,7 +963,7 @@ export const styles = StyleSheet.create({
   selectPkgBtnText: {
     fontSize: 13,
     fontFamily: fonts.bold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   selectPkgBtnTextPopular: {
     color: colors.ink,
@@ -1053,7 +1053,7 @@ export const styles = StyleSheet.create({
   insightPillText: {
     fontSize: 11,
     fontFamily: fonts.semiBold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   tableContainer: {
     borderRadius: 12,
@@ -1105,7 +1105,7 @@ export const styles = StyleSheet.create({
   demandBadgeText: {
     fontSize: 11,
     fontFamily: fonts.semiBold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   payoutMethodsRow: {
     flexDirection: "row",
@@ -1154,7 +1154,7 @@ export const styles = StyleSheet.create({
   connectPayoutBtnText: {
     fontSize: 12,
     fontFamily: fonts.bold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   payoutAccountNo: {
     fontSize: 13,
@@ -1197,7 +1197,7 @@ export const styles = StyleSheet.create({
   supportChannelValue: {
     fontSize: 13.5,
     fontFamily: fonts.semiBold,
-    color: colors.green,
+    color: colors.greenOnLight,
   },
   supportChannelSub: {
     fontSize: 12,

@@ -30,7 +30,6 @@ export function PropertyNewsTrendsScreen() {
     <AppChrome>
       <ResourcePage>
         <ResourceHero
-          eyebrow={t("propertyNewsTrends.eyebrow")}
           title={t("propertyNewsTrends.headline")}
           intro={t("propertyNewsTrends.subheading")}
         />

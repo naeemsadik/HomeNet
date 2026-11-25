@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { AppChrome } from "@/components/AppChrome";
-import { AppLink, Eyebrow, FeatureCard } from "@/components/ui";
+import { AppLink, FeatureCard } from "@/components/ui";
 import {
   Briefcase,
   Building2,
@@ -69,7 +69,6 @@ export function TechBlogScreen() {
       <View style={[styles.container, { maxWidth: containerMaxWidth }]}>
         {/* Intro */}
         <View style={[styles.intro, isPhone && styles.introPhone]}>
-          <Eyebrow style={styles.eyebrow}>{t("techBlog.eyebrow")}</Eyebrow>
           <Text
             accessibilityRole="header"
             aria-level={1}

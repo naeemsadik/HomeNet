@@ -170,7 +170,7 @@ export const styles = StyleSheet.create({
   verifiedTagText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   forRentTag: {
     backgroundColor: "#E8EEFC",
@@ -424,7 +424,7 @@ export const styles = StyleSheet.create({
   categoryBadgeText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   verifiedSmallBadge: {
     flexDirection: "row",
@@ -438,7 +438,7 @@ export const styles = StyleSheet.create({
   verifiedSmallText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   propertyTitle: {
     fontSize: 24,
@@ -510,7 +510,7 @@ export const styles = StyleSheet.create({
   aiValuationTitle: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   aiValuationDesc: {
     fontSize: 14,
@@ -535,7 +535,7 @@ export const styles = StyleSheet.create({
   aiTrendText: {
     fontSize: 12,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   sectionCard: {
     backgroundColor: "#FFFFFF",
@@ -562,7 +562,7 @@ export const styles = StyleSheet.create({
   seeAllLink: {
     fontSize: 14,
     fontFamily: fonts.semiBold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   descriptionParagraph: {
     fontSize: 14,
@@ -755,7 +755,7 @@ export const styles = StyleSheet.create({
   similarPrice: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   similarScoreBadge: {
     flexDirection: "row",
@@ -765,7 +765,7 @@ export const styles = StyleSheet.create({
   similarScoreText: {
     fontSize: 12,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   similarTitle: {
     fontSize: 13,
@@ -843,7 +843,7 @@ export const styles = StyleSheet.create({
   scoreBadgeText: {
     fontSize: 14,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   priceCalloutValue: {
     fontSize: 22,
@@ -957,7 +957,7 @@ export const styles = StyleSheet.create({
   aiRecTitle: {
     fontSize: 15,
     fontFamily: fonts.bold,
-    color: "#04cf92",
+    color: colorTokens.brandText,
   },
   aiRecBody: {
     fontSize: 13,

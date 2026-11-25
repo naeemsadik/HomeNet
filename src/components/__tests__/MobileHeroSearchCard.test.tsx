@@ -60,7 +60,7 @@ describe("MobileHeroSearchCard", () => {
     expect(container.textContent).toContain("Sold");
 
     // Natural-language search placeholder
-    expect(container.textContent).toContain("Search by area, project, or keyword");
+    expect(container.textContent).toContain("Search area or keyword");
 
     // Mobile search button displays "Search"
     expect(container.textContent).toContain("Search");
