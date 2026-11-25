@@ -1,4 +1,4 @@
-# Google sign-in (website)
+# Google sign-in
 
 The website's sign-in and sign-up forms show Google's own "Sign in with Google"
 button. The API side is `POST /v1/auth/google` (backend branch
@@ -54,7 +54,20 @@ project. Only the public client id is needed.
 
 ## Android
 
-Not included: the button never renders there (`GOOGLE_SIGN_IN_AVAILABLE` is false off
-the web). Android needs an Android-type OAuth client (package `com.homenetbd.app` plus
-the SHA-1 of the Play signing key, which exists after the first Play upload), added to
-the backend's `GOOGLE_CLIENT_IDS`, and a native sign-in on the app side.
+`GoogleSignInButton.android.tsx` opens the phone's own account picker
+(`@react-native-google-signin/google-signin`) and sends the ID token to the same
+`POST /v1/auth/google`.
+
+- The app passes the **web** client id as `webClientId`, so the token's audience is
+  the one the API already checks. The backend needs no new client id.
+- `EXPO_PUBLIC_GOOGLE_CLIENT_ID` is fixed at build time: EAS builds read it from
+  `eas.json`, local builds from `.env` / `.env.local`.
+- In the same Google Cloud project, create an **Android** OAuth client (package
+  `com.homenetbd.app`) for **each** signing certificate's SHA-1: the Play app signing
+  key (Play Console), the EAS upload key (`npx eas-cli credentials -p android`) and,
+  for local builds, the debug key. Android client ids are not put in the code.
+- A build whose certificate is not registered shows "We couldn't sign you in with
+  Google" after the account is picked.
+- Needs a new native build; it does not work in Expo Go.
+- Before release, check that the Play data safety form and the privacy policy cover
+  Google sign-in in the app.

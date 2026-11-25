@@ -14,6 +14,14 @@
  *    badge. They are now distinct.
  * 3. Declare elevation once, `divider` OR `shadow`, never both on one surface.
  */
+/** Google's logo colours. Only for Google's "G": its branding rules fix them. */
+export const googleLogoColors = {
+  blue: "#4285F4",
+  green: "#34A853",
+  yellow: "#FBBC05",
+  red: "#EA4335",
+} as const;
+
 export const colorTokens = {
   // ─── Brand ──────────────────────────────────────────────────────────────
   /** Fills, large graphics, active indicators. Never text. */
