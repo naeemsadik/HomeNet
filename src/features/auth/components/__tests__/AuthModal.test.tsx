@@ -80,8 +80,8 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
         root.render(<AuthModal />);
       });
 
-      expect(document.body.textContent).toContain("Sign In");
-      expect(document.body.textContent).toContain("Create Account");
+      expect(document.body.textContent).toContain("Sign in");
+      expect(document.body.textContent).toContain("Create account");
 
       // Verify close button is rendered
       const closeBtn = document.body.querySelector('[aria-label="Close"]');
@@ -172,7 +172,7 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
       });
 
       const signInTab = Array.from(container.querySelectorAll('[role="button"]')).find(
-        (el) => el.textContent === "Sign In",
+        (el) => el.textContent === "Sign in",
       ) as HTMLElement;
 
       await act(async () => {
@@ -186,7 +186,7 @@ describe("AuthModal & AuthCard 'Confirm Password' Feature", () => {
 
       // Switch back to signup tab
       const signUpTab = Array.from(container.querySelectorAll('[role="button"]')).find(
-        (el) => el.textContent === "Create Account",
+        (el) => el.textContent === "Create account",
       ) as HTMLElement;
 
       await act(async () => {
