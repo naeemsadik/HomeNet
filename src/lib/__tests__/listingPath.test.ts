@@ -41,4 +41,49 @@ describe("listingPath", () => {
     const { listingPath } = load(true);
     expect(listingPath({ id: "a/b", subtype: "mess" })).toBe("/mess/a%2Fb");
   });
+
+  describe("readable URLs", () => {
+    const ID = "0b6f3c1e-1234-4abc-8def-0123456789ab";
+
+    it("puts the title words before a uuid", () => {
+      const { listingPath } = load(true);
+      expect(listingPath({ id: ID, title: "3 Bed Flat, Gulshan-1!" })).toBe(`/property/3-bed-flat-gulshan-1-${ID}`);
+      expect(listingPath({ id: ID, title: "Seat near BRACU", subtype: "mess" })).toBe(`/mess/seat-near-bracu-${ID}`);
+    });
+
+    it("strips accents and keeps the id alone for a title with no Latin words", () => {
+      const { listingPath, titleSlug } = load(true);
+      expect(titleSlug("Café Résidence")).toBe("cafe-residence");
+      expect(listingPath({ id: ID, title: "গুলশানে ফ্ল্যাট" })).toBe(`/property/${ID}`);
+      expect(listingPath({ id: ID, title: null })).toBe(`/property/${ID}`);
+    });
+
+    it("cuts a long title at a word, within 60 characters", () => {
+      const { titleSlug } = load(true);
+      const slug = titleSlug("Spacious fully furnished family apartment with lake view and rooftop garden in Gulshan");
+      expect(slug.length).toBeLessThanOrEqual(60);
+      expect(slug).toBe("spacious-fully-furnished-family-apartment-with-lake-view-and");
+    });
+
+    it("keeps a non-uuid id bare, since it could not be read back from the end", () => {
+      const { listingPath } = load(true);
+      expect(listingPath({ id: "fx-mess-1", title: "Seat", subtype: "mess" })).toBe("/mess/fx-mess-1");
+    });
+
+    it("uses the API's slug when it sends one", () => {
+      const { listingPath } = load(true);
+      expect(listingPath({ id: ID, title: "Flat", slug: "flat-gulshan-k7p2" })).toBe("/property/flat-gulshan-k7p2");
+    });
+
+    it("reads the uuid back from any URL form", () => {
+      const { listingKeyFromSegment } = load(true);
+      expect(listingKeyFromSegment(`3-bed-flat-${ID}`)).toBe(ID);
+      expect(listingKeyFromSegment(ID.toUpperCase())).toBe(ID);
+      expect(listingKeyFromSegment(`any-words-${ID}`)).toBe(ID);
+      expect(listingKeyFromSegment("fx-mess-1")).toBe("fx-mess-1");
+      expect(listingKeyFromSegment("flat-gulshan-k7p2")).toBe("flat-gulshan-k7p2");
+      expect(listingKeyFromSegment("%E0%A4")).toBe("%E0%A4");
+      expect(listingKeyFromSegment(undefined)).toBe("");
+    });
+  });
 });

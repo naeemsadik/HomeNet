@@ -1,8 +1,8 @@
 import { pressedState } from "@/lib/a11yState";
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, usePathname } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import {
   AlertCircle,
@@ -55,6 +55,7 @@ import { formatDate, formatDistance, formatTakaRange } from "../utils/format";
 import { formatClock } from "../utils/time";
 import { DemoNotice } from "../components/DemoNotice";
 import { MESS_DEMO } from "@/lib/features";
+import { messPath, samePath } from "@/lib/listingPath";
 
 const REPORT_REASONS: Record<ReportReasonKey, ReportReason> = {
   fakeListing: "fake_listing",
@@ -68,6 +69,12 @@ const REPORT_REASONS: Record<ReportReasonKey, ReportReason> = {
 export function MessDetailScreen({ id }: { id: string | undefined }) {
   const { t } = useTranslation();
   const query = useMessDetail(id);
+  // An id-only or outdated /mess link is swapped for the listing's current URL.
+  const currentPath = query.data ? messPath(query.data) : undefined;
+  const pathname = usePathname();
+  useEffect(() => {
+    if (currentPath && !samePath(pathname, currentPath)) router.replace(currentPath as never);
+  }, [currentPath, pathname]);
 
   if (query.data) return <MessDetailView detail={query.data} />;
 
@@ -173,7 +180,7 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
         title={t("mess.meta.detailTitle", { title: detail.title })}
         description={priceText ? t("mess.meta.detailDescription", { title: detail.title, price: priceText }) : undefined}
         image={cover ? cdnImage(cover.url, 1200) : undefined}
-        canonicalPath={`/mess/${detail.id}`}
+        canonicalPath={messPath(detail)}
         noindex={MESS_DEMO || detail.status !== "active" ? true : undefined}
       />
       <DemoNotice />
@@ -192,7 +199,7 @@ function MessDetailView({ detail }: { detail: MessDetail }) {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t("mess.detail.share")}
-              onPress={() => void shareLink({ title: detail.title, url: `${SITE_URL}/mess/${detail.id}` })}
+              onPress={() => void shareLink({ title: detail.title, url: `${SITE_URL}${messPath(detail)}` })}
               style={[styles.iconButton, webPointer]}
             >
               <Share2 size={18} color={colorTokens.ink} />
