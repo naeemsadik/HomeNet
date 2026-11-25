@@ -7,9 +7,9 @@ export interface GoogleSignInButtonProps {
 }
 
 /**
- * Google sign-in is a website feature for now (see GOOGLE_SIGN_IN_AVAILABLE in
- * src/lib/features.ts); the Android app has no Google client id yet. The real
- * button is GoogleSignInButton.web.tsx, which Metro picks for the web build.
+ * Metro picks GoogleSignInButton.web.tsx for the website and
+ * GoogleSignInButton.android.tsx for the Android app. This one is what other
+ * platforms get: no button (see GOOGLE_SIGN_IN_AVAILABLE in src/lib/features.ts).
  */
 export function GoogleSignInButton(_props: GoogleSignInButtonProps) {
   return null;

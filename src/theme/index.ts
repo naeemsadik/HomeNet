@@ -8,7 +8,7 @@ import { radiusTokens } from "./radius";
 import { layoutTokens } from "./layout";
 import { Platform, type TextStyle, type ViewStyle } from "react-native";
 
-export { colorTokens, type ColorTokens } from "./colors";
+export { colorTokens, googleLogoColors, type ColorTokens } from "./colors";
 export { fontTokens, type FontTokens } from "./fonts";
 export { radiusTokens, type RadiusTokens } from "./radius";
 export { layoutTokens, type LayoutTokens } from "./layout";
