@@ -255,6 +255,8 @@ export function BrowseScreen({
     Boolean(filters.area) ||
     Boolean(filters.lat && filters.lng) ||
     Boolean(filters.query) ||
+    // Not counted as a filter, but /rent?status=rented is a link to results.
+    filters.availability !== "available" ||
     activeFilterCount > 0;
   const [searchStarted, setSearchStarted] = useState(false);
   if (hasSearchedNow && !searchStarted) setSearchStarted(true);
