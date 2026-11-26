@@ -22,7 +22,8 @@ Last reviewed: 20 October 2026. Figures described as indicative are broad market
 | Sale or rent in one area | https://www.homenetbd.com/buy/{area}, https://www.homenetbd.com/rent/{area} |
 | One listing | https://www.homenetbd.com/property/{id} |
 | Short-let and serviced | https://www.homenetbd.com/rent?subtype=short-let |
-| Recently sold | https://www.homenetbd.com/sold |
+| Recently sold | https://www.homenetbd.com/buy?status=sold |
+| Recently rented | https://www.homenetbd.com/rent?status=rented |
 | Map search | https://www.homenetbd.com/explore |
 | Guides | https://www.homenetbd.com/guides |
 | List a property | https://www.homenetbd.com/sell |

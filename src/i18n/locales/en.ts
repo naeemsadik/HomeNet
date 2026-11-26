@@ -389,6 +389,8 @@ export const en = {
     resetFilters: "Reset filters",
   },
   propertyDetail: {
+    closedSoldBody: "This property has been sold. It is shown for price reference.",
+    closedRentedBody: "This property has been let. It is shown for rent reference.",
     forSale: "For Sale",
     forRent: "For Rent",
     holidayStay: "Holiday Stay",
@@ -1912,6 +1914,7 @@ export const en = {
       headingRent: "Properties for Rent in {{location}}",
       headingShortLet: "Find property for a holiday stay in {{location}}",
       headingSold: "Recently sold in {{location}}",
+      headingRented: "Recently rented in {{location}}",
       headingAll: "Find property for sale & rent in {{location}}",
       locationPlaceholder: "Enter location, area or project...",
       update: "Update",
@@ -3805,6 +3808,22 @@ export const en = {
     feedbackHeading: "Feedback & Assistance",
     feedbackBody: "If you experience any accessibility barrier while browsing properties on HomeNet, please email our accessibility team at accessibility@homenetbd.com or support@homenetbd.com. We investigate every issue promptly.",
   },
+  availability: {
+    legend: "Availability",
+    available: "Available",
+    sold: "Sold",
+    rented: "Rented",
+    showAvailable: "Show available properties",
+    showSold: "Show sold properties",
+    showRented: "Show rented properties",
+    emptySoldTitle: "No sold properties to show yet",
+    emptySoldBody:
+      "Nothing has been marked sold in this search. Completed lets are listed separately.",
+    emptySoldLink: "Browse recently rented properties",
+    emptyRentedTitle: "No rented properties to show yet",
+    emptyRentedBody: "Nothing has been marked rented in this search. Try a wider area.",
+  },
+
   faq: {
     areaHeading: "Frequently asked questions about {{area}}",
     guideHeading: "Frequently asked questions",

@@ -64,7 +64,10 @@ describe("SitemapScreen", () => {
 
     expect(hrefs).toContain("/buy");
     expect(hrefs).toContain("/rent");
-    expect(hrefs).toContain("/sold");
+    // /sold is retired; its two halves are linked where the data lives.
+    expect(hrefs).not.toContain("/sold");
+    expect(hrefs).toContain("/buy?status=sold");
+    expect(hrefs).toContain("/rent?status=rented");
     expect(hrefs).toContain("/resources/stamp-duty-tax-guide");
     expect(hrefs).toContain("/guides");
     expect(hrefs).toContain("/contact");

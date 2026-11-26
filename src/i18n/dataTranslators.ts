@@ -122,6 +122,29 @@ const LISTING_STATUS_MAP_BN: Record<string, string> = {
 };
 
 /**
+ * The status a reader should see, which is not always the status the backend
+ * stores.
+ *
+ * The API has one closed status, `sold`, and uses it for closed rentals too —
+ * it rejects `rented` outright. So a let that has gone comes back as "sold",
+ * and saying so on a rental would tell the tenant the flat was bought. The
+ * listing type decides the word.
+ *
+ * Everything downstream already understands "rented": the Bangla map has it,
+ * and so does the badge config. Normalising here means each of those has one
+ * fewer special case rather than one more.
+ */
+export function effectiveListingStatus(
+  status: string | null | undefined,
+  listingType: string | null | undefined,
+): string {
+  const raw = (status ?? "").trim().toLowerCase();
+  if (raw !== "sold") return raw;
+  const type = (listingType ?? "").trim().toLowerCase();
+  return type === "rent" || type === "short_let" ? "rented" : "sold";
+}
+
+/**
  * Safely translates backend listing status without modifying underlying raw values.
  */
 export function translateListingStatus(status: string, lang: SupportedLanguage): string {

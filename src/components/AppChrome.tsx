@@ -19,7 +19,6 @@ import {
   Menu,
   Plus,
   Search,
-  Tag,
   TrendingUp,
   User,
   X,
@@ -110,7 +109,6 @@ const browseNavLinks: {
     icon: CalendarCheck,
     key: "holiday",
   },
-  { translationKey: "nav.sold", href: "/sold", icon: Tag, key: "sold" },
   // Mess & Seat Share appears with its API (src/lib/features.ts).
   ...(MESS_ENABLED ? [{ translationKey: "mess.nav" as TranslationKey, href: "/mess", icon: BedDouble, key: "mess" as ActivePage }] : []),
 ];

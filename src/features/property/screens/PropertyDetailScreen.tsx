@@ -43,6 +43,7 @@ import { NoTranslateText } from "@/components/NoTranslateText";
 import { trackContactOwner, trackPropertyView } from "@/lib/analytics";
 
 import {
+  effectiveListingStatus,
   useTranslation,
   translateAmenity,
   translatePropertyType,
@@ -214,6 +215,15 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       }),
     };
   }, [apiDetail, similarProperties, language, t]);
+
+  // Null while the listing is open, which is the common case.
+  const closedNotice = useMemo(() => {
+    const display = effectiveListingStatus(apiDetail?.status, apiDetail?.listing_type);
+    if (display !== "sold" && display !== "rented") return null;
+    return display === "rented"
+      ? { label: t("availability.rented"), body: t("propertyDetail.closedRentedBody") }
+      : { label: t("availability.sold"), body: t("propertyDetail.closedSoldBody") };
+  }, [apiDetail?.status, apiDetail?.listing_type, t]);
 
   // Reported once per property, and only once the API detail is in hand.
   // `property` can be built from the build-time snapshot before the request
@@ -780,6 +790,17 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                   </View>
                 ) : null}
               </View>
+
+              {/* Said once, above the title, before the reader weighs the
+                  price or reaches for the call button. The word follows the
+                  listing type: the API stores a closed let as "sold", and
+                  telling a tenant this flat was sold would be plainly wrong. */}
+              {closedNotice ? (
+                <View style={styles.closedNotice} aria-live="polite">
+                  <Text style={styles.closedNoticeLabel}>{closedNotice.label}</Text>
+                  <Text style={styles.closedNoticeBody}>{closedNotice.body}</Text>
+                </View>
+              ) : null}
 
               <Text accessibilityRole="header" aria-level={1} style={styles.propertyTitle}>{property.title}</Text>
 

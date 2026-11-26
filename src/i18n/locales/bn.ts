@@ -391,6 +391,8 @@ export const bn: TranslationSchema = {
     resetFilters: "ফিল্টার রিসেট",
   },
   propertyDetail: {
+    closedSoldBody: "এই প্রোপার্টিটি বিক্রি হয়ে গেছে। দামের ধারণা পেতে এটি দেখানো হচ্ছে।",
+    closedRentedBody: "এই প্রোপার্টিটি ভাড়া হয়ে গেছে। ভাড়ার ধারণা পেতে এটি দেখানো হচ্ছে।",
     forSale: "বিক্রির জন্য",
     forRent: "ভাড়ার জন্য",
     holidayStay: "হলিডে স্টে",
@@ -1914,6 +1916,7 @@ export const bn: TranslationSchema = {
       headingRent: "{{location}}-এ বাসা ও ফ্ল্যাট ভাড়া (টু-লেট)",
       headingShortLet: "{{location}}-এ হলিডে স্টে-র জন্য প্রোপার্টি খুঁজুন",
       headingSold: "{{location}}-এ সম্প্রতি বিক্রি হওয়া প্রোপার্টি",
+      headingRented: "{{location}}-এ সম্প্রতি ভাড়া হওয়া প্রোপার্টি",
       headingAll: "{{location}}-এ বিক্রয় ও ভাড়ার প্রোপার্টি খুঁজুন",
       locationPlaceholder: "এলাকা, রোড বা প্রজেক্ট লিখুন...",
       update: "আপডেট",
@@ -3804,6 +3807,22 @@ export const bn: TranslationSchema = {
     feedbackHeading: "মতামত ও সহায়তা",
     feedbackBody: "ব্রাউজ করতে কোনো প্রতিবন্ধকতা অনুভব করলে আমাদের জানান: accessibility@homenetbd.com অথবা support@homenetbd.com।",
   },
+  availability: {
+    legend: "প্রাপ্যতা",
+    available: "পাওয়া যাচ্ছে",
+    sold: "বিক্রিত",
+    rented: "ভাড়া হয়ে গেছে",
+    showAvailable: "যেসব প্রোপার্টি এখনো পাওয়া যাচ্ছে দেখুন",
+    showSold: "বিক্রি হয়ে যাওয়া প্রোপার্টি দেখুন",
+    showRented: "ভাড়া হয়ে যাওয়া প্রোপার্টি দেখুন",
+    emptySoldTitle: "এখনো বিক্রি হওয়া কোনো প্রোপার্টি নেই",
+    emptySoldBody:
+      "এই অনুসন্ধানে বিক্রিত হিসেবে চিহ্নিত কিছু নেই। ভাড়া হয়ে যাওয়া প্রোপার্টি আলাদা তালিকায় আছে।",
+    emptySoldLink: "সম্প্রতি ভাড়া হওয়া প্রোপার্টি দেখুন",
+    emptyRentedTitle: "এখনো ভাড়া হওয়া কোনো প্রোপার্টি নেই",
+    emptyRentedBody: "এই অনুসন্ধানে ভাড়া হিসেবে চিহ্নিত কিছু নেই। আরও বড় এলাকা বেছে দেখুন।",
+  },
+
   faq: {
     areaHeading: "{{area}} সম্পর্কে সাধারণ জিজ্ঞাসা",
     guideHeading: "সাধারণ জিজ্ঞাসা",

@@ -18,7 +18,22 @@ export { filterAddedSince } from "./addedToSite";
 import type { Property, PropertyFilters } from "../types/property";
 import type { Area, PropertyType } from "@/types/api";
 
-export type SearchPurpose = "all" | "sale" | "rent" | "short-let" | "sold";
+export type SearchPurpose = "all" | "sale" | "rent" | "short-let";
+
+/**
+ * Whether a search wants listings that are still open, ones that have closed,
+ * or both.
+ *
+ * This is a separate axis from `purpose`, and deliberately so. "Sold" used to
+ * be a fifth purpose, which meant choosing it threw away the listing type: a
+ * sold search sent no `listing_type` at all, so /buy would have returned
+ * closed rentals. Availability now sits alongside the listing type rather
+ * than replacing it.
+ *
+ * "any" is the old "include sold" checkbox: an otherwise active list widened
+ * to carry closed listings too.
+ */
+export type Availability = "available" | "closed" | "any";
 
 export interface SearchFilters {
   purpose: SearchPurpose;
@@ -38,7 +53,7 @@ export interface SearchFilters {
   propertyType: string;
   /** "", "24h", "3d", "7d", "14d", applied client-side. */
   addedToSite: string;
-  includeSold: boolean;
+  availability: Availability;
   verifiedOnly: boolean;
   minPrice: string;
   maxPrice: string;
@@ -63,7 +78,7 @@ export const defaultSearchFilters: SearchFilters = {
   radius: "",
   propertyType: "all",
   addedToSite: "",
-  includeSold: false,
+  availability: "available",
   verifiedOnly: false,
   minPrice: "",
   maxPrice: "",
@@ -136,7 +151,7 @@ function one(value: ParamValue): string | undefined {
 
 export interface ParamContext {
   /** The route's own intent: /buy, /rent or /sold. */
-  mode?: "buy" | "rent" | "sold";
+  mode?: "buy" | "rent";
   /** Pins the area, for the /buy/<area> and /rent/<area> landing pages. */
   fixedLocation?: string;
   /**
@@ -180,9 +195,7 @@ export function filtersFromParams(
   const subtype = one(params.subtype);
 
   const purpose: SearchPurpose =
-    mode === "sold" || status === "sold"
-      ? "sold"
-      : subtype === "short-let" || listingType === "short_let"
+    subtype === "short-let" || listingType === "short_let"
       ? "short-let"
       : listingType === "rent" || mode === "rent"
       ? "rent"
@@ -234,8 +247,16 @@ export function filtersFromParams(
     }
   }
 
-  // `status=sold` already becomes the sold purpose above, so "include sold"
-  // only ever comes from its own round-trip param.
+  // `/rent` writes `status=rented` because that is the word a tenant reads.
+  // The backend has no such status — it answers 400 — so the word stops here
+  // and `toApiFilters` is the only place that decides what the API is sent.
+  const availability: Availability =
+    status === "sold" || status === "rented"
+      ? "closed"
+      : one(params.include_sold) === "true"
+      ? "any"
+      : "available";
+
   return {
     purpose,
     query,
@@ -246,7 +267,7 @@ export function filtersFromParams(
     radius: one(params.radius) || "",
     propertyType: toPropertyTypeFilter(one(params.type) || one(params.category)),
     addedToSite: one(params.added) || "",
-    includeSold: one(params.include_sold) === "true",
+    availability,
     verifiedOnly: one(params.is_verified) === "true",
     minPrice: normalizePrice(one(params.min_price)),
     maxPrice: normalizePrice(one(params.max_price)),
@@ -279,9 +300,7 @@ export function filtersToParams(
 
   if (filters.query.trim()) params.query = filters.query.trim();
 
-  if (filters.purpose === "sold") {
-    params.status = "sold";
-  } else if (filters.purpose === "short-let") {
+  if (filters.purpose === "short-let") {
     params.subtype = "short-let";
     params.listing_type = "short_let";
   } else if (filters.purpose === "rent" || filters.purpose === "sale") {
@@ -297,7 +316,14 @@ export function filtersToParams(
   if (filters.propertyType && filters.propertyType !== "all") params.type = filters.propertyType;
   if (filters.radius) params.radius = filters.radius;
   if (filters.addedToSite) params.added = filters.addedToSite;
-  if (filters.includeSold) params.include_sold = "true";
+  // "Rented" on a rental route, "Sold" on a sale route: the URL says what the
+  // reader sees on the page. Both mean status=sold to the API.
+  if (filters.availability === "closed") {
+    params.status =
+      filters.purpose === "rent" || filters.purpose === "short-let" ? "rented" : "sold";
+  } else if (filters.availability === "any") {
+    params.include_sold = "true";
+  }
   if (filters.verifiedOnly) params.is_verified = "true";
   if (filters.minPrice) params.min_price = filters.minPrice;
   if (filters.maxPrice) params.max_price = filters.maxPrice;
@@ -402,7 +428,6 @@ export function toApiFilters(filters: SearchFilters): PropertyFilters {
   const [minSize, maxSize] = orderedPair(filters.minSize, filters.maxSize);
 
   const isShortLet = filters.purpose === "short-let";
-  const isSold = filters.purpose === "sold";
 
   return {
     listing_type:
@@ -424,9 +449,16 @@ export function toApiFilters(filters: SearchFilters): PropertyFilters {
     max_price: maxPrice,
     min_area: minSize,
     max_area: maxSize,
-    // The Sold section is sold-only; elsewhere "include sold" merely widens
-    // an otherwise active-only list.
-    status: isSold ? ("sold" as const) : filters.includeSold ? undefined : ("active" as const),
+    // The one place a status reaches the API. `closed` is sent as "sold" for
+    // every listing type, because that is the only closed status the backend
+    // accepts — it answers 400 to "rented". The label the reader sees comes
+    // from the listing type instead (see `closedStatusLabelKey`).
+    status:
+      filters.availability === "closed"
+        ? ("sold" as const)
+        : filters.availability === "any"
+        ? undefined
+        : ("active" as const),
     is_verified: filters.verifiedOnly ? true : undefined,
     // A client-side pass can only narrow what it was given, so it needs a
     // wider page to work from or the first screen comes back nearly empty.
@@ -450,10 +482,12 @@ function roomCountOf(property: Property, key: "bedrooms" | "bathrooms"): number 
 export function applyClientFilters(items: Property[], filters: SearchFilters): Property[] {
   let results = items;
 
-  // The API ignores `status` when `listing_type` is set, so a sold query comes
-  // back full of active listings. Presenting those as completed sales would be
-  // a lie, so the client re-asserts the filter.
-  if (filters.purpose === "sold") {
+  // Belt and braces on the closed view. A check against production on
+  // 2026-11-26 showed `status=sold` honoured alongside `listing_type`
+  // (sale -> 0 results, rent -> 3), so this no longer filters anything out —
+  // but presenting an active listing as a completed deal is the one mistake
+  // worth paying a cheap pass to avoid.
+  if (filters.availability === "closed") {
     results = results.filter((property) => property.status === "sold");
   }
 
@@ -495,7 +529,7 @@ export function countActiveFilters(filters: SearchFilters): number {
   if (filters.addedToSite) count++;
   if (filters.amenities.length) count++;
   if (filters.verifiedOnly) count++;
-  if (filters.includeSold) count++;
+  if (filters.availability !== "available") count++;
   if (filters.radius) count++;
   return count;
 }
@@ -518,7 +552,7 @@ export function clampRange(
 }
 
 /**
- * Reset keeps the page's own intent: the purpose a /buy or /sold route implies,
+ * Reset keeps the page's own intent: the purpose a /buy or /rent route implies,
  * and the area pinned by a /buy/<area> page. Clearing those would navigate the
  * person off the page they are on.
  */

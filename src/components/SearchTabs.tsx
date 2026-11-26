@@ -5,7 +5,7 @@ import { useTranslation, type TranslationKey } from "@/i18n";
 import { MESS_ENABLED } from "@/lib/features";
 
 /** "mess" opens Mess & Seat Share (/mess), its own search; the rest set the search's intent. */
-export type SearchTabType = "buy" | "rent" | "short-let" | "sold" | "mess";
+export type SearchTabType = "buy" | "rent" | "short-let" | "mess";
 
 interface SearchTabsProps {
   activeTab: SearchTabType;
@@ -17,8 +17,6 @@ const TABS: { key: SearchTabType; translationKey: TranslationKey }[] = [
   { key: "buy", translationKey: "hero.tabs.buy" },
   { key: "rent", translationKey: "hero.tabs.rent" },
   { key: "short-let", translationKey: "hero.tabs.shortLet" },
-  // Sold is a research intent, not a buying one, it trails the live tabs.
-  { key: "sold", translationKey: "hero.tabs.sold" },
   // Shown with the mess module (src/lib/features.ts).
   ...(MESS_ENABLED ? [{ key: "mess" as const, translationKey: "mess.tab" as TranslationKey }] : []),
 ];

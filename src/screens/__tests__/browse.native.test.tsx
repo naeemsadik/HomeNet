@@ -75,7 +75,7 @@ const textOf = (node: ReactTestInstance): string =>
 const mounted: ReactTestRenderer[] = [];
 
 async function mount(
-  mode: "buy" | "rent" | "sold" = "rent",
+  mode: "buy" | "rent" = "rent",
   onTotalChange?: (total: number) => void,
 ): Promise<ReactTestRenderer> {
   // gcTime: Infinity schedules no cache-cleanup timer, which would keep Jest from exiting.

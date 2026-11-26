@@ -71,11 +71,6 @@ export const getSearchLinks = (): readonly NavigationLinkItem[] => {
       href: "/rent",
     },
     {
-      labelKey: "footer.recentlySold",
-      label: "Recently sold",
-      href: "/sold",
-    },
-    {
       labelKey: "footer.commercialForSale",
       label: "Commercial properties",
       href: "/buy?type=commercial",

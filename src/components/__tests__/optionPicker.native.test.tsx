@@ -93,7 +93,7 @@ describe("the search filters on Android", () => {
     radius: "",
     propertyType: "all",
     addedToSite: "",
-    includeSold: false,
+    availability: "available" as const,
     verifiedOnly: false,
     minPrice: "",
     maxPrice: "",

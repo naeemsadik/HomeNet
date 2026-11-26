@@ -13,6 +13,11 @@
   },
   "redirects": [
     {
+      "source": "/sold",
+      "destination": "/buy?status=sold",
+      "permanent": true
+    },
+    {
       "source": "/valuation",
       "destination": "/instant-valuation",
       "permanent": true

@@ -28,9 +28,9 @@ import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { MESS_ENABLED } from "@/lib/features";
 
 /** "mess" opens Mess & Seat Share (/mess), its own search. */
-type MobileTab = "buy" | "rent" | "holiday" | "sold" | "mess";
+type MobileTab = "buy" | "rent" | "holiday" | "mess";
 
-const MOBILE_TABS: MobileTab[] = ["buy", "rent", "holiday", "sold", ...(MESS_ENABLED ? (["mess"] as const) : [])];
+const MOBILE_TABS: MobileTab[] = ["buy", "rent", "holiday", ...(MESS_ENABLED ? (["mess"] as const) : [])];
 
 export function MobileHeroSearchCard() {
   const { t } = useTranslation();
@@ -49,8 +49,6 @@ export function MobileHeroSearchCard() {
 
   const purposeForTab = (tab: MobileTab): SearchPurpose => {
     switch (tab) {
-      case "sold":
-        return "sold";
       case "holiday":
         return "short-let";
       case "rent":
@@ -69,7 +67,7 @@ export function MobileHeroSearchCard() {
     setActiveTab(tab);
     setFilters((prev) => ({
       ...prev,
-      includeSold: tab === "sold" ? prev.includeSold : false,
+      availability: "available",
     }));
   };
 
@@ -88,7 +86,7 @@ export function MobileHeroSearchCard() {
   };
 
   const handleSearch = () => {
-    const target = activeTab === "sold" ? "/sold" : activeTab === "buy" ? "/buy" : "/rent";
+    const target = activeTab === "buy" ? "/buy" : "/rent";
     const params = new URLSearchParams(
       filtersToParams({
         ...filters,
@@ -121,9 +119,7 @@ export function MobileHeroSearchCard() {
   };
 
   const primaryButtonLabel =
-    activeTab === "sold"
-      ? t("search.searchHomesSold")
-      : activeTab === "holiday"
+    activeTab === "holiday"
       ? t("search.searchHolidayStays")
       : activeTab === "rent"
       ? t("search.searchHomesForRent")
@@ -140,9 +136,7 @@ export function MobileHeroSearchCard() {
     : selectedCity;
 
   const searchLabel =
-    activeTab === "sold"
-      ? t("search.mobileHero.labelSold")
-      : activeTab === "holiday"
+    activeTab === "holiday"
       ? t("search.mobileHero.labelHoliday")
       : activeTab === "rent"
       ? t("search.mobileHero.labelRent")
