@@ -1,7 +1,8 @@
 import { router, useLocalSearchParams, usePathname } from "expo-router";
+import { safeGoBack } from "@/lib/navigation";
 import Head from "expo-router/head";
 import { ArrowLeft, Bath, BedDouble, Building2, Calendar, Camera, Check, ChevronLeft, ChevronRight, Flag, Heart, MapPin, Maximize2, Phone, RotateCcw, Share2, ShieldCheck, TrendingUp, UserRound } from "@/components/icons";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -63,7 +64,7 @@ type AiValuation = {
 
 export function PropertyDetailScreen({ initialDetail }: { initialDetail?: PropertyDetail } = {}) {
   const { t, language } = useTranslation();
-  const params = useLocalSearchParams<{ id?: string | string[] }>();
+  const params = useLocalSearchParams<{ id?: string | string[]; returnTo?: string | string[] }>();
   const rawId = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
   // The URL reads /property/<title words>-<uuid>; the API is asked for the uuid.
   const propertyId = listingKeyFromSegment(rawId);
@@ -215,6 +216,26 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       }),
     };
   }, [apiDetail, similarProperties, language, t]);
+
+  /**
+   * Back without assuming there is history. A listing is routinely opened in
+   * a new tab or reloaded — from the admin panel, from a share link, from
+   * search — and a bare router.back() there does nothing at all.
+   *
+   * The fallback follows the listing: a let returns to /rent, a sale to /buy,
+   * so the person lands among listings like the one they were reading.
+   */
+  const goBack = useCallback(() => {
+    const fallback =
+      effectiveListingStatus(apiDetail?.status, apiDetail?.listing_type) === "rented" ||
+      apiDetail?.listing_type === "rent" ||
+      apiDetail?.listing_type === "short_let"
+        ? "/rent"
+        : apiDetail?.listing_type === "sale"
+        ? "/buy"
+        : "/";
+    safeGoBack({ returnTo: params.returnTo, fallback });
+  }, [apiDetail?.listing_type, apiDetail?.status, params.returnTo]);
 
   // Null while the listing is open, which is the common case.
   const closedNotice = useMemo(() => {
@@ -457,7 +478,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
         <PageMeta title="Listing not found | HomeNet BD" robots="noindex, follow" noCanonical />
         <View style={styles.requestState}>
           <Text style={styles.requestError}>{error ? toApiError(error).message : t("propertyDetail.notFound")}</Text>
-          <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>
+          <Pressable onPress={() => (error ? void refetch() : goBack())} style={styles.retryButton}>
             <RotateCcw color={colorTokens.onBrand} size={16} />
             <Text style={styles.retryText}>{error ? t("propertyDetail.retry") : t("propertyDetail.goBack")}</Text>
           </Pressable>
@@ -477,7 +498,11 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
 
       <View style={styles.forRentTag}>
         <Text style={styles.forRentTagText}>
-          {isHolidayStayType(apiDetail?.listing_type)
+          {/* Once it is gone it is not "For Rent" any more; the chip reports
+              what happened to it instead of what it was offered as. */}
+          {closedNotice
+            ? closedNotice.label
+            : isHolidayStayType(apiDetail?.listing_type)
             ? t("propertyCard.holidayStay")
             : apiDetail?.listing_type === "rent"
             ? t("propertyDetail.forRent")
@@ -531,7 +556,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
         {/* Top Header Row: Back Link & Share/Favorite */}
         <View style={styles.topHeaderNav}>
           <Pressable
-            onPress={() => router.back()}
+            onPress={goBack}
             style={({ pressed }) => [styles.backLink, webPointer, pressed && styles.pressed]}
           >
             <ArrowLeft color="#0B1A17" size={18} />
@@ -783,12 +808,10 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                 <View style={styles.categoryBadge}>
                   <Text style={styles.categoryBadgeText}>{translatePropertyType(property.type, language)}</Text>
                 </View>
-                {property.isVerified ? (
-                  <View style={styles.verifiedSmallBadge}>
-                    <ShieldCheck color="#04cf92" size={14} />
-                    <Text style={styles.verifiedSmallText}>{t("propertyDetail.verifiedBadge")}</Text>
-                  </View>
-                ) : null}
+                {/* The Verified badge is on the gallery (galleryBadges), which
+                    renders in every media branch including the no-photo
+                    placeholder. A second copy here said the same thing twice
+                    within one screen. */}
               </View>
 
               {/* Said once, above the title, before the reader weighs the
@@ -996,7 +1019,9 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
               {/* Asking Price Callout */}
               <View style={styles.priceCalloutWrap}>
                 <View style={styles.priceCalloutHeader}>
-                  <Text style={styles.priceCalloutLabel}>{t("propertyDetail.askingPrice")}</Text>
+                  <Text style={styles.priceCalloutLabel}>
+                    {t(closedNotice ? "propertyDetail.lastAskingPrice" : "propertyDetail.askingPrice")}
+                  </Text>
                   {property.score ? (
                     <View style={styles.scoreBadge}>
                       <Text style={styles.scoreBadgeText}>{property.score}</Text>
@@ -1009,7 +1034,12 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                 </NoTranslateText>
               </View>
 
-              {/* Action Buttons Row */}
+              {/* Action Buttons Row. Gone once the deal has closed: calling
+                  or booking a viewing for a flat that is already sold or let
+                  wastes the reader's time and the owner's, and leaving the
+                  buttons there reads as though it is still going. The notice
+                  above the title says what happened. */}
+              {closedNotice ? null : (
               <View style={styles.sellerActionsRow}>
                 <Pressable
                   accessibilityLabel={t("propertyDetail.callSeller")}
@@ -1054,6 +1084,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                   <Text style={styles.bookVisitBtnText}>{t("propertyDetail.bookViewing")}</Text>
                 </Pressable>
               </View>
+              )}
 
               <Pressable
                 accessibilityRole="button"

@@ -529,7 +529,10 @@ export function countActiveFilters(filters: SearchFilters): number {
   if (filters.addedToSite) count++;
   if (filters.amenities.length) count++;
   if (filters.verifiedOnly) count++;
-  if (filters.availability !== "available") count++;
+  // Availability is not a filter the person added: it is which of the two
+  // views they are on, and it has its own control. Counting it made simply
+  // switching to Sold read as "1 filter applied", with a Reset button
+  // offering to clear something they had not set.
   if (filters.radius) count++;
   return count;
 }

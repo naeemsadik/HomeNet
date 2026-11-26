@@ -133,6 +133,8 @@ function PropertyCardComponent({
   // of its own, so the card has to say so itself. The word follows the
   // listing type: the API stores a closed let as "sold" too.
   const closedStatus = effectiveListingStatus(property.status, property.listing_type);
+  // A deal that has closed: no one can enquire, call or book it any more.
+  const isClosed = closedStatus === "sold" || closedStatus === "rented";
   const closedLabel =
     closedStatus === "rented"
       ? t("availability.rented")
@@ -478,7 +480,16 @@ function PropertyCardComponent({
 
           {adminActions}
 
-          {/* 4. In-Card Bottom Action Row (3-column action footer) */}
+          {/* The phone layout had no badge at all, so a sold or rented home
+              was indistinguishable from an available one on the surface most
+              people browse from. */}
+          {mediaBadges}
+
+          {/* 4. In-Card Bottom Action Row (3-column action footer).
+              Hidden once the deal has closed: offering to call or message
+              about a flat that is already let wastes the reader's time and
+              the owner's. The badge above says why the row is gone. */}
+          {isClosed ? null : (
           <View style={styles.actionFooter}>
             <Pressable
               accessibilityRole="button"
@@ -526,6 +537,7 @@ function PropertyCardComponent({
               <Text style={styles.actionBtnText}>{t("propertyDetail.whatsapp")}</Text>
             </Pressable>
           </View>
+          )}
         </View>
       </View>
     );

@@ -328,7 +328,13 @@ export function BrowseScreen({
   // what a search for "flat rent gulshan" should land on. Until the feed has
   // answered it names the page without a count, never "0 found".
   const headingPurpose = t(
-    filters.purpose === "sale"
+    // A closed view counts what has already gone, so "3 properties for rent"
+    // there was simply wrong: those three are not for rent.
+    isClosedView
+      ? isRentLike
+        ? "browse.purposeRented"
+        : "browse.purposeSold"
+      : filters.purpose === "sale"
       ? "browse.purposeSale"
       : filters.purpose === "rent"
       ? "browse.purposeRent"

@@ -191,6 +191,7 @@ function ResultListingCardComponent({
   );
 
   const closedStatus = effectiveListingStatus(property.status, property.listing_type);
+  const isClosed = closedStatus === "sold" || closedStatus === "rented";
   const closedLabel =
     closedStatus === "rented"
       ? t("availability.rented")
@@ -323,7 +324,10 @@ function ResultListingCardComponent({
             </View>
 
             <View style={styles.actions}>
-              {whatsappLink ? (
+              {/* Contact is gone on a closed listing; Save stays, because
+                  keeping a sold comparable for price reference is a reason
+                  to be on this card at all. */}
+              {!isClosed && whatsappLink ? (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={t("search.results.whatsapp")}
@@ -333,7 +337,7 @@ function ResultListingCardComponent({
                   <MessageSquare color={colorTokens.ink} size={17} strokeWidth={2} />
                 </Pressable>
               ) : null}
-              {ownerPhone ? (
+              {!isClosed && ownerPhone ? (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={t("search.results.call")}
@@ -343,6 +347,7 @@ function ResultListingCardComponent({
                   <Phone color={colorTokens.ink} size={17} strokeWidth={2} />
                 </Pressable>
               ) : null}
+              {!isClosed ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t("search.results.email")}
@@ -352,6 +357,7 @@ function ResultListingCardComponent({
                 <Mail color={colorTokens.ink} size={17} strokeWidth={2} />
                 <Text style={styles.saveText}>{t("search.results.email")}</Text>
               </Pressable>
+              ) : null}
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={

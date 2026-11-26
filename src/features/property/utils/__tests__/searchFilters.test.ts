@@ -450,11 +450,17 @@ describe("countActiveFilters", () => {
       availability: "any" as const,
       radius: "5",
     };
-    // price, beds, baths, size, type, added, amenities, verified, sold, radius
-    expect(countActiveFilters(filters)).toBe(10);
+    // price, beds, baths, size, type, added, amenities, verified, radius.
+    // Availability is deliberately not among them: it is which view you are
+    // on, not a filter you added, and counting it made switching to Sold
+    // read as "1 filter applied" with a Reset button for something unset.
+    expect(countActiveFilters(filters)).toBe(9);
+    expect(
+      countActiveFilters({ ...defaultSearchFilters, availability: "closed" }),
+    ).toBe(0);
 
     // The hero builds a URL, Browse reads it: the count has to survive.
-    expect(countActiveFilters(filtersFromParams(filtersToParams(filters)))).toBe(10);
+    expect(countActiveFilters(filtersFromParams(filtersToParams(filters)))).toBe(9);
   });
 });
 
