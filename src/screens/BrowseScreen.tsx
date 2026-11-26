@@ -17,6 +17,7 @@ import {
   Bell,
   ChevronDown,
   ChevronRight,
+  ArrowRight,
   List,
   MapPin,
   RotateCcw,
@@ -25,6 +26,8 @@ import {
   Star,
   X,
 } from "@/components/icons";
+import { AppLink } from "@/components/ui";
+import { AvailabilityFilter } from "@/features/property/components/AvailabilityFilter";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyCard } from "@/components/PropertyCard";
 import { RightmoveFilterCard } from "@/components/RightmoveFilterCard";
@@ -82,7 +85,7 @@ export function BrowseScreen({
   onTotalChange,
   footer,
 }: {
-  mode?: "buy" | "rent" | "sold";
+  mode?: "buy" | "rent";
   /** Pins the area filter, for the /buy/<area> and /rent/<area> landing pages. */
   location?: string;
   /** The first page as the build saw it (route loader), shown until the feed answers. */
@@ -252,6 +255,8 @@ export function BrowseScreen({
     Boolean(filters.area) ||
     Boolean(filters.lat && filters.lng) ||
     Boolean(filters.query) ||
+    // Not counted as a filter, but /rent?status=rented is a link to results.
+    filters.availability !== "available" ||
     activeFilterCount > 0;
   const [searchStarted, setSearchStarted] = useState(false);
   if (hasSearchedNow && !searchStarted) setSearchStarted(true);
@@ -282,7 +287,8 @@ export function BrowseScreen({
   const snapshot = loading && !hasUrlFilters ? initialResults : undefined;
   const feedLoading = loading && !snapshot;
   const feed = snapshot ? snapshot.items : apiProperties ?? [];
-  const isSoldView = filters.purpose === "sold";
+  const isClosedView = filters.availability === "closed";
+  const isRentLike = filters.purpose === "rent" || filters.purpose === "short-let";
 
   // Memoised so the sort below, and every card under it, only recompute when
   // the feed or the filters actually change rather than on each render.
@@ -309,7 +315,7 @@ export function BrowseScreen({
     }
   }, [results, sortBy]);
 
-  const totalCount = hasClientFilters(filters) || isSoldView
+  const totalCount = hasClientFilters(filters) || isClosedView
     ? results.length
     : ((snapshot ? snapshot.total : total) ?? results.length);
 
@@ -324,14 +330,18 @@ export function BrowseScreen({
   // what a search for "flat rent gulshan" should land on. Until the feed has
   // answered it names the page without a count, never "0 found".
   const headingPurpose = t(
-    filters.purpose === "sale"
+    // A closed view counts what has already gone, so "3 properties for rent"
+    // there was simply wrong: those three are not for rent.
+    isClosedView
+      ? isRentLike
+        ? "browse.purposeRented"
+        : "browse.purposeSold"
+      : filters.purpose === "sale"
       ? "browse.purposeSale"
       : filters.purpose === "rent"
       ? "browse.purposeRent"
       : filters.purpose === "short-let"
       ? "browse.purposeShortLet"
-      : filters.purpose === "sold"
-      ? "browse.purposeSold"
       : "browse.purposeAll"
   );
   const headingPlace =
@@ -404,8 +414,10 @@ export function BrowseScreen({
   /** "Properties for Sale in Gulshan", the line the results start under. */
   const heading = useMemo(() => {
     const key: TranslationKey =
-      filters.purpose === "sold"
-        ? "search.rightmove.headingSold"
+      isClosedView
+        ? isRentLike
+          ? "search.rightmove.headingRented"
+          : "search.rightmove.headingSold"
         : filters.purpose === "short-let"
         ? "search.rightmove.headingShortLet"
         : filters.purpose === "rent"
@@ -594,11 +606,24 @@ export function BrowseScreen({
       )}
       {loadMoreButton}
     </View>
-  ) : isSoldView ? (
+  ) : isClosedView ? (
     <View style={styles.emptyContainer}>
       <Search color={colorTokens.brand} size={32} />
-      <Text style={styles.emptyTitle}>{t("browse.noSoldTitle")}</Text>
-      <Text style={styles.emptySubtitle}>{t("browse.noSoldSubtitle")}</Text>
+      <Text style={styles.emptyTitle}>
+        {t(isRentLike ? "availability.emptyRentedTitle" : "availability.emptySoldTitle")}
+      </Text>
+      <Text style={styles.emptySubtitle}>
+        {t(isRentLike ? "availability.emptyRentedBody" : "availability.emptySoldBody")}
+      </Text>
+      {/* Every closed listing in the system today is a let, so a buyer who
+          lands here from the retired /sold bookmark would otherwise hit a
+          dead end. One quiet link out, not a second call to action. */}
+      {!isRentLike ? (
+        <AppLink href="/rent?status=rented" style={styles.emptyCrossLink}>
+          <Text style={styles.emptyCrossLinkText}>{t("availability.emptySoldLink")}</Text>
+          <ArrowRight color={colorTokens.brandText} size={15} strokeWidth={2.2} />
+        </AppLink>
+      ) : null}
     </View>
   ) : (
     <View style={styles.emptyContainer}>
@@ -649,6 +674,20 @@ export function BrowseScreen({
   );
 
   // ── Desktop ──────────────────────────────────────────────────────────────
+  // One definition, rendered by both layouts. It lived only in the desktop
+  // branch at first, which left the control missing on a phone — and with it
+  // the only way back to the available listings.
+  const availabilityRow =
+    filters.purpose !== "all" ? (
+      <View style={styles.availabilityRow}>
+        <AvailabilityFilter
+          purpose={filters.purpose}
+          value={filters.availability}
+          onChange={(availability) => applyFilters({ ...filters, availability })}
+        />
+      </View>
+    ) : null;
+
   const desktopContent = (
     <>
       <SearchFilterBar
@@ -743,6 +782,8 @@ export function BrowseScreen({
                 </View>
               </View>
 
+              {availabilityRow}
+
               {resultsBody}
             </View>
 
@@ -821,6 +862,8 @@ export function BrowseScreen({
           {viewToggle}
         </View>
       </View>
+
+      {availabilityRow}
 
       {view === "map" ? (
         <PropertyResultsMap
@@ -912,6 +955,24 @@ export function BrowseScreen({
 }
 
 const styles = StyleSheet.create({
+  availabilityRow: {
+    flexDirection: "row",
+    marginBottom: 14,
+  },
+  emptyCrossLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 4,
+    minHeight: 44,
+    paddingHorizontal: 4,
+  },
+  emptyCrossLinkText: {
+    color: colorTokens.brandText,
+    fontFamily: fonts.semiBold,
+    fontSize: 14.5,
+    lineHeight: 22,
+  },
   landing: {
     width: "100%",
     maxWidth: 820,

@@ -25,6 +25,7 @@ import {
   isPriceOnRequest,
   translateAreaUnit,
   useTranslation,
+  effectiveListingStatus,
 } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { contactPhone, listerDisplay, whatsappUrl } from "@/features/property/utils/lister";
@@ -189,10 +190,27 @@ function ResultListingCardComponent({
     </View>
   );
 
+  const closedStatus = effectiveListingStatus(property.status, property.listing_type);
+  const isClosed = closedStatus === "sold" || closedStatus === "rented";
+  const closedLabel =
+    closedStatus === "rented"
+      ? t("availability.rented")
+      : closedStatus === "sold"
+      ? t("availability.sold")
+      : null;
+
   return (
     <View style={[styles.card, highlighted && styles.cardHighlighted]}>
+      {/* A closed listing says so before anything else: this card now shows up
+          inside /buy and /rent, where the page title no longer tells you. */}
+      {closedLabel ? (
+        <View style={styles.closedRibbon}>
+          <Text style={styles.closedRibbonText}>{closedLabel.toUpperCase()}</Text>
+        </View>
+      ) : null}
+
       {/* Verified listings get a strip across the top, the way a promoted one would. */}
-      {property.is_verified ? (
+      {!closedLabel && property.is_verified ? (
         <View style={styles.ribbon}>
           <ShieldCheck color={colorTokens.onBrand} size={14} strokeWidth={2.4} />
           <Text style={styles.ribbonText}>{t("search.results.verifiedListing").toUpperCase()}</Text>
@@ -306,7 +324,10 @@ function ResultListingCardComponent({
             </View>
 
             <View style={styles.actions}>
-              {whatsappLink ? (
+              {/* Contact is gone on a closed listing; Save stays, because
+                  keeping a sold comparable for price reference is a reason
+                  to be on this card at all. */}
+              {!isClosed && whatsappLink ? (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={t("search.results.whatsapp")}
@@ -316,7 +337,7 @@ function ResultListingCardComponent({
                   <MessageSquare color={colorTokens.ink} size={17} strokeWidth={2} />
                 </Pressable>
               ) : null}
-              {ownerPhone ? (
+              {!isClosed && ownerPhone ? (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={t("search.results.call")}
@@ -326,6 +347,7 @@ function ResultListingCardComponent({
                   <Phone color={colorTokens.ink} size={17} strokeWidth={2} />
                 </Pressable>
               ) : null}
+              {!isClosed ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t("search.results.email")}
@@ -335,6 +357,7 @@ function ResultListingCardComponent({
                 <Mail color={colorTokens.ink} size={17} strokeWidth={2} />
                 <Text style={styles.saveText}>{t("search.results.email")}</Text>
               </Pressable>
+              ) : null}
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={
@@ -365,6 +388,21 @@ function ResultListingCardComponent({
 export const ResultListingCard = memo(ResultListingCardComponent);
 
 const styles = StyleSheet.create({
+  closedRibbon: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: colorTokens.ink,
+  },
+  closedRibbonText: {
+    color: colorTokens.onInk,
+    fontFamily: fonts.bold,
+    fontSize: 11,
+    letterSpacing: 0.5,
+    lineHeight: 16,
+  },
   card: {
     width: "100%",
     backgroundColor: colorTokens.surface,

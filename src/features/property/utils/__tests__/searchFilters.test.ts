@@ -115,12 +115,13 @@ describe("filtersFromParams", () => {
 
   it("derives purpose from subtype, status, listing_type and the route", () => {
     expect(filtersFromParams({ subtype: "short-let" }).purpose).toBe("short-let");
-    expect(filtersFromParams({ status: "sold" }).purpose).toBe("sold");
+    // status is the availability axis, not the purpose: it must not wipe out
+    // the listing type, or /buy would return closed rentals.
+    expect(filtersFromParams({ status: "sold", listing_type: "sale" }).purpose).toBe("sale");
     expect(filtersFromParams({ listing_type: "rent" }).purpose).toBe("rent");
     expect(filtersFromParams({ listing_type: "sale" }).purpose).toBe("sale");
     expect(filtersFromParams({}, { mode: "buy" }).purpose).toBe("sale");
     expect(filtersFromParams({}, { mode: "rent" }).purpose).toBe("rent");
-    expect(filtersFromParams({}, { mode: "sold" }).purpose).toBe("sold");
     expect(filtersFromParams({}).purpose).toBe("all");
   });
 
@@ -147,7 +148,7 @@ describe("filtersFromParams", () => {
     expect(filters.maxSize).toBe("2000");
     expect(filters.radius).toBe("5");
     expect(filters.addedToSite).toBe("7d");
-    expect(filters.includeSold).toBe(true);
+    expect(filters.availability).toBe("any");
     expect(filters.amenities).toEqual(["lift", "parking", "generator"]);
   });
 
@@ -194,7 +195,7 @@ describe("filtersToParams", () => {
       radius: "5",
       propertyType: "residential",
       addedToSite: "3d",
-      includeSold: true,
+      availability: "any" as const,
       verifiedOnly: true,
       minPrice: "2500000",
       maxPrice: "10000000",
@@ -210,10 +211,21 @@ describe("filtersToParams", () => {
     expect(filtersFromParams(filtersToParams(original))).toEqual(original);
   });
 
-  it("round-trips a short-let and a sold search", () => {
-    for (const purpose of ["short-let", "sold"] as const) {
+  it("round-trips every purpose", () => {
+    for (const purpose of ["short-let", "sale", "rent"] as const) {
       const filters = { ...defaultSearchFilters, purpose };
       expect(filtersFromParams(filtersToParams(filters)).purpose).toBe(purpose);
+    }
+  });
+
+  it("round-trips a closed search without losing the listing type", () => {
+    // The bug this replaces: "sold" was a purpose, so choosing it dropped
+    // listing_type and /buy would have returned closed rentals.
+    for (const purpose of ["sale", "rent"] as const) {
+      const filters = { ...defaultSearchFilters, purpose, availability: "closed" as const };
+      const back = filtersFromParams(filtersToParams(filters));
+      expect(back.purpose).toBe(purpose);
+      expect(back.availability).toBe("closed");
     }
   });
 
@@ -280,11 +292,10 @@ describe("toApiFilters", () => {
     expect(shortLet.listing_type).toBe("short_let");
     expect(shortLet.search).toBeUndefined();
 
-    const sold = toApiFilters({ ...defaultSearchFilters, purpose: "sold" });
-    expect(sold.status).toBe("sold");
-
     expect(toApiFilters({ ...defaultSearchFilters }).status).toBe("active");
-    expect(toApiFilters({ ...defaultSearchFilters, includeSold: true }).status).toBeUndefined();
+    expect(
+      toApiFilters({ ...defaultSearchFilters, availability: "any" }).status,
+    ).toBeUndefined();
     expect(toApiFilters({ ...defaultSearchFilters, verifiedOnly: true }).is_verified).toBe(true);
   });
 
@@ -381,7 +392,7 @@ describe("applyClientFilters", () => {
     const active = property({ id: "active", status: "active" });
     const results = applyClientFilters([sold, active], {
       ...defaultSearchFilters,
-      purpose: "sold",
+      availability: "closed",
     });
     expect(results.map((p) => p.id)).toEqual(["sold"]);
   });
@@ -436,14 +447,20 @@ describe("countActiveFilters", () => {
       addedToSite: "7d",
       amenities: ["lift", "parking"],
       verifiedOnly: true,
-      includeSold: true,
+      availability: "any" as const,
       radius: "5",
     };
-    // price, beds, baths, size, type, added, amenities, verified, sold, radius
-    expect(countActiveFilters(filters)).toBe(10);
+    // price, beds, baths, size, type, added, amenities, verified, radius.
+    // Availability is deliberately not among them: it is which view you are
+    // on, not a filter you added, and counting it made switching to Sold
+    // read as "1 filter applied" with a Reset button for something unset.
+    expect(countActiveFilters(filters)).toBe(9);
+    expect(
+      countActiveFilters({ ...defaultSearchFilters, availability: "closed" }),
+    ).toBe(0);
 
     // The hero builds a URL, Browse reads it: the count has to survive.
-    expect(countActiveFilters(filtersFromParams(filtersToParams(filters)))).toBe(10);
+    expect(countActiveFilters(filtersFromParams(filtersToParams(filters)))).toBe(9);
   });
 });
 

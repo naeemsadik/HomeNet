@@ -46,7 +46,8 @@ export function SitemapScreen() {
         { label: "Commercial properties for sale", href: "/buy?type=commercial" },
         { label: "New developments", href: "/buy?condition=new" },
         { label: "Verified listings only", href: "/buy?is_verified=true" },
-        { label: "Recently sold property prices", href: "/sold" },
+        { label: "Recently sold property prices", href: "/buy?status=sold" },
+        { label: "Recently rented properties", href: "/rent?status=rented" },
       ],
     },
     {

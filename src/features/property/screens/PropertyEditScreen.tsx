@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { safeGoBack } from "@/lib/navigation";
 import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
 import { confirmAction, notify } from "@/lib/alert";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { PropertyForm } from "../components/PropertyForm";
 import { useUpdateProperty } from "../hooks/usePropertyMutations";
@@ -75,7 +76,7 @@ export function PropertyEditScreen() {
       // not an error.
       const saved = reviewNotice ? await fetchPropertyForViewer(propertyId, { ownFirst: true }).catch(() => null) : null;
       const inReview = saved?.status === "pending";
-      notify(t("common.success"), t(inReview ? "property.editInReview" : "property.updateSuccess"), { onConfirm: () => router.back() });
+      notify(t("common.success"), t(inReview ? "property.editInReview" : "property.updateSuccess"), { onConfirm: () => safeGoBack({ fallback: "/my-properties" }) });
     } catch (err: any) {
       notify(t("common.error"), toApiError(err).message);
     } finally {
@@ -143,7 +144,7 @@ export function PropertyEditScreen() {
           initialArea={propertyData.area ?? null}
           initialImages={initialImages}
           onSubmit={handleSubmit}
-          onCancel={() => router.back()}
+          onCancel={() => safeGoBack({ fallback: "/my-properties" })}
           reviewNotice={reviewNotice}
           keepLastPhoto={!hasOtherMedia}
           loading={saving}

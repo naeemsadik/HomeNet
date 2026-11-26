@@ -59,16 +59,11 @@ export function HeroSearchWidget({
 
   /** The tab is the search's intent; the filters carry it into the URL. */
   const purposeForTab = (tab: HeroSearchTab): SearchPurpose =>
-    tab === "sold"
-      ? "sold"
-      : tab === "short-let"
-      ? "short-let"
-      : tab === "rent"
-      ? "rent"
-      : "sale";
+    tab === "short-let" ? "short-let" : tab === "rent" ? "rent" : "sale";
 
   // Switching tabs keeps the query, the area and every filter that still
-  // applies. "Include sold" only means something while looking at Sold.
+  // applies. A new tab always opens on what is still available; closed
+  // listings are one press away inside Buy and Rent.
   const handleTabChange = (tab: HeroSearchTab) => {
     // Mess & Seats is its own search, campus first, so the tab opens it.
     if (tab === "mess") {
@@ -76,10 +71,7 @@ export function HeroSearchWidget({
       return;
     }
     setActiveTab(tab);
-    setFilters((prev) => ({
-      ...prev,
-      includeSold: tab === "sold" ? prev.includeSold : false,
-    }));
+    setFilters((prev) => ({ ...prev, availability: "available" }));
   };
 
   const clearLocationSelection = () => {
@@ -124,8 +116,7 @@ export function HeroSearchWidget({
       onSearch(query, activeTab, selectedArea);
       return;
     }
-    const target =
-      activeTab === "sold" ? "/sold" : activeTab === "buy" ? "/buy" : "/rent";
+    const target = activeTab === "buy" ? "/buy" : "/rent";
     // Bug 2: the hero used to write only price, beds, baths and verified, so
     // amenities and size were counted on the badge and then dropped. One
     // serializer now writes every filter Browse knows how to read.
@@ -155,9 +146,7 @@ export function HeroSearchWidget({
   const placeholder =
     activeTab === "short-let"
       ? t("hero.placeholders.shortLet")
-      : activeTab === "sold"
-        ? t("hero.placeholders.sold")
-        : t("hero.placeholders.buyRent");
+      : t("hero.placeholders.buyRent");
 
   return (
     <View style={[styles.card, isPhone && styles.cardPhone, docked && styles.cardDocked]}>
