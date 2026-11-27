@@ -57,7 +57,8 @@ describe("MobileHeroSearchCard", () => {
     expect(container.textContent).toContain("Buy");
     expect(container.textContent).toContain("Rent");
     expect(container.textContent).toContain("Holiday stay");
-    expect(container.textContent).toContain("Sold");
+    // Sold is no longer a tab: closed listings live inside Buy and Rent.
+    expect(container.textContent).not.toContain("Sold");
 
     // Natural-language search placeholder
     expect(container.textContent).toContain("Search area or keyword");
@@ -87,7 +88,8 @@ describe("MobileHeroSearchCard", () => {
     expect(container.textContent).toContain("কিনুন");
     expect(container.textContent).toContain("ভাড়া");
     expect(container.textContent).toContain("হলিডে স্টে");
-    expect(container.textContent).toContain("বিক্রি হয়েছে");
+    // Sold is no longer a tab: closed listings live inside Buy and Rent.
+    expect(container.textContent).not.toContain("বিক্রি হয়েছে");
 
     // Mobile search button in Bengali displays "অনুসন্ধান"
     expect(container.textContent).toContain("অনুসন্ধান");

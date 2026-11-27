@@ -5,13 +5,13 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  View,
 } from "react-native";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { goToPostAuthDestination } from "@/lib/postAuth";
 import { colorTokens } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { AuthCard } from "./AuthCard";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export function AuthModal() {
   const { visible, close, onSuccess } = useAuthModalStore();
@@ -26,7 +26,7 @@ export function AuthModal() {
       visible={visible}
       onRequestClose={close}
     >
-      <View style={modalStyles.overlay}>
+      <ModalSafeView style={modalStyles.overlay}>
         <Pressable
           style={modalStyles.backdrop}
           onPress={close}
@@ -48,7 +48,7 @@ export function AuthModal() {
             showClose
           />
         </KeyboardAvoidingView>
-      </View>
+      </ModalSafeView>
     </Modal>
   );
 }

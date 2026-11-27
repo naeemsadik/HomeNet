@@ -4,6 +4,7 @@ import { colorTokens, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { styles } from "../screens/PropertyDetailScreen.styles";
 import { WhatsAppIcon } from "./WhatsAppIcon";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 type BookVisitModalProps = {
   visible: boolean;
@@ -33,7 +34,7 @@ export function BookVisitModal({
 
   return (
     <Modal animationType="fade" onRequestClose={onClose} transparent visible={visible}>
-      <View style={styles.modalOverlay}>
+      <ModalSafeView style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{t("bookVisit.title")}</Text>
@@ -106,7 +107,7 @@ export function BookVisitModal({
             </Text>
           </Pressable>
         </View>
-      </View>
+      </ModalSafeView>
     </Modal>
   );
 }

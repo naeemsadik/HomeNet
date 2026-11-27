@@ -38,7 +38,7 @@ describe("the phone footer's policy links", () => {
       "Terms of Use Accessibility Privacy Policy",
       "Delete account Contact us",
     ]);
-    expect(rows.map((row) => byTestId(row, "footer-legal-divider").length)).toEqual([2, 2, 1]);
+    expect(rows.map((row) => byTestId(row, "footer-legal-divider").length)).toEqual([3, 3, 2]);
     for (const row of rows) {
       expect(StyleSheet.flatten(row.props.style)?.justifyContent).toBeUndefined();
     }

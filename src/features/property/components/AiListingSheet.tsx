@@ -20,6 +20,7 @@ import {
   AI_FIELD_DEFINITIONS,
 } from "../types/aiListing";
 import { useGeneratePropertyDescription } from "../hooks/useGeneratePropertyDescription";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -150,7 +151,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
         behavior={Platform.OS === "web" ? undefined : "padding"}
         style={s.keyboardView}
       >
-        <View style={s.overlay}>
+        <ModalSafeView style={s.overlay}>
           <Pressable
             accessibilityHint={t("wizard.aiSheet.closeHint")}
             accessibilityLabel={t("wizard.aiSheet.closeAria")}
@@ -483,7 +484,7 @@ export function AiListingSheet({ visible, onClose, onApply, onUseManualForm }: A
               </ScrollView>
             </View>
           </View>
-        </View>
+        </ModalSafeView>
       </KeyboardAvoidingView>
     </Modal>
   );

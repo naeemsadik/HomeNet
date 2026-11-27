@@ -11,6 +11,7 @@ import { useTranslation, type TranslationKey } from "@/i18n";
 import { useInstantValuation } from "../hooks/useInstantValuation";
 import { confidenceReasonText } from "../utils/confidenceText";
 import type { ValuationPropertyType } from "../types/valuationTypes";
+import { propertyPath } from "@/lib/listingPath";
 
 const CONFIDENCE_KEY = {
   high: "valuation.result.confidence.high",
@@ -193,7 +194,7 @@ export function Step4ResultDashboard() {
                 accessibilityLabel={`${comp.title}, ${comp.priceFormatted}`}
                 accessibilityRole="link"
                 key={comp.id}
-                onPress={() => router.push(`/property/${comp.id}` as never)}
+                onPress={() => router.push(propertyPath(comp) as never)}
                 style={({ hovered }: { hovered?: boolean }) => [styles.comp, hovered && styles.compHovered, webPointer]}
               >
                 {comp.imageUrl ? (

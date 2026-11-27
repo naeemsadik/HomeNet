@@ -29,6 +29,7 @@ import { cardsForMap, hasPin } from "../utils/mapListings";
 import { ruleMatchesFilters } from "../utils/rules";
 import { DemoNotice } from "../components/DemoNotice";
 import { MESS_DEMO } from "@/lib/features";
+import { messPath } from "@/lib/listingPath";
 
 const SORTS: { value: MessSort; labelKey: TranslationKey; needsCampus?: boolean }[] = [
   { value: "walk_asc", labelKey: "mess.filters.sortWalk", needsCampus: true },
@@ -178,7 +179,7 @@ export function MessBrowseScreen() {
                     <View key={item.id} style={styles.cell} role="listitem">
                       <MessListingCard
                         item={item}
-                        onPress={(id) => router.push(`/mess/${id}` as never)}
+                        onPress={() => router.push(messPath(item) as never)}
                         onPressIn={(id) => void prefetchMessDetail(queryClient, id)}
                         onPressPrice={setBreakdownId}
                         activeRuleFilters={item.rules.filter(activeRuleFilters)}

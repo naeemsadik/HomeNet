@@ -17,6 +17,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { toApiError } from "@/services/apiClient";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export type ChangePasswordModalProps = {
   visible: boolean;
@@ -94,7 +95,7 @@ export function ChangePasswordModal({ visible, onClose }: ChangePasswordModalPro
       transparent
       visible={visible}
     >
-      <Pressable onPress={handleClose} style={styles.modalBackdrop}>
+      <ModalSafeView as={Pressable} onPress={handleClose} style={styles.modalBackdrop}>
         <Pressable
           onPress={(e) => e.stopPropagation()}
           style={[styles.modalCard, isPhone && styles.modalCardPhone]}
@@ -278,7 +279,7 @@ export function ChangePasswordModal({ visible, onClose }: ChangePasswordModalPro
             </Pressable>
           </View>
         </Pressable>
-      </Pressable>
+      </ModalSafeView>
     </Modal>
   );
 }

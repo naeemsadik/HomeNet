@@ -1,8 +1,9 @@
 import { memo, useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions, type StyleProp, type ViewStyle } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import { AppLink } from "@/components/ui";
 import { GooglePlayButton } from "@/components/GooglePlayButton";
 import { ChevronDown, Facebook, Linkedin, Youtube } from "@/components/icons";
+import { useWindowSize } from "@/hooks/useResponsive";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { useTranslation, type TranslationKey } from "@/i18n";
 import { colorTokens, fonts, webPointer } from "@/theme";
@@ -134,8 +135,10 @@ const Section = memo(function Section({
 export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
   const { t } = useTranslation();
   const [openKey, setOpenKey] = useState<string | null>(null);
-  // Under 360 points three links need tighter spacing, or a long word broke in the middle.
-  const { width } = useWindowDimensions();
+  // Under 360 points the links sit closer, so three still fit on one line at the normal text size.
+  // useWindowSize, not useWindowDimensions: the website is pre-rendered, and React keeps the
+  // server's styles on hydration, so the narrow styles never applied on the live site.
+  const { width } = useWindowSize();
   const narrow = width > 0 && width < 360;
   const toggle = (key: string) => setOpenKey((current) => (current === key ? null : key));
 
@@ -165,19 +168,21 @@ export function MobileFooter({ style }: { style?: StyleProp<ViewStyle> }) {
       <View style={styles.legal}>
         {/* Always on screen: left-aligned rows with a divider between neighbours. */}
         <View style={styles.column}>
+          {/* With a large system font three links do not fit on a line. The row then wraps, so a
+              word is never broken. Every link carries a divider on its left; the one that starts a
+              line falls outside the clip and is not seen. */}
           {MOBILE_LEGAL_ROWS.map((row) => (
-            <View key={row[0].href} style={styles.legalRow} testID="footer-legal-row">
-              {row.map((link, index) => (
-                <View
-                  key={link.href}
-                  style={[styles.legalItem, index > 0 && styles.legalItemNext, index > 0 && narrow && styles.legalItemNarrow]}
-                >
-                  {index > 0 ? <View style={styles.legalDivider} testID="footer-legal-divider" /> : null}
-                  <AppLink href={link.href} style={styles.legalLink}>
-                    <Text style={[styles.legalLinkText, narrow && styles.legalLinkTextNarrow]}>{t(link.labelKey)}</Text>
-                  </AppLink>
-                </View>
-              ))}
+            <View key={row[0].href} style={styles.legalClip}>
+              <View style={[styles.legalRow, narrow && styles.legalRowNarrow]} testID="footer-legal-row">
+                {row.map((link) => (
+                  <View key={link.href} style={[styles.legalItem, narrow && styles.legalItemNarrow]}>
+                    <View style={styles.legalDivider} testID="footer-legal-divider" />
+                    <AppLink href={link.href} style={styles.legalLink}>
+                      <Text style={[styles.legalLinkText, narrow && styles.legalLinkTextNarrow]}>{t(link.labelKey)}</Text>
+                    </AppLink>
+                  </View>
+                ))}
+              </View>
             </View>
           ))}
 
@@ -282,23 +287,36 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: colorTokens.ink,
   },
+  // 4 points of room all round, so the clip does not cut a keyboard focus ring.
+  legalClip: {
+    overflow: "hidden",
+    margin: -4,
+    padding: 4,
+  },
+  // Pulled left by a divider and its gap (1 + 14), which puts each line's first divider outside the clip.
   legalRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     alignItems: "center",
+    marginLeft: -15,
+    // Takes back the last item's trailing margin, so it never causes an early wrap.
+    marginRight: -14,
   },
-  // Long words wrap inside their own item on a narrow phone, so a divider never starts a line.
+  legalRowNarrow: {
+    marginLeft: -9,
+    marginRight: -8,
+  },
   legalItem: {
     flexDirection: "row",
     alignItems: "center",
     flexShrink: 1,
-  },
-  legalItemNext: {
-    marginLeft: 14,
+    maxWidth: "100%",
     gap: 14,
+    marginRight: 14,
   },
   legalItemNarrow: {
-    marginLeft: 8,
     gap: 8,
+    marginRight: 8,
   },
   legalDivider: {
     width: 1,

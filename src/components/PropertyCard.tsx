@@ -30,7 +30,7 @@ import { cdnImage } from "@/lib/cloudinaryImage";
 import { listingPath } from "@/lib/listingPath";
 import { isSafeLinkUrl, openExternalUrl } from "@/lib/safeUrl";
 import { whatsappUrl } from "@/features/property/utils/lister";
-import { useTranslation, formatLocalizedPrice, isPriceOnRequest, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
+import { effectiveListingStatus, useTranslation, formatLocalizedPrice, isPriceOnRequest, formatLocalizedNumber, translateAreaUnit, type SupportedLanguage } from "@/i18n";
 import type { Property } from "@/features/property/types/property";
 import { isHolidayStayType } from "@/features/property/utils/listingType";
 import { AdminListingActions } from "@/features/property/components/AdminListingActions";
@@ -129,14 +129,37 @@ function PropertyCardComponent({
   // matches the box instead of arriving at the wrong aspect ratio.
   const photo = cdnImage(original, isFeature ? 1240 : 1200, mediaHeight * 2);
 
-  const verifiedBadge = property.is_verified ? (
-    <View style={styles.badgeRow} pointerEvents="none">
-      <View style={styles.verifiedBadge}>
-        <ShieldCheck color={colorTokens.info} size={13} strokeWidth={2.4} />
-        <Text style={styles.verifiedText}>{t("propertyCard.verified")}</Text>
+  // A closed listing now appears inside /buy and /rent rather than on a page
+  // of its own, so the card has to say so itself. The word follows the
+  // listing type: the API stores a closed let as "sold" too.
+  const closedStatus = effectiveListingStatus(property.status, property.listing_type);
+  // A deal that has closed: no one can enquire, call or book it any more.
+  const isClosed = closedStatus === "sold" || closedStatus === "rented";
+  const closedLabel =
+    closedStatus === "rented"
+      ? t("availability.rented")
+      : closedStatus === "sold"
+      ? t("availability.sold")
+      : null;
+
+  const mediaBadges =
+    closedLabel || property.is_verified ? (
+      <View style={styles.badgeRow} pointerEvents="none">
+        {/* Ink, not the brand fill: this is a statement of fact about the
+            listing, and it has to hold contrast over any photograph. */}
+        {closedLabel ? (
+          <View style={styles.closedBadge}>
+            <Text style={styles.closedBadgeText}>{closedLabel}</Text>
+          </View>
+        ) : null}
+        {property.is_verified ? (
+          <View style={styles.verifiedBadge}>
+            <ShieldCheck color={colorTokens.info} size={13} strokeWidth={2.4} />
+            <Text style={styles.verifiedText}>{t("propertyCard.verified")}</Text>
+          </View>
+        ) : null}
       </View>
-    </View>
-  ) : null;
+    ) : null;
 
   const isSavedInStore = useSavedStore((state) => state.isSaved(property?.id));
   const isCardSaved = saved !== undefined ? saved : isSavedInStore;
@@ -457,7 +480,16 @@ function PropertyCardComponent({
 
           {adminActions}
 
-          {/* 4. In-Card Bottom Action Row (3-column action footer) */}
+          {/* The phone layout had no badge at all, so a sold or rented home
+              was indistinguishable from an available one on the surface most
+              people browse from. */}
+          {mediaBadges}
+
+          {/* 4. In-Card Bottom Action Row (3-column action footer).
+              Hidden once the deal has closed: offering to call or message
+              about a flat that is already let wastes the reader's time and
+              the owner's. The badge above says why the row is gone. */}
+          {isClosed ? null : (
           <View style={styles.actionFooter}>
             <Pressable
               accessibilityRole="button"
@@ -505,6 +537,7 @@ function PropertyCardComponent({
               <Text style={styles.actionBtnText}>{t("propertyDetail.whatsapp")}</Text>
             </Pressable>
           </View>
+          )}
         </View>
       </View>
     );
@@ -547,7 +580,7 @@ function PropertyCardComponent({
                   locations={[0, 0.5, 1]}
                   style={StyleSheet.absoluteFill}
                 />
-                {verifiedBadge}
+                {mediaBadges}
                 <View style={styles.featureBody}>
                   <Text numberOfLines={1} style={styles.featureLocation}>{location}</Text>
                   <Text numberOfLines={2} style={styles.featureTitle}>{property.title}</Text>
@@ -560,7 +593,7 @@ function PropertyCardComponent({
             ) : (
               <View style={styles.fill}>
                 {placeholder}
-                {verifiedBadge}
+                {mediaBadges}
               </View>
             )}
           </View>
@@ -598,7 +631,7 @@ function PropertyCardComponent({
           ) : (
             placeholder
           )}
-          {verifiedBadge}
+          {mediaBadges}
           <View style={styles.intentTag}>
             <Text style={styles.intentText}>{intentLabel}</Text>
           </View>
@@ -697,10 +730,24 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 12,
     left: 12,
+    gap: 6,
     // Stops short of the save button's 34px + 12px gutter.
     right: 58,
     flexDirection: "row",
     alignItems: "flex-start",
+  },
+  closedBadge: {
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: radius.pill,
+    backgroundColor: colorTokens.ink,
+  },
+  closedBadgeText: {
+    color: colorTokens.onInk,
+    fontFamily: fonts.semiBold,
+    fontSize: 11.5,
+    lineHeight: 16,
+    letterSpacing: 0.2,
   },
   verifiedBadge: {
     flexDirection: "row",

@@ -274,7 +274,7 @@ export function SellerDashboardScreen() {
                 <View style={styles.cardHeader}>
                   <View style={styles.cardHeaderTitleRow}>
                     <BarChart3 color={colors.ink} size={18} />
-                    <View>
+                    <View style={styles.cardHeaderText}>
                       <Text style={styles.cardTitle}>{t("seller.dashboard.viewsByListing")}</Text>
                       <Text style={styles.cardSubtext}>{t("seller.dashboard.viewsByListingSub")}</Text>
                     </View>

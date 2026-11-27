@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { AlertCircle, Check, Send, X } from "@/components/icons";
+import { ModalSafeView } from "@/components/ModalSafeView";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTranslation } from "@/i18n";
 import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
@@ -111,10 +112,9 @@ export function ListingFeedbackModal({
       transparent
       visible={visible}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "web" ? undefined : "padding"}
-        style={[styles.overlay, isPhone && styles.overlayPhone]}
-      >
+      {/* The insets go inside: KeyboardAvoidingView replaces its own bottom padding. */}
+      <KeyboardAvoidingView behavior={Platform.OS === "web" ? undefined : "padding"} style={styles.keyboardView}>
+      <ModalSafeView style={[styles.overlay, isPhone && styles.overlayPhone]}>
         <Pressable
           accessibilityLabel={t("moderation.feedbackCancel")}
           accessibilityRole="button"
@@ -285,12 +285,14 @@ export function ListingFeedbackModal({
             </Pressable>
           </View>
         </View>
+      </ModalSafeView>
       </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardView: { flex: 1 },
   overlay: {
     flex: 1,
     backgroundColor: colorTokens.overlay,

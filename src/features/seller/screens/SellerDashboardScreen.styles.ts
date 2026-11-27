@@ -331,7 +331,10 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(11,26,23,0.08)",
     padding: 24,
   },
+  // Wraps: at 360 points with a large font the totals pushed the title off the card.
   cardHeader: {
+    flexWrap: "wrap",
+    gap: 8,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -340,8 +343,10 @@ export const styles = StyleSheet.create({
   cardHeaderTitleRow: {
     flexDirection: "row",
     alignItems: "center",
+    flexShrink: 1,
     gap: 8,
   },
+  cardHeaderText: { flexShrink: 1 },
   cardTitle: {
     fontSize: 18,
     fontFamily: fonts.bold,

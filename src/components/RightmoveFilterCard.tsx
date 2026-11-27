@@ -1,13 +1,12 @@
 import React, { useMemo, useState } from "react";
 import {
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
-import { Check, Edit3, SlidersHorizontal } from "@/components/icons";
+import { Edit3, SlidersHorizontal } from "@/components/icons";
 import { SelectField } from "@/components/SelectField";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useResponsive } from "@/hooks/useResponsive";
@@ -221,10 +220,12 @@ export function RightmoveFilterCard({
 
   const heading = useMemo(() => {
     const place = filters.query?.trim() || locationName || "Bangladesh";
-    // Sold is a lookup, not a search, the verb changes with it.
+    // A closed-listing view is a lookup, not a search, so the verb changes.
     const key: TranslationKey =
-      filters.purpose === "sold"
-        ? "search.rightmove.headingSold"
+      filters.availability === "closed"
+        ? filters.purpose === "rent" || filters.purpose === "short-let"
+          ? "search.rightmove.headingRented"
+          : "search.rightmove.headingSold"
         : filters.purpose === "short-let"
         ? "search.rightmove.headingShortLet"
         : filters.purpose === "rent"
@@ -428,28 +429,10 @@ export function RightmoveFilterCard({
             onChange={(val) => handleUpdate({ addedToSite: val })}
           />
 
-          {/* Include Under Offer, Sold STC Checkbox */}
-          <View style={styles.checkboxRowContainer}>
-            <Pressable
-              onPress={() => handleUpdate({ includeSold: !filters.includeSold })}
-              style={[styles.checkboxRow, webPointer]}
-              accessibilityRole="checkbox"
-              aria-checked={filters.includeSold}
-              accessibilityHint={t("search.rightmove.includeSoldHelp")}
-              // The (?) was decoration until it carried the explanation.
-              {...(Platform.OS === "web"
-                ? ({ title: t("search.rightmove.includeSoldHelp") } as any)
-                : null)}
-            >
-              <View style={[styles.checkboxBox, filters.includeSold && styles.checkboxBoxChecked]}>
-                {filters.includeSold ? (
-                  <Check color={colorTokens.onBrand} size={13} strokeWidth={3} />
-                ) : null}
-              </View>
-              <Text style={styles.checkboxLabel}>{t("search.rightmove.includeSold")}</Text>
-              <Text style={styles.helpBadge}>(?)</Text>
-            </Pressable>
-          </View>
+          {/* The availability checkbox that used to sit here is gone. Open vs
+              closed is now one segmented control in the browse toolbar
+              (AvailabilityFilter), so there is a single place to change it
+              rather than two that can disagree. */}
         </View>
 
         {/* ROW 1, COL 4: Price range (৳) */}

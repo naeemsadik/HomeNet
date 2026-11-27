@@ -1,6 +1,6 @@
 import type { PropertyDetail } from "@/features/property/hooks/usePropertyDetail";
 import { buildTimeGet } from "@/lib/buildTimeApi";
-import { isMessSubtype } from "@/lib/listingPath";
+import { isMessSubtype, listingSegment } from "@/lib/listingPath";
 
 /**
  * The live listing ids, for `generateStaticParams` in app/property/[id].tsx.
@@ -18,10 +18,15 @@ import { isMessSubtype } from "@/lib/listingPath";
 const PAGE_SIZE = 100; // the API's maximum
 const MAX_PAGES = 50; // a runaway-loop guard: 5,000 listings
 
-type ListingsPage = { data?: { items?: { id?: string; status?: string; subtype?: string | null }[]; total?: number } };
+type ListingItem = { id?: string; status?: string; subtype?: string | null; title?: string | null; slug?: string | null };
+type ListingsPage = { data?: { items?: ListingItem[]; total?: number } };
 
-export async function listingStaticParams(): Promise<{ id: string }[]> {
-  const ids: string[] = [];
+/**
+ * `id` is the URL segment the page is exported at (title words and uuid, see
+ * listingSegment); `listingId` is the uuid the API is asked for.
+ */
+export async function listingStaticParams(): Promise<{ id: string; listingId: string }[]> {
+  const listings = new Map<string, { id: string; listingId: string }>();
   try {
     for (let page = 1; page <= MAX_PAGES; page += 1) {
       const body = await buildTimeGet<ListingsPage>(`/v1/properties?page=${page}&limit=${PAGE_SIZE}`);
@@ -30,15 +35,18 @@ export async function listingStaticParams(): Promise<{ id: string }[]> {
       for (const item of items) {
         // A mess listing is not a /property page (it lives at /mess/:id), so it is not exported here.
         if (isMessSubtype(item?.subtype)) continue;
-        if (item?.id && (item.status === undefined || item.status === "active")) ids.push(String(item.id));
+        if (item?.id && (item.status === undefined || item.status === "active")) {
+          const listingId = String(item.id);
+          listings.set(listingId, { id: listingSegment({ ...item, id: listingId }), listingId });
+        }
       }
-      if (items.length < PAGE_SIZE || ids.length >= (body.data?.total ?? 0)) break;
+      if (items.length < PAGE_SIZE || listings.size >= (body.data?.total ?? 0)) break;
     }
   } catch (error) {
     console.warn(`WARNING: listing pages not pre-rendered: ${(error as Error).message}`);
     return [];
   }
-  return [...new Set(ids)].map((id) => ({ id }));
+  return [...listings.values()];
 }
 
 /**

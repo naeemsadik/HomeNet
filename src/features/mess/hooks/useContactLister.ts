@@ -10,6 +10,7 @@ import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { contactLister } from "../api/messApi";
 import type { ContactChannel } from "../types/mess";
 import { MESS_DEMO } from "@/lib/features";
+import { messPath } from "@/lib/listingPath";
 
 const WHATSAPP_HOSTS = ["wa.me", "api.whatsapp.com"];
 
@@ -65,7 +66,7 @@ export function useContactLister(listing: { id: string; title: string }, campusN
       }
       if (channel === "whatsapp" && result.whatsapp_url && isWhatsAppUrl(result.whatsapp_url)) {
         const message = [
-          t("mess.contact.whatsappMessage", { title: listing.title, link: `${SITE_URL}/mess/${listing.id}` }),
+          t("mess.contact.whatsappMessage", { title: listing.title, link: `${SITE_URL}${messPath(listing)}` }),
           campusName ? t("mess.contact.whatsappCampus", { campus: campusName }) : "",
         ]
           .filter(Boolean)

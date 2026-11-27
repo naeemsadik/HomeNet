@@ -38,6 +38,7 @@ import { MESS_ENABLED } from "@/lib/features";
 import { startSeatListing } from "@/lib/startListing";
 import { colorTokens, colors, webPointer } from "@/theme";
 import { styles } from "./OwnerListPropertySection.styles";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export type OwnerIntentId =
   | "sell_residential"
@@ -437,7 +438,7 @@ export function OwnerListPropertySection() {
         transparent
         visible={isModalOpen}
       >
-        <View style={styles.modalOverlay}>
+        <ModalSafeView style={styles.modalOverlay}>
           <Pressable
             accessibilityLabel={t("search.ownerSection.closeModalOverlay")}
             onPress={() => setIsModalOpen(false)}
@@ -625,7 +626,7 @@ export function OwnerListPropertySection() {
               </View>
             </View>
           </View>
-        </View>
+        </ModalSafeView>
       </Modal>
 
       <AiListingSheet

@@ -29,6 +29,7 @@ import { inferAreaCity, resolveAreaFromGooglePlace, type GeoPoint } from "@/lib/
 import { fetchGooglePlaceSuggestions, type PlaceAutocompleteItem } from "@/services/googlePlaces";
 import type { Area } from "@/types/api";
 import { styles } from "./AreaPicker.styles";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export interface AreaLocationSelection {
   city: string | null;
@@ -338,7 +339,7 @@ export function AreaPicker({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={[styles.modalOverlay, !isPhone && styles.modalOverlayDesktop]}>
+      <ModalSafeView style={[styles.modalOverlay, !isPhone && styles.modalOverlayDesktop]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("areaPicker.close")}
@@ -752,7 +753,7 @@ export function AreaPicker({
           </View>
 
         </View>
-      </View>
+      </ModalSafeView>
     </OverlayModal>
   );
 }

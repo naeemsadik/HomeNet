@@ -4,6 +4,7 @@ import { OverlayModal } from "@/components/OverlayModal";
 import { X } from "@/components/icons";
 import { useResponsive, useWindowSize } from "@/hooks/useResponsive";
 import { colorTokens, fonts, radius, webPointer } from "@/theme";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 /**
  * A panel over the page: a bottom sheet on phones, a centred dialog on wider
@@ -32,7 +33,7 @@ export function MessSheet({
 
   return (
     <OverlayModal visible={visible} onRequestClose={onClose} animationType={isPhone ? "slide" : "fade"}>
-      <View style={[styles.layer, isPhone ? styles.layerPhone : styles.layerWide]}>
+      <ModalSafeView style={[styles.layer, isPhone ? styles.layerPhone : styles.layerWide]}>
         <Pressable accessibilityLabel={closeLabel} accessibilityRole="button" onPress={onClose} style={styles.scrim} />
         <View
           accessibilityViewIsModal
@@ -41,7 +42,8 @@ export function MessSheet({
           style={[
             styles.panel,
             isPhone ? styles.panelPhone : [styles.panelWide, { width }],
-            { maxHeight: Math.round(height * (isPhone ? 0.9 : 0.85)) },
+            // flexShrink: the safe-area padding leaves a short phone less room than the maxHeight.
+            { maxHeight: Math.round(height * (isPhone ? 0.9 : 0.85)), flexShrink: 1 },
           ]}
         >
           <View style={styles.header}>
@@ -57,7 +59,7 @@ export function MessSheet({
           </ScrollView>
           {footer ? <View style={styles.footer}>{footer}</View> : null}
         </View>
-      </View>
+      </ModalSafeView>
     </OverlayModal>
   );
 }

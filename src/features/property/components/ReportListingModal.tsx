@@ -5,6 +5,7 @@ import { Check, CheckCircle2, Flag, X } from "@/components/icons";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import { reportListingMailto } from "@/lib/reportListing";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export interface ReportListingModalProps {
   visible: boolean;
@@ -88,7 +89,7 @@ export function ReportListingModal({
 
   return (
     <Modal animationType="fade" onRequestClose={handleClose} transparent visible={visible}>
-      <View style={modalStyles.overlay}>
+      <ModalSafeView style={modalStyles.overlay}>
         <View style={modalStyles.content}>
           <View style={modalStyles.header}>
             <View style={modalStyles.titleRow}>
@@ -181,7 +182,7 @@ export function ReportListingModal({
             </>
           )}
         </View>
-      </View>
+      </ModalSafeView>
     </Modal>
   );
 }

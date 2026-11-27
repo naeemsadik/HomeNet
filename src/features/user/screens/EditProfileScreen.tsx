@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
+import { safeGoBack } from "@/lib/navigation";
 import { View, Text, Pressable, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
 import { notify } from "@/lib/alert";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, Trash2, UserRound } from "@/components/icons";
-import { router } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AppChrome } from "@/components/AppChrome";
@@ -47,7 +47,7 @@ export function EditProfileScreen() {
     try {
       await updateProfile.mutateAsync({ id: user.id, data: { full_name: data.full_name } });
       await fetchMe();
-      notify(t("common.success"), t("userProfile.profileUpdated"), { onConfirm: () => router.back() });
+      notify(t("common.success"), t("userProfile.profileUpdated"), { onConfirm: () => safeGoBack({ fallback: "/profile" }) });
     } catch (err: any) {
       setServerError(toApiError(err).message);
     }

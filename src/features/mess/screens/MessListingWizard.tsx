@@ -25,6 +25,7 @@ import { useMessWizardStore } from "../stores/messWizardStore";
 import type { MediaLabel, MessMedia } from "../types/mess";
 import { emptyForm, formFromDetail, WIZARD_STEPS, dtoForStep, type MessListingForm, type WizardStep } from "../utils/wizardForm";
 import { DemoNotice } from "../components/DemoNotice";
+import { messPath } from "@/lib/listingPath";
 
 const STEP_LABELS: Record<WizardStep, TranslationKey> = {
   place: "mess.wizard.steps.place",
@@ -259,7 +260,7 @@ function WizardForm({ start, isEdit, onStartOver }: { start: WizardStart; isEdit
         <Text style={styles.doneBody}>{t("mess.wizard.submittedBody")}</Text>
         <View style={styles.doneActions}>
           <AppButton label={t("seller.myListings")} onPress={() => router.replace("/my-properties" as never)} />
-          <AppButton label={t("mess.my.view")} onPress={() => router.replace(`/mess/${submittedId}` as never)} variant="secondary" />
+          <AppButton label={t("mess.my.view")} onPress={() => router.replace(messPath({ id: submittedId }) as never)} variant="secondary" />
         </View>
       </View>
     );

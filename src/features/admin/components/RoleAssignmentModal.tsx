@@ -16,6 +16,7 @@ import { useRoles } from "../hooks/useRoles";
 import type { UserWithRoles, RoleWithPermissions } from "../types/admin";
 import { toApiError } from "@/services/apiClient";
 import { useTranslation } from "@/i18n";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 interface RoleAssignmentModalProps {
   visible: boolean;
@@ -61,7 +62,7 @@ export function RoleAssignmentModal({ visible, user, onClose }: RoleAssignmentMo
 
   return (
     <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <ModalSafeView style={styles.overlay}>
         <View style={styles.dialog}>
           <View style={styles.header}>
             <View>
@@ -122,7 +123,7 @@ export function RoleAssignmentModal({ visible, user, onClose }: RoleAssignmentMo
             />
           )}
         </View>
-      </View>
+      </ModalSafeView>
     </Modal>
   );
 }

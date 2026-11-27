@@ -107,7 +107,7 @@ export function InstantValuationScreen() {
                     ]}
                   >
                     <MapPin color={colorTokens.brandText} size={18} strokeWidth={2.2} />
-                    <Text numberOfLines={1} style={[styles.areaText, !areaName && styles.areaPlaceholder]}>
+                    <Text numberOfLines={2} style={[styles.areaText, !areaName && styles.areaPlaceholder]}>
                       {areaName || t("valuation.landing.areaPlaceholder")}
                     </Text>
                     <ChevronDown color={colorTokens.muted} size={18} strokeWidth={2} />

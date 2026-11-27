@@ -5,6 +5,7 @@ import { colorTokens, fontTokens } from "@/theme";
 import { useAdminProperties, useAdminPropertyMutations } from "../hooks/useAdminProperties";
 import { ADMIN_STATUS_FILTERS, PropertyAdminList } from "../components/PropertyAdminList";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { withReturnTo } from "@/lib/navigation";
 import { ListingFeedbackModal } from "@/features/property/components/ListingFeedbackModal";
 import type { Property } from "@/features/property/types/property";
 import type { PropertyAdminItem } from "../types/admin";
@@ -17,6 +18,9 @@ import { listingPath } from "@/lib/listingPath";
 /** A ?status= from a link counts only when it names a filter the list has. */
 const statusFromLink = (value: string | undefined) =>
   ADMIN_STATUS_FILTERS.find((status) => status === value) ?? "all";
+
+/** Where the Back button on a listing returns to when it was opened from here. */
+const ADMIN_PROPERTIES_PATH = "/admin/properties";
 
 export function AdminPropertiesScreen() {
   const { t } = useTranslation();
@@ -65,7 +69,11 @@ export function AdminPropertiesScreen() {
 
   function handleView(id: string) {
     const listing = properties.find((item) => item.id === id);
-    router.push(listingPath({ id, subtype: listing?.subtype }) as never);
+    // push, not replace, so Back works by history in the ordinary case; the
+    // returnTo is for the cases where there is no history to use — the
+    // listing opened in a new tab, or the page reloaded on it.
+    const href = withReturnTo(listingPath({ id, subtype: listing?.subtype }), ADMIN_PROPERTIES_PATH);
+    router.push(href as never);
   }
 
   function handleClearHighlight() {

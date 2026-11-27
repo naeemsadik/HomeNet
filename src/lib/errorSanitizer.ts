@@ -17,8 +17,11 @@ const STACK_TRACE_PATTERNS = [
 ];
 
 const FILE_PATH_PATTERNS = [
-  /[a-zA-Z]:\\[\w\s.-]+\\/i, // Windows absolute path: C:\...
-  /[a-zA-Z]:\/[\w\s.-]+\//i, // Windows forward slash: C:/...
+  // One pattern for C:\..., C:/... and the doubled form a path takes when it
+  // has been escaped before reaching us. The separators repeat, which the
+  // single-backslash version did not allow: an escaped path then fell past
+  // detection and was returned verbatim unless the status happened to be 5xx.
+  /[a-zA-Z]:[\\/]+[\w\s.-]+[\\/]+/i,
   /(?:^|[\s"'(])\/(?:var|usr|etc|opt|tmp|home|app|node_modules|src|dist|build)\/[\w.-]+(?:\.[\w]+|\/[\w.-]+)/i, // Unix paths
   /file:\/\/\S+/i,
   /webpack:\/\/\S+/i,
@@ -41,6 +44,12 @@ const DATABASE_PATTERNS = [
   /\b(?:pg_catalog|information_schema)\b/i,
   /\b(?:sqlstate|sql error|database error|db error)\b/i,
   /\b(?:ORA-\d{5}|PG::Error|ActiveRecord::)\b/i,
+  // Driver class names and codes. The list above is SQL-shaped, so a Mongo
+  // error ("MongoServerError: E11000 duplicate key …") named no product and
+  // matched nothing: it reached the screen whole on any status below 500.
+  /\b(?:Mongo(?:Server|Network|Parse|Bulk|Runtime)?Error|E11000)\b/i,
+  /\b(?:Prisma|Sequelize|TypeORM|Knex)\w*Error\b/i,
+  /\b(?:QueryFailedError|EntityNotFoundError)\b/i,
 ];
 
 const INTERNAL_NETWORK_PATTERNS = [
