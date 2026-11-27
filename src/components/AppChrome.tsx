@@ -15,6 +15,7 @@ import {
   Heart,
   Home,
   KeyRound,
+  LayoutDashboard,
   LogOut,
   Menu,
   Plus,
@@ -651,6 +652,34 @@ function TopBar({
                         </View>
                         <Text style={styles.dropdownItemText}>{t("nav.profile")}</Text>
                       </Pressable>
+
+                      <View style={styles.dropdownDivider} />
+
+                      {/* Selling: the owner's own listings and dashboard. */}
+                      {[
+                        { href: "/my-properties", label: t("nav.myListings"), Icon: Building2 },
+                        { href: "/seller", label: t("nav.sellerDashboard"), Icon: LayoutDashboard },
+                      ].map(({ href, label, Icon }) => (
+                        <Pressable
+                          accessibilityLabel={label}
+                          accessibilityRole="button"
+                          key={href}
+                          onPress={() => {
+                            setUserDropdownOpen(false);
+                            router.push(href as never);
+                          }}
+                          style={({ pressed, hovered }: any) => [
+                            styles.dropdownItem,
+                            (pressed || hovered) && styles.dropdownItemPressed,
+                            webPointer,
+                          ]}
+                        >
+                          <View style={styles.dropdownIconBox}>
+                            <Icon color={colorTokens.ink} size={16} strokeWidth={1.8} />
+                          </View>
+                          <Text style={styles.dropdownItemText}>{label}</Text>
+                        </Pressable>
+                      ))}
 
                       <View style={styles.dropdownDivider} />
 

@@ -6,6 +6,7 @@ import { Dimensions, Text } from "react-native";
 import { router } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import { layout } from "@/theme";
+import { useAuthStore } from "@/stores/authStore";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -95,11 +96,31 @@ describe("the page chrome on a phone", () => {
 
     const links = tree.root.findAll((n) => n.props.accessibilityRole === "link" && typeof n.props.onPress === "function");
     const labels = links.map(textOf).map((label) => label.trim());
-    for (const label of ["Buy", "Rent", "Holiday Stay", "Sold", "Insights", "Valuation", "Guides"]) {
+    for (const label of ["Buy", "Rent", "Holiday Stay", "Insights", "Valuation", "Guides"]) {
       expect(labels).toContain(label);
     }
 
     act(() => links[labels.indexOf("Holiday Stay")].props.onPress());
     expect(router.push).toHaveBeenCalledWith("/rent?subtype=short-let");
+  });
+});
+
+describe("the account menu on a wide screen", () => {
+  afterEach(() => useAuthStore.setState({ user: null, hydrated: false }));
+
+  it.each([
+    ["My listings", "/my-properties"],
+    ["Seller dashboard", "/seller"],
+  ])("takes an owner to %s", (label, href) => {
+    jest.spyOn(Dimensions, "get").mockReturnValue({ width: 1280, height: 900, scale: 2, fontScale: 1 });
+    useAuthStore.setState({ user: { id: "u1", full_name: "Test Person", email: "t@example.test", avatar_url: null, email_verified: true }, hydrated: true });
+    const tree = mount();
+    const press = (name: string) =>
+      act(() => tree.root.find((n) => n.props.accessibilityLabel === name && typeof n.props.onPress === "function").props.onPress());
+
+    press("Open user menu");
+    press(label);
+
+    expect(router.push).toHaveBeenCalledWith(href);
   });
 });
