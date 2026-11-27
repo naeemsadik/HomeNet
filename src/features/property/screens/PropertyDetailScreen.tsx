@@ -1,5 +1,5 @@
-import { router, useLocalSearchParams, usePathname } from "expo-router";
-import { safeGoBack } from "@/lib/navigation";
+import { router, useIsFocused, useLocalSearchParams } from "expo-router";
+import { safeGoBack, withReturnTo } from "@/lib/navigation";
 import Head from "expo-router/head";
 import { ArrowLeft, Bath, BedDouble, Building2, Calendar, Camera, Check, ChevronLeft, ChevronRight, Flag, Heart, MapPin, Maximize2, Phone, RotateCcw, Share2, ShieldCheck, TrendingUp, UserRound } from "@/components/icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -80,12 +80,17 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   // An old /property/<uuid> link, or one from before a title change, is swapped
   // for the listing's current URL, which is also the page's canonical.
   const canonicalPath = apiDetail && !messPage ? listingPath(apiDetail) : undefined;
-  const pathname = usePathname();
+  // This screen's own address (rawId), never the app-wide pathname: the screen
+  // stays mounted under whatever is opened from it, and watching the pathname
+  // sent every visitor straight back here, so menus and Back looked dead.
+  const isFocused = useIsFocused();
+  const isOutdated = Boolean(canonicalPath) && !samePath(`/property/${rawId}`, canonicalPath ?? "");
+  const returnTo = typeof params.returnTo === "string" ? params.returnTo : undefined;
   useEffect(() => {
-    if (canonicalPath && !samePath(pathname, canonicalPath)) {
-      router.replace(canonicalPath as never);
-    }
-  }, [canonicalPath, pathname]);
+    if (!isFocused || !isOutdated || !canonicalPath) return;
+    const href = returnTo ? withReturnTo(canonicalPath, returnTo) : canonicalPath;
+    router.replace(href as never);
+  }, [canonicalPath, isFocused, isOutdated, returnTo]);
   const {
     data: similarProperties = [],
     error: similarError,

@@ -20,10 +20,15 @@ jest.mock("@/components/icons", () => {
   return new Proxy({}, { get: () => Icon });
 });
 let mockSegment = "m1";
+// The address of whatever page is on top, which is not always this one.
+let mockPathname: string | null = null;
+let mockFocused = true;
+let mockReturnTo: string | undefined;
 jest.mock("expo-router", () => ({
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn() },
-  useLocalSearchParams: () => ({ id: mockSegment }),
-  usePathname: () => `/property/${mockSegment}`,
+  useLocalSearchParams: () => ({ id: mockSegment, returnTo: mockReturnTo }),
+  usePathname: () => mockPathname ?? `/property/${mockSegment}`,
+  useIsFocused: () => mockFocused,
 }));
 jest.mock("@/components/AppChrome", () => ({
   AppChrome: ({ children }: { children: React.ReactNode }) => children,
@@ -71,6 +76,9 @@ let root: { render: (node: React.ReactNode) => void; unmount: () => void };
 beforeEach(() => {
   jest.clearAllMocks();
   mockSegment = "m1";
+  mockPathname = null;
+  mockFocused = true;
+  mockReturnTo = undefined;
   useLanguageStore.getState().setLanguage("en");
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -116,6 +124,36 @@ describe("PropertyDetailScreen URLs", () => {
     await act(async () => root.render(<PropertyDetailScreen />));
     expect(mockAskedFor).toHaveBeenCalledWith(ID);
     expect(router.replace).toHaveBeenCalledWith(READABLE);
+  });
+
+  // The listing stays mounted under whatever is opened from it. It must not drag
+  // the visitor back: that made every menu item and Back look dead.
+  it("leaves the visitor alone after they move on to another page", async () => {
+    mockSegment = READABLE.slice("/property/".length);
+    mockCurrent = detail("apartment", ID);
+    await act(async () => root.render(<PropertyDetailScreen />));
+
+    mockPathname = "/rent";
+    mockFocused = false;
+    await act(async () => root.render(<PropertyDetailScreen />));
+
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("does not rewrite the address from a screen that is not on top", async () => {
+    mockSegment = ID;
+    mockFocused = false;
+    mockCurrent = detail("apartment", ID);
+    await act(async () => root.render(<PropertyDetailScreen />));
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("keeps the return address when it moves to the readable URL", async () => {
+    mockSegment = ID;
+    mockReturnTo = "/admin/properties";
+    mockCurrent = detail("apartment", ID);
+    await act(async () => root.render(<PropertyDetailScreen />));
+    expect(router.replace).toHaveBeenCalledWith(`${READABLE}?returnTo=%2Fadmin%2Fproperties`);
   });
 
   it("moves a link with an outdated title to the current one", async () => {
