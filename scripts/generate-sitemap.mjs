@@ -37,7 +37,6 @@ const STATIC_PAGES = [
   { path: "", file: "app/index.tsx", changefreq: "daily", priority: "1.0" },
   { path: "/buy", file: "app/buy.tsx", changefreq: "daily", priority: "0.9" },
   { path: "/rent", file: "app/rent.tsx", changefreq: "daily", priority: "0.9" },
-  { path: "/sold", file: "app/sold.tsx", changefreq: "weekly", priority: "0.5" },
   { path: "/areas", file: "app/areas.tsx", changefreq: "weekly", priority: "0.7" },
   { path: "/sell", file: "app/sell.tsx", changefreq: "monthly", priority: "0.7" },
   { path: "/instant-valuation", file: "app/instant-valuation.tsx", changefreq: "monthly", priority: "0.8" },

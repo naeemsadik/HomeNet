@@ -13,6 +13,7 @@ import { DrawerLanguageDropdown } from "@/components/DrawerLanguageDropdown";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
 import type { SellerNavKey } from "./SellerShell";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export interface SellerNavItem {
   key: SellerNavKey;
@@ -94,7 +95,7 @@ export function SellerMobileDrawer({
         />
 
         {/* Drawer Sheet */}
-        <View style={styles.drawerCard}>
+        <ModalSafeView style={styles.drawerCard}>
           {/* Header */}
           <View style={styles.drawerHeader}>
             <Brand compact onPress={onClose} />
@@ -141,7 +142,7 @@ export function SellerMobileDrawer({
             <DrawerLanguageDropdown />
             {items.filter((item) => item.danger).map(renderItem)}
           </View>
-        </View>
+        </ModalSafeView>
       </View>
     </Modal>
   );

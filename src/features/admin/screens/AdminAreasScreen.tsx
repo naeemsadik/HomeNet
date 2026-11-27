@@ -28,6 +28,7 @@ import { allAreasQuery, filterAreas, pageAreas } from "@/hooks/useAllAreas";
 import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useTranslation } from "@/i18n";
 import { parseCoordinate } from "@/lib/coordinates";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 const ADMIN_AREAS_PAGE_SIZE = 20;
 
@@ -109,7 +110,7 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
   return (
     <>
       <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
-        <View style={styles.overlay}>
+        <ModalSafeView style={styles.overlay}>
           <View style={styles.formDialog}>
             <View style={styles.formHeader}>
               <Text style={styles.formTitle}>{initial ? t("admin.areas.editTitle") : t("admin.areas.createTitle")}</Text>
@@ -214,7 +215,7 @@ function AreaForm({ visible, initial, loading, error, onClose, onSubmit }: AreaF
               </Pressable>
             </View>
           </View>
-        </View>
+        </ModalSafeView>
       </Modal>
 
       <AreaPicker

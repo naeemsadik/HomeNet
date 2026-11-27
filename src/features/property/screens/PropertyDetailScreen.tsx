@@ -1,7 +1,8 @@
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useIsFocused, useLocalSearchParams } from "expo-router";
+import { safeGoBack, withReturnTo } from "@/lib/navigation";
 import Head from "expo-router/head";
 import { ArrowLeft, Bath, BedDouble, Building2, Calendar, Camera, Check, ChevronLeft, ChevronRight, Flag, Heart, MapPin, Maximize2, Phone, RotateCcw, Share2, ShieldCheck, TrendingUp, UserRound } from "@/components/icons";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { openExternalUrl } from "@/lib/safeUrl";
 import {
   ActivityIndicator,
@@ -29,7 +30,7 @@ import { type PropertyDetail, usePropertyDetail, useSimilarProperties } from "..
 import { useSavedStore } from "@/stores/savedStore";
 import { useAuthStore } from "@/stores/authStore";
 import { hasPermission } from "@/lib/permissions";
-import { listingPath, opensOnMessPage } from "@/lib/listingPath";
+import { listingKeyFromSegment, listingPath, opensOnMessPage, propertyPath, samePath } from "@/lib/listingPath";
 import { toApiError } from "@/services/apiClient";
 import { styles } from "./PropertyDetailScreen.styles";
 import { AdminPropertyCommandDeck } from "../components/AdminPropertyCommandDeck";
@@ -43,6 +44,7 @@ import { NoTranslateText } from "@/components/NoTranslateText";
 import { trackContactOwner, trackPropertyView } from "@/lib/analytics";
 
 import {
+  effectiveListingStatus,
   useTranslation,
   translateAmenity,
   translatePropertyType,
@@ -62,9 +64,10 @@ type AiValuation = {
 
 export function PropertyDetailScreen({ initialDetail }: { initialDetail?: PropertyDetail } = {}) {
   const { t, language } = useTranslation();
-  const params = useLocalSearchParams<{ id?: string | string[] }>();
+  const params = useLocalSearchParams<{ id?: string | string[]; returnTo?: string | string[] }>();
   const rawId = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
-  const propertyId = (rawId ?? "").trim();
+  // The URL reads /property/<title words>-<uuid>; the API is asked for the uuid.
+  const propertyId = listingKeyFromSegment(rawId);
   const id = propertyId;
   const { isPhone, isTablet } = useResponsive();
   const { data: apiDetail, error, isLoading, refetch } = usePropertyDetail(propertyId, initialDetail);
@@ -74,6 +77,20 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
   useEffect(() => {
     if (messPage) router.replace(messPage as never);
   }, [messPage]);
+  // An old /property/<uuid> link, or one from before a title change, is swapped
+  // for the listing's current URL, which is also the page's canonical.
+  const canonicalPath = apiDetail && !messPage ? listingPath(apiDetail) : undefined;
+  // This screen's own address (rawId), never the app-wide pathname: the screen
+  // stays mounted under whatever is opened from it, and watching the pathname
+  // sent every visitor straight back here, so menus and Back looked dead.
+  const isFocused = useIsFocused();
+  const isOutdated = Boolean(canonicalPath) && !samePath(`/property/${rawId}`, canonicalPath ?? "");
+  const returnTo = typeof params.returnTo === "string" ? params.returnTo : undefined;
+  useEffect(() => {
+    if (!isFocused || !isOutdated || !canonicalPath) return;
+    const href = returnTo ? withReturnTo(canonicalPath, returnTo) : canonicalPath;
+    router.replace(href as never);
+  }, [canonicalPath, isFocused, isOutdated, returnTo]);
   const {
     data: similarProperties = [],
     error: similarError,
@@ -204,6 +221,35 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
       }),
     };
   }, [apiDetail, similarProperties, language, t]);
+
+  /**
+   * Back without assuming there is history. A listing is routinely opened in
+   * a new tab or reloaded — from the admin panel, from a share link, from
+   * search — and a bare router.back() there does nothing at all.
+   *
+   * The fallback follows the listing: a let returns to /rent, a sale to /buy,
+   * so the person lands among listings like the one they were reading.
+   */
+  const goBack = useCallback(() => {
+    const fallback =
+      effectiveListingStatus(apiDetail?.status, apiDetail?.listing_type) === "rented" ||
+      apiDetail?.listing_type === "rent" ||
+      apiDetail?.listing_type === "short_let"
+        ? "/rent"
+        : apiDetail?.listing_type === "sale"
+        ? "/buy"
+        : "/";
+    safeGoBack({ returnTo: params.returnTo, fallback });
+  }, [apiDetail?.listing_type, apiDetail?.status, params.returnTo]);
+
+  // Null while the listing is open, which is the common case.
+  const closedNotice = useMemo(() => {
+    const display = effectiveListingStatus(apiDetail?.status, apiDetail?.listing_type);
+    if (display !== "sold" && display !== "rented") return null;
+    return display === "rented"
+      ? { label: t("availability.rented"), body: t("propertyDetail.closedRentedBody") }
+      : { label: t("availability.sold"), body: t("propertyDetail.closedSoldBody") };
+  }, [apiDetail?.status, apiDetail?.listing_type, t]);
 
   // Reported once per property, and only once the API detail is in hand.
   // `property` can be built from the build-time snapshot before the request
@@ -445,7 +491,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
         <PageMeta title="Listing not found | HomeNet BD" robots="noindex, follow" noCanonical />
         <View style={styles.requestState}>
           <Text style={styles.requestError}>{error ? toApiError(error).message : t("propertyDetail.notFound")}</Text>
-          <Pressable onPress={() => (error ? void refetch() : router.back())} style={styles.retryButton}>
+          <Pressable onPress={() => (error ? void refetch() : goBack())} style={styles.retryButton}>
             <RotateCcw color={colorTokens.onBrand} size={16} />
             <Text style={styles.retryText}>{error ? t("propertyDetail.retry") : t("propertyDetail.goBack")}</Text>
           </Pressable>
@@ -465,7 +511,11 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
 
       <View style={styles.forRentTag}>
         <Text style={styles.forRentTagText}>
-          {isHolidayStayType(apiDetail?.listing_type)
+          {/* Once it is gone it is not "For Rent" any more; the chip reports
+              what happened to it instead of what it was offered as. */}
+          {closedNotice
+            ? closedNotice.label
+            : isHolidayStayType(apiDetail?.listing_type)
             ? t("propertyCard.holidayStay")
             : apiDetail?.listing_type === "rent"
             ? t("propertyDetail.forRent")
@@ -497,6 +547,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
           title={listingMetaTitle(apiDetail)}
           description={listingMetaDescription(apiDetail)}
           image={listingShareImage(apiDetail)}
+          canonicalPath={canonicalPath}
         />
       ) : null}
       {apiDetail ? (
@@ -518,7 +569,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
         {/* Top Header Row: Back Link & Share/Favorite */}
         <View style={styles.topHeaderNav}>
           <Pressable
-            onPress={() => router.back()}
+            onPress={goBack}
             style={({ pressed }) => [styles.backLink, webPointer, pressed && styles.pressed]}
           >
             <ArrowLeft color="#0B1A17" size={18} />
@@ -770,13 +821,22 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                 <View style={styles.categoryBadge}>
                   <Text style={styles.categoryBadgeText}>{translatePropertyType(property.type, language)}</Text>
                 </View>
-                {property.isVerified ? (
-                  <View style={styles.verifiedSmallBadge}>
-                    <ShieldCheck color="#04cf92" size={14} />
-                    <Text style={styles.verifiedSmallText}>{t("propertyDetail.verifiedBadge")}</Text>
-                  </View>
-                ) : null}
+                {/* The Verified badge is on the gallery (galleryBadges), which
+                    renders in every media branch including the no-photo
+                    placeholder. A second copy here said the same thing twice
+                    within one screen. */}
               </View>
+
+              {/* Said once, above the title, before the reader weighs the
+                  price or reaches for the call button. The word follows the
+                  listing type: the API stores a closed let as "sold", and
+                  telling a tenant this flat was sold would be plainly wrong. */}
+              {closedNotice ? (
+                <View style={styles.closedNotice} aria-live="polite">
+                  <Text style={styles.closedNoticeLabel}>{closedNotice.label}</Text>
+                  <Text style={styles.closedNoticeBody}>{closedNotice.body}</Text>
+                </View>
+              ) : null}
 
               <Text accessibilityRole="header" aria-level={1} style={styles.propertyTitle}>{property.title}</Text>
 
@@ -911,7 +971,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.similarScroll}>
                   <View style={styles.similarRow}>
                     {property.similarProperties.map((sim) => (
-                      <AppLink href={`/property/${sim.id}`} key={sim.id} style={styles.similarCard}>
+                      <AppLink href={propertyPath(sim)} key={sim.id} style={styles.similarCard}>
                         {sim.imageUrl ? (
                           <Image
                             source={{ uri: cdnImage(sim.imageUrl, 480) }}
@@ -972,7 +1032,9 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
               {/* Asking Price Callout */}
               <View style={styles.priceCalloutWrap}>
                 <View style={styles.priceCalloutHeader}>
-                  <Text style={styles.priceCalloutLabel}>{t("propertyDetail.askingPrice")}</Text>
+                  <Text style={styles.priceCalloutLabel}>
+                    {t(closedNotice ? "propertyDetail.lastAskingPrice" : "propertyDetail.askingPrice")}
+                  </Text>
                   {property.score ? (
                     <View style={styles.scoreBadge}>
                       <Text style={styles.scoreBadgeText}>{property.score}</Text>
@@ -985,7 +1047,12 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                 </NoTranslateText>
               </View>
 
-              {/* Action Buttons Row */}
+              {/* Action Buttons Row. Gone once the deal has closed: calling
+                  or booking a viewing for a flat that is already sold or let
+                  wastes the reader's time and the owner's, and leaving the
+                  buttons there reads as though it is still going. The notice
+                  above the title says what happened. */}
+              {closedNotice ? null : (
               <View style={styles.sellerActionsRow}>
                 <Pressable
                   accessibilityLabel={t("propertyDetail.callSeller")}
@@ -1030,6 +1097,7 @@ export function PropertyDetailScreen({ initialDetail }: { initialDetail?: Proper
                   <Text style={styles.bookVisitBtnText}>{t("propertyDetail.bookViewing")}</Text>
                 </Pressable>
               </View>
+              )}
 
               <Pressable
                 accessibilityRole="button"

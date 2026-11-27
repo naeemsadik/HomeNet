@@ -1,6 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
 import { MessDetailScreen } from "@/features/mess/screens/MessDetailScreen";
 import { MESS_ENABLED } from "@/lib/features";
+import { listingKeyFromSegment } from "@/lib/listingPath";
 import { NotFoundScreen } from "@/screens/NotFoundScreen";
 
 /**
@@ -9,6 +10,8 @@ import { NotFoundScreen } from "@/screens/NotFoundScreen";
  */
 export default function MessDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  if (!MESS_ENABLED || !id) return <NotFoundScreen />;
-  return <MessDetailScreen key={id} id={id} />;
+  // The URL reads /mess/<title words>-<uuid>; the API is asked for the uuid.
+  const listingId = listingKeyFromSegment(id);
+  if (!MESS_ENABLED || !listingId) return <NotFoundScreen />;
+  return <MessDetailScreen key={listingId} id={listingId} />;
 }

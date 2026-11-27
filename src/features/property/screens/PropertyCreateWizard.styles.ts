@@ -585,7 +585,8 @@ export const styles = StyleSheet.create({
   },
   toggleRow: {
     flexDirection: "row",
-    height: 48,
+    // minHeight, not height: with a large system font a label takes two lines.
+    minHeight: 48,
     backgroundColor: "#F4F6F5",
     borderRadius: 16,
     borderWidth: 1.2,
@@ -595,6 +596,9 @@ export const styles = StyleSheet.create({
   toggleBtn: {
     flex: 1,
     minWidth: 0,
+    minHeight: 44,
+    paddingHorizontal: 4,
+    paddingVertical: 4,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 12,
@@ -611,6 +615,7 @@ export const styles = StyleSheet.create({
     elevation: 1,
   },
   toggleBtnText: {
+    textAlign: "center",
     fontSize: 14,
     fontFamily: fonts.semiBold,
     color: "#5C6B66",

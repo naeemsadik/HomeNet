@@ -2,6 +2,7 @@ import React, { act } from "react";
 // @ts-expect-error -- @types/react-dom is not in dependencies, Jest loads react-dom
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { router } from "expo-router";
 import { useLanguageStore } from "@/i18n";
 import { ApiError } from "@/services/apiClient";
 import { useAuthStore } from "@/stores/authStore";
@@ -34,7 +35,14 @@ jest.mock("@/components/PropertyResultsMap", () => ({
 }));
 jest.mock("@/features/property/components/PropertyLightbox", () => ({ PropertyLightbox: () => null }));
 jest.mock("@/features/property/components/WhatsAppIcon", () => ({ WhatsAppIcon: () => null }));
-jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false } }));
+let mockPathname = "/mess/m1";
+let mockFocused = true;
+jest.mock("expo-router", () => ({
+  router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => false },
+  // DETAIL's id is not a uuid, so its URL is the id alone.
+  usePathname: () => mockPathname,
+  useIsFocused: () => mockFocused,
+}));
 jest.mock("../../api/messApi", () => ({
   getMessDetail: jest.fn(),
   getUniversities: jest.fn(),
@@ -219,6 +227,22 @@ const MODERATOR: UserRole[] = [
     role: { id: "role-mod", name: "moderator", role_permissions: [{ permission: { id: "p-mod", name: "moderate_listing", description: null } }] },
   },
 ];
+
+describe("MessDetailScreen after the visitor moves on", () => {
+  afterEach(() => {
+    mockPathname = "/mess/m1";
+    mockFocused = true;
+  });
+
+  // The listing stays mounted under the page opened from it and must not pull the visitor back.
+  it("does not send them back to the listing", async () => {
+    (getMessDetail as jest.Mock).mockResolvedValue(DETAIL);
+    mockPathname = "/buy";
+    mockFocused = false;
+    expect(await render()).toContain(DETAIL.title);
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+});
 
 describe("MessDetailScreen for staff", () => {
   const signInStaff = () =>

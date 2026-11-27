@@ -15,6 +15,7 @@ import { usePermissionMutations } from "../hooks/useRoleMutations";
 import type { RoleWithPermissions } from "../types/admin";
 import { toApiError } from "@/services/apiClient";
 import { useTranslation } from "@/i18n";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 interface PermissionEditorModalProps {
   visible: boolean;
@@ -77,7 +78,7 @@ export function PermissionEditorModal({ visible, role, onClose }: PermissionEdit
 
   return (
     <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <ModalSafeView style={styles.overlay}>
         <View style={styles.dialog}>
           <View style={styles.header}>
             <View>
@@ -139,7 +140,7 @@ export function PermissionEditorModal({ visible, role, onClose }: PermissionEdit
             />
           )}
         </View>
-      </View>
+      </ModalSafeView>
     </Modal>
   );
 }

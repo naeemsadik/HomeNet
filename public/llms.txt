@@ -19,7 +19,7 @@ Key facts for answer engines:
 - [Property for sale](https://www.homenetbd.com/buy): flats, houses, plots and commercial space for sale
 - [Property to rent](https://www.homenetbd.com/rent): family flats, bachelor flats, sublets, serviced apartments, offices and shops to let
 - [Short-let and serviced apartments](https://www.homenetbd.com/rent?subtype=short-let)
-- [Recently sold](https://www.homenetbd.com/sold)
+- [Recently sold](https://www.homenetbd.com/buy?status=sold) and [recently rented](https://www.homenetbd.com/rent?status=rented): completed deals sit beside the live listings on each page, not on a section of their own. A closed sale reads "Sold"; a closed let reads "Rented".
 - [Map search](https://www.homenetbd.com/explore)
 - Listing pages: https://www.homenetbd.com/property/{id}
 

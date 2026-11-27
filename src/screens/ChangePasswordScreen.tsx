@@ -1,4 +1,5 @@
 import React from "react";
+import { safeGoBack } from "@/lib/navigation";
 import { StyleSheet, Text, View, ScrollView } from "react-native";
 import { Lock, ArrowLeft } from "@/components/icons";
 import { router } from "expo-router";
@@ -86,7 +87,7 @@ export function ChangePasswordScreen() {
             label={t("changePasswordScreen.backToProfile")}
             onPress={() => {
               clearError();
-              router.back();
+              safeGoBack({ fallback: "/settings" });
             }}
             variant="ghost"
             icon={ArrowLeft}

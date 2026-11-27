@@ -75,7 +75,7 @@ const textOf = (node: ReactTestInstance): string =>
 const mounted: ReactTestRenderer[] = [];
 
 async function mount(
-  mode: "buy" | "rent" | "sold" = "rent",
+  mode: "buy" | "rent" = "rent",
   onTotalChange?: (total: number) => void,
 ): Promise<ReactTestRenderer> {
   // gcTime: Infinity schedules no cache-cleanup timer, which would keep Jest from exiting.
@@ -542,5 +542,19 @@ describe("the result count the page uses to keep empty pages out of Google", () 
     await mount("buy", onTotalChange);
     expect(feedCalls()).toHaveLength(0);
     expect(onTotalChange).not.toHaveBeenCalled();
+  });
+});
+
+// The footer, the sitemap and the old /sold address all link straight to these.
+describe("a direct link to the closed listings", () => {
+  it.each([
+    ["rent", "rented", "rent"],
+    ["buy", "sold", "sale"],
+  ] as const)("on /%s?status=%s loads the results, not the search card", async (mode, status, listingType) => {
+    mockParams = { status };
+
+    await mount(mode);
+
+    expect(feedCalls()).toContainEqual(expect.objectContaining({ status: "sold", listing_type: listingType }));
   });
 });

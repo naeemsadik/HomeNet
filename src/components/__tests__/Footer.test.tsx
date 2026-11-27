@@ -36,6 +36,7 @@ let mockResponsive = {
 
 jest.mock("@/hooks/useResponsive", () => ({
   useResponsive: () => mockResponsive,
+  useWindowSize: () => mockResponsive,
 }));
 
 const textOf = (node: ReactTestInstance | string | number | null | undefined): string => {

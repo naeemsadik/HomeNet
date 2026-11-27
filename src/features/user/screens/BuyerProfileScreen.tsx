@@ -8,6 +8,7 @@ import { useResponsive } from "@/hooks/useResponsive";
 import { webPointer } from "@/theme";
 import { useAuthStore } from "@/stores/authStore";
 import { useTranslation } from "@/i18n";
+import { SellingCard } from "../components/SellingCard";
 import { styles } from "./BuyerProfileScreen.styles";
 
 /** A buyer's profile, inside the site chrome. The form itself is the one sellers see. */
@@ -78,7 +79,9 @@ export function BuyerProfileScreen() {
               </Pressable>
             ) : undefined
           }
-        />
+        >
+          <SellingCard />
+        </AccountProfileForm>
       </ScrollView>
     </AppChrome>
   );

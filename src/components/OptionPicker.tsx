@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, typ
 import { Check, ChevronDown } from "@/components/icons";
 import { OverlayModal } from "@/components/OverlayModal";
 import { colorTokens, fonts } from "@/theme";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export interface PickerOption {
   label: string;
@@ -51,7 +52,7 @@ export function OptionPicker({
       </Pressable>
 
       <OverlayModal animationType="fade" onRequestClose={() => setOpen(false)} visible={open}>
-        <View style={styles.layer}>
+        <ModalSafeView style={styles.layer}>
           <Pressable accessibilityLabel="Close" accessibilityRole="button" onPress={() => setOpen(false)} style={styles.overlay} />
           <View style={[styles.sheet, { maxHeight: Math.round(height * 0.6) }]}>
             <ScrollView keyboardShouldPersistTaps="handled">
@@ -75,7 +76,7 @@ export function OptionPicker({
               })}
             </ScrollView>
           </View>
-        </View>
+        </ModalSafeView>
       </OverlayModal>
     </>
   );
