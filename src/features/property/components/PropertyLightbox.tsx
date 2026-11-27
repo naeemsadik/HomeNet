@@ -5,6 +5,7 @@ import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { webPointer } from "@/theme";
 import { useTranslation, formatLocalizedNumber } from "@/i18n";
 import { styles } from "../screens/PropertyDetailScreen.styles";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 type PropertyLightboxProps = {
   visible: boolean;
@@ -42,7 +43,7 @@ export function PropertyLightbox({
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={styles.lightboxBackdrop}>
+      <ModalSafeView style={styles.lightboxBackdrop}>
         {/* Top Bar */}
         <View style={styles.lightboxHeader}>
           <View style={styles.lightboxTitleArea}>
@@ -137,7 +138,7 @@ export function PropertyLightbox({
             ))}
           </ScrollView>
         </View>
-      </View>
+      </ModalSafeView>
     </Modal>
   );
 }

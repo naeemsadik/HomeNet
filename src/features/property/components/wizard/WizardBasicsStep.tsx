@@ -231,7 +231,6 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
               ]}
             >
               <Text
-                numberOfLines={1}
                 style={[
                   styles.toggleBtnText,
                   store.listingType === "sale" && store.subtype !== "short-let" && styles.toggleBtnTextActive,
@@ -254,7 +253,6 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
               ]}
             >
               <Text
-                numberOfLines={1}
                 style={[
                   styles.toggleBtnText,
                   store.listingType === "rent" && store.subtype !== "short-let" && styles.toggleBtnTextActive,
@@ -279,7 +277,6 @@ export function WizardBasicsStep({ activeTypeConfig }: { activeTypeConfig: Prope
               ]}
             >
               <Text
-                numberOfLines={1}
                 style={[
                   styles.toggleBtnText,
                   store.subtype === "short-let" && styles.toggleBtnTextActive,

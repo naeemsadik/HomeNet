@@ -19,6 +19,7 @@ import {
 import { colors, colorTokens, fonts, radius, webPointer, brandButtonState } from "@/theme";
 import { OverlayModal } from "@/components/OverlayModal";
 import { useResponsive } from "@/hooks/useResponsive";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export function AppLink({
   href,
@@ -289,7 +290,7 @@ export function SelectField({
         <ChevronDown color={colors.green} size={14} />
       </Pressable>
       <OverlayModal animationType="fade" onRequestClose={() => setOpen(false)} visible={open}>
-        <View style={styles.selectModalLayer}>
+        <ModalSafeView style={styles.selectModalLayer}>
           <Pressable accessibilityLabel="Close options" onPress={() => setOpen(false)} style={styles.selectModalOverlay} />
           <View style={styles.selectMenu}>
             {options.map((option) => {
@@ -309,7 +310,7 @@ export function SelectField({
               );
             })}
           </View>
-        </View>
+        </ModalSafeView>
       </OverlayModal>
     </View>
   );

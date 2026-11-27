@@ -19,6 +19,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { colorTokens, fonts, webPointer } from "@/theme";
 import { useTranslation } from "@/i18n";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 type DeleteAccountDialogProps = {
   visible: boolean;
@@ -98,7 +99,7 @@ export function DeleteAccountDialog({
 
   return (
     <Modal animationType="fade" onRequestClose={handleClose} transparent visible={visible}>
-      <Pressable onPress={handleClose} style={styles.backdrop}>
+      <ModalSafeView as={Pressable} onPress={handleClose} style={styles.backdrop}>
         <Pressable
           onPress={(e) => e.stopPropagation()}
           style={[styles.card, isPhone && styles.cardPhone]}
@@ -179,7 +180,7 @@ export function DeleteAccountDialog({
             </Pressable>
           </View>
         </Pressable>
-      </Pressable>
+      </ModalSafeView>
     </Modal>
   );
 }

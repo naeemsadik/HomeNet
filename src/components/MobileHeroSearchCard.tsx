@@ -204,7 +204,8 @@ export function MobileHeroSearchCard() {
             >
               <Search color={colorTokens.ink} size={20} strokeWidth={2.2} />
               <Text
-                numberOfLines={1}
+                // Two lines: at 320 points, or with a large font, the placeholder was cut to "keyw...".
+                numberOfLines={2}
                 style={[styles.searchBoxText, !locationDisplayText && styles.searchBoxPlaceholder]}
               >
                 {locationDisplayText || t("search.placeholder")}
@@ -394,7 +395,7 @@ const styles = StyleSheet.create({
   tabsRow: {
     borderBottomWidth: 1,
     borderBottomColor: colorTokens.divider,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     width: "100%",
   },
   tabsScrollContent: {
@@ -408,7 +409,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    // 4, not 8: with a large font "Holiday stay" was cut off at 320 points.
+    paddingHorizontal: 4,
+    minWidth: 44,
     overflow: "visible",
   },
   tabText: {
@@ -444,7 +447,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colorTokens.surfaceSunken,
     borderRadius: radius.md,
-    height: 54,
+    // minHeight, not height: with a very large font the two-line placeholder was cut.
+    minHeight: 54,
+    paddingVertical: 4,
     paddingHorizontal: 14,
     gap: 10,
   },
@@ -453,7 +458,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    height: "100%",
+    minHeight: 46,
+    alignSelf: "stretch",
   },
   searchBoxText: {
     flex: 1,
@@ -563,7 +569,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
+  // The label wraps inside the row; without these it pushed the arrow off a narrow card.
   quickNavRowLeft: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
@@ -577,6 +586,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   quickNavText: {
+    flexShrink: 1,
     fontFamily: fonts.semiBold,
     fontSize: 14.5,
     color: colorTokens.ink,

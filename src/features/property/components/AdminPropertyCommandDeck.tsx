@@ -9,6 +9,7 @@ import { colorTokens, fonts, layout, radius, shadow, webPointer, brandButtonStat
 import type { PropertyStatus } from "@/types/api";
 import { useListingModeration } from "../hooks/useListingModeration";
 import { ListingFeedbackModal } from "./ListingFeedbackModal";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export interface AdminPropertyCommandDeckProps {
   property: {
@@ -170,7 +171,7 @@ function CommandDeckInner({ property }: AdminPropertyCommandDeckProps) {
         transparent
         visible={statusMenuOpen}
       >
-        <View style={styles.overlay}>
+        <ModalSafeView style={styles.overlay}>
           <Pressable
             accessibilityLabel={t("common.close")}
             accessibilityRole="button"
@@ -213,7 +214,7 @@ function CommandDeckInner({ property }: AdminPropertyCommandDeckProps) {
               );
             })}
           </View>
-        </View>
+        </ModalSafeView>
       </Modal>
 
       <ListingFeedbackModal

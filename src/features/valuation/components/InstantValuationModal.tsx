@@ -14,6 +14,7 @@ import { OverlayHost } from "@/components/OverlayModal";
 import { useInstantValuationModalStore } from "../stores/useInstantValuationModalStore";
 import { useInstantValuationStore } from "../stores/useInstantValuationStore";
 import { InstantValuationWizard } from "./InstantValuationWizard";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 export function InstantValuationModal() {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ export function InstantValuationModal() {
       {/* The area picker opens inside this window; a second Modal opened from
           here can fail to appear on Android. */}
       <OverlayHost>
-      <View style={styles.overlay}>
+      <ModalSafeView style={styles.overlay}>
         <Pressable
           accessibilityLabel={t("valuation.modal.closeAria")}
           onPress={close}
@@ -85,7 +86,7 @@ export function InstantValuationModal() {
             <InstantValuationWizard />
           </ScrollView>
         </View>
-      </View>
+      </ModalSafeView>
       </OverlayHost>
     </Modal>
   );
