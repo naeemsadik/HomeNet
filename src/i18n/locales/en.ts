@@ -28,6 +28,8 @@ export const en = {
     openUserMenu: "Open user menu",
     savedProperties: "Saved properties",
     profileSettings: "Profile settings",
+    myListings: "My listings",
+    sellerDashboard: "Seller dashboard",
   },
   hero: {
     tabLabel: "{{label}} properties",

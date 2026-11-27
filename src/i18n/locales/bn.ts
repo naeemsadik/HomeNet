@@ -30,6 +30,8 @@ export const bn: TranslationSchema = {
     openUserMenu: "ইউজার মেনু খুলুন",
     savedProperties: "সংরক্ষিত প্রপার্টি",
     profileSettings: "প্রোফাইল সেটিংস",
+    myListings: "আমার লিস্টিং",
+    sellerDashboard: "বিক্রেতা ড্যাশবোর্ড",
   },
   hero: {
     tabLabel: "{{label}} প্রপার্টি",
