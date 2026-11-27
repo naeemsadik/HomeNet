@@ -1,3 +1,4 @@
+import { View } from "react-native";
 import Svg, { Path, Rect } from "react-native-svg";
 import { colorTokens } from "@/theme";
 
@@ -25,15 +26,21 @@ export function BrandMark({ size }: { size: number; tone?: Tone }) {
 
 const WORDMARK_RATIO = 2706 / 383;
 
-/** "Homenet" with the small "BD", sized by its height. Use tone="light" on dark backgrounds. */
+/**
+ * "Homenet" with the small "BD", sized by its height. Use tone="light" on dark backgrounds.
+ * Where the room is narrower than the artwork (a 320 point phone with a Sign in button), it
+ * scales down to fit; at a fixed width the "BD" was cut off.
+ */
 export function BrandWordmark({ height, tone = "dark" }: { height: number; tone?: Tone }) {
   const fill = tone === "light" ? "#FFFFFF" : colorTokens.brand;
   return (
     // overflow visible: Android clips an Svg to its box, and a rounding error of a pixel or two in
     // that box cut the tops off the letters in the phone header.
-    <Svg width={height * WORDMARK_RATIO} height={height} style={{ overflow: "visible" }} viewBox="858 310 2706 383">
-      <Path d={HOMENET} fill={fill} fillRule="evenodd" />
-      <Path d={BD} fill={fill} fillRule="evenodd" />
-    </Svg>
+    <View style={{ width: height * WORDMARK_RATIO, maxWidth: "100%", height }}>
+      <Svg width="100%" height="100%" preserveAspectRatio="xMinYMid meet" style={{ overflow: "visible" }} viewBox="858 310 2706 383">
+        <Path d={HOMENET} fill={fill} fillRule="evenodd" />
+        <Path d={BD} fill={fill} fillRule="evenodd" />
+      </Svg>
+    </View>
   );
 }

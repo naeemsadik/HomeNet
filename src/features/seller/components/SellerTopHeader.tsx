@@ -3,12 +3,12 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from "react-native";
 import { AppLink } from "@/components/ui";
 import { ToggleViewButton } from "./ToggleViewButton";
+import { FitText } from "@/components/FitText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useResponsive } from "@/hooks/useResponsive";
 import { fonts, webPointer } from "@/theme";
@@ -84,9 +84,10 @@ export function SellerTopHeader({
 
       {/* Screen Title */}
       <View style={styles.titleContainer}>
-        <Text numberOfLines={1} style={styles.headerTitle}>
+        {/* Shrinks, then takes two lines: at 320 points it read "Create P...". */}
+        <FitText maxFontSize={19.2} minFontSize={15} wrapWhenTooLong style={styles.headerTitle}>
           {displayTitle}
-        </Text>
+        </FitText>
       </View>
 
       {/* Right Actions */}

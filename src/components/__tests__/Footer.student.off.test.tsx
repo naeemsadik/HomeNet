@@ -17,7 +17,7 @@ jest.mock("expo-router", () => {
 jest.mock("@/lib/features", () => ({ ...jest.requireActual("@/lib/features"), MESS_ENABLED: false }));
 
 let mockResponsive = { isPhone: false, isTablet: false, width: 1280, containerMaxWidth: 1200 };
-jest.mock("@/hooks/useResponsive", () => ({ useResponsive: () => mockResponsive }));
+jest.mock("@/hooks/useResponsive", () => ({ useResponsive: () => mockResponsive, useWindowSize: () => mockResponsive }));
 
 const textOf = (node: ReactTestInstance | string | number | null | undefined): string => {
   if (node == null) return "";

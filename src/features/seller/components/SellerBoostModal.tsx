@@ -4,6 +4,7 @@ import { colorTokens, colors, webPointer } from "@/theme";
 import { notify } from "@/lib/alert";
 import { useTranslation } from "@/i18n";
 import { styles } from "../screens/SellerDashboardScreen.styles";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 type SellerBoostModalProps = {
   visible: boolean;
@@ -47,7 +48,7 @@ export function SellerBoostModal({ visible, onClose, selectedPackage, onSelectPa
       transparent
       visible={visible}
     >
-      <View style={styles.modalBackdrop}>
+      <ModalSafeView style={styles.modalBackdrop}>
         <Pressable
           onPress={onClose}
           style={styles.modalBackdropTouch}
@@ -131,7 +132,7 @@ export function SellerBoostModal({ visible, onClose, selectedPackage, onSelectPa
             </Pressable>
           </View>
         </View>
-      </View>
+      </ModalSafeView>
     </Modal>
   );
 }

@@ -50,6 +50,12 @@ export function PropertyAdminItemRow({
   const isPending = item.status === "pending";
   const isActive = item.status === "active";
 
+  // Beside the title on a wide screen; above it on a phone, where a third column left
+  // the title and the owner a few letters wide and broke their words.
+  const statusBadge = (
+    <PropertyStatusBadge status={item.status as ComponentProps<typeof PropertyStatusBadge>["status"]} />
+  );
+
   return (
     <View style={[styles.card, isHighlighted && styles.cardHighlighted]}>
       <View style={[styles.mainRow, isPhone && styles.mainRowPhone]}>
@@ -68,6 +74,7 @@ export function PropertyAdminItemRow({
         </View>
 
         <View style={styles.info}>
+          {isPhone ? statusBadge : null}
           <Text style={styles.title} numberOfLines={2}>
             {item.title}
           </Text>
@@ -100,9 +107,7 @@ export function PropertyAdminItemRow({
           </View>
         </View>
 
-        <View style={styles.statusWrap}>
-          <PropertyStatusBadge status={item.status as ComponentProps<typeof PropertyStatusBadge>["status"]} />
-        </View>
+        {isPhone ? null : <View style={styles.statusWrap}>{statusBadge}</View>}
       </View>
 
       <View style={styles.divider} />
@@ -253,6 +258,7 @@ const styles = StyleSheet.create({
   },
   info: {
     flex: 1,
+    minWidth: 0,
     gap: 4,
   },
   title: {
@@ -287,12 +293,16 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 2,
   },
+  // A long owner name ends in an ellipsis inside the card instead of running past it.
   metaItem: {
+    flexShrink: 1,
+    maxWidth: "100%",
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
   },
   metaText: {
+    flexShrink: 1,
     fontSize: 12,
     fontFamily: fontTokens.regular,
     color: colorTokens.textMuted,

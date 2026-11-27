@@ -4,6 +4,7 @@ import { Animated, Modal, Pressable, StyleSheet, Text, View } from "react-native
 import { AlertTriangle, Trash2, type LucideIcon } from "@/components/icons";
 import { colorTokens, fontTokens, radiusTokens } from "@/theme";
 import { useTranslation } from "@/i18n";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 interface ConfirmDialogProps {
   visible: boolean;
@@ -49,7 +50,7 @@ export function ConfirmDialog({
 
   return (
     <Modal animationType="fade" transparent visible={visible} onRequestClose={onCancel}>
-      <View style={styles.overlay}>
+      <ModalSafeView style={styles.overlay}>
         <Animated.View style={[styles.dialog, { transform: [{ scale }] }]}>
           <View style={[styles.iconWrap, { backgroundColor: iconBg }]}>
             <IconComponent color={iconColor} size={24} />
@@ -77,7 +78,7 @@ export function ConfirmDialog({
             </Pressable>
           </View>
         </Animated.View>
-      </View>
+      </ModalSafeView>
     </Modal>
   );
 }

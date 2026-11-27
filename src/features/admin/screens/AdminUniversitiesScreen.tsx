@@ -11,6 +11,7 @@ import { parseCoordinate } from "@/lib/coordinates";
 import { toApiError } from "@/services/apiClient";
 import { colorTokens, fontTokens, webPointer } from "@/theme";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 /**
  * The university and campus catalogue behind Mess & Seat Share (PRD 2.2.5 and
@@ -72,7 +73,7 @@ function FormShell({
   const { t } = useTranslation();
   return (
     <Modal animationType="fade" transparent visible={visible} onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <ModalSafeView style={styles.overlay}>
         <View style={styles.formDialog}>
           <View style={styles.formHeader}>
             <Text accessibilityRole="header" style={styles.formTitle}>
@@ -103,7 +104,7 @@ function FormShell({
             </Pressable>
           </View>
         </View>
-      </View>
+      </ModalSafeView>
     </Modal>
   );
 }

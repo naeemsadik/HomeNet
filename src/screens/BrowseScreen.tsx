@@ -67,6 +67,7 @@ import { colorTokens, fonts, layout, radius, webPointer } from "@/theme";
 import { LiveText } from "@/components/LiveText";
 import { useTranslation, formatLocalizedNumber, type TranslationKey } from "@/i18n";
 import { showToast } from "@/lib/toast";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 /**
  * Save search and Create alert need an API to store them and send the alerts,
@@ -915,7 +916,7 @@ export function BrowseScreen({
         visible={isSortMenuOpen}
         onRequestClose={() => setIsSortMenuOpen(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setIsSortMenuOpen(false)}>
+        <ModalSafeView as={Pressable} style={styles.modalOverlay} onPress={() => setIsSortMenuOpen(false)}>
           <View style={styles.sortModalSheet} onStartShouldSetResponder={() => true}>
             <View style={styles.sortModalHeader}>
               <Text style={styles.sortModalTitle}>{t("search.sort.label")}</Text>
@@ -948,7 +949,7 @@ export function BrowseScreen({
               })}
             </View>
           </View>
-        </Pressable>
+        </ModalSafeView>
       </Modal>
     </AppChrome>
   );

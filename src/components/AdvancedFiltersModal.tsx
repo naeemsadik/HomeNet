@@ -40,6 +40,7 @@ import {
   resetSearchFilters,
   type SearchFilters,
 } from "@/features/property/utils/searchFilters";
+import { ModalSafeView } from "@/components/ModalSafeView";
 
 /**
  * @deprecated Kept for one release so older imports keep compiling.
@@ -247,7 +248,7 @@ export function AdvancedFiltersModal({
       {/* The drop-downs open inside this window; a second Modal opened from
           here can fail to appear on Android. */}
       <OverlayHost>
-      <View style={[styles.backdrop, isPhone && styles.backdropPhone]}>
+      <ModalSafeView style={[styles.backdrop, isPhone && styles.backdropPhone]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("filters.close")}
@@ -516,7 +517,7 @@ export function AdvancedFiltersModal({
             </Pressable>
           </View>
         </View>
-      </View>
+      </ModalSafeView>
       </OverlayHost>
     </Modal>
   );

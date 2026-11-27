@@ -47,7 +47,7 @@ export function SellerStatCard({ item }: SellerStatCardProps) {
       </LiveText>
 
       {/* Metric Label */}
-      <Text numberOfLines={1} style={styles.statLabel}>
+      <Text numberOfLines={2} style={styles.statLabel}>
         {item.label}
       </Text>
     </View>
