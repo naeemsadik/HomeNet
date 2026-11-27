@@ -2,7 +2,7 @@ import { pressedState } from "@/lib/a11yState";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import { Image } from "expo-image";
-import { router, usePathname } from "expo-router";
+import { router, useIsFocused } from "expo-router";
 import { AppChrome } from "@/components/AppChrome";
 import {
   AlertCircle,
@@ -71,10 +71,13 @@ export function MessDetailScreen({ id }: { id: string | undefined }) {
   const query = useMessDetail(id);
   // An id-only or outdated /mess link is swapped for the listing's current URL.
   const currentPath = query.data ? messPath(query.data) : undefined;
-  const pathname = usePathname();
+  // Compared with this screen's own id, not the app-wide pathname: the screen stays mounted
+  // under the page opened from it, and must not pull the visitor back.
+  const isFocused = useIsFocused();
+  const isOutdated = Boolean(currentPath) && !samePath(`/mess/${id ?? ""}`, currentPath ?? "");
   useEffect(() => {
-    if (currentPath && !samePath(pathname, currentPath)) router.replace(currentPath as never);
-  }, [currentPath, pathname]);
+    if (isFocused && isOutdated && currentPath) router.replace(currentPath as never);
+  }, [currentPath, isFocused, isOutdated]);
 
   if (query.data) return <MessDetailView detail={query.data} />;
 
