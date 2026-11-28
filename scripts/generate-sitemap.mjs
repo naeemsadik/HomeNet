@@ -45,7 +45,7 @@ const STATIC_PAGES = [
   { path: "/careers", file: "app/careers.tsx", changefreq: "monthly", priority: "0.4" },
   { path: "/mortgage-calculator", file: "app/mortgage-calculator.tsx", changefreq: "monthly", priority: "0.7" },
   { path: "/resources/stamp-duty-tax-guide", file: "app/resources/stamp-duty-tax-guide.tsx", changefreq: "monthly", priority: "0.7" },
-  { path: "/resources/property-price-index", file: "app/resources/property-price-index.tsx", changefreq: "weekly", priority: "0.8" },
+  { path: "/resources/property-price-index", file: "app/resources/property-price-index/index.tsx", changefreq: "weekly", priority: "0.8" },
   { path: "/resources/property-valuation-guide", file: "app/resources/property-valuation-guide.tsx", changefreq: "monthly", priority: "0.7" },
   { path: "/resources/property-news-trends", file: "app/resources/property-news-trends.tsx", changefreq: "weekly", priority: "0.8" },
   { path: "/resources/buyer-guides", file: "app/resources/buyer-guides.tsx", changefreq: "monthly", priority: "0.8" },
