@@ -4,7 +4,7 @@
 // and must not claim a Bangla alternate that does not exist. Those fail the build. Titles
 // over 60 characters and descriptions outside 120-160 are reported as warnings:
 // they are copy decisions, not breakage.
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
 const DIST = process.argv[2] || "dist";
@@ -33,10 +33,20 @@ function urlOf(file) {
 const errors = [];
 const warnings = [];
 let checked = 0;
+// A page the sitemap offers to search engines must not be the not-found page. It
+// is noindex, so the checks below would skip it without a word.
+const sitemapFile = join(DIST, "sitemap.xml");
+const listed = new Set(
+  existsSync(sitemapFile) ? [...readFileSync(sitemapFile, "utf8").matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]) : [],
+);
+
 for (const file of htmlFiles(DIST)) {
   const html = readFileSync(file, "utf8");
   // Not a page the app rendered: a plain file from public/ (Google's verification file).
   if (!html.includes('id="root"')) continue;
+  if (listed.has(urlOf(file)) && /<title[^>]*>Page not found/i.test(html)) {
+    errors.push(`${relative(DIST, file)}: listed in the sitemap but exported as the not-found page`);
+  }
   if (/<meta[^>]*name="robots"[^>]*content="[^"]*noindex/i.test(html)) continue;
   const canonical = html.match(/<link[^>]*rel="canonical"[^>]*href="([^"]+)"/i)?.[1];
   const url = urlOf(file);
@@ -84,7 +94,7 @@ if (warnings.length) {
   for (const warning of warnings) console.warn(`  ${warning}`);
 }
 if (errors.length) {
-  console.error(`check-seo: ${errors.length} problems on indexable pages:`);
+  console.error(`check-seo: ${errors.length} problems:`);
   for (const error of errors) console.error(`  ${error}`);
   process.exit(1);
 }
